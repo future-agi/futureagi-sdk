@@ -4,9 +4,8 @@ from fi.client import Client
 from fi.client import ModelTypes, Environments
 
 fi_client = Client(
-    uri="https://api.futureagi.com",
-  api_key="FI_API_KEY",
-  secret_key="FI_SECRET_KEY"
+    api_key="5ffab106598343a79720824d380632ce",
+    secret_key="faf78735c36c459f8f6be81823950f9d"
 )
 
 response = fi_client.log(

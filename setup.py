@@ -3,14 +3,14 @@ def get_requirements(path: str):
     return [l.strip() for l in open(path)]
 
 setup(
-    name='futureagi',
-    version='0.2.1',
-    author='Future AGI',
+    name='fi-tcs',
+    version='0.1.1',
+    author='FutureAgi',
     author_email='noreply@mail.futureagi.com',
-    description='Empowering GenAI teams to maintain peak model accuracy in production environments.',
-    long_description=open('README.md', encoding='utf-8').read(),
+    description='We help GenAI teams maintain high-accuracy for their Models in production.',
+    long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/future-agi/client',
+    url='https://github.com/future-agi/clients',
     packages=find_packages(),
     classifiers=[
         'Programming Language :: Python :: 3',
