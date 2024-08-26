@@ -139,38 +139,38 @@ The chat_graph must be a dictionary with the following keys:
                 "content": "The Los Angeles Dodgers won the World Series in 2020."
             }
         ]
-    }
+}
 ```
 
 1. **Logging data all at once:** This involves logging structured conversations in a unified format:
     
-    ```json
-    [{
-        "conversation_id": "",
-        "title": "",
-        "root_node": "",
-        "metadata": {},
-        "nodes": [{
-            "parent_node": "",
-            "child_node": "",
-            "message": {
-                "id": "",
-                "author": {
-                            "role": "assistant",
-                            "metadata": {}
-                        },
-                "content": {
-                            "content_type": "text",
-                            "parts": [
-                                "The user is interested to do this task..."
-                            ]
-                        }
-                "context": ""
-            }
-        }]
+```
+[{
+    "conversation_id": "",
+    "title": "",
+    "root_node": "",
+    "metadata": {},
+    "nodes": [{
+        "parent_node": "",
+        "child_node": "",
+        "message": {
+            "id": "",
+            "author": {
+                        "role": "assistant",
+                        "metadata": {}
+                    },
+            "content": {
+                        "content_type": "text",
+                        "parts": [
+                            "The user is interested to do this task..."
+                        ]
+                    }
+            "context": ""
+        }
     }]
+}]
     
-    ```
+```
 **Error Handling**
 The client raises specific exceptions for different types of errors:
 * 	_AuthError_: Raised if the API key or secret key is missing.
