@@ -4,7 +4,7 @@ def get_requirements(path: str):
 
 setup(
     name='futureagi',
-    version='0.1.1',
+    version='0.2.1',
     author='Future AGI',
     author_email='noreply@mail.futureagi.com',
     description='Empowering GenAI teams to maintain peak model accuracy in production environments.',
