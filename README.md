@@ -183,21 +183,28 @@ The client raises specific exceptions for different types of errors:
 # FAQ’s:
 
 1. Q: How do you give a performance score without human in the loop?
+
 Our secret Sauce is a Critique AI agent that cana deliver powerful evaluation framework without need for human in the loop. What’s more is that it is 100% configurable as per new evolving use cases. Now anything that you can imagine your AI system should deliver - you can configure our platform to manage it.
 
 2. Q: What all inputs FutureAGI platform needs?
+
 We would need only the input-output database, training dataset if available, and User-analytics. We do not need to understand the model and how it is taking decisions.
 
 3. Q: I don't want to share data with Future AGI, can I still use it?
+
 Yes, you can now install our SDK in your private cloud and take advantage of our strong platform to align your Ai system to your users.
 
+
 4. Q: My use case is unique, would you provide service to customise your platform as per my use case?
+
 Our platform if 100% customisable and easy to configure for all types of models and modalities by the AI teams. However, our customer-success engineer would be happy to assist you for figuring out solutions to your unique use cases.
 
 5. Q: My app uses multiple models with multiple modalities, can you work with images and videos also?
+
 Yes we can.
 
 6. Q: How much time does it take to integrate the  Future AGI platform? How much bandwidth would be required?
+
 It takes just 2 minutes to integrate a few lines of code and your data starts showing on our platform. Try it today.
 
 
