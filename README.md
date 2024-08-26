@@ -33,12 +33,12 @@ To install the client, you can clone the repository or install the library:
 
 Install the  library in an environment using Python >= 3.6.
 ```
-$ pip3 install fagi-tcs
+$ pip3 install futureagi
 ```
 Or clone the repo:
 
 ```
-$ git clone https://github.com/future-agi/clients 
+$ git clone https://github.com/future-agi/client
 ```
 
 **Initialisation**
@@ -215,8 +215,8 @@ It takes just 2 minutes to integrate a few lines of code and your data starts sh
 
 # Website
 Visit Us At: https://www.futureagi.com/
-Gitbook: https://futureagi.gitbook.io/future-agi/product-guides/quickstart
-
+Gitbook: https://docs.futureagi.com/
+PyPi : https://pypi.org/project/futureagi/
 
 
 
