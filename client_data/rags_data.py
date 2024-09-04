@@ -11,7 +11,28 @@ fi_client = Client(
 
 
 response = fi_client.log(
-    "rags-data",
+    "rag-data",
+    ModelTypes.GENERATIVE_LLM,
+    Environments.PRODUCTION,
+    "1.2",
+    int(time.time()),
+    {
+        "chat_history": [
+
+            {"role": "user", "content": "Who developed the theory of relativity?", "context": [
+                ["The theory of relativity was developed by Albert Einstein.", " It revolutionized physics."],
+                ["Quantum mechanics is a fundamental theory in physics.", " It describes physical phenomena at the scale of atoms and subatomic particles."],
+                ["Classical mechanics is a branch of physics.", " It deals with the motion of bodies under the action of forces."]
+            ]},
+            {"role": "assistant",
+             "content": "Albert Einstein"},
+        ]
+    }
+).result()
+print(response)
+
+response = fi_client.log(
+    "rag-data",
     ModelTypes.GENERATIVE_LLM,
     Environments.PRODUCTION,
     "1.2",
@@ -25,13 +46,21 @@ response = fi_client.log(
             ]},
             {"role": "assistant",
              "content": "Oxygen."},
-            {"role": "user", "content": "Who developed the theory of relativity?", "context": [
-                ["The theory of relativity was developed by Albert Einstein.", " It revolutionized physics."],
-                ["Quantum mechanics is a fundamental theory in physics.", " It describes physical phenomena at the scale of atoms and subatomic particles."],
-                ["Classical mechanics is a branch of physics.", " It deals with the motion of bodies under the action of forces."]
-            ]},
-            {"role": "assistant",
-             "content": "Albert Einstein"},
+
+        ]
+    }
+).result()
+print(response)
+
+
+response = fi_client.log(
+    "rag-data",
+    ModelTypes.GENERATIVE_LLM,
+    Environments.PRODUCTION,
+    "1.2",
+    int(time.time()),
+    {
+        "chat_history": [
             {"role": "user", "content": "What is the largest planet in our solar system?", "context": [
                 ["Jupiter is the largest planet in our solar system.", " It is a gas giant."],
                 ["Mars is the fourth planet from the Sun.", " It is known as the Red Planet."],
