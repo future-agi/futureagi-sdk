@@ -34,7 +34,7 @@ class Client:
         self,
         api_key,
         secret_key,
-        uri="http://localhost:8000",
+        uri="https://api.futureagi.com",
         max_workers=8,
         max_queue_bound=5000,
         timeout=200,
