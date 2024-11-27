@@ -1,12 +1,9 @@
 import time
-from fi.client import Client
 
-from fi.client import ModelTypes, Environments
+from fi.client import Client, Environments, ModelTypes
 
 fi_client = Client(
-    uri="https://api.futureagi.com",
-    api_key="FI_API_KEY",
-    secret_key="FI_SECRET_KEY"
+    uri="https://api.futureagi.com", api_key="FI_API_KEY", secret_key="FI_SECRET_KEY"
 )
 
 response = fi_client.log(
@@ -15,13 +12,19 @@ response = fi_client.log(
     Environments.PRODUCTION,
     "1.2",
     int(time.time()),
-    {'chat_history':
-     [{'role': 'user',
-      "content": "TEXT",
-      'variables': {'name': 'Garvit',
-      'value_proposition': 'Get location information of your social media .'},
-      'prompt_template': 'Xyz template'},
-      {'role': 'assistant',
-      'content': "abc reply"}]}
-).result()
+    {
+        "chat_history": [
+            {
+                "role": "user",
+                "content": "TEXT",
+                "variables": {
+                    "name": "Garvit",
+                    "value_proposition": "Get location information of your social media .",
+                },
+                "prompt_template": "Xyz template",
+            },
+            {"role": "assistant", "content": "abc reply"},
+        ]
+    },
+)
 print(response)

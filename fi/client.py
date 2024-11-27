@@ -1,80 +1,90 @@
 import concurrent.futures as cf
-import os
 import time
-from typing import Dict, Optional, Union, List
+from typing import Dict, Optional, Union
 
 from requests_futures.sessions import FuturesSession
 
+from fi.api.auth import APIKeyAuth
+from fi.api.types import RequestType
 from fi.bounded_executor import BoundedExecutor
 from fi.utils.constants import (
-    API_KEY_ENVVAR_NAME,
     MAX_FUTURE_YEARS_FROM_CURRENT_TIME,
-    MAX_NUMBER_OF_EMBEDDINGS,
     MAX_PAST_YEARS_FROM_CURRENT_TIME,
-    SECRET_KEY_ENVVAR_NAME,
-    MAX_EMBEDDING_DIMENSIONALITY,
 )
 from fi.utils.errors import (
-    AuthError,
     InvalidAdditionalHeaders,
-    InvalidNumberOfEmbeddings,
-    InvalidValueType,
     InvalidSupportedType,
+    InvalidValueType,
     MissingRequiredKey,
-    InvalidVectorLength,
 )
-from fi.utils.types import Embedding, Environments, ModelTypes
+from fi.utils.logging import logger
+from fi.utils.types import Environments, ModelTypes
 from fi.utils.utils import is_timestamp_in_range
 
-from fi.utils.logging import logger
 
-
-class Client:
+class Client(APIKeyAuth):
     def __init__(
         self,
-        api_key,
-        secret_key,
-        uri="https://api.futureagi.com",
-        max_workers=8,
-        max_queue_bound=5000,
-        timeout=200,
-        additional_headers=None,
+        fi_api_key: str = None,
+        fi_secret_key: str = None,
+        url: str = None,
+        max_workers: int = 8,
+        max_queue_bound: int = 5000,
+        timeout: int = 200,
+        additional_headers: Dict[str, str] = None,
     ) -> None:
         """
         Initializes the Fi Client
-        :param api_key: provided API key associated with your account.
-        :param secret_key:provided identifier to connect records to spaces.
-        :param uri: RI to send your records to Fi AI..
-        :param max_workers: maximum number of concurrent requests to Fi. Defaults
+        :param fi_api_key: provided API key associated with your account.
+        :param fi_secret_key: provided SECRET key associated with your account.
+        :param max_workers: maximum number of concurrent requests to fi. Defaults
                 to 8.
         :param max_queue_bound: maximum number of concurrent future objects
-                generated for publishing to Fi. Defaults to 5000.
+                generated for publishing to fi. Defaults to 5000.
         :param timeout: how long to wait for the server to send data before giving
                 up. Defaults to 200.
         :param additional_headers: Dictionary of additional headers to
                 append to request
         """
-        api_key = api_key or os.getenv(API_KEY_ENVVAR_NAME)
-        secret_key = secret_key or os.getenv(SECRET_KEY_ENVVAR_NAME)
-        if api_key is None or secret_key is None:
-            raise AuthError(api_key, secret_key)
-        self._uri_event = f"{uri}/log/event/"
-        self._uri_model = f"{uri}/log/model/"
+        super().__init__(fi_api_key, fi_secret_key, url)
+
         self._timeout = timeout
         self._session = FuturesSession(
             executor=BoundedExecutor(max_queue_bound, max_workers)
         )
 
-        self._headers = {
-            "X-Api-Key": api_key,
-            "X-Secret-Key": secret_key,
-        }
-
         if additional_headers is not None:
-            conflicting_keys = self._headers.keys() & additional_headers.keys()
+            conflicting_keys = self.headers.keys() & additional_headers.keys()
             if conflicting_keys:
                 raise InvalidAdditionalHeaders(conflicting_keys)
-            self._headers.update(additional_headers)
+            self.headers.update(additional_headers)
+
+    @property
+    def session(self):
+        return self._session
+
+    @property
+    def headers(self) -> dict:
+        return {
+            "X-Api-Key": self._fi_api_key,
+            "X-Secret-Key": self._fi_secret_key,
+        }
+
+    @property
+    def url(self) -> str:
+        return f"{self.BASE_URL}/sdk/api/v1/log/model/"
+
+    @property
+    def params(self) -> dict:
+        if not hasattr(self, "_params"):
+            self._params = {}
+        return self._params
+
+    @property
+    def payload(self) -> dict:
+        if not hasattr(self, "_payload"):
+            self._payload = {}
+        return self._payload
 
     def _now(self):
         return time.time()
@@ -128,12 +138,16 @@ class Client:
             if not isinstance(model_version, str):
                 raise InvalidValueType("model_version", model_version, "str")
 
-
         # Validate feature types
         if conversation:
             if isinstance(conversation, dict):
-                if "chat_history" not in conversation and "chat_graph" not in conversation:
-                    raise MissingRequiredKey("conversation", "[chat_history, chat_graph]")
+                if (
+                    "chat_history" not in conversation
+                    and "chat_graph" not in conversation
+                ):
+                    raise MissingRequiredKey(
+                        "conversation", "[chat_history, chat_graph]"
+                    )
 
                 if "chat_history" in conversation:
                     chat_history = conversation["chat_history"]
@@ -157,7 +171,9 @@ class Client:
 
                         if not isinstance(item["role"], str):
                             raise InvalidValueType(
-                                "conversation['chat_history']['role']", item["role"], "str"
+                                "conversation['chat_history']['role']",
+                                item["role"],
+                                "str",
                             )
 
                 if "chat_graph" in conversation:
@@ -178,11 +194,15 @@ class Client:
                         # node_required_keys = ["parent_node", "child_node", "message"]
                         for key in node_required_keys:
                             if key not in node:
-                                raise MissingRequiredKey("conversation['nodes'] item", key)
+                                raise MissingRequiredKey(
+                                    "conversation['nodes'] item", key
+                                )
 
                         if not isinstance(node["message"], dict):
                             raise InvalidValueType(
-                                "conversation['nodes']['message']", node["message"], "dict"
+                                "conversation['nodes']['message']",
+                                node["message"],
+                                "dict",
                             )
 
                         message_required_keys = ["id", "author", "content", "context"]
@@ -225,7 +245,6 @@ class Client:
                             )
             else:
                 raise InvalidValueType("conversation", conversation, "dict or list")
-
 
         # Validate tags type
         if tags:
@@ -290,22 +309,22 @@ class Client:
             tags=tags,
         )
 
-        record = {
-            "model_id": model_id,
-            "model_type": model_type.value,
-            "environment": environment.value,
-            "model_version": model_version,
-            "prediction_timestamp": prediction_timestamp,
-            "conversation": conversation,
-            "tags": tags,
-        }
-        return self._post(record=record, uri=self._uri_model)
-
-    def _post(self, record, uri):
-        resp = self._session.post(
-            uri,
-            headers=self._headers,
-            timeout=self._timeout,
-            json=record,
+        self.payload.update(
+            {
+                "model_id": model_id,
+                "model_type": model_type.value,
+                "environment": environment.value,
+                "model_version": model_version,
+                "prediction_timestamp": prediction_timestamp,
+                "conversation": conversation,
+                "tags": tags,
+            }
         )
-        return resp
+
+        return self.make_request(
+            request_type=RequestType.POST.value,
+            payload=self.payload,
+            url=self.url,
+            params=self.params,
+            headers=self.headers,
+        )

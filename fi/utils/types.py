@@ -1,12 +1,15 @@
 from enum import Enum, unique
-from typing import List, NamedTuple, Optional, Sequence, TypeVar, Union, Type
-
-import pandas as pd
-from fi.utils.logging import get_truncation_warning_message, logger
+from typing import List, NamedTuple, Optional, Sequence, Type, TypeVar, Union
 
 import numpy as np
+import pandas as pd
 
-from fi.utils.constants import MAX_RAW_DATA_CHARACTERS, MAX_RAW_DATA_CHARACTERS_TRUNCATION
+from fi.utils.constants import (
+    MAX_RAW_DATA_CHARACTERS,
+    MAX_RAW_DATA_CHARACTERS_TRUNCATION,
+)
+from fi.utils.logging import get_truncation_warning_message, logger
+
 
 @unique
 class ModelTypes(Enum):
@@ -77,8 +80,8 @@ class Embedding(NamedTuple):
         return None
 
     def _validate_embedding_vector(
-            self,
-            emb_name: Union[str, int, float],
+        self,
+        emb_name: Union[str, int, float],
     ) -> None:
         """
         Validates that the embedding vector passed is of the correct format. That is:
@@ -114,7 +117,7 @@ class Embedding(NamedTuple):
 
     @staticmethod
     def _validate_embedding_data(
-            emb_name: Union[str, int, float], data: Union[str, List[str]]
+        emb_name: Union[str, int, float], data: Union[str, List[str]]
     ) -> None:
         """
         Validates that the embedding raw data field is of the correct format. That is:
@@ -158,7 +161,7 @@ class Embedding(NamedTuple):
 
     @staticmethod
     def _validate_embedding_link_to_data(
-            emb_name: Union[str, int, float], link_to_data: str
+        emb_name: Union[str, int, float], link_to_data: str
     ) -> None:
         """
         Validates that the embedding link to data field is of the correct format. That is:
@@ -181,7 +184,9 @@ class Embedding(NamedTuple):
             )
 
     @staticmethod
-    def _is_valid_iterable(data: Union[str, List[str], List[float], np.ndarray, pd.Series]) -> bool:
+    def _is_valid_iterable(
+        data: Union[str, List[str], List[float], np.ndarray, pd.Series]
+    ) -> bool:
         """
         Validates that the input data field is of the correct iterable type. That is:
             1. List or
