@@ -1,80 +1,133 @@
 import os
 import time
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
+from typing import Dict, Generic, Optional, TypeVar, Union
 
 from requests import Response
+from requests_futures.sessions import FuturesSession
 
-from fi.api.types import RequestType
+from fi.api.types import RequestConfig
 from fi.integrations.providers.types import ApiKeyName
-from fi.utils.constants import API_KEY_ENVVAR_NAME, BASE_URL, SECRET_KEY_ENVVAR_NAME
+from fi.utils.constants import (
+    API_KEY_ENVVAR_NAME,
+    BASE_URL,
+    DEFAULT_MAX_QUEUE,
+    DEFAULT_MAX_WORKERS,
+    DEFAULT_TIMEOUT,
+    SECRET_KEY_ENVVAR_NAME,
+)
 from fi.utils.errors import AuthError
+from fi.utils.executor import BoundedExecutor
+
+T = TypeVar("T")
 
 
-class BaseClient(ABC):
-    @property
+class ResponseHandler(Generic[T], ABC):
+    """Handles response parsing and validation"""
+
+    @classmethod
+    def parse(cls, response: Response) -> T:
+        """Parse the response into the expected type"""
+        if not response.ok:
+            cls._handle_error(response)
+        return cls._parse_success(response)
+
+    @classmethod
     @abstractmethod
-    def url(self) -> str:
+    def _parse_success(cls, response: Response) -> T:
+        """Parse successful response"""
         pass
 
-    @property
+    @classmethod
     @abstractmethod
-    def headers(self) -> dict:
+    def _handle_error(cls, response: Response) -> None:
+        """Handle error responses"""
         pass
 
-    @property
-    @abstractmethod
-    def params(self) -> dict:
-        pass
 
-    @property
-    @abstractmethod
-    def payload(self) -> dict:
-        pass
+class HttpClient:
+    """Base HTTP client with improved request handling"""
 
-    @property
-    @abstractmethod
-    def session(self):
-        pass
-
-    def make_request(
+    def __init__(
         self,
-        request_type: RequestType,
-        url: Optional[str] = None,
-        headers: Optional[dict] = None,
-        params: Optional[dict] = None,
-        payload: Optional[dict] = None,
-    ) -> Response:
-        response_future = self.session.request(
-            request_type,
-            url or self.url,
-            headers=headers or self.headers,
-            params=params or self.params,
-            json=payload or self.payload,
+        base_url: Optional[str] = None,
+        session: Optional[FuturesSession] = None,
+        default_headers: Optional[Dict[str, str]] = None,
+        **kwargs,
+    ):
+        self._base_url = base_url.rstrip("/") if base_url else BASE_URL.rstrip("/")
+        self._session = session or FuturesSession(
+            executor=BoundedExecutor(
+                bound=kwargs.get("max_queue", DEFAULT_MAX_QUEUE),
+                max_workers=kwargs.get("max_workers", DEFAULT_MAX_WORKERS),
+            ),
         )
-        while response_future.done() is False:
-            time.sleep(1)
-        return response_future.result()
+        self._default_headers = default_headers or {}
+        self._default_timeout = kwargs.get("timeout", DEFAULT_TIMEOUT)
+
+    def request(
+        self,
+        config: RequestConfig,
+        response_handler: Optional[ResponseHandler[T]] = None,
+    ) -> Union[Response, T]:
+        """Make an HTTP request with retries and response handling"""
+
+        url = config.url
+        headers = {**self._default_headers, **(config.headers or {})}
+        params = config.params or {}
+        json = config.json or {}
+        timeout = config.timeout or self._default_timeout
+        for attempt in range(config.retry_attempts):
+            try:
+                response = self._session.request(
+                    method=config.method.value,
+                    url=url,
+                    headers=headers,
+                    params=params,
+                    json=json,
+                    timeout=timeout,
+                ).result()
+
+                if response_handler:
+                    return response_handler.parse(response=response)
+                return response
+
+            except Exception as e:
+                if attempt == config.retry_attempts - 1:
+                    raise e
+                time.sleep(config.retry_delay)
+
+    def close(self):
+        """Close the client session"""
+        self._session.close()
 
 
-class APIKeyAuth(BaseClient):
+class APIKeyAuth(HttpClient):
     _fi_api_key: str = None
     _fi_secret_key: str = None
-    BASE_URL: str = None
 
     def __init__(
         self,
         fi_api_key: Optional[str] = None,
         fi_secret_key: Optional[str] = None,
-        url: Optional[str] = None,
+        fi_base_url: Optional[str] = None,
+        **kwargs,
     ):
         self.__class__._fi_api_key = fi_api_key or os.environ.get(API_KEY_ENVVAR_NAME)
         self.__class__._fi_secret_key = fi_secret_key or os.environ.get(
             SECRET_KEY_ENVVAR_NAME
         )
-        self.__class__.BASE_URL = url or BASE_URL
         if self._fi_api_key is None or self._fi_secret_key is None:
             raise AuthError(self._fi_api_key, self._fi_secret_key)
+
+        super().__init__(
+            base_url=fi_base_url,
+            default_headers={
+                "X-Api-Key": self._fi_api_key,
+                "X-Secret-Key": self._fi_secret_key,
+            },
+            **kwargs,
+        )
 
 
 class APIKeyManager(APIKeyAuth):

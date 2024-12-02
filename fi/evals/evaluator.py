@@ -1,13 +1,63 @@
 from typing import Any, Dict, List, Optional, Union
 
-from requests_futures.sessions import FuturesSession
+from requests import Response
 
-from fi.api.auth import APIKeyAuth
-from fi.api.types import RequestType
-from fi.bounded_executor import BoundedExecutor
+from fi.api.auth import APIKeyAuth, ResponseHandler
+from fi.api.types import HttpMethod, RequestConfig
 from fi.evals.templates import EvalTemplate
 from fi.evals.types import BatchRunResult, EvalResult, EvalResultMetric
 from fi.testcases import ConversationalTestCase, LLMTestCase, MLLMTestCase, TestCase
+from fi.utils.routes import Routes
+
+
+class EvalResponseHandler(ResponseHandler[BatchRunResult]):
+    """Handles responses for evaluation requests"""
+
+    @classmethod
+    def _parse_success(cls, response: Response) -> BatchRunResult:
+        return cls.convert_to_batch_results(response.json())
+
+    @classmethod
+    def _handle_error(cls, response: Response) -> None:
+        if response.status_code == 400:
+            response.raise_for_status()
+
+    @classmethod
+    def convert_to_batch_results(cls, response: Dict[str, Any]) -> BatchRunResult:
+        """
+        Convert API response to BatchRunResult
+
+        Args:
+            response: Raw API response dictionary
+
+        Returns:
+            BatchRunResult containing evaluation results
+        """
+        eval_results = []
+
+        for result in response.get("result", []):
+            for evaluation in result.get("evaluations", []):
+                eval_results.append(
+                    EvalResult(
+                        name=evaluation["name"],
+                        display_name=evaluation["name"],
+                        data=evaluation.get("data"),
+                        failure=evaluation.get("failure"),
+                        reason=evaluation.get("reason", ""),
+                        runtime=evaluation.get("runtime", 0),
+                        model=evaluation.get("model"),
+                        metadata=evaluation.get("metadata"),
+                        metrics=[
+                            EvalResultMetric(id=metric["id"], value=metric["value"])
+                            for metric in evaluation.get("metrics", [])
+                        ],
+                        datapoint_field_annotations=evaluation.get(
+                            "datapointFieldAnnotations"
+                        ),
+                    )
+                )
+
+        return BatchRunResult(eval_results=eval_results)
 
 
 class EvalClient(APIKeyAuth):
@@ -15,10 +65,8 @@ class EvalClient(APIKeyAuth):
         self,
         fi_api_key: Optional[str] = None,
         fi_secret_key: Optional[str] = None,
-        url: Optional[str] = None,
-        timeout: Optional[int] = 200,
-        max_queue_bound: Optional[int] = 5000,
-        max_workers: Optional[int] = 8,
+        fi_base_url: Optional[str] = None,
+        **kwargs,
     ) -> None:
         """
         Initialize the Eval Client
@@ -26,38 +74,14 @@ class EvalClient(APIKeyAuth):
         Args:
             fi_api_key: API key
             fi_secret_key: Secret key
+            fi_base_url: Base URL
+
+        Keyword Args:
+            timeout: Optional timeout value in seconds (default: 200)
+            max_queue_bound: Optional maximum queue size (default: 5000)
+            max_workers: Optional maximum number of workers (default: 8)
         """
-        super().__init__(fi_api_key, fi_secret_key, url)
-
-        self._timeout = timeout
-        self._session = FuturesSession(
-            executor=BoundedExecutor(max_queue_bound, max_workers)
-        )
-
-    @property
-    def session(self):
-        return self._session
-
-    @property
-    def url(self) -> str:
-        return f"{self.BASE_URL}/sdk/api/v1/eval/"
-
-    @property
-    def headers(self) -> dict:
-        return {
-            "X-Api-Key": self._fi_api_key,
-            "X-Secret-Key": self._fi_secret_key,
-        }
-
-    @property
-    def payload(self) -> dict:
-        if not hasattr(self, "_payload"):
-            self._payload = {}
-        return self._payload
-
-    @property
-    def params(self) -> dict:
-        return {}
+        super().__init__(fi_api_key, fi_secret_key, fi_base_url, **kwargs)
 
     def evaluate(
         self,
@@ -72,7 +96,7 @@ class EvalClient(APIKeyAuth):
             ConversationalTestCase,
             List[ConversationalTestCase],
         ],
-        timeout: Union[int, None] = None,
+        timeout: Optional[int] = None,
     ) -> BatchRunResult:
         """
         Run a single or batch of evaluations independently
@@ -87,6 +111,7 @@ class EvalClient(APIKeyAuth):
 
         Raises:
             ValidationError: If the inputs do not match the evaluation templates
+            Exception: If the API request fails
         """
         # Convert single items to lists for consistent handling
         if not isinstance(eval_templates, list):
@@ -95,21 +120,28 @@ class EvalClient(APIKeyAuth):
             inputs = [inputs]
 
         # Validate inputs
-        try:
-            self._validate_inputs(inputs, eval_templates)
-            self.payload.update(
-                {
-                    "inputs": [test_case.model_dump() for test_case in inputs],
-                    "config": {},
-                }
-            )
-            for eval_object in eval_templates:
-                self.payload["config"][eval_object.name] = eval_object.config
-        except Exception as e:
-            raise e
+        self._validate_inputs(inputs, eval_templates)
 
-        result = self.make_request(request_type=RequestType.POST.value)
-        return self._validate_output(result)
+        # Prepare payload
+        payload = {
+            "inputs": [test_case.model_dump() for test_case in inputs],
+            "config": {
+                eval_object.name: eval_object.config for eval_object in eval_templates
+            },
+        }
+
+        # Make request
+        response = self.request(
+            config=RequestConfig(
+                method=HttpMethod.POST,
+                url=f"{self._base_url}/{Routes.evaluate.value}",
+                json=payload,
+                timeout=timeout or self._default_timeout,
+            ),
+            response_handler=EvalResponseHandler,
+        )
+
+        return response
 
     def _validate_inputs(
         self,
@@ -150,41 +182,3 @@ class EvalClient(APIKeyAuth):
             eval_object.validate_input(inputs)
 
         return True
-
-    def _validate_output(self, result: Dict[str, Any]):
-        if result.status_code == 200:
-            return self.convert_to_batch_results(result.json())
-        elif result.status_code == 400:
-            raise Exception(result.json())
-        else:
-            raise Exception(result)
-
-    def convert_to_batch_results(
-        self, response: Dict[str, Any]
-    ) -> List[BatchRunResult]:
-        batch_results = []
-
-        for result in response.get("result", []):
-            for evaluation in result.get("evaluations", []):
-                eval_result = EvalResult(
-                    name=evaluation["name"],
-                    display_name=evaluation["name"],
-                    data=evaluation["data"],
-                    failure=evaluation["failure"],
-                    reason=evaluation["reason"],
-                    runtime=evaluation["runtime"],
-                    model=evaluation["model"],
-                    metadata=evaluation["metadata"],
-                    metrics=[
-                        EvalResultMetric(id=metric["id"], value=metric["value"])
-                        for metric in evaluation.get("metrics", [])
-                    ],
-                    datapoint_field_annotations=evaluation.get(
-                        "datapointFieldAnnotations"
-                    ),
-                )
-                batch_results.append(eval_result)
-
-        batch_result = BatchRunResult(eval_results=batch_results)
-
-        return batch_result
