@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fi"
-version = "0.1.1"
+version = "0.2.0"
 description = "We help GenAI teams maintain high-accuracy for their Models in production."
 authors = ["FutureAgi"]
 readme = "README.md"
