@@ -1,9 +1,12 @@
 [tool.poetry]
-name = "fi"
-version = "0.2.0"
+name = "futureagi"
+version = "0.3.0"
 description = "We help GenAI teams maintain high-accuracy for their Models in production."
-authors = ["FutureAgi"]
+authors = ["Future AGI<no-reply@futureagi.com>"]
 readme = "README.md"
+packages = [
+    { include = "fi" }
+]
 
 [tool.poetry.dependencies]
 python = ">3.9"
