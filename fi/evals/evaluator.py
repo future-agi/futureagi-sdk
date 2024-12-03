@@ -7,6 +7,7 @@ from fi.api.types import HttpMethod, RequestConfig
 from fi.evals.templates import EvalTemplate
 from fi.evals.types import BatchRunResult, EvalResult, EvalResultMetric
 from fi.testcases import ConversationalTestCase, LLMTestCase, MLLMTestCase, TestCase
+from fi.utils.errors import InvalidAuthError
 from fi.utils.routes import Routes
 
 
@@ -21,6 +22,8 @@ class EvalResponseHandler(ResponseHandler[BatchRunResult]):
     def _handle_error(cls, response: Response) -> None:
         if response.status_code == 400:
             response.raise_for_status()
+        if response.status_code == 403:
+            raise InvalidAuthError()
 
     @classmethod
     def convert_to_batch_results(cls, response: Dict[str, Any]) -> BatchRunResult:

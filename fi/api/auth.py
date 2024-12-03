@@ -16,7 +16,7 @@ from fi.utils.constants import (
     DEFAULT_TIMEOUT,
     SECRET_KEY_ENVVAR_NAME,
 )
-from fi.utils.errors import AuthError
+from fi.utils.errors import MissingAuthError
 from fi.utils.executor import BoundedExecutor
 
 T = TypeVar("T")
@@ -118,7 +118,7 @@ class APIKeyAuth(HttpClient):
             SECRET_KEY_ENVVAR_NAME
         )
         if self._fi_api_key is None or self._fi_secret_key is None:
-            raise AuthError(self._fi_api_key, self._fi_secret_key)
+            raise MissingAuthError(self._fi_api_key, self._fi_secret_key)
 
         super().__init__(
             base_url=fi_base_url,

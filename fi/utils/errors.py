@@ -10,7 +10,7 @@ from .constants import (
 from .types import Environments, ModelTypes
 
 
-class ValidationError(Exception, ABC):
+class CustomException(Exception, ABC):
     def __str__(self) -> str:
         return self.error_message()
 
@@ -23,16 +23,13 @@ class ValidationError(Exception, ABC):
         pass
 
 
-class AuthError(Exception):
+class MissingAuthError(CustomException):
     def __init__(self, fi_api_key: Optional[str], fi_secret_key: Optional[str]) -> None:
         self.missing_api_key = fi_api_key is None
         self.missing_secret_key = fi_secret_key is None
 
     def __repr__(self) -> str:
-        return "Invalid_FI_Client_Authentication"
-
-    def __str__(self) -> str:
-        return self.error_message()
+        return "Missing_FI_Client_Authentication"
 
     def error_message(self) -> str:
         missing_list = ["fi_api_key"] if self.missing_api_key else []
@@ -50,7 +47,27 @@ class AuthError(Exception):
         )
 
 
-class InvalidAdditionalHeaders(ValidationError):
+class InvalidAuthError(CustomException):
+    """Exception raised when API authentication fails due to invalid credentials"""
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def __repr__(self) -> str:
+        return "Invalid_FI_Client_Authentication"
+
+    def __str__(self) -> str:
+        return self.error_message()
+
+    def error_message(self) -> str:
+        return (
+            "Invalid FI Client Authentication, please check your api key and secret key"
+        )
+
+
+class InvalidAdditionalHeaders(CustomException):
+    """Exception raised when additional headers are invalid"""
+
     def __repr__(self) -> str:
         return "Invalid_Additional_Headers"
 
@@ -64,12 +81,14 @@ class InvalidAdditionalHeaders(ValidationError):
         )
 
 
-class InvalidNumberOfEmbeddings(ValidationError):
-    def __repr__(self) -> str:
-        return "Invalid_Number_Of_Embeddings"
+class InvalidNumberOfEmbeddings(CustomException):
+    """Exception raised when the number of embeddings is invalid"""
 
     def __init__(self, number_of_embeddings: int) -> None:
         self.number_of_embeddings = number_of_embeddings
+
+    def __repr__(self) -> str:
+        return "Invalid_Number_Of_Embeddings"
 
     def error_message(self) -> str:
         return (
@@ -78,7 +97,9 @@ class InvalidNumberOfEmbeddings(ValidationError):
         )
 
 
-class InvalidValueType(Exception):
+class InvalidValueType(CustomException):
+    """Exception raised when the value type is invalid"""
+
     def __init__(
         self,
         value_name: str,
@@ -92,9 +113,6 @@ class InvalidValueType(Exception):
     def __repr__(self) -> str:
         return "Invalid_Value_Type"
 
-    def __str__(self) -> str:
-        return self.error_message()
-
     def error_message(self) -> str:
         return (
             f"{self.value_name} with value {self.value} is of type {type(self.value).__name__}, "
@@ -102,7 +120,9 @@ class InvalidValueType(Exception):
         )
 
 
-class InvalidSupportedType(Exception):
+class InvalidSupportedType(CustomException):
+    """Exception raised when the supported type is invalid"""
+
     def __init__(
         self,
         value_name: str,
@@ -116,9 +136,6 @@ class InvalidSupportedType(Exception):
     def __repr__(self) -> str:
         return "Invalid_Value_Type"
 
-    def __str__(self) -> str:
-        return self.error_message()
-
     def error_message(self) -> str:
         return (
             f"{self.value_name} with value {self.value} is noy supported as of now, "
@@ -126,35 +143,25 @@ class InvalidSupportedType(Exception):
         )
 
 
-class MissingRequiredKey(Exception):
+class MissingRequiredKey(CustomException):
     def __init__(self, field_name, missing_key):
-        super().__init__(f"Missing required key '{missing_key}' in {field_name}.")
+        self.field_name = field_name
+        self.missing_key = missing_key
+
+    def __repr__(self) -> str:
+        return "Missing_Required_Key"
+
+    def error_message(self) -> str:
+        return f"Missing required key '{self.missing_key}' in {self.field_name}."
 
 
-class MissingRequiredKeys(Exception):
-    def __init__(self, field_name, missing_keys):
-        super().__init__(f"Missing required keys '{missing_keys}' in {field_name}.")
-
-
-class InvalidVectorLength(Exception):
-    def __init__(self, field_name, length, max_length):
-        super().__init__(
-            f"Invalid vector length for {field_name}: maximum length is {max_length}, got {length}."
-        )
-
-
-class InvalidConfiguration(Exception):
-    def __init__(self, message):
-        super().__init__(f"Invalid configuration: {message}")
-
-
-class InvalidOption(Exception):
-    def __init__(self, option, key):
-        super().__init__(f"Invalid option {option} for key {key}")
-
-
-class MissingRequiredKeyForEvalTemplate(Exception):
+class MissingRequiredKeyForEvalTemplate(CustomException):
     def __init__(self, missing_key, eval_template_name):
-        super().__init__(
-            f"Missing required key '{missing_key}' for eval template {eval_template_name}."
-        )
+        self.missing_key = missing_key
+        self.eval_template_name = eval_template_name
+
+    def __repr__(self) -> str:
+        return "Missing_Required_Key_For_Eval_Template"
+
+    def error_message(self) -> str:
+        return f"Missing required key '{self.missing_key}' for eval template {self.eval_template_name}."
