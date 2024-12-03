@@ -1,3 +1,5 @@
+from typing import Union
+
 import pytest
 
 from fi.evals import (
@@ -10,7 +12,7 @@ from fi.evals import (
 )
 from fi.evals.templates import RagasFaithfulness, RagasMaliciousness
 from fi.evals.types import Comparator
-from fi.testcases import LLMTestCase, MLLMTestCase, TestCase
+from fi.testcases import LLMTestCase, MLLMImage, MLLMTestCase, TestCase
 
 
 @pytest.fixture
@@ -135,6 +137,38 @@ def test_deterministic_evaluation(evaluator):
         }
     )
     response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
+
+    assert response is not None
+    assert len(response.eval_results) > 0
+    assert response.eval_results[0].data[0] in ["Yes", "No"]
+
+
+def test_deterministic_image_evaluation(evaluator):
+    # Define test case class with image URLs
+    class ImageDeterministicTestCase(MLLMTestCase):
+        image_url: Union[str, MLLMImage]
+        expected_label: str
+
+    # Initialize the deterministic evaluator
+    deterministic_eval = DeterministicEvaluation(
+        config={
+            "multi_choice": False,
+            "choices": ["Yes", "No"],
+            "rule_prompt": "Does the image at {{input_key1}} depict a stunning natural landscape featuring a narrow river winding through a deep canyon? Compare with expected answer {{input_key2}}",
+            "input": {"input_key1": "image_url", "input_key2": "expected_label"},
+        }
+    )
+
+    # Create a test case
+    test_case = ImageDeterministicTestCase(
+        image_url="https://fastly.picsum.photos/id/511/200/300.jpg?hmac=3pjxomHmNfWivxE47hYNY3VdnJTTJtcRJmQ3ihqJcBA",
+        expected_label="Yes",
+    )
+
+    # Run the evaluation
+    response = evaluator.evaluate(
+        eval_templates=[deterministic_eval], inputs=[test_case]
+    )
 
     assert response is not None
     assert len(response.eval_results) > 0

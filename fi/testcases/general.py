@@ -15,7 +15,7 @@ class TestCase(BaseModel):
     expected_json: Optional[dict] = None
     response: Optional[str] = None
 
-    def __post_init__(self):
+    def model_post_init(self, __context):
         if self.actual_json is not None:
             self.actual_json = json.loads(self.actual_json)
         if self.expected_json is not None:
