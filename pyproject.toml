@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "futureagi"
+version = "0.3.2"
+description = "We help GenAI teams maintain high-accuracy for their Models in production."
+authors = ["Future AGI <no-reply@futureagi.com>"]
+readme = "README.md"
+packages = [
+    { include = "fi" }
+]
+
+[tool.poetry.dependencies]
+python = ">3.9"
+certifi = "2024.6.2"
+charset-normalizer = "3.3.2"
+idna = "3.7"
+numpy = "1.26.4"
+pandas = "2.2.2"
+python-dateutil = "2.9.0.post0"
+pytz = "2024.1"
+requests = "2.32.3"
+requests-futures = "1.0.1"
+six = "1.16.0"
+tzdata = "2024.1"
+urllib3 = "2.2.2"
+pydantic = "^2.9.2"
+
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.0.1"
+pytest = "^8.3.3"
+pytest-cov = "^6.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

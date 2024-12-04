@@ -2,11 +2,11 @@
 
 ![Company Logo](https://github.com/future-agi/client/blob/main/Logo.png)
 
-Welcome to FutureAGI - Empowering GenAI Teams with Advanced Performance Management
+Welcome to Future AGI - Empowering GenAI Teams with Advanced Performance Management
 
 # Overview
 
-FutureAGI provides a cutting-edge platform designed to help GenAI teams maintain peak model accuracy in production environments.
+Future AGI provides a cutting-edge platform designed to help GenAI teams maintain peak model accuracy in production environments.
 Our solution is purpose-built, scalable, and delivers results 10x faster than traditional methods.
 
 **Key Features**
@@ -21,7 +21,7 @@ Our solution is purpose-built, scalable, and delivers results 10x faster than tr
 
 To install the client, you can clone the repository or install the library:
 
-Install the  library in an environment using Python >= 3.6.
+Install the library in an environment using Python >= 3.6.
 ```
 $ pip3 install futureagi
 ```
@@ -33,20 +33,19 @@ $ git clone https://github.com/future-agi/client
 
 **Initialisation**
 
-To initialise the Future agi Client, you need to provide your api_key and secret_key, which are associated with your Future agi account.
+To initialise the Future AGI Client, you need to provide your fi_api_key and fi_secret_key, which are associated with your Future AGI account.
 
 Get your service API key When you create an account, we generate a service API key. You will need this API Key and your Space Key for logging authentication.
-Instrument your code Python Client If you are using the Future Agi python client, add a few lines to your code to log your data. Logs are sent to us asynchronously.
+Instrument your code Python Client If you are using the Future AGI python client, add a few lines to your code to log your data. Logs are sent to us asynchronously.
 
 ```
 from fi.client import Client
 
-api_key = os.environ["FI_API_KEY"]
-secret_key = os.environ["FI_SECRET_KEY"]
+fi_api_key = os.environ["FI_API_KEY"]
+fi_secret_key = os.environ["FI_SECRET_KEY"]
 base_url = os.environ["FI_API_URL"]
 
-client = Client(api_key=api_key, secret_key=secret_key,
-        uri=base_url,
+client = Client(fi_api_key=fi_api_key, fi_secret_key=fi_secret_key,
         max_workers=8,
         max_queue_bound=5000,
         timeout=200,
@@ -54,12 +53,12 @@ client = Client(api_key=api_key, secret_key=secret_key,
 )
 ```
 
-**Initializes the Futureagi Client**
-* _api_key_: provided API key associated with your account.
-* _secret_key_:provided identifier to connect records to spaces.
-* _uri_: URI to send your records to Futureagi client.
-* _max_workers_: maximum number of concurrent requests to Futureagi. Defaults to 8.
-* _max_queue_bound_: maximum number of concurrent future objects generated for publishing to Futureagi. Defaults to 5000.
+**Initialises the Future AGI Client**
+* _fi_api_key_: provided API key associated with your account.
+* _fi_secret_key_: provided identifier to connect records to spaces.
+* _uri_: URI to send your records to Future AGI client.
+* _max_workers_: maximum number of concurrent requests to Future AGI. Defaults to 8.
+* _max_queue_bound_: maximum number of concurrent future objects generated for publishing to Future AGI. Defaults to 5000.
 * _timeout_: how long to wait for the server to send data before giving up. Defaults to 200.
 * _additional_headers_: Dictionary of additional headers to append to request
 
@@ -143,7 +142,6 @@ The chat_graph must be a dictionary with the following keys:
 ```
 
 1. **Logging data all at once:** This involves logging structured conversations in a unified format:
-    
 ```
 [{
     "conversation_id": "",
@@ -169,7 +167,6 @@ The chat_graph must be a dictionary with the following keys:
         }
     }]
 }]
-    
 ```
 **Error Handling**
 The client raises specific exceptions for different types of errors:
@@ -184,26 +181,26 @@ The client raises specific exceptions for different types of errors:
 
 1. Q: How do you give a performance score without human in the loop?
 
-Our secret Sauce is a Critique AI agent that cana deliver powerful evaluation framework without need for human in the loop. What’s more is that it is 100% configurable as per new evolving use cases. Now anything that you can imagine your AI system should deliver - you can configure our platform to manage it.
+Our secret Sauce is a Critique AI agent that can deliver powerful evaluation framework without need for human in the loop. What’s more is that it is 100% configurable as per new evolving use cases. Now anything that you can imagine your AI system should deliver - you can configure our platform to manage it.
 
-2. Q: What all inputs FutureAGI platform needs?
+2. Q: What all inputs Future AGI platform needs?
 
 We would need only the input-output database, training dataset if available, and User-analytics. We do not need to understand the model and how it is taking decisions.
 
 3. Q: I don't want to share data with Future AGI, can I still use it?
 
-Yes, you can now install our SDK in your private cloud and take advantage of our strong platform to align your Ai system to your users.
+Yes, you can now install our SDK in your private cloud and take advantage of our strong platform to align your AI system to your users.
 
 
 4. Q: My use case is unique, would you provide service to customise your platform as per my use case?
 
-Our platform if 100% customisable and easy to configure for all types of models and modalities by the AI teams. However, our customer-success engineer would be happy to assist you for figuring out solutions to your unique use cases.
+Our platform is 100% customisable and easy to configure for all types of models and modalities by the AI teams. However, our customer-success engineer would be happy to assist you for figuring out solutions to your unique use cases.
 
 5. Q: My app uses multiple models with multiple modalities, can you work with images and videos also?
 
 Yes we can.
 
-6. Q: How much time does it take to integrate the  Future AGI platform? How much bandwidth would be required?
+6. Q: How much time does it take to integrate the Future AGI platform? How much bandwidth would be required?
 
 It takes just 2 minutes to integrate a few lines of code and your data starts showing on our platform. Try it today.
 
@@ -215,8 +212,3 @@ It takes just 2 minutes to integrate a few lines of code and your data starts sh
 **Documentation**: https://docs.futureagi.com/
 
 **PyPI** : https://pypi.org/project/futureagi/
-
-
-
-
-
