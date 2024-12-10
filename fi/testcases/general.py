@@ -1,5 +1,5 @@
 import json
-from typing import Optional
+from typing import List, Optional, Union
 
 from pydantic import BaseModel
 
@@ -13,7 +13,10 @@ class TestCase(BaseModel):
     criteria: Optional[str] = None
     actual_json: Optional[dict] = None
     expected_json: Optional[dict] = None
+    expected_text: Optional[str] = None
+    query: Optional[str] = None
     response: Optional[str] = None
+    context: Union[List[str], str] = None
 
     def model_post_init(self, __context):
         if self.actual_json is not None:
