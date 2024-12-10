@@ -86,6 +86,7 @@ class RequiredKeys(Enum):
     query = "query"
     context = "context"
     expected_response = "expected_response"
+    expected_text = "expected_text"
     document = "document"
     input = "input"
     output = "output"
@@ -95,16 +96,20 @@ class RequiredKeys(Enum):
     output_image_url = "output_image_url"
     actual_json = "actual_json"
     expected_json = "expected_json"
+    messages = "messages"
 
 
 class EvalTags(Enum):
-    safety = "safety"
-    function = "function"
-    custom = "custom"
-    llm = "llm"
-    ragas = "ragas"
-    grounded = "grounded"
-    futureagi = "futureagi"
+    CONVERSATION = "CONVERSATION"
+    HALLUCINATION = "HALLUCINATION"
+    RAG = "RAG"
+    FUTURE_EVALS = "FUTURE_EVALS"
+    LLMS = "LLMS"
+    CUSTOM = "CUSTOM"
+    FUNCTION = "FUNCTION"
+    IMAGE = "IMAGE"
+    SAFETY = "SAFETY"
+    TEXT = "TEXT"
 
 
 class Comparator(Enum):

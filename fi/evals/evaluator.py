@@ -129,7 +129,8 @@ class EvalClient(APIKeyAuth):
         payload = {
             "inputs": [test_case.model_dump() for test_case in inputs],
             "config": {
-                eval_object.name: eval_object.config for eval_object in eval_templates
+                eval_object.eval_id: eval_object.config
+                for eval_object in eval_templates
             },
         }
 

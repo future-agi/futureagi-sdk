@@ -1,15 +1,14 @@
-from copy import deepcopy
-from dataclasses import dataclass
-from typing import List
+from typing import Any, List
+
+from pydantic import BaseModel
 
 from fi.testcases.llm_test_case import LLMTestCase
 
 
-@dataclass
-class ConversationalTestCase:
+class ConversationalTestCase(BaseModel):
     messages: List[LLMTestCase]
 
-    def __post_init__(self):
+    def model_post_init(self, __context: Any) -> None:
         if len(self.messages) == 0:
             raise TypeError("'messages' must not be empty")
 
@@ -17,6 +16,8 @@ class ConversationalTestCase:
         for message in self.messages:
             if not isinstance(message, LLMTestCase):
                 raise TypeError("'messages' must be a list of `LLMTestCases`")
-            copied_messages.append(deepcopy(message))
-
+            else:
+                copied_messages.append(str(message.query))
+                copied_messages.append(str(message.response))
+        print(copied_messages)
         self.messages = copied_messages
