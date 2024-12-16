@@ -12,7 +12,7 @@ from fi.utils.errors import InvalidAuthError
 from fi.utils.routes import Routes
 
 
-class EvalResponseHandler(ResponseHandler[BatchRunResult]):
+class EvalResponseHandler(ResponseHandler[BatchRunResult, None]):
     """Handles responses for evaluation requests"""
 
     @classmethod

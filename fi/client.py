@@ -16,7 +16,7 @@ from fi.utils.types import Environments, ModelTypes
 from fi.utils.utils import is_timestamp_in_range
 
 
-class ClientResponseHandler(ResponseHandler[Dict]):
+class ClientResponseHandler(ResponseHandler[Dict, None]):
     """Handles responses for client requests"""
 
     @classmethod

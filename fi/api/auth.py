@@ -20,7 +20,7 @@ from fi.utils.errors import MissingAuthError
 from fi.utils.executor import BoundedExecutor
 
 T = TypeVar("T")
-U = TypeVar("U", default=None)
+U = TypeVar("U")
 
 
 class ResponseHandler(Generic[T, U], ABC):
@@ -69,7 +69,7 @@ class HttpClient:
     def request(
         self,
         config: RequestConfig,
-        response_handler: Optional[ResponseHandler[T]] = None,
+        response_handler: Optional[ResponseHandler[T, U]] = None,
     ) -> Union[Response, T]:
         """Make an HTTP request with retries and response handling"""
 
