@@ -155,13 +155,13 @@ class MissingRequiredKey(CustomException):
         return f"Missing required key '{self.missing_key}' in {self.field_name}."
 
 
-class MissingRequiredKeyForEvalTemplate(CustomException):
+class MissingRequiredConfigForEvalTemplate(CustomException):
     def __init__(self, missing_key, eval_template_name):
         self.missing_key = missing_key
         self.eval_template_name = eval_template_name
 
     def __repr__(self) -> str:
-        return "Missing_Required_Key_For_Eval_Template"
+        return "Missing_Required_Config_For_Eval_Template"
 
     def error_message(self) -> str:
-        return f"Missing required key '{self.missing_key}' for eval template {self.eval_template_name}."
+        return f"Missing required config '{self.missing_key}' for eval template {self.eval_template_name}."

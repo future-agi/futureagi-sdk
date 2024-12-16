@@ -20,13 +20,14 @@ from fi.utils.errors import MissingAuthError
 from fi.utils.executor import BoundedExecutor
 
 T = TypeVar("T")
+U = TypeVar("U", default=None)
 
 
-class ResponseHandler(Generic[T], ABC):
+class ResponseHandler(Generic[T, U], ABC):
     """Handles response parsing and validation"""
 
     @classmethod
-    def parse(cls, response: Response) -> T:
+    def parse(cls, response: Response) -> Union[T, U]:
         """Parse the response into the expected type"""
         if not response.ok:
             cls._handle_error(response)
@@ -34,7 +35,7 @@ class ResponseHandler(Generic[T], ABC):
 
     @classmethod
     @abstractmethod
-    def _parse_success(cls, response: Response) -> T:
+    def _parse_success(cls, response: Response) -> Union[T, U]:
         """Parse successful response"""
         pass
 
@@ -77,6 +78,8 @@ class HttpClient:
         params = config.params or {}
         json = config.json or {}
         timeout = config.timeout or self._default_timeout
+        files = config.files or {}
+        data = config.data or {}
         for attempt in range(config.retry_attempts):
             try:
                 response = self._session.request(
@@ -85,6 +88,8 @@ class HttpClient:
                     headers=headers,
                     params=params,
                     json=json,
+                    data=data,
+                    files=files,
                     timeout=timeout,
                 ).result()
 

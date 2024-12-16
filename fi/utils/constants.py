@@ -24,9 +24,15 @@ RESERVED_TAG_COLS = []
 SECRET_KEY_ENVVAR_NAME = "FI_SECRET_KEY"
 API_KEY_ENVVAR_NAME = "FI_API_KEY"
 
-BASE_URL = os.getenv("FI_API_URL", "https://api.futureagi.com")
+BASE_URL = os.getenv("FI_BASE_URL", "https://api.futureagi.com")
 
 # Session settings
 DEFAULT_TIMEOUT = 200
 DEFAULT_MAX_WORKERS = 8
 DEFAULT_MAX_QUEUE = 5000
+
+
+# Dataset settings
+PAGE_SIZE = 100
+DATASET_TEMP_FILE_PREFIX = "tmp_fi_dataset_"
+DATASET_TEMP_FILE_SUFFIX = ".csv"

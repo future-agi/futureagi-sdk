@@ -19,6 +19,8 @@ class RequestConfig(BaseModel):
     url: str
     headers: Optional[Dict[str, str]] = {}
     params: Optional[Dict[str, Any]] = {}
+    files: Optional[Dict[str, Any]] = {}
+    data: Optional[Dict[str, Any]] = {}
     json: Optional[Dict[str, Any]] = {}
     timeout: Optional[int] = None
     retry_attempts: int = 3

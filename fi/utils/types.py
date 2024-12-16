@@ -11,32 +11,15 @@ from fi.utils.constants import (
 from fi.utils.logging import get_truncation_warning_message, logger
 
 
-@unique
 class ModelTypes(Enum):
-    NUMERIC = 1
-    SCORE_CATEGORICAL = 2  # Multi class classification, nlp, image classification
-    RANKING = 3
-    BINARY_CLASSIFICATION = 4  # single class classification
-    REGRESSION = 5  # regression, timeseries
-    OBJECT_DETECTION = 6
-    SEGMENTATION = 7
-    GENERATIVE_LLM = 8
-    GENERATIVE_IMAGE = 9
-    GENERATIVE_VIDEO = 10
-    TTS = 11
-    STT = 12
-    MULTI_MODAL = 13
+    """Model types for dataset"""
+
+    GENERATIVE_LLM = "GenerativeLLM"
+    GENERATIVE_IMAGE = "GenerativeImage"
 
     @classmethod
-    def list_types(cls):
-        return [t.name for t in cls]
-
-
-NUMERIC_MODEL_TYPES = [ModelTypes.NUMERIC, ModelTypes.REGRESSION]
-CATEGORICAL_MODEL_TYPES = [
-    ModelTypes.SCORE_CATEGORICAL,
-    ModelTypes.BINARY_CLASSIFICATION,
-]
+    def get_choices(cls):
+        return [(tag.value, tag.name.replace("_", " ").title()) for tag in cls]
 
 
 @unique

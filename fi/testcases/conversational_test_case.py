@@ -19,5 +19,4 @@ class ConversationalTestCase(BaseModel):
             else:
                 copied_messages.append(str(message.query))
                 copied_messages.append(str(message.response))
-        print(copied_messages)
         self.messages = copied_messages
