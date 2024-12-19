@@ -8,14 +8,13 @@ from fi.evals.templates import (
     AnswerRelevance,
     AnswerSimilarity,
     BiasDetection,
-    ChunkAttribution,
-    ChunkUtilization,
     Completeness,
     ContentModeration,
     ContextAdherence,
     ContextRelevance,
     ContextRetrieval,
     ContextSimilarity,
+    ContextSufficiency,
     ConversationCoherence,
     ConversationResolution,
     CulturalSensitivity,
@@ -25,7 +24,6 @@ from fi.evals.templates import (
     ImageInstruction,
     LLMFunctionCalling,
     Output,
-    PromptPerplexity,
     Ranking,
     SummaryQuality,
     Tone,
@@ -176,21 +174,6 @@ def test_context_adherence(evaluator):
     assert isinstance(response.eval_results[0].metrics[0].value, float)
 
 
-def test_prompt_perplexity(evaluator):
-    test_case = TestCase(
-        input="Write a poem",
-        output="Roses are red\nViolets are blue",
-        prompt="Create a simple rhyming poem",
-        context="User wants a basic rhyming poem",
-    )
-    template = PromptPerplexity(config={"check_internet": False})
-    response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
-
-    assert response is not None
-    assert len(response.eval_results) > 0
-    assert isinstance(response.eval_results[0].metrics[0].value, float)
-
-
 def test_context_relevance(evaluator):
     test_case = TestCase(
         context="The current temperature is 72°F with partly cloudy skies.",
@@ -226,13 +209,9 @@ def test_completeness(evaluator):
 def test_cultural_sensitivity(evaluator):
     test_case = TestCase(
         input="Describe traditional Japanese customs",
-        output="In Japanese culture, bowing is a respectful greeting. The depth and duration of the bow can indicate different levels of respect.",
-        context="Japanese etiquette includes various forms of bowing as traditional greetings.",
     )
     template = CulturalSensitivity(config={"check_internet": False})
     response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
-
-    print(response)
 
     assert response is not None
     assert len(response.eval_results) > 0
@@ -241,9 +220,7 @@ def test_cultural_sensitivity(evaluator):
 
 def test_bias_detection(evaluator):
     test_case = TestCase(
-        input="What are the differences between men and women in the workplace?",
-        output="Men and women have equal capabilities in the workplace and should be evaluated based on their individual skills and qualifications rather than gender.",
-        context="Workplace diversity and equality studies show that performance and capability are not gender-dependent.",
+        input="What are the differences between men and women in the workplace?"
     )
     template = BiasDetection(config={"check_internet": False})
     response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
@@ -337,46 +314,6 @@ def test_factual_accuracy(evaluator):
     assert isinstance(response.eval_results[0].metrics[0].value, float)
 
 
-def test_chunk_attribution(evaluator):
-    test_case = TestCase(
-        input="What is quantum computing?",
-        output=(
-            "Quantum computing uses quantum mechanics principles like superposition "
-            "and entanglement to perform computations."
-        ),
-        context=[
-            "Quantum computing leverages quantum mechanical phenomena",
-            "Superposition and entanglement are key quantum principles",
-        ],
-    )
-    template = ChunkAttribution(config={"check_internet": False})
-    response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
-
-    assert response is not None
-    assert len(response.eval_results) > 0
-    assert isinstance(response.eval_results[0].metrics[0].value, float)
-
-
-def test_chunk_utilization(evaluator):
-    test_case = TestCase(
-        input="Explain climate change",
-        output=(
-            "Climate change refers to long-term shifts in global weather patterns "
-            "and temperatures."
-        ),
-        context=[
-            "Climate change affects global temperatures",
-            "Weather patterns are changing due to global warming",
-        ],
-    )
-    template = ChunkUtilization(config={"check_internet": False})
-    response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
-
-    assert response is not None
-    assert len(response.eval_results) > 0
-    assert isinstance(response.eval_results[0].metrics[0].value, float)
-
-
 def test_context_similarity(evaluator):
     test_case = TestCase(
         context="The Earth orbits around the Sun in an elliptical path.",
@@ -392,6 +329,19 @@ def test_context_similarity(evaluator):
     assert response is not None
     assert len(response.eval_results) > 0
     assert isinstance(response.eval_results[0].metrics[0].value, float)
+
+
+def test_context_sufficiency(evaluator):
+    test_case = TestCase(
+        query="What is the capital of France?",
+        context="Paris has been the capital of France since 508 CE.",
+    )
+    template = ContextSufficiency(config={"model": "gpt-4o-mini"})
+    response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
+    print(response)
+    assert response is not None
+    assert len(response.eval_results) > 0
+    assert response.eval_results[0].metrics[0].value == 1.0
 
 
 def test_pii_detection(evaluator):
@@ -434,7 +384,17 @@ def test_tone_evaluation(evaluator):
 
     assert response is not None
     assert len(response.eval_results) > 0
-    assert response.eval_results[0].data[0] in ["Passed", "Failed"]
+    assert response.eval_results[0].data[0] in [
+        "neutral",
+        "joy",
+        "love",
+        "fear",
+        "surprise",
+        "sadness",
+        "anger",
+        "annoyance",
+        "confusion",
+    ]
 
 
 def test_image_input_output(evaluator):

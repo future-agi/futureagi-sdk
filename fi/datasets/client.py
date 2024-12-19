@@ -119,12 +119,13 @@ class DatasetResponseHandler(ResponseHandler[DatasetConfig, DatasetTable]):
 class DatasetClient(APIKeyAuth):
     """Manager class for handling datasets
 
-    A client for managing datasets including creation, deletion, downloading and metadata operations.
-    Provides functionality to work with empty datasets, local files, and Hugging Face datasets.
+    This client can be used in two ways:
+    1. As class methods for simple one-off operations:
+        DatasetClient.download_dataset("my_dataset")
 
-    Attributes:
-        _dataset_id_cache (dict): Class-level cache for storing dataset IDs
-        dataset_config (DatasetConfig): Configuration for the current dataset
+    2. As an instance for chained operations:
+        client = DatasetClient(dataset_config=config)
+        client.create().download("output.csv").delete()
     """
 
     _dataset_id_cache = {}
@@ -134,206 +135,137 @@ class DatasetClient(APIKeyAuth):
         fi_api_key: Optional[str] = None,
         fi_secret_key: Optional[str] = None,
         fi_base_url: Optional[str] = None,
+        dataset_config: Optional[DatasetConfig] = None,
         **kwargs,
     ):
-        """Initialize the dataset manager
-
-        Args:
-            fi_api_key (str, optional): API key for authentication
-            fi_secret_key (str, optional): Secret key for authentication
-            fi_base_url (str, optional): Base URL of the API
-
-        Kwargs:
-            dataset_config (DatasetConfig): Dataset configuration
-
-        Returns:
-            DatasetClient: Instance of DatasetClient
-        """
         super().__init__(
             fi_api_key=fi_api_key,
             fi_secret_key=fi_secret_key,
             fi_base_url=fi_base_url,
             **kwargs,
         )
-        self.dataset_config = None
-        if kwargs.get("dataset_config"):
-            self.dataset_config = kwargs.get("dataset_config")
+        self.dataset_config = dataset_config
 
-    @classmethod
-    def _get_instance(
-        cls,
-        fi_api_key: Optional[str] = None,
-        fi_secret_key: Optional[str] = None,
-        fi_base_url: Optional[str] = None,
-        **kwargs,
+    # Instance methods for chaining
+    def create(
+        self, source: Optional[Union[str, HuggingfaceDatasetConfig]] = None
     ) -> "DatasetClient":
-        """Create and return an instance of DatasetClient
+        """Create a dataset and return self for chaining"""
+        if not self.dataset_config:
+            raise ValueError("dataset_config must be set")
 
-        Factory method to create a new DatasetClient instance or return existing one.
+        response = self._create_dataset(self.dataset_config, source)
+        self.dataset_config.id = response.id
+        return self
 
-        Args:
-            fi_api_key (str, optional): API key for authentication
-            fi_secret_key (str, optional): Secret key for authentication
-            fi_base_url (str, optional): Base URL of the API
-
-        Kwargs:
-            dataset_config (DatasetConfig): Dataset configuration
-
-        Returns:
-            DatasetClient: New or existing instance of DatasetClient
-        """
-
-        if isinstance(cls, type):
-            # Called on class
-            return cls(
-                fi_api_key=fi_api_key,
-                fi_secret_key=fi_secret_key,
-                fi_base_url=fi_base_url,
-                **kwargs,
-            )
-        else:
-            # Called on instance
-            return cls
-
-    @classmethod
-    def create_dataset(
-        cls,
-        dataset_config: Optional[DatasetConfig] = None,
-        source: Optional[Union[str, HuggingfaceDatasetConfig]] = None,
-        **kwargs,
-    ) -> "DatasetClient":
-        """Create a new dataset
-
-        Creates a new dataset either empty, from a local file, or from Hugging Face.
-
-        Args:
-            dataset_config (DatasetConfig): Configuration for the new dataset
-            source (Optional[Union[str, HuggingfaceDatasetConfig]]): Source for dataset creation.
-                - If None: Creates empty dataset
-                - If str: Path to local file (.csv, .xlsx, .json, or .jsonl)
-                - If HuggingfaceDatasetConfig: Configuration for importing from Hugging Face
-
-        Returns:
-            DatasetClient: Instance of DatasetClient with the created dataset
-
-        Raises:
-            ValueError: If file format is not supported or file cannot be processed
-            InvalidAuthError: If authentication fails
-        """
-        instance = cls._get_instance(dataset_config=dataset_config, **kwargs)
-
-        if source is None:
-            # Create empty dataset
-            payload = {
-                "new_dataset_name": instance.dataset_config.name,
-                "model_type": instance.dataset_config.model_type.value,
-            }
-            url = instance._base_url + "/" + Routes.dataset_empty.value
-            response = instance.request(
-                config=RequestConfig(method=HttpMethod.POST, url=url, json=payload),
-                response_handler=DatasetResponseHandler,
-            )
-
-        elif isinstance(source, str):
-            # Create from local file
-            supported_extensions = [".csv", ".xlsx", ".xls", ".json", ".jsonl"]
-            file_ext = os.path.splitext(source)[1].lower()
-            if file_ext not in supported_extensions:
-                raise ValueError(
-                    f"Unsupported file format. File must have one of these extensions: {', '.join(supported_extensions)}"
-                )
-
-            files = {"file": (os.path.basename(source), open(source, "rb").read())}
-            data = {}
-            if instance.dataset_config.model_type:
-                data["model_type"] = instance.dataset_config.model_type.value
-            if instance.dataset_config.name:
-                data["new_dataset_name"] = instance.dataset_config.name
-            url = instance._base_url + "/" + Routes.dataset_local.value
-
-            response = instance.request(
-                config=RequestConfig(
-                    method=HttpMethod.POST, url=url, data=data, files=files
-                ),
-                response_handler=DatasetResponseHandler,
-            )
-
-        elif isinstance(source, HuggingfaceDatasetConfig):
-            # Create from Hugging Face dataset
-            data = {
-                "new_dataset_name": instance.dataset_config.name,
-                "huggingface_dataset_name": source.name,
-            }
-            if instance.dataset_config.model_type:
-                data["model_type"] = instance.dataset_config.model_type.value
-            if source.split:
-                data["huggingface_dataset_split"] = source.split
-            if source.num_rows:
-                data["num_rows"] = source.num_rows
-            url = instance._base_url + "/" + Routes.dataset_huggingface.value
-
-            response = instance.request(
-                config=RequestConfig(method=HttpMethod.POST, url=url, data=data),
-                response_handler=DatasetResponseHandler,
-            )
-
-        # Update the dataset config with the new dataset ID
-        instance.dataset_config.id = response.id
-        return instance
-
-    @classmethod
-    def download_dataset(
-        cls,
-        dataset_name: Optional[str] = None,
-        file_path: Optional[str] = None,
-        load_to_pandas: Optional[bool] = False,
-    ) -> Union[str, pd.DataFrame]:
-        """Download dataset to file
-
-        Downloads a dataset to a local file or pandas DataFrame.
-
-        Args:
-            dataset_name (str, optional): Name of the dataset
-            file_path (str, optional): File path to save the dataset
-            load_to_pandas (bool, optional): Whether to return as pandas DataFrame
-
-        Returns:
-            Union[str, pd.DataFrame]: File path or pandas DataFrame containing the dataset
-
-        Raises:
-            ValueError: If file format is not supported
-            InvalidAuthError: If authentication fails
-        """
-        # Get the dataset metadata
-        instance = cls.get_dataset(dataset_name)
-
-        # Prepare request and data
-        url = (
-            instance._base_url
-            + "/"
-            + Routes.dataset_table.value.format(
-                dataset_id=str(instance.dataset_config.id)
-            )
+    def download(
+        self, file_path: Optional[str] = None, load_to_pandas: bool = False
+    ) -> Union["DatasetClient", pd.DataFrame]:
+        """Download dataset and return self or DataFrame"""
+        result = self._download_dataset(
+            self.dataset_config.name, file_path, load_to_pandas
         )
-        data = {}
-        data["page_size"] = PAGE_SIZE
-        data["current_page_index"] = 0
+        return result if load_to_pandas else self
 
-        # Prepare file path
-        if file_path is None:
+    def delete(self) -> None:
+        """Delete the current dataset"""
+        self._delete()
+        self.dataset_config = None
+
+    def get_config(self) -> DatasetConfig:
+        """Get the current dataset configuration"""
+        if not self.dataset_config:
+            raise ValueError("No dataset configured")
+        return self.dataset_config
+
+    # Protected internal methods
+    def _create_dataset(
+        self,
+        config: DatasetConfig,
+        source: Optional[Union[str, HuggingfaceDatasetConfig]],
+    ) -> DatasetConfig:
+        """Internal method for dataset creation logic"""
+        if source is None:
+            return self._create_empty_dataset(config)
+        elif isinstance(source, str):
+            return self._create_from_file(config, source)
+        elif isinstance(source, HuggingfaceDatasetConfig):
+            return self._create_from_huggingface(config, source)
+        else:
+            raise ValueError(f"Unsupported source type: {type(source)}")
+
+    def _create_empty_dataset(self, config: DatasetConfig) -> DatasetConfig:
+        """Create an empty dataset"""
+        payload = {
+            "new_dataset_name": config.name,
+            "model_type": config.model_type.value,
+        }
+        url = f"{self._base_url}/{Routes.dataset_empty.value}"
+        return self.request(
+            config=RequestConfig(method=HttpMethod.POST, url=url, json=payload),
+            response_handler=DatasetResponseHandler,
+        )
+
+    def _create_from_file(self, config: DatasetConfig, file_path: str) -> DatasetConfig:
+        """Create dataset from local file"""
+        supported_extensions = [".csv", ".xlsx", ".xls", ".json", ".jsonl"]
+        file_ext = os.path.splitext(file_path)[1].lower()
+        if file_ext not in supported_extensions:
+            raise ValueError(
+                f"Unsupported file format. Must be one of: {', '.join(supported_extensions)}"
+            )
+
+        files = {"file": (os.path.basename(file_path), open(file_path, "rb").read())}
+        data = {"model_type": config.model_type.value, "new_dataset_name": config.name}
+        url = f"{self._base_url}/{Routes.dataset_local.value}"
+
+        return self.request(
+            config=RequestConfig(
+                method=HttpMethod.POST, url=url, data=data, files=files
+            ),
+            response_handler=DatasetResponseHandler,
+        )
+
+    def _create_from_huggingface(
+        self, config: DatasetConfig, hf_config: HuggingfaceDatasetConfig
+    ) -> DatasetConfig:
+        """Create dataset from Hugging Face"""
+        data = {
+            "new_dataset_name": config.name,
+            "huggingface_dataset_name": hf_config.name,
+            "model_type": config.model_type.value,
+        }
+        if hf_config.split:
+            data["huggingface_dataset_split"] = hf_config.split
+        if hf_config.num_rows:
+            data["num_rows"] = hf_config.num_rows
+
+        url = f"{self._base_url}/{Routes.dataset_huggingface.value}"
+        return self.request(
+            config=RequestConfig(method=HttpMethod.POST, url=url, data=data),
+            response_handler=DatasetResponseHandler,
+        )
+
+    def _download_dataset(
+        self, name: str, file_path: Optional[str] = None, load_to_pandas: bool = False
+    ) -> Union[str, pd.DataFrame]:
+        """Internal method for dataset download"""
+        if not file_path:
             file_path = get_tempfile_path(
                 DATASET_TEMP_FILE_PREFIX, DATASET_TEMP_FILE_SUFFIX
             )
 
-        # Make the request
+        url = f"{self._base_url}/{Routes.dataset_table.value.format(dataset_id=str(self.dataset_config.id))}"
+        data = {"page_size": PAGE_SIZE, "current_page_index": 0}
+
         with tqdm(desc="Downloading dataset") as pbar:
             while True:
                 pbar.set_postfix({"page": data["current_page_index"] + 1})
-                dataset_table = instance.request(
+                dataset_table = self.request(
                     config=RequestConfig(method=HttpMethod.POST, url=url, json=data),
                     response_handler=DatasetResponseHandler,
                 )
-                _ = dataset_table.to_file(file_path)
+                dataset_table.to_file(file_path)
                 data["current_page_index"] += 1
                 if (
                     dataset_table.metadata.get("totalPages")
@@ -342,101 +274,86 @@ class DatasetClient(APIKeyAuth):
                     pbar.update(1)
                     break
 
-        # Load the dataset to pandas if requested
         if load_to_pandas:
             if file_path.endswith(".csv"):
                 return pd.read_csv(file_path)
             elif file_path.endswith(".json"):
                 return pd.read_json(file_path)
             else:
-                raise ValueError(f"Unsupported file format: {file_path}")
-        else:
-            return instance
+                raise ValueError(f"Unsupported format for pandas: {file_path}")
+        return file_path
+
+    def _delete(self) -> None:
+        """Internal method to delete dataset"""
+        if not self.dataset_config or not self.dataset_config.id:
+            raise ValueError("No dataset configured for deletion")
+
+        url = f"{self._base_url}/{Routes.dataset_delete.value}"
+        payload = {"dataset_ids": [str(self.dataset_config.id)]}
+
+        self.request(
+            config=RequestConfig(method=HttpMethod.DELETE, url=url, json=payload),
+            response_handler=DatasetResponseHandler,
+        )
+
+    # Class methods for simple operations
+    @classmethod
+    def _get_instance(cls, **kwargs) -> "DatasetClient":
+        """Create a new DatasetClient instance"""
+        return cls(**kwargs) if isinstance(cls, type) else cls
 
     @classmethod
-    def get_dataset(
+    def create_dataset(
+        cls,
+        dataset_config: DatasetConfig,
+        source: Optional[Union[str, HuggingfaceDatasetConfig]] = None,
+        **kwargs,
+    ) -> "DatasetClient":
+        """Class method for simple dataset creation"""
+        instance = cls._get_instance(dataset_config=dataset_config, **kwargs)
+        return instance.create(source)
+
+    @classmethod
+    def download_dataset(
+        cls,
+        dataset_name: str,
+        file_path: Optional[str] = None,
+        load_to_pandas: bool = False,
+        **kwargs,
+    ) -> Union[str, pd.DataFrame]:
+        """Class method for simple dataset download"""
+        instance = cls.get_dataset_config(dataset_name, **kwargs)
+        return instance.download(file_path, load_to_pandas)
+
+    @classmethod
+    def delete_dataset(cls, dataset_name: str, **kwargs) -> None:
+        """Class method for simple dataset deletion"""
+        instance = cls.get_dataset_config(dataset_name, **kwargs)
+        instance.delete()
+
+    @classmethod
+    def get_dataset_config(
         cls,
         dataset_name: str,
         excluded_datasets: Optional[List[str]] = None,
         **kwargs,
-    ) -> DatasetConfig:
-        """Get the metadata of a dataset
-
-        Retrieves metadata for a dataset, with caching support.
-
-        Args:
-            dataset_name (str): Name of the dataset
-            excluded_datasets (List[str], optional): List of dataset IDs to exclude
-
-        Kwargs:
-            fi_api_key (str): API key for authentication
-            fi_secret_key (str): Secret key for authentication
-            fi_base_url (str): Base URL of the API
-
-        Returns:
-            DatasetConfig: Metadata of the dataset
-
-        Raises:
-            ValueError: If no dataset or multiple datasets found
-            InvalidAuthError: If authentication fails
-        """
-        # Check cache and return instance if found
+    ) -> "DatasetClient":
+        """Get dataset configuration with caching"""
         cache_key = f"{dataset_name}_{str(excluded_datasets)}"
         if cache_key in cls._dataset_id_cache:
             return cls._dataset_id_cache[cache_key]
 
-        # Get the instance of the dataset client
         instance = cls._get_instance(**kwargs)
-
-        # Prepare request and data
         payload = {"search_text": dataset_name}
         if excluded_datasets:
             payload["excluded_datasets"] = excluded_datasets
-        url = instance._base_url + "/" + Routes.dataset_names
 
-        # Make the request
+        url = f"{instance._base_url}/{Routes.dataset_names.value}"
         dataset_config = instance.request(
             config=RequestConfig(method=HttpMethod.POST, url=url, json=payload),
             response_handler=DatasetResponseHandler,
         )
+
         instance.dataset_config = dataset_config
-
-        # Store in cache before returning
         cls._dataset_id_cache[cache_key] = instance
-        return instance
-
-    @classmethod
-    def delete_dataset(
-        cls, dataset_name: Optional[str] = None, **kwargs
-    ) -> "DatasetClient":
-        """Delete a dataset
-
-        Deletes a dataset by name.
-
-        Args:
-            dataset_name (str): Name of the dataset to delete
-
-        Kwargs:
-            fi_api_key (str): API key for authentication
-            fi_secret_key (str): Secret key for authentication
-            fi_base_url (str): Base URL of the API
-
-        Returns:
-            None
-
-        Raises:
-            InvalidAuthError: If authentication fails
-        """
-        # Get the dataset metadata
-        instance = cls.get_dataset(dataset_name, **kwargs)
-
-        # Prepare request and data
-        url = instance._base_url + "/" + Routes.dataset_delete.value
-        payload = {"dataset_ids": [str(instance.dataset_config.id)]}
-
-        # Make the request
-        instance.request(
-            config=RequestConfig(method=HttpMethod.DELETE, url=url, json=payload),
-            response_handler=DatasetResponseHandler,
-        )
         return instance

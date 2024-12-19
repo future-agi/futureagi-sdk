@@ -90,10 +90,6 @@ class ContextAdherence(EvalTemplate):
     eval_id = "5"
 
 
-class PromptPerplexity(EvalTemplate):
-    eval_id = "7"
-
-
 class AnswerRelevance(EvalTemplate):
     eval_id = "8"
 
@@ -104,14 +100,6 @@ class ContextRelevance(EvalTemplate):
 
 class Completeness(EvalTemplate):
     eval_id = "10"
-
-
-class ChunkAttribution(EvalTemplate):
-    eval_id = "11"
-
-
-class ChunkUtilization(EvalTemplate):
-    eval_id = "12"
 
 
 class ContextSimilarity(EvalTemplate):
