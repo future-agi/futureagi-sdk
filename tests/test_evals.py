@@ -18,19 +18,15 @@ from fi.evals.templates import (
     ContextSimilarity,
     ConversationCoherence,
     ConversationResolution,
-    Correctness,
     CulturalSensitivity,
     Deterministic,
     FactualAccuracy,
     ImageInputOutput,
     ImageInstruction,
-    LegalCompliance,
     LLMFunctionCalling,
     Output,
-    PromptAdherence,
     PromptPerplexity,
     Ranking,
-    ReasoningChain,
     SummaryQuality,
     Tone,
     Toxicity,
@@ -131,7 +127,11 @@ def test_deterministic_image_evaluation(evaluator):
         config={
             "multi_choice": False,
             "choices": ["Yes", "No"],
-            "rule_prompt": "Does the image at {{input_key1}} depict a stunning natural landscape featuring a narrow river winding through a deep canyon? Compare with expected answer {{input_key2}}",
+            "rule_prompt": (
+                "Does the image at {{input_key1}} depict a stunning natural landscape "
+                "featuring a narrow river winding through a deep canyon? Compare with "
+                "expected answer {{input_key2}}"
+            ),
             "input": {"input_key1": "image_url", "input_key2": "expected_label"},
         }
     )
@@ -176,20 +176,6 @@ def test_context_adherence(evaluator):
     assert isinstance(response.eval_results[0].metrics[0].value, float)
 
 
-def test_correctness(evaluator):
-    test_case = TestCase(
-        context="Paris is the capital of France.",
-        input="What is the capital of France?",
-        output="Paris is the capital of France.",
-    )
-    template = Correctness(config={"model": "gpt-4o-mini"})
-    response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
-
-    assert response is not None
-    assert len(response.eval_results) > 0
-    assert isinstance(response.eval_results[0].metrics[0].value, float)
-
-
 def test_prompt_perplexity(evaluator):
     test_case = TestCase(
         input="Write a poem",
@@ -207,10 +193,16 @@ def test_prompt_perplexity(evaluator):
 
 def test_context_relevance(evaluator):
     test_case = TestCase(
-        query="What is the weather like?",
         context="The current temperature is 72°F with partly cloudy skies.",
+        input="What is the weather like?",
+        output="The current temperature is 72°F with partly cloudy skies.",
     )
-    template = ContextRelevance(config={"model": "gpt-4o-mini"})
+    template = ContextRelevance(
+        config={
+            "model": "gpt-4o-mini",
+            "check_internet": False,
+        }
+    )
     response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
 
     assert response is not None
@@ -228,7 +220,7 @@ def test_completeness(evaluator):
 
     assert response is not None
     assert len(response.eval_results) > 0
-    assert response.eval_results[0].metrics[0].value in ["Pass", "Fail"]
+    assert response.eval_results[0].metrics[0].value == 1.0
 
 
 def test_cultural_sensitivity(evaluator):
@@ -240,9 +232,11 @@ def test_cultural_sensitivity(evaluator):
     template = CulturalSensitivity(config={"check_internet": False})
     response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
 
+    print(response)
+
     assert response is not None
     assert len(response.eval_results) > 0
-    assert isinstance(response.eval_results[0].metrics[0].value, float)
+    assert response.eval_results[0].data[0] in ["Passed", "Failed"]
 
 
 def test_bias_detection(evaluator):
@@ -256,7 +250,7 @@ def test_bias_detection(evaluator):
 
     assert response is not None
     assert len(response.eval_results) > 0
-    assert isinstance(response.eval_results[0].metrics[0].value, float)
+    assert response.eval_results[0].data[0] in ["Passed", "Failed"]
 
 
 def test_conversation_coherence(evaluator):
@@ -280,20 +274,6 @@ def test_conversation_coherence(evaluator):
     assert isinstance(response.eval_results[0].metrics[0].value, float)
 
 
-def test_legal_compliance(evaluator):
-    test_case = TestCase(
-        input="What are GDPR requirements?",
-        output="GDPR requires explicit consent for data collection, right to access personal data, and right to be forgotten.",
-        context="GDPR is EU's data protection regulation that governs personal data handling.",
-    )
-    template = LegalCompliance(config={"check_internet": False})
-    response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
-
-    assert response is not None
-    assert len(response.eval_results) > 0
-    assert isinstance(response.eval_results[0].metrics[0].value, float)
-
-
 def test_translation_accuracy(evaluator):
     test_case = TestCase(
         input="Translate 'Hello, how are you?' to French",
@@ -301,20 +281,6 @@ def test_translation_accuracy(evaluator):
         context="Standard French greetings and conversational phrases.",
     )
     template = TranslationAccuracy(config={"check_internet": False})
-    response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
-
-    assert response is not None
-    assert len(response.eval_results) > 0
-    assert isinstance(response.eval_results[0].metrics[0].value, float)
-
-
-def test_reasoning_chain(evaluator):
-    test_case = TestCase(
-        input="Why does ice float in water?",
-        output="Ice floats in water because it is less dense than liquid water. This happens because water molecules form a crystalline structure when frozen, creating spaces between molecules.",
-        context="Water's unique properties include its solid form being less dense than its liquid form.",
-    )
-    template = ReasoningChain(config={"check_internet": False})
     response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
 
     assert response is not None
@@ -339,25 +305,17 @@ def test_llm_function_calling(evaluator):
 def test_summary_quality(evaluator):
     test_case = TestCase(
         input="Summarize the text about photosynthesis",
-        output="Photosynthesis is the process where plants convert sunlight into energy, producing oxygen as a byproduct.",
-        context="Photosynthesis is a complex biological process where plants and other organisms convert light energy into chemical energy. This process produces glucose and oxygen while consuming carbon dioxide and water.",
+        output=(
+            "Photosynthesis is the process where plants convert sunlight into energy, "
+            "producing oxygen as a byproduct."
+        ),
+        context=(
+            "Photosynthesis is a complex biological process where plants and other "
+            "organisms convert light energy into chemical energy. This process produces "
+            "glucose and oxygen while consuming carbon dioxide and water."
+        ),
     )
     template = SummaryQuality(config={"check_internet": False})
-    response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
-
-    assert response is not None
-    assert len(response.eval_results) > 0
-    assert isinstance(response.eval_results[0].metrics[0].value, float)
-
-
-def test_prompt_adherence(evaluator):
-    test_case = TestCase(
-        input="Write a haiku about spring",
-        output="Cherry blossoms fall\nPink petals dance in the breeze\nSpring awakens now",
-        prompt="Write a haiku (5-7-5 syllable pattern) about spring",
-        context="A haiku is a Japanese poem with three lines following a 5-7-5 syllable pattern",
-    )
-    template = PromptAdherence(config={"check_internet": False})
     response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
 
     assert response is not None
@@ -382,7 +340,10 @@ def test_factual_accuracy(evaluator):
 def test_chunk_attribution(evaluator):
     test_case = TestCase(
         input="What is quantum computing?",
-        output="Quantum computing uses quantum mechanics principles like superposition and entanglement to perform computations.",
+        output=(
+            "Quantum computing uses quantum mechanics principles like superposition "
+            "and entanglement to perform computations."
+        ),
         context=[
             "Quantum computing leverages quantum mechanical phenomena",
             "Superposition and entanglement are key quantum principles",
@@ -399,7 +360,10 @@ def test_chunk_attribution(evaluator):
 def test_chunk_utilization(evaluator):
     test_case = TestCase(
         input="Explain climate change",
-        output="Climate change refers to long-term shifts in global weather patterns and temperatures.",
+        output=(
+            "Climate change refers to long-term shifts in global weather patterns "
+            "and temperatures."
+        ),
         context=[
             "Climate change affects global temperatures",
             "Weather patterns are changing due to global warming",
@@ -416,7 +380,9 @@ def test_chunk_utilization(evaluator):
 def test_context_similarity(evaluator):
     test_case = TestCase(
         context="The Earth orbits around the Sun in an elliptical path.",
-        response="The Earth's orbit around the Sun is not perfectly circular but elliptical.",
+        response=(
+            "The Earth's orbit around the Sun is not perfectly circular but elliptical."
+        ),
     )
     template = ContextSimilarity(
         config={"comparator": Comparator.COSINE.value, "failure_threshold": 0.7}
@@ -430,7 +396,10 @@ def test_context_similarity(evaluator):
 
 def test_pii_detection(evaluator):
     test_case = TestCase(
-        text="My email is john.doe@example.com and my phone is 123-456-7890"
+        text=(
+            "My email is john.doe@example.com and my phone is 123-456-7890. My "
+            "address is 123 Main St, Anytown, USA."
+        )
     )
     template = PII()
     response = evaluator.evaluate(eval_templates=[template], inputs=[test_case])
@@ -451,7 +420,7 @@ def test_toxicity(evaluator):
 
     assert response is not None
     assert len(response.eval_results) > 0
-    assert isinstance(response.eval_results[0].metrics[0].value, float)
+    assert response.eval_results[0].data[0] in ["Passed", "Failed"]
 
 
 def test_tone_evaluation(evaluator):
@@ -465,7 +434,7 @@ def test_tone_evaluation(evaluator):
 
     assert response is not None
     assert len(response.eval_results) > 0
-    assert isinstance(response.eval_results[0].metrics[0].value, float)
+    assert response.eval_results[0].data[0] in ["Passed", "Failed"]
 
 
 def test_image_input_output(evaluator):

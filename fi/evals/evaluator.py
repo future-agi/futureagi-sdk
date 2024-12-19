@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import Any, Dict, List, Optional, Union
 
 from requests import Response
@@ -11,7 +12,7 @@ from fi.utils.errors import InvalidAuthError
 from fi.utils.routes import Routes
 
 
-class EvalResponseHandler(ResponseHandler[BatchRunResult]):
+class EvalResponseHandler(ResponseHandler[BatchRunResult, None]):
     """Handles responses for evaluation requests"""
 
     @classmethod
@@ -64,6 +65,8 @@ class EvalResponseHandler(ResponseHandler[BatchRunResult]):
 
 
 class EvalClient(APIKeyAuth):
+    """Client for evaluating LLM test cases"""
+
     def __init__(
         self,
         fi_api_key: Optional[str] = None,
@@ -122,6 +125,9 @@ class EvalClient(APIKeyAuth):
         if not isinstance(inputs, list):
             inputs = [inputs]
 
+        # Get evaluation template configs
+        eval_templates = self._get_eval_configs(eval_templates)
+
         # Validate inputs
         self._validate_inputs(inputs, eval_templates)
 
@@ -129,8 +135,7 @@ class EvalClient(APIKeyAuth):
         payload = {
             "inputs": [test_case.model_dump() for test_case in inputs],
             "config": {
-                eval_object.eval_id: eval_object.config
-                for eval_object in eval_templates
+                template.eval_id: template.config for template in eval_templates
             },
         }
 
@@ -183,6 +188,44 @@ class EvalClient(APIKeyAuth):
 
         # Then validate each eval object's required inputs
         for eval_object in eval_objects:
+            eval_object.validate_config(eval_object.config)
             eval_object.validate_input(inputs)
 
         return True
+
+    def _get_eval_configs(
+        self, eval_templates: List[EvalTemplate]
+    ) -> List[EvalTemplate]:
+
+        for template in eval_templates:
+            eval_id = template.eval_id
+
+            eval_info = self._get_eval_info(eval_id)
+            template.name = eval_info["name"]
+            template.description = eval_info["description"]
+            template.eval_tags = eval_info["eval_tags"]
+            template.required_keys = eval_info["config"]["required_keys"]
+            template.output = eval_info["config"]["output"]
+            template.eval_type_id = eval_info["config"]["eval_type_id"]
+            template.config_schema = (
+                eval_info["config"]["config"] if "config" in eval_info["config"] else {}
+            )
+            template.criteria = eval_info["criteria"]
+            template.choices = eval_info["choices"]
+            template.multi_choice = eval_info["multi_choice"]
+        return eval_templates
+
+    @lru_cache(maxsize=100)
+    def _get_eval_info(self, eval_id: str) -> Dict[str, Any]:
+        url = (
+            self._base_url
+            + "/"
+            + Routes.evaluate_template.value.format(eval_id=eval_id)
+        )
+        response = self.request(
+            config=RequestConfig(
+                method=HttpMethod.GET,
+                url=url,
+            ),
+        )
+        return response.json()["result"]
