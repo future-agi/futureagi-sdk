@@ -1,5 +1,6 @@
 import os
 import uuid
+import json
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
@@ -21,6 +22,7 @@ class DataTypeChoices(str, Enum):
     ARRAY = "array"
     IMAGE = "image"
     DATETIME = "datetime"
+    AUDIO = "audio"
 
     @classmethod
     def get_python_type(cls, data_type: "DataTypeChoices") -> type:
@@ -33,6 +35,7 @@ class DataTypeChoices(str, Enum):
             cls.JSON: dict,
             cls.ARRAY: list,
             cls.IMAGE: str,
+            cls.AUDIO: str,
             cls.DATETIME: datetime,
         }
         return TYPE_MAPPING.get(data_type, str)
@@ -42,11 +45,20 @@ class SourceChoices(str, Enum):
     """Valid source types for dataset columns"""
 
     EVALUATION = "evaluation"
+    EVALUATION_TAGS = "evaluation_tags"
+    EVALUATION_REASON = "evaluation_reason"
+
     RUN_PROMPT = "run_prompt"
     EXPERIMENT = "experiment"
     OPTIMISATION = "optimisation"
+
     EXPERIMENT_EVALUATION = "experiment_evaluation"
+    EXPERIMENT_EVALUATION_TAGS = "experiment_evaluation_tags"
+
     OPTIMISATION_EVALUATION = "optimisation_evaluation"
+    ANNOTATION_LABEL = "annotation_label"
+    OPTIMISATION_EVALUATION_TAGS = "optimisation_evaluation_tags"
+
     EXTRACTED_JSON = "extracted_json"
     CLASSIFICATION = "classification"
     EXTRACTED_ENTITIES = "extracted_entities"
@@ -65,10 +77,10 @@ class SourceChoices(str, Enum):
 class Column(BaseModel):
     """Column information for dataset tables"""
 
-    id: uuid.UUID
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
     name: str
     data_type: DataTypeChoices
-    source: SourceChoices
+    source: Optional[SourceChoices] = Field(default=SourceChoices.OTHERS)
     source_id: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     is_frozen: bool = False
@@ -86,6 +98,17 @@ class Column(BaseModel):
             raise ValueError("Column name too long (max 255 characters)")
         return v.strip()
 
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert Column instance to a dictionary"""
+        return {
+            "id": str(self.id),
+            "name": self.name,
+            "data_type": self.data_type.value,
+            "source": self.source.value,
+            "source_id": self.source_id,
+            "metadata": self.metadata,
+        }
+
     class Config:
         frozen = True
 
@@ -93,9 +116,10 @@ class Column(BaseModel):
 class Cell(BaseModel):
     """Cell information for dataset tables"""
 
-    column_id: uuid.UUID
-    row_id: uuid.UUID
-    value: Optional[str] = None
+    column_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    row_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    column_name: Optional[str] = None
+    value: Optional[Any] = None
     value_infos: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     status: Optional[str] = None
@@ -117,6 +141,19 @@ class Cell(BaseModel):
             return []
         return v
 
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert Cell Instance to dictionary"""
+        return {
+            "column_id": str(self.column_id),
+            "row_id": str(self.row_id),
+            "column_name": self.column_name,
+            "value": self.value,
+            "value_infos": self.value_infos,
+            "metadata": self.metadata,
+            "status": self.status,
+            "failure_reason": self.failure_reason,
+        }
+
     class Config:
         frozen = True
 
@@ -124,8 +161,8 @@ class Cell(BaseModel):
 class Row(BaseModel):
     """Row information for dataset tables"""
 
-    id: uuid.UUID
-    order: int
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    order: Optional[int] = Field(default=0)
     cells: List[Cell]
 
     @field_validator("order")
@@ -141,6 +178,14 @@ class Row(BaseModel):
         if not v:
             raise ValueError("Row must have at least one cell")
         return v
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert Row instance to a dictionary"""
+        return {
+            "id": str(self.id),
+            "order": self.order,
+            "cells": [cell.to_dict() for cell in self.cells],
+        }
 
     class Config:
         frozen = True
@@ -223,13 +268,34 @@ class DatasetTable(BaseModel):
             if data_type == DataTypeChoices.FLOAT:
                 return float(value)
             elif data_type == DataTypeChoices.BOOLEAN:
-                return value.lower() == "true"
+                if value.lower() == "passed":
+                    return True
+                elif value.lower() == "failed":
+                    return False
+                else:
+                    return value.lower() == "true"
             elif data_type == DataTypeChoices.DATETIME:
                 return pd.to_datetime(value)
             elif data_type == DataTypeChoices.JSON:
-                return pd.read_json(value)
+                try:
+                    # Replace single quotes with double quotes for JSON parsing
+                    value_normalized = value.replace("'", "\"")
+                    return json.loads(value_normalized)
+                except json.JSONDecodeError:
+                    return value
             elif data_type == DataTypeChoices.ARRAY:
-                return value.split(",")
+                if isinstance(value, list):
+                    return value
+                
+                if isinstance(value, str):
+                    if value.startswith('[') and value.endswith(']'):
+                        try:
+                            # Replace single quotes with double quotes for JSON parsing
+                            value_normalized = value.replace("'", "\"")
+                            return json.loads(value_normalized)
+                        except json.JSONDecodeError:
+                            return value
+                
             return value
         except (ValueError, TypeError):
             return None
@@ -250,10 +316,26 @@ class DatasetTable(BaseModel):
     def to_json(self, file_path: str) -> str:
         """Convert dataset table to JSON string"""
         df = self.to_df()
-        if file_path and os.path.exists(file_path):
-            df.to_json(file_path, orient="records", lines=True, mode="a")
-        elif file_path and not os.path.exists(file_path):
-            df.to_json(file_path, orient="records", lines=True)
+        
+        records = df.to_dict(orient="records")
+        
+        if os.path.exists(file_path):
+            try:
+                with open(file_path, 'r') as f:
+                    existing_data = json.load(f)
+                if not isinstance(existing_data, list):
+                    existing_data = [existing_data]
+            except json.JSONDecodeError:
+                existing_data = []
+                
+            all_records = existing_data + records
+            with open(file_path, 'w') as f:
+                json.dump(all_records, f)
+        else:
+            with open(file_path, 'w') as f:
+                json.dump(records, f)
+        
+        return file_path
 
     def to_csv(self, file_path: str) -> str:
         """Convert dataset table to CSV string"""

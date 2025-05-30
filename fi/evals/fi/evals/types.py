@@ -51,8 +51,8 @@ class EvalResultMetric(BaseModel):
     Represents the LLM evaluation result metric.
     """
 
-    id: str
-    value: float
+    id: Union[str, int, float]
+    value: Union[str, int, float, List[Any]]
 
 
 class EvalResult(BaseModel):
@@ -60,16 +60,12 @@ class EvalResult(BaseModel):
     Represents the LLM evaluation result.
     """
 
-    name: str
-    display_name: str
     data: Optional[Union[Dict[str, Any], List[Any]]] = None
     failure: Optional[bool]
     reason: str
     runtime: int
-    model: Optional[str]
     metadata: Optional[Union[str, List[Any], Dict[str, Any]]] = None
     metrics: List[EvalResultMetric]
-    datapoint_field_annotations: Optional[List[DatapointFieldAnnotation]]
 
 
 class BatchRunResult(BaseModel):

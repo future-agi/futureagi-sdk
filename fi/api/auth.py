@@ -7,17 +7,17 @@ from requests import Response
 from requests_futures.sessions import FuturesSession
 
 from fi.api.types import RequestConfig
-from fi.integrations.providers.types import ApiKeyName
 from fi.utils.constants import (
     API_KEY_ENVVAR_NAME,
-    BASE_URL,
+    get_base_url,
     DEFAULT_MAX_QUEUE,
     DEFAULT_MAX_WORKERS,
     DEFAULT_TIMEOUT,
     SECRET_KEY_ENVVAR_NAME,
 )
-from fi.utils.errors import MissingAuthError
+from fi.utils.errors import MissingAuthError, DatasetNotFoundError
 from fi.utils.executor import BoundedExecutor
+from fi.utils.utils import ApiKeyName
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -29,7 +29,7 @@ class ResponseHandler(Generic[T, U], ABC):
     @classmethod
     def parse(cls, response: Response) -> Union[T, U]:
         """Parse the response into the expected type"""
-        if not response.ok:
+        if not response.ok or response.status_code != 200:
             cls._handle_error(response)
         return cls._parse_success(response)
 
@@ -56,7 +56,7 @@ class HttpClient:
         default_headers: Optional[Dict[str, str]] = None,
         **kwargs,
     ):
-        self._base_url = base_url.rstrip("/") if base_url else BASE_URL.rstrip("/")
+        self._base_url = base_url.rstrip("/") if base_url else get_base_url().rstrip("/")
         self._session = session or FuturesSession(
             executor=BoundedExecutor(
                 bound=kwargs.get("max_queue", DEFAULT_MAX_QUEUE),
@@ -98,6 +98,8 @@ class HttpClient:
                 return response
 
             except Exception as e:
+                if isinstance(e, DatasetNotFoundError):
+                    raise e
                 if attempt == config.retry_attempts - 1:
                     raise e
                 time.sleep(config.retry_delay)
@@ -146,7 +148,7 @@ class APIKeyManager(APIKeyAuth):
 
     @property
     def url(self) -> str:
-        return self.BASE_URL + "/model_hub/api-keys"
+        return get_base_url() + "/model_hub/api-keys"
 
     @property
     def headers(self) -> dict:

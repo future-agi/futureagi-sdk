@@ -51,3 +51,9 @@ output/
 *.xlsx
 #csv files
 *.csv
+#virtual environments
+**/venv
+**/env
+**/.env
+*.DS_Store
+*.pdf

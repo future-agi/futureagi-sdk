@@ -1,11 +1,15 @@
 [tool.poetry]
 name = "futureagi"
-version = "0.3.5"
+version = "0.6.2"
 description = "We help GenAI teams maintain high-accuracy for their Models in production."
 authors = ["Future AGI <no-reply@futureagi.com>"]
 readme = "README.md"
 packages = [
     { include = "fi" }
+]
+exclude = [
+    "fi/integrations/otel",
+    "fi/evals"
 ]
 
 [tool.poetry.dependencies]
@@ -23,7 +27,13 @@ six = "1.16.0"
 tzdata = "2024.1"
 urllib3 = "2.2.2"
 pydantic = "^2.9.2"
-
+tqdm = "^4.67.1"
+rouge_score = "*"
+Levenshtein = "*"
+scipy = [
+    {version = ">=1.13.0,<1.15.0", python = "<3.10"},
+    {version = ">=1.15.0", python = ">=3.10"}
+]
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.0.1"
