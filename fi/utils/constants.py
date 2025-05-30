@@ -24,7 +24,16 @@ RESERVED_TAG_COLS = []
 SECRET_KEY_ENVVAR_NAME = "FI_SECRET_KEY"
 API_KEY_ENVVAR_NAME = "FI_API_KEY"
 
-BASE_URL = os.getenv("FI_BASE_URL", "https://api.futureagi.com")
+def get_base_url():
+    """Get the base URL from environment variable at runtime.
+    
+    This ensures that changes to the FI_BASE_URL environment variable
+    are picked up even after the module has been imported.
+    
+    Returns:
+        str: The base URL for the FutureAGI API
+    """
+    return os.getenv("FI_BASE_URL", "https://api.futureagi.com")
 
 # Session settings
 DEFAULT_TIMEOUT = 200
@@ -36,3 +45,7 @@ DEFAULT_MAX_QUEUE = 5000
 PAGE_SIZE = 100
 DATASET_TEMP_FILE_PREFIX = "tmp_fi_dataset_"
 DATASET_TEMP_FILE_SUFFIX = ".csv"
+
+# Environment variables specific to the subpackage
+FI_PROJECT_NAME = "DEFAULT_PROJECT_NAME"
+FI_PROJECT_VERSION_NAME = "DEFAULT_PROJECT_VERSION_NAME"

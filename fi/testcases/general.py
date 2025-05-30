@@ -14,6 +14,7 @@ class TestCase(BaseModel):
     actual_json: Optional[dict] = None
     expected_json: Optional[dict] = None
     expected_text: Optional[str] = None
+    expected_response: Optional[str] = None
     query: Optional[str] = None
     response: Optional[str] = None
     context: Union[List[str], str] = None
