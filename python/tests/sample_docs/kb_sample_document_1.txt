@@ -1,0 +1,13 @@
+This is a sample text file for knowledge base testing.
+It contains multiple lines of text
+with various information.
+
+Some key points:
+- Point 1: Testing file structure
+- Point 2: Multiple lines
+- Point 3: Different formats
+
+The file includes some technical terms:
+* Machine Learning
+* Natural Language Processing
+* Data Science 

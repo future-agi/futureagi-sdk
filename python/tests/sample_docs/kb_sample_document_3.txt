@@ -1,0 +1,24 @@
+# Example Code Documentation
+
+def process_document(doc_text: str) -> Dict:
+    """
+    Process a document and extract key information
+    
+    Args:
+        doc_text: Input text to process
+        
+    Returns:
+        Dictionary containing processed information
+    """
+    # Implementation details here
+    pass
+
+# Configuration Settings
+MAX_TOKEN_LENGTH = 512
+MIN_CONFIDENCE = 0.85
+SUPPORTED_LANGUAGES = ['en', 'es', 'fr']
+
+# Usage Notes:
+# 1. Always validate input text
+# 2. Check token length before processing
+# 3. Handle multiple languages appropriately 
