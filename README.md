@@ -1,174 +1,448 @@
-# Future AGI
+<div align="center">
 
-![Company Logo](https://fi-content.s3.ap-south-1.amazonaws.com/Logo.png)
+![Future AGI Logo](Logo.png)
 
-Welcome to Future AGI - Empowering GenAI Teams with Advanced Performance Management
+# Future AGI SDK
 
-# Overview
+**The world's most accurate AI evaluation, observability and optimization platform**
 
-Future AGI is the world's most accurate AI evaluation, observability and optimization platform. We help teams build near perfect AI applications across software and hardware through comprehensive model monitoring, testing and optimization.
+[![PyPI version](https://badge.fury.io/py/futureagi.svg)](https://pypi.org/project/futureagi/)
+[![Downloads](https://static.pepy.tech/badge/futureagi)](https://pepy.tech/project/futureagi)
+[![Python Support](https://img.shields.io/pypi/pyversions/futureagi.svg)](https://pypi.org/project/futureagi/)
+[![License](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE.md)
+[![GitHub Stars](https://img.shields.io/github/stars/future-agi/futureagi-sdk?style=social)](https://github.com/future-agi/futureagi-sdk)
 
-**Key Features**
+[📖 Docs](https://docs.futureagi.com) • [🌐 Website](https://www.futureagi.com) • [💬 Community](https://www.linkedin.com/company/futureagi) • [🎯 Dashboard](https://app.futureagi.com)
 
-* **_World's Best Evaluations_**: Power your AGI development with industry-leading evaluation frameworks and metrics.
-* **_Ultra-Fast Guardrails_**: Implement real-time safety checks with sub-100ms latency for production-ready AI systems.
-* **_Comprehensive SDKs_**: Rapidly prototype and observe agent behavior with our developer-friendly toolkits.
-* **_Advanced Analytics_**: Monitor and optimize agent performance with detailed insights and actionable metrics.
+</div>
 
-# Quickstart
-**Installation**
+---
 
-To install the client, you can clone the repository or install the library:
+## 📖 Table of Contents
 
-Install the library in an environment using Python >= 3.6.
+- [What is Future AGI?](#-what-is-future-agi)
+- [Installation](#-installation)
+- [Authentication](#-authentication)
+- [30-Second Examples](#-30-second-examples)
+- [Quick Start](#-quick-start)
+  - [Dataset Management](#-dataset-management)
+  - [Prompt Workbench](#-prompt-workbench)
+  - [Knowledge Base (RAG)](#-knowledge-base-rag)
+- [How It Works](#️-how-it-works)
+- [Core Use Cases](#-core-use-cases)
+- [Real-World Use Cases](#-real-world-use-cases)
+- [Why Choose Future AGI?](#-why-choose-future-agi)
+- [Supported Integrations](#-supported-integrations)
+- [Documentation](#-documentation)
+- [Language Support](#-language-support)
+- [Support & Community](#-support--community)
+- [Contributing](#-contributing)
+- [Testimonials](#-testimonials)
+- [Roadmap](#-roadmap)
+- [Troubleshooting & FAQ](#-troubleshooting--faq)
+
+---
+
+## 🚀 What is Future AGI?
+
+Future AGI empowers GenAI teams to build near-perfect AI applications through comprehensive evaluation, monitoring, and optimization. Our platform provides everything you need to develop, test, and deploy production-ready AI systems with confidence.
+
+```bash
+# Get started in 30 seconds
+pip install futureagi
+export FI_API_KEY="your_key"
+export FI_SECRET_KEY="your_secret"
 ```
-$ pip3 install futureagi
+
+**👉 [Get Free API Keys](https://app.futureagi.com/signup) • [View Live Demo](https://docs.futureagi.com) • [Read Quick Start Guide](https://docs.futureagi.com/get-started/quickstart)**
+
+### ✨ Key Features
+
+- **🎯 World-Class Evaluations** — Industry-leading evaluation frameworks powered by our Critique AI agent
+- **⚡ Ultra-Fast Guardrails** — Real-time safety checks with sub-100ms latency
+- **📊 Dataset Management** — Programmatically create, update, and manage AI training datasets
+- **🎨 Prompt Workbench** — Version control, A/B testing, and deployment management for prompts
+- **📚 Knowledge Base** — Intelligent document management and retrieval for RAG applications
+- **📈 Advanced Analytics** — Deep insights into model performance and behavior
+- **🤖 Simulate your AI system** — Simulate your AI system with different scenarios and see how it performs
+- **Add Observability** — Add observability to your AI system to monitor its performance and behavior
+
+
+---
+
+## 📦 Installation
+
+### Python
+```bash
+pip install futureagi
 ```
-Or clone the repo:
 
+### TypeScript/JavaScript
+```bash
+npm install @futureagi/sdk
+# or
+pnpm add @futureagi/sdk
 ```
-$ git clone https://github.com/future-agi/client
+
+**Requirements:** Python >= 3.6 | Node.js >= 14
+
+---
+
+## 🔑 Authentication
+
+Get your API credentials from the [Future AGI Dashboard](https://app.futureagi.com):
+
+```bash
+export FI_API_KEY="your_api_key"
+export FI_SECRET_KEY="your_secret_key"
 ```
 
-**Initialisation**
+Or set them programmatically:
 
-To Start working with Future AGI, you need to create an account and get your API key and secret key.
-You will be needing these keys to work with the Future AGI platform.
-
-Start working by uploading your data to the platform
-
-```
-# pip install futureagi
-
+```python
 import os
+os.environ["FI_API_KEY"] = "your_api_key"
+os.environ["FI_SECRET_KEY"] = "your_secret_key"
+```
+
+## 🎯 Quick Start
+
+### 📊 Dataset Management
+
+Create and manage datasets with built-in evaluations:
+
+```python
 from fi.datasets import Dataset
 from fi.datasets.types import (
-    Cell,
-    Column,
-    DatasetConfig,
-    DataTypeChoices,
-    ModelTypes,
-    Row,
-    SourceChoices,
+    Cell, Column, DatasetConfig, DataTypeChoices,
+    ModelTypes, Row, SourceChoices
 )
 
-# Set environment variables
-os.environ["FI_API_KEY"] = "<Your API Key>"
-os.environ["FI_SECRET_KEY"] = "<Your Secret Key>"
-
-# Get existing dataset
-config = DatasetConfig(name="example_dataset", model_type= ModelTypes.GENERATIVE_LLM)
+# Create a new dataset
+config = DatasetConfig(name="qa_dataset", model_type=ModelTypes.GENERATIVE_LLM)
 dataset = Dataset(dataset_config=config)
-dataset = dataset.create_dataset(dataset_config=config)
+dataset = dataset.create()
 
 # Define columns
 columns = [
-    Column(
-        name="user_query",
-        data_type=DataTypeChoices.TEXT,
-        source=SourceChoices.OTHERS
-    ),
-    Column(
-        name="response_quality",
-        data_type=DataTypeChoices.INTEGER,
-        source=SourceChoices.OTHERS
-    ),
-    Column(
-        name="is_helpful",
-        data_type=DataTypeChoices.BOOLEAN,
-        source=SourceChoices.OTHERS
-    )
+    Column(name="user_query", data_type=DataTypeChoices.TEXT, source=SourceChoices.OTHERS),
+    Column(name="ai_response", data_type=DataTypeChoices.TEXT, source=SourceChoices.OTHERS),
+    Column(name="quality_score", data_type=DataTypeChoices.INTEGER, source=SourceChoices.OTHERS),
 ]
 
-# Define rows
+# Add data
 rows = [
-    Row(
-        order=1,
-        cells=[
+    Row(order=1, cells=[
             Cell(column_name="user_query", value="What is machine learning?"),
-            Cell(column_name="response_quality", value=8),
-            Cell(column_name="is_helpful", value=True)
-        ]
-    ),
-    Row(
-        order=2,
-        cells=[
+        Cell(column_name="ai_response", value="Machine learning is a subset of AI..."),
+        Cell(column_name="quality_score", value=9),
+    ]),
+    Row(order=2, cells=[
             Cell(column_name="user_query", value="Explain quantum computing"),
-            Cell(column_name="response_quality", value=9),
-            Cell(column_name="is_helpful", value=True)
-        ]
-    )
+        Cell(column_name="ai_response", value="Quantum computing uses quantum bits..."),
+        Cell(column_name="quality_score", value=8),
+    ]),
 ]
 
-try:
-    # Add columns and rows to dataset
+# Push data and run evaluations
     dataset = dataset.add_columns(columns=columns)
     dataset = dataset.add_rows(rows=rows)
-    print("✓ Data added successfully")
-    
-except Exception as e:
-    print(f"Failed to add data: {e}")
 
+# Add automated evaluation
+dataset.add_evaluation(
+    name="factual_accuracy",
+    eval_template="is_factually_consistent",
+    required_keys_to_column_names={
+        "input": "user_query",
+        "output": "ai_response",
+        "context": "user_query",
+    },
+    run=True
+)
+
+print("✓ Dataset created with automated evaluations")
 ```
 
-**Initialises the Future AGI Dataset Client**
-* _fi_api_key_: provided API key associated with your account.
-* _fi_secret_key_: provided identifier to connect records to spaces.
-* _DatasetConfig_: The configuration for the dataset.
-* _create_dataset_: The function to create the dataset.
+### 🎨 Prompt Workbench
 
+Version control and A/B test your prompts:
 
-You can also set these keys as environment variables:
+```python
+from fi.prompt import Prompt, PromptTemplate, ModelConfig
+
+# Create a versioned prompt template
+template = PromptTemplate(
+    name="customer_support",
+    messages=[
+        {"role": "system", "content": "You are a helpful customer support agent."},
+        {"role": "user", "content": "Help {{customer_name}} with {{issue_type}}."},
+    ],
+    variable_names={"customer_name": ["Alice"], "issue_type": ["billing"]},
+    model_configuration=ModelConfig(model_name="gpt-4o-mini", temperature=0.7)
+)
+
+# Create and version the template
+client = Prompt(template)
+client.create()  # Create v1
+client.commit_current_version("Initial version", set_as_default=True)
+
+# Assign deployment labels
+client.labels().assign("Production", "v1")
+
+# Compile with variables
+compiled = client.compile({"customer_name": "Bob", "issue_type": "refund"})
+print(compiled)
+# Output: [
+#   {"role": "system", "content": "You are a helpful customer support agent."},
+#   {"role": "user", "content": "Help Bob with refund."}
+# ]
 ```
-export FI_API_KEY=your_api_key
-export FI_SECRET_KEY=your_secret_key
+
+**A/B Testing Example:**
+
+```python
+import random
+from openai import OpenAI
+from fi.prompt import Prompt
+
+# Fetch different variants
+variant_a = Prompt.get_template_by_name("customer_support", label="variant-a")
+variant_b = Prompt.get_template_by_name("customer_support", label="variant-b")
+
+# Randomly select and use
+selected = random.choice([variant_a, variant_b])
+client = Prompt(selected)
+compiled = client.compile({"customer_name": "Alice", "issue_type": "refund"})
+
+# Send to your LLM provider
+openai = OpenAI(api_key="your_openai_key")
+response = openai.chat.completions.create(model="gpt-4o", messages=compiled)
+print(f"Using variant: {selected.version}")
+print(f"Response: {response.choices[0].message.content}")
 ```
-And then initialise the Dataset without passing the keys directly:
 
-**_[For full details, see our docs.](https://docs.futureagi.com/)_**
+### 📚 Knowledge Base (RAG)
 
+Manage documents for retrieval-augmented generation:
 
-# FAQ’s:
+```python
+from fi.kb import KnowledgeBase
 
-1. Q: How do you give a Evaluation score without human in the loop?
+# Initialize client
+kb_client = KnowledgeBase(
+    fi_api_key="your_api_key",
+    fi_secret_key="your_secret_key"
+)
 
-Our secret Sauce is a Critique AI agent that can deliver powerful evaluation framework without need for human in the loop. What’s more is that it is 100% configurable as per new evolving use cases. Now anything that you can imagine your AI system should deliver - you can configure our platform to manage it.
+# Create a knowledge base with documents
+kb = kb_client.create_kb(
+    name="product_docs",
+    file_paths=["manual.pdf", "faq.txt", "guide.md"]
+)
 
-2. Q: What all inputs Future AGI platform needs?
+print(f"✓ Knowledge base created: {kb.kb.name}")
+print(f"  Files uploaded: {len(kb.kb.file_names)}")
 
-We are a data-agnostic platform and can work with any data kind of that you have. Whether it is text, image, audio, video, or any other data type, we can help you annotate, evaluate, optimize and monitor your AI system.
+# Update with more files
+updated_kb = kb_client.update_kb(
+    kb_id=kb.kb.id,
+    file_paths=["updates.pdf"]
+)
 
-3. Q: I don't want to share data with Future AGI, can I still use it?
+# Delete specific files
+kb_client.delete_files_from_kb(file_ids=["file_id_here"])
 
-Yes, you can now install our SDK in your private cloud and take advantage of our strong platform to align your AI system to your users.
+# Clean up
+kb_client.delete_kb(kb_ids=[kb.kb.id])
+```
 
+## 🎯 Core Use Cases
 
-4. Q: My app uses multiple models with multiple modalities, can you work with images and audio also?
+| Feature | Use Case | Benefit |
+|---------|----------|---------|
+| **Datasets** | Store and version training/test data | Reproducible experiments, automated evaluations |
+| **Prompt Workbench** | Version control for prompts | A/B testing, deployment management, rollback |
+| **Knowledge Base** | Evaluations and synthetic data | Intelligent retrieval, document versioning |
+| **Evaluations** | Automated quality checks | No human-in-the-loop, 100% configurable |
+| **Protect** | Real-time safety filters | Sub-100ms latency, production-ready |
 
-Yes we can.
+---
 
-5. Q: How much time does it take to integrate the Future AGI platform? How much bandwidth would be required?
+## 🔥 Why Choose Future AGI?
 
-It takes just 2 minutes to integrate a few lines of code and your data starts showing on our platform. Try it today.
+| Feature | Future AGI | Traditional Tools | Other Platforms |
+|---------|-----------|-------------------|-----------------|
+| **Evaluation Speed** | ⚡ Sub-100ms | 🐌 Seconds-Minutes | 🐢 Minutes-Hours |
+| **Human in Loop** | ❌ Fully Automated | ✅ Required | ✅ Often Required |
+| **Multimodal Support** | ✅ Text, Image, Audio, Video | ⚠️ Limited | ⚠️ Text Only |
+| **Setup Time** | ⏱️ 2 minutes | ⏳ Days-Weeks | ⏳ Hours-Days |
+| **Configurability** | 🎯 100% Customizable | 🔒 Fixed Metrics | ⚙️ Some Flexibility |
+| **Privacy Options** | 🔐 Cloud + Self-hosted | ☁️ Cloud Only | ☁️ Cloud Only |
+| **A/B Testing** | ✅ Built-in | ❌ Manual | ⚠️ Limited |
+| **Prompt Versioning** | ✅ Git-like Control | ❌ Not Available | ⚠️ Basic |
+| **Real-time Guardrails** | ✅ Production-ready | ❌ Not Available | ⚠️ Experimental |
 
+---
 
-# Resources
+## 🔌 Supported Integrations
 
-**Website**: https://www.futureagi.com/
+Future AGI works seamlessly with your existing AI stack:
 
-**Documentation**: https://docs.futureagi.com/
+**LLM Providers**  
+`OpenAI` • `Anthropic` • `Google Gemini` • `Azure OpenAI` • `AWS Bedrock` • `Cohere` • `Mistral` • `Ollama`
 
-**PyPI** : https://pypi.org/project/futureagi/
+**Frameworks**  
+`LangChain` • `LlamaIndex` • `CrewAI` • `AutoGen` • `Haystack` • `Semantic Kernel`
 
-# Connect with us
+**Vector Databases**  
+`Pinecone` • `Weaviate` • `Qdrant` • `Milvus` • `Chroma` • `FAISS` • `vLLM`
 
-**Email**: support@futureagi.com
+**Observability**  
+`OpenTelemetry` • `Custom Logging` • `Trace Context Propagation`
 
+---
 
-**LinkedIn**: https://www.linkedin.com/company/futureagi
+## 📚 Documentation
 
-**X**: https://x.com/FutureAGI_
+- **[Complete Documentation](https://docs.futureagi.com)**
+- **[Dataset SDK Guide](https://docs.futureagi.com/future-agi/get-started/dataset/adding-dataset/using-sdk)**
+- **[Prompt Workbench Guide](https://docs.futureagi.com/products/prompt/how-to/prompt-workbench-using-sdk)**
+- **[Knowledge Base Guide](https://docs.futureagi.com/future-agi/get-started/knowledge-base/how-to/create-kb-using-sdk)**
+- **[API Reference](https://docs.futureagi.com)**
 
-**Reddit**: https://www.reddit.com/user/Future_AGI/submitted/
+---
 
-**Substack**: https://substack.com/@futureagi
+## 🤝 Language Support
+
+| Language | Package | Status |
+|----------|---------|--------|
+| **Python** | `futureagi` | ✅ Full Support |
+| **TypeScript/JavaScript** | `@futureagi/sdk` | ✅ Full Support |
+| **REST API** | cURL/HTTP | ✅ Available |
+
+---
+
+## 🆘 Support & Community
+
+- **📧 Email:** support@futureagi.com
+- **💼 LinkedIn:** [Future AGI Company](https://www.linkedin.com/company/futureagi)
+- **🐦 X (Twitter):** [@FutureAGI_](https://x.com/FutureAGI_)
+- **📰 Substack:** [Future AGI Blog](https://substack.com/@futureagi)
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how to get involved:
+
+- **🐛 Report bugs**: [Open an issue](https://github.com/future-agi/futureagi-sdk/issues)
+- **💡 Request features**: [Start a discussion](https://github.com/future-agi/futureagi-sdk/discussions)
+- **🔧 Submit PRs**: Fork, create a feature branch, and submit a pull request
+- **📖 Improve docs**: Help us make our documentation better
+
+See [CONTRIBUTING.md](https://github.com/future-agi/futureagi-sdk/blob/main/CONTRIBUTING.md) for detailed guidelines.
+
+---
+
+## 🌟 Testimonials
+
+> "Future AGI cut our evaluation time from days to minutes. The automated critiques are spot-on!"  
+> — **AI Engineering Team, Fortune 500 Company**
+
+> "The prompt versioning alone saved us countless headaches. A/B testing is now trivial."  
+> — **ML Lead, Healthcare Startup**
+
+> "Sub-100ms guardrails in production. Game changer for our customer-facing AI."  
+> — **CTO, E-commerce Platform**
+
+---
+
+## 📊 Roadmap
+
+- [x] Datasets with automated evaluations
+- [x] Prompt workbench with versioning
+- [x] Knowledge base for RAG
+- [x] Real-time guardrails (sub-100ms)
+- [x] Multi-language SDK (Python + TypeScript)
+- [x] Bulk Annotations for Human in the Loop
+- [ ] On-premise deployment toolkit
+
+---
+
+## ❓ Troubleshooting & FAQ
+
+<details>
+<summary><strong>Import Error: `ModuleNotFoundError: No module named 'fi'`</strong></summary>
+
+Make sure Future AGI is installed:
+```bash
+pip install futureagi --upgrade
+```
+</details>
+
+<details>
+<summary><strong>Authentication Error: Invalid API credentials</strong></summary>
+
+1. Check your API keys at [Dashboard](https://app.futureagi.com/settings/api-keys)
+2. Ensure environment variables are set correctly:
+```bash
+echo $FI_API_KEY
+echo $FI_SECRET_KEY
+```
+3. Try setting them programmatically in your code
+</details>
+
+<details>
+<summary><strong>How do I switch between environments (dev/staging/prod)?</strong></summary>
+
+Use prompt labels to manage different deployment environments:
+```python
+client.labels().assign("Development", "v1")
+client.labels().assign("Staging", "v2")
+client.labels().assign("Production", "v3")
+```
+</details>
+
+<details>
+<summary><strong>Can I use Future AGI without sending data to the cloud?</strong></summary>
+
+Yes! Future AGI supports self-hosted deployments. Contact us at support@futureagi.com for enterprise on-premise options.
+</details>
+
+<details>
+<summary><strong>What LLM providers are supported?</strong></summary>
+
+All major providers: OpenAI, Anthropic, Google, Azure, AWS Bedrock, Cohere, Mistral, and open-source models via vLLM/Ollama.
+</details>
+
+**Need more help?** Check our [complete FAQ](https://docs.futureagi.com/faq) or [join our community](https://www.linkedin.com/company/futureagi).
+
+---
+
+## 📄 License
+
+This project is licensed under the BSD-3-Clause License - see the [LICENSE.md](LICENSE.md) file for details.
+
+---
+
+<div align="center">
+
+## 🚀 Ready to Build Better AI?
+
+**[🎯 Get Free API Keys](https://app.futureagi.com/signup)** • **[📖 Read the Docs](https://docs.futureagi.com)** • **[💬 Join Community](https://www.linkedin.com/company/futureagi)**
+
+---
+
+### ⭐ If you find Future AGI helpful, give us a star on GitHub!
+
+[![Star History Chart](https://api.star-history.com/svg?repos=future-agi/futureagi-sdk&type=Date)](https://star-history.com/#future-agi/futureagi-sdk&Date)
+
+---
+
+Made with ❤️ by the [Future AGI Team](https://www.futureagi.com)
+
+**[Website](https://www.futureagi.com)** • **[Documentation](https://docs.futureagi.com)** • **[Dashboard](https://app.futureagi.com)** • **[Blog](https://substack.com/@futureagi)** • **[Twitter](https://x.com/FutureAGI_)**
+
+© 2025 Future AGI. All rights reserved.
+
+</div>
