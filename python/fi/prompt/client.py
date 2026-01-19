@@ -314,12 +314,6 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         if not self.template:
             raise ValueError("template must be set")
 
-        # Enforce maximum 10 variables per template at creation time
-        if self.template.variable_names and len(self.template.variable_names) > 10:
-            raise ValueError(
-                f"A maximum of 10 unique variables is allowed; received {len(self.template.variable_names)}."
-            )
-
         if self.template.id:
             raise TemplateAlreadyExists(self.template.name)
 
