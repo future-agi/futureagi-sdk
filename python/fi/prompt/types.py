@@ -141,13 +141,6 @@ class PromptTemplate(BaseModel):
             return v[0]
         return v or {}
 
-    @field_validator("variable_names")
-    def validate_variable_count(cls, v):
-        """Limit the number of distinct variables to 10 for now."""
-        if v is not None and len(v) > 10:
-            raise ValueError("A maximum of 10 unique variables is allowed in a prompt template.")
-        return v
-
     def model_post_init(self, __context: Any) -> None:
         """Initialize variable names by inferring them from the content if not already set."""
         if self.variable_names == {}:
