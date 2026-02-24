@@ -538,14 +538,26 @@ class Dataset(APIKeyAuth):
         if not required_keys_to_column_names:
             raise DatasetValidationError("required_keys_to_column_names mapping cannot be empty.")
 
-        template_classes = {cls.__name__: cls for cls in EvalTemplate.__subclasses__()}
-        if eval_template not in template_classes:
-            raise DatasetValidationError(f"Unknown or unsupported template name: {eval_template}")
-        
         if not model:
             raise DatasetValidationError("Model cannot be empty for evaluation.")
 
-        eval_id = template_classes[eval_template].eval_id
+        # Query backend for all evals and match by name (case-insensitive)
+        evals_url = f"{self._base_url}/sdk/api/v1/get-evals/"
+        all_evals = self.request_with_retry(
+            config=RequestConfig(method=HttpMethod.GET, url=evals_url, timeout=DEFAULT_API_TIMEOUT),
+            response_handler=EvalInfoResponseHandler,
+        )
+        eval_id = None
+        if isinstance(all_evals, list):
+            for ev in all_evals:
+                if ev.get("name", "").lower() == eval_template.lower():
+                    eval_id = ev.get("evalId") or ev.get("eval_id")
+                    break
+        if not eval_id:
+            available = sorted({ev.get("name", "") for ev in all_evals}) if isinstance(all_evals, list) else []
+            raise DatasetValidationError(
+                f"Unknown template: '{eval_template}'. Available: {available}"
+            )
 
         url = f"{self._base_url}/sdk/api/v1/eval/{eval_id}/"
         template_details = self.request_with_retry(
