@@ -1,0 +1,628 @@
+/**
+ * AnnotationQueue – SDK client for managing annotation queues, items, scores, and analytics.
+ *
+ * @example
+ * ```ts
+ * import { AnnotationQueue } from '@future-agi/sdk';
+ *
+ * const client = new AnnotationQueue({ fiApiKey: '...', fiSecretKey: '...' });
+ *
+ * const queue = await client.create({ name: 'Review Queue' });
+ * await client.activate(queue.id);
+ * await client.addItems(queue.id, [{ source_type: 'trace', source_id: 'abc' }]);
+ * const progress = await client.getProgress(queue.id);
+ * ```
+ */
+
+import { APIKeyAuth, APIKeyAuthConfig, ResponseHandler } from '../api/auth';
+import { HttpMethod, RequestConfig } from '../api/types';
+import { InvalidAuthError, SDKException } from '../utils/errors';
+import { Routes } from '../utils/routes';
+import type {
+    AddItemsResponse,
+    AnnotationPayload,
+    ExportToDatasetResponse,
+    ImportAnnotationsResponse,
+    QueueAgreement,
+    QueueAnalytics,
+    QueueConfig,
+    QueueDetail,
+    QueueItem,
+    QueueItemSource,
+    QueueProgress,
+    Score,
+} from './types';
+
+// ---------------------------------------------------------------------------
+// Response handlers
+// ---------------------------------------------------------------------------
+
+function unwrap(data: any): any {
+    if (data && typeof data === 'object' && 'result' in data) {
+        return data.result;
+    }
+    return data;
+}
+
+class QueueResponseHandler extends ResponseHandler<QueueDetail> {
+    static _parseSuccess(response: any): QueueDetail {
+        return unwrap(response.data);
+    }
+}
+
+class QueueListResponseHandler extends ResponseHandler<QueueDetail[]> {
+    static _parseSuccess(response: any): QueueDetail[] {
+        const data = unwrap(response.data);
+        if (Array.isArray(data)) return data;
+        return data?.results ?? data?.table ?? [];
+    }
+}
+
+class DictResponseHandler extends ResponseHandler<Record<string, any>> {
+    static _parseSuccess(response: any): Record<string, any> {
+        return unwrap(response.data);
+    }
+}
+
+class ItemListResponseHandler extends ResponseHandler<QueueItem[]> {
+    static _parseSuccess(response: any): QueueItem[] {
+        const data = unwrap(response.data);
+        if (Array.isArray(data)) return data;
+        return data?.results ?? [];
+    }
+}
+
+class ScoreListResponseHandler extends ResponseHandler<Score[]> {
+    static _parseSuccess(response: any): Score[] {
+        const data = unwrap(response.data);
+        if (Array.isArray(data)) return data;
+        return data?.results ?? [];
+    }
+}
+
+class ScoreResponseHandler extends ResponseHandler<Score> {
+    static _parseSuccess(response: any): Score {
+        return unwrap(response.data);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// URL helper
+// ---------------------------------------------------------------------------
+
+function buildUrl(base: string, route: string, params: Record<string, string> = {}): string {
+    let url = `${base}/${route}`;
+    for (const [key, val] of Object.entries(params)) {
+        url = url.replace(`{${key}}`, val);
+    }
+    return url;
+}
+
+// ---------------------------------------------------------------------------
+// Client
+// ---------------------------------------------------------------------------
+
+export class AnnotationQueue extends APIKeyAuth {
+    constructor(config: APIKeyAuthConfig = {}) {
+        super(config);
+    }
+
+    // ------------------------------------------------------------------
+    // Queue CRUD
+    // ------------------------------------------------------------------
+
+    async create(config: QueueConfig): Promise<QueueDetail> {
+        const body: Record<string, any> = { name: config.name };
+        if (config.description != null) body.description = config.description;
+        if (config.instructions != null) body.instructions = config.instructions;
+        if (config.assignmentStrategy != null) body.assignment_strategy = config.assignmentStrategy;
+        if (config.annotationsRequired != null) body.annotations_required = config.annotationsRequired;
+        if (config.reservationTimeoutMinutes != null) body.reservation_timeout_minutes = config.reservationTimeoutMinutes;
+        if (config.requiresReview != null) body.requires_review = config.requiresReview;
+        if (config.project != null) body.project = config.project;
+        if (config.dataset != null) body.dataset = config.dataset;
+        if (config.agentDefinition != null) body.agent_definition = config.agentDefinition;
+
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUES),
+                json: body,
+            },
+            QueueResponseHandler,
+        ) as Promise<QueueDetail>;
+    }
+
+    async list(options?: {
+        status?: string;
+        search?: string;
+        includeCounts?: boolean;
+        page?: number;
+        pageSize?: number;
+        timeout?: number;
+    }): Promise<QueueDetail[]> {
+        const params: Record<string, any> = {
+            page: options?.page ?? 1,
+            page_size: options?.pageSize ?? 20,
+        };
+        if (options?.status) params.status = options.status;
+        if (options?.search) params.search = options.search;
+        if (options?.includeCounts !== false) params.include_counts = 'true';
+
+        return this.request(
+            {
+                method: HttpMethod.GET,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUES),
+                params,
+                timeout: options?.timeout,
+            },
+            QueueListResponseHandler,
+        ) as Promise<QueueDetail[]>;
+    }
+
+    async get(queueId: string, options?: { timeout?: number }): Promise<QueueDetail> {
+        return this.request(
+            {
+                method: HttpMethod.GET,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_DETAIL, { queue_id: queueId }),
+                timeout: options?.timeout,
+            },
+            QueueResponseHandler,
+        ) as Promise<QueueDetail>;
+    }
+
+    async update(
+        queueId: string,
+        updates: Partial<Omit<QueueConfig, 'project' | 'dataset' | 'agentDefinition'>>,
+        options?: { timeout?: number },
+    ): Promise<QueueDetail> {
+        const body: Record<string, any> = {};
+        if (updates.name != null) body.name = updates.name;
+        if (updates.description != null) body.description = updates.description;
+        if (updates.instructions != null) body.instructions = updates.instructions;
+        if (updates.assignmentStrategy != null) body.assignment_strategy = updates.assignmentStrategy;
+        if (updates.annotationsRequired != null) body.annotations_required = updates.annotationsRequired;
+        if (updates.reservationTimeoutMinutes != null) body.reservation_timeout_minutes = updates.reservationTimeoutMinutes;
+        if (updates.requiresReview != null) body.requires_review = updates.requiresReview;
+
+        return this.request(
+            {
+                method: HttpMethod.PATCH,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_DETAIL, { queue_id: queueId }),
+                json: body,
+                timeout: options?.timeout,
+            },
+            QueueResponseHandler,
+        ) as Promise<QueueDetail>;
+    }
+
+    async delete(queueId: string, options?: { timeout?: number }): Promise<Record<string, any>> {
+        return this.request(
+            {
+                method: HttpMethod.DELETE,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_DETAIL, { queue_id: queueId }),
+                timeout: options?.timeout,
+            },
+            DictResponseHandler,
+        ) as Promise<Record<string, any>>;
+    }
+
+    // ------------------------------------------------------------------
+    // Queue lifecycle
+    // ------------------------------------------------------------------
+
+    async activate(queueId: string, options?: { timeout?: number }): Promise<QueueDetail> {
+        return this._updateStatus(queueId, 'active', options?.timeout);
+    }
+
+    async completeQueue(queueId: string, options?: { timeout?: number }): Promise<QueueDetail> {
+        return this._updateStatus(queueId, 'completed', options?.timeout);
+    }
+
+    private async _updateStatus(queueId: string, status: string, timeout?: number): Promise<QueueDetail> {
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_STATUS, { queue_id: queueId }),
+                json: { status },
+                timeout,
+            },
+            QueueResponseHandler,
+        ) as Promise<QueueDetail>;
+    }
+
+    // ------------------------------------------------------------------
+    // Labels
+    // ------------------------------------------------------------------
+
+    async addLabel(queueId: string, labelId: string, options?: { timeout?: number }): Promise<Record<string, any>> {
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_ADD_LABEL, { queue_id: queueId }),
+                json: { label_id: labelId },
+                timeout: options?.timeout,
+            },
+            DictResponseHandler,
+        ) as Promise<Record<string, any>>;
+    }
+
+    async removeLabel(queueId: string, labelId: string, options?: { timeout?: number }): Promise<Record<string, any>> {
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_REMOVE_LABEL, { queue_id: queueId }),
+                json: { label_id: labelId },
+                timeout: options?.timeout,
+            },
+            DictResponseHandler,
+        ) as Promise<Record<string, any>>;
+    }
+
+    // ------------------------------------------------------------------
+    // Items
+    // ------------------------------------------------------------------
+
+    async addItems(
+        queueId: string,
+        items: QueueItemSource[],
+        options?: { timeout?: number },
+    ): Promise<AddItemsResponse> {
+        if (!items || items.length === 0) {
+            throw new SDKException('items must be a non-empty array');
+        }
+
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.QUEUE_ITEMS_ADD, { queue_id: queueId }),
+                json: { items },
+                timeout: options?.timeout,
+            },
+            DictResponseHandler as any,
+        ) as Promise<AddItemsResponse>;
+    }
+
+    async listItems(
+        queueId: string,
+        options?: {
+            status?: string;
+            assignedTo?: string;
+            page?: number;
+            pageSize?: number;
+            timeout?: number;
+        },
+    ): Promise<QueueItem[]> {
+        const params: Record<string, any> = {
+            page: options?.page ?? 1,
+            page_size: options?.pageSize ?? 50,
+        };
+        if (options?.status) params.status = options.status;
+        if (options?.assignedTo) params.assigned_to = options.assignedTo;
+
+        return this.request(
+            {
+                method: HttpMethod.GET,
+                url: buildUrl(this._baseUrl, Routes.QUEUE_ITEMS, { queue_id: queueId }),
+                params,
+                timeout: options?.timeout,
+            },
+            ItemListResponseHandler,
+        ) as Promise<QueueItem[]>;
+    }
+
+    async removeItems(
+        queueId: string,
+        itemIds: string[],
+        options?: { timeout?: number },
+    ): Promise<Record<string, any>> {
+        if (!itemIds || itemIds.length === 0) {
+            throw new SDKException('itemIds must be a non-empty array');
+        }
+
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.QUEUE_ITEMS_BULK_REMOVE, { queue_id: queueId }),
+                json: { item_ids: itemIds },
+                timeout: options?.timeout,
+            },
+            DictResponseHandler,
+        ) as Promise<Record<string, any>>;
+    }
+
+    async assignItems(
+        queueId: string,
+        itemIds: string[],
+        userId: string | null = null,
+        options?: { timeout?: number },
+    ): Promise<Record<string, any>> {
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.QUEUE_ITEMS_ASSIGN, { queue_id: queueId }),
+                json: { item_ids: itemIds, user_id: userId },
+                timeout: options?.timeout,
+            },
+            DictResponseHandler,
+        ) as Promise<Record<string, any>>;
+    }
+
+    // ------------------------------------------------------------------
+    // Annotation submission
+    // ------------------------------------------------------------------
+
+    async importAnnotations(
+        queueId: string,
+        itemId: string,
+        annotations: AnnotationPayload[],
+        options?: { annotatorId?: string; timeout?: number },
+    ): Promise<ImportAnnotationsResponse> {
+        if (!annotations || annotations.length === 0) {
+            throw new SDKException('annotations must be a non-empty array');
+        }
+
+        const body: Record<string, any> = { annotations };
+        if (options?.annotatorId) body.annotator_id = options.annotatorId;
+
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.QUEUE_ITEM_ANNOTATIONS_IMPORT, {
+                    queue_id: queueId,
+                    item_id: itemId,
+                }),
+                json: body,
+                timeout: options?.timeout,
+            },
+            DictResponseHandler as any,
+        ) as Promise<ImportAnnotationsResponse>;
+    }
+
+    async submitAnnotations(
+        queueId: string,
+        itemId: string,
+        annotations: AnnotationPayload[],
+        options?: { notes?: string; timeout?: number },
+    ): Promise<Record<string, any>> {
+        if (!annotations || annotations.length === 0) {
+            throw new SDKException('annotations must be a non-empty array');
+        }
+
+        const body: Record<string, any> = { annotations };
+        if (options?.notes) body.notes = options.notes;
+
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.QUEUE_ITEM_ANNOTATIONS_SUBMIT, {
+                    queue_id: queueId,
+                    item_id: itemId,
+                }),
+                json: body,
+                timeout: options?.timeout,
+            },
+            DictResponseHandler,
+        ) as Promise<Record<string, any>>;
+    }
+
+    async getAnnotations(
+        queueId: string,
+        itemId: string,
+        options?: { timeout?: number },
+    ): Promise<Score[]> {
+        return this.request(
+            {
+                method: HttpMethod.GET,
+                url: buildUrl(this._baseUrl, Routes.QUEUE_ITEM_ANNOTATIONS_LIST, {
+                    queue_id: queueId,
+                    item_id: itemId,
+                }),
+                timeout: options?.timeout,
+            },
+            ScoreListResponseHandler,
+        ) as Promise<Score[]>;
+    }
+
+    async completeItem(
+        queueId: string,
+        itemId: string,
+        options?: { timeout?: number },
+    ): Promise<Record<string, any>> {
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.QUEUE_ITEM_COMPLETE, {
+                    queue_id: queueId,
+                    item_id: itemId,
+                }),
+                timeout: options?.timeout,
+            },
+            DictResponseHandler,
+        ) as Promise<Record<string, any>>;
+    }
+
+    async skipItem(
+        queueId: string,
+        itemId: string,
+        options?: { timeout?: number },
+    ): Promise<Record<string, any>> {
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.QUEUE_ITEM_SKIP, {
+                    queue_id: queueId,
+                    item_id: itemId,
+                }),
+                timeout: options?.timeout,
+            },
+            DictResponseHandler,
+        ) as Promise<Record<string, any>>;
+    }
+
+    // ------------------------------------------------------------------
+    // Scores (unified annotation model)
+    // ------------------------------------------------------------------
+
+    async createScore(options: {
+        sourceType: string;
+        sourceId: string;
+        labelId: string;
+        value: any;
+        scoreSource?: string;
+        notes?: string;
+        timeout?: number;
+    }): Promise<Score> {
+        const body: Record<string, any> = {
+            source_type: options.sourceType,
+            source_id: options.sourceId,
+            label_id: options.labelId,
+            value: options.value,
+            score_source: options.scoreSource ?? 'api',
+        };
+        if (options.notes) body.notes = options.notes;
+
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.SCORES),
+                json: body,
+                timeout: options.timeout,
+            },
+            ScoreResponseHandler,
+        ) as Promise<Score>;
+    }
+
+    async createScores(options: {
+        sourceType: string;
+        sourceId: string;
+        scores: Array<{ label_id: string; value: any; score_source?: string }>;
+        notes?: string;
+        timeout?: number;
+    }): Promise<Record<string, any>> {
+        if (!options.scores || options.scores.length === 0) {
+            throw new SDKException('scores must be a non-empty array');
+        }
+
+        const body: Record<string, any> = {
+            source_type: options.sourceType,
+            source_id: options.sourceId,
+            scores: options.scores,
+        };
+        if (options.notes) body.notes = options.notes;
+
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.SCORES_BULK),
+                json: body,
+                timeout: options.timeout,
+            },
+            DictResponseHandler,
+        ) as Promise<Record<string, any>>;
+    }
+
+    async getScores(
+        sourceType: string,
+        sourceId: string,
+        options?: { timeout?: number },
+    ): Promise<Score[]> {
+        return this.request(
+            {
+                method: HttpMethod.GET,
+                url: buildUrl(this._baseUrl, Routes.SCORES_FOR_SOURCE),
+                params: { source_type: sourceType, source_id: sourceId },
+                timeout: options?.timeout,
+            },
+            ScoreListResponseHandler,
+        ) as Promise<Score[]>;
+    }
+
+    // ------------------------------------------------------------------
+    // Progress & Analytics
+    // ------------------------------------------------------------------
+
+    async getProgress(queueId: string, options?: { timeout?: number }): Promise<QueueProgress> {
+        return this.request(
+            {
+                method: HttpMethod.GET,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_PROGRESS, { queue_id: queueId }),
+                timeout: options?.timeout,
+            },
+            DictResponseHandler as any,
+        ) as Promise<QueueProgress>;
+    }
+
+    async getAnalytics(queueId: string, options?: { timeout?: number }): Promise<QueueAnalytics> {
+        return this.request(
+            {
+                method: HttpMethod.GET,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_ANALYTICS, { queue_id: queueId }),
+                timeout: options?.timeout,
+            },
+            DictResponseHandler as any,
+        ) as Promise<QueueAnalytics>;
+    }
+
+    async getAgreement(queueId: string, options?: { timeout?: number }): Promise<QueueAgreement> {
+        return this.request(
+            {
+                method: HttpMethod.GET,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_AGREEMENT, { queue_id: queueId }),
+                timeout: options?.timeout,
+            },
+            DictResponseHandler as any,
+        ) as Promise<QueueAgreement>;
+    }
+
+    // ------------------------------------------------------------------
+    // Export
+    // ------------------------------------------------------------------
+
+    async export(
+        queueId: string,
+        options?: { format?: 'json' | 'csv'; status?: string; timeout?: number },
+    ): Promise<any> {
+        const params: Record<string, any> = { format: options?.format ?? 'json' };
+        if (options?.status) params.status = options.status;
+
+        return this.request(
+            {
+                method: HttpMethod.GET,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_EXPORT, { queue_id: queueId }),
+                params,
+                timeout: options?.timeout,
+            },
+            DictResponseHandler as any,
+        ) as Promise<any>;
+    }
+
+    async exportToDataset(
+        queueId: string,
+        options: {
+            datasetName?: string;
+            datasetId?: string;
+            statusFilter?: string;
+            timeout?: number;
+        },
+    ): Promise<ExportToDatasetResponse> {
+        if (!options.datasetName && !options.datasetId) {
+            throw new SDKException('Provide either datasetName or datasetId');
+        }
+
+        const body: Record<string, any> = {};
+        if (options.datasetName) body.dataset_name = options.datasetName;
+        if (options.datasetId) body.dataset_id = options.datasetId;
+        if (options.statusFilter) body.status_filter = options.statusFilter;
+
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_EXPORT_TO_DATASET, { queue_id: queueId }),
+                json: body,
+                timeout: options.timeout,
+            },
+            DictResponseHandler as any,
+        ) as Promise<ExportToDatasetResponse>;
+    }
+}

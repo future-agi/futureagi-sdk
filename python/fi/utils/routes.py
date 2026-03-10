@@ -71,3 +71,31 @@ class Routes(str, Enum):
     bulk_annotation = "tracer/bulk-annotation/"
     get_annotation_labels = "tracer/get-annotation-labels/"
     list_projects = "tracer/project/list_projects/"
+
+    # annotation queues
+    annotation_queues = "model-hub/annotation-queues/"
+    annotation_queue_detail = "model-hub/annotation-queues/{queue_id}/"
+    annotation_queue_status = "model-hub/annotation-queues/{queue_id}/update-status/"
+    annotation_queue_progress = "model-hub/annotation-queues/{queue_id}/progress/"
+    annotation_queue_analytics = "model-hub/annotation-queues/{queue_id}/analytics/"
+    annotation_queue_agreement = "model-hub/annotation-queues/{queue_id}/agreement/"
+    annotation_queue_export = "model-hub/annotation-queues/{queue_id}/export/"
+    annotation_queue_export_to_dataset = "model-hub/annotation-queues/{queue_id}/export-to-dataset/"
+    annotation_queue_add_label = "model-hub/annotation-queues/{queue_id}/add-label/"
+    annotation_queue_remove_label = "model-hub/annotation-queues/{queue_id}/remove-label/"
+
+    # queue items
+    queue_items = "model-hub/annotation-queues/{queue_id}/items/"
+    queue_items_add = "model-hub/annotation-queues/{queue_id}/items/add-items/"
+    queue_items_bulk_remove = "model-hub/annotation-queues/{queue_id}/items/bulk-remove/"
+    queue_items_assign = "model-hub/annotation-queues/{queue_id}/items/assign/"
+    queue_item_annotations_submit = "model-hub/annotation-queues/{queue_id}/items/{item_id}/annotations/submit/"
+    queue_item_annotations_import = "model-hub/annotation-queues/{queue_id}/items/{item_id}/annotations/import/"
+    queue_item_annotations_list = "model-hub/annotation-queues/{queue_id}/items/{item_id}/annotations/"
+    queue_item_complete = "model-hub/annotation-queues/{queue_id}/items/{item_id}/complete/"
+    queue_item_skip = "model-hub/annotation-queues/{queue_id}/items/{item_id}/skip/"
+
+    # scores (unified annotations)
+    scores = "model-hub/scores/"
+    scores_bulk = "model-hub/scores/bulk/"
+    scores_for_source = "model-hub/scores/for-source/"
