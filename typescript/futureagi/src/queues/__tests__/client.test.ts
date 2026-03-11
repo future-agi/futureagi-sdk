@@ -189,9 +189,9 @@ describe('AnnotationQueue', () => {
             mockRequest.mockResolvedValueOnce({ added: 3, duplicates: 0 });
 
             const result = await client.addItems('q1', [
-                { source_type: 'trace', source_id: 't1' },
-                { source_type: 'trace', source_id: 't2' },
-                { source_type: 'dataset_row', source_id: 'r1' },
+                { sourceType: 'trace', sourceId: 't1' },
+                { sourceType: 'trace', sourceId: 't2' },
+                { sourceType: 'dataset_row', sourceId: 'r1' },
             ]);
 
             const config = mockRequest.mock.calls[0][0];
@@ -268,8 +268,8 @@ describe('AnnotationQueue', () => {
             mockRequest.mockResolvedValueOnce({ imported: 2 });
 
             const result = await client.importAnnotations('q1', 'item1', [
-                { label_id: 'lbl1', value: 'positive' },
-                { label_id: 'lbl2', value: 4.5 },
+                { labelId: 'lbl1', value: 'positive' },
+                { labelId: 'lbl2', value: 4.5 },
             ]);
 
             const config = mockRequest.mock.calls[0][0];
@@ -285,7 +285,7 @@ describe('AnnotationQueue', () => {
             await client.importAnnotations(
                 'q1',
                 'item1',
-                [{ label_id: 'lbl1', value: 'good' }],
+                [{ labelId: 'lbl1', value: 'good' }],
                 { annotatorId: 'user123' },
             );
 
@@ -307,7 +307,7 @@ describe('AnnotationQueue', () => {
             await client.submitAnnotations(
                 'q1',
                 'item1',
-                [{ label_id: 'lbl1', value: 'good' }],
+                [{ labelId: 'lbl1', value: 'good' }],
                 { notes: 'Looks fine' },
             );
 
@@ -584,7 +584,7 @@ describe('AnnotationQueue', () => {
 
         it('should interpolate in import URL', async () => {
             mockRequest.mockResolvedValueOnce({ imported: 0 });
-            await client.importAnnotations('q-id', 'item-id', [{ label_id: 'l1', value: 'x' }]);
+            await client.importAnnotations('q-id', 'item-id', [{ labelId: 'l1', value: 'x' }]);
             expect(mockRequest.mock.calls[0][0].url).toContain('q-id/items/item-id/annotations/import/');
         });
 

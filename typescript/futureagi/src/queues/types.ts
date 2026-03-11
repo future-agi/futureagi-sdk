@@ -39,9 +39,11 @@ export interface QueueDetail {
 // Items
 // ---------------------------------------------------------------------------
 
+export type SourceType = 'trace' | 'observation_span' | 'trace_session' | 'call_execution' | 'prototype_run' | 'dataset_row';
+
 export interface QueueItemSource {
-    source_type: string;
-    source_id: string;
+    sourceType: SourceType;
+    sourceId: string;
 }
 
 export interface QueueItem {
@@ -64,11 +66,13 @@ export interface AddItemsResponse {
 // Scores / Annotations
 // ---------------------------------------------------------------------------
 
+export type ScoreValue = string | number | boolean | string[];
+
 export interface Score {
     id?: string;
     labelId?: string;
     labelName?: string;
-    value?: any;
+    value?: ScoreValue;
     scoreSource?: string;
     notes?: string;
     annotatorId?: string;
@@ -79,9 +83,9 @@ export interface Score {
 }
 
 export interface AnnotationPayload {
-    label_id: string;
-    value: any;
-    score_source?: string;
+    labelId: string;
+    value?: ScoreValue;
+    scoreSource?: string;
 }
 
 export interface ImportAnnotationsResponse {

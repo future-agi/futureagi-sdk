@@ -9,14 +9,14 @@
  *
  * const queue = await client.create({ name: 'Review Queue' });
  * await client.activate(queue.id);
- * await client.addItems(queue.id, [{ source_type: 'trace', source_id: 'abc' }]);
+ * await client.addItems(queue.id, [{ sourceType: 'trace', sourceId: 'abc' }]);
  * const progress = await client.getProgress(queue.id);
  * ```
  */
 
 import { APIKeyAuth, APIKeyAuthConfig, ResponseHandler } from '../api/auth';
 import { HttpMethod, RequestConfig } from '../api/types';
-import { InvalidAuthError, SDKException } from '../utils/errors';
+import { SDKException } from '../utils/errors';
 import { Routes } from '../utils/routes';
 import type {
     AddItemsResponse,
@@ -103,10 +103,6 @@ function buildUrl(base: string, route: string, params: Record<string, string> = 
 // ---------------------------------------------------------------------------
 
 export class AnnotationQueue extends APIKeyAuth {
-    constructor(config: APIKeyAuthConfig = {}) {
-        super(config);
-    }
-
     // ------------------------------------------------------------------
     // Queue CRUD
     // ------------------------------------------------------------------
@@ -219,7 +215,7 @@ export class AnnotationQueue extends APIKeyAuth {
         return this._updateStatus(queueId, 'completed', options?.timeout);
     }
 
-    private async _updateStatus(queueId: string, status: string, timeout?: number): Promise<QueueDetail> {
+    private async _updateStatus(queueId: string, status: 'active' | 'completed' | 'paused', timeout?: number): Promise<QueueDetail> {
         return this.request(
             {
                 method: HttpMethod.POST,
@@ -272,11 +268,16 @@ export class AnnotationQueue extends APIKeyAuth {
             throw new SDKException('items must be a non-empty array');
         }
 
+        const wireItems = items.map((item) => ({
+            source_type: item.sourceType,
+            source_id: item.sourceId,
+        }));
+
         return this.request(
             {
                 method: HttpMethod.POST,
                 url: buildUrl(this._baseUrl, Routes.QUEUE_ITEMS_ADD, { queue_id: queueId }),
-                json: { items },
+                json: { items: wireItems },
                 timeout: options?.timeout,
             },
             DictResponseHandler as any,
@@ -362,7 +363,12 @@ export class AnnotationQueue extends APIKeyAuth {
             throw new SDKException('annotations must be a non-empty array');
         }
 
-        const body: Record<string, any> = { annotations };
+        const wireAnnotations = annotations.map((a) => ({
+            label_id: a.labelId,
+            value: a.value,
+            ...(a.scoreSource != null ? { score_source: a.scoreSource } : {}),
+        }));
+        const body: Record<string, any> = { annotations: wireAnnotations };
         if (options?.annotatorId) body.annotator_id = options.annotatorId;
 
         return this.request(
@@ -389,7 +395,12 @@ export class AnnotationQueue extends APIKeyAuth {
             throw new SDKException('annotations must be a non-empty array');
         }
 
-        const body: Record<string, any> = { annotations };
+        const wireAnnotations = annotations.map((a) => ({
+            label_id: a.labelId,
+            value: a.value,
+            ...(a.scoreSource != null ? { score_source: a.scoreSource } : {}),
+        }));
+        const body: Record<string, any> = { annotations: wireAnnotations };
         if (options?.notes) body.notes = options.notes;
 
         return this.request(
@@ -583,18 +594,25 @@ export class AnnotationQueue extends APIKeyAuth {
         queueId: string,
         options?: { format?: 'json' | 'csv'; status?: string; timeout?: number },
     ): Promise<any> {
-        const params: Record<string, any> = { format: options?.format ?? 'json' };
+        const fmt = options?.format ?? 'json';
+        const params: Record<string, any> = { format: fmt };
         if (options?.status) params.status = options.status;
 
-        return this.request(
-            {
-                method: HttpMethod.GET,
-                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_EXPORT, { queue_id: queueId }),
-                params,
-                timeout: options?.timeout,
-            },
-            DictResponseHandler as any,
-        ) as Promise<any>;
+        const requestConfig: RequestConfig = {
+            method: HttpMethod.GET,
+            url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_EXPORT, { queue_id: queueId }),
+            params,
+            timeout: options?.timeout,
+        };
+
+        if (fmt === 'csv') {
+            // Return raw response text for CSV — skip JSON parsing
+            const response = await this.request(requestConfig);
+            // When no handler is passed, request() returns the AxiosResponse
+            return (response as any).data as string;
+        }
+
+        return this.request(requestConfig, DictResponseHandler as any) as Promise<any>;
     }
 
     async exportToDataset(
