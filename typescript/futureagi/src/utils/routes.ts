@@ -13,6 +13,8 @@ export const Routes = {
     evaluatev2: "sdk/api/v1/new-eval/",
     evaluate_template: "sdk/api/v1/eval/{eval_id}/",
     get_eval_templates: "sdk/api/v1/get-evals/",
+    get_eval_result: "sdk/api/v1/new-eval/",
+    evaluate_pipeline: "sdk/api/v1/evaluate-pipeline/",
 
     // Dataset
     dataset: "model-hub/develops",
@@ -63,6 +65,9 @@ export const Routes = {
     knowledge_base: "model-hub/knowledge-base/",
     knowledge_base_list: "model-hub/knowledge-base/list/",
     knowledge_base_files: "model-hub/knowledge-base/files/",
+
+    // Configure evaluations
+    configure_evaluations: "sdk/api/v1/configure-evaluations/",
 
     // Annotations
     BULK_ANNOTATION: "tracer/bulk-annotation/",
