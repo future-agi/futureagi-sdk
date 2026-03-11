@@ -355,6 +355,10 @@ export class AnnotationQueue extends APIKeyAuth {
         userId: string | null = null,
         options?: { timeout?: number },
     ): Promise<Record<string, any>> {
+        if (!itemIds || itemIds.length === 0) {
+            throw new SDKException('itemIds must be a non-empty array');
+        }
+
         return this.request(
             {
                 method: HttpMethod.POST,
@@ -386,7 +390,7 @@ export class AnnotationQueue extends APIKeyAuth {
             ...(a.scoreSource != null ? { score_source: a.scoreSource } : {}),
         }));
         const body: Record<string, any> = { annotations: wireAnnotations };
-        if (options?.annotatorId) body.annotator_id = options.annotatorId;
+        if (options?.annotatorId != null) body.annotator_id = options.annotatorId;
 
         return this.request(
             {
@@ -418,7 +422,7 @@ export class AnnotationQueue extends APIKeyAuth {
             ...(a.scoreSource != null ? { score_source: a.scoreSource } : {}),
         }));
         const body: Record<string, any> = { annotations: wireAnnotations };
-        if (options?.notes) body.notes = options.notes;
+        if (options?.notes != null) body.notes = options.notes;
 
         return this.request(
             {
@@ -501,6 +505,12 @@ export class AnnotationQueue extends APIKeyAuth {
         notes?: string;
         timeout?: number;
     }): Promise<Score> {
+        if (!(VALID_SOURCE_TYPES as readonly string[]).includes(options.sourceType)) {
+            throw new SDKException(
+                `Invalid sourceType '${options.sourceType}'. Must be one of: ${VALID_SOURCE_TYPES.join(', ')}`,
+            );
+        }
+
         const body: Record<string, any> = {
             source_type: options.sourceType,
             source_id: options.sourceId,
@@ -508,7 +518,7 @@ export class AnnotationQueue extends APIKeyAuth {
             value: options.value,
             score_source: options.scoreSource ?? 'api',
         };
-        if (options.notes) body.notes = options.notes;
+        if (options.notes != null) body.notes = options.notes;
 
         return this.request(
             {
@@ -528,6 +538,12 @@ export class AnnotationQueue extends APIKeyAuth {
         notes?: string;
         timeout?: number;
     }): Promise<Record<string, any>> {
+        if (!(VALID_SOURCE_TYPES as readonly string[]).includes(options.sourceType)) {
+            throw new SDKException(
+                `Invalid sourceType '${options.sourceType}'. Must be one of: ${VALID_SOURCE_TYPES.join(', ')}`,
+            );
+        }
+
         if (!options.scores || options.scores.length === 0) {
             throw new SDKException('scores must be a non-empty array');
         }
@@ -543,7 +559,7 @@ export class AnnotationQueue extends APIKeyAuth {
             source_id: options.sourceId,
             scores: wireScores,
         };
-        if (options.notes) body.notes = options.notes;
+        if (options.notes != null) body.notes = options.notes;
 
         return this.request(
             {
@@ -630,13 +646,9 @@ export class AnnotationQueue extends APIKeyAuth {
 
         if (fmt === 'csv') {
             // Return raw response text for CSV — skip JSON parsing
+            requestConfig.responseType = 'text';
             const response = await this.request(requestConfig);
             const axiosResponse = response as any;
-            if (axiosResponse.status && axiosResponse.status >= 400) {
-                throw new SDKException(
-                    `CSV export failed with status ${axiosResponse.status}: ${axiosResponse.statusText ?? 'Unknown error'}`,
-                );
-            }
             return axiosResponse.data as string;
         }
 

@@ -41,8 +41,9 @@ from fi.queues.types import (
 
 def _mock_response(data, status_code=200):
     """Build a mock requests.Response."""
-    resp = MagicMock()
-    resp.ok = status_code == 200
+    from requests import Response
+    resp = MagicMock(spec=Response)
+    resp.ok = 200 <= status_code < 300
     resp.status_code = status_code
     resp.json.return_value = data
     resp.text = json.dumps(data)

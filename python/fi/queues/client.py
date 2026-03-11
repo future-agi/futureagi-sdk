@@ -10,7 +10,6 @@ from fi.queues.types import (
     ImportAnnotationsResponse,
     QueueAgreement,
     QueueAnalytics,
-    QueueConfig,
     QueueDetail,
     QueueItem,
     QueueProgress,
@@ -416,8 +415,8 @@ class AnnotationQueue(APIKeyAuth):
         self,
         queue_id: str,
         item_ids: List[str],
-        user_id: Optional[str] = None,
         *,
+        user_id: Optional[str] = None,
         timeout: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Assign items to an annotator. Pass ``user_id=None`` to unassign."""
@@ -456,7 +455,7 @@ class AnnotationQueue(APIKeyAuth):
             queue_id=queue_id, item_id=item_id,
         )
         body: Dict[str, Any] = {"annotations": annotations}
-        if annotator_id:
+        if annotator_id is not None:
             body["annotator_id"] = annotator_id
 
         config = RequestConfig(method=HttpMethod.POST, url=url, json=body, timeout=timeout)
@@ -490,7 +489,7 @@ class AnnotationQueue(APIKeyAuth):
             queue_id=queue_id, item_id=item_id,
         )
         body: Dict[str, Any] = {"annotations": annotations}
-        if notes:
+        if notes is not None:
             body["notes"] = notes
 
         config = RequestConfig(method=HttpMethod.POST, url=url, json=body, timeout=timeout)
@@ -571,7 +570,7 @@ class AnnotationQueue(APIKeyAuth):
             "value": value,
             "score_source": score_source,
         }
-        if notes:
+        if notes is not None:
             body["notes"] = notes
 
         config = RequestConfig(
@@ -608,7 +607,7 @@ class AnnotationQueue(APIKeyAuth):
             "source_id": source_id,
             "scores": scores,
         }
-        if notes:
+        if notes is not None:
             body["notes"] = notes
 
         config = RequestConfig(
@@ -728,6 +727,8 @@ class AnnotationQueue(APIKeyAuth):
         """
         if not dataset_name and not dataset_id:
             raise ValueError("Provide either dataset_name or dataset_id")
+        if dataset_name and dataset_id:
+            raise ValueError("Provide either dataset_name or dataset_id, not both")
 
         body: Dict[str, Any] = {}
         if dataset_name:
