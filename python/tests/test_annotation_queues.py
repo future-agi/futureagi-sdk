@@ -524,14 +524,17 @@ class TestExport:
         assert config.params["status"] == "completed"
 
     def test_export_csv(self, client, mock_request):
-        csv_resp = MagicMock()
+        from requests import Response
+        csv_text = "id,label,value\ni1,Sentiment,positive\n"
+        csv_resp = MagicMock(spec=Response)
         csv_resp.ok = True
         csv_resp.status_code = 200
-        csv_resp.text = "id,label,value\ni1,Sentiment,positive\n"
+        csv_resp.text = csv_text
         mock_request.return_value = csv_resp
         result = client.export("q1", format="csv")
-        # CSV returns raw response (not parsed through handler)
-        assert isinstance(result, MagicMock)
+        # CSV returns raw text content
+        assert isinstance(result, str)
+        assert result == csv_text
 
     def test_export_to_dataset_with_name(self, client, mock_request):
         mock_request.return_value = {"datasetId": "d1", "datasetName": "Curated", "rowsCreated": 42}

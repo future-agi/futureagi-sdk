@@ -31,7 +31,9 @@ import type {
     QueueItemSource,
     QueueProgress,
     Score,
+    ScoreInput,
 } from './types';
+import { VALID_SOURCE_TYPES, VALID_ASSIGNMENT_STRATEGIES } from './types';
 
 // ---------------------------------------------------------------------------
 // Response handlers
@@ -108,6 +110,13 @@ export class AnnotationQueue extends APIKeyAuth {
     // ------------------------------------------------------------------
 
     async create(config: QueueConfig): Promise<QueueDetail> {
+        if (config.assignmentStrategy != null &&
+            !(VALID_ASSIGNMENT_STRATEGIES as readonly string[]).includes(config.assignmentStrategy)) {
+            throw new SDKException(
+                `Invalid assignmentStrategy '${config.assignmentStrategy}'. Must be one of: ${VALID_ASSIGNMENT_STRATEGIES.join(', ')}`,
+            );
+        }
+
         const body: Record<string, any> = { name: config.name };
         if (config.description != null) body.description = config.description;
         if (config.instructions != null) body.instructions = config.instructions;
@@ -266,6 +275,14 @@ export class AnnotationQueue extends APIKeyAuth {
     ): Promise<AddItemsResponse> {
         if (!items || items.length === 0) {
             throw new SDKException('items must be a non-empty array');
+        }
+
+        for (const item of items) {
+            if (!(VALID_SOURCE_TYPES as readonly string[]).includes(item.sourceType)) {
+                throw new SDKException(
+                    `Invalid sourceType '${item.sourceType}'. Must be one of: ${VALID_SOURCE_TYPES.join(', ')}`,
+                );
+            }
         }
 
         const wireItems = items.map((item) => ({
@@ -507,7 +524,7 @@ export class AnnotationQueue extends APIKeyAuth {
     async createScores(options: {
         sourceType: string;
         sourceId: string;
-        scores: Array<{ label_id: string; value: any; score_source?: string }>;
+        scores: ScoreInput[];
         notes?: string;
         timeout?: number;
     }): Promise<Record<string, any>> {
@@ -515,10 +532,16 @@ export class AnnotationQueue extends APIKeyAuth {
             throw new SDKException('scores must be a non-empty array');
         }
 
+        const wireScores = options.scores.map((s) => ({
+            label_id: s.labelId,
+            value: s.value,
+            ...(s.scoreSource != null ? { score_source: s.scoreSource } : {}),
+        }));
+
         const body: Record<string, any> = {
             source_type: options.sourceType,
             source_id: options.sourceId,
-            scores: options.scores,
+            scores: wireScores,
         };
         if (options.notes) body.notes = options.notes;
 
@@ -608,8 +631,13 @@ export class AnnotationQueue extends APIKeyAuth {
         if (fmt === 'csv') {
             // Return raw response text for CSV — skip JSON parsing
             const response = await this.request(requestConfig);
-            // When no handler is passed, request() returns the AxiosResponse
-            return (response as any).data as string;
+            const axiosResponse = response as any;
+            if (axiosResponse.status && axiosResponse.status >= 400) {
+                throw new SDKException(
+                    `CSV export failed with status ${axiosResponse.status}: ${axiosResponse.statusText ?? 'Unknown error'}`,
+                );
+            }
+            return axiosResponse.data as string;
         }
 
         return this.request(requestConfig, DictResponseHandler as any) as Promise<any>;
@@ -626,6 +654,9 @@ export class AnnotationQueue extends APIKeyAuth {
     ): Promise<ExportToDatasetResponse> {
         if (!options.datasetName && !options.datasetId) {
             throw new SDKException('Provide either datasetName or datasetId');
+        }
+        if (options.datasetName && options.datasetId) {
+            throw new SDKException('Provide either datasetName or datasetId, not both');
         }
 
         const body: Record<string, any> = {};

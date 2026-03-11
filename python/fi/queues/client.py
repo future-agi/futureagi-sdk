@@ -36,6 +36,7 @@ class _QueueResponseHandler(ResponseHandler[Dict[str, Any], QueueDetail]):
         try:
             return QueueDetail(**data)
         except Exception:
+            logger.warning("Failed to parse QueueDetail from response, returning raw dict")
             return data
 
     @classmethod
@@ -55,6 +56,7 @@ class _QueueListResponseHandler(ResponseHandler[Dict[str, Any], List[QueueDetail
         try:
             return [QueueDetail(**q) for q in items]
         except Exception:
+            logger.warning("Failed to parse QueueDetail list from response, returning raw list")
             return items
 
     @classmethod
@@ -88,6 +90,7 @@ class _ItemListResponseHandler(ResponseHandler[Dict[str, Any], List[QueueItem]])
         try:
             return [QueueItem(**i) for i in items]
         except Exception:
+            logger.warning("Failed to parse QueueItem list from response, returning raw list")
             return items
 
     @classmethod
@@ -106,6 +109,7 @@ class _ScoreListResponseHandler(ResponseHandler[Dict[str, Any], List[Score]]):
         try:
             return [Score(**s) for s in items]
         except Exception:
+            logger.warning("Failed to parse Score list from response, returning raw list")
             return items
 
     @classmethod
@@ -123,6 +127,7 @@ class _ScoreResponseHandler(ResponseHandler[Dict[str, Any], Score]):
         try:
             return Score(**data)
         except Exception:
+            logger.warning("Failed to parse Score from response, returning raw dict")
             return data
 
     @classmethod

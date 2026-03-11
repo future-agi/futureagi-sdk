@@ -10,7 +10,7 @@ export interface QueueConfig {
     name: string;
     description?: string;
     instructions?: string;
-    assignmentStrategy?: 'manual' | 'round_robin' | 'load_balanced';
+    assignmentStrategy?: AssignmentStrategy;
     annotationsRequired?: number;
     reservationTimeoutMinutes?: number;
     requiresReview?: boolean;
@@ -39,7 +39,11 @@ export interface QueueDetail {
 // Items
 // ---------------------------------------------------------------------------
 
-export type SourceType = 'trace' | 'observation_span' | 'trace_session' | 'call_execution' | 'prototype_run' | 'dataset_row';
+export const VALID_SOURCE_TYPES = ['trace', 'observation_span', 'trace_session', 'call_execution', 'prototype_run', 'dataset_row'] as const;
+export type SourceType = (typeof VALID_SOURCE_TYPES)[number];
+
+export const VALID_ASSIGNMENT_STRATEGIES = ['manual', 'round_robin', 'load_balanced'] as const;
+export type AssignmentStrategy = (typeof VALID_ASSIGNMENT_STRATEGIES)[number];
 
 export interface QueueItemSource {
     sourceType: SourceType;
@@ -80,6 +84,12 @@ export interface Score {
     sourceType?: string;
     sourceId?: string;
     createdAt?: string;
+}
+
+export interface ScoreInput {
+    labelId: string;
+    value: ScoreValue;
+    scoreSource?: string;
 }
 
 export interface AnnotationPayload {

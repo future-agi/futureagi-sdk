@@ -412,8 +412,8 @@ describe('AnnotationQueue', () => {
                 sourceType: 'observation_span',
                 sourceId: 'os1',
                 scores: [
-                    { label_id: 'lbl1', value: 'good' },
-                    { label_id: 'lbl2', value: 4.0 },
+                    { labelId: 'lbl1', value: 'good' },
+                    { labelId: 'lbl2', value: 4.0 },
                 ],
                 notes: 'Batch import',
             });
