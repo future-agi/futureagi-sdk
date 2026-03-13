@@ -175,6 +175,7 @@ export class HttpClient {
             params: config.params,
             data: config.json || config.data,
             timeout: config.timeout || this._defaultTimeout,
+            ...(config.responseType ? { responseType: config.responseType } : {}),
         };
 
         // Handle file uploads

@@ -18,6 +18,7 @@ interface RequestConfig {
     timeout?: number;
     retry_attempts?: number;
     retry_delay?: number;
+    responseType?: 'json' | 'text' | 'arraybuffer' | 'blob' | 'document' | 'stream';
 }
 
 enum ModelProvider {
