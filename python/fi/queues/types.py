@@ -3,23 +3,6 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class QueueConfig(BaseModel):
-    """Configuration for creating an annotation queue."""
-
-    model_config = ConfigDict(populate_by_name=True)
-
-    name: str
-    description: Optional[str] = None
-    instructions: Optional[str] = None
-    assignment_strategy: Optional[str] = Field(None, description="manual | round_robin | load_balanced")
-    annotations_required: Optional[int] = Field(None, description="Number of annotators required per item")
-    reservation_timeout_minutes: Optional[int] = None
-    requires_review: Optional[bool] = None
-    project: Optional[str] = Field(None, description="Project ID to scope the queue")
-    dataset: Optional[str] = Field(None, description="Dataset ID to scope the queue")
-    agent_definition: Optional[str] = Field(None, description="Agent definition ID to scope the queue")
-
-
 class QueueDetail(BaseModel):
     """Annotation queue as returned by the API."""
 
@@ -68,17 +51,6 @@ class QueueProgress(BaseModel):
     annotator_stats: Optional[List[Dict[str, Any]]] = Field(None, alias="annotatorStats")
 
 
-class AnnotatorPerformance(BaseModel):
-    """Per-annotator performance metrics."""
-
-    model_config = ConfigDict(populate_by_name=True, extra="allow")
-
-    annotator_id: Optional[str] = Field(None, alias="annotatorId")
-    annotator_name: Optional[str] = Field(None, alias="annotatorName")
-    completed: int = 0
-    last_active: Optional[str] = Field(None, alias="lastActive")
-
-
 class QueueAnalytics(BaseModel):
     """Queue analytics data."""
 
@@ -89,17 +61,6 @@ class QueueAnalytics(BaseModel):
     label_distribution: Optional[Dict[str, Any]] = Field(None, alias="labelDistribution")
     status_breakdown: Optional[Dict[str, int]] = Field(None, alias="statusBreakdown")
     total: Optional[int] = None
-
-
-class LabelAgreement(BaseModel):
-    """Per-label agreement metrics."""
-
-    model_config = ConfigDict(populate_by_name=True, extra="allow")
-
-    label_id: Optional[str] = Field(None, alias="labelId")
-    label_name: Optional[str] = Field(None, alias="labelName")
-    agreement_pct: Optional[float] = Field(None, alias="agreementPct")
-    cohens_kappa: Optional[float] = Field(None, alias="cohensKappa")
 
 
 class QueueAgreement(BaseModel):

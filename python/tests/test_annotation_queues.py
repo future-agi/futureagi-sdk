@@ -6,6 +6,7 @@ Tests mock the HTTP layer (HttpClient.request) to verify:
 - Correct request body / params assembly
 - Response handler parsing (JSON → Pydantic models)
 - Input validation (empty lists, missing args)
+- Error status code differentiation
 """
 
 import json
@@ -15,12 +16,14 @@ from unittest.mock import MagicMock, patch
 from fi.api.types import HttpMethod
 from fi.queues.client import (
     AnnotationQueue,
+    _CsvResponseHandler,
     _DictResponseHandler,
     _QueueResponseHandler,
     _QueueListResponseHandler,
     _ItemListResponseHandler,
     _ScoreListResponseHandler,
     _ScoreResponseHandler,
+    _validate_id,
 )
 from fi.queues.types import (
     AddItemsResponse,
@@ -46,7 +49,7 @@ def _mock_response(data, status_code=200):
     resp.ok = 200 <= status_code < 300
     resp.status_code = status_code
     resp.json.return_value = data
-    resp.text = json.dumps(data)
+    resp.text = json.dumps(data) if not isinstance(data, str) else data
     return resp
 
 
@@ -75,6 +78,31 @@ def mock_request(client):
 
 
 # ===========================================================================
+# ID Validation Tests
+# ===========================================================================
+
+class TestIdValidation:
+
+    def test_valid_uuid(self):
+        _validate_id("abc-123-def", "queue_id")
+
+    def test_valid_alphanumeric(self):
+        _validate_id("abc_123", "queue_id")
+
+    def test_rejects_empty(self):
+        with pytest.raises(ValueError, match="Invalid queue_id"):
+            _validate_id("", "queue_id")
+
+    def test_rejects_path_traversal(self):
+        with pytest.raises(ValueError, match="Invalid queue_id"):
+            _validate_id("../../admin", "queue_id")
+
+    def test_rejects_slash(self):
+        with pytest.raises(ValueError, match="Invalid item_id"):
+            _validate_id("abc/def", "item_id")
+
+
+# ===========================================================================
 # Response Handler Tests
 # ===========================================================================
 
@@ -92,6 +120,11 @@ class TestResponseHandlers:
         result = _QueueResponseHandler.parse(resp)
         assert isinstance(result, QueueDetail)
         assert result.id == "q2"
+
+    def test_queue_response_handler_raises_on_invalid_data(self):
+        resp = _mock_response(_wrapped({"not_a_queue": True}))
+        with pytest.raises(Exception):
+            _QueueResponseHandler.parse(resp)
 
     def test_queue_list_handler_parses_results(self):
         resp = _mock_response(_wrapped({"results": [
@@ -139,6 +172,19 @@ class TestResponseHandlers:
         result = _DictResponseHandler.parse(resp)
         assert result == {"added": 3, "duplicates": 1}
 
+    def test_csv_response_handler(self):
+        resp = _mock_response("id,label,value\ni1,Sentiment,positive\n")
+        resp.text = "id,label,value\ni1,Sentiment,positive\n"
+        result = _CsvResponseHandler.parse(resp)
+        assert isinstance(result, str)
+        assert "Sentiment" in result
+
+    def test_error_handler_raises_on_401(self):
+        resp = _mock_response({"message": "Unauthorized"}, status_code=401)
+        from fi.utils.errors import InvalidAuthError
+        with pytest.raises(InvalidAuthError):
+            _DictResponseHandler.parse(resp)
+
     def test_error_handler_raises_on_403(self):
         resp = _mock_response({"message": "Forbidden"}, status_code=403)
         from fi.utils.errors import InvalidAuthError
@@ -149,6 +195,32 @@ class TestResponseHandlers:
         resp = _mock_response({"message": "Bad request"}, status_code=400)
         from fi.utils.errors import SDKException
         with pytest.raises(SDKException, match="Bad request"):
+            _DictResponseHandler.parse(resp)
+
+    def test_error_handler_raises_on_429(self):
+        resp = _mock_response({"message": "Too many requests"}, status_code=429)
+        from fi.utils.errors import RateLimitError
+        with pytest.raises(RateLimitError):
+            _DictResponseHandler.parse(resp)
+
+    def test_error_handler_raises_on_503(self):
+        resp = _mock_response({"message": "Service unavailable"}, status_code=503)
+        from fi.utils.errors import ServiceUnavailableError
+        with pytest.raises(ServiceUnavailableError):
+            _DictResponseHandler.parse(resp)
+
+    def test_error_handler_raises_on_500(self):
+        resp = _mock_response({"message": "Internal error"}, status_code=500)
+        from fi.utils.errors import ServerError
+        with pytest.raises(ServerError):
+            _DictResponseHandler.parse(resp)
+
+    def test_error_handler_fallback_message(self):
+        """PY-13: _raise_for_status should not produce None messages."""
+        resp = _mock_response({}, status_code=418)
+        resp.json.side_effect = ValueError("not json")
+        from fi.utils.errors import SDKException
+        with pytest.raises(SDKException, match="HTTP 418"):
             _DictResponseHandler.parse(resp)
 
 
@@ -183,9 +255,9 @@ class TestQueueCRUD:
         config = mock_request.call_args[0][0]
         assert config.json == {"name": "Min"}
 
-    def test_list(self, client, mock_request):
+    def test_list_queues(self, client, mock_request):
         mock_request.return_value = [QueueDetail(id="q1", name="A")]
-        result = client.list(status="active", search="test")
+        result = client.list_queues(status="active", search="test")
         config = mock_request.call_args[0][0]
         assert config.method == HttpMethod.GET
         assert config.params["status"] == "active"
@@ -198,6 +270,10 @@ class TestQueueCRUD:
         config = mock_request.call_args[0][0]
         assert config.method == HttpMethod.GET
         assert "q1" in config.url
+
+    def test_get_rejects_path_traversal(self, client):
+        with pytest.raises(ValueError, match="Invalid queue_id"):
+            client.get("../../admin")
 
     def test_update(self, client, mock_request):
         mock_request.return_value = QueueDetail(id="q1", name="Updated")
@@ -517,7 +593,7 @@ class TestExport:
 
     def test_export_json(self, client, mock_request):
         mock_request.return_value = [{"item_id": "i1", "annotations": []}]
-        result = client.export("q1", format="json", status="completed")
+        result = client.export("q1", export_format="json", status="completed")
         config = mock_request.call_args[0][0]
         assert config.method == HttpMethod.GET
         assert "export" in config.url
@@ -525,15 +601,9 @@ class TestExport:
         assert config.params["status"] == "completed"
 
     def test_export_csv(self, client, mock_request):
-        from requests import Response
         csv_text = "id,label,value\ni1,Sentiment,positive\n"
-        csv_resp = MagicMock(spec=Response)
-        csv_resp.ok = True
-        csv_resp.status_code = 200
-        csv_resp.text = csv_text
-        mock_request.return_value = csv_resp
-        result = client.export("q1", format="csv")
-        # CSV returns raw text content
+        mock_request.return_value = csv_text
+        result = client.export("q1", export_format="csv")
         assert isinstance(result, str)
         assert result == csv_text
 
@@ -557,6 +627,11 @@ class TestExport:
     def test_export_to_dataset_missing_args_raises(self, client):
         with pytest.raises(ValueError, match="dataset_name or dataset_id"):
             client.export_to_dataset("q1")
+
+    def test_export_to_dataset_both_args_raises(self, client):
+        """PY-14: Mutual exclusion — both dataset_name AND dataset_id."""
+        with pytest.raises(ValueError, match="not both"):
+            client.export_to_dataset("q1", dataset_name="New", dataset_id="d1")
 
 
 # ===========================================================================

@@ -21,6 +21,7 @@ import { Routes } from '../utils/routes';
 import type {
     AddItemsResponse,
     AnnotationPayload,
+    AssignmentStrategy,
     ExportToDatasetResponse,
     ImportAnnotationsResponse,
     QueueAgreement,
@@ -32,8 +33,18 @@ import type {
     QueueProgress,
     Score,
     ScoreInput,
+    ScoreValue,
 } from './types';
 import { VALID_SOURCE_TYPES, VALID_ASSIGNMENT_STRATEGIES } from './types';
+
+// ---------------------------------------------------------------------------
+// Response type for handlers
+// ---------------------------------------------------------------------------
+
+interface ApiResponse {
+    data: any;
+    status: number;
+}
 
 // ---------------------------------------------------------------------------
 // Response handlers
@@ -47,13 +58,13 @@ function unwrap(data: any): any {
 }
 
 class QueueResponseHandler extends ResponseHandler<QueueDetail> {
-    static _parseSuccess(response: any): QueueDetail {
+    static _parseSuccess(response: ApiResponse): QueueDetail {
         return unwrap(response.data);
     }
 }
 
 class QueueListResponseHandler extends ResponseHandler<QueueDetail[]> {
-    static _parseSuccess(response: any): QueueDetail[] {
+    static _parseSuccess(response: ApiResponse): QueueDetail[] {
         const data = unwrap(response.data);
         if (Array.isArray(data)) return data;
         return data?.results ?? data?.table ?? [];
@@ -61,13 +72,13 @@ class QueueListResponseHandler extends ResponseHandler<QueueDetail[]> {
 }
 
 class DictResponseHandler extends ResponseHandler<Record<string, any>> {
-    static _parseSuccess(response: any): Record<string, any> {
+    static _parseSuccess(response: ApiResponse): Record<string, any> {
         return unwrap(response.data);
     }
 }
 
 class ItemListResponseHandler extends ResponseHandler<QueueItem[]> {
-    static _parseSuccess(response: any): QueueItem[] {
+    static _parseSuccess(response: ApiResponse): QueueItem[] {
         const data = unwrap(response.data);
         if (Array.isArray(data)) return data;
         return data?.results ?? [];
@@ -75,7 +86,7 @@ class ItemListResponseHandler extends ResponseHandler<QueueItem[]> {
 }
 
 class ScoreListResponseHandler extends ResponseHandler<Score[]> {
-    static _parseSuccess(response: any): Score[] {
+    static _parseSuccess(response: ApiResponse): Score[] {
         const data = unwrap(response.data);
         if (Array.isArray(data)) return data;
         return data?.results ?? [];
@@ -83,7 +94,49 @@ class ScoreListResponseHandler extends ResponseHandler<Score[]> {
 }
 
 class ScoreResponseHandler extends ResponseHandler<Score> {
-    static _parseSuccess(response: any): Score {
+    static _parseSuccess(response: ApiResponse): Score {
+        return unwrap(response.data);
+    }
+}
+
+class AddItemsResponseHandler extends ResponseHandler<AddItemsResponse> {
+    static _parseSuccess(response: ApiResponse): AddItemsResponse {
+        return unwrap(response.data);
+    }
+}
+
+class ImportAnnotationsResponseHandler extends ResponseHandler<ImportAnnotationsResponse> {
+    static _parseSuccess(response: ApiResponse): ImportAnnotationsResponse {
+        return unwrap(response.data);
+    }
+}
+
+class QueueProgressResponseHandler extends ResponseHandler<QueueProgress> {
+    static _parseSuccess(response: ApiResponse): QueueProgress {
+        return unwrap(response.data);
+    }
+}
+
+class QueueAnalyticsResponseHandler extends ResponseHandler<QueueAnalytics> {
+    static _parseSuccess(response: ApiResponse): QueueAnalytics {
+        return unwrap(response.data);
+    }
+}
+
+class QueueAgreementResponseHandler extends ResponseHandler<QueueAgreement> {
+    static _parseSuccess(response: ApiResponse): QueueAgreement {
+        return unwrap(response.data);
+    }
+}
+
+class ExportToDatasetResponseHandler extends ResponseHandler<ExportToDatasetResponse> {
+    static _parseSuccess(response: ApiResponse): ExportToDatasetResponse {
+        return unwrap(response.data);
+    }
+}
+
+class ExportJsonResponseHandler extends ResponseHandler<Record<string, any>[]> {
+    static _parseSuccess(response: ApiResponse): Record<string, any>[] {
         return unwrap(response.data);
     }
 }
@@ -95,14 +148,32 @@ class ScoreResponseHandler extends ResponseHandler<Score> {
 function buildUrl(base: string, route: string, params: Record<string, string> = {}): string {
     let url = `${base}/${route}`;
     for (const [key, val] of Object.entries(params)) {
-        url = url.replace(`{${key}}`, val);
+        url = url.replace(`{${key}}`, encodeURIComponent(val));
     }
     return url;
 }
 
 // ---------------------------------------------------------------------------
+// Source type validation helper
+// ---------------------------------------------------------------------------
+
+function validateSourceType(sourceType: string): void {
+    if (!(VALID_SOURCE_TYPES as readonly string[]).includes(sourceType)) {
+        throw new SDKException(
+            `Invalid sourceType '${sourceType}'. Must be one of: ${VALID_SOURCE_TYPES.join(', ')}`,
+        );
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Client
 // ---------------------------------------------------------------------------
+
+// Sentinel for explicitly clearing a field via PATCH
+const CLEAR = Symbol('CLEAR');
+type Clearable<T> = T | typeof CLEAR;
+
+export { CLEAR };
 
 export class AnnotationQueue extends APIKeyAuth {
     // ------------------------------------------------------------------
@@ -178,17 +249,34 @@ export class AnnotationQueue extends APIKeyAuth {
 
     async update(
         queueId: string,
-        updates: Partial<Omit<QueueConfig, 'project' | 'dataset' | 'agentDefinition'>>,
+        updates: {
+            name?: Clearable<string>;
+            description?: Clearable<string>;
+            instructions?: Clearable<string>;
+            assignmentStrategy?: AssignmentStrategy;
+            annotationsRequired?: Clearable<number>;
+            reservationTimeoutMinutes?: Clearable<number>;
+            requiresReview?: Clearable<boolean>;
+        },
         options?: { timeout?: number },
     ): Promise<QueueDetail> {
         const body: Record<string, any> = {};
-        if (updates.name != null) body.name = updates.name;
-        if (updates.description != null) body.description = updates.description;
-        if (updates.instructions != null) body.instructions = updates.instructions;
-        if (updates.assignmentStrategy != null) body.assignment_strategy = updates.assignmentStrategy;
-        if (updates.annotationsRequired != null) body.annotations_required = updates.annotationsRequired;
-        if (updates.reservationTimeoutMinutes != null) body.reservation_timeout_minutes = updates.reservationTimeoutMinutes;
-        if (updates.requiresReview != null) body.requires_review = updates.requiresReview;
+
+        const set = (wireKey: string, val: any) => {
+            if (val === CLEAR) {
+                body[wireKey] = null;
+            } else if (val !== undefined) {
+                body[wireKey] = val;
+            }
+        };
+
+        set('name', updates.name);
+        set('description', updates.description);
+        set('instructions', updates.instructions);
+        set('assignment_strategy', updates.assignmentStrategy);
+        set('annotations_required', updates.annotationsRequired);
+        set('reservation_timeout_minutes', updates.reservationTimeoutMinutes);
+        set('requires_review', updates.requiresReview);
 
         return this.request(
             {
@@ -297,7 +385,7 @@ export class AnnotationQueue extends APIKeyAuth {
                 json: { items: wireItems },
                 timeout: options?.timeout,
             },
-            DictResponseHandler as any,
+            AddItemsResponseHandler,
         ) as Promise<AddItemsResponse>;
     }
 
@@ -402,7 +490,7 @@ export class AnnotationQueue extends APIKeyAuth {
                 json: body,
                 timeout: options?.timeout,
             },
-            DictResponseHandler as any,
+            ImportAnnotationsResponseHandler,
         ) as Promise<ImportAnnotationsResponse>;
     }
 
@@ -500,16 +588,12 @@ export class AnnotationQueue extends APIKeyAuth {
         sourceType: string;
         sourceId: string;
         labelId: string;
-        value: any;
+        value: ScoreValue;
         scoreSource?: string;
         notes?: string;
         timeout?: number;
     }): Promise<Score> {
-        if (!(VALID_SOURCE_TYPES as readonly string[]).includes(options.sourceType)) {
-            throw new SDKException(
-                `Invalid sourceType '${options.sourceType}'. Must be one of: ${VALID_SOURCE_TYPES.join(', ')}`,
-            );
-        }
+        validateSourceType(options.sourceType);
 
         const body: Record<string, any> = {
             source_type: options.sourceType,
@@ -538,11 +622,7 @@ export class AnnotationQueue extends APIKeyAuth {
         notes?: string;
         timeout?: number;
     }): Promise<Record<string, any>> {
-        if (!(VALID_SOURCE_TYPES as readonly string[]).includes(options.sourceType)) {
-            throw new SDKException(
-                `Invalid sourceType '${options.sourceType}'. Must be one of: ${VALID_SOURCE_TYPES.join(', ')}`,
-            );
-        }
+        validateSourceType(options.sourceType);
 
         if (!options.scores || options.scores.length === 0) {
             throw new SDKException('scores must be a non-empty array');
@@ -577,6 +657,8 @@ export class AnnotationQueue extends APIKeyAuth {
         sourceId: string,
         options?: { timeout?: number },
     ): Promise<Score[]> {
+        validateSourceType(sourceType);
+
         return this.request(
             {
                 method: HttpMethod.GET,
@@ -599,7 +681,7 @@ export class AnnotationQueue extends APIKeyAuth {
                 url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_PROGRESS, { queue_id: queueId }),
                 timeout: options?.timeout,
             },
-            DictResponseHandler as any,
+            QueueProgressResponseHandler,
         ) as Promise<QueueProgress>;
     }
 
@@ -610,7 +692,7 @@ export class AnnotationQueue extends APIKeyAuth {
                 url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_ANALYTICS, { queue_id: queueId }),
                 timeout: options?.timeout,
             },
-            DictResponseHandler as any,
+            QueueAnalyticsResponseHandler,
         ) as Promise<QueueAnalytics>;
     }
 
@@ -621,7 +703,7 @@ export class AnnotationQueue extends APIKeyAuth {
                 url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_AGREEMENT, { queue_id: queueId }),
                 timeout: options?.timeout,
             },
-            DictResponseHandler as any,
+            QueueAgreementResponseHandler,
         ) as Promise<QueueAgreement>;
     }
 
@@ -629,10 +711,12 @@ export class AnnotationQueue extends APIKeyAuth {
     // Export
     // ------------------------------------------------------------------
 
+    async export(queueId: string, options: { format: 'csv'; status?: string; timeout?: number }): Promise<string>;
+    async export(queueId: string, options?: { format?: 'json'; status?: string; timeout?: number }): Promise<Record<string, any>[]>;
     async export(
         queueId: string,
         options?: { format?: 'json' | 'csv'; status?: string; timeout?: number },
-    ): Promise<any> {
+    ): Promise<string | Record<string, any>[]> {
         const fmt = options?.format ?? 'json';
         const params: Record<string, any> = { format: fmt };
         if (options?.status) params.status = options.status;
@@ -645,14 +729,13 @@ export class AnnotationQueue extends APIKeyAuth {
         };
 
         if (fmt === 'csv') {
-            // Return raw response text for CSV — skip JSON parsing
             requestConfig.responseType = 'text';
             const response = await this.request(requestConfig);
-            const axiosResponse = response as any;
-            return axiosResponse.data as string;
+            const axiosResponse = response as { data: string };
+            return axiosResponse.data;
         }
 
-        return this.request(requestConfig, DictResponseHandler as any) as Promise<any>;
+        return this.request(requestConfig, ExportJsonResponseHandler) as Promise<Record<string, any>[]>;
     }
 
     async exportToDataset(
@@ -664,17 +747,17 @@ export class AnnotationQueue extends APIKeyAuth {
             timeout?: number;
         },
     ): Promise<ExportToDatasetResponse> {
-        if (!options.datasetName && !options.datasetId) {
+        if (options.datasetName == null && options.datasetId == null) {
             throw new SDKException('Provide either datasetName or datasetId');
         }
-        if (options.datasetName && options.datasetId) {
+        if (options.datasetName != null && options.datasetId != null) {
             throw new SDKException('Provide either datasetName or datasetId, not both');
         }
 
         const body: Record<string, any> = {};
-        if (options.datasetName) body.dataset_name = options.datasetName;
-        if (options.datasetId) body.dataset_id = options.datasetId;
-        if (options.statusFilter) body.status_filter = options.statusFilter;
+        if (options.datasetName != null) body.dataset_name = options.datasetName;
+        if (options.datasetId != null) body.dataset_id = options.datasetId;
+        if (options.statusFilter != null) body.status_filter = options.statusFilter;
 
         return this.request(
             {
@@ -683,7 +766,7 @@ export class AnnotationQueue extends APIKeyAuth {
                 json: body,
                 timeout: options.timeout,
             },
-            DictResponseHandler as any,
+            ExportToDatasetResponseHandler,
         ) as Promise<ExportToDatasetResponse>;
     }
 }

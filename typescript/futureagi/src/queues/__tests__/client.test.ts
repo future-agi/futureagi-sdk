@@ -1,4 +1,4 @@
-import { AnnotationQueue } from '../client';
+import { AnnotationQueue, CLEAR } from '../client';
 import { SDKException } from '../../utils/errors';
 
 // Mock the auth module so APIKeyAuth constructor doesn't actually validate
@@ -59,6 +59,12 @@ describe('AnnotationQueue', () => {
             const config = mockRequest.mock.calls[0][0];
             expect(config.json).toEqual({ name: 'Min' });
         });
+
+        it('should throw on invalid assignmentStrategy', async () => {
+            await expect(
+                client.create({ name: 'Bad', assignmentStrategy: 'invalid' as any }),
+            ).rejects.toThrow('Invalid assignmentStrategy');
+        });
     });
 
     describe('list', () => {
@@ -108,6 +114,15 @@ describe('AnnotationQueue', () => {
 
             const config = mockRequest.mock.calls[0][0];
             expect(config.json).toEqual({ name: 'Same' });
+        });
+
+        it('should send null for CLEAR sentinel to clear fields', async () => {
+            mockRequest.mockResolvedValueOnce({ id: 'q1', name: 'Q' });
+
+            await client.update('q1', { description: CLEAR });
+
+            const config = mockRequest.mock.calls[0][0];
+            expect(config.json.description).toBeNull();
         });
     });
 
@@ -203,6 +218,12 @@ describe('AnnotationQueue', () => {
 
         it('should throw on empty items', async () => {
             await expect(client.addItems('q1', [])).rejects.toThrow('non-empty');
+        });
+
+        it('should throw on invalid sourceType', async () => {
+            await expect(
+                client.addItems('q1', [{ sourceType: 'invalid' as any, sourceId: 't1' }]),
+            ).rejects.toThrow('Invalid sourceType');
         });
     });
 
@@ -402,6 +423,17 @@ describe('AnnotationQueue', () => {
             const config = mockRequest.mock.calls[0][0];
             expect(config.json.score_source).toBe('api');
         });
+
+        it('should throw on invalid sourceType', async () => {
+            await expect(
+                client.createScore({
+                    sourceType: 'invalid',
+                    sourceId: 't1',
+                    labelId: 'lbl1',
+                    value: 'x',
+                }),
+            ).rejects.toThrow('Invalid sourceType');
+        });
     });
 
     describe('createScores', () => {
@@ -430,6 +462,16 @@ describe('AnnotationQueue', () => {
                 client.createScores({ sourceType: 'trace', sourceId: 't1', scores: [] }),
             ).rejects.toThrow('non-empty');
         });
+
+        it('should throw on invalid sourceType', async () => {
+            await expect(
+                client.createScores({
+                    sourceType: 'invalid',
+                    sourceId: 't1',
+                    scores: [{ labelId: 'lbl1', value: 'x' }],
+                }),
+            ).rejects.toThrow('Invalid sourceType');
+        });
     });
 
     describe('getScores', () => {
@@ -446,6 +488,12 @@ describe('AnnotationQueue', () => {
             expect(config.params.source_type).toBe('trace');
             expect(config.params.source_id).toBe('t1');
             expect(result).toHaveLength(1);
+        });
+
+        it('should throw on invalid sourceType', async () => {
+            await expect(
+                client.getScores('invalid', 't1'),
+            ).rejects.toThrow('Invalid sourceType');
         });
     });
 
@@ -528,6 +576,18 @@ describe('AnnotationQueue', () => {
             const config = mockRequest.mock.calls[0][0];
             expect(config.params.format).toBe('json');
         });
+
+        it('should export as CSV with responseType text', async () => {
+            const csvData = 'id,label,value\ni1,Sentiment,positive\n';
+            mockRequest.mockResolvedValueOnce({ data: csvData });
+
+            const result = await client.export('q1', { format: 'csv' });
+
+            const config = mockRequest.mock.calls[0][0];
+            expect(config.params.format).toBe('csv');
+            expect(config.responseType).toBe('text');
+            expect(result).toBe(csvData);
+        });
     });
 
     describe('exportToDataset', () => {
@@ -563,6 +623,12 @@ describe('AnnotationQueue', () => {
                 client.exportToDataset('q1', {}),
             ).rejects.toThrow('datasetName or datasetId');
         });
+
+        it('should throw when both name and ID provided', async () => {
+            await expect(
+                client.exportToDataset('q1', { datasetName: 'New', datasetId: 'd1' }),
+            ).rejects.toThrow('not both');
+        });
     });
 
     // ======================================================================
@@ -574,6 +640,12 @@ describe('AnnotationQueue', () => {
             mockRequest.mockResolvedValueOnce({ id: 'abc-123', name: 'A' });
             await client.get('abc-123');
             expect(mockRequest.mock.calls[0][0].url).toContain('annotation-queues/abc-123/');
+        });
+
+        it('should encode special characters in URL params', async () => {
+            mockRequest.mockResolvedValueOnce({ id: 'test', name: 'A' });
+            await client.get('id with spaces');
+            expect(mockRequest.mock.calls[0][0].url).toContain('id%20with%20spaces');
         });
 
         it('should interpolate queue_id and item_id in annotations URL', async () => {

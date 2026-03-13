@@ -1,3 +1,4 @@
+import re
 from typing import Any, Dict, List, Optional, Union
 
 from requests import Response
@@ -15,9 +16,31 @@ from fi.queues.types import (
     QueueProgress,
     Score,
 )
-from fi.utils.errors import InvalidAuthError, SDKException
+from fi.utils.errors import (
+    InvalidAuthError,
+    RateLimitError,
+    SDKException,
+    ServerError,
+    ServiceUnavailableError,
+)
 from fi.utils.logging import logger
 from fi.utils.routes import Routes
+
+
+# ---------------------------------------------------------------------------
+# ID validation
+# ---------------------------------------------------------------------------
+
+_SAFE_ID_RE = re.compile(r"^[a-zA-Z0-9_\-]+$")
+
+
+def _validate_id(value: str, name: str = "id") -> None:
+    """Validate that an ID is safe for URL interpolation."""
+    if not value or not _SAFE_ID_RE.match(value):
+        raise ValueError(
+            f"Invalid {name}: {value!r}. "
+            "Must be non-empty and contain only alphanumeric characters, hyphens, or underscores."
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -28,15 +51,11 @@ class _QueueResponseHandler(ResponseHandler[Dict[str, Any], QueueDetail]):
     """Handles single-queue responses."""
 
     @classmethod
-    def _parse_success(cls, response: Response) -> Union[Dict[str, Any], QueueDetail]:
+    def _parse_success(cls, response: Response) -> QueueDetail:
         data = response.json()
         if isinstance(data, dict) and "result" in data:
             data = data["result"]
-        try:
-            return QueueDetail(**data)
-        except Exception:
-            logger.warning("Failed to parse QueueDetail from response, returning raw dict")
-            return data
+        return QueueDetail(**data)
 
     @classmethod
     def _handle_error(cls, response: Response) -> None:
@@ -47,16 +66,12 @@ class _QueueListResponseHandler(ResponseHandler[Dict[str, Any], List[QueueDetail
     """Handles list-queues responses."""
 
     @classmethod
-    def _parse_success(cls, response: Response) -> Union[Dict[str, Any], List[QueueDetail]]:
+    def _parse_success(cls, response: Response) -> List[QueueDetail]:
         data = response.json()
         if isinstance(data, dict) and "result" in data:
             data = data["result"]
         items = data if isinstance(data, list) else data.get("results", data.get("table", []))
-        try:
-            return [QueueDetail(**q) for q in items]
-        except Exception:
-            logger.warning("Failed to parse QueueDetail list from response, returning raw list")
-            return items
+        return [QueueDetail(**q) for q in items]
 
     @classmethod
     def _handle_error(cls, response: Response) -> None:
@@ -81,16 +96,12 @@ class _DictResponseHandler(ResponseHandler[Dict[str, Any], Dict[str, Any]]):
 class _ItemListResponseHandler(ResponseHandler[Dict[str, Any], List[QueueItem]]):
 
     @classmethod
-    def _parse_success(cls, response: Response) -> Union[Dict[str, Any], List[QueueItem]]:
+    def _parse_success(cls, response: Response) -> List[QueueItem]:
         data = response.json()
         if isinstance(data, dict) and "result" in data:
             data = data["result"]
         items = data if isinstance(data, list) else data.get("results", [])
-        try:
-            return [QueueItem(**i) for i in items]
-        except Exception:
-            logger.warning("Failed to parse QueueItem list from response, returning raw list")
-            return items
+        return [QueueItem(**i) for i in items]
 
     @classmethod
     def _handle_error(cls, response: Response) -> None:
@@ -100,16 +111,12 @@ class _ItemListResponseHandler(ResponseHandler[Dict[str, Any], List[QueueItem]])
 class _ScoreListResponseHandler(ResponseHandler[Dict[str, Any], List[Score]]):
 
     @classmethod
-    def _parse_success(cls, response: Response) -> Union[Dict[str, Any], List[Score]]:
+    def _parse_success(cls, response: Response) -> List[Score]:
         data = response.json()
         if isinstance(data, dict) and "result" in data:
             data = data["result"]
         items = data if isinstance(data, list) else data.get("results", [])
-        try:
-            return [Score(**s) for s in items]
-        except Exception:
-            logger.warning("Failed to parse Score list from response, returning raw list")
-            return items
+        return [Score(**s) for s in items]
 
     @classmethod
     def _handle_error(cls, response: Response) -> None:
@@ -119,15 +126,23 @@ class _ScoreListResponseHandler(ResponseHandler[Dict[str, Any], List[Score]]):
 class _ScoreResponseHandler(ResponseHandler[Dict[str, Any], Score]):
 
     @classmethod
-    def _parse_success(cls, response: Response) -> Union[Dict[str, Any], Score]:
+    def _parse_success(cls, response: Response) -> Score:
         data = response.json()
         if isinstance(data, dict) and "result" in data:
             data = data["result"]
-        try:
-            return Score(**data)
-        except Exception:
-            logger.warning("Failed to parse Score from response, returning raw dict")
-            return data
+        return Score(**data)
+
+    @classmethod
+    def _handle_error(cls, response: Response) -> None:
+        _raise_for_status(response)
+
+
+class _CsvResponseHandler(ResponseHandler[Dict[str, Any], str]):
+    """Handler for CSV export — returns raw text and raises on errors."""
+
+    @classmethod
+    def _parse_success(cls, response: Response) -> str:
+        return response.text
 
     @classmethod
     def _handle_error(cls, response: Response) -> None:
@@ -135,16 +150,21 @@ class _ScoreResponseHandler(ResponseHandler[Dict[str, Any], Score]):
 
 
 def _raise_for_status(response: Response) -> None:
-    if response.status_code == 403:
+    status = response.status_code
+    if status == 401 or status == 403:
         raise InvalidAuthError()
+    if status == 429:
+        raise RateLimitError()
+    if status == 503:
+        raise ServiceUnavailableError()
+    if status >= 500:
+        raise ServerError()
     try:
         detail = response.json()
         msg = detail.get("message", detail.get("detail", response.text))
-        raise SDKException(msg)
-    except SDKException:
-        raise
     except Exception:
-        response.raise_for_status()
+        msg = None
+    raise SDKException(msg or f"HTTP {status}")
 
 
 # ---------------------------------------------------------------------------
@@ -235,7 +255,7 @@ class AnnotationQueue(APIKeyAuth):
         )
         return self.request(config, _QueueResponseHandler)
 
-    def list(
+    def list_queues(
         self,
         *,
         status: Optional[str] = None,
@@ -264,6 +284,7 @@ class AnnotationQueue(APIKeyAuth):
 
     def get(self, queue_id: str, *, timeout: Optional[int] = None) -> QueueDetail:
         """Get a single annotation queue by ID."""
+        _validate_id(queue_id, "queue_id")
         url = f"{self._base_url}/{Routes.annotation_queue_detail.value}".format(queue_id=queue_id)
         config = RequestConfig(method=HttpMethod.GET, url=url, timeout=timeout)
         return self.request(config, _QueueResponseHandler)
@@ -282,6 +303,7 @@ class AnnotationQueue(APIKeyAuth):
         timeout: Optional[int] = None,
     ) -> QueueDetail:
         """Update an annotation queue."""
+        _validate_id(queue_id, "queue_id")
         body: Dict[str, Any] = {}
         if name is not None:
             body["name"] = name
@@ -304,6 +326,7 @@ class AnnotationQueue(APIKeyAuth):
 
     def delete(self, queue_id: str, *, timeout: Optional[int] = None) -> Dict[str, Any]:
         """Delete (soft-delete) an annotation queue."""
+        _validate_id(queue_id, "queue_id")
         url = f"{self._base_url}/{Routes.annotation_queue_detail.value}".format(queue_id=queue_id)
         config = RequestConfig(method=HttpMethod.DELETE, url=url, timeout=timeout)
         return self.request(config, _DictResponseHandler)
@@ -321,6 +344,7 @@ class AnnotationQueue(APIKeyAuth):
         return self._update_status(queue_id, "completed", timeout=timeout)
 
     def _update_status(self, queue_id: str, status: str, *, timeout: Optional[int] = None) -> QueueDetail:
+        _validate_id(queue_id, "queue_id")
         url = f"{self._base_url}/{Routes.annotation_queue_status.value}".format(queue_id=queue_id)
         config = RequestConfig(method=HttpMethod.POST, url=url, json={"status": status}, timeout=timeout)
         return self.request(config, _QueueResponseHandler)
@@ -331,12 +355,14 @@ class AnnotationQueue(APIKeyAuth):
 
     def add_label(self, queue_id: str, label_id: str, *, timeout: Optional[int] = None) -> Dict[str, Any]:
         """Attach a label to the queue."""
+        _validate_id(queue_id, "queue_id")
         url = f"{self._base_url}/{Routes.annotation_queue_add_label.value}".format(queue_id=queue_id)
         config = RequestConfig(method=HttpMethod.POST, url=url, json={"label_id": label_id}, timeout=timeout)
         return self.request(config, _DictResponseHandler)
 
     def remove_label(self, queue_id: str, label_id: str, *, timeout: Optional[int] = None) -> Dict[str, Any]:
         """Remove a label from the queue."""
+        _validate_id(queue_id, "queue_id")
         url = f"{self._base_url}/{Routes.annotation_queue_remove_label.value}".format(queue_id=queue_id)
         config = RequestConfig(method=HttpMethod.POST, url=url, json={"label_id": label_id}, timeout=timeout)
         return self.request(config, _DictResponseHandler)
@@ -367,13 +393,11 @@ class AnnotationQueue(APIKeyAuth):
         if not items:
             raise ValueError("items must be a non-empty list")
 
+        _validate_id(queue_id, "queue_id")
         url = f"{self._base_url}/{Routes.queue_items_add.value}".format(queue_id=queue_id)
         config = RequestConfig(method=HttpMethod.POST, url=url, json={"items": items}, timeout=timeout)
         result = self.request(config, _DictResponseHandler)
-        try:
-            return AddItemsResponse(**result)
-        except Exception:
-            return result
+        return AddItemsResponse(**result)
 
     def list_items(
         self,
@@ -386,6 +410,7 @@ class AnnotationQueue(APIKeyAuth):
         timeout: Optional[int] = None,
     ) -> List[QueueItem]:
         """List items in a queue with optional filters."""
+        _validate_id(queue_id, "queue_id")
         params: Dict[str, Any] = {"page": page, "page_size": page_size}
         if status:
             params["status"] = status
@@ -407,6 +432,7 @@ class AnnotationQueue(APIKeyAuth):
         if not item_ids:
             raise ValueError("item_ids must be a non-empty list")
 
+        _validate_id(queue_id, "queue_id")
         url = f"{self._base_url}/{Routes.queue_items_bulk_remove.value}".format(queue_id=queue_id)
         config = RequestConfig(method=HttpMethod.POST, url=url, json={"item_ids": item_ids}, timeout=timeout)
         return self.request(config, _DictResponseHandler)
@@ -420,6 +446,7 @@ class AnnotationQueue(APIKeyAuth):
         timeout: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Assign items to an annotator. Pass ``user_id=None`` to unassign."""
+        _validate_id(queue_id, "queue_id")
         url = f"{self._base_url}/{Routes.queue_items_assign.value}".format(queue_id=queue_id)
         body: Dict[str, Any] = {"item_ids": item_ids, "user_id": user_id}
         config = RequestConfig(method=HttpMethod.POST, url=url, json=body, timeout=timeout)
@@ -451,6 +478,8 @@ class AnnotationQueue(APIKeyAuth):
         if not annotations:
             raise ValueError("annotations must be a non-empty list")
 
+        _validate_id(queue_id, "queue_id")
+        _validate_id(item_id, "item_id")
         url = f"{self._base_url}/{Routes.queue_item_annotations_import.value}".format(
             queue_id=queue_id, item_id=item_id,
         )
@@ -460,10 +489,7 @@ class AnnotationQueue(APIKeyAuth):
 
         config = RequestConfig(method=HttpMethod.POST, url=url, json=body, timeout=timeout)
         result = self.request(config, _DictResponseHandler)
-        try:
-            return ImportAnnotationsResponse(**result)
-        except Exception:
-            return result
+        return ImportAnnotationsResponse(**result)
 
     def submit_annotations(
         self,
@@ -485,6 +511,8 @@ class AnnotationQueue(APIKeyAuth):
         if not annotations:
             raise ValueError("annotations must be a non-empty list")
 
+        _validate_id(queue_id, "queue_id")
+        _validate_id(item_id, "item_id")
         url = f"{self._base_url}/{Routes.queue_item_annotations_submit.value}".format(
             queue_id=queue_id, item_id=item_id,
         )
@@ -503,6 +531,8 @@ class AnnotationQueue(APIKeyAuth):
         timeout: Optional[int] = None,
     ) -> List[Score]:
         """Get all annotations for a queue item."""
+        _validate_id(queue_id, "queue_id")
+        _validate_id(item_id, "item_id")
         url = f"{self._base_url}/{Routes.queue_item_annotations_list.value}".format(
             queue_id=queue_id, item_id=item_id,
         )
@@ -517,6 +547,8 @@ class AnnotationQueue(APIKeyAuth):
         timeout: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Mark a queue item as completed and get the next item."""
+        _validate_id(queue_id, "queue_id")
+        _validate_id(item_id, "item_id")
         url = f"{self._base_url}/{Routes.queue_item_complete.value}".format(
             queue_id=queue_id, item_id=item_id,
         )
@@ -531,6 +563,8 @@ class AnnotationQueue(APIKeyAuth):
         timeout: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Skip a queue item and get the next item."""
+        _validate_id(queue_id, "queue_id")
+        _validate_id(item_id, "item_id")
         url = f"{self._base_url}/{Routes.queue_item_skip.value}".format(
             queue_id=queue_id, item_id=item_id,
         )
@@ -640,33 +674,27 @@ class AnnotationQueue(APIKeyAuth):
 
     def get_progress(self, queue_id: str, *, timeout: Optional[int] = None) -> QueueProgress:
         """Get queue progress (total, pending, completed, etc.)."""
+        _validate_id(queue_id, "queue_id")
         url = f"{self._base_url}/{Routes.annotation_queue_progress.value}".format(queue_id=queue_id)
         config = RequestConfig(method=HttpMethod.GET, url=url, timeout=timeout)
         result = self.request(config, _DictResponseHandler)
-        try:
-            return QueueProgress(**result)
-        except Exception:
-            return result
+        return QueueProgress(**result)
 
     def get_analytics(self, queue_id: str, *, timeout: Optional[int] = None) -> QueueAnalytics:
         """Get queue analytics (throughput, annotator performance, label distribution)."""
+        _validate_id(queue_id, "queue_id")
         url = f"{self._base_url}/{Routes.annotation_queue_analytics.value}".format(queue_id=queue_id)
         config = RequestConfig(method=HttpMethod.GET, url=url, timeout=timeout)
         result = self.request(config, _DictResponseHandler)
-        try:
-            return QueueAnalytics(**result)
-        except Exception:
-            return result
+        return QueueAnalytics(**result)
 
     def get_agreement(self, queue_id: str, *, timeout: Optional[int] = None) -> QueueAgreement:
         """Get inter-annotator agreement metrics for a queue."""
+        _validate_id(queue_id, "queue_id")
         url = f"{self._base_url}/{Routes.annotation_queue_agreement.value}".format(queue_id=queue_id)
         config = RequestConfig(method=HttpMethod.GET, url=url, timeout=timeout)
         result = self.request(config, _DictResponseHandler)
-        try:
-            return QueueAgreement(**result)
-        except Exception:
-            return result
+        return QueueAgreement(**result)
 
     # ------------------------------------------------------------------
     # Export
@@ -676,7 +704,7 @@ class AnnotationQueue(APIKeyAuth):
         self,
         queue_id: str,
         *,
-        format: str = "json",
+        export_format: str = "json",
         status: Optional[str] = None,
         timeout: Optional[int] = None,
     ) -> Any:
@@ -684,27 +712,22 @@ class AnnotationQueue(APIKeyAuth):
 
         Args:
             queue_id: Queue UUID.
-            format: ``"json"`` or ``"csv"``.
+            export_format: ``"json"`` or ``"csv"``.
             status: Optional item status filter (e.g. ``"completed"``).
 
         Returns:
             For JSON format: list of dicts. For CSV: raw text content.
         """
-        params: Dict[str, Any] = {"format": format}
+        _validate_id(queue_id, "queue_id")
+        params: Dict[str, Any] = {"format": export_format}
         if status:
             params["status"] = status
 
         url = f"{self._base_url}/{Routes.annotation_queue_export.value}".format(queue_id=queue_id)
         config = RequestConfig(method=HttpMethod.GET, url=url, params=params, timeout=timeout)
 
-        if format == "csv":
-            # Return raw response text for CSV
-            response = self.request(config)
-            if isinstance(response, Response):
-                if not response.ok:
-                    _raise_for_status(response)
-                return response.text
-            return response
+        if export_format == "csv":
+            return self.request(config, _CsvResponseHandler)
 
         return self.request(config, _DictResponseHandler)
 
@@ -725,23 +748,21 @@ class AnnotationQueue(APIKeyAuth):
             dataset_id: Existing dataset UUID to append to.
             status_filter: Item status to export (default: "completed").
         """
-        if not dataset_name and not dataset_id:
+        if dataset_name is None and dataset_id is None:
             raise ValueError("Provide either dataset_name or dataset_id")
-        if dataset_name and dataset_id:
+        if dataset_name is not None and dataset_id is not None:
             raise ValueError("Provide either dataset_name or dataset_id, not both")
 
+        _validate_id(queue_id, "queue_id")
         body: Dict[str, Any] = {}
-        if dataset_name:
+        if dataset_name is not None:
             body["dataset_name"] = dataset_name
-        if dataset_id:
+        if dataset_id is not None:
             body["dataset_id"] = dataset_id
-        if status_filter:
+        if status_filter is not None:
             body["status_filter"] = status_filter
 
         url = f"{self._base_url}/{Routes.annotation_queue_export_to_dataset.value}".format(queue_id=queue_id)
         config = RequestConfig(method=HttpMethod.POST, url=url, json=body, timeout=timeout)
         result = self.request(config, _DictResponseHandler)
-        try:
-            return ExportToDatasetResponse(**result)
-        except Exception:
-            return result
+        return ExportToDatasetResponse(**result)

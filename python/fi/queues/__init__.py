@@ -1,6 +1,5 @@
 from fi.queues.client import AnnotationQueue
 from fi.queues.types import (
-    QueueConfig,
     QueueDetail,
     QueueItem,
     QueueProgress,
@@ -14,7 +13,6 @@ from fi.queues.types import (
 
 __all__ = [
     "AnnotationQueue",
-    "QueueConfig",
     "QueueDetail",
     "QueueItem",
     "QueueProgress",

@@ -6,6 +6,9 @@
 // Queue
 // ---------------------------------------------------------------------------
 
+export type QueueStatus = 'draft' | 'active' | 'paused' | 'completed';
+export type QueueItemStatus = 'pending' | 'assigned' | 'in_progress' | 'completed' | 'skipped';
+
 export interface QueueConfig {
     name: string;
     description?: string;
@@ -24,7 +27,7 @@ export interface QueueDetail {
     name: string;
     description?: string;
     instructions?: string;
-    status?: string;
+    status?: QueueStatus;
     assignmentStrategy?: string;
     annotationsRequired?: number;
     reservationTimeoutMinutes?: number;
@@ -54,7 +57,7 @@ export interface QueueItem {
     id: string;
     sourceType?: string;
     sourceId?: string;
-    status?: string;
+    status?: QueueItemStatus;
     order?: number;
     assignedTo?: string;
     createdAt?: string;
@@ -94,7 +97,7 @@ export interface ScoreInput {
 
 export interface AnnotationPayload {
     labelId: string;
-    value?: ScoreValue;
+    value: ScoreValue;
     scoreSource?: string;
 }
 
