@@ -56,7 +56,7 @@ class QueueAnalytics(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
-    throughput: Optional[List[Dict[str, Any]]] = None
+    throughput: Optional[Dict[str, Any]] = None
     annotator_performance: Optional[List[Dict[str, Any]]] = Field(None, alias="annotatorPerformance")
     label_distribution: Optional[Dict[str, Any]] = Field(None, alias="labelDistribution")
     status_breakdown: Optional[Dict[str, int]] = Field(None, alias="statusBreakdown")

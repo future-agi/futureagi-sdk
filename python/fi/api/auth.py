@@ -29,7 +29,7 @@ class ResponseHandler(Generic[T, U], ABC):
     @classmethod
     def parse(cls, response: Response) -> Union[T, U]:
         """Parse the response into the expected type"""
-        if not response.ok or response.status_code != 200:
+        if not (200 <= response.status_code < 300):
             cls._handle_error(response)
         return cls._parse_success(response)
 
