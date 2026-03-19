@@ -120,7 +120,7 @@ export interface QueueProgress {
 }
 
 export interface QueueAnalytics {
-    throughput?: Array<Record<string, any>>;
+    throughput?: Record<string, any>;
     annotatorPerformance?: Array<Record<string, any>>;
     labelDistribution?: Record<string, any>;
     statusBreakdown?: Record<string, number>;

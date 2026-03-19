@@ -23,7 +23,7 @@ export abstract class ResponseHandler<T = any, U = any> {
      * Parse the response into the expected type
      */
     static parse<T, U>(response: AxiosResponse, handlerClass: typeof ResponseHandler): T | U {
-        if (!response || response.status !== 200) {
+        if (!response || response.status < 200 || response.status >= 300) {
             handlerClass._handleError(response);
         }
         return handlerClass._parseSuccess(response);

@@ -718,7 +718,7 @@ export class AnnotationQueue extends APIKeyAuth {
         options?: { format?: 'json' | 'csv'; status?: string; timeout?: number },
     ): Promise<string | Record<string, any>[]> {
         const fmt = options?.format ?? 'json';
-        const params: Record<string, any> = { format: fmt };
+        const params: Record<string, any> = { export_format: fmt };
         if (options?.status) params.status = options.status;
 
         const requestConfig: RequestConfig = {
