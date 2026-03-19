@@ -73,4 +73,32 @@ export const Routes = {
     BULK_ANNOTATION: "tracer/bulk-annotation/",
     GET_ANNOTATION_LABELS: "tracer/get-annotation-labels/",
     LIST_PROJECTS: "tracer/project/list_projects/",
+
+    // Annotation queues
+    ANNOTATION_QUEUES: "model-hub/annotation-queues/",
+    ANNOTATION_QUEUE_DETAIL: "model-hub/annotation-queues/{queue_id}/",
+    ANNOTATION_QUEUE_STATUS: "model-hub/annotation-queues/{queue_id}/update-status/",
+    ANNOTATION_QUEUE_PROGRESS: "model-hub/annotation-queues/{queue_id}/progress/",
+    ANNOTATION_QUEUE_ANALYTICS: "model-hub/annotation-queues/{queue_id}/analytics/",
+    ANNOTATION_QUEUE_AGREEMENT: "model-hub/annotation-queues/{queue_id}/agreement/",
+    ANNOTATION_QUEUE_EXPORT: "model-hub/annotation-queues/{queue_id}/export/",
+    ANNOTATION_QUEUE_EXPORT_TO_DATASET: "model-hub/annotation-queues/{queue_id}/export-to-dataset/",
+    ANNOTATION_QUEUE_ADD_LABEL: "model-hub/annotation-queues/{queue_id}/add-label/",
+    ANNOTATION_QUEUE_REMOVE_LABEL: "model-hub/annotation-queues/{queue_id}/remove-label/",
+
+    // Queue items
+    QUEUE_ITEMS: "model-hub/annotation-queues/{queue_id}/items/",
+    QUEUE_ITEMS_ADD: "model-hub/annotation-queues/{queue_id}/items/add-items/",
+    QUEUE_ITEMS_BULK_REMOVE: "model-hub/annotation-queues/{queue_id}/items/bulk-remove/",
+    QUEUE_ITEMS_ASSIGN: "model-hub/annotation-queues/{queue_id}/items/assign/",
+    QUEUE_ITEM_ANNOTATIONS_SUBMIT: "model-hub/annotation-queues/{queue_id}/items/{item_id}/annotations/submit/",
+    QUEUE_ITEM_ANNOTATIONS_IMPORT: "model-hub/annotation-queues/{queue_id}/items/{item_id}/annotations/import/",
+    QUEUE_ITEM_ANNOTATIONS_LIST: "model-hub/annotation-queues/{queue_id}/items/{item_id}/annotations/",
+    QUEUE_ITEM_COMPLETE: "model-hub/annotation-queues/{queue_id}/items/{item_id}/complete/",
+    QUEUE_ITEM_SKIP: "model-hub/annotation-queues/{queue_id}/items/{item_id}/skip/",
+
+    // Scores (unified annotations)
+    SCORES: "model-hub/scores/",
+    SCORES_BULK: "model-hub/scores/bulk/",
+    SCORES_FOR_SOURCE: "model-hub/scores/for-source/",
 } as const;

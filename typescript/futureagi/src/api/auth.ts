@@ -23,7 +23,7 @@ export abstract class ResponseHandler<T = any, U = any> {
      * Parse the response into the expected type
      */
     static parse<T, U>(response: AxiosResponse, handlerClass: typeof ResponseHandler): T | U {
-        if (!response || response.status !== 200) {
+        if (!response || response.status < 200 || response.status >= 300) {
             handlerClass._handleError(response);
         }
         return handlerClass._parseSuccess(response);
@@ -175,6 +175,7 @@ export class HttpClient {
             params: config.params,
             data: config.json || config.data,
             timeout: config.timeout || this._defaultTimeout,
+            ...(config.responseType ? { responseType: config.responseType } : {}),
         };
 
         // Handle file uploads
