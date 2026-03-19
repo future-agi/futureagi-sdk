@@ -719,7 +719,7 @@ class AnnotationQueue(APIKeyAuth):
             For JSON format: list of dicts. For CSV: raw text content.
         """
         _validate_id(queue_id, "queue_id")
-        params: Dict[str, Any] = {"format": export_format}
+        params: Dict[str, Any] = {"export_format": export_format}
         if status:
             params["status"] = status
 
