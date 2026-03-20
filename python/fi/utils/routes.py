@@ -72,6 +72,10 @@ class Routes(str, Enum):
     get_annotation_labels = "tracer/get-annotation-labels/"
     list_projects = "tracer/project/list_projects/"
 
+    # annotation labels (CRUD)
+    annotations_labels = "model-hub/annotations-labels/"
+    annotations_labels_detail = "model-hub/annotations-labels/{label_id}/"
+
     # annotation queues
     annotation_queues = "model-hub/annotation-queues/"
     annotation_queue_detail = "model-hub/annotation-queues/{queue_id}/"
