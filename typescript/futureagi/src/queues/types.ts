@@ -6,6 +6,9 @@
 // Queue
 // ---------------------------------------------------------------------------
 
+export const VALID_LABEL_TYPES = ['categorical', 'text', 'numeric', 'star', 'thumbs_up_down'] as const;
+export type LabelType = (typeof VALID_LABEL_TYPES)[number];
+
 export type QueueStatus = 'draft' | 'active' | 'paused' | 'completed';
 export type QueueItemStatus = 'pending' | 'assigned' | 'in_progress' | 'completed' | 'skipped';
 

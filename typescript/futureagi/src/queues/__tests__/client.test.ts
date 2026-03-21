@@ -174,7 +174,7 @@ describe('AnnotationQueue', () => {
         it('should add a label to a queue', async () => {
             mockRequest.mockResolvedValueOnce({ label: { id: 'lbl1' }, created: true });
 
-            await client.addLabel('q1', 'lbl1');
+            await client.addLabel({ queueId: 'q1', labelId: 'lbl1' });
 
             const config = mockRequest.mock.calls[0][0];
             expect(config.method).toBe('POST');
@@ -187,7 +187,7 @@ describe('AnnotationQueue', () => {
         it('should remove a label from a queue', async () => {
             mockRequest.mockResolvedValueOnce({ removed: true });
 
-            await client.removeLabel('q1', 'lbl1');
+            await client.removeLabel({ queueId: 'q1', labelId: 'lbl1' });
 
             const config = mockRequest.mock.calls[0][0];
             expect(config.url).toContain('remove-label');

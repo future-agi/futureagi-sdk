@@ -18,12 +18,14 @@ import { APIKeyAuth, APIKeyAuthConfig, ResponseHandler } from '../api/auth';
 import { HttpMethod, RequestConfig } from '../api/types';
 import { SDKException } from '../utils/errors';
 import { Routes } from '../utils/routes';
+import type { AnnotationLabel } from '../annotations/types';
 import type {
     AddItemsResponse,
     AnnotationPayload,
     AssignmentStrategy,
     ExportToDatasetResponse,
     ImportAnnotationsResponse,
+    LabelType,
     QueueAgreement,
     QueueAnalytics,
     QueueConfig,
@@ -35,7 +37,7 @@ import type {
     ScoreInput,
     ScoreValue,
 } from './types';
-import { VALID_SOURCE_TYPES, VALID_ASSIGNMENT_STRATEGIES } from './types';
+import { VALID_SOURCE_TYPES, VALID_ASSIGNMENT_STRATEGIES, VALID_LABEL_TYPES } from './types';
 
 // ---------------------------------------------------------------------------
 // Response type for handlers
@@ -138,6 +140,21 @@ class ExportToDatasetResponseHandler extends ResponseHandler<ExportToDatasetResp
 class ExportJsonResponseHandler extends ResponseHandler<Record<string, any>[]> {
     static _parseSuccess(response: ApiResponse): Record<string, any>[] {
         return unwrap(response.data);
+    }
+}
+
+class LabelResponseHandler extends ResponseHandler<AnnotationLabel> {
+    static _parseSuccess(response: ApiResponse): AnnotationLabel {
+        const data = unwrap(response.data);
+        return data?.data ?? data;
+    }
+}
+
+class LabelListResponseHandler extends ResponseHandler<AnnotationLabel[]> {
+    static _parseSuccess(response: ApiResponse): AnnotationLabel[] {
+        const data = unwrap(response.data);
+        if (Array.isArray(data)) return data;
+        return data?.results ?? data?.data ?? [];
     }
 }
 
@@ -325,28 +342,182 @@ export class AnnotationQueue extends APIKeyAuth {
     }
 
     // ------------------------------------------------------------------
-    // Labels
+    // Name → ID resolvers
     // ------------------------------------------------------------------
 
-    async addLabel(queueId: string, labelId: string, options?: { timeout?: number }): Promise<Record<string, any>> {
+    private async _getQueueIdFromName(queueName: string): Promise<string> {
+        const queues = await this.list({ search: queueName });
+        const matches = queues.filter((q) => q.name.toLowerCase() === queueName.toLowerCase());
+        if (matches.length === 0) {
+            throw new SDKException(`Queue with name '${queueName}' not found.`);
+        }
+        if (matches.length > 1) {
+            throw new SDKException(
+                `Multiple queues found with name '${queueName}': ${matches.map((q) => q.id).join(', ')}. Use queueId instead.`,
+            );
+        }
+        return matches[0].id;
+    }
+
+    private async _getLabelIdFromName(labelName: string): Promise<string> {
+        const labels = await this.listLabels();
+        const matches = labels.filter((l) => l.name.toLowerCase() === labelName.toLowerCase());
+        if (matches.length === 0) {
+            throw new SDKException(`Label with name '${labelName}' not found.`);
+        }
+        if (matches.length > 1) {
+            throw new SDKException(
+                `Multiple labels found with name '${labelName}': ${matches.map((l) => `${l.id} (${l.type})`).join(', ')}. Use labelId instead.`,
+            );
+        }
+        return matches[0].id;
+    }
+
+    // ------------------------------------------------------------------
+    // Labels (CRUD)
+    // ------------------------------------------------------------------
+
+    async createLabel(options: {
+        name: string;
+        type: LabelType;
+        settings?: Record<string, any>;
+        description?: string;
+        project?: string;
+        timeout?: number;
+    }): Promise<AnnotationLabel> {
+        if (!(VALID_LABEL_TYPES as readonly string[]).includes(options.type)) {
+            throw new SDKException(
+                `Invalid label type '${options.type}'. Must be one of: ${VALID_LABEL_TYPES.join(', ')}`,
+            );
+        }
+
+        const body: Record<string, any> = { name: options.name, type: options.type };
+        if (options.settings != null) body.settings = options.settings;
+        if (options.description != null) body.description = options.description;
+        if (options.project != null) body.project = options.project;
+
         return this.request(
             {
                 method: HttpMethod.POST,
-                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_ADD_LABEL, { queue_id: queueId }),
-                json: { label_id: labelId },
+                url: buildUrl(this._baseUrl, Routes.ANNOTATIONS_LABELS),
+                json: body,
+                timeout: options.timeout,
+            },
+            LabelResponseHandler,
+        ) as Promise<AnnotationLabel>;
+    }
+
+    async listLabels(options?: {
+        projectId?: string;
+        timeout?: number;
+    }): Promise<AnnotationLabel[]> {
+        const params: Record<string, any> = {};
+        if (options?.projectId != null) params.project_id = options.projectId;
+
+        return this.request(
+            {
+                method: HttpMethod.GET,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATIONS_LABELS),
+                params,
                 timeout: options?.timeout,
+            },
+            LabelListResponseHandler,
+        ) as Promise<AnnotationLabel[]>;
+    }
+
+    async getLabel(options: {
+        labelId?: string;
+        labelName?: string;
+        timeout?: number;
+    }): Promise<AnnotationLabel> {
+        if (!options.labelId && !options.labelName) {
+            throw new SDKException('Provide either labelId or labelName');
+        }
+        const resolvedId = options.labelId ?? await this._getLabelIdFromName(options.labelName!);
+
+        return this.request(
+            {
+                method: HttpMethod.GET,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATIONS_LABELS_DETAIL, { label_id: resolvedId }),
+                timeout: options.timeout,
+            },
+            LabelResponseHandler,
+        ) as Promise<AnnotationLabel>;
+    }
+
+    async deleteLabel(options: {
+        labelId?: string;
+        labelName?: string;
+        timeout?: number;
+    }): Promise<Record<string, any>> {
+        if (!options.labelId && !options.labelName) {
+            throw new SDKException('Provide either labelId or labelName');
+        }
+        const resolvedId = options.labelId ?? await this._getLabelIdFromName(options.labelName!);
+
+        return this.request(
+            {
+                method: HttpMethod.DELETE,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATIONS_LABELS_DETAIL, { label_id: resolvedId }),
+                timeout: options.timeout,
             },
             DictResponseHandler,
         ) as Promise<Record<string, any>>;
     }
 
-    async removeLabel(queueId: string, labelId: string, options?: { timeout?: number }): Promise<Record<string, any>> {
+    // ------------------------------------------------------------------
+    // Labels (queue attachment)
+    // ------------------------------------------------------------------
+
+    async addLabel(options: {
+        queueId?: string;
+        labelId?: string;
+        queueName?: string;
+        labelName?: string;
+        timeout?: number;
+    }): Promise<Record<string, any>> {
+        if (!options.queueId && !options.queueName) {
+            throw new SDKException('Provide either queueId or queueName');
+        }
+        if (!options.labelId && !options.labelName) {
+            throw new SDKException('Provide either labelId or labelName');
+        }
+        const resolvedQueueId = options.queueId ?? await this._getQueueIdFromName(options.queueName!);
+        const resolvedLabelId = options.labelId ?? await this._getLabelIdFromName(options.labelName!);
+
         return this.request(
             {
                 method: HttpMethod.POST,
-                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_REMOVE_LABEL, { queue_id: queueId }),
-                json: { label_id: labelId },
-                timeout: options?.timeout,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_ADD_LABEL, { queue_id: resolvedQueueId }),
+                json: { label_id: resolvedLabelId },
+                timeout: options.timeout,
+            },
+            DictResponseHandler,
+        ) as Promise<Record<string, any>>;
+    }
+
+    async removeLabel(options: {
+        queueId?: string;
+        labelId?: string;
+        queueName?: string;
+        labelName?: string;
+        timeout?: number;
+    }): Promise<Record<string, any>> {
+        if (!options.queueId && !options.queueName) {
+            throw new SDKException('Provide either queueId or queueName');
+        }
+        if (!options.labelId && !options.labelName) {
+            throw new SDKException('Provide either labelId or labelName');
+        }
+        const resolvedQueueId = options.queueId ?? await this._getQueueIdFromName(options.queueName!);
+        const resolvedLabelId = options.labelId ?? await this._getLabelIdFromName(options.labelName!);
+
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_REMOVE_LABEL, { queue_id: resolvedQueueId }),
+                json: { label_id: resolvedLabelId },
+                timeout: options.timeout,
             },
             DictResponseHandler,
         ) as Promise<Record<string, any>>;

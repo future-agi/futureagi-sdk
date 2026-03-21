@@ -74,6 +74,10 @@ export const Routes = {
     GET_ANNOTATION_LABELS: "tracer/get-annotation-labels/",
     LIST_PROJECTS: "tracer/project/list_projects/",
 
+    // Annotation labels (CRUD)
+    ANNOTATIONS_LABELS: "model-hub/annotations-labels/",
+    ANNOTATIONS_LABELS_DETAIL: "model-hub/annotations-labels/{label_id}/",
+
     // Annotation queues
     ANNOTATION_QUEUES: "model-hub/annotation-queues/",
     ANNOTATION_QUEUE_DETAIL: "model-hub/annotation-queues/{queue_id}/",
