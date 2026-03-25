@@ -676,6 +676,8 @@ class AnnotationQueue(APIKeyAuth):
         timeout: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Assign items to an annotator. Pass ``user_id=None`` to unassign."""
+        if not item_ids:
+            raise ValueError("item_ids must be a non-empty list")
         if not queue_id and not queue_name:
             raise ValueError("Provide either queue_id or queue_name")
         resolved_id = queue_id or self._get_queue_id_from_name(queue_name)
