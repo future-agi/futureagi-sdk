@@ -167,31 +167,190 @@ describe('AnnotationQueue', () => {
     });
 
     // ======================================================================
-    // Labels
+    // Label CRUD
+    // ======================================================================
+
+    describe('createLabel', () => {
+        it('should create a label with all fields', async () => {
+            mockRequest.mockResolvedValueOnce({ id: 'lbl1', name: 'Quality', type: 'star' });
+
+            const result = await client.createLabel({
+                name: 'Quality',
+                type: 'star',
+                settings: { no_of_stars: 5 },
+                description: 'Rate quality',
+                project: 'proj1',
+            });
+
+            const config = mockRequest.mock.calls[0][0];
+            expect(config.method).toBe('POST');
+            expect(config.url).toContain('annotations-labels');
+            expect(config.json.name).toBe('Quality');
+            expect(config.json.type).toBe('star');
+            expect(config.json.settings).toEqual({ no_of_stars: 5 });
+            expect(config.json.description).toBe('Rate quality');
+            expect(config.json.project).toBe('proj1');
+            expect(result.name).toBe('Quality');
+        });
+
+        it('should throw on invalid label type', async () => {
+            await expect(
+                client.createLabel({ name: 'Bad', type: 'invalid' as any }),
+            ).rejects.toThrow('Invalid label type');
+        });
+    });
+
+    describe('listLabels', () => {
+        it('should list labels', async () => {
+            mockRequest.mockResolvedValueOnce([
+                { id: 'lbl1', name: 'Quality', type: 'star' },
+                { id: 'lbl2', name: 'Sentiment', type: 'categorical' },
+            ]);
+
+            const result = await client.listLabels();
+
+            const config = mockRequest.mock.calls[0][0];
+            expect(config.method).toBe('GET');
+            expect(config.url).toContain('annotations-labels');
+            expect(result).toHaveLength(2);
+        });
+
+        it('should filter by projectId', async () => {
+            mockRequest.mockResolvedValueOnce([]);
+
+            await client.listLabels({ projectId: 'proj1' });
+
+            const config = mockRequest.mock.calls[0][0];
+            expect(config.params.project_id).toBe('proj1');
+        });
+    });
+
+    describe('getLabel', () => {
+        it('should get label by ID', async () => {
+            mockRequest.mockResolvedValueOnce({ id: 'lbl1', name: 'Quality', type: 'star' });
+
+            const result = await client.getLabel({ labelId: 'lbl1' });
+
+            const config = mockRequest.mock.calls[0][0];
+            expect(config.method).toBe('GET');
+            expect(config.url).toContain('annotations-labels/lbl1');
+            expect(result.id).toBe('lbl1');
+        });
+
+        it('should get label by name (resolves via listLabels)', async () => {
+            // First call: listLabels for name resolution
+            mockRequest.mockResolvedValueOnce([
+                { id: 'lbl1', name: 'Quality', type: 'star' },
+            ]);
+            // Second call: getLabel by resolved ID
+            mockRequest.mockResolvedValueOnce({ id: 'lbl1', name: 'Quality', type: 'star' });
+
+            const result = await client.getLabel({ labelName: 'Quality' });
+
+            expect(result.name).toBe('Quality');
+        });
+
+        it('should throw when neither labelId nor labelName provided', async () => {
+            await expect(client.getLabel({})).rejects.toThrow('labelId or labelName');
+        });
+    });
+
+    describe('deleteLabel', () => {
+        it('should delete label by ID', async () => {
+            mockRequest.mockResolvedValueOnce({ deleted: true });
+
+            await client.deleteLabel({ labelId: 'lbl1' });
+
+            const config = mockRequest.mock.calls[0][0];
+            expect(config.method).toBe('DELETE');
+            expect(config.url).toContain('annotations-labels/lbl1');
+        });
+
+        it('should delete label by name', async () => {
+            // listLabels for name resolution
+            mockRequest.mockResolvedValueOnce([
+                { id: 'lbl1', name: 'Quality', type: 'star' },
+            ]);
+            // delete call
+            mockRequest.mockResolvedValueOnce({ deleted: true });
+
+            await client.deleteLabel({ labelName: 'Quality' });
+
+            const deleteConfig = mockRequest.mock.calls[1][0];
+            expect(deleteConfig.method).toBe('DELETE');
+            expect(deleteConfig.url).toContain('annotations-labels/lbl1');
+        });
+
+        it('should throw when neither labelId nor labelName provided', async () => {
+            await expect(client.deleteLabel({})).rejects.toThrow('labelId or labelName');
+        });
+    });
+
+    // ======================================================================
+    // Labels (queue attachment)
     // ======================================================================
 
     describe('addLabel', () => {
-        it('should add a label to a queue', async () => {
+        it('should add a label to a queue by IDs', async () => {
             mockRequest.mockResolvedValueOnce({ label: { id: 'lbl1' }, created: true });
 
-            await client.addLabel('q1', 'lbl1');
+            await client.addLabel({ queueId: 'q1', labelId: 'lbl1' });
 
             const config = mockRequest.mock.calls[0][0];
             expect(config.method).toBe('POST');
             expect(config.url).toContain('add-label');
             expect(config.json).toEqual({ label_id: 'lbl1' });
         });
+
+        it('should resolve names to IDs', async () => {
+            // list queues for name resolution
+            mockRequest.mockResolvedValueOnce([{ id: 'q1', name: 'My Queue' }]);
+            // list labels for name resolution
+            mockRequest.mockResolvedValueOnce([{ id: 'lbl1', name: 'Quality', type: 'star' }]);
+            // addLabel call
+            mockRequest.mockResolvedValueOnce({ created: true });
+
+            await client.addLabel({ queueName: 'My Queue', labelName: 'Quality' });
+
+            const addConfig = mockRequest.mock.calls[2][0];
+            expect(addConfig.url).toContain('add-label');
+            expect(addConfig.json).toEqual({ label_id: 'lbl1' });
+        });
+
+        it('should throw when neither queueId nor queueName provided', async () => {
+            await expect(
+                client.addLabel({ labelId: 'lbl1' }),
+            ).rejects.toThrow('queueId or queueName');
+        });
+
+        it('should throw when neither labelId nor labelName provided', async () => {
+            await expect(
+                client.addLabel({ queueId: 'q1' }),
+            ).rejects.toThrow('labelId or labelName');
+        });
     });
 
     describe('removeLabel', () => {
-        it('should remove a label from a queue', async () => {
+        it('should remove a label from a queue by IDs', async () => {
             mockRequest.mockResolvedValueOnce({ removed: true });
 
-            await client.removeLabel('q1', 'lbl1');
+            await client.removeLabel({ queueId: 'q1', labelId: 'lbl1' });
 
             const config = mockRequest.mock.calls[0][0];
             expect(config.url).toContain('remove-label');
             expect(config.json).toEqual({ label_id: 'lbl1' });
+        });
+
+        it('should throw when neither queueId nor queueName provided', async () => {
+            await expect(
+                client.removeLabel({ labelId: 'lbl1' }),
+            ).rejects.toThrow('queueId or queueName');
+        });
+
+        it('should throw when neither labelId nor labelName provided', async () => {
+            await expect(
+                client.removeLabel({ queueId: 'q1' }),
+            ).rejects.toThrow('labelId or labelName');
         });
     });
 
@@ -564,7 +723,7 @@ describe('AnnotationQueue', () => {
             const config = mockRequest.mock.calls[0][0];
             expect(config.method).toBe('GET');
             expect(config.url).toContain('export');
-            expect(config.params.format).toBe('json');
+            expect(config.params.export_format).toBe('json');
             expect(config.params.status).toBe('completed');
         });
 
@@ -574,7 +733,7 @@ describe('AnnotationQueue', () => {
             await client.export('q1');
 
             const config = mockRequest.mock.calls[0][0];
-            expect(config.params.format).toBe('json');
+            expect(config.params.export_format).toBe('json');
         });
 
         it('should export as CSV with responseType text', async () => {
@@ -584,7 +743,7 @@ describe('AnnotationQueue', () => {
             const result = await client.export('q1', { format: 'csv' });
 
             const config = mockRequest.mock.calls[0][0];
-            expect(config.params.format).toBe('csv');
+            expect(config.params.export_format).toBe('csv');
             expect(config.responseType).toBe('text');
             expect(result).toBe(csvData);
         });

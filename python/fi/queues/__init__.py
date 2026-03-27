@@ -1,3 +1,4 @@
+from fi.annotations.types import AnnotationLabel
 from fi.queues.client import AnnotationQueue
 from fi.queues.types import (
     QueueDetail,
@@ -13,6 +14,7 @@ from fi.queues.types import (
 
 __all__ = [
     "AnnotationQueue",
+    "AnnotationLabel",
     "QueueDetail",
     "QueueItem",
     "QueueProgress",
