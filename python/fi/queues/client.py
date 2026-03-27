@@ -868,6 +868,8 @@ class AnnotationQueue(APIKeyAuth):
         """
         if not label_id and not label_name:
             raise ValueError("Provide either label_id or label_name")
+        if value is None:
+            raise ValueError("value is required")
         resolved_label_id = label_id or self._get_label_id_from_name(label_name)
         body: Dict[str, Any] = {
             "source_type": source_type,
