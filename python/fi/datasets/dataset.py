@@ -548,25 +548,40 @@ class Dataset(APIKeyAuth):
             response_handler=EvalInfoResponseHandler,
         )
         eval_id = None
+        matched_eval = None
         if isinstance(all_evals, list):
             for ev in all_evals:
                 if ev.get("name", "").lower() == eval_template.lower():
-                    eval_id = ev.get("evalId") or ev.get("eval_id")
-                    break
-        if not eval_id:
+                    candidate_id = ev.get("evalId") if ev.get("evalId") is not None else ev.get("eval_id")
+                    if candidate_id is not None:
+                        eval_id = candidate_id
+                        matched_eval = ev
+                        break
+        if eval_id is None:
             available = sorted({ev.get("name", "") for ev in all_evals}) if isinstance(all_evals, list) else []
             raise DatasetValidationError(
                 f"Unknown template: '{eval_template}'. Available: {available}"
             )
 
-        url = f"{self._base_url}/sdk/api/v1/eval/{eval_id}/"
-        template_details = self.request_with_retry(
-            config=RequestConfig(method=HttpMethod.GET, url=url, timeout=DEFAULT_API_TIMEOUT),
-            response_handler=EvalInfoResponseHandler,
-        )
-
-        template_id = template_details["id"]
-        required_keys = template_details["config"]["required_keys"]
+        # Custom evals have eval_id=0; use the UUID from get-evals directly
+        # to avoid hitting /eval/0/ which may not resolve correctly.
+        is_custom_eval = eval_id == 0
+        if is_custom_eval and matched_eval:
+            template_id = matched_eval.get("id", None)
+            cfg = matched_eval.get("config") or {}
+            required_keys = cfg.get("requiredKeys") or cfg.get("required_keys") or []
+            if not template_id:
+                raise DatasetValidationError(
+                    f"Custom eval '{eval_template}' has no template UUID. Please check the eval configuration."
+                )
+        else:
+            url = f"{self._base_url}/sdk/api/v1/eval/{eval_id}/"
+            template_details = self.request_with_retry(
+                config=RequestConfig(method=HttpMethod.GET, url=url, timeout=DEFAULT_API_TIMEOUT),
+                response_handler=EvalInfoResponseHandler,
+            )
+            template_id = template_details["id"]
+            required_keys = template_details["config"]["required_keys"]
 
         mapping = {}
 

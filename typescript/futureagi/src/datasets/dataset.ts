@@ -607,23 +607,36 @@ export class Dataset extends APIKeyAuth {
             throw new DatasetValidationError(`Unknown or unsupported evaluation template: ${evalTemplate}`);
         }
 
-        const evalId = matchedListItem.eval_id || matchedListItem.evalId || matchedListItem.id;
-        if (!evalId) {
+        // Resolve eval_id — use evalId/eval_id first, fall back to id (UUID)
+        const candidateId = matchedListItem.eval_id ?? matchedListItem.evalId ?? matchedListItem.id;
+        if (candidateId === undefined || candidateId === null) {
             throw new DatasetError(`Failed to determine eval_id for template '${evalTemplate}'.`);
         }
 
-        // Now fetch detailed info for this template to obtain template_id & required_keys
-        const templateDetail = await this.request<any>(
-            {
-                method: HttpMethod.GET,
-                url: `${this._baseUrl}/${Routes.evaluate_template.replace('{eval_id}', evalId)}`,
-                timeout: DEFAULT_API_TIMEOUT,
-            },
-            EvalInfoResponseHandler
-        ) as Record<string, any>;
+        const isCustomEval = candidateId === 0;
+        let templateId: string;
+        let requiredKeys: string[];
 
-        const templateId = templateDetail.id;
-        const requiredKeys: string[] = templateDetail.config?.required_keys || [];
+        if (isCustomEval && matchedListItem.id) {
+            // Custom evals have evalId=0. Use UUID and config from get-evals directly
+            // instead of hitting /eval/0/ which won't resolve.
+            templateId = matchedListItem.id;
+            const cfg = matchedListItem.config || {};
+            requiredKeys = cfg.requiredKeys || cfg.required_keys || [];
+        } else {
+            // Built-in evals: fetch detailed info from /eval/{eval_id}/
+            const templateDetail = await this.request<any>(
+                {
+                    method: HttpMethod.GET,
+                    url: `${this._baseUrl}/${Routes.evaluate_template.replace('{eval_id}', String(candidateId))}`,
+                    timeout: DEFAULT_API_TIMEOUT,
+                },
+                EvalInfoResponseHandler
+            ) as Record<string, any>;
+
+            templateId = templateDetail.id;
+            requiredKeys = templateDetail.config?.required_keys || [];
+        }
 
         if (!templateId) {
             throw new DatasetError(`template_id not found for evaluation template '${evalTemplate}'.`);
