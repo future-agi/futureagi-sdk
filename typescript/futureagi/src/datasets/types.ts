@@ -44,7 +44,7 @@ export enum ModelTypes {
 
 // Utility functions for data types
 export const DataTypeUtils = {
-    getJavaScriptType(dataType: DataTypeChoices): string {
+    getJavaScriptType(data_type: DataTypeChoices): string {
         const typeMapping = {
             [DataTypeChoices.TEXT]: 'string',
             [DataTypeChoices.BOOLEAN]: 'boolean',
@@ -56,7 +56,7 @@ export const DataTypeUtils = {
             [DataTypeChoices.AUDIO]: 'string',
             [DataTypeChoices.DATETIME]: 'string',
         };
-        return typeMapping[dataType] || 'string';
+        return typeMapping[data_type] || 'string';
     },
 
     getSourceChoices(): Array<{ value: string; displayName: string }> {
@@ -74,27 +74,27 @@ export const DataTypeUtils = {
 export interface Column {
     id: string;
     name: string;
-    dataType: DataTypeChoices;
+    data_type: DataTypeChoices;
     source?: SourceChoices;
-    sourceId?: string;
+    source_id?: string;
     metadata?: Record<string, any>;
-    isFrozen?: boolean;
-    isVisible?: boolean;
-    evalTags?: string[];
-    averageScore?: number;
-    orderIndex?: number;
+    is_frozen?: boolean;
+    is_visible?: boolean;
+    eval_tags?: string[];
+    average_score?: number;
+    order_index?: number;
 }
 
 // Cell interface for dataset tables
 export interface Cell {
-    columnId?: string;
-    rowId?: string;
-    columnName?: string;
+    column_id?: string;
+    row_id?: string;
+    column_name?: string;
     value?: any;
-    valueInfos?: Array<Record<string, any>>;
+    value_infos?: Array<Record<string, any>>;
     metadata?: Record<string, any>;
     status?: string;
-    failureReason?: string;
+    failure_reason?: string;
 }
 
 // Row interface for dataset tables
@@ -108,8 +108,8 @@ export interface Row {
 export interface DatasetConfig {
     id?: string;
     name: string;
-    modelType?: ModelTypes.GENERATIVE_LLM;
-    columnOrder?: string[];
+    model_type?: ModelTypes.GENERATIVE_LLM;
+    column_order?: string[];
 }
 
 // Hugging Face dataset configuration
@@ -117,7 +117,7 @@ export interface HuggingfaceDatasetConfig {
     name: string;
     subset?: string;
     split?: string;
-    numRows?: number;
+    num_rows?: number;
 }
 
 // Dataset table interface
@@ -126,21 +126,21 @@ export interface DatasetTable {
     columns: Column[];
     rows: Row[];
     metadata?: Record<string, any>;
-    datasetConfig?: DatasetConfig;
+    dataset_config?: DatasetConfig;
 }
 
 // Column creation helper
 export function createColumn(options: {
     name: string;
-    dataType: DataTypeChoices;
+    data_type: DataTypeChoices;
     source?: SourceChoices;
-    sourceId?: string;
+    source_id?: string;
     metadata?: Record<string, any>;
-    isFrozen?: boolean;
-    isVisible?: boolean;
-    evalTags?: string[];
-    averageScore?: number;
-    orderIndex?: number;
+    is_frozen?: boolean;
+    is_visible?: boolean;
+    eval_tags?: string[];
+    average_score?: number;
+    order_index?: number;
 }): Column {
     if (!options.name?.trim()) {
         throw new Error("Column name cannot be empty");
@@ -152,42 +152,42 @@ export function createColumn(options: {
     return {
         id: uuidv4(),
         name: options.name.trim(),
-        dataType: options.dataType,
+        data_type: options.data_type,
         source: options.source || SourceChoices.OTHERS,
-        sourceId: options.sourceId,
+        source_id: options.source_id,
         metadata: options.metadata || {},
-        isFrozen: options.isFrozen || false,
-        isVisible: options.isVisible !== false,
-        evalTags: options.evalTags || [],
-        averageScore: options.averageScore,
-        orderIndex: options.orderIndex || 0,
+        is_frozen: options.is_frozen || false,
+        is_visible: options.is_visible !== false,
+        eval_tags: options.eval_tags || [],
+        average_score: options.average_score,
+        order_index: options.order_index || 0,
     };
 }
 
 // Cell creation helper
 export function createCell(options: {
-    columnId?: string;
-    rowId?: string;
-    columnName?: string;
+    column_id?: string;
+    row_id?: string;
+    column_name?: string;
     value?: any;
-    valueInfos?: Array<Record<string, any>>;
+    value_infos?: Array<Record<string, any>>;
     metadata?: Record<string, any>;
     status?: string;
-    failureReason?: string;
+    failure_reason?: string;
 }): Cell {
     if (options.value != null && String(options.value).length > 65535) {
         throw new Error("Cell value too long (max 65535 characters)");
     }
 
     return {
-        columnId: options.columnId,
-        rowId: options.rowId,
-        columnName: options.columnName,
+        column_id: options.column_id,
+        row_id: options.row_id,
+        column_name: options.column_name,
         value: options.value,
-        valueInfos: options.valueInfos || [],
+        value_infos: options.value_infos || [],
         metadata: options.metadata || {},
         status: options.status,
-        failureReason: options.failureReason,
+        failure_reason: options.failure_reason,
     };
 }
 
@@ -204,11 +204,11 @@ export function createRow(options: {
     }
 
     const rowId = uuidv4();
-    // Ensure each cell has rowId; generate columnId if missing
+    // Ensure each cell has row_id; generate column_id if missing
     const updatedCells = options.cells.map(cell => ({
         ...cell,
-        rowId: cell.rowId || rowId,
-        columnId: cell.columnId || uuidv4(),
+        row_id: cell.row_id || rowId,
+        column_id: cell.column_id || uuidv4(),
     }));
 
     return {
@@ -242,7 +242,7 @@ export const DatasetTableUtils = {
         // Add data rows
         for (const row of table.rows) {
             const rowData = table.columns.map(col => {
-                const cell = row.cells.find(c => c.columnId === col.id);
+                const cell = row.cells.find(c => c.column_id === col.id);
                 const value = cell?.value || '';
                 // Escape CSV values
                 const stringValue = String(value);
@@ -259,11 +259,11 @@ export const DatasetTableUtils = {
     /**
      * Convert value based on data type
      */
-    convertValue(value: any, dataType: DataTypeChoices): any {
+    convertValue(value: any, data_type: DataTypeChoices): any {
         if (value == null) return null;
 
         try {
-            switch (dataType) {
+            switch (data_type) {
                 case DataTypeChoices.BOOLEAN:
                     if (typeof value === 'boolean') return value;
                     return String(value).toLowerCase() === 'true';
@@ -284,7 +284,7 @@ export const DatasetTableUtils = {
                     return String(value);
             }
         } catch (error) {
-            console.warn(`Failed to convert value "${value}" to ${dataType}:`, error);
+            console.warn(`Failed to convert value "${value}" to ${data_type}:`, error);
             return String(value);
         }
     }
