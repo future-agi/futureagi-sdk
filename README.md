@@ -4,12 +4,12 @@
 
 # Future AGI SDK
 
-**The world's most accurate AI evaluation, observability and optimization platform**
+**The open-source SDK for AI evaluation, observability, and optimization**
 
 [![PyPI version](https://badge.fury.io/py/futureagi.svg)](https://pypi.org/project/futureagi/)
 [![Downloads](https://static.pepy.tech/badge/futureagi)](https://pepy.tech/project/futureagi)
 [![Python Support](https://img.shields.io/pypi/pyversions/futureagi.svg)](https://pypi.org/project/futureagi/)
-[![License](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE.md)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![GitHub Stars](https://img.shields.io/github/stars/future-agi/futureagi-sdk?style=social)](https://github.com/future-agi/futureagi-sdk)
 
 [📖 Docs](https://docs.futureagi.com) • [🌐 Website](https://www.futureagi.com) • [💬 Community](https://www.linkedin.com/company/futureagi) • [🎯 Dashboard](https://app.futureagi.com)
@@ -45,7 +45,7 @@
 
 ## 🚀 What is Future AGI?
 
-Future AGI empowers GenAI teams to build near-perfect AI applications through comprehensive evaluation, monitoring, and optimization. Our platform provides everything you need to develop, test, and deploy production-ready AI systems with confidence.
+Your agent passed every eval. Then it hallucinated a refund policy that doesn't exist. Future AGI gives you the tools to catch that — datasets, prompt versioning, knowledge bases, evaluations, and guardrails. One SDK, one feedback loop.
 
 ```bash
 # Get started in 30 seconds
@@ -58,14 +58,14 @@ export FI_SECRET_KEY="your_secret"
 
 ### ✨ Key Features
 
-- **🎯 World-Class Evaluations** — Industry-leading evaluation frameworks powered by our Critique AI agent
-- **⚡ Ultra-Fast Guardrails** — Real-time safety checks with sub-100ms latency
-- **📊 Dataset Management** — Programmatically create, update, and manage AI training datasets
-- **🎨 Prompt Workbench** — Version control, A/B testing, and deployment management for prompts
-- **📚 Knowledge Base** — Intelligent document management and retrieval for RAG applications
-- **📈 Advanced Analytics** — Deep insights into model performance and behavior
-- **🤖 Simulate your AI system** — Simulate your AI system with different scenarios and see how it performs
-- **Add Observability** — Add observability to your AI system to monitor its performance and behavior
+- **🎯 Evaluations** — 50+ metrics, LLM-as-judge, and custom rubrics powered by the Critique AI agent
+- **⚡ Guardrails** — Real-time safety checks with sub-100ms latency
+- **📊 Datasets** — Programmatically create, version, and manage training and test datasets
+- **🎨 Prompt Workbench** — Version control, A/B testing, and deployment labels for prompts
+- **📚 Knowledge Base** — Document management and retrieval for RAG applications
+- **📈 Analytics** — Model performance, token costs, and behavior insights
+- **🤖 Simulate** — Test your AI system against realistic scenarios before users hit it
+- **🔍 Observability** — OpenTelemetry-native tracing across 50+ frameworks
 
 
 ---
@@ -79,12 +79,12 @@ pip install futureagi
 
 ### TypeScript/JavaScript
 ```bash
-npm install @futureagi/sdk
+npm install @future-agi/sdk
 # or
-pnpm add @futureagi/sdk
+pnpm add @future-agi/sdk
 ```
 
-**Requirements:** Python >= 3.6 | Node.js >= 14
+**Requirements:** Python >= 3.10 | Node.js >= 14
 
 ---
 
@@ -152,6 +152,7 @@ rows = [
 dataset.add_evaluation(
     name="factual_accuracy",
     eval_template="is_factually_consistent",
+    model="gpt-4o-mini",
     required_keys_to_column_names={
         "input": "user_query",
         "output": "ai_response",
@@ -184,13 +185,13 @@ template = PromptTemplate(
 # Create and version the template
 client = Prompt(template)
 client.create()  # Create v1
-client.commit_current_version("Initial version", set_as_default=True)
+client.commit_current_version("Initial version", set_default=True)
 
 # Assign deployment labels
-client.labels().assign("Production", "v1")
+client.assign_label("Production", version="v1")
 
 # Compile with variables
-compiled = client.compile({"customer_name": "Bob", "issue_type": "refund"})
+compiled = client.compile(customer_name="Bob", issue_type="refund")
 print(compiled)
 # Output: [
 #   {"role": "system", "content": "You are a helpful customer support agent."},
@@ -205,19 +206,18 @@ import random
 from openai import OpenAI
 from fi.prompt import Prompt
 
-# Fetch different variants
+# Fetch different variants (returns Prompt instances)
 variant_a = Prompt.get_template_by_name("customer_support", label="variant-a")
 variant_b = Prompt.get_template_by_name("customer_support", label="variant-b")
 
 # Randomly select and use
 selected = random.choice([variant_a, variant_b])
-client = Prompt(selected)
-compiled = client.compile({"customer_name": "Alice", "issue_type": "refund"})
+compiled = selected.compile(customer_name="Alice", issue_type="refund")
 
 # Send to your LLM provider
 openai = OpenAI(api_key="your_openai_key")
 response = openai.chat.completions.create(model="gpt-4o", messages=compiled)
-print(f"Using variant: {selected.version}")
+print(f"Using variant: {selected.template.name}")
 print(f"Response: {response.choices[0].message.content}")
 ```
 
@@ -237,20 +237,20 @@ kb_client = KnowledgeBase(
 # Create a knowledge base with documents
 kb = kb_client.create_kb(
     name="product_docs",
-    file_paths=["manual.pdf", "faq.txt", "guide.md"]
+    file_paths=["manual.pdf", "faq.txt", "guide.docx"]
 )
 
 print(f"✓ Knowledge base created: {kb.kb.name}")
-print(f"  Files uploaded: {len(kb.kb.file_names)}")
+print(f"  Files uploaded: {len(kb.kb.files)}")
 
 # Update with more files
 updated_kb = kb_client.update_kb(
-    kb_id=kb.kb.id,
+    kb_name=kb.kb.name,
     file_paths=["updates.pdf"]
 )
 
 # Delete specific files
-kb_client.delete_files_from_kb(file_ids=["file_id_here"])
+kb_client.delete_files_from_kb(file_names=["updates.pdf"])
 
 # Clean up
 kb_client.delete_kb(kb_ids=[kb.kb.id])
@@ -289,13 +289,13 @@ kb_client.delete_kb(kb_ids=[kb.kb.id])
 Future AGI works seamlessly with your existing AI stack:
 
 **LLM Providers**  
-`OpenAI` • `Anthropic` • `Google Gemini` • `Azure OpenAI` • `AWS Bedrock` • `Cohere` • `Mistral` • `Ollama`
+`OpenAI` • `Anthropic` • `Google Gemini` • `Azure OpenAI` • `AWS Bedrock` • `Cohere` • `Mistral` • `Ollama` • `vLLM`
 
 **Frameworks**  
 `LangChain` • `LlamaIndex` • `CrewAI` • `AutoGen` • `Haystack` • `Semantic Kernel`
 
 **Vector Databases**  
-`Pinecone` • `Weaviate` • `Qdrant` • `Milvus` • `Chroma` • `FAISS` • `vLLM`
+`Pinecone` • `Weaviate` • `Qdrant` • `Milvus` • `Chroma` • `FAISS`
 
 **Observability**  
 `OpenTelemetry` • `Custom Logging` • `Trace Context Propagation`
@@ -317,7 +317,7 @@ Future AGI works seamlessly with your existing AI stack:
 | Language | Package | Status |
 |----------|---------|--------|
 | **Python** | `futureagi` | ✅ Full Support |
-| **TypeScript/JavaScript** | `@futureagi/sdk` | ✅ Full Support |
+| **TypeScript/JavaScript** | `@future-agi/sdk` | ✅ Full Support |
 | **REST API** | cURL/HTTP | ✅ Available |
 
 ---
@@ -397,9 +397,9 @@ echo $FI_SECRET_KEY
 
 Use prompt labels to manage different deployment environments:
 ```python
-client.labels().assign("Development", "v1")
-client.labels().assign("Staging", "v2")
-client.labels().assign("Production", "v3")
+client.assign_label("Development", version="v1")
+client.assign_label("Staging", version="v2")
+client.assign_label("Production", version="v3")
 ```
 </details>
 
@@ -421,28 +421,18 @@ All major providers: OpenAI, Anthropic, Google, Azure, AWS Bedrock, Cohere, Mist
 
 ## 📄 License
 
-This project is licensed under the BSD-3-Clause License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 ---
 
 <div align="center">
 
-## 🚀 Ready to Build Better AI?
+**Built with ❤️ by the [Future AGI](https://www.futureagi.com/) team and [contributors](https://github.com/future-agi/futureagi-sdk/graphs/contributors).**
 
-**[🎯 Get Free API Keys](https://app.futureagi.com/signup)** • **[📖 Read the Docs](https://docs.futureagi.com)** • **[💬 Join Community](https://www.linkedin.com/company/futureagi)**
-
----
-
-### ⭐ If you find Future AGI helpful, give us a star on GitHub!
+If Future AGI helps you ship better AI, a ⭐ helps more teams find us.
 
 [![Star History Chart](https://api.star-history.com/svg?repos=future-agi/futureagi-sdk&type=Date)](https://star-history.com/#future-agi/futureagi-sdk&Date)
 
----
-
-Made with ❤️ by the [Future AGI Team](https://www.futureagi.com)
-
-**[Website](https://www.futureagi.com)** • **[Documentation](https://docs.futureagi.com)** • **[Dashboard](https://app.futureagi.com)** • **[Blog](https://substack.com/@futureagi)** • **[Twitter](https://x.com/FutureAGI_)**
-
-© 2025 Future AGI. All rights reserved.
+[🌐 futureagi.com](https://futureagi.com) · [📖 docs.futureagi.com](https://docs.futureagi.com) · [☁️ app.futureagi.com](https://app.futureagi.com)
 
 </div>
