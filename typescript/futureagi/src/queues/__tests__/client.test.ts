@@ -507,7 +507,7 @@ describe('AnnotationQueue', () => {
     describe('getAnnotations', () => {
         it('should get annotations for an item', async () => {
             mockRequest.mockResolvedValueOnce([
-                { id: 's1', labelName: 'Q', value: 'good' },
+                { id: 's1', label_name: 'Q', value: 'good' },
             ]);
 
             const result = await client.getAnnotations('q1', 'item1');
@@ -636,7 +636,7 @@ describe('AnnotationQueue', () => {
     describe('getScores', () => {
         it('should get scores for a source', async () => {
             mockRequest.mockResolvedValueOnce([
-                { id: 's1', labelName: 'Sentiment', value: 'positive' },
+                { id: 's1', label_name: 'Sentiment', value: 'positive' },
             ]);
 
             const result = await client.getScores('trace', 't1');
@@ -663,8 +663,8 @@ describe('AnnotationQueue', () => {
     describe('getProgress', () => {
         it('should get queue progress', async () => {
             const progress = {
-                total: 100, pending: 30, inProgress: 20,
-                completed: 45, skipped: 5, progressPct: 45.0,
+                total: 100, pending: 30, in_progress: 20,
+                completed: 45, skipped: 5, progress_pct: 45.0,
             };
             mockRequest.mockResolvedValueOnce(progress);
 
@@ -682,8 +682,8 @@ describe('AnnotationQueue', () => {
         it('should get queue analytics', async () => {
             const analytics = {
                 throughput: [{ date: '2025-01-01', count: 10 }],
-                annotatorPerformance: [{ annotatorName: 'Alice', completed: 50 }],
-                labelDistribution: { positive: 30, negative: 20 },
+                annotator_performance: [{ annotator_name: 'Alice', completed: 50 }],
+                label_distribution: { positive: 30, negative: 20 },
                 total: 100,
             };
             mockRequest.mockResolvedValueOnce(analytics);
@@ -698,15 +698,15 @@ describe('AnnotationQueue', () => {
     describe('getAgreement', () => {
         it('should get agreement metrics', async () => {
             mockRequest.mockResolvedValueOnce({
-                overallAgreement: 85.5,
-                perLabel: [{ labelName: 'Sentiment', agreementPct: 90.0 }],
-                annotatorPairs: [],
+                overall_agreement: 85.5,
+                per_label: [{ label_name: 'Sentiment', agreement_pct: 90.0 }],
+                annotator_pairs: [],
             });
 
             const result = await client.getAgreement('q1');
 
-            expect(result.overallAgreement).toBe(85.5);
-            expect(result.perLabel).toHaveLength(1);
+            expect(result.overall_agreement).toBe(85.5);
+            expect(result.per_label).toHaveLength(1);
         });
     });
 
@@ -752,7 +752,7 @@ describe('AnnotationQueue', () => {
     describe('exportToDataset', () => {
         it('should export to a new dataset by name', async () => {
             mockRequest.mockResolvedValueOnce({
-                datasetId: 'd1', datasetName: 'Curated', rowsCreated: 42,
+                dataset_id: 'd1', dataset_name: 'Curated', rows_created: 42,
             });
 
             const result = await client.exportToDataset('q1', { datasetName: 'Curated' });
@@ -761,11 +761,11 @@ describe('AnnotationQueue', () => {
             expect(config.method).toBe('POST');
             expect(config.url).toContain('export-to-dataset');
             expect(config.json.dataset_name).toBe('Curated');
-            expect(result.rowsCreated).toBe(42);
+            expect(result.rows_created).toBe(42);
         });
 
         it('should export to existing dataset by ID', async () => {
-            mockRequest.mockResolvedValueOnce({ datasetId: 'd1', rowsCreated: 10 });
+            mockRequest.mockResolvedValueOnce({ dataset_id: 'd1', rows_created: 10 });
 
             await client.exportToDataset('q1', {
                 datasetId: 'd1',

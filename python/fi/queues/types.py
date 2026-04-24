@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 
 class QueueDetail(BaseModel):
@@ -13,14 +13,14 @@ class QueueDetail(BaseModel):
     description: Optional[str] = None
     instructions: Optional[str] = None
     status: Optional[str] = None
-    assignment_strategy: Optional[str] = Field(None, alias="assignmentStrategy")
-    annotations_required: Optional[int] = Field(None, alias="annotationsRequired")
-    reservation_timeout_minutes: Optional[int] = Field(None, alias="reservationTimeoutMinutes")
-    requires_review: Optional[bool] = Field(None, alias="requiresReview")
-    created_at: Optional[str] = Field(None, alias="createdAt")
-    updated_at: Optional[str] = Field(None, alias="updatedAt")
-    item_count: Optional[int] = Field(None, alias="itemCount")
-    completed_count: Optional[int] = Field(None, alias="completedCount")
+    assignment_strategy: Optional[str] = None
+    annotations_required: Optional[int] = None
+    reservation_timeout_minutes: Optional[int] = None
+    requires_review: Optional[bool] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+    item_count: Optional[int] = None
+    completed_count: Optional[int] = None
 
 
 class QueueItem(BaseModel):
@@ -29,12 +29,12 @@ class QueueItem(BaseModel):
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
     id: str
-    source_type: Optional[str] = Field(None, alias="sourceType")
-    source_id: Optional[str] = Field(None, alias="sourceId")
+    source_type: Optional[str] = None
+    source_id: Optional[str] = None
     status: Optional[str] = None
     order: Optional[int] = None
-    assigned_to: Optional[str] = Field(None, alias="assignedTo")
-    created_at: Optional[str] = Field(None, alias="createdAt")
+    assigned_to: Optional[str] = None
+    created_at: Optional[str] = None
 
 
 class QueueProgress(BaseModel):
@@ -44,11 +44,11 @@ class QueueProgress(BaseModel):
 
     total: int = 0
     pending: int = 0
-    in_progress: int = Field(0, alias="inProgress")
+    in_progress: int = 0
     completed: int = 0
     skipped: int = 0
-    progress_pct: Optional[float] = Field(None, alias="progressPct")
-    annotator_stats: Optional[List[Dict[str, Any]]] = Field(None, alias="annotatorStats")
+    progress_pct: Optional[float] = None
+    annotator_stats: Optional[List[Dict[str, Any]]] = None
 
 
 class QueueAnalytics(BaseModel):
@@ -57,9 +57,9 @@ class QueueAnalytics(BaseModel):
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
     throughput: Optional[Dict[str, Any]] = None
-    annotator_performance: Optional[List[Dict[str, Any]]] = Field(None, alias="annotatorPerformance")
-    label_distribution: Optional[Dict[str, Any]] = Field(None, alias="labelDistribution")
-    status_breakdown: Optional[Dict[str, int]] = Field(None, alias="statusBreakdown")
+    annotator_performance: Optional[List[Dict[str, Any]]] = None
+    label_distribution: Optional[Dict[str, Any]] = None
+    status_breakdown: Optional[Dict[str, int]] = None
     total: Optional[int] = None
 
 
@@ -68,9 +68,9 @@ class QueueAgreement(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
-    overall_agreement: Optional[float] = Field(None, alias="overallAgreement")
-    per_label: Optional[List[Dict[str, Any]]] = Field(None, alias="perLabel")
-    annotator_pairs: Optional[List[Dict[str, Any]]] = Field(None, alias="annotatorPairs")
+    overall_agreement: Optional[float] = None
+    per_label: Optional[List[Dict[str, Any]]] = None
+    annotator_pairs: Optional[List[Dict[str, Any]]] = None
 
 
 class Score(BaseModel):
@@ -79,16 +79,16 @@ class Score(BaseModel):
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
     id: Optional[str] = None
-    label_id: Optional[str] = Field(None, alias="labelId")
-    label_name: Optional[str] = Field(None, alias="labelName")
+    label_id: Optional[str] = None
+    label_name: Optional[str] = None
     value: Optional[Any] = None
-    score_source: Optional[str] = Field(None, alias="scoreSource")
+    score_source: Optional[str] = None
     notes: Optional[str] = None
-    annotator_id: Optional[str] = Field(None, alias="annotatorId")
-    annotator_name: Optional[str] = Field(None, alias="annotatorName")
-    source_type: Optional[str] = Field(None, alias="sourceType")
-    source_id: Optional[str] = Field(None, alias="sourceId")
-    created_at: Optional[str] = Field(None, alias="createdAt")
+    annotator_id: Optional[str] = None
+    annotator_name: Optional[str] = None
+    source_type: Optional[str] = None
+    source_id: Optional[str] = None
+    created_at: Optional[str] = None
 
 
 class AddItemsResponse(BaseModel):
@@ -106,9 +106,9 @@ class ExportToDatasetResponse(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
-    dataset_id: Optional[str] = Field(None, alias="datasetId")
-    dataset_name: Optional[str] = Field(None, alias="datasetName")
-    rows_created: Optional[int] = Field(None, alias="rowsCreated")
+    dataset_id: Optional[str] = None
+    dataset_name: Optional[str] = None
+    rows_created: Optional[int] = None
 
 
 class ImportAnnotationsResponse(BaseModel):
