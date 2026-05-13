@@ -349,12 +349,12 @@ export class Annotation extends APIKeyAuth {
 
     return {
       message: data.message || 'Bulk annotation completed',
-      annotationsCreated: data.annotationsCreated || 0,
-      annotationsUpdated: data.annotationsUpdated || 0,
-      notesCreated: data.notesCreated || 0,
-      succeededCount: data.succeededCount || 0,
-      errorsCount: data.errorsCount || 0,
-      warningsCount: data.warningsCount || 0,
+      annotations_created: data.annotations_created || 0,
+      annotations_updated: data.annotations_updated || 0,
+      notes_created: data.notes_created || 0,
+      succeeded_count: data.succeeded_count || 0,
+      errors_count: data.errors_count || 0,
+      warnings_count: data.warnings_count || 0,
       warnings: data.warnings,
       errors: data.errors,
     };

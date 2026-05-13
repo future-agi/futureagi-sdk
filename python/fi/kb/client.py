@@ -198,7 +198,7 @@ class KnowledgeBase(APIKeyAuth):
                 KBResponseHandler._handle_error(response)
                 parsed_result_data = KBResponseHandler._parse_success(response)
 
-                if 'notUploaded' in parsed_result_data and parsed_result_data['notUploaded']:
+                if 'not_uploaded' in parsed_result_data and parsed_result_data['not_uploaded']:
                     raise SDKException("Server reported that some files were not uploaded successfully.")
                 
                 if parsed_result_data:
@@ -416,13 +416,13 @@ class KnowledgeBase(APIKeyAuth):
                 KBResponseHandler._handle_error(response)
                 parsed_result_data = KBResponseHandler._parse_success(response)
 
-                if 'notUploaded' in parsed_result_data and parsed_result_data['notUploaded']:
+                if 'not_uploaded' in parsed_result_data and parsed_result_data['not_uploaded']:
                     raise SDKException("Server reported that some files were not uploaded during Knowledge Base creation.")
                 
                 self.kb = KnowledgeBaseConfig(
-                    id=parsed_result_data.get("kbId"),
-                    name=parsed_result_data.get("kbName"),
-                    files=parsed_result_data.get("fileIds", []),
+                    id=parsed_result_data.get("kb_id"),
+                    name=parsed_result_data.get("kb_name"),
+                    files=parsed_result_data.get("file_ids", []),
                 )
                 return self
                 
@@ -526,7 +526,7 @@ class KnowledgeBase(APIKeyAuth):
             ),
             response_handler=KBResponseHandler,
         )
-        data = response["result"].get("tableData")
+        data = response["result"].get("table_data")
         if not data:
             raise SDKException(f"Knowledge Base with name '{kb_name}' not found.")
         return KnowledgeBaseConfig(id=data[0].get("id"), name=data[0].get("name"))

@@ -39,12 +39,12 @@ describe('Annotation', () => {
 
       const mockResponse: BulkAnnotationResponse = {
         message: 'Bulk annotation completed',
-        annotationsCreated: 2,
-        annotationsUpdated: 0,
-        notesCreated: 1,
-        succeededCount: 3,
-        errorsCount: 0,
-        warningsCount: 0,
+        annotations_created: 2,
+        annotations_updated: 0,
+        notes_created: 1,
+        succeeded_count: 3,
+        errors_count: 0,
+        warnings_count: 0,
       };
 
       // Setup mocks
@@ -107,12 +107,12 @@ describe('Annotation', () => {
           data: {
             result: {
               message: 'Completed',
-              annotationsCreated: 2,
-              annotationsUpdated: 0,
-              notesCreated: 0,
-              succeededCount: 2,
-              errorsCount: 0,
-              warningsCount: 0,
+              annotations_created: 2,
+              annotations_updated: 0,
+              notes_created: 0,
+              succeeded_count: 2,
+              errors_count: 0,
+              warnings_count: 0,
             },
           },
         });
@@ -132,7 +132,7 @@ describe('Annotation', () => {
         projectName: 'Test Project',
       });
 
-      expect(result.annotationsCreated).toBe(2);
+      expect(result.annotations_created).toBe(2);
       
       // Verify backend format
       const finalCall = mockRequest.mock.calls[3];
@@ -158,12 +158,12 @@ describe('Annotation', () => {
         .mockResolvedValueOnce({
           data: {
             message: 'Success',
-            annotationsCreated: 5,
-            annotationsUpdated: 0,
-            notesCreated: 0,
-            succeededCount: 5,
-            errorsCount: 0,
-            warningsCount: 0,
+            annotations_created: 5,
+            annotations_updated: 0,
+            notes_created: 0,
+            succeeded_count: 5,
+            errors_count: 0,
+            warnings_count: 0,
           },
         });
 

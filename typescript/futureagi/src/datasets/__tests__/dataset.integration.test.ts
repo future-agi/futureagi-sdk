@@ -51,8 +51,8 @@ describeIf(areEnvVarsSet)('Dataset Integration Tests', () => {
 
     test('should add columns to the dataset', async () => {
         const columns = [
-            createColumn({ name: 'question', dataType: DataTypeChoices.TEXT }),
-            createColumn({ name: 'answer', dataType: DataTypeChoices.TEXT }),
+            createColumn({ name: 'question', data_type: DataTypeChoices.TEXT }),
+            createColumn({ name: 'answer', data_type: DataTypeChoices.TEXT }),
         ];
 
         await dataset.addColumns(columns);
@@ -73,8 +73,8 @@ describeIf(areEnvVarsSet)('Dataset Integration Tests', () => {
         const rows = [
             createRow({
                 cells: [
-                    createCell({ columnId: questionColId, rowId: 'row-1', value: 'What is FutureAGI?' }),
-                    createCell({ columnId: answerColId, rowId: 'row-1', value: 'An AI evaluation platform.' }),
+                    createCell({ column_id: questionColId, row_id: 'row-1', value: 'What is FutureAGI?' }),
+                    createCell({ column_id: answerColId, row_id: 'row-1', value: 'An AI evaluation platform.' }),
                 ],
             }),
         ];

@@ -103,9 +103,9 @@ export class DatasetResponseHandler extends ResponseHandler {
             }
             
             return {
-                id: datasets[0].datasetId,
+                id: datasets[0].dataset_id,
                 name: datasets[0].name,
-                modelType: datasets[0].modelType,
+                model_type: datasets[0].model_type,
             };
         }
 
@@ -113,34 +113,34 @@ export class DatasetResponseHandler extends ResponseHandler {
             const id = url.split('/').slice(-3, -2)[0];
             const result = data.result;
             
-            const columns: Column[] = result.columnConfig.map((col: any) => ({
+            const columns: Column[] = result.column_config.map((col: any) => ({
                 id: col.id,
                 name: col.name,
-                dataType: col.dataType,
-                source: col.originType,
-                sourceId: col.sourceId,
-                isFrozen: col.isFrozen?.isFrozen || false,
-                isVisible: col.isVisible,
-                evalTags: col.evalTag || [],
-                averageScore: col.averageScore,
-                orderIndex: col.orderIndex,
+                data_type: col.data_type,
+                source: col.origin_type,
+                source_id: col.source_id,
+                is_frozen: col.is_frozen?.is_frozen || false,
+                is_visible: col.is_visible,
+                eval_tags: col.eval_tag || [],
+                average_score: col.average_score,
+                order_index: col.order_index,
             }));
 
             const rows: Row[] = result.table.map((row: any) => {
                 const cells: Cell[] = [];
-                const rowId = row.rowId;
+                const rowId = row.row_id;
                 const order = row.order;
-                
+
                 Object.entries(row).forEach(([columnId, value]: [string, any]) => {
-                    if (columnId !== 'rowId' && columnId !== 'order') {
+                    if (columnId !== 'row_id' && columnId !== 'order') {
                         cells.push(createCell({
-                            columnId,
-                            rowId,
-                            value: value?.cellValue,
-                            valueInfos: value?.valueInfos ? [value.valueInfos] : [],
+                            column_id: columnId,
+                            row_id: rowId,
+                            value: value?.cell_value,
+                            value_infos: value?.value_infos ? [value.value_infos] : [],
                             metadata: value?.metadata,
                             status: value?.status,
-                            failureReason: value?.failureReason,
+                            failure_reason: value?.failure_reason,
                         }));
                     }
                 });
@@ -160,9 +160,9 @@ export class DatasetResponseHandler extends ResponseHandler {
             url.includes(Routes.dataset_local) || 
             url.includes(Routes.dataset_huggingface)) {
             return {
-                id: data.result.datasetId,
-                name: data.result.datasetName,
-                modelType: data.result.datasetModelType,
+                id: data.result.dataset_id,
+                name: data.result.dataset_name,
+                model_type: data.result.dataset_model_type,
             };
         }
 
@@ -243,7 +243,7 @@ export class Dataset extends APIKeyAuth {
             ...this._datasetConfig,
             id: responseConfig.id,
             name: responseConfig.name,
-            modelType: responseConfig.modelType,
+            model_type: responseConfig.model_type,
         };
         
         return this;
@@ -294,15 +294,15 @@ export class Dataset extends APIKeyAuth {
                 // Create column from partial data
                 return createColumn({
                     name: col.name || '',
-                    dataType: col.dataType || DataTypeChoices.TEXT,
+                    data_type: col.data_type || DataTypeChoices.TEXT,
                     source: col.source,
-                    sourceId: col.sourceId,
+                    source_id: col.source_id,
                     metadata: col.metadata,
-                    isFrozen: col.isFrozen,
-                    isVisible: col.isVisible,
-                    evalTags: col.evalTags,
-                    averageScore: col.averageScore,
-                    orderIndex: col.orderIndex,
+                    is_frozen: col.is_frozen,
+                    is_visible: col.is_visible,
+                    eval_tags: col.eval_tags,
+                    average_score: col.average_score,
+                    order_index: col.order_index,
                 });
             }
         });
@@ -326,18 +326,18 @@ export class Dataset extends APIKeyAuth {
                 return row as Row;
             } else {
                 // Create row from partial data
-                const cells = row.cells?.map(cell => 
-                    'columnId' in cell && cell.columnId ? 
-                    cell as Cell : 
+                const cells = row.cells?.map(cell =>
+                    'column_id' in cell && cell.column_id ?
+                    cell as Cell :
                     createCell({
-                        columnId: cell.columnId || '',
-                        rowId: row.id || uuidv4(),
-                        columnName: cell.columnName,
+                        column_id: cell.column_id || '',
+                        row_id: row.id || uuidv4(),
+                        column_name: cell.column_name,
                         value: cell.value,
-                        valueInfos: cell.valueInfos,
+                        value_infos: cell.value_infos,
                         metadata: cell.metadata,
                         status: cell.status,
-                        failureReason: cell.failureReason,
+                        failure_reason: cell.failure_reason,
                     })
                 ) || [];
 
@@ -607,8 +607,8 @@ export class Dataset extends APIKeyAuth {
             throw new DatasetValidationError(`Unknown or unsupported evaluation template: ${evalTemplate}`);
         }
 
-        // Resolve eval_id — use evalId/eval_id first, fall back to id (UUID)
-        const candidateId = matchedListItem.eval_id ?? matchedListItem.evalId ?? matchedListItem.id;
+        // Resolve eval_id — use eval_id first, fall back to id (UUID)
+        const candidateId = matchedListItem.eval_id ?? matchedListItem.id;
         if (candidateId === undefined || candidateId === null) {
             throw new DatasetError(`Failed to determine eval_id for template '${evalTemplate}'.`);
         }
@@ -618,11 +618,11 @@ export class Dataset extends APIKeyAuth {
         let requiredKeys: string[];
 
         if (isCustomEval && matchedListItem.id) {
-            // Custom evals have evalId=0. Use UUID and config from get-evals directly
+            // Custom evals have eval_id=0. Use UUID and config from get-evals directly
             // instead of hitting /eval/0/ which won't resolve.
             templateId = matchedListItem.id;
             const cfg = matchedListItem.config || {};
-            requiredKeys = cfg.requiredKeys || cfg.required_keys || [];
+            requiredKeys = cfg.required_keys || [];
         } else {
             // Built-in evals: fetch detailed info from /eval/{eval_id}/
             const templateDetail = await this.request<any>(
@@ -664,11 +664,11 @@ export class Dataset extends APIKeyAuth {
             template_id: templateId,
             run,
             name,
-            saveAsTemplate,
+            save_as_template: saveAsTemplate,
             config: {
                 mapping,
                 config: config || {},
-                reasonColumn: reasonColumn,
+                reason_column: reasonColumn,
             },
         };
 
@@ -798,7 +798,7 @@ export class Dataset extends APIKeyAuth {
                 url,
                 json: {
                     new_dataset_name: config.name,
-                    model_type: config.modelType,
+                    model_type: config.model_type,
                 },
                 timeout: DEFAULT_API_TIMEOUT,
             },
@@ -818,7 +818,7 @@ export class Dataset extends APIKeyAuth {
         const formData = new FormData();
         formData.append('file', fs.createReadStream(filePath));
         formData.append('new_dataset_name', config.name);
-        formData.append('model_type', config.modelType);
+        formData.append('model_type', config.model_type);
 
         const response = await this.request<DatasetConfig>(
             {
@@ -845,11 +845,11 @@ export class Dataset extends APIKeyAuth {
                 url,
                 json: {
                     new_dataset_name: config.name,
-                    model_type: config.modelType,
+                    model_type: config.model_type,
                     huggingface_dataset_name: hfConfig.name,
                     huggingface_dataset_config: hfConfig.subset,
                     huggingface_dataset_split: hfConfig.split,
-                    num_rows: hfConfig.numRows,
+                    num_rows: hfConfig.num_rows,
                 },
                 timeout: DEFAULT_API_TIMEOUT,
             },
@@ -1027,7 +1027,7 @@ export class Dataset extends APIKeyAuth {
                 // Create new dataset then return instance
                 const dsConfig: DatasetConfig = {
                     name: datasetName,
-                    modelType: ModelTypes.GENERATIVE_LLM,
+                    model_type: ModelTypes.GENERATIVE_LLM,
                 } as DatasetConfig;
 
                 const instance = new Dataset({ ...authOpts, datasetConfig: dsConfig });

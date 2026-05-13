@@ -194,9 +194,9 @@ export class KnowledgeBase extends APIKeyAuth {
             } as RequestConfig, KBResponseHandler) as KnowledgeBaseUpdateResponse;
 
             // Check if server reported any files that failed to upload
-            if (response.notUploaded && response.notUploaded.length > 0) {
+            if (response.not_uploaded && response.not_uploaded.length > 0) {
                 throw new SDKException(
-                    `Server reported that some files were not uploaded successfully: ${response.notUploaded.join(', ')}`
+                    `Server reported that some files were not uploaded successfully: ${response.not_uploaded.join(', ')}`
                 );
             }
 
@@ -384,16 +384,16 @@ export class KnowledgeBase extends APIKeyAuth {
             } as RequestConfig, KBResponseHandler) as KnowledgeBaseCreateResponse;
 
             // Check if server reported any files that failed to upload during creation
-            if (response.notUploaded && response.notUploaded.length > 0) {
+            if (response.not_uploaded && response.not_uploaded.length > 0) {
                 throw new SDKException(
-                    `Server reported that some files were not uploaded during Knowledge Base creation: ${response.notUploaded.join(', ')}`
+                    `Server reported that some files were not uploaded during Knowledge Base creation: ${response.not_uploaded.join(', ')}`
                 );
             }
 
             this.kb = {
-                id: response.kbId,
-                name: response.kbName,
-                files: response.fileIds || []
+                id: response.kb_id,
+                name: response.kb_name,
+                files: response.file_ids || []
             };
 
             return this;
@@ -422,7 +422,7 @@ export class KnowledgeBase extends APIKeyAuth {
                 params
             } as RequestConfig, KBResponseHandler) as KnowledgeBaseListResponse;
 
-            return response.result.tableData.map(item => ({
+            return response.result.table_data.map(item => ({
                 id: item.id,
                 name: item.name,
                 status: item.status,
@@ -450,7 +450,7 @@ export class KnowledgeBase extends APIKeyAuth {
             params: { search: kbName }
         } as RequestConfig, KBResponseHandler) as KnowledgeBaseListResponse;
 
-        const data = response.result.tableData;
+        const data = response.result.table_data;
         if (!data || data.length === 0) {
             throw new SDKException(`Knowledge Base with name '${kbName}' not found.`);
         }

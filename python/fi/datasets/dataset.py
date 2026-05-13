@@ -77,13 +77,22 @@ class LRUCache:
 class DatasetResponseHandler(ResponseHandler[DatasetConfig, DatasetTable]):
     """Handles responses for dataset requests"""
 
+    @staticmethod
+    def _get(data: Dict[str, Any], *keys: str) -> Any:
+        """Get the first matching key from data dict (supports multiple key formats)."""
+        for key in keys:
+            if key in data:
+                return data[key]
+        return None
+
     @classmethod
     def _parse_dataset_creation(cls, data: Dict[str, Any]) -> DatasetConfig:
         """Parses the response from dataset creation endpoints."""
+        result = data["result"]
         return DatasetConfig(
-            id=data["result"]["datasetId"],
-            name=data["result"]["datasetName"],
-            model_type=data["result"]["datasetModelType"],
+            id=cls._get(result, "dataset_id", "datasetId"),
+            name=cls._get(result, "dataset_name", "datasetName"),
+            model_type=cls._get(result, "dataset_model_type", "datasetModelType"),
         )
 
     @classmethod
@@ -94,10 +103,11 @@ class DatasetResponseHandler(ResponseHandler[DatasetConfig, DatasetTable]):
             raise DatasetNotFoundError("No dataset found matching the criteria.")
         if len(datasets) > 1:
             raise ValueError("Multiple datasets found. Please specify a dataset name.")
+        dataset = datasets[0]
         return DatasetConfig(
-            id=datasets[0]["datasetId"],
-            name=datasets[0]["name"],
-            model_type=datasets[0]["modelType"],
+            id=cls._get(dataset, "dataset_id", "datasetId"),
+            name=dataset["name"],
+            model_type=cls._get(dataset, "model_type", "modelType"),
         )
 
     @classmethod
@@ -111,48 +121,53 @@ class DatasetResponseHandler(ResponseHandler[DatasetConfig, DatasetTable]):
         except (ValueError, IndexError):
             raise DatasetError(f"Could not parse dataset ID from URL: {response.url}")
 
-        columns = [
-            Column(
-                id=column["id"],
-                name=column["name"],
-                data_type=column["dataType"],
-                source=column["originType"],
-                source_id=column["sourceId"],
-                is_frozen=(
-                    column["isFrozen"]["isFrozen"]
-                    if column["isFrozen"] is not None
-                    else False
-                ),
-                is_visible=column["isVisible"],
-                eval_tags=column["evalTag"],
-                average_score=column["averageScore"],
-                order_index=column["orderIndex"],
+        result = data["result"]
+        columns = []
+        for column in cls._get(result, "column_config", "columnConfig") or []:
+            is_frozen = cls._get(column, "is_frozen", "isFrozen")
+            columns.append(
+                Column(
+                    id=column["id"],
+                    name=column["name"],
+                    data_type=cls._get(column, "data_type", "dataType"),
+                    source=cls._get(column, "origin_type", "originType"),
+                    source_id=cls._get(column, "source_id", "sourceId"),
+                    is_frozen=(
+                        cls._get(is_frozen, "is_frozen", "isFrozen")
+                        if isinstance(is_frozen, dict)
+                        else bool(is_frozen)
+                    ),
+                    is_visible=cls._get(column, "is_visible", "isVisible"),
+                    eval_tags=cls._get(column, "eval_tag", "evalTag") or [],
+                    average_score=cls._get(column, "average_score", "averageScore"),
+                    order_index=cls._get(column, "order_index", "orderIndex") or 0,
+                )
             )
-            for column in data["result"]["columnConfig"]
-        ]
         rows = []
-        for row in data["result"]["table"]:
+        for row in result["table"]:
             cells = []
-            row_id = row.pop("rowId")
-            order = row.pop("order")
+            row_id = cls._get(row, "row_id", "rowId")
+            order = row.pop("order", 0)
             for column_id, value in row.items():
+                if column_id in {"row_id", "rowId"}:
+                    continue
                 cells.append(
                     Cell(
                         column_id=column_id,
                         row_id=row_id,
-                        value=value.get("cellValue"),
+                        value=cls._get(value, "cell_value", "cellValue"),
                         value_infos=(
-                            [value.get("valueInfos")]
-                            if value.get("valueInfos")
+                            [cls._get(value, "value_infos", "valueInfos")]
+                            if cls._get(value, "value_infos", "valueInfos")
                             else None
                         ),
                         metadata=value.get("metadata"),
                         status=value.get("status"),
-                        failure_reason=value.get("failureReason"),
+                        failure_reason=cls._get(value, "failure_reason", "failureReason"),
                     )
                 )
             rows.append(Row(id=row_id, order=order, cells=cells))
-        metadata = data["result"]["metadata"]
+        metadata = result.get("metadata", {})
         return DatasetTable(id=dataset_id, columns=columns, rows=rows, metadata=metadata)
 
     @classmethod
@@ -552,7 +567,7 @@ class Dataset(APIKeyAuth):
         if isinstance(all_evals, list):
             for ev in all_evals:
                 if ev.get("name", "").lower() == eval_template.lower():
-                    candidate_id = ev.get("evalId") if ev.get("evalId") is not None else ev.get("eval_id")
+                    candidate_id = ev.get("eval_id")
                     if candidate_id is not None:
                         eval_id = candidate_id
                         matched_eval = ev
@@ -569,7 +584,7 @@ class Dataset(APIKeyAuth):
         if is_custom_eval and matched_eval:
             template_id = matched_eval.get("id", None)
             cfg = matched_eval.get("config") or {}
-            required_keys = cfg.get("requiredKeys") or cfg.get("required_keys") or []
+            required_keys = cfg.get("required_keys") or []
             if not template_id:
                 raise DatasetValidationError(
                     f"Custom eval '{eval_template}' has no template UUID. Please check the eval configuration."
@@ -602,11 +617,11 @@ class Dataset(APIKeyAuth):
             "template_id": template_id,
             "run": run,
             "name": name,
-            "saveAsTemplate": save_as_template,
+            "save_as_template": save_as_template,
             "config": {
                 "mapping": mapping,
                 "config": config or {},
-                "reasonColumn": reason_column,
+                "reason_column": reason_column,
             },
         }
 
@@ -857,9 +872,12 @@ class Dataset(APIKeyAuth):
                 )
                 dataset_table.to_file(file_path)
                 params["current_page_index"] += 1
+                total_pages = (
+                    dataset_table.metadata.get("total_pages")
+                    or dataset_table.metadata.get("totalPages")
+                )
                 if (
-                    dataset_table.metadata.get("totalPages")
-                    == params["current_page_index"]
+                    total_pages == params["current_page_index"]
                 ):
                     pbar.update(1)
                     break

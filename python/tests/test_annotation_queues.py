@@ -142,7 +142,7 @@ class TestResponseHandlers:
 
     def test_item_list_handler(self):
         resp = _mock_response(_wrapped({"results": [
-            {"id": "i1", "sourceType": "trace", "sourceId": "t1", "status": "pending"},
+            {"id": "i1", "source_type": "trace", "source_id": "t1", "status": "pending"},
         ]}))
         result = _ItemListResponseHandler.parse(resp)
         assert len(result) == 1
@@ -151,7 +151,7 @@ class TestResponseHandlers:
 
     def test_score_list_handler(self):
         resp = _mock_response(_wrapped([
-            {"id": "s1", "labelName": "Sentiment", "value": "positive", "scoreSource": "human"},
+            {"id": "s1", "label_name": "Sentiment", "value": "positive", "score_source": "human"},
         ]))
         result = _ScoreListResponseHandler.parse(resp)
         assert len(result) == 1
@@ -161,7 +161,7 @@ class TestResponseHandlers:
 
     def test_score_response_handler(self):
         resp = _mock_response(_wrapped({
-            "id": "s1", "labelName": "Quality", "value": 4.5, "scoreSource": "api",
+            "id": "s1", "label_name": "Quality", "value": 4.5, "score_source": "api",
         }))
         result = _ScoreResponseHandler.parse(resp)
         assert isinstance(result, Score)
@@ -546,8 +546,8 @@ class TestAnalytics:
 
     def test_get_progress(self, client, mock_request):
         mock_request.return_value = {
-            "total": 100, "pending": 30, "inProgress": 20,
-            "completed": 45, "skipped": 5, "progressPct": 45.0,
+            "total": 100, "pending": 30, "in_progress": 20,
+            "completed": 45, "skipped": 5, "progress_pct": 45.0,
         }
         result = client.get_progress("q1")
         config = mock_request.call_args[0][0]
@@ -561,23 +561,23 @@ class TestAnalytics:
 
     def test_get_analytics(self, client, mock_request):
         mock_request.return_value = {
-            "throughput": [{"date": "2025-01-01", "count": 10}],
-            "annotatorPerformance": [{"annotatorName": "Alice", "completed": 50}],
-            "labelDistribution": {"positive": 30, "negative": 20},
-            "statusBreakdown": {"completed": 45, "pending": 30},
+            "throughput": {"2025-01-01": 10},
+            "annotator_performance": [{"annotator_name": "Alice", "completed": 50}],
+            "label_distribution": {"positive": 30, "negative": 20},
+            "status_breakdown": {"completed": 45, "pending": 30},
             "total": 100,
         }
         result = client.get_analytics("q1")
         assert isinstance(result, QueueAnalytics)
         assert result.total == 100
-        assert len(result.throughput) == 1
+        assert result.throughput["2025-01-01"] == 10
         assert result.label_distribution["positive"] == 30
 
     def test_get_agreement(self, client, mock_request):
         mock_request.return_value = {
-            "overallAgreement": 85.5,
-            "perLabel": [{"labelName": "Sentiment", "agreementPct": 90.0, "cohensKappa": 0.82}],
-            "annotatorPairs": [],
+            "overall_agreement": 85.5,
+            "per_label": [{"label_name": "Sentiment", "agreement_pct": 90.0, "cohens_kappa": 0.82}],
+            "annotator_pairs": [],
         }
         result = client.get_agreement("q1")
         assert isinstance(result, QueueAgreement)
@@ -597,7 +597,7 @@ class TestExport:
         config = mock_request.call_args[0][0]
         assert config.method == HttpMethod.GET
         assert "export" in config.url
-        assert config.params["format"] == "json"
+        assert config.params["export_format"] == "json"
         assert config.params["status"] == "completed"
 
     def test_export_csv(self, client, mock_request):
@@ -608,7 +608,7 @@ class TestExport:
         assert result == csv_text
 
     def test_export_to_dataset_with_name(self, client, mock_request):
-        mock_request.return_value = {"datasetId": "d1", "datasetName": "Curated", "rowsCreated": 42}
+        mock_request.return_value = {"dataset_id": "d1", "dataset_name": "Curated", "rows_created": 42}
         result = client.export_to_dataset("q1", dataset_name="Curated")
         config = mock_request.call_args[0][0]
         assert config.method == HttpMethod.POST
@@ -618,7 +618,7 @@ class TestExport:
         assert result.rows_created == 42
 
     def test_export_to_dataset_with_id(self, client, mock_request):
-        mock_request.return_value = {"datasetId": "d1", "rowsCreated": 10}
+        mock_request.return_value = {"dataset_id": "d1", "rows_created": 10}
         client.export_to_dataset("q1", dataset_id="d1", status_filter="completed")
         config = mock_request.call_args[0][0]
         assert config.json["dataset_id"] == "d1"

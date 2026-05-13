@@ -46,9 +46,9 @@ describe('KnowledgeBase SDK – happy path', () => {
                 case HttpMethod.POST: {
                     // createKb
                     return {
-                        kbId: KB_ID,
-                        kbName: TEST_KB_NAME,
-                        fileIds: ['file1', 'file3'],
+                        kb_id: KB_ID,
+                        kb_name: TEST_KB_NAME,
+                        file_ids: ['file1', 'file3'],
                     };
                 }
                 case HttpMethod.PATCH: {
@@ -67,7 +67,7 @@ describe('KnowledgeBase SDK – happy path', () => {
                     // listKbs / getKbFromName
                     return {
                         result: {
-                            tableData: [
+                            table_data: [
                                 { id: KB_ID, name: TEST_KB_NAME, files: ['file1', 'file3'] },
                             ],
                         },
