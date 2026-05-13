@@ -259,11 +259,11 @@ export const DatasetTableUtils = {
     /**
      * Convert value based on data type
      */
-    convertValue(value: any, data_type: DataTypeChoices): any {
+    convertValue(value: any, dataType: DataTypeChoices): any {
         if (value == null) return null;
 
         try {
-            switch (data_type) {
+            switch (dataType) {
                 case DataTypeChoices.BOOLEAN:
                     if (typeof value === 'boolean') return value;
                     return String(value).toLowerCase() === 'true';
@@ -284,7 +284,7 @@ export const DatasetTableUtils = {
                     return String(value);
             }
         } catch (error) {
-            console.warn(`Failed to convert value "${value}" to ${data_type}:`, error);
+            console.warn(`Failed to convert value "${value}" to ${dataType}:`, error);
             return String(value);
         }
     }

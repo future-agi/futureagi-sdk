@@ -77,13 +77,22 @@ class LRUCache:
 class DatasetResponseHandler(ResponseHandler[DatasetConfig, DatasetTable]):
     """Handles responses for dataset requests"""
 
+    @staticmethod
+    def _get(data: Dict[str, Any], *keys: str) -> Any:
+        """Get the first matching key from data dict (supports multiple key formats)."""
+        for key in keys:
+            if key in data:
+                return data[key]
+        return None
+
     @classmethod
     def _parse_dataset_creation(cls, data: Dict[str, Any]) -> DatasetConfig:
         """Parses the response from dataset creation endpoints."""
+        result = data["result"]
         return DatasetConfig(
-            id=data["result"]["dataset_id"],
-            name=data["result"]["dataset_name"],
-            model_type=data["result"]["dataset_model_type"],
+            id=cls._get(result, "dataset_id", "datasetId"),
+            name=cls._get(result, "dataset_name", "datasetName"),
+            model_type=cls._get(result, "dataset_model_type", "datasetModelType"),
         )
 
     @classmethod
@@ -94,10 +103,11 @@ class DatasetResponseHandler(ResponseHandler[DatasetConfig, DatasetTable]):
             raise DatasetNotFoundError("No dataset found matching the criteria.")
         if len(datasets) > 1:
             raise ValueError("Multiple datasets found. Please specify a dataset name.")
+        dataset = datasets[0]
         return DatasetConfig(
-            id=datasets[0]["dataset_id"],
-            name=datasets[0]["name"],
-            model_type=datasets[0]["model_type"],
+            id=cls._get(dataset, "dataset_id", "datasetId"),
+            name=dataset["name"],
+            model_type=cls._get(dataset, "model_type", "modelType"),
         )
 
     @classmethod
@@ -111,48 +121,53 @@ class DatasetResponseHandler(ResponseHandler[DatasetConfig, DatasetTable]):
         except (ValueError, IndexError):
             raise DatasetError(f"Could not parse dataset ID from URL: {response.url}")
 
-        columns = [
-            Column(
-                id=column["id"],
-                name=column["name"],
-                data_type=column["data_type"],
-                source=column["origin_type"],
-                source_id=column["source_id"],
-                is_frozen=(
-                    column["is_frozen"]["is_frozen"]
-                    if column["is_frozen"] is not None
-                    else False
-                ),
-                is_visible=column["is_visible"],
-                eval_tags=column["eval_tag"],
-                average_score=column["average_score"],
-                order_index=column["order_index"],
+        result = data["result"]
+        columns = []
+        for column in cls._get(result, "column_config", "columnConfig") or []:
+            is_frozen = cls._get(column, "is_frozen", "isFrozen")
+            columns.append(
+                Column(
+                    id=column["id"],
+                    name=column["name"],
+                    data_type=cls._get(column, "data_type", "dataType"),
+                    source=cls._get(column, "origin_type", "originType"),
+                    source_id=cls._get(column, "source_id", "sourceId"),
+                    is_frozen=(
+                        cls._get(is_frozen, "is_frozen", "isFrozen")
+                        if isinstance(is_frozen, dict)
+                        else bool(is_frozen)
+                    ),
+                    is_visible=cls._get(column, "is_visible", "isVisible"),
+                    eval_tags=cls._get(column, "eval_tag", "evalTag") or [],
+                    average_score=cls._get(column, "average_score", "averageScore"),
+                    order_index=cls._get(column, "order_index", "orderIndex") or 0,
+                )
             )
-            for column in data["result"]["column_config"]
-        ]
         rows = []
-        for row in data["result"]["table"]:
+        for row in result["table"]:
             cells = []
-            row_id = row.pop("row_id")
-            order = row.pop("order")
+            row_id = cls._get(row, "row_id", "rowId")
+            order = row.pop("order", 0)
             for column_id, value in row.items():
+                if column_id in {"row_id", "rowId"}:
+                    continue
                 cells.append(
                     Cell(
                         column_id=column_id,
                         row_id=row_id,
-                        value=value.get("cell_value"),
+                        value=cls._get(value, "cell_value", "cellValue"),
                         value_infos=(
-                            [value.get("value_infos")]
-                            if value.get("value_infos")
+                            [cls._get(value, "value_infos", "valueInfos")]
+                            if cls._get(value, "value_infos", "valueInfos")
                             else None
                         ),
                         metadata=value.get("metadata"),
                         status=value.get("status"),
-                        failure_reason=value.get("failure_reason"),
+                        failure_reason=cls._get(value, "failure_reason", "failureReason"),
                     )
                 )
             rows.append(Row(id=row_id, order=order, cells=cells))
-        metadata = data["result"]["metadata"]
+        metadata = result.get("metadata", {})
         return DatasetTable(id=dataset_id, columns=columns, rows=rows, metadata=metadata)
 
     @classmethod
@@ -857,9 +872,12 @@ class Dataset(APIKeyAuth):
                 )
                 dataset_table.to_file(file_path)
                 params["current_page_index"] += 1
-                if (
+                total_pages = (
                     dataset_table.metadata.get("total_pages")
-                    == params["current_page_index"]
+                    or dataset_table.metadata.get("totalPages")
+                )
+                if (
+                    total_pages == params["current_page_index"]
                 ):
                     pbar.update(1)
                     break

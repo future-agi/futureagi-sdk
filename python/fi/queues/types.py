@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict
 class QueueDetail(BaseModel):
     """Annotation queue as returned by the API."""
 
-    model_config = ConfigDict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(extra="allow")
 
     id: str
     name: str
@@ -26,7 +26,7 @@ class QueueDetail(BaseModel):
 class QueueItem(BaseModel):
     """A single item in an annotation queue."""
 
-    model_config = ConfigDict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(extra="allow")
 
     id: str
     source_type: Optional[str] = None
@@ -40,7 +40,7 @@ class QueueItem(BaseModel):
 class QueueProgress(BaseModel):
     """Queue progress statistics."""
 
-    model_config = ConfigDict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(extra="allow")
 
     total: int = 0
     pending: int = 0
@@ -54,7 +54,7 @@ class QueueProgress(BaseModel):
 class QueueAnalytics(BaseModel):
     """Queue analytics data."""
 
-    model_config = ConfigDict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(extra="allow")
 
     throughput: Optional[Dict[str, Any]] = None
     annotator_performance: Optional[List[Dict[str, Any]]] = None
@@ -66,7 +66,7 @@ class QueueAnalytics(BaseModel):
 class QueueAgreement(BaseModel):
     """Inter-annotator agreement metrics."""
 
-    model_config = ConfigDict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(extra="allow")
 
     overall_agreement: Optional[float] = None
     per_label: Optional[List[Dict[str, Any]]] = None
@@ -76,7 +76,7 @@ class QueueAgreement(BaseModel):
 class Score(BaseModel):
     """A unified annotation score."""
 
-    model_config = ConfigDict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(extra="allow")
 
     id: Optional[str] = None
     label_id: Optional[str] = None
@@ -94,7 +94,7 @@ class Score(BaseModel):
 class AddItemsResponse(BaseModel):
     """Response from adding items to a queue."""
 
-    model_config = ConfigDict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(extra="allow")
 
     added: int = 0
     duplicates: int = 0
@@ -104,7 +104,7 @@ class AddItemsResponse(BaseModel):
 class ExportToDatasetResponse(BaseModel):
     """Response from exporting queue to dataset."""
 
-    model_config = ConfigDict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(extra="allow")
 
     dataset_id: Optional[str] = None
     dataset_name: Optional[str] = None
@@ -114,6 +114,6 @@ class ExportToDatasetResponse(BaseModel):
 class ImportAnnotationsResponse(BaseModel):
     """Response from importing annotations."""
 
-    model_config = ConfigDict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(extra="allow")
 
     imported: int = 0
