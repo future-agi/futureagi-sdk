@@ -4,8 +4,10 @@ import {
   Annotation,
   AnnotationQueue,
   APIKeyAuth,
+  Client,
   DataTypeChoices,
   Dataset,
+  Environments,
   HttpMethod,
   KnowledgeBase,
   ModelConfig,
@@ -41,6 +43,7 @@ const capabilities = [
   'dataset_lifecycle',
   'dataset_management_lifecycle',
   'knowledge_base_lifecycle',
+  'model_log_lifecycle',
   'prompt_lifecycle',
   'provider_api_key_lifecycle',
 ];
@@ -100,6 +103,7 @@ const server = http.createServer(async (req, res) => {
       '/dataset/lifecycle': handleDatasetLifecycle,
       '/dataset/management': handleDatasetManagement,
       '/knowledge-base/lifecycle': handleKnowledgeBaseLifecycle,
+      '/model/log': handleModelLog,
       '/prompt/lifecycle': handlePromptLifecycle,
       '/provider-api-key/lifecycle': handleProviderApiKeyLifecycle,
     };
@@ -386,6 +390,24 @@ async function handleKnowledgeBaseLifecycle(payload: JsonRecord): Promise<JsonRe
   await client.close();
   state.calls.push({ operation: 'knowledge-base/lifecycle', name });
   return { success: true, result: { listed, deleted: true } };
+}
+
+async function handleModelLog(payload: JsonRecord): Promise<JsonRecord> {
+  ensureInitialized();
+  const client = new Client(authOptions());
+  const result = await client.log({
+    modelId: required(payload, 'model_id'),
+    modelType: ModelTypes[String(required(payload, 'model_type')) as keyof typeof ModelTypes],
+    environment: Environments[String(required(payload, 'environment')) as keyof typeof Environments],
+    modelVersion: payload.model_version,
+    predictionTimestamp: payload.prediction_timestamp,
+    conversation: payload.conversation,
+    tags: payload.tags,
+    timeout: payload.timeout ?? state.timeout,
+  });
+  await client.close();
+  state.calls.push({ operation: 'model/log', model_id: payload.model_id });
+  return { success: true, body: result };
 }
 
 async function handlePromptLifecycle(payload: JsonRecord): Promise<JsonRecord> {
