@@ -74,14 +74,22 @@ jobs:
           cache: npm
           cache-dependency-path: typescript/futureagi/package-lock.json
 
+      - name: Enable pnpm for package scripts
+        run: |
+          corepack enable
+          corepack prepare pnpm@8.15.0 --activate
+
       - name: Install TypeScript SDK
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Type check
         run: npm run typecheck
 
       - name: Run TypeScript tests
         run: npm test -- --runInBand
+
+      - name: Build TypeScript SDK
+        run: npm run build
 
   typescript-compliance:
     name: TypeScript SDK compliance
