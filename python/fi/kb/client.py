@@ -107,6 +107,7 @@ class KnowledgeBase(APIKeyAuth):
 
         # Internal cache of the current KB (instance of KnowledgeBaseConfig)
         self.kb: Optional[KnowledgeBaseConfig] = None
+        self._valid_file_paths: List[str] = []
 
         if kb_name:
             try:
@@ -263,7 +264,7 @@ class KnowledgeBase(APIKeyAuth):
                 "kb_id": str(self.kb.id)
             }
             
-            response = self.request(
+            self.request(
                 config=RequestConfig(
                     method=method,
                     url=url,
@@ -338,7 +339,7 @@ class KnowledgeBase(APIKeyAuth):
             url = self._base_url + "/" + Routes.knowledge_base.value       
             json_payload = {"kb_ids": resolved_ids}
             
-            response = self.request(
+            self.request(
                 config=RequestConfig(
                     method=method,
                     url=url,
@@ -376,7 +377,6 @@ class KnowledgeBase(APIKeyAuth):
         try:
             data = {"name": final_kb_name}
                 
-            method = HttpMethod.POST
             url = self._base_url + "/" + Routes.knowledge_base.value
             
             files = []

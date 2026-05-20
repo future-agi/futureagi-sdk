@@ -11,10 +11,16 @@ the shared harness:
 - `GET /state`
 - `POST /raw-request`
 - `POST /annotation/log`
+- `POST /annotation/metadata`
 - `POST /annotation-queue/lifecycle`
+- `POST /annotation-queue/management`
 - `POST /annotation-score/lifecycle`
 - `POST /dataset/lifecycle`
+- `POST /dataset/management`
+- `POST /knowledge-base/lifecycle`
 - `POST /model/log`
+- `POST /prompt/lifecycle`
+- `POST /provider-api-key/lifecycle`
 
 ## Local Run
 
@@ -37,10 +43,16 @@ Current passing suites:
 
 - `auth_raw_request`
 - `annotation_bulk_log`
+- `annotation_metadata_lifecycle_e2e`
 - `annotation_queue_lifecycle_e2e`
+- `annotation_queue_management_lifecycle_e2e`
 - `annotation_score_lifecycle_e2e`
 - `dataset_lifecycle_e2e`
+- `dataset_management_lifecycle_e2e`
+- `knowledge_base_lifecycle_e2e`
 - `model_log_lifecycle_e2e`
+- `prompt_lifecycle_e2e`
+- `provider_api_key_lifecycle_e2e`
 
 ## Docker
 
