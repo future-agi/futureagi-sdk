@@ -1,5 +1,6 @@
 import { APIKeyAuth, ResponseHandler } from '../api/auth';
-import { RequestConfig, HttpMethod } from '../api/types';
+import { HttpMethod } from '../api/types';
+import type { RequestConfig } from '../api/types';
 import { Routes } from '../utils/routes';
 import {
     KnowledgeBaseConfig,
@@ -360,7 +361,8 @@ export class KnowledgeBase extends APIKeyAuth {
 
             // Handle optional files
             const files: Record<string, any> = {};
-            if (filePaths) {
+            const hasFilePaths = Array.isArray(filePaths) ? filePaths.length > 0 : Boolean(filePaths);
+            if (hasFilePaths) {
                 await this._checkFilePaths(filePaths);
 
                 this._validFilePaths.forEach((filePath, idx) => {
@@ -560,4 +562,4 @@ export class KnowledgeBase extends APIKeyAuth {
     }
 }
 
-export default KnowledgeBase; 
+export default KnowledgeBase;

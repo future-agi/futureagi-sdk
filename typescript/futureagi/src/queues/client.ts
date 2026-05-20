@@ -14,8 +14,10 @@
  * ```
  */
 
-import { APIKeyAuth, APIKeyAuthConfig, ResponseHandler } from '../api/auth';
-import { HttpMethod, RequestConfig } from '../api/types';
+import { APIKeyAuth, ResponseHandler } from '../api/auth';
+import type { APIKeyAuthConfig } from '../api/auth';
+import { HttpMethod } from '../api/types';
+import type { RequestConfig } from '../api/types';
 import { SDKException } from '../utils/errors';
 import { Routes } from '../utils/routes';
 import type { AnnotationLabel } from '../annotations/types';

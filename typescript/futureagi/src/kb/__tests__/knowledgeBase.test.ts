@@ -85,7 +85,11 @@ describe('KnowledgeBase SDK – happy path', () => {
     });
 
     it('creates a knowledge base', async () => {
-        kb = new KnowledgeBase();
+        kb = new KnowledgeBase(undefined, {
+            fiApiKey: 'test-api-key',
+            fiSecretKey: 'test-secret-key',
+            fiBaseUrl: 'http://localhost:8000',
+        });
         await kb.createKb(TEST_KB_NAME, [TEST_FILE_1, TEST_FILE_3]);
 
         expect(kb).toBeDefined();
@@ -112,4 +116,4 @@ describe('KnowledgeBase SDK – happy path', () => {
         await kb.deleteKb({ kbIds: kb.kb?.id });
         expect(kb.kb).toBeUndefined();
     });
-}); 
+});

@@ -108,7 +108,7 @@ export interface Row {
 export interface DatasetConfig {
     id?: string;
     name: string;
-    model_type?: ModelTypes.GENERATIVE_LLM;
+    model_type?: ModelTypes;
     column_order?: string[];
 }
 
@@ -298,4 +298,4 @@ export type {
     DatasetConfig as DatasetConfigType,
     HuggingfaceDatasetConfig as HuggingfaceDatasetConfigType,
     DatasetTable as DatasetTableType,
-}; 
+};

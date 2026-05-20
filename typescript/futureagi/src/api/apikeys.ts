@@ -1,6 +1,7 @@
 import { APIKeyAuth, ResponseHandler } from './auth';
 import { AUTH_ENVVAR_NAME, get_base_url } from '../utils/constants';
-import { ModelProvider, ApiKey, RequestConfig, HttpMethod } from './types';
+import { ModelProvider, HttpMethod } from './types';
+import type { ApiKey, RequestConfig } from './types';
 import { Routes } from '../utils/routes';
 import { AxiosResponse } from 'axios';
 

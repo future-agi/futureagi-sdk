@@ -13,7 +13,8 @@ import {
     DEFAULT_SETTINGS, 
     get_base_url 
 } from '../utils/constants';
-import { RequestConfig, HttpMethod, ModelProvider } from './types';
+import { HttpMethod } from './types';
+import type { RequestConfig } from './types';
 
 /**
  * Generic response handler for parsing and validating HTTP responses
