@@ -233,12 +233,10 @@ export class AnnotationQueue extends APIKeyAuth {
         search?: string;
         includeCounts?: boolean;
         page?: number;
-        pageSize?: number;
         timeout?: number;
     }): Promise<QueueDetail[]> {
         const params: Record<string, any> = {
             page: options?.page ?? 1,
-            page_size: options?.pageSize ?? 20,
         };
         if (options?.status) params.status = options.status;
         if (options?.search) params.search = options.search;

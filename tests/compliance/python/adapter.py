@@ -14,13 +14,12 @@ from fi.annotations import Annotation
 from fi.api.auth import APIKeyAuth
 from fi.api.apikeys import ProviderAPIKeyClient
 from fi.api.types import ApiKey, HttpMethod, ModelProvider, RequestConfig
-from fi.client import Client
 from fi.datasets import Dataset, DatasetConfig
 from fi.datasets.types import DataTypeChoices
 from fi.kb import KnowledgeBase
 from fi.prompt import ModelConfig, Prompt, PromptTemplate, UserMessage
 from fi.queues import AnnotationQueue
-from fi.utils.types import Environments, ModelTypes
+from fi.utils.types import ModelTypes
 
 
 @dataclass
@@ -62,7 +61,6 @@ class Handler(BaseHTTPRequestHandler):
                         "dataset_lifecycle",
                         "dataset_management_lifecycle",
                         "knowledge_base_lifecycle",
-                        "model_log_lifecycle",
                         "prompt_lifecycle",
                         "provider_api_key_lifecycle",
                     ],
@@ -138,10 +136,6 @@ class Handler(BaseHTTPRequestHandler):
 
         if parsed.path == "/knowledge-base/lifecycle":
             self._handle_knowledge_base_lifecycle(payload)
-            return
-
-        if parsed.path == "/model/log":
-            self._handle_model_log(payload)
             return
 
         if parsed.path == "/prompt/lifecycle":
@@ -520,30 +514,6 @@ class Handler(BaseHTTPRequestHandler):
             client.delete_kb(kb_names=updated_name)
             STATE.calls.append({"operation": "knowledge-base/lifecycle", "name": name})
             self._write_json({"success": True, "result": {"deleted": True}})
-        except Exception as exc:
-            self._write_json({"success": False, "error": str(exc)}, status=500)
-
-    def _handle_model_log(self, payload: dict[str, Any]) -> None:
-        try:
-            _ensure_initialized()
-            client = Client(
-                fi_api_key=STATE.api_key,
-                fi_secret_key=STATE.secret_key,
-                fi_base_url=STATE.base_url,
-                timeout=STATE.timeout,
-            )
-            result = client.log(
-                model_id=_required(payload, "model_id"),
-                model_type=ModelTypes[_required(payload, "model_type")],
-                environment=Environments[_required(payload, "environment")],
-                model_version=payload.get("model_version"),
-                prediction_timestamp=payload.get("prediction_timestamp"),
-                conversation=payload.get("conversation"),
-                tags=payload.get("tags"),
-                timeout=payload.get("timeout") or STATE.timeout,
-            )
-            STATE.calls.append({"operation": "model/log", "model_id": payload.get("model_id")})
-            self._write_json({"success": True, "body": _jsonable(result)})
         except Exception as exc:
             self._write_json({"success": False, "error": str(exc)}, status=500)
 

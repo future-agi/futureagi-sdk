@@ -5,9 +5,6 @@ export const Routes = {
     // Healthcheck
     healthcheck: "healthcheck",
 
-    // Logging
-    log_model: "sdk/api/v1/log/model/",
-
     // Evaluation
     evaluate: "sdk/api/v1/eval/",
     evaluatev2: "sdk/api/v1/new-eval/",

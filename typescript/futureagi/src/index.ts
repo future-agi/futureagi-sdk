@@ -1,5 +1,4 @@
 export * from './api';
-export * from './client';
 export * from './datasets';
 export * from './kb';
 export * from './prompt';

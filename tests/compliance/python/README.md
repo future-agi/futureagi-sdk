@@ -18,9 +18,11 @@ the shared harness:
 - `POST /dataset/lifecycle`
 - `POST /dataset/management`
 - `POST /knowledge-base/lifecycle`
-- `POST /model/log`
 - `POST /prompt/lifecycle`
 - `POST /provider-api-key/lifecycle`
+
+Model logging is not currently claimed by this adapter because the current
+backend does not expose `/sdk/api/v1/log/model/` or `/log/model/`.
 
 ## Local Run
 
@@ -50,7 +52,6 @@ Current passing suites:
 - `dataset_lifecycle_e2e`
 - `dataset_management_lifecycle_e2e`
 - `knowledge_base_lifecycle_e2e`
-- `model_log_lifecycle_e2e`
 - `prompt_lifecycle_e2e`
 - `provider_api_key_lifecycle_e2e`
 

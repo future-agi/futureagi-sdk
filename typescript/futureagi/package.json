@@ -22,6 +22,7 @@
     "postbuild": "echo '{\"type\": \"module\"}' > ./dist/esm/package.json",
     "build:watch": "tsc --build --watch tsconfig.json",
     "test": "jest",
+    "test:live": "tsx tests/live/smoke.ts",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint . --ext .ts",

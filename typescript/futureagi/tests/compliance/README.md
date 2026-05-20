@@ -20,7 +20,8 @@ It wraps the TypeScript `@future-agi/sdk` package and exposes the shared adapter
 - `POST /prompt/lifecycle`
 - `POST /provider-api-key/lifecycle`
 
-`model_log_lifecycle_e2e` is intentionally not claimed yet because this TypeScript package does not expose the model logging client that exists in the Python SDK.
+Model logging is not currently claimed by this adapter because the current
+backend does not expose `/sdk/api/v1/log/model/` or `/log/model/`.
 
 ## Local Run
 
