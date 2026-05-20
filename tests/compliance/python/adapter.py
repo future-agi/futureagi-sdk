@@ -12,7 +12,11 @@ import pandas as pd
 from fi.annotations import Annotation
 from fi.api.auth import APIKeyAuth
 from fi.api.types import HttpMethod, RequestConfig
+from fi.client import Client
+from fi.datasets import Dataset, DatasetConfig
+from fi.datasets.types import DataTypeChoices
 from fi.queues import AnnotationQueue
+from fi.utils.types import Environments, ModelTypes
 
 
 @dataclass
@@ -48,6 +52,9 @@ class Handler(BaseHTTPRequestHandler):
                         "raw_request",
                         "annotation_bulk_log",
                         "annotation_queue_lifecycle",
+                        "annotation_score_lifecycle",
+                        "dataset_lifecycle",
+                        "model_log_lifecycle",
                     ],
                 }
             )
@@ -99,6 +106,18 @@ class Handler(BaseHTTPRequestHandler):
             self._handle_annotation_queue_lifecycle(payload)
             return
 
+        if parsed.path == "/annotation-score/lifecycle":
+            self._handle_annotation_score_lifecycle(payload)
+            return
+
+        if parsed.path == "/dataset/lifecycle":
+            self._handle_dataset_lifecycle(payload)
+            return
+
+        if parsed.path == "/model/log":
+            self._handle_model_log(payload)
+            return
+
         self._write_json({"error": "not found"}, status=404)
 
     def log_message(self, format: str, *args: Any) -> None:  # noqa: A002
@@ -127,6 +146,121 @@ class Handler(BaseHTTPRequestHandler):
             )
             STATE.calls.append({"operation": "raw-request", "path": path, "method": method.value})
             self._write_json(_response_payload(response))
+        except Exception as exc:
+            self._write_json({"success": False, "error": str(exc)}, status=500)
+
+    def _handle_annotation_score_lifecycle(self, payload: dict[str, Any]) -> None:
+        try:
+            _ensure_initialized()
+            client = AnnotationQueue(
+                fi_api_key=STATE.api_key,
+                fi_secret_key=STATE.secret_key,
+                fi_base_url=STATE.base_url,
+                timeout=STATE.timeout,
+            )
+            source_type = _required(payload, "source_type")
+            source_id = _required(payload, "source_id")
+            created = client.create_score(
+                source_type=source_type,
+                source_id=source_id,
+                label_id=_required(payload, "label_id"),
+                value=payload.get("value"),
+                notes=payload.get("notes"),
+                timeout=payload.get("timeout") or STATE.timeout,
+            )
+            bulk = client.create_scores(
+                source_type=source_type,
+                source_id=source_id,
+                scores=payload.get("bulk_scores") or [],
+                timeout=payload.get("timeout") or STATE.timeout,
+            )
+            fetched = client.get_scores(
+                source_type=source_type,
+                source_id=source_id,
+                timeout=payload.get("timeout") or STATE.timeout,
+            )
+            STATE.calls.append({"operation": "annotation-score/lifecycle", "source_id": source_id})
+            self._write_json(
+                {
+                    "success": True,
+                    "result": _jsonable(
+                        {
+                            "created": created,
+                            "bulk": bulk,
+                            "fetched": fetched,
+                        }
+                    ),
+                }
+            )
+        except Exception as exc:
+            self._write_json({"success": False, "error": str(exc)}, status=500)
+
+    def _handle_dataset_lifecycle(self, payload: dict[str, Any]) -> None:
+        try:
+            _ensure_initialized()
+            columns = payload.get("columns")
+            rows = payload.get("rows")
+            if not isinstance(columns, list) or not columns:
+                raise ValueError("columns must be a non-empty list")
+            if not isinstance(rows, list) or not rows:
+                raise ValueError("rows must be a non-empty list")
+
+            dataset = Dataset(
+                dataset_config=DatasetConfig(
+                    name=_required(payload, "name"),
+                    model_type=ModelTypes[_required(payload, "model_type")],
+                ),
+                fi_api_key=STATE.api_key,
+                fi_secret_key=STATE.secret_key,
+                fi_base_url=STATE.base_url,
+                timeout=STATE.timeout,
+            )
+            dataset.create()
+            dataset.add_columns(
+                [
+                    {
+                        "name": _required(column, "name"),
+                        "data_type": DataTypeChoices[_required(column, "data_type")],
+                    }
+                    for column in columns
+                ]
+            )
+            dataset.add_rows(rows)
+            STATE.calls.append({"operation": "dataset/lifecycle", "dataset_id": str(dataset.dataset_config.id)})
+            self._write_json(
+                {
+                    "success": True,
+                    "result": {
+                        "dataset": _jsonable(dataset.dataset_config),
+                        "columns_added": len(columns),
+                        "rows_added": len(rows),
+                    },
+                }
+            )
+        except Exception as exc:
+            self._write_json({"success": False, "error": str(exc)}, status=500)
+
+    def _handle_model_log(self, payload: dict[str, Any]) -> None:
+        try:
+            _ensure_initialized()
+            client = Client(
+                fi_api_key=STATE.api_key,
+                fi_secret_key=STATE.secret_key,
+                fi_base_url=STATE.base_url,
+                timeout=STATE.timeout,
+            )
+            result = client.log(
+                model_id=_required(payload, "model_id"),
+                model_type=ModelTypes[_required(payload, "model_type")],
+                environment=Environments[_required(payload, "environment")],
+                model_version=payload.get("model_version"),
+                prediction_timestamp=payload.get("prediction_timestamp"),
+                conversation=payload.get("conversation"),
+                tags=payload.get("tags"),
+                timeout=payload.get("timeout") or STATE.timeout,
+            )
+            STATE.calls.append({"operation": "model/log", "model_id": payload.get("model_id")})
+            self._write_json({"success": True, "body": _jsonable(result)})
         except Exception as exc:
             self._write_json({"success": False, "error": str(exc)}, status=500)
 

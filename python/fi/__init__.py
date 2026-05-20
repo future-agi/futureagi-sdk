@@ -6,6 +6,7 @@ except PackageNotFoundError:
     # Source-tree fallback for environments that import `fi` before installing
     # the package metadata. Keep this in sync with python/pyproject.toml.
     __version__ = "0.6.13"
+__versions__ = __version__
 
 # Allow sibling `fi.*` packages (notably `fi.evals` shipped from the
 # ai-evaluation repo) to extend this namespace when both are installed.
@@ -30,6 +31,7 @@ from fi.annotations import Annotation, BulkAnnotationResponse
 
 __all__ = [
     "__version__",
+    "__versions__",
     "AnnotationQueue",
     "AnnotationLabel",
     "QueueDetail",
