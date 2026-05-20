@@ -1,4 +1,11 @@
-__version__ = "0.0.1"
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("futureagi")
+except PackageNotFoundError:
+    # Source-tree fallback for environments that import `fi` before installing
+    # the package metadata. Keep this in sync with python/pyproject.toml.
+    __version__ = "0.6.13"
 
 # Allow sibling `fi.*` packages (notably `fi.evals` shipped from the
 # ai-evaluation repo) to extend this namespace when both are installed.
