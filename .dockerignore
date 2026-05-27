@@ -7,3 +7,25 @@
 **/*.pyc
 **/*.tsbuildinfo
 *.log
+
+# === Python virtualenvs + caches (added by setup) ===
+.venv
+.venv/
+.venv*/
+**/.venv
+**/.venv/
+**/.venv*/
+venv
+venv/
+**/venv
+**/venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+**/.pytest_cache/
+.ruff_cache/
+**/.ruff_cache/
+.mypy_cache/
+**/.mypy_cache/

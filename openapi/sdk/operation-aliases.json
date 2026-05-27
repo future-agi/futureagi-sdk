@@ -1,0 +1,554 @@
+{
+  "GET /model-hub/annotation-queues/": {
+    "operationId": "listAnnotationQueues",
+    "tag": "Annotation Queues"
+  },
+  "POST /model-hub/annotation-queues/": {
+    "operationId": "createAnnotationQueue",
+    "tag": "Annotation Queues"
+  },
+  "GET /model-hub/annotation-queues/{id}/": {
+    "operationId": "getAnnotationQueue",
+    "tag": "Annotation Queues"
+  },
+  "PATCH /model-hub/annotation-queues/{id}/": {
+    "operationId": "updateAnnotationQueue",
+    "tag": "Annotation Queues"
+  },
+  "DELETE /model-hub/annotation-queues/{id}/": {
+    "operationId": "archiveAnnotationQueue",
+    "tag": "Annotation Queues"
+  },
+  "POST /model-hub/annotation-queues/{id}/update-status/": {
+    "operationId": "updateAnnotationQueueStatus",
+    "tag": "Annotation Queues"
+  },
+  "GET /model-hub/annotation-queues/{id}/progress/": {
+    "operationId": "getAnnotationQueueProgress",
+    "tag": "Annotation Queues"
+  },
+  "GET /model-hub/annotation-queues/{id}/analytics/": {
+    "operationId": "getAnnotationQueueAnalytics",
+    "tag": "Annotation Queues"
+  },
+  "GET /model-hub/annotation-queues/{id}/agreement/": {
+    "operationId": "getAnnotationQueueAgreement",
+    "tag": "Annotation Queues"
+  },
+  "GET /model-hub/annotation-queues/{id}/export/": {
+    "operationId": "exportAnnotationQueue",
+    "tag": "Annotation Queues"
+  },
+  "GET /model-hub/annotation-queues/{id}/export-fields/": {
+    "operationId": "listAnnotationQueueExportFields",
+    "tag": "Annotation Queues"
+  },
+  "POST /model-hub/annotation-queues/{id}/export-to-dataset/": {
+    "operationId": "exportAnnotationQueueToDataset",
+    "tag": "Annotation Queues"
+  },
+  "POST /model-hub/annotation-queues/{id}/add-label/": {
+    "operationId": "addAnnotationQueueLabel",
+    "tag": "Annotation Queues"
+  },
+  "POST /model-hub/annotation-queues/{id}/remove-label/": {
+    "operationId": "removeAnnotationQueueLabel",
+    "tag": "Annotation Queues"
+  },
+  "GET /model-hub/annotation-queues/{queue_id}/items/": {
+    "operationId": "listAnnotationQueueItems",
+    "tag": "Annotation Queue Items"
+  },
+  "POST /model-hub/annotation-queues/{queue_id}/items/add-items/": {
+    "operationId": "addAnnotationQueueItems",
+    "tag": "Annotation Queue Items"
+  },
+  "POST /model-hub/annotation-queues/{queue_id}/items/assign/": {
+    "operationId": "assignAnnotationQueueItems",
+    "tag": "Annotation Queue Items"
+  },
+  "POST /model-hub/annotation-queues/{queue_id}/items/bulk-remove/": {
+    "operationId": "removeAnnotationQueueItems",
+    "tag": "Annotation Queue Items"
+  },
+  "GET /model-hub/annotation-queues/{queue_id}/items/next-item/": {
+    "operationId": "getNextAnnotationQueueItem",
+    "tag": "Annotation Queue Items"
+  },
+  "GET /model-hub/annotation-queues/{queue_id}/items/{id}/annotate-detail/": {
+    "operationId": "getAnnotationQueueItemDetail",
+    "tag": "Annotation Queue Items"
+  },
+  "POST /model-hub/annotation-queues/{queue_id}/items/{id}/release/": {
+    "operationId": "releaseAnnotationQueueItem",
+    "tag": "Annotation Queue Items"
+  },
+  "POST /model-hub/annotation-queues/{queue_id}/items/{id}/complete/": {
+    "operationId": "completeAnnotationQueueItem",
+    "tag": "Annotation Queue Items"
+  },
+  "POST /model-hub/annotation-queues/{queue_id}/items/{id}/skip/": {
+    "operationId": "skipAnnotationQueueItem",
+    "tag": "Annotation Queue Items"
+  },
+  "GET /model-hub/annotation-queues/{queue_id}/items/{id}/annotations/": {
+    "operationId": "listAnnotationQueueItemAnnotations",
+    "tag": "Annotation Queue Items"
+  },
+  "POST /model-hub/annotation-queues/{queue_id}/items/{id}/annotations/submit/": {
+    "operationId": "submitAnnotationQueueItemAnnotations",
+    "tag": "Annotation Queue Items"
+  },
+  "POST /model-hub/annotation-queues/{queue_id}/items/{id}/annotations/import/": {
+    "operationId": "importAnnotationQueueItemAnnotations",
+    "tag": "Annotation Queue Items"
+  },
+  "GET /model-hub/annotation-queues/{queue_id}/items/{id}/discussion/": {
+    "operationId": "listAnnotationQueueItemDiscussion",
+    "tag": "Annotation Queue Discussion"
+  },
+  "POST /model-hub/annotation-queues/{queue_id}/items/{id}/discussion/": {
+    "operationId": "createAnnotationQueueItemComment",
+    "tag": "Annotation Queue Discussion"
+  },
+  "POST /model-hub/annotation-queues/{queue_id}/items/{id}/discussion/{thread_id}/resolve/": {
+    "operationId": "resolveAnnotationQueueItemThread",
+    "tag": "Annotation Queue Discussion"
+  },
+  "POST /model-hub/annotation-queues/{queue_id}/items/{id}/discussion/{thread_id}/reopen/": {
+    "operationId": "reopenAnnotationQueueItemThread",
+    "tag": "Annotation Queue Discussion"
+  },
+  "POST /model-hub/annotation-queues/{queue_id}/items/{id}/discussion/comments/{comment_id}/reaction/": {
+    "operationId": "toggleAnnotationQueueItemCommentReaction",
+    "tag": "Annotation Queue Discussion"
+  },
+  "POST /model-hub/annotation-queues/{queue_id}/items/{id}/review/": {
+    "operationId": "reviewAnnotationQueueItem",
+    "tag": "Annotation Queue Review"
+  },
+  "GET /model-hub/develops/get-datasets/": {
+    "operationId": "listDatasets",
+    "tag": "Datasets"
+  },
+  "GET /model-hub/develops/get-datasets-names/": {
+    "operationId": "listDatasetNames",
+    "tag": "Datasets"
+  },
+  "GET /model-hub/develops/{dataset_id}/get-dataset-table/": {
+    "operationId": "getDatasetTable",
+    "tag": "Datasets"
+  },
+  "POST /model-hub/develops/{dataset_id}/get-row-data/": {
+    "operationId": "getDatasetRow",
+    "tag": "Datasets"
+  },
+  "GET /model-hub/dataset/columns/{dataset_id}/": {
+    "operationId": "getDatasetColumns",
+    "tag": "Datasets"
+  },
+  "POST /model-hub/develops/create-empty-dataset/": {
+    "operationId": "createEmptyDataset",
+    "tag": "Datasets"
+  },
+  "POST /model-hub/develops/create-dataset-manually/": {
+    "operationId": "createDatasetManually",
+    "tag": "Datasets"
+  },
+  "POST /model-hub/develops/create-dataset-from-local-file/": {
+    "operationId": "createDatasetFromLocalFile",
+    "tag": "Datasets"
+  },
+  "POST /model-hub/develops/{dataset_id}/add_rows/": {
+    "operationId": "addDatasetRows",
+    "tag": "Datasets"
+  },
+  "POST /model-hub/develops/{dataset_id}/add_columns/": {
+    "operationId": "addDatasetColumns",
+    "tag": "Datasets"
+  },
+  "POST /model-hub/develops/{dataset_id}/update_cell_value/": {
+    "operationId": "updateDatasetCell",
+    "tag": "Datasets"
+  },
+  "DELETE /model-hub/develops/{dataset_id}/delete_row/": {
+    "operationId": "deleteDatasetRow",
+    "tag": "Datasets"
+  },
+  "DELETE /model-hub/develops/{dataset_id}/delete_column/{column_id}/": {
+    "operationId": "deleteDatasetColumn",
+    "tag": "Datasets"
+  },
+  "GET /model-hub/develops/{dataset_id}/download_dataset/": {
+    "operationId": "downloadDataset",
+    "tag": "Datasets"
+  },
+  "GET /model-hub/dataset/{dataset_id}/json-schema/": {
+    "operationId": "getDatasetJsonSchema",
+    "tag": "Datasets"
+  },
+  "GET /model-hub/dataset/{dataset_id}/eval-stats/": {
+    "operationId": "getDatasetEvalStats",
+    "tag": "Datasets"
+  },
+  "GET /model-hub/dataset/{dataset_id}/annotation-summary/": {
+    "operationId": "getDatasetAnnotationSummary",
+    "tag": "Datasets"
+  },
+  "POST /model-hub/datasets/{dataset_id}/duplicate/": {
+    "operationId": "duplicateDataset",
+    "tag": "Datasets"
+  },
+  "GET /model-hub/datasets/{dataset_id}/derived-variables/": {
+    "operationId": "listDatasetDerivedVariables",
+    "tag": "Datasets"
+  },
+  "GET /model-hub/datasets/get-base-columns/": {
+    "operationId": "listDatasetBaseColumns",
+    "tag": "Datasets"
+  },
+  "GET /model-hub/experiments/v2/list/": {
+    "operationId": "listExperiments",
+    "tag": "Experiments"
+  },
+  "POST /model-hub/experiments/v2/": {
+    "operationId": "createExperiment",
+    "tag": "Experiments"
+  },
+  "GET /model-hub/experiments/v2/{experiment_id}/": {
+    "operationId": "getExperiment",
+    "tag": "Experiments"
+  },
+  "PUT /model-hub/experiments/v2/{experiment_id}/": {
+    "operationId": "updateExperiment",
+    "tag": "Experiments"
+  },
+  "DELETE /model-hub/experiments/v2/delete/": {
+    "operationId": "deleteExperiments",
+    "tag": "Experiments"
+  },
+  "GET /model-hub/experiments/v2/{experiment_id}/rows/": {
+    "operationId": "listExperimentRows",
+    "tag": "Experiments"
+  },
+  "GET /model-hub/experiments/v2/{experiment_id}/rows/{row_id}/": {
+    "operationId": "getExperimentRow",
+    "tag": "Experiments"
+  },
+  "GET /model-hub/experiments/v2/{experiment_id}/stats/": {
+    "operationId": "getExperimentStats",
+    "tag": "Experiments"
+  },
+  "GET /model-hub/experiments/v2/{experiment_id}/download/": {
+    "operationId": "downloadExperiment",
+    "tag": "Experiments"
+  },
+  "POST /model-hub/experiments/v2/re-run/": {
+    "operationId": "rerunExperiment",
+    "tag": "Experiments"
+  },
+  "POST /model-hub/experiments/v2/{experiment_id}/stop/": {
+    "operationId": "stopExperiment",
+    "tag": "Experiments"
+  },
+  "POST /model-hub/experiments/v2/{experiment_id}/compare-experiments/": {
+    "operationId": "compareExperiments",
+    "tag": "Experiments"
+  },
+  "GET /model-hub/experiments/v2/{experiment_id}/comparisons/": {
+    "operationId": "listExperimentComparisons",
+    "tag": "Experiments"
+  },
+  "GET /model-hub/experiments/v2/{experiment_id}/json-schema/": {
+    "operationId": "getExperimentJsonSchema",
+    "tag": "Experiments"
+  },
+  "GET /sdk/api/v1/simulation/runs/": {
+    "operationId": "listSimulationRuns",
+    "tag": "Simulations"
+  },
+  "GET /sdk/api/v1/simulation/metrics/": {
+    "operationId": "listSimulationMetrics",
+    "tag": "Simulations"
+  },
+  "GET /sdk/api/v1/simulation/analytics/": {
+    "operationId": "getSimulationAnalytics",
+    "tag": "Simulations"
+  },
+  "GET /simulate/agent-definitions/": {
+    "operationId": "listAgentDefinitions",
+    "tag": "Simulation Agent Definitions"
+  },
+  "POST /simulate/agent-definitions/create/": {
+    "operationId": "createAgentDefinition",
+    "tag": "Simulation Agent Definitions"
+  },
+  "GET /simulate/agent-definitions/{agent_id}/": {
+    "operationId": "getAgentDefinition",
+    "tag": "Simulation Agent Definitions"
+  },
+  "PUT /simulate/agent-definitions/{agent_id}/edit/": {
+    "operationId": "updateAgentDefinition",
+    "tag": "Simulation Agent Definitions"
+  },
+  "DELETE /simulate/agent-definitions/{agent_id}/delete/": {
+    "operationId": "deleteAgentDefinition",
+    "tag": "Simulation Agent Definitions"
+  },
+  "GET /simulate/run-tests/": {
+    "operationId": "listRunTests",
+    "tag": "Simulation Run Tests"
+  },
+  "POST /simulate/run-tests/create/": {
+    "operationId": "createRunTest",
+    "tag": "Simulation Run Tests"
+  },
+  "GET /simulate/run-tests/{run_test_id}/": {
+    "operationId": "getRunTest",
+    "tag": "Simulation Run Tests"
+  },
+  "PATCH /simulate/run-tests/{run_test_id}/": {
+    "operationId": "updateRunTest",
+    "tag": "Simulation Run Tests"
+  },
+  "DELETE /simulate/run-tests/{run_test_id}/": {
+    "operationId": "deleteRunTest",
+    "tag": "Simulation Run Tests"
+  },
+  "POST /simulate/run-tests/{run_test_id}/execute/": {
+    "operationId": "executeRunTest",
+    "tag": "Simulation Run Tests"
+  },
+  "GET /simulate/run-tests/{run_test_id}/status/": {
+    "operationId": "getRunTestStatus",
+    "tag": "Simulation Run Tests"
+  },
+  "GET /simulate/run-tests/{run_test_id}/analytics/": {
+    "operationId": "getRunTestAnalytics",
+    "tag": "Simulation Run Tests"
+  },
+  "GET /simulate/run-tests/{run_test_id}/executions/": {
+    "operationId": "listRunTestExecutions",
+    "tag": "Simulation Run Tests"
+  },
+  "GET /simulate/run-tests/{run_test_id}/call-executions/": {
+    "operationId": "listRunTestCallExecutions",
+    "tag": "Simulation Run Tests"
+  },
+  "GET /simulate/api/test-executions/": {
+    "operationId": "listTestExecutions",
+    "tag": "Simulation Test Executions"
+  },
+  "GET /simulate/test-executions/{test_execution_id}/": {
+    "operationId": "getTestExecution",
+    "tag": "Simulation Test Executions"
+  },
+  "GET /simulate/test-executions/{test_execution_id}/analytics/": {
+    "operationId": "getTestExecutionAnalytics",
+    "tag": "Simulation Test Executions"
+  },
+  "GET /simulate/test-executions/{test_execution_id}/transcripts/": {
+    "operationId": "getTestExecutionTranscripts",
+    "tag": "Simulation Test Executions"
+  },
+  "GET /simulate/test-executions/{test_execution_id}/kpis/": {
+    "operationId": "getTestExecutionKpis",
+    "tag": "Simulation Test Executions"
+  },
+  "GET /simulate/test-executions/{test_execution_id}/performance-summary/": {
+    "operationId": "getTestExecutionPerformanceSummary",
+    "tag": "Simulation Test Executions"
+  },
+  "POST /simulate/test-executions/{test_execution_id}/cancel/": {
+    "operationId": "cancelTestExecution",
+    "tag": "Simulation Test Executions"
+  },
+  "GET /simulate/api/personas/": {
+    "operationId": "listPersonas",
+    "tag": "Simulation Personas"
+  },
+  "POST /simulate/api/personas/": {
+    "operationId": "createPersona",
+    "tag": "Simulation Personas"
+  },
+  "GET /simulate/api/personas/{id}/": {
+    "operationId": "getPersona",
+    "tag": "Simulation Personas"
+  },
+  "PATCH /simulate/api/personas/{id}/": {
+    "operationId": "updatePersona",
+    "tag": "Simulation Personas"
+  },
+  "DELETE /simulate/api/personas/{id}/": {
+    "operationId": "deletePersona",
+    "tag": "Simulation Personas"
+  },
+  "GET /simulate/scenarios/": {
+    "operationId": "listScenarios",
+    "tag": "Simulation Scenarios"
+  },
+  "POST /simulate/scenarios/create/": {
+    "operationId": "createScenario",
+    "tag": "Simulation Scenarios"
+  },
+  "GET /simulate/scenarios/{scenario_id}/": {
+    "operationId": "getScenario",
+    "tag": "Simulation Scenarios"
+  },
+  "PUT /simulate/scenarios/{scenario_id}/edit/": {
+    "operationId": "updateScenario",
+    "tag": "Simulation Scenarios"
+  },
+  "DELETE /simulate/scenarios/{scenario_id}/delete/": {
+    "operationId": "deleteScenario",
+    "tag": "Simulation Scenarios"
+  },
+  "GET /tracer/project/list_projects/": {
+    "operationId": "listTraceProjects",
+    "tag": "Tracing"
+  },
+  "GET /tracer/trace/list_traces/": {
+    "operationId": "listTraces",
+    "tag": "Tracing"
+  },
+  "GET /tracer/trace/{id}/": {
+    "operationId": "getTrace",
+    "tag": "Tracing"
+  },
+  "GET /tracer/trace/list_voice_calls/": {
+    "operationId": "listVoiceCalls",
+    "tag": "Tracing"
+  },
+  "GET /tracer/trace/voice_call_detail/": {
+    "operationId": "getVoiceCallDetail",
+    "tag": "Tracing"
+  },
+  "GET /tracer/trace/get_properties/": {
+    "operationId": "listTraceProperties",
+    "tag": "Tracing"
+  },
+  "PATCH /tracer/trace/{id}/tags/": {
+    "operationId": "updateTraceTags",
+    "tag": "Tracing"
+  },
+  "POST /tracer/trace/get_graph_methods/": {
+    "operationId": "getTraceGraphMethods",
+    "tag": "Tracing"
+  },
+  "GET /tracer/trace-session/list_sessions/": {
+    "operationId": "listTraceSessions",
+    "tag": "Tracing"
+  },
+  "GET /tracer/trace-session/{id}/": {
+    "operationId": "getTraceSession",
+    "tag": "Tracing"
+  },
+  "POST /tracer/trace-session/get_session_graph_data/": {
+    "operationId": "getTraceSessionGraphData",
+    "tag": "Tracing"
+  },
+  "GET /tracer/users/": {
+    "operationId": "listTraceUsers",
+    "tag": "Tracing"
+  },
+  "GET /tracer/get-annotation-labels/": {
+    "operationId": "listTraceAnnotationLabels",
+    "tag": "Tracing"
+  },
+  "POST /tracer/bulk-annotation/": {
+    "operationId": "createBulkTraceAnnotation",
+    "tag": "Tracing"
+  },
+  "GET /tracer/feed/issues/": {
+    "operationId": "listErrorFeedIssues",
+    "tag": "Tracing"
+  },
+  "GET /tracer/feed/issues/{cluster_id}/": {
+    "operationId": "getErrorFeedIssue",
+    "tag": "Tracing"
+  },
+  "GET /tracer/feed/issues/stats/": {
+    "operationId": "getErrorFeedIssueStats",
+    "tag": "Tracing"
+  },
+  "GET /accounts/user-info/": {
+    "operationId": "getCurrentUser",
+    "tag": "Users"
+  },
+  "GET /accounts/organization/members/": {
+    "operationId": "listOrganizationMembers",
+    "tag": "Users"
+  },
+  "GET /accounts/workspace/list/": {
+    "operationId": "listWorkspaces",
+    "tag": "Users"
+  },
+  "GET /accounts/workspace/{workspace_id}/members/": {
+    "operationId": "listWorkspaceMembers",
+    "tag": "Users"
+  },
+  "POST /accounts/workspace/switch/": {
+    "operationId": "switchWorkspace",
+    "tag": "Users"
+  },
+  "GET /tracer/user-alerts/": {
+    "operationId": "listAlerts",
+    "tag": "Alerts"
+  },
+  "POST /tracer/user-alerts/": {
+    "operationId": "createAlert",
+    "tag": "Alerts"
+  },
+  "GET /tracer/user-alerts/{id}/": {
+    "operationId": "getAlert",
+    "tag": "Alerts"
+  },
+  "PATCH /tracer/user-alerts/{id}/": {
+    "operationId": "updateAlert",
+    "tag": "Alerts"
+  },
+  "DELETE /tracer/user-alerts/{id}/": {
+    "operationId": "deleteAlert",
+    "tag": "Alerts"
+  },
+  "GET /tracer/user-alerts/metric-options/": {
+    "operationId": "listAlertMetricOptions",
+    "tag": "Alerts"
+  },
+  "POST /tracer/user-alerts/preview-graph/": {
+    "operationId": "previewAlertGraph",
+    "tag": "Alerts"
+  },
+  "GET /tracer/user-alerts/{id}/graph/": {
+    "operationId": "getAlertGraph",
+    "tag": "Alerts"
+  },
+  "GET /tracer/user-alerts/{id}/details/": {
+    "operationId": "getAlertDetails",
+    "tag": "Alerts"
+  },
+  "POST /tracer/user-alerts/bulk-mute/": {
+    "operationId": "bulkMuteAlerts",
+    "tag": "Alerts"
+  },
+  "GET /tracer/user-alert-logs/": {
+    "operationId": "listAlertLogs",
+    "tag": "Alerts"
+  },
+  "GET /tracer/user-alert-logs/all/": {
+    "operationId": "listAllAlertLogs",
+    "tag": "Alerts"
+  },
+  "GET /tracer/user-alert-logs/{id}/": {
+    "operationId": "getAlertLog",
+    "tag": "Alerts"
+  },
+  "GET /tracer/user-alert-logs/{id}/list/": {
+    "operationId": "listAlertLogsForAlert",
+    "tag": "Alerts"
+  },
+  "POST /tracer/user-alert-logs/resolve/": {
+    "operationId": "resolveAlertLogs",
+    "tag": "Alerts"
+  }
+}

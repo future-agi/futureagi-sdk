@@ -1,0 +1,170 @@
+{
+  "annotationQueues": {
+    "list": "listAnnotationQueues",
+    "create": "createAnnotationQueue",
+    "get": "getAnnotationQueue",
+    "update": "updateAnnotationQueue",
+    "archive": "archiveAnnotationQueue",
+    "updateStatus": "updateAnnotationQueueStatus",
+    "progress": "getAnnotationQueueProgress",
+    "analytics": "getAnnotationQueueAnalytics",
+    "agreement": "getAnnotationQueueAgreement",
+    "exportJson": "exportAnnotationQueue",
+    "listExportFields": "listAnnotationQueueExportFields",
+    "exportToDataset": "exportAnnotationQueueToDataset",
+    "addLabel": "addAnnotationQueueLabel",
+    "removeLabel": "removeAnnotationQueueLabel"
+  },
+  "annotationQueueItems": {
+    "list": "listAnnotationQueueItems",
+    "add": "addAnnotationQueueItems",
+    "assign": "assignAnnotationQueueItems",
+    "remove": "removeAnnotationQueueItems",
+    "next": "getNextAnnotationQueueItem",
+    "getDetail": "getAnnotationQueueItemDetail",
+    "release": "releaseAnnotationQueueItem",
+    "complete": "completeAnnotationQueueItem",
+    "skip": "skipAnnotationQueueItem",
+    "listAnnotations": "listAnnotationQueueItemAnnotations",
+    "submitAnnotations": "submitAnnotationQueueItemAnnotations",
+    "importAnnotations": "importAnnotationQueueItemAnnotations"
+  },
+  "annotationQueueDiscussion": {
+    "list": "listAnnotationQueueItemDiscussion",
+    "comment": "createAnnotationQueueItemComment",
+    "resolveThread": "resolveAnnotationQueueItemThread",
+    "reopenThread": "reopenAnnotationQueueItemThread",
+    "react": "toggleAnnotationQueueItemCommentReaction"
+  },
+  "annotationQueueReview": {
+    "submit": "reviewAnnotationQueueItem"
+  },
+  "datasets": {
+    "list": "listDatasets",
+    "listNames": "listDatasetNames",
+    "getTable": "getDatasetTable",
+    "getRow": "getDatasetRow",
+    "getColumns": "getDatasetColumns",
+    "createEmpty": "createEmptyDataset",
+    "createManual": "createDatasetManually",
+    "createFromFile": "createDatasetFromLocalFile",
+    "addRows": "addDatasetRows",
+    "addColumns": "addDatasetColumns",
+    "updateCell": "updateDatasetCell",
+    "deleteRow": "deleteDatasetRow",
+    "deleteColumn": "deleteDatasetColumn",
+    "download": "downloadDataset",
+    "jsonSchema": "getDatasetJsonSchema",
+    "evalStats": "getDatasetEvalStats",
+    "annotationSummary": "getDatasetAnnotationSummary",
+    "duplicate": "duplicateDataset",
+    "derivedVariables": "listDatasetDerivedVariables",
+    "baseColumns": "listDatasetBaseColumns"
+  },
+  "experiments": {
+    "list": "listExperiments",
+    "create": "createExperiment",
+    "get": "getExperiment",
+    "update": "updateExperiment",
+    "delete": "deleteExperiments",
+    "rows": "listExperimentRows",
+    "row": "getExperimentRow",
+    "stats": "getExperimentStats",
+    "download": "downloadExperiment",
+    "rerun": "rerunExperiment",
+    "stop": "stopExperiment",
+    "compare": "compareExperiments",
+    "comparisons": "listExperimentComparisons",
+    "jsonSchema": "getExperimentJsonSchema"
+  },
+  "simulations": {
+    "runs": "listSimulationRuns",
+    "metrics": "listSimulationMetrics",
+    "analytics": "getSimulationAnalytics"
+  },
+  "simulationAgentDefinitions": {
+    "list": "listAgentDefinitions",
+    "create": "createAgentDefinition",
+    "get": "getAgentDefinition",
+    "update": "updateAgentDefinition",
+    "delete": "deleteAgentDefinition"
+  },
+  "simulationRunTests": {
+    "list": "listRunTests",
+    "create": "createRunTest",
+    "get": "getRunTest",
+    "update": "updateRunTest",
+    "delete": "deleteRunTest",
+    "execute": "executeRunTest",
+    "status": "getRunTestStatus",
+    "analytics": "getRunTestAnalytics",
+    "executions": "listRunTestExecutions",
+    "callExecutions": "listRunTestCallExecutions"
+  },
+  "simulationTestExecutions": {
+    "list": "listTestExecutions",
+    "get": "getTestExecution",
+    "analytics": "getTestExecutionAnalytics",
+    "transcripts": "getTestExecutionTranscripts",
+    "kpis": "getTestExecutionKpis",
+    "performanceSummary": "getTestExecutionPerformanceSummary",
+    "cancel": "cancelTestExecution"
+  },
+  "simulationPersonas": {
+    "list": "listPersonas",
+    "create": "createPersona",
+    "get": "getPersona",
+    "update": "updatePersona",
+    "delete": "deletePersona"
+  },
+  "simulationScenarios": {
+    "list": "listScenarios",
+    "create": "createScenario",
+    "get": "getScenario",
+    "update": "updateScenario",
+    "delete": "deleteScenario"
+  },
+  "tracing": {
+    "projects": "listTraceProjects",
+    "traces": "listTraces",
+    "getTrace": "getTrace",
+    "voiceCalls": "listVoiceCalls",
+    "voiceCallDetail": "getVoiceCallDetail",
+    "properties": "listTraceProperties",
+    "updateTags": "updateTraceTags",
+    "graphMethods": "getTraceGraphMethods",
+    "sessions": "listTraceSessions",
+    "getSession": "getTraceSession",
+    "sessionGraph": "getTraceSessionGraphData",
+    "users": "listTraceUsers",
+    "annotationLabels": "listTraceAnnotationLabels",
+    "bulkAnnotation": "createBulkTraceAnnotation",
+    "issues": "listErrorFeedIssues",
+    "issue": "getErrorFeedIssue",
+    "issueStats": "getErrorFeedIssueStats"
+  },
+  "users": {
+    "current": "getCurrentUser",
+    "organizationMembers": "listOrganizationMembers",
+    "workspaces": "listWorkspaces",
+    "workspaceMembers": "listWorkspaceMembers",
+    "switchWorkspace": "switchWorkspace"
+  },
+  "alerts": {
+    "list": "listAlerts",
+    "create": "createAlert",
+    "get": "getAlert",
+    "update": "updateAlert",
+    "delete": "deleteAlert",
+    "metricOptions": "listAlertMetricOptions",
+    "previewGraph": "previewAlertGraph",
+    "graph": "getAlertGraph",
+    "details": "getAlertDetails",
+    "bulkMute": "bulkMuteAlerts",
+    "logs": "listAlertLogs",
+    "allLogs": "listAllAlertLogs",
+    "log": "getAlertLog",
+    "logsForAlert": "listAlertLogsForAlert",
+    "resolveLogs": "resolveAlertLogs"
+  }
+}

@@ -28,6 +28,7 @@ from fi.queues import (
     ImportAnnotationsResponse,
 )
 from fi.annotations import Annotation, BulkAnnotationResponse
+from fi.futureagi_client import FutureAGIAPIError, FutureAGIClient
 
 __all__ = [
     "__version__",
@@ -45,4 +46,6 @@ __all__ = [
     "ImportAnnotationsResponse",
     "Annotation",
     "BulkAnnotationResponse",
+    "FutureAGIClient",
+    "FutureAGIAPIError",
 ]
