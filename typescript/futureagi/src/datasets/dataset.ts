@@ -3,8 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
 import FormData from 'form-data';
-import { APIKeyAuth, APIKeyAuthConfig, ResponseHandler } from '../api/auth';
-import { HttpMethod, RequestConfig } from '../api/types';
+import { APIKeyAuth, ResponseHandler } from '../api/auth';
+import type { APIKeyAuthConfig } from '../api/auth';
+import { HttpMethod } from '../api/types';
+import type { RequestConfig } from '../api/types';
 import { Routes } from '../utils/routes';
 import { DEFAULT_SETTINGS } from '../utils/constants';
 import {
@@ -17,12 +19,6 @@ import {
     ServiceUnavailableError,
 } from '../utils/errors';
 import {
-    DatasetConfig,
-    DatasetTable,
-    HuggingfaceDatasetConfig,
-    Column,
-    Row,
-    Cell,
     createColumn,
     createRow,
     createCell,
@@ -30,6 +26,14 @@ import {
     DataTypeChoices,
     SourceChoices,
     ModelTypes,
+} from './types';
+import type {
+    DatasetConfig,
+    DatasetTable,
+    HuggingfaceDatasetConfig,
+    Column,
+    Row,
+    Cell,
 } from './types';
 
 const DEFAULT_API_TIMEOUT = 30000; // 30 seconds in milliseconds
@@ -739,17 +743,83 @@ export class Dataset extends APIKeyAuth {
             throw new DatasetValidationError("Prompt column name cannot be empty.");
         }
 
+        const validOptimizeTypes = ["PROMPT_TEMPLATE", "MODEL_PARAMETERS", "HYBRID"];
+        if (!validOptimizeTypes.includes(optimizeType)) {
+            throw new DatasetValidationError(
+                `Invalid optimizeType: '${optimizeType}'. Must be one of: ${validOptimizeTypes.join(", ")}`
+            );
+        }
+
+        const columnId = await this.getColumnId(promptColumnName);
+        if (!columnId) {
+            throw new DatasetError(
+                `Prompt column '${promptColumnName}' not found in dataset '${this._datasetConfig.name}'`
+            );
+        }
+
+        let evalTemplateIds: string[] = [];
+        try {
+            class MetricsByColumnResponseHandler extends ResponseHandler {
+                static _parseSuccess(response: AxiosResponse): any {
+                    return response.data;
+                }
+            }
+
+            const metricsResponse = await this.request<any>(
+                {
+                    method: HttpMethod.GET,
+                    url: `${this._baseUrl}/model-hub/metrics/by-column/`,
+                    params: { column_id: columnId },
+                    timeout: DEFAULT_API_TIMEOUT,
+                },
+                MetricsByColumnResponseHandler
+            ) as Record<string, any>;
+            const metrics = metricsResponse?.result ?? [];
+            if (Array.isArray(metrics)) {
+                evalTemplateIds = metrics
+                    .map((metric: Record<string, any>) => metric.id)
+                    .filter((id: unknown): id is string => typeof id === "string" && id.length > 0);
+            }
+        } catch {
+            evalTemplateIds = [];
+        }
+
+        if (evalTemplateIds.length === 0) {
+            const evalStats = await this.getEvalStats();
+            const stats = Array.isArray(evalStats?.result)
+                ? evalStats.result
+                : Array.isArray(evalStats)
+                    ? evalStats
+                    : [];
+            evalTemplateIds = stats
+                .map((metric: Record<string, any>) => metric.id)
+                .filter((id: unknown): id is string => typeof id === "string" && id.length > 0);
+        }
+
+        if (evalTemplateIds.length === 0) {
+            throw new DatasetError(
+                `No evaluation templates found for optimization in dataset '${this._datasetConfig.name}'.`
+            );
+        }
+
+        const userEvalTemplateMapping = Object.fromEntries(
+            evalTemplateIds.map((id) => [String(id), String(id)])
+        );
+
         const url = `${this._baseUrl}/${Routes.dataset_optimization_create}`;
         await this.request(
             {
                 method: HttpMethod.POST,
                 url,
                 json: {
-                    dataset_id: this._datasetConfig.id,
-                    optimization_name: optimizationName,
-                    prompt_column_name: promptColumnName,
+                    name: optimizationName,
+                    column_id: columnId,
                     optimize_type: optimizeType,
-                    model_config: modelConfig,
+                    user_eval_template_ids: evalTemplateIds,
+                    dataset_id: this._datasetConfig.id,
+                    model_config: modelConfig || {},
+                    messages: [],
+                    user_eval_template_mapping: userEvalTemplateMapping,
                 },
                 timeout: DEFAULT_API_TIMEOUT,
             },
@@ -1037,4 +1107,4 @@ export class Dataset extends APIKeyAuth {
             throw err;
         }
     }
-} 
+}

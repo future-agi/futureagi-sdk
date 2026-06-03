@@ -70,6 +70,30 @@ os.environ["FI_SECRET_KEY"] = "your_secret_key"
 os.environ["FI_BASE_URL"] = "https://api.futureagi.com"
 ```
 
+### OpenAPI-backed client
+
+For generated API surfaces, use the wrapper client. It handles Future AGI
+headers and keeps the generated code replaceable:
+
+```python
+from fi import FutureAGIClient
+
+client = FutureAGIClient(api_key="...", secret_key="...")
+queues = client.annotation_queues.list(limit=20)
+next_item = client.annotation_queues.items.next("queue-id")
+
+datasets = client.datasets.list(page=1)
+experiment_rows = client.experiments.rows("experiment-id")
+run_tests = client.simulations.run_tests.list()
+trace_projects = client.tracing.projects()
+me = client.users.current()
+alert_options = client.alerts.metric_options(project_id="project-id")
+```
+
+The low-level OpenAPI clients are regenerated with `scripts/generate-oss-sdk.sh`.
+Public method names are controlled by `openapi/sdk/operation-aliases.json` and
+`openapi/sdk/wrapper-map.json`.
+
 ---
 
 ## 🎯 Quick Start
@@ -247,6 +271,8 @@ kb_client.delete_kb(kb_ids=[kb.kb.id])
 |----------|---------|--------|
 | **Python** | `futureagi` | ✅ Full Support |
 | **TypeScript/JavaScript** | `@futureagi/sdk` | ✅ Full Support |
+| **Go** | `github.com/future-agi/futureagi-sdk/go/futureagi` | Generated low-level client |
+| **Java** | `com.futureagi:futureagi-sdk` | Generated low-level client |
 | **REST API** | cURL/HTTP | ✅ Available |
 
 ---

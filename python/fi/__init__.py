@@ -1,4 +1,12 @@
-__version__ = "0.0.1"
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("futureagi")
+except PackageNotFoundError:
+    # Source-tree fallback for environments that import `fi` before installing
+    # the package metadata. Keep this in sync with python/pyproject.toml.
+    __version__ = "0.6.13"
+__versions__ = __version__
 
 # Allow sibling `fi.*` packages (notably `fi.evals` shipped from the
 # ai-evaluation repo) to extend this namespace when both are installed.
@@ -20,9 +28,11 @@ from fi.queues import (
     ImportAnnotationsResponse,
 )
 from fi.annotations import Annotation, BulkAnnotationResponse
+from fi.futureagi_client import FutureAGIAPIError, FutureAGIClient
 
 __all__ = [
     "__version__",
+    "__versions__",
     "AnnotationQueue",
     "AnnotationLabel",
     "QueueDetail",
@@ -36,4 +46,6 @@ __all__ = [
     "ImportAnnotationsResponse",
     "Annotation",
     "BulkAnnotationResponse",
+    "FutureAGIClient",
+    "FutureAGIAPIError",
 ]

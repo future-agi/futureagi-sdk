@@ -22,6 +22,7 @@
     "postbuild": "echo '{\"type\": \"module\"}' > ./dist/esm/package.json",
     "build:watch": "tsc --build --watch tsconfig.json",
     "test": "jest",
+    "test:live": "tsx tests/live/smoke.ts",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint . --ext .ts",
@@ -55,10 +56,11 @@
   "homepage": "https://github.com/futureagi/futureagi#readme",
   "engines": {
     "node": ">=18.0.0",
-    "pnpm": ">=8.0.0"
+    "pnpm": ">=9.0.0"
   },
-  "packageManager": "pnpm@8.15.0",
+  "packageManager": "pnpm@10.12.1",
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
@@ -77,6 +79,7 @@
   "dependencies": {
     "@types/uuid": "^10.0.0",
     "axios": "^1.6.0",
+    "form-data": "^4.0.3",
     "uuid": "^11.1.0",
     "winston": "^3.11.0"
   },

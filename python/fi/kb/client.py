@@ -2,7 +2,7 @@ from typing import Dict, Optional, List, Union
 
 from fi.api.auth import APIKeyAuth, ResponseHandler
 from fi.api.types import HttpMethod, RequestConfig
-from fi.kb.types import KnowledgeBaseConfig
+from fi.kb.types import KnowledgeBaseConfig, StatusType
 
 from fi.utils.errors import InvalidAuthError
 from fi.utils.routes import Routes
@@ -107,6 +107,7 @@ class KnowledgeBase(APIKeyAuth):
 
         # Internal cache of the current KB (instance of KnowledgeBaseConfig)
         self.kb: Optional[KnowledgeBaseConfig] = None
+        self._valid_file_paths: List[str] = []
 
         if kb_name:
             try:
@@ -187,13 +188,17 @@ class KnowledgeBase(APIKeyAuth):
                     'X-Secret-Key': self._fi_secret_key,
                 }
                 
-                response = requests.patch(
-                    url=url,
-                    data=data,
-                    files=files,  
-                    headers=headers,
-                    timeout=300
-                )
+                request_kwargs = {
+                    "url": url,
+                    "headers": headers,
+                    "timeout": 300,
+                }
+                if files:
+                    request_kwargs.update({"data": data, "files": files})
+                else:
+                    request_kwargs["json"] = data
+
+                response = requests.patch(**request_kwargs)
                 
                 KBResponseHandler._handle_error(response)
                 parsed_result_data = KBResponseHandler._parse_success(response)
@@ -263,7 +268,7 @@ class KnowledgeBase(APIKeyAuth):
                 "kb_id": str(self.kb.id)
             }
             
-            response = self.request(
+            self.request(
                 config=RequestConfig(
                     method=method,
                     url=url,
@@ -338,7 +343,7 @@ class KnowledgeBase(APIKeyAuth):
             url = self._base_url + "/" + Routes.knowledge_base.value       
             json_payload = {"kb_ids": resolved_ids}
             
-            response = self.request(
+            self.request(
                 config=RequestConfig(
                     method=method,
                     url=url,
@@ -376,7 +381,6 @@ class KnowledgeBase(APIKeyAuth):
         try:
             data = {"name": final_kb_name}
                 
-            method = HttpMethod.POST
             url = self._base_url + "/" + Routes.knowledge_base.value
             
             files = []
@@ -406,13 +410,17 @@ class KnowledgeBase(APIKeyAuth):
                     'X-Secret-Key': self._fi_secret_key,
                 }
                 
-                response = requests.post(
-                    url=url,
-                    data=data,
-                    files=files,  
-                    headers=headers,
-                    timeout=300
-                )
+                request_kwargs = {
+                    "url": url,
+                    "headers": headers,
+                    "timeout": 300,
+                }
+                if files:
+                    request_kwargs.update({"data": data, "files": files})
+                else:
+                    request_kwargs["json"] = data
+
+                response = requests.post(**request_kwargs)
                 KBResponseHandler._handle_error(response)
                 parsed_result_data = KBResponseHandler._parse_success(response)
 
@@ -438,6 +446,28 @@ class KnowledgeBase(APIKeyAuth):
                 if hasattr(fh, 'close') and not fh.closed:
                     fh.close()
             raise SDKException("Failed to create the Knowledge Base due to an unexpected error.", cause=e)
+
+    def list_kbs(self, search: Optional[str] = None) -> List[KnowledgeBaseConfig]:
+        """List knowledge bases visible to the authenticated user."""
+        params = {"search": search} if search else {}
+        response = self.request(
+            config=RequestConfig(
+                method=HttpMethod.GET,
+                url=self._base_url + "/" + Routes.knowledge_base_list.value,
+                params=params,
+            ),
+            response_handler=KBResponseHandler,
+        )
+        table_data = response["result"].get("table_data") or []
+        return [
+            KnowledgeBaseConfig(
+                id=item.get("id"),
+                name=item.get("name"),
+                files=item.get("files") or [],
+                status=item.get("status") or StatusType.PROCESSING.value,
+            )
+            for item in table_data
+        ]
 
     def _check_file_paths(self, file_paths: Union[str, List[str]]) -> bool:
         """
@@ -518,15 +548,7 @@ class KnowledgeBase(APIKeyAuth):
         Returns:
             Knowledge BaseConfig: Knowledge Base Config object 
         """
-        response = self.request(
-            config=RequestConfig(
-                method=HttpMethod.GET,
-                url=self._base_url + "/" + Routes.knowledge_base_list.value,
-                params={"search": kb_name},
-            ),
-            response_handler=KBResponseHandler,
-        )
-        data = response["result"].get("table_data")
-        if not data:
+        matches = self.list_kbs(kb_name)
+        if not matches:
             raise SDKException(f"Knowledge Base with name '{kb_name}' not found.")
-        return KnowledgeBaseConfig(id=data[0].get("id"), name=data[0].get("name"))
+        return matches[0]

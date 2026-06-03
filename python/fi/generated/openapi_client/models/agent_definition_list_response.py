@@ -1,0 +1,461 @@
+from __future__ import annotations
+
+import datetime
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, cast
+from uuid import UUID
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+from dateutil.parser import isoparse
+
+from ..models.agent_definition_list_response_agent_type import (
+    AgentDefinitionListResponseAgentType,
+)
+from ..models.agent_definition_list_response_language import (
+    AgentDefinitionListResponseLanguage,
+)
+from ..models.agent_definition_list_response_languages import (
+    AgentDefinitionListResponseLanguages,
+)
+from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.agent_definition_list_response_model_details import (
+        AgentDefinitionListResponseModelDetails,
+    )
+    from ..models.agent_definition_list_response_websocket_headers import (
+        AgentDefinitionListResponseWebsocketHeaders,
+    )
+
+
+T = TypeVar("T", bound="AgentDefinitionListResponse")
+
+
+@_attrs_define
+class AgentDefinitionListResponse:
+    """
+    Attributes:
+        id (UUID | Unset):
+        agent_name (str | Unset): Name of the AI agent
+        agent_type (AgentDefinitionListResponseAgentType | Unset):
+        contact_number (None | str | Unset): Phone number associated with the AI agent
+        inbound (bool | Unset): Whether the agent handles inbound calls
+        description (str | Unset): Detailed description of the AI agent's purpose and capabilities
+        assistant_id (None | str | Unset): External identifier for the assistant
+        provider (None | str | Unset): Provider of the AI agent
+        language (AgentDefinitionListResponseLanguage | Unset): Language of the agent
+        languages (list[AgentDefinitionListResponseLanguages] | None | Unset):
+        websocket_url (None | str | Unset): WebSocket URL for real-time communication with the agent
+        websocket_headers (AgentDefinitionListResponseWebsocketHeaders | Unset): Headers to be sent to the websocket
+            server
+        workspace (None | Unset | UUID):
+        knowledge_base (None | Unset | UUID):
+        organization (UUID | Unset): Organization this agent definition belongs to
+        created_at (datetime.datetime | Unset):
+        updated_at (datetime.datetime | Unset):
+        latest_version (str | Unset):
+        latest_version_id (str | Unset):
+        model_details (AgentDefinitionListResponseModelDetails | Unset): Details of the model
+        model (None | str | Unset): Model of the agent
+    """
+
+    id: UUID | Unset = UNSET
+    agent_name: str | Unset = UNSET
+    agent_type: AgentDefinitionListResponseAgentType | Unset = UNSET
+    contact_number: None | str | Unset = UNSET
+    inbound: bool | Unset = UNSET
+    description: str | Unset = UNSET
+    assistant_id: None | str | Unset = UNSET
+    provider: None | str | Unset = UNSET
+    language: AgentDefinitionListResponseLanguage | Unset = UNSET
+    languages: list[AgentDefinitionListResponseLanguages] | None | Unset = UNSET
+    websocket_url: None | str | Unset = UNSET
+    websocket_headers: AgentDefinitionListResponseWebsocketHeaders | Unset = UNSET
+    workspace: None | Unset | UUID = UNSET
+    knowledge_base: None | Unset | UUID = UNSET
+    organization: UUID | Unset = UNSET
+    created_at: datetime.datetime | Unset = UNSET
+    updated_at: datetime.datetime | Unset = UNSET
+    latest_version: str | Unset = UNSET
+    latest_version_id: str | Unset = UNSET
+    model_details: AgentDefinitionListResponseModelDetails | Unset = UNSET
+    model: None | str | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        id: str | Unset = UNSET
+        if not isinstance(self.id, Unset):
+            id = str(self.id)
+
+        agent_name = self.agent_name
+
+        agent_type: str | Unset = UNSET
+        if not isinstance(self.agent_type, Unset):
+            agent_type = self.agent_type.value
+
+        contact_number: None | str | Unset
+        if isinstance(self.contact_number, Unset):
+            contact_number = UNSET
+        else:
+            contact_number = self.contact_number
+
+        inbound = self.inbound
+
+        description = self.description
+
+        assistant_id: None | str | Unset
+        if isinstance(self.assistant_id, Unset):
+            assistant_id = UNSET
+        else:
+            assistant_id = self.assistant_id
+
+        provider: None | str | Unset
+        if isinstance(self.provider, Unset):
+            provider = UNSET
+        else:
+            provider = self.provider
+
+        language: str | Unset = UNSET
+        if not isinstance(self.language, Unset):
+            language = self.language.value
+
+        languages: list[str] | None | Unset
+        if isinstance(self.languages, Unset):
+            languages = UNSET
+        elif isinstance(self.languages, list):
+            languages = []
+            for languages_type_0_item_data in self.languages:
+                languages_type_0_item = languages_type_0_item_data.value
+                languages.append(languages_type_0_item)
+
+        else:
+            languages = self.languages
+
+        websocket_url: None | str | Unset
+        if isinstance(self.websocket_url, Unset):
+            websocket_url = UNSET
+        else:
+            websocket_url = self.websocket_url
+
+        websocket_headers: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.websocket_headers, Unset):
+            websocket_headers = self.websocket_headers.to_dict()
+
+        workspace: None | str | Unset
+        if isinstance(self.workspace, Unset):
+            workspace = UNSET
+        elif isinstance(self.workspace, UUID):
+            workspace = str(self.workspace)
+        else:
+            workspace = self.workspace
+
+        knowledge_base: None | str | Unset
+        if isinstance(self.knowledge_base, Unset):
+            knowledge_base = UNSET
+        elif isinstance(self.knowledge_base, UUID):
+            knowledge_base = str(self.knowledge_base)
+        else:
+            knowledge_base = self.knowledge_base
+
+        organization: str | Unset = UNSET
+        if not isinstance(self.organization, Unset):
+            organization = str(self.organization)
+
+        created_at: str | Unset = UNSET
+        if not isinstance(self.created_at, Unset):
+            created_at = self.created_at.isoformat()
+
+        updated_at: str | Unset = UNSET
+        if not isinstance(self.updated_at, Unset):
+            updated_at = self.updated_at.isoformat()
+
+        latest_version = self.latest_version
+
+        latest_version_id = self.latest_version_id
+
+        model_details: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.model_details, Unset):
+            model_details = self.model_details.to_dict()
+
+        model: None | str | Unset
+        if isinstance(self.model, Unset):
+            model = UNSET
+        else:
+            model = self.model
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update({})
+        if id is not UNSET:
+            field_dict["id"] = id
+        if agent_name is not UNSET:
+            field_dict["agent_name"] = agent_name
+        if agent_type is not UNSET:
+            field_dict["agent_type"] = agent_type
+        if contact_number is not UNSET:
+            field_dict["contact_number"] = contact_number
+        if inbound is not UNSET:
+            field_dict["inbound"] = inbound
+        if description is not UNSET:
+            field_dict["description"] = description
+        if assistant_id is not UNSET:
+            field_dict["assistant_id"] = assistant_id
+        if provider is not UNSET:
+            field_dict["provider"] = provider
+        if language is not UNSET:
+            field_dict["language"] = language
+        if languages is not UNSET:
+            field_dict["languages"] = languages
+        if websocket_url is not UNSET:
+            field_dict["websocket_url"] = websocket_url
+        if websocket_headers is not UNSET:
+            field_dict["websocket_headers"] = websocket_headers
+        if workspace is not UNSET:
+            field_dict["workspace"] = workspace
+        if knowledge_base is not UNSET:
+            field_dict["knowledge_base"] = knowledge_base
+        if organization is not UNSET:
+            field_dict["organization"] = organization
+        if created_at is not UNSET:
+            field_dict["created_at"] = created_at
+        if updated_at is not UNSET:
+            field_dict["updated_at"] = updated_at
+        if latest_version is not UNSET:
+            field_dict["latest_version"] = latest_version
+        if latest_version_id is not UNSET:
+            field_dict["latest_version_id"] = latest_version_id
+        if model_details is not UNSET:
+            field_dict["model_details"] = model_details
+        if model is not UNSET:
+            field_dict["model"] = model
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.agent_definition_list_response_model_details import (
+            AgentDefinitionListResponseModelDetails,
+        )
+        from ..models.agent_definition_list_response_websocket_headers import (
+            AgentDefinitionListResponseWebsocketHeaders,
+        )
+
+        d = dict(src_dict)
+        _id = d.pop("id", UNSET)
+        id: UUID | Unset
+        if isinstance(_id, Unset):
+            id = UNSET
+        else:
+            id = UUID(_id)
+
+        agent_name = d.pop("agent_name", UNSET)
+
+        _agent_type = d.pop("agent_type", UNSET)
+        agent_type: AgentDefinitionListResponseAgentType | Unset
+        if isinstance(_agent_type, Unset):
+            agent_type = UNSET
+        else:
+            agent_type = AgentDefinitionListResponseAgentType(_agent_type)
+
+        def _parse_contact_number(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        contact_number = _parse_contact_number(d.pop("contact_number", UNSET))
+
+        inbound = d.pop("inbound", UNSET)
+
+        description = d.pop("description", UNSET)
+
+        def _parse_assistant_id(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        assistant_id = _parse_assistant_id(d.pop("assistant_id", UNSET))
+
+        def _parse_provider(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        provider = _parse_provider(d.pop("provider", UNSET))
+
+        _language = d.pop("language", UNSET)
+        language: AgentDefinitionListResponseLanguage | Unset
+        if isinstance(_language, Unset):
+            language = UNSET
+        else:
+            language = AgentDefinitionListResponseLanguage(_language)
+
+        def _parse_languages(
+            data: object,
+        ) -> list[AgentDefinitionListResponseLanguages] | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                languages_type_0 = []
+                _languages_type_0 = data
+                for languages_type_0_item_data in _languages_type_0:
+                    languages_type_0_item = AgentDefinitionListResponseLanguages(
+                        languages_type_0_item_data
+                    )
+
+                    languages_type_0.append(languages_type_0_item)
+
+                return languages_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(list[AgentDefinitionListResponseLanguages] | None | Unset, data)
+
+        languages = _parse_languages(d.pop("languages", UNSET))
+
+        def _parse_websocket_url(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        websocket_url = _parse_websocket_url(d.pop("websocket_url", UNSET))
+
+        _websocket_headers = d.pop("websocket_headers", UNSET)
+        websocket_headers: AgentDefinitionListResponseWebsocketHeaders | Unset
+        if isinstance(_websocket_headers, Unset):
+            websocket_headers = UNSET
+        else:
+            websocket_headers = AgentDefinitionListResponseWebsocketHeaders.from_dict(
+                _websocket_headers
+            )
+
+        def _parse_workspace(data: object) -> None | Unset | UUID:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                workspace_type_0 = UUID(data)
+
+                return workspace_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | Unset | UUID, data)
+
+        workspace = _parse_workspace(d.pop("workspace", UNSET))
+
+        def _parse_knowledge_base(data: object) -> None | Unset | UUID:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                knowledge_base_type_0 = UUID(data)
+
+                return knowledge_base_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | Unset | UUID, data)
+
+        knowledge_base = _parse_knowledge_base(d.pop("knowledge_base", UNSET))
+
+        _organization = d.pop("organization", UNSET)
+        organization: UUID | Unset
+        if isinstance(_organization, Unset):
+            organization = UNSET
+        else:
+            organization = UUID(_organization)
+
+        _created_at = d.pop("created_at", UNSET)
+        created_at: datetime.datetime | Unset
+        if isinstance(_created_at, Unset):
+            created_at = UNSET
+        else:
+            created_at = isoparse(_created_at)
+
+        _updated_at = d.pop("updated_at", UNSET)
+        updated_at: datetime.datetime | Unset
+        if isinstance(_updated_at, Unset):
+            updated_at = UNSET
+        else:
+            updated_at = isoparse(_updated_at)
+
+        latest_version = d.pop("latest_version", UNSET)
+
+        latest_version_id = d.pop("latest_version_id", UNSET)
+
+        _model_details = d.pop("model_details", UNSET)
+        model_details: AgentDefinitionListResponseModelDetails | Unset
+        if isinstance(_model_details, Unset):
+            model_details = UNSET
+        else:
+            model_details = AgentDefinitionListResponseModelDetails.from_dict(
+                _model_details
+            )
+
+        def _parse_model(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        model = _parse_model(d.pop("model", UNSET))
+
+        agent_definition_list_response = cls(
+            id=id,
+            agent_name=agent_name,
+            agent_type=agent_type,
+            contact_number=contact_number,
+            inbound=inbound,
+            description=description,
+            assistant_id=assistant_id,
+            provider=provider,
+            language=language,
+            languages=languages,
+            websocket_url=websocket_url,
+            websocket_headers=websocket_headers,
+            workspace=workspace,
+            knowledge_base=knowledge_base,
+            organization=organization,
+            created_at=created_at,
+            updated_at=updated_at,
+            latest_version=latest_version,
+            latest_version_id=latest_version_id,
+            model_details=model_details,
+            model=model,
+        )
+
+        agent_definition_list_response.additional_properties = d
+        return agent_definition_list_response
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties
