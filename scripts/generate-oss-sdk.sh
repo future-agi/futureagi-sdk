@@ -3,8 +3,9 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SPEC="$ROOT_DIR/openapi/sdk/generated/futureagi-sdk.openapi.json"
+SOURCE_SWAGGER="${1:-"${SOURCE_SWAGGER:-"$ROOT_DIR/../future-agi/api_contracts/openapi/swagger.json"}"}"
 
-"$ROOT_DIR/scripts/build-sdk-openapi.sh"
+"$ROOT_DIR/scripts/build-sdk-openapi.sh" "$SOURCE_SWAGGER"
 
 rm -rf "$ROOT_DIR/typescript/futureagi/src/generated/openapi"
 npx --yes @hey-api/openapi-ts \

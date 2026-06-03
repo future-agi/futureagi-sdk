@@ -2,9 +2,16 @@ name: SDK Compliance
 
 on:
   pull_request:
+    branches:
+      - dev
+      - main
     paths:
       - ".github/workflows/sdk-compliance.yml"
+      - "go/futureagi/**"
+      - "java/futureagi/**"
       - "python/**"
+      - "openapi/sdk/**"
+      - "scripts/**"
       - "typescript/futureagi/**"
       - "tests/compliance/**"
   push:
@@ -13,7 +20,11 @@ on:
       - main
     paths:
       - ".github/workflows/sdk-compliance.yml"
+      - "go/futureagi/**"
+      - "java/futureagi/**"
       - "python/**"
+      - "openapi/sdk/**"
+      - "scripts/**"
       - "typescript/futureagi/**"
       - "tests/compliance/**"
   workflow_dispatch:
@@ -67,29 +78,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.0
+          run_install: false
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: npm
-          cache-dependency-path: typescript/futureagi/package-lock.json
-
-      - name: Enable pnpm for package scripts
-        run: |
-          corepack enable
-          corepack prepare pnpm@8.15.0 --activate
+          cache: pnpm
+          cache-dependency-path: typescript/futureagi/pnpm-lock.yaml
 
       - name: Install TypeScript SDK
-        run: npm ci --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Type check
-        run: npm run typecheck
+        run: pnpm run typecheck
 
       - name: Run TypeScript tests
-        run: npm test -- --runInBand
+        run: pnpm test -- --runInBand
 
       - name: Build TypeScript SDK
-        run: npm run build
+        run: pnpm run build
 
   typescript-compliance:
     name: TypeScript SDK compliance
@@ -99,3 +111,32 @@ jobs:
       adapter-dockerfile: typescript/futureagi/tests/compliance/Dockerfile
       adapter-context: "."
       report-name: futureagi-sdk-typescript-compliance-report
+
+  generated-sdk-builds:
+    name: Generated Go and Java SDK builds
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache-dependency-path: go/futureagi/go.sum
+
+      - name: Test Go SDK
+        working-directory: go/futureagi
+        run: go test ./...
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+          cache-dependency-path: java/futureagi/pom.xml
+
+      - name: Build Java SDK
+        run: mvn -B -f java/futureagi/pom.xml -DskipTests package

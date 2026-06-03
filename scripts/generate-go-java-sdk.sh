@@ -3,9 +3,10 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SPEC="$ROOT_DIR/openapi/sdk/generated/futureagi-sdk.openapi.json"
+SOURCE_SWAGGER="${1:-"${SOURCE_SWAGGER:-"$ROOT_DIR/../future-agi/api_contracts/openapi/swagger.json"}"}"
 GENERATOR_IMAGE="${OPENAPI_GENERATOR_IMAGE:-openapitools/openapi-generator-cli:v7.12.0}"
 
-"$ROOT_DIR/scripts/build-sdk-openapi.sh"
+"$ROOT_DIR/scripts/build-sdk-openapi.sh" "$SOURCE_SWAGGER"
 
 docker run --rm "$GENERATOR_IMAGE" version >/dev/null
 
