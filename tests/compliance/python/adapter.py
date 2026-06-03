@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 
 import pandas as pd
 
+from fi import FutureAGIClient
 from fi.annotations import Annotation
 from fi.api.auth import APIKeyAuth
 from fi.api.apikeys import ProviderAPIKeyClient
@@ -63,6 +64,10 @@ class Handler(BaseHTTPRequestHandler):
                         "knowledge_base_lifecycle",
                         "prompt_lifecycle",
                         "provider_api_key_lifecycle",
+                        "futureagi_client_basic",
+                        "evals_lifecycle",
+                        "simulation_lifecycle",
+                        "tracing_lifecycle",
                     ],
                 }
             )
@@ -104,6 +109,22 @@ class Handler(BaseHTTPRequestHandler):
 
         if parsed.path == "/raw-request":
             self._handle_raw_request(payload)
+            return
+
+        if parsed.path == "/futureagi/basic":
+            self._handle_futureagi_basic(payload)
+            return
+
+        if parsed.path == "/evals/lifecycle":
+            self._handle_evals_lifecycle(payload)
+            return
+
+        if parsed.path == "/simulation/lifecycle":
+            self._handle_simulation_lifecycle(payload)
+            return
+
+        if parsed.path == "/tracing/lifecycle":
+            self._handle_tracing_lifecycle(payload)
             return
 
         if parsed.path == "/annotation/log":
@@ -172,8 +193,271 @@ class Handler(BaseHTTPRequestHandler):
                     timeout=payload.get("timeout") or STATE.timeout,
                 )
             )
-            STATE.calls.append({"operation": "raw-request", "path": path, "method": method.value})
+            STATE.calls.append(
+                {"operation": "raw-request", "path": path, "method": method.value}
+            )
             self._write_json(_response_payload(response))
+        except Exception as exc:
+            self._write_json({"success": False, "error": str(exc)}, status=500)
+
+    def _handle_futureagi_basic(self, payload: dict[str, Any]) -> None:
+        try:
+            _ensure_initialized()
+            with _futureagi_client() as client:
+                current_user = client.users.current()
+                workspaces = client.users.workspaces(limit=payload.get("limit") or 5)
+                datasets = client.datasets.list(limit=payload.get("limit") or 5)
+                simulation_run_tests = client.simulations.run_tests.list(
+                    limit=payload.get("limit") or 5
+                )
+                trace_projects = client.tracing.projects(
+                    limit=payload.get("limit") or 5
+                )
+            STATE.calls.append({"operation": "futureagi/basic"})
+            self._write_json(
+                {
+                    "success": True,
+                    "result": {
+                        "current_user": _jsonable(current_user),
+                        "workspaces": _jsonable(workspaces),
+                        "datasets": _jsonable(datasets),
+                        "simulation_run_tests": _jsonable(simulation_run_tests),
+                        "trace_projects": _jsonable(trace_projects),
+                    },
+                }
+            )
+        except Exception as exc:
+            self._write_json({"success": False, "error": str(exc)}, status=500)
+
+    def _handle_evals_lifecycle(self, payload: dict[str, Any]) -> None:
+        try:
+            _ensure_initialized()
+            template_payload = payload.get("template") or {}
+            template_id = _required(payload, "template_id")
+            version_id = _required(payload, "version_id")
+            dataset_id = _required(payload, "dataset_id")
+            eval_id = _required(payload, "eval_id")
+            sdk_eval_id = _required(payload, "sdk_eval_id")
+            with _futureagi_client() as client:
+                listed = client.evals.list_templates(payload.get("list_body") or {})
+                created = client.evals.create_template(template_payload)
+                fetched = client.evals.get_template(template_id)
+                updated = client.evals.update_template(
+                    template_id, payload.get("template_update") or template_payload
+                )
+                usage = client.evals.template_usage(template_id)
+                versions = client.evals.template_versions(template_id)
+                created_version = client.evals.create_template_version(
+                    template_id, payload.get("version") or {}
+                )
+                restored = client.evals.restore_template_version(
+                    template_id, version_id
+                )
+                defaulted = client.evals.set_default_template_version(
+                    template_id, version_id
+                )
+                sdk_evals = client.evals.list_sdk_evals()
+                configured = client.evals.configure(payload.get("configure") or {})
+                sdk_run = client.evals.run_v2(payload.get("run") or {})
+                sdk_result = client.evals.get_run_v2(sdk_eval_id)
+                dataset_evals = client.evals.dataset_evals(dataset_id)
+                structure = client.evals.dataset_eval_structure(
+                    dataset_id,
+                    eval_id,
+                    **(payload.get("eval_structure_query") or {"eval_type": "preset"}),
+                )
+                preview = client.evals.preview_dataset_eval(
+                    dataset_id, payload.get("preview") or {}
+                )
+                started = client.evals.start_dataset_evals(
+                    dataset_id, payload.get("start") or {}
+                )
+                delete_result = client.evals.delete_template(
+                    payload.get("delete") or {"eval_id": template_id}
+                )
+            STATE.calls.append(
+                {"operation": "evals/lifecycle", "template_id": template_id}
+            )
+            self._write_json(
+                {
+                    "success": True,
+                    "result": _jsonable(
+                        {
+                            "listed": listed,
+                            "created": created,
+                            "fetched": fetched,
+                            "updated": updated,
+                            "usage": usage,
+                            "versions": versions,
+                            "created_version": created_version,
+                            "restored": restored,
+                            "defaulted": defaulted,
+                            "sdk_evals": sdk_evals,
+                            "configured": configured,
+                            "sdk_run": sdk_run,
+                            "sdk_result": sdk_result,
+                            "dataset_evals": dataset_evals,
+                            "structure": structure,
+                            "preview": preview,
+                            "started": started,
+                            "delete": delete_result,
+                        }
+                    ),
+                }
+            )
+        except Exception as exc:
+            self._write_json({"success": False, "error": str(exc)}, status=500)
+
+    def _handle_simulation_lifecycle(self, payload: dict[str, Any]) -> None:
+        try:
+            _ensure_initialized()
+            agent_id = _required(payload, "agent_id")
+            persona_id = _required(payload, "persona_id")
+            scenario_id = _required(payload, "scenario_id")
+            run_test_id = _required(payload, "run_test_id")
+            eval_config_id = _required(payload, "eval_config_id")
+            test_execution_id = _required(payload, "test_execution_id")
+            run_test_name = (payload.get("run_test") or {}).get(
+                "name"
+            ) or "SDK run test"
+            with _futureagi_client() as client:
+                persona = client.simulations.personas.create(
+                    payload.get("persona") or {}
+                )
+                scenario = client.simulations.scenarios.create(
+                    payload.get("scenario") or {}
+                )
+                agent = client.simulations.agent_definitions.create(
+                    payload.get("agent") or {}
+                )
+                run_test = client.simulations.run_tests.create(
+                    payload.get("run_test") or {}
+                )
+                runs = client.simulations.runs(limit=5, run_test_name=run_test_name)
+                metrics = client.simulations.metrics(
+                    limit=5, run_test_name=run_test_name
+                )
+                analytics = client.simulations.analytics(run_test_name=run_test_name)
+                fetched_run_test = client.simulations.run_tests.get(run_test_id)
+                eval_configs = client.simulations.run_tests.add_eval_configs(
+                    run_test_id, payload.get("eval_configs") or {}
+                )
+                eval_structure = client.simulations.run_tests.eval_config_structure(
+                    run_test_id, eval_config_id
+                )
+                eval_summary = client.simulations.run_tests.eval_summary(
+                    run_test_id, test_execution_id=test_execution_id
+                )
+                new_evals = client.simulations.run_tests.run_new_evals(
+                    run_test_id, payload.get("run_new_evals") or {}
+                )
+                executed = client.simulations.run_tests.execute(
+                    run_test_id, payload.get("execute") or {}
+                )
+                status = client.simulations.run_tests.status(run_test_id)
+                executions = client.simulations.run_tests.executions(run_test_id)
+                test_execution = client.simulations.test_executions.get(
+                    test_execution_id
+                )
+                canceled = client.simulations.test_executions.cancel(
+                    test_execution_id, payload.get("cancel") or {}
+                )
+                deleted_run_test = client.simulations.run_tests.delete(run_test_id)
+                deleted_agent = client.simulations.agent_definitions.delete(agent_id)
+                deleted_scenario = client.simulations.scenarios.delete(scenario_id)
+                deleted_persona = client.simulations.personas.delete(persona_id)
+            STATE.calls.append(
+                {"operation": "simulation/lifecycle", "run_test_id": run_test_id}
+            )
+            self._write_json(
+                {
+                    "success": True,
+                    "result": _jsonable(
+                        {
+                            "runs": runs,
+                            "metrics": metrics,
+                            "analytics": analytics,
+                            "persona": persona,
+                            "scenario": scenario,
+                            "agent": agent,
+                            "run_test": run_test,
+                            "fetched_run_test": fetched_run_test,
+                            "eval_configs": eval_configs,
+                            "eval_structure": eval_structure,
+                            "eval_summary": eval_summary,
+                            "new_evals": new_evals,
+                            "executed": executed,
+                            "status": status,
+                            "executions": executions,
+                            "test_execution": test_execution,
+                            "canceled": canceled,
+                            "deleted_run_test": deleted_run_test,
+                            "deleted_agent": deleted_agent,
+                            "deleted_scenario": deleted_scenario,
+                            "deleted_persona": deleted_persona,
+                        }
+                    ),
+                }
+            )
+        except Exception as exc:
+            self._write_json({"success": False, "error": str(exc)}, status=500)
+
+    def _handle_tracing_lifecycle(self, payload: dict[str, Any]) -> None:
+        try:
+            _ensure_initialized()
+            project_id = _required(payload, "project_id")
+            trace_id = _required(payload, "trace_id")
+            session_id = _required(payload, "session_id")
+            cluster_id = _required(payload, "cluster_id")
+            with _futureagi_client() as client:
+                projects = client.tracing.projects(limit=5)
+                traces = client.tracing.traces(project_id=project_id, limit=5)
+                trace = client.tracing.get_trace(trace_id)
+                properties = client.tracing.properties(project_id=project_id)
+                updated_tags = client.tracing.update_tags(
+                    trace_id, payload.get("tags") or {}
+                )
+                graph_methods = client.tracing.graph_methods(
+                    payload.get("graph_methods") or {}
+                )
+                sessions = client.tracing.sessions(project_id=project_id, limit=5)
+                session = client.tracing.get_session(session_id)
+                session_graph = client.tracing.session_graph(
+                    payload.get("session_graph") or {}
+                )
+                users = client.tracing.users(project_id=project_id, limit=5)
+                labels = client.tracing.annotation_labels(project_id=project_id)
+                bulk_annotation = client.tracing.bulk_annotation(
+                    payload.get("bulk_annotation") or {}
+                )
+                issues = client.tracing.issues(project_id=project_id, limit=5)
+                issue = client.tracing.issue(cluster_id)
+                issue_stats = client.tracing.issue_stats(project_id=project_id)
+            STATE.calls.append({"operation": "tracing/lifecycle", "trace_id": trace_id})
+            self._write_json(
+                {
+                    "success": True,
+                    "result": _jsonable(
+                        {
+                            "projects": projects,
+                            "traces": traces,
+                            "trace": trace,
+                            "properties": properties,
+                            "updated_tags": updated_tags,
+                            "graph_methods": graph_methods,
+                            "sessions": sessions,
+                            "session": session,
+                            "session_graph": session_graph,
+                            "users": users,
+                            "labels": labels,
+                            "bulk_annotation": bulk_annotation,
+                            "issues": issues,
+                            "issue": issue,
+                            "issue_stats": issue_stats,
+                        }
+                    ),
+                }
+            )
         except Exception as exc:
             self._write_json({"success": False, "error": str(exc)}, status=500)
 
@@ -207,7 +491,9 @@ class Handler(BaseHTTPRequestHandler):
                 source_id=source_id,
                 timeout=payload.get("timeout") or STATE.timeout,
             )
-            STATE.calls.append({"operation": "annotation-score/lifecycle", "source_id": source_id})
+            STATE.calls.append(
+                {"operation": "annotation-score/lifecycle", "source_id": source_id}
+            )
             self._write_json(
                 {
                     "success": True,
@@ -245,7 +531,9 @@ class Handler(BaseHTTPRequestHandler):
                 fi_secret_key=STATE.secret_key,
                 fi_base_url=STATE.base_url,
             )
-            STATE.calls.append({"operation": "provider-api-key/lifecycle", "provider": provider.value})
+            STATE.calls.append(
+                {"operation": "provider-api-key/lifecycle", "provider": provider.value}
+            )
             self._write_json(
                 {
                     "success": True,
@@ -276,7 +564,9 @@ class Handler(BaseHTTPRequestHandler):
                 name=payload.get("project_name"),
                 timeout=payload.get("timeout") or STATE.timeout,
             )
-            STATE.calls.append({"operation": "annotation/metadata", "labels": len(labels)})
+            STATE.calls.append(
+                {"operation": "annotation/metadata", "labels": len(labels)}
+            )
             self._write_json(
                 {
                     "success": True,
@@ -310,7 +600,9 @@ class Handler(BaseHTTPRequestHandler):
                 timeout=payload.get("timeout") or STATE.timeout,
             )
             labels = client.list_labels(timeout=payload.get("timeout") or STATE.timeout)
-            fetched_label = client.get_label(label_id=label.id, timeout=payload.get("timeout") or STATE.timeout)
+            fetched_label = client.get_label(
+                label_id=label.id, timeout=payload.get("timeout") or STATE.timeout
+            )
             queue = client.create(
                 name=_required(queue_payload, "name"),
                 description=queue_payload.get("description"),
@@ -324,17 +616,30 @@ class Handler(BaseHTTPRequestHandler):
                 search=queue.name,
                 timeout=payload.get("timeout") or STATE.timeout,
             )
-            fetched_queue = client.get(queue_id=queue.id, timeout=payload.get("timeout") or STATE.timeout)
+            fetched_queue = client.get(
+                queue_id=queue.id, timeout=payload.get("timeout") or STATE.timeout
+            )
             updated_queue = client.update(
                 queue_id=queue.id,
                 description=queue_payload.get("updated_description"),
                 timeout=payload.get("timeout") or STATE.timeout,
             )
-            activated_queue = client.activate(queue_id=queue.id, timeout=payload.get("timeout") or STATE.timeout)
-            add_label = client.add_label(queue_id=queue.id, label_id=label.id, timeout=payload.get("timeout") or STATE.timeout)
+            activated_queue = client.activate(
+                queue_id=queue.id, timeout=payload.get("timeout") or STATE.timeout
+            )
+            add_label = client.add_label(
+                queue_id=queue.id,
+                label_id=label.id,
+                timeout=payload.get("timeout") or STATE.timeout,
+            )
             added_items = client.add_items(
                 queue_id=queue.id,
-                items=[{"source_type": _required(item_payload, "source_type"), "source_id": _required(item_payload, "source_id")}],
+                items=[
+                    {
+                        "source_type": _required(item_payload, "source_type"),
+                        "source_id": _required(item_payload, "source_id"),
+                    }
+                ],
                 timeout=payload.get("timeout") or STATE.timeout,
             )
             items = client.list_items(
@@ -362,25 +667,45 @@ class Handler(BaseHTTPRequestHandler):
                 item_id=item_id,
                 timeout=payload.get("timeout") or STATE.timeout,
             )
-            skipped = client.skip_item(queue_id=queue.id, item_id=item_id, timeout=payload.get("timeout") or STATE.timeout)
+            skipped = client.skip_item(
+                queue_id=queue.id,
+                item_id=item_id,
+                timeout=payload.get("timeout") or STATE.timeout,
+            )
             removed_items = client.remove_items(
                 queue_id=queue.id,
                 item_ids=[item_id],
                 timeout=payload.get("timeout") or STATE.timeout,
             )
-            remove_label = client.remove_label(queue_id=queue.id, label_id=label.id, timeout=payload.get("timeout") or STATE.timeout)
-            analytics = client.get_analytics(queue_id=queue.id, timeout=payload.get("timeout") or STATE.timeout)
-            agreement = client.get_agreement(queue_id=queue.id, timeout=payload.get("timeout") or STATE.timeout)
+            remove_label = client.remove_label(
+                queue_id=queue.id,
+                label_id=label.id,
+                timeout=payload.get("timeout") or STATE.timeout,
+            )
+            analytics = client.get_analytics(
+                queue_id=queue.id, timeout=payload.get("timeout") or STATE.timeout
+            )
+            agreement = client.get_agreement(
+                queue_id=queue.id, timeout=payload.get("timeout") or STATE.timeout
+            )
             export_to_dataset = client.export_to_dataset(
                 queue_id=queue.id,
                 dataset_name=payload.get("dataset_name"),
                 status_filter=payload.get("status_filter"),
                 timeout=payload.get("timeout") or STATE.timeout,
             )
-            completed_queue = client.complete_queue(queue_id=queue.id, timeout=payload.get("timeout") or STATE.timeout)
-            deleted_label = client.delete_label(label_id=label.id, timeout=payload.get("timeout") or STATE.timeout)
-            deleted_queue = client.delete(queue_id=queue.id, timeout=payload.get("timeout") or STATE.timeout)
-            STATE.calls.append({"operation": "annotation-queue/management", "queue_id": queue.id})
+            completed_queue = client.complete_queue(
+                queue_id=queue.id, timeout=payload.get("timeout") or STATE.timeout
+            )
+            deleted_label = client.delete_label(
+                label_id=label.id, timeout=payload.get("timeout") or STATE.timeout
+            )
+            deleted_queue = client.delete(
+                queue_id=queue.id, timeout=payload.get("timeout") or STATE.timeout
+            )
+            STATE.calls.append(
+                {"operation": "annotation-queue/management", "queue_id": queue.id}
+            )
             self._write_json(
                 {
                     "success": True,
@@ -447,7 +772,12 @@ class Handler(BaseHTTPRequestHandler):
                 ]
             )
             dataset.add_rows(rows)
-            STATE.calls.append({"operation": "dataset/lifecycle", "dataset_id": str(dataset.dataset_config.id)})
+            STATE.calls.append(
+                {
+                    "operation": "dataset/lifecycle",
+                    "dataset_id": str(dataset.dataset_config.id),
+                }
+            )
             self._write_json(
                 {
                     "success": True,
@@ -483,7 +813,14 @@ class Handler(BaseHTTPRequestHandler):
                 prompt_column_name=_required(payload, "lookup_column"),
             )
             dataset.delete()
-            STATE.calls.append({"operation": "dataset/management", "dataset_id": str(dataset.dataset_config) if dataset.dataset_config else None})
+            STATE.calls.append(
+                {
+                    "operation": "dataset/management",
+                    "dataset_id": str(dataset.dataset_config)
+                    if dataset.dataset_config
+                    else None,
+                }
+            )
             self._write_json(
                 {
                     "success": True,
@@ -510,7 +847,9 @@ class Handler(BaseHTTPRequestHandler):
             updated_name = payload.get("updated_name") or name
             client.create_kb(name=name)
             client.update_kb(kb_name=name, new_name=updated_name)
-            client.delete_files_from_kb(file_names=payload.get("file_names") or [], kb_name=updated_name)
+            client.delete_files_from_kb(
+                file_names=payload.get("file_names") or [], kb_name=updated_name
+            )
             client.delete_kb(kb_names=updated_name)
             STATE.calls.append({"operation": "knowledge-base/lifecycle", "name": name})
             self._write_json({"success": True, "result": {"deleted": True}})
@@ -555,7 +894,9 @@ class Handler(BaseHTTPRequestHandler):
                 fi_base_url=STATE.base_url,
             )
             prompt.delete()
-            STATE.calls.append({"operation": "prompt/lifecycle", "template": payload.get("name")})
+            STATE.calls.append(
+                {"operation": "prompt/lifecycle", "template": payload.get("name")}
+            )
             self._write_json(
                 {
                     "success": True,
@@ -654,7 +995,9 @@ class Handler(BaseHTTPRequestHandler):
                 status="completed",
                 timeout=payload.get("timeout") or STATE.timeout,
             )
-            STATE.calls.append({"operation": "annotation-queue/lifecycle", "queue_id": queue.id})
+            STATE.calls.append(
+                {"operation": "annotation-queue/lifecycle", "queue_id": queue.id}
+            )
             self._write_json(
                 {
                     "success": True,
@@ -693,6 +1036,16 @@ class Handler(BaseHTTPRequestHandler):
 def _ensure_initialized() -> None:
     if not STATE.api_key or not STATE.secret_key or not STATE.base_url:
         raise RuntimeError("adapter is not initialized")
+
+
+def _futureagi_client() -> FutureAGIClient:
+    _ensure_initialized()
+    return FutureAGIClient(
+        api_key=STATE.api_key,
+        secret_key=STATE.secret_key,
+        base_url=STATE.base_url,
+        timeout=STATE.timeout,
+    )
 
 
 def _required(payload: dict[str, Any], key: str) -> str:

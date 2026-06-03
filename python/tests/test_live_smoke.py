@@ -9,6 +9,7 @@ from fi.api.auth import APIKeyAuth
 from fi.api.types import HttpMethod, RequestConfig
 from fi.datasets import Dataset, DatasetConfig
 from fi.datasets.types import DataTypeChoices
+from fi.futureagi_client import FutureAGIClient
 from fi.kb import KnowledgeBase
 from fi.queues import AnnotationQueue
 from fi.utils.types import ModelTypes
@@ -19,7 +20,9 @@ def _live_options():
     secret_key = os.environ.get("FI_SECRET_KEY")
     base_url = os.environ.get("FI_BASE_URL")
     if not api_key or not secret_key or not base_url:
-        pytest.skip("FI_API_KEY, FI_SECRET_KEY, and FI_BASE_URL are required for live SDK smoke tests")
+        pytest.skip(
+            "FI_API_KEY, FI_SECRET_KEY, and FI_BASE_URL are required for live SDK smoke tests"
+        )
     return {
         "fi_api_key": api_key,
         "fi_secret_key": secret_key,
@@ -41,6 +44,29 @@ def _first_dataset_name(client: APIKeyAuth, base_url: str) -> str | None:
     return datasets[0]["name"] if datasets else None
 
 
+def _items_count(payload: object, *keys: str) -> int:
+    if isinstance(payload, list):
+        return len(payload)
+    if not isinstance(payload, dict):
+        return 0
+
+    candidates: list[object] = [payload]
+    result = payload.get("result")
+    if isinstance(result, dict):
+        candidates.append(result)
+
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        for key in keys:
+            value = candidate.get(key)
+            if isinstance(value, list):
+                return len(value)
+            if isinstance(value, dict):
+                return len(value)
+    return 0
+
+
 def test_live_read_surfaces_against_real_backend():
     opts = _live_options()
     base_url = opts["fi_base_url"]
@@ -59,12 +85,47 @@ def test_live_read_surfaces_against_real_backend():
     assert isinstance(queue.list_labels(), list)
     assert isinstance(queue.list_queues(), list)
 
-    dataset_name = os.environ.get("FI_LIVE_DATASET_NAME") or _first_dataset_name(raw, base_url)
+    dataset_name = os.environ.get("FI_LIVE_DATASET_NAME") or _first_dataset_name(
+        raw, base_url
+    )
     if dataset_name:
         dataset = Dataset.get_dataset_config(dataset_name, **opts)
         config = dataset.get_config()
         assert config.id
         assert config.name == dataset_name
+
+
+def test_live_futureagi_client_read_surfaces_against_real_backend():
+    opts = _live_options()
+
+    with FutureAGIClient(
+        api_key=opts["fi_api_key"],
+        secret_key=opts["fi_secret_key"],
+        base_url=opts["fi_base_url"],
+        timeout=opts["timeout"],
+    ) as client:
+        current_user = client.users.current()
+        workspaces = client.users.workspaces(limit=5)
+        datasets = client.datasets.list_names(
+            search_text=os.environ.get("FI_LIVE_DATASET_NAME", "sdk-live-dataset")
+        )
+        sdk_evals = client.evals.list_sdk_evals()
+        simulation_run_tests = client.simulations.run_tests.list(limit=5)
+        active_run_tests = client.simulations.run_tests.active()
+        trace_projects = client.tracing.projects(limit=5)
+        trace_labels = client.tracing.annotation_labels()
+
+    assert isinstance(current_user, dict)
+    assert isinstance(workspaces, dict | list)
+    assert isinstance(datasets, dict | list)
+    assert isinstance(sdk_evals, dict | list)
+    assert isinstance(simulation_run_tests, dict | list)
+    assert isinstance(active_run_tests, dict | list)
+    assert isinstance(trace_projects, dict | list)
+    assert isinstance(trace_labels, dict | list)
+    assert _items_count(workspaces, "workspaces", "data", "items") >= 0
+    assert _items_count(datasets, "datasets", "data", "items") >= 0
+    assert _items_count(trace_projects, "projects", "data", "items") >= 0
 
 
 def test_live_knowledge_base_write_flow_against_real_backend():
@@ -91,7 +152,9 @@ def test_live_knowledge_base_write_flow_against_real_backend():
 
 def test_live_dataset_write_flow_against_real_backend():
     if os.environ.get("FI_LIVE_DATASET_WRITE") != "1":
-        pytest.skip("Set FI_LIVE_DATASET_WRITE=1 to run the mutating dataset live smoke test")
+        pytest.skip(
+            "Set FI_LIVE_DATASET_WRITE=1 to run the mutating dataset live smoke test"
+        )
 
     opts = _live_options()
     dataset = Dataset(

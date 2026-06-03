@@ -64,6 +64,7 @@ const callGenerated = <TResult>(
 export class FutureAGIClient {
   readonly annotationQueues: AnnotationQueuesClient;
   readonly datasets: DatasetsClient;
+  readonly evals: EvalsClient;
   readonly experiments: ExperimentsClient;
   readonly simulations: SimulationsClient;
   readonly tracing: TracingClient;
@@ -90,6 +91,7 @@ export class FutureAGIClient {
     });
     this.annotationQueues = new AnnotationQueuesClient(this.generatedClient);
     this.datasets = new DatasetsClient(this.generatedClient);
+    this.evals = new EvalsClient(this.generatedClient);
     this.experiments = new ExperimentsClient(this.generatedClient);
     this.simulations = new SimulationsClient(this.generatedClient);
     this.tracing = new TracingClient(this.generatedClient);
@@ -453,7 +455,9 @@ export class DatasetsClient {
   }
 
   createEmpty(body: LooseBody) {
-    return callGenerated(this.client, generatedSdk.createEmptyDataset, { body });
+    return callGenerated(this.client, generatedSdk.createEmptyDataset, {
+      body,
+    });
   }
 
   createManual(body: LooseBody) {
@@ -523,10 +527,14 @@ export class DatasetsClient {
   }
 
   annotationSummary(datasetId: string, query?: LooseQuery) {
-    return callGenerated(this.client, generatedSdk.getDatasetAnnotationSummary, {
-      path: { dataset_id: datasetId },
-      query,
-    });
+    return callGenerated(
+      this.client,
+      generatedSdk.getDatasetAnnotationSummary,
+      {
+        path: { dataset_id: datasetId },
+        query,
+      },
+    );
   }
 
   duplicate(datasetId: string, body?: LooseBody) {
@@ -537,9 +545,13 @@ export class DatasetsClient {
   }
 
   derivedVariables(datasetId: string) {
-    return callGenerated(this.client, generatedSdk.listDatasetDerivedVariables, {
-      path: { dataset_id: datasetId },
-    });
+    return callGenerated(
+      this.client,
+      generatedSdk.listDatasetDerivedVariables,
+      {
+        path: { dataset_id: datasetId },
+      },
+    );
   }
 
   baseColumns(query?: LooseQuery) {
@@ -638,6 +650,242 @@ export class ExperimentsClient {
   }
 }
 
+export class EvalsClient {
+  constructor(private readonly client: Client) {}
+
+  listTemplates(
+    body: BodyOf<generatedTypes.ModelHubEvalTemplatesListCreateData>,
+  ) {
+    return generatedSdk.modelHubEvalTemplatesListCreate(
+      dataOptions(this.client, { body }),
+    );
+  }
+
+  createTemplate(
+    body: BodyOf<generatedTypes.ModelHubEvalTemplatesCreateV2CreateData>,
+  ) {
+    return generatedSdk.modelHubEvalTemplatesCreateV2Create(
+      dataOptions(this.client, { body }),
+    );
+  }
+
+  getTemplate(templateId: string) {
+    return generatedSdk.modelHubEvalTemplatesDetailList(
+      dataOptions(this.client, { path: { template_id: templateId } }),
+    );
+  }
+
+  updateTemplate(
+    templateId: string,
+    body: BodyOf<generatedTypes.ModelHubEvalTemplatesUpdateUpdateData>,
+  ) {
+    return generatedSdk.modelHubEvalTemplatesUpdateUpdate(
+      dataOptions(this.client, { path: { template_id: templateId }, body }),
+    );
+  }
+
+  deleteTemplate(
+    body: BodyOf<generatedTypes.ModelHubDeleteEvalTemplateCreateData>,
+  ) {
+    return generatedSdk.modelHubDeleteEvalTemplateCreate(
+      dataOptions(this.client, { body }),
+    );
+  }
+
+  bulkDeleteTemplates(
+    body: BodyOf<generatedTypes.ModelHubEvalTemplatesBulkDeleteCreateData>,
+  ) {
+    return generatedSdk.modelHubEvalTemplatesBulkDeleteCreate(
+      dataOptions(this.client, { body }),
+    );
+  }
+
+  templateUsage(templateId: string) {
+    return generatedSdk.modelHubEvalTemplatesUsageList(
+      dataOptions(this.client, { path: { template_id: templateId } }),
+    );
+  }
+
+  templateVersions(templateId: string) {
+    return generatedSdk.modelHubEvalTemplatesVersionsList(
+      dataOptions(this.client, { path: { template_id: templateId } }),
+    );
+  }
+
+  createTemplateVersion(
+    templateId: string,
+    body: BodyOf<generatedTypes.ModelHubEvalTemplatesVersionsCreateCreateData>,
+  ) {
+    return generatedSdk.modelHubEvalTemplatesVersionsCreateCreate(
+      dataOptions(this.client, { path: { template_id: templateId }, body }),
+    );
+  }
+
+  restoreTemplateVersion(
+    templateId: string,
+    versionId: string,
+    body: BodyOf<generatedTypes.ModelHubEvalTemplatesVersionsRestoreCreateData> = {},
+  ) {
+    return generatedSdk.modelHubEvalTemplatesVersionsRestoreCreate(
+      dataOptions(this.client, {
+        path: { template_id: templateId, version_id: versionId },
+        body,
+      }),
+    );
+  }
+
+  setDefaultTemplateVersion(
+    templateId: string,
+    versionId: string,
+    body: BodyOf<generatedTypes.ModelHubEvalTemplatesVersionsSetDefaultUpdateData> = {},
+  ) {
+    return generatedSdk.modelHubEvalTemplatesVersionsSetDefaultUpdate(
+      dataOptions(this.client, {
+        path: { template_id: templateId, version_id: versionId },
+        body,
+      }),
+    );
+  }
+
+  listSdkEvals() {
+    return generatedSdk.sdkApiV1GetEvalsList(dataOptions(this.client, {}));
+  }
+
+  configure(
+    body: BodyOf<generatedTypes.SdkApiV1ConfigureEvaluationsCreateData>,
+  ) {
+    return generatedSdk.sdkApiV1ConfigureEvaluationsCreate(
+      dataOptions(this.client, { body }),
+    );
+  }
+
+  run(body: BodyOf<generatedTypes.SdkApiV1EvalCreateData>) {
+    return generatedSdk.sdkApiV1EvalCreate(dataOptions(this.client, { body }));
+  }
+
+  getRun(evalId: string) {
+    return generatedSdk.sdkApiV1EvalRead(
+      dataOptions(this.client, { path: { eval_id: evalId } }),
+    );
+  }
+
+  runV2(body: BodyOf<generatedTypes.SdkApiV1NewEvalCreateData>) {
+    return generatedSdk.sdkApiV1NewEvalCreate(
+      dataOptions(this.client, { body }),
+    );
+  }
+
+  getRunV2(evalId: string) {
+    return generatedSdk.sdkApiV1NewEvalList(
+      dataOptions(this.client, { query: { eval_id: evalId } }),
+    );
+  }
+
+  listPipelines(
+    query: QueryOf<generatedTypes.SdkApiV1EvaluatePipelineListData>,
+  ) {
+    return generatedSdk.sdkApiV1EvaluatePipelineList(
+      dataOptions(this.client, { query }),
+    );
+  }
+
+  evaluatePipeline(
+    body: BodyOf<generatedTypes.SdkApiV1EvaluatePipelineCreateData>,
+  ) {
+    return generatedSdk.sdkApiV1EvaluatePipelineCreate(
+      dataOptions(this.client, { body }),
+    );
+  }
+
+  datasetEvals(datasetId: string) {
+    return generatedSdk.modelHubDevelopsGetEvalsListList(
+      dataOptions(this.client, { path: { dataset_id: datasetId } }),
+    );
+  }
+
+  datasetEvalStructure(
+    datasetId: string,
+    evalId: string,
+    query: QueryOf<generatedTypes.ModelHubDevelopsGetEvalStructureReadData>,
+  ) {
+    return generatedSdk.modelHubDevelopsGetEvalStructureRead(
+      dataOptions(this.client, {
+        path: { dataset_id: datasetId, eval_id: evalId },
+        query,
+      }),
+    );
+  }
+
+  previewDatasetEval(
+    datasetId: string,
+    body: BodyOf<generatedTypes.ModelHubDevelopsPreviewRunEvalCreateData>,
+  ) {
+    return generatedSdk.modelHubDevelopsPreviewRunEvalCreate(
+      dataOptions(this.client, { path: { dataset_id: datasetId }, body }),
+    );
+  }
+
+  startDatasetEvals(
+    datasetId: string,
+    body: BodyOf<generatedTypes.ModelHubDevelopsStartEvalsProcessCreateData>,
+  ) {
+    return generatedSdk.modelHubDevelopsStartEvalsProcessCreate(
+      dataOptions(this.client, { path: { dataset_id: datasetId }, body }),
+    );
+  }
+
+  addDatasetUserEval(
+    datasetId: string,
+    body: BodyOf<generatedTypes.ModelHubDevelopsAddUserEvalCreateData>,
+  ) {
+    return generatedSdk.modelHubDevelopsAddUserEvalCreate(
+      dataOptions(this.client, { path: { dataset_id: datasetId }, body }),
+    );
+  }
+
+  editAndRunDatasetUserEval(
+    datasetId: string,
+    evalId: string,
+    body: BodyOf<generatedTypes.ModelHubDevelopsEditAndRunUserEvalCreateData>,
+  ) {
+    return generatedSdk.modelHubDevelopsEditAndRunUserEvalCreate(
+      dataOptions(this.client, {
+        path: { dataset_id: datasetId, eval_id: evalId },
+        body,
+      }),
+    );
+  }
+
+  stopDatasetUserEval(
+    datasetId: string,
+    evalId: string,
+    body: BodyOf<generatedTypes.ModelHubDevelopsStopUserEvalCreateData> = {},
+  ) {
+    return generatedSdk.modelHubDevelopsStopUserEvalCreate(
+      dataOptions(this.client, {
+        path: { dataset_id: datasetId, eval_id: evalId },
+        body,
+      }),
+    );
+  }
+
+  deleteDatasetUserEval(datasetId: string, evalId: string) {
+    return generatedSdk.modelHubDevelopsDeleteUserEvalDelete(
+      dataOptions(this.client, {
+        path: { dataset_id: datasetId, eval_id: evalId },
+      }),
+    );
+  }
+
+  deleteDatasetTemplateEval(datasetId: string, evalId: string) {
+    return generatedSdk.modelHubDevelopsDeleteTemplateEvalDelete(
+      dataOptions(this.client, {
+        path: { dataset_id: datasetId, eval_id: evalId },
+      }),
+    );
+  }
+}
+
 export class SimulationsClient {
   readonly agentDefinitions: SimulationAgentDefinitionsClient;
   readonly runTests: SimulationRunTestsClient;
@@ -654,7 +902,9 @@ export class SimulationsClient {
   }
 
   runs(query?: LooseQuery) {
-    return callGenerated(this.client, generatedSdk.listSimulationRuns, { query });
+    return callGenerated(this.client, generatedSdk.listSimulationRuns, {
+      query,
+    });
   }
 
   metrics(query?: LooseQuery) {
@@ -707,6 +957,10 @@ export class SimulationAgentDefinitionsClient {
 
 export class SimulationRunTestsClient {
   constructor(private readonly client: Client) {}
+
+  active() {
+    return callGenerated(this.client, generatedSdk.simulateRunTestsActiveList);
+  }
 
   list(query?: LooseQuery) {
     return callGenerated(this.client, generatedSdk.listRunTests, { query });
@@ -768,6 +1022,97 @@ export class SimulationRunTestsClient {
       query,
     });
   }
+
+  addEvalConfigs(
+    runTestId: string,
+    body: BodyOf<generatedTypes.SimulateRunTestsEvalConfigsCreateData>,
+  ) {
+    return generatedSdk.simulateRunTestsEvalConfigsCreate(
+      dataOptions(this.client, { path: { run_test_id: runTestId }, body }),
+    );
+  }
+
+  deleteEvalConfig(runTestId: string, evalConfigId: string) {
+    return generatedSdk.simulateRunTestsEvalConfigsDelete(
+      dataOptions(this.client, {
+        path: { run_test_id: runTestId, eval_config_id: evalConfigId },
+      }),
+    );
+  }
+
+  evalConfigStructure(runTestId: string, evalConfigId: string) {
+    return generatedSdk.simulateRunTestsEvalConfigsGetStructureList(
+      dataOptions(this.client, {
+        path: { run_test_id: runTestId, eval_config_id: evalConfigId },
+      }),
+    );
+  }
+
+  updateEvalConfig(
+    runTestId: string,
+    evalConfigId: string,
+    body: BodyOf<generatedTypes.SimulateRunTestsEvalConfigsUpdateCreateData>,
+  ) {
+    return generatedSdk.simulateRunTestsEvalConfigsUpdateCreate(
+      dataOptions(this.client, {
+        path: { run_test_id: runTestId, eval_config_id: evalConfigId },
+        body,
+      }),
+    );
+  }
+
+  evalSummary(runTestId: string, query?: LooseQuery) {
+    return callGenerated(
+      this.client,
+      generatedSdk.simulateRunTestsEvalSummaryList,
+      {
+        path: { run_test_id: runTestId },
+        query,
+      },
+    );
+  }
+
+  evalSummaryComparison(runTestId: string, query?: LooseQuery) {
+    return callGenerated(
+      this.client,
+      generatedSdk.simulateRunTestsEvalSummaryComparisonList,
+      {
+        path: { run_test_id: runTestId },
+        query,
+      },
+    );
+  }
+
+  runNewEvals(
+    runTestId: string,
+    body: BodyOf<generatedTypes.SimulateRunTestsRunNewEvalsCreateData>,
+  ) {
+    return generatedSdk.simulateRunTestsRunNewEvalsCreate(
+      dataOptions(this.client, { path: { run_test_id: runTestId }, body }),
+    );
+  }
+
+  scenarios(runTestId: string, query?: LooseQuery) {
+    return callGenerated(
+      this.client,
+      generatedSdk.simulateRunTestsScenariosList,
+      {
+        path: { run_test_id: runTestId },
+        query,
+      },
+    );
+  }
+
+  sdkCode(runTestId: string, query?: LooseQuery) {
+    return callGenerated(
+      this.client,
+      generatedSdk.simulateRunTestsSdkCodeList,
+      {
+        path: { run_test_id: runTestId },
+        query,
+      },
+    );
+  }
 }
 
 export class SimulationTestExecutionsClient {
@@ -793,10 +1138,14 @@ export class SimulationTestExecutionsClient {
   }
 
   transcripts(testExecutionId: string, query?: LooseQuery) {
-    return callGenerated(this.client, generatedSdk.getTestExecutionTranscripts, {
-      path: { test_execution_id: testExecutionId },
-      query,
-    });
+    return callGenerated(
+      this.client,
+      generatedSdk.getTestExecutionTranscripts,
+      {
+        path: { test_execution_id: testExecutionId },
+        query,
+      },
+    );
   }
 
   kpis(testExecutionId: string, query?: LooseQuery) {
@@ -891,7 +1240,9 @@ export class TracingClient {
   constructor(private readonly client: Client) {}
 
   projects(query?: LooseQuery) {
-    return callGenerated(this.client, generatedSdk.listTraceProjects, { query });
+    return callGenerated(this.client, generatedSdk.listTraceProjects, {
+      query,
+    });
   }
 
   traces(query?: LooseQuery) {
@@ -934,7 +1285,9 @@ export class TracingClient {
   }
 
   sessions(query?: LooseQuery) {
-    return callGenerated(this.client, generatedSdk.listTraceSessions, { query });
+    return callGenerated(this.client, generatedSdk.listTraceSessions, {
+      query,
+    });
   }
 
   getSession(id: string) {

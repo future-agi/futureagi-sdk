@@ -164,6 +164,7 @@ class FutureAGIClient:
         )
         self.annotation_queues = AnnotationQueuesClient(self.generated_client)
         self.datasets = DatasetsClient(self.generated_client)
+        self.evals = EvalsClient(self.generated_client)
         self.experiments = ExperimentsClient(self.generated_client)
         self.simulations = SimulationsClient(self.generated_client)
         self.tracing = TracingClient(self.generated_client)
@@ -520,7 +521,9 @@ class AnnotationQueueReviewClient(BaseGeneratedClient):
 
 class DatasetsClient(BaseGeneratedClient):
     def list(self, **query: Any) -> Any:
-        return self._raw_request("GET", "/model-hub/develops/get-datasets/", query=query)
+        return self._raw_request(
+            "GET", "/model-hub/develops/get-datasets/", query=query
+        )
 
     def list_names(self, **query: Any) -> Any:
         return self._raw_request(
@@ -723,6 +726,174 @@ class ExperimentsClient(BaseGeneratedClient):
         )
 
 
+class EvalsClient(BaseGeneratedClient):
+    def list_templates(self, body: Any) -> Any:
+        return self._raw_request("POST", "/model-hub/eval-templates/list/", body=body)
+
+    def create_template(self, body: Any) -> Any:
+        return self._raw_request(
+            "POST", "/model-hub/eval-templates/create-v2/", body=body
+        )
+
+    def get_template(self, template_id: str | UUID) -> Any:
+        return self._raw_request(
+            "GET", f"/model-hub/eval-templates/{_quote(template_id)}/detail/"
+        )
+
+    def update_template(self, template_id: str | UUID, body: Any) -> Any:
+        return self._raw_request(
+            "PUT",
+            f"/model-hub/eval-templates/{_quote(template_id)}/update/",
+            body=body,
+        )
+
+    def delete_template(self, body: Any) -> Any:
+        return self._raw_request("POST", "/model-hub/delete-eval-template/", body=body)
+
+    def bulk_delete_templates(self, body: Any) -> Any:
+        return self._raw_request(
+            "POST", "/model-hub/eval-templates/bulk-delete/", body=body
+        )
+
+    def template_usage(self, template_id: str | UUID) -> Any:
+        return self._raw_request(
+            "GET", f"/model-hub/eval-templates/{_quote(template_id)}/usage/"
+        )
+
+    def template_versions(self, template_id: str | UUID) -> Any:
+        return self._raw_request(
+            "GET", f"/model-hub/eval-templates/{_quote(template_id)}/versions/"
+        )
+
+    def create_template_version(self, template_id: str | UUID, body: Any) -> Any:
+        return self._raw_request(
+            "POST",
+            f"/model-hub/eval-templates/{_quote(template_id)}/versions/create/",
+            body=body,
+        )
+
+    def restore_template_version(
+        self,
+        template_id: str | UUID,
+        version_id: str | UUID,
+        body: Any | None = None,
+    ) -> Any:
+        return self._raw_request(
+            "POST",
+            f"/model-hub/eval-templates/{_quote(template_id)}/versions/{_quote(version_id)}/restore/",
+            body=body or {},
+        )
+
+    def set_default_template_version(
+        self,
+        template_id: str | UUID,
+        version_id: str | UUID,
+        body: Any | None = None,
+    ) -> Any:
+        return self._raw_request(
+            "PUT",
+            f"/model-hub/eval-templates/{_quote(template_id)}/versions/{_quote(version_id)}/set-default/",
+            body=body or {},
+        )
+
+    def list_sdk_evals(self) -> Any:
+        return self._raw_request("GET", "/sdk/api/v1/get-evals/")
+
+    def configure(self, body: Any) -> Any:
+        return self._raw_request(
+            "POST", "/sdk/api/v1/configure-evaluations/", body=body
+        )
+
+    def run(self, body: Any) -> Any:
+        return self._raw_request("POST", "/sdk/api/v1/eval/", body=body)
+
+    def get_run(self, eval_id: str | UUID) -> Any:
+        return self._raw_request("GET", f"/sdk/api/v1/eval/{_quote(eval_id)}/")
+
+    def run_v2(self, body: Any) -> Any:
+        return self._raw_request("POST", "/sdk/api/v1/new-eval/", body=body)
+
+    def get_run_v2(self, eval_id: str | UUID) -> Any:
+        return self._raw_request(
+            "GET", "/sdk/api/v1/new-eval/", query={"eval_id": eval_id}
+        )
+
+    def list_pipelines(self, **query: Any) -> Any:
+        return self._raw_request("GET", "/sdk/api/v1/evaluate-pipeline/", query=query)
+
+    def evaluate_pipeline(self, body: Any) -> Any:
+        return self._raw_request("POST", "/sdk/api/v1/evaluate-pipeline/", body=body)
+
+    def dataset_evals(self, dataset_id: str | UUID) -> Any:
+        return self._raw_request(
+            "GET", f"/model-hub/develops/{_quote(dataset_id)}/get_evals_list/"
+        )
+
+    def dataset_eval_structure(
+        self, dataset_id: str | UUID, eval_id: str | UUID, **query: Any
+    ) -> Any:
+        return self._raw_request(
+            "GET",
+            f"/model-hub/develops/{_quote(dataset_id)}/get_eval_structure/{_quote(eval_id)}/",
+            query=query,
+        )
+
+    def preview_dataset_eval(self, dataset_id: str | UUID, body: Any) -> Any:
+        return self._raw_request(
+            "POST",
+            f"/model-hub/develops/{_quote(dataset_id)}/preview_run_eval/",
+            body=body,
+        )
+
+    def start_dataset_evals(self, dataset_id: str | UUID, body: Any) -> Any:
+        return self._raw_request(
+            "POST",
+            f"/model-hub/develops/{_quote(dataset_id)}/start_evals_process/",
+            body=body,
+        )
+
+    def add_dataset_user_eval(self, dataset_id: str | UUID, body: Any) -> Any:
+        return self._raw_request(
+            "POST",
+            f"/model-hub/develops/{_quote(dataset_id)}/add_user_eval/",
+            body=body,
+        )
+
+    def edit_and_run_dataset_user_eval(
+        self, dataset_id: str | UUID, eval_id: str | UUID, body: Any
+    ) -> Any:
+        return self._raw_request(
+            "POST",
+            f"/model-hub/develops/{_quote(dataset_id)}/edit_and_run_user_eval/{_quote(eval_id)}/",
+            body=body,
+        )
+
+    def stop_dataset_user_eval(
+        self, dataset_id: str | UUID, eval_id: str | UUID, body: Any | None = None
+    ) -> Any:
+        return self._raw_request(
+            "POST",
+            f"/model-hub/develops/{_quote(dataset_id)}/stop_user_eval/{_quote(eval_id)}/",
+            body=body or {},
+        )
+
+    def delete_dataset_user_eval(
+        self, dataset_id: str | UUID, eval_id: str | UUID
+    ) -> Any:
+        return self._raw_request(
+            "DELETE",
+            f"/model-hub/develops/{_quote(dataset_id)}/delete_user_eval/{_quote(eval_id)}/",
+        )
+
+    def delete_dataset_template_eval(
+        self, dataset_id: str | UUID, eval_id: str | UUID
+    ) -> Any:
+        return self._raw_request(
+            "DELETE",
+            f"/model-hub/develops/{_quote(dataset_id)}/delete_template_eval/{_quote(eval_id)}/",
+        )
+
+
 class SimulationsClient(BaseGeneratedClient):
     def __init__(self, client: GeneratedOpenAPIClient) -> None:
         super().__init__(client)
@@ -770,6 +941,9 @@ class SimulationAgentDefinitionsClient(BaseGeneratedClient):
 
 
 class SimulationRunTestsClient(BaseGeneratedClient):
+    def active(self) -> Any:
+        return self._raw_request("GET", "/simulate/run-tests/active/")
+
     def list(self, **query: Any) -> Any:
         return self._raw_request("GET", "/simulate/run-tests/", query=query)
 
@@ -817,6 +991,73 @@ class SimulationRunTestsClient(BaseGeneratedClient):
         return self._raw_request(
             "GET",
             f"/simulate/run-tests/{_quote(run_test_id)}/call-executions/",
+            query=query,
+        )
+
+    def add_eval_configs(self, run_test_id: str | UUID, body: Any) -> Any:
+        return self._raw_request(
+            "POST",
+            f"/simulate/run-tests/{_quote(run_test_id)}/eval-configs/",
+            body=body,
+        )
+
+    def delete_eval_config(
+        self, run_test_id: str | UUID, eval_config_id: str | UUID
+    ) -> Any:
+        return self._raw_request(
+            "DELETE",
+            f"/simulate/run-tests/{_quote(run_test_id)}/eval-configs/{_quote(eval_config_id)}/",
+        )
+
+    def eval_config_structure(
+        self, run_test_id: str | UUID, eval_config_id: str | UUID
+    ) -> Any:
+        return self._raw_request(
+            "GET",
+            f"/simulate/run-tests/{_quote(run_test_id)}/eval-configs/{_quote(eval_config_id)}/get-structure/",
+        )
+
+    def update_eval_config(
+        self, run_test_id: str | UUID, eval_config_id: str | UUID, body: Any
+    ) -> Any:
+        return self._raw_request(
+            "POST",
+            f"/simulate/run-tests/{_quote(run_test_id)}/eval-configs/{_quote(eval_config_id)}/update/",
+            body=body,
+        )
+
+    def eval_summary(self, run_test_id: str | UUID, **query: Any) -> Any:
+        return self._raw_request(
+            "GET",
+            f"/simulate/run-tests/{_quote(run_test_id)}/eval-summary/",
+            query=query,
+        )
+
+    def eval_summary_comparison(self, run_test_id: str | UUID, **query: Any) -> Any:
+        return self._raw_request(
+            "GET",
+            f"/simulate/run-tests/{_quote(run_test_id)}/eval-summary-comparison/",
+            query=query,
+        )
+
+    def run_new_evals(self, run_test_id: str | UUID, body: Any) -> Any:
+        return self._raw_request(
+            "POST",
+            f"/simulate/run-tests/{_quote(run_test_id)}/run-new-evals/",
+            body=body,
+        )
+
+    def scenarios(self, run_test_id: str | UUID, **query: Any) -> Any:
+        return self._raw_request(
+            "GET",
+            f"/simulate/run-tests/{_quote(run_test_id)}/scenarios/",
+            query=query,
+        )
+
+    def sdk_code(self, run_test_id: str | UUID, **query: Any) -> Any:
+        return self._raw_request(
+            "GET",
+            f"/simulate/run-tests/{_quote(run_test_id)}/sdk-code/",
             query=query,
         )
 
@@ -936,12 +1177,12 @@ class TracingClient(BaseGeneratedClient):
         return self._raw_request("POST", "/tracer/trace/get_graph_methods/", body=body)
 
     def sessions(self, **query: Any) -> Any:
-        return self._raw_request("GET", "/tracer/trace-session/list_sessions/", query=query)
+        return self._raw_request(
+            "GET", "/tracer/trace-session/list_sessions/", query=query
+        )
 
     def get_session(self, session_id: str | UUID) -> Any:
-        return self._raw_request(
-            "GET", f"/tracer/trace-session/{_quote(session_id)}/"
-        )
+        return self._raw_request("GET", f"/tracer/trace-session/{_quote(session_id)}/")
 
     def session_graph(self, body: Any) -> Any:
         return self._raw_request(
@@ -1005,10 +1246,14 @@ class AlertsClient(BaseGeneratedClient):
         return self._raw_request("DELETE", f"/tracer/user-alerts/{_quote(alert_id)}/")
 
     def metric_options(self, **query: Any) -> Any:
-        return self._raw_request("GET", "/tracer/user-alerts/metric-options/", query=query)
+        return self._raw_request(
+            "GET", "/tracer/user-alerts/metric-options/", query=query
+        )
 
     def preview_graph(self, body: Any) -> Any:
-        return self._raw_request("POST", "/tracer/user-alerts/preview-graph/", body=body)
+        return self._raw_request(
+            "POST", "/tracer/user-alerts/preview-graph/", body=body
+        )
 
     def graph(self, alert_id: str | UUID, **query: Any) -> Any:
         return self._raw_request(

@@ -108,3 +108,51 @@ def test_futureagi_client_wraps_common_public_sdk_paths():
 
     assert len(requests) == 6
     assert expected == []
+
+
+def test_futureagi_client_wraps_eval_and_simulation_eval_paths():
+    requests = []
+    expected = [
+        ("POST", "/model-hub/eval-templates/list/"),
+        ("POST", "/model-hub/eval-templates/create-v2/"),
+        ("GET", "/model-hub/eval-templates/eval-template-1/detail/"),
+        ("PUT", "/model-hub/eval-templates/eval-template-1/update/"),
+        ("GET", "/model-hub/eval-templates/eval-template-1/versions/"),
+        ("POST", "/sdk/api/v1/new-eval/"),
+        ("GET", "/sdk/api/v1/new-eval/"),
+        ("POST", "/simulate/run-tests/run-test-1/eval-configs/"),
+        (
+            "GET",
+            "/simulate/run-tests/run-test-1/eval-configs/eval-config-1/get-structure/",
+        ),
+        ("GET", "/simulate/run-tests/run-test-1/eval-summary/"),
+        ("POST", "/simulate/run-tests/run-test-1/run-new-evals/"),
+    ]
+
+    def handler(request):
+        requests.append(request)
+        method, path = expected.pop(0)
+        assert request.method == method
+        assert request.url.path == path
+        return httpx.Response(200, json={"ok": True})
+
+    client = _client_with_transport(handler)
+
+    client.evals.list_templates({"filters": {}})
+    client.evals.create_template({"name": "Faithfulness"})
+    client.evals.get_template("eval-template-1")
+    client.evals.update_template("eval-template-1", {"name": "Faithfulness v2"})
+    client.evals.template_versions("eval-template-1")
+    client.evals.run_v2({"eval_id": "run-1", "data": []})
+    client.evals.get_run_v2("11111111-1111-1111-1111-111111111111")
+    client.simulations.run_tests.add_eval_configs(
+        "run-test-1", {"eval_configs": [{"eval_id": "eval-template-1"}]}
+    )
+    client.simulations.run_tests.eval_config_structure("run-test-1", "eval-config-1")
+    client.simulations.run_tests.eval_summary("run-test-1", test_execution_id="te-1")
+    client.simulations.run_tests.run_new_evals(
+        "run-test-1", {"test_execution_ids": ["te-1"], "eval_config_ids": ["cfg-1"]}
+    )
+
+    assert len(requests) == 11
+    assert expected == []

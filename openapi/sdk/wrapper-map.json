@@ -61,6 +61,36 @@
     "derivedVariables": "listDatasetDerivedVariables",
     "baseColumns": "listDatasetBaseColumns"
   },
+  "evals": {
+    "listTemplates": "model-hub_eval-templates_list_create",
+    "createTemplate": "model-hub_eval-templates_create-v2_create",
+    "getTemplate": "model-hub_eval-templates_detail_list",
+    "updateTemplate": "model-hub_eval-templates_update_update",
+    "deleteTemplate": "model-hub_delete-eval-template_create",
+    "bulkDeleteTemplates": "model-hub_eval-templates_bulk-delete_create",
+    "templateUsage": "model-hub_eval-templates_usage_list",
+    "templateVersions": "model-hub_eval-templates_versions_list",
+    "createTemplateVersion": "model-hub_eval-templates_versions_create_create",
+    "restoreTemplateVersion": "model-hub_eval-templates_versions_restore_create",
+    "setDefaultTemplateVersion": "model-hub_eval-templates_versions_set-default_update",
+    "listSdkEvals": "sdk_api_v1_get-evals_list",
+    "configure": "sdk_api_v1_configure-evaluations_create",
+    "run": "sdk_api_v1_eval_create",
+    "getRun": "sdk_api_v1_eval_read",
+    "runV2": "sdk_api_v1_new-eval_create",
+    "getRunV2": "sdk_api_v1_new-eval_list",
+    "listPipelines": "sdk_api_v1_evaluate-pipeline_list",
+    "evaluatePipeline": "sdk_api_v1_evaluate-pipeline_create",
+    "datasetEvals": "model-hub_develops_get_evals_list_list",
+    "datasetEvalStructure": "model-hub_develops_get_eval_structure_read",
+    "previewDatasetEval": "model-hub_develops_preview_run_eval_create",
+    "startDatasetEvals": "model-hub_develops_start_evals_process_create",
+    "addDatasetUserEval": "model-hub_develops_add_user_eval_create",
+    "editAndRunDatasetUserEval": "model-hub_develops_edit_and_run_user_eval_create",
+    "stopDatasetUserEval": "model-hub_develops_stop_user_eval_create",
+    "deleteDatasetUserEval": "model-hub_develops_delete_user_eval_delete",
+    "deleteDatasetTemplateEval": "model-hub_develops_delete_template_eval_delete"
+  },
   "experiments": {
     "list": "listExperiments",
     "create": "createExperiment",
@@ -90,6 +120,7 @@
     "delete": "deleteAgentDefinition"
   },
   "simulationRunTests": {
+    "active": "simulate_run-tests_active_list",
     "list": "listRunTests",
     "create": "createRunTest",
     "get": "getRunTest",
@@ -99,7 +130,16 @@
     "status": "getRunTestStatus",
     "analytics": "getRunTestAnalytics",
     "executions": "listRunTestExecutions",
-    "callExecutions": "listRunTestCallExecutions"
+    "callExecutions": "listRunTestCallExecutions",
+    "addEvalConfigs": "simulate_run-tests_eval-configs_create",
+    "deleteEvalConfig": "simulate_run-tests_eval-configs_delete",
+    "evalConfigStructure": "simulate_run-tests_eval-configs_get-structure_list",
+    "updateEvalConfig": "simulate_run-tests_eval-configs_update_create",
+    "evalSummary": "simulate_run-tests_eval-summary_list",
+    "evalSummaryComparison": "simulate_run-tests_eval-summary-comparison_list",
+    "runNewEvals": "simulate_run-tests_run-new-evals_create",
+    "scenarios": "simulate_run-tests_scenarios_list",
+    "sdkCode": "simulate_run-tests_sdk-code_list"
   },
   "simulationTestExecutions": {
     "list": "listTestExecutions",
