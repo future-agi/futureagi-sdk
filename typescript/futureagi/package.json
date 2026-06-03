@@ -56,9 +56,9 @@
   "homepage": "https://github.com/futureagi/futureagi#readme",
   "engines": {
     "node": ">=18.0.0",
-    "pnpm": ">=8.0.0"
+    "pnpm": ">=9.0.0"
   },
-  "packageManager": "pnpm@8.15.0",
+  "packageManager": "pnpm@10.12.1",
   "devDependencies": {
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",

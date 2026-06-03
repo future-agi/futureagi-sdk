@@ -45,7 +45,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 8.15.0
+          version: 10.12.1
           run_install: false
 
       - name: Set up Node
@@ -65,7 +65,7 @@ jobs:
 
       - name: Run TypeScript tests
         working-directory: typescript/futureagi
-        run: pnpm test -- --runInBand
+        run: pnpm test --runInBand
 
       - name: Build TypeScript SDK
         working-directory: typescript/futureagi
@@ -156,7 +156,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 8.15.0
+          version: 10.12.1
           run_install: false
 
       - name: Set up Node
