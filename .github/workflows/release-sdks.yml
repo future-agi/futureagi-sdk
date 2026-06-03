@@ -53,7 +53,7 @@ jobs:
         with:
           node-version: "20"
           cache: pnpm
-          cache-dependency-path: typescript/futureagi/pnpm-lock.yaml
+          cache-dependency-path: typescript/pnpm-lock.yaml
 
       - name: Install TypeScript SDK
         working-directory: typescript/futureagi
@@ -164,7 +164,7 @@ jobs:
         with:
           node-version: "20"
           cache: pnpm
-          cache-dependency-path: typescript/futureagi/pnpm-lock.yaml
+          cache-dependency-path: typescript/pnpm-lock.yaml
           registry-url: https://registry.npmjs.org
 
       - name: Install TypeScript SDK

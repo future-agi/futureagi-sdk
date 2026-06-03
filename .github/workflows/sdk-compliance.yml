@@ -12,7 +12,7 @@ on:
       - "python/**"
       - "openapi/sdk/**"
       - "scripts/**"
-      - "typescript/futureagi/**"
+      - "typescript/**"
       - "tests/compliance/**"
   push:
     branches:
@@ -25,7 +25,7 @@ on:
       - "python/**"
       - "openapi/sdk/**"
       - "scripts/**"
-      - "typescript/futureagi/**"
+      - "typescript/**"
       - "tests/compliance/**"
   workflow_dispatch:
 
@@ -89,7 +89,7 @@ jobs:
         with:
           node-version: "20"
           cache: pnpm
-          cache-dependency-path: typescript/futureagi/pnpm-lock.yaml
+          cache-dependency-path: typescript/pnpm-lock.yaml
 
       - name: Install TypeScript SDK
         run: pnpm install --frozen-lockfile --ignore-scripts

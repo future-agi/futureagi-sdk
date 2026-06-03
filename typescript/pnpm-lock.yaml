@@ -84,6 +84,9 @@ importers:
       axios:
         specifier: ^1.6.0
         version: 1.10.0
+      form-data:
+        specifier: ^4.0.3
+        version: 4.0.3
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -91,6 +94,9 @@ importers:
         specifier: ^3.11.0
         version: 3.17.0
     devDependencies:
+      '@jest/globals':
+        specifier: ^29.7.0
+        version: 29.7.0
       '@types/jest':
         specifier: ^29.5.0
         version: 29.5.14

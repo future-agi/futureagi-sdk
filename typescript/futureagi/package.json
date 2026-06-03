@@ -60,6 +60,7 @@
   },
   "packageManager": "pnpm@10.12.1",
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
@@ -78,6 +79,7 @@
   "dependencies": {
     "@types/uuid": "^10.0.0",
     "axios": "^1.6.0",
+    "form-data": "^4.0.3",
     "uuid": "^11.1.0",
     "winston": "^3.11.0"
   },
