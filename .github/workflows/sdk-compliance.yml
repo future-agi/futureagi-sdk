@@ -5,28 +5,10 @@ on:
     branches:
       - dev
       - main
-    paths:
-      - ".github/workflows/sdk-compliance.yml"
-      - "go/futureagi/**"
-      - "java/futureagi/**"
-      - "python/**"
-      - "openapi/sdk/**"
-      - "scripts/**"
-      - "typescript/**"
-      - "tests/compliance/**"
   push:
     branches:
       - dev
       - main
-    paths:
-      - ".github/workflows/sdk-compliance.yml"
-      - "go/futureagi/**"
-      - "java/futureagi/**"
-      - "python/**"
-      - "openapi/sdk/**"
-      - "scripts/**"
-      - "typescript/**"
-      - "tests/compliance/**"
   workflow_dispatch:
 
 permissions:
