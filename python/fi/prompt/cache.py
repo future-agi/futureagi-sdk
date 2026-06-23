@@ -77,16 +77,27 @@ class _TaskManager:
     """Manages background refresh workers and graceful shutdown."""
 
     def __init__(self, num_workers: int):
+        self._num_workers = num_workers
         self._queue: "Queue[Callable[[], None]]" = Queue()
-        self._workers = [_RefreshWorker(self._queue, i) for i in range(num_workers)]
-        for w in self._workers:
-            w.start()
-
-        atexit.register(self._shutdown)
+        self._workers: list = []
+        self._start_lock = threading.Lock()
+        self._started = False
 
     # Public API -----------------------------------------------------------
 
+    def _ensure_started(self):
+        if not self._started:
+            with self._start_lock:
+                if not self._started:
+                    for i in range(self._num_workers):
+                        w = _RefreshWorker(self._queue, i)
+                        w.start()
+                        self._workers.append(w)
+                    atexit.register(self._shutdown)
+                    self._started = True
+
     def submit(self, task: Callable[[], None]):
+        self._ensure_started()
         self._queue.put(task)
 
     # Private --------------------------------------------------------------
