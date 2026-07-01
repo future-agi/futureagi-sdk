@@ -351,7 +351,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
     @property
     def last_generation_id(self) -> Optional[str]:
         """Return the generation_id from the most recent generate()/improve() call."""
-        return getattr(self, "_last_generation_id", None)
+        return self._last_generation_id
 
     def create(self, *, label: Optional[str] = None) -> "Prompt":
         """Create a draft prompt template and return self for chaining.
@@ -483,7 +483,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             try:
                 prompt_cache.invalidate(self.template.name)
             except Exception:
-                logger.debug("prompt_cache.invalidate failed during delete()", exc_info=True)
+                logger.warning("prompt_cache.invalidate failed during delete()", exc_info=True)
 
         self.request(
             config=RequestConfig(
@@ -538,7 +538,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             try:
                 prompt_cache.invalidate(name)
             except Exception:
-                logger.debug("prompt_cache.invalidate failed during delete_template_by_name()", exc_info=True)
+                logger.warning("prompt_cache.invalidate failed during delete_template_by_name()", exc_info=True)
             return True
         finally:
             client.close()
