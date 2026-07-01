@@ -268,13 +268,13 @@ class LabelManagementMixin:
         history = history_resp.json().get("results", [])
         matched = None
         for entry in history:
-            entry_version = entry.get("templateVersion") or entry.get("template_version")
+            entry_version = entry.get("template_version")
             if str(entry_version) == version:
                 matched = entry
                 break
         if not matched:
             raise SDKException(f"No version '{version}' found for template '{template_name}'")
-        is_draft = matched.get("isDraft") if matched.get("isDraft") is not None else matched.get("is_draft")
+        is_draft = matched.get("is_draft")
         if is_draft:
             raise SDKException("Cannot assign label to a draft version. Commit the version first.")
 
@@ -329,9 +329,9 @@ class LabelManagementMixin:
         history = history_resp.json().get("results", [])
         version_id = None
         for entry in history:
-            entry_version = entry.get("templateVersion") or entry.get("template_version")
+            entry_version = entry.get("template_version")
             if str(entry_version) == version:
-                for key in ("id", "versionId", "executionId"):
+                for key in ("id", "version_id", "execution_id"):
                     if entry.get(key):
                         version_id = str(entry.get(key))
                         break
@@ -359,10 +359,9 @@ class LabelManagementMixin:
         """Lookup internal version_id by version name via history endpoint."""
         history = self._fetch_template_version_history()
         for entry in history:
-            entry_version = entry.get("templateVersion") or entry.get("template_version")
+            entry_version = entry.get("template_version")
             if str(entry_version) == version_name:
-                # Try common id keys
-                for key in ("id", "versionId", "executionId"):
+                for key in ("id", "version_id", "execution_id"):
                     if entry.get(key):
                         return str(entry[key])
         return None
