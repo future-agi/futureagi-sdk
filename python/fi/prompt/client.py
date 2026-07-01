@@ -59,35 +59,36 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
 
         # Handle GET template by ID endpoint
         if response.request.method == HttpMethod.GET.value:
+            # Support both camelCase and snake_case keys from backend
             # Unwrap common {"result": {...}} envelope if present
             if isinstance(data, dict) and "result" in data and isinstance(data["result"], dict):
                 data = data["result"]
-            pc = data.get("prompt_config") or [{}]
+            pc = data.get("promptConfig") or data.get("prompt_config") or [{}]
             if isinstance(pc, list):
                 prompt_config_raw = pc[0] if pc else {}
             else:
                 prompt_config_raw = pc
             cfg_src = (prompt_config_raw or {}).get("configuration", {})
             cfg = {
-                "model_name": cfg_src.get("model_name") or cfg_src.get("model"),
+                "modelName": cfg_src.get("modelName") or cfg_src.get("model"),
                 "temperature": cfg_src.get("temperature"),
-                "frequency_penalty": cfg_src.get("frequency_penalty"),
-                "presence_penalty": cfg_src.get("presence_penalty"),
-                "max_tokens": cfg_src.get("max_tokens"),
-                "top_p": cfg_src.get("top_p"),
-                "response_format": cfg_src.get("response_format"),
-                "tool_choice": cfg_src.get("tool_choice"),
+                "frequencyPenalty": cfg_src.get("frequencyPenalty") or cfg_src.get("frequency_penalty"),
+                "presencePenalty": cfg_src.get("presencePenalty") or cfg_src.get("presence_penalty"),
+                "maxTokens": cfg_src.get("maxTokens") or cfg_src.get("max_tokens"),
+                "topP": cfg_src.get("topP") or cfg_src.get("top_p"),
+                "responseFormat": cfg_src.get("responseFormat") or cfg_src.get("response_format"),
+                "toolChoice": cfg_src.get("toolChoice") or cfg_src.get("tool_choice"),
                 "tools": cfg_src.get("tools"),
             }
             model_config = ModelConfig(
-                model_name=cfg["model_name"] or "unavailable",
+                model_name=cfg["modelName"] or "unavailable",
                 temperature=cfg["temperature"] if cfg["temperature"] is not None else 0,
-                frequency_penalty=cfg["frequency_penalty"] if cfg["frequency_penalty"] is not None else 0,
-                presence_penalty=cfg["presence_penalty"] if cfg["presence_penalty"] is not None else 0,
-                max_tokens=cfg["max_tokens"],
-                top_p=cfg["top_p"] if cfg["top_p"] is not None else 0,
-                response_format=cfg["response_format"],
-                tool_choice=cfg["tool_choice"],
+                frequency_penalty=cfg["frequencyPenalty"] if cfg["frequencyPenalty"] is not None else 0,
+                presence_penalty=cfg["presencePenalty"] if cfg["presencePenalty"] is not None else 0,
+                max_tokens=cfg["maxTokens"],
+                top_p=cfg["topP"] if cfg["topP"] is not None else 0,
+                response_format=cfg["responseFormat"],
+                tool_choice=cfg["toolChoice"],
                 tools=cfg["tools"],
             )
             template_data = {
@@ -96,12 +97,12 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
                 "description": data.get("description", ""),
                 "messages": (prompt_config_raw or {}).get("messages", []),
                 "model_configuration": model_config,
-                "variable_names": data.get("variable_names", {}),
+                "variable_names": data.get("variableNames") or data.get("variable_names", {}),
                 "version": data.get("version"),
-                "is_default": data.get("is_default", True),
-                "evaluation_configs": data.get("evaluation_configs", []),
+                "is_default": data.get("isDefault", True) if data.get("isDefault") is not None else data.get("is_default", True),
+                "evaluation_configs": data.get("evaluationConfigs") or data.get("evaluation_configs", []),
                 "status": data.get("status"),
-                "error_message": data.get("error_message"),
+                "error_message": data.get("errorMessage") or data.get("error_message"),
                 "metadata": data.get("metadata"),
                 "placeholders": (prompt_config_raw or {}).get("placeholders", {}),
             }
@@ -130,7 +131,13 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
         if response.status_code == 400:
             try:
                 detail = response.json()
-                error_code = detail.get("error_code") if isinstance(detail, dict) else None
+                # Backend returns `code` (snake_case-style single word);
+                # accept `errorCode` as a legacy alternative.
+                error_code = (
+                    (detail.get("code") or detail.get("errorCode"))
+                    if isinstance(detail, dict)
+                    else None
+                )
             except Exception:
                 error_code = None
 
@@ -156,31 +163,32 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
     def _dict_to_prompt_template(item: Dict) -> PromptTemplate:
         """Safely convert backend JSON to PromptTemplate."""
 
-        prompt_config_raw = item.get("prompt_config")
+        prompt_config_raw = item.get("promptConfig") or item.get("prompt_config")
 
         if prompt_config_raw:
             pc = prompt_config_raw[0] if isinstance(prompt_config_raw, list) else prompt_config_raw
             cfg_raw = pc.get("configuration", {})
+            # Normalize key casing / naming
             cfg = {
-                "model_name": cfg_raw.get("model_name") or cfg_raw.get("model"),
+                "modelName": cfg_raw.get("modelName") or cfg_raw.get("model"),
                 "temperature": cfg_raw.get("temperature"),
-                "frequency_penalty": cfg_raw.get("frequency_penalty"),
-                "presence_penalty": cfg_raw.get("presence_penalty"),
-                "max_tokens": cfg_raw.get("max_tokens"),
-                "top_p": cfg_raw.get("top_p"),
-                "response_format": cfg_raw.get("response_format"),
-                "tool_choice": cfg_raw.get("tool_choice"),
+                "frequencyPenalty": cfg_raw.get("frequencyPenalty") or cfg_raw.get("frequency_penalty"),
+                "presencePenalty": cfg_raw.get("presencePenalty") or cfg_raw.get("presence_penalty"),
+                "maxTokens": cfg_raw.get("maxTokens") or cfg_raw.get("max_tokens"),
+                "topP": cfg_raw.get("topP") or cfg_raw.get("top_p"),
+                "responseFormat": cfg_raw.get("responseFormat") or cfg_raw.get("response_format"),
+                "toolChoice": cfg_raw.get("toolChoice") or cfg_raw.get("tool_choice"),
                 "tools": cfg_raw.get("tools"),
             }
             model_config = ModelConfig(
-                model_name=cfg["model_name"] or "unavailable",
+                model_name=cfg["modelName"] or "unavailable",
                 temperature=cfg["temperature"] if cfg["temperature"] is not None else 0,
-                frequency_penalty=cfg["frequency_penalty"] if cfg["frequency_penalty"] is not None else 0,
-                presence_penalty=cfg["presence_penalty"] if cfg["presence_penalty"] is not None else 0,
-                max_tokens=cfg["max_tokens"],
-                top_p=cfg["top_p"] if cfg["top_p"] is not None else 0,
-                response_format=cfg["response_format"] if cfg["response_format"] is not None else None,
-                tool_choice=cfg["tool_choice"] if cfg["tool_choice"] is not None else None,
+                frequency_penalty=cfg["frequencyPenalty"] if cfg["frequencyPenalty"] is not None else 0,
+                presence_penalty=cfg["presencePenalty"] if cfg["presencePenalty"] is not None else 0,
+                max_tokens=cfg["maxTokens"],
+                top_p=cfg["topP"] if cfg["topP"] is not None else 0,
+                response_format=cfg["responseFormat"] if cfg["responseFormat"] is not None else None,
+                tool_choice=cfg["toolChoice"] if cfg["toolChoice"] is not None else None,
                 tools=cfg["tools"] if cfg["tools"] is not None else None,
             )
             messages = pc.get("messages", [])
@@ -196,12 +204,16 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             description=item.get("description", ""),
             messages=messages or [],
             model_configuration=model_config or ModelConfig(),
-            variable_names=item.get("variable_names", {}),
+            variable_names=item.get("variableNames") or item.get("variable_names", {}),
             version=item.get("version"),
-            is_default=item.get("is_default", True),
-            evaluation_configs=item.get("evaluation_configs", []),
+            is_default=(
+                item.get("isDefault")
+                if item.get("isDefault") is not None
+                else item.get("is_default", True)
+            ),
+            evaluation_configs=item.get("evaluationConfigs") or item.get("evaluation_configs", []),
             status=item.get("status"),
-            error_message=item.get("error_message"),
+            error_message=item.get("errorMessage") or item.get("error_message"),
             metadata=item.get("metadata"),
             placeholders=item.get("placeholders", {}),
         )
@@ -243,6 +255,22 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         fi_base_url: Optional[str] = None,
         **kwargs,
     ):
+        """Initialize the Prompt client.
+
+        If ``template`` has no ``id`` but has a ``name``, the SDK will attempt
+        to fetch the corresponding template from the backend. This supports
+        two workflows:
+
+        1. Existing template — pass a ``PromptTemplate(name=...)`` and the
+           constructor will populate ``id``/``version`` from the backend.
+        2. New template — pass a ``PromptTemplate(name=..., messages=...)``
+           for a name that doesn't yet exist; the fetch will fail softly
+           (logged warning) and the user-provided template is retained with
+           ``id=None`` so ``create()`` can register it.
+
+        For explicit retrieval use ``Prompt.get_template_by_name()`` which
+        raises ``TemplateNotFound`` on miss instead of falling back.
+        """
         super().__init__(
             fi_api_key=fi_api_key,
             fi_secret_key=fi_secret_key,
@@ -252,6 +280,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
 
         # Label requested during draft create; will be assigned on commit
         self._pending_label: Optional[str] = None
+        self._last_generation_id: Optional[str] = None
 
         if template and not template.id:
             try:
@@ -265,7 +294,16 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             self.template = template
 
     def generate(self, requirements: str) -> "Prompt":
-        """Generate a prompt and return self for chaining"""
+        """Submit a prompt-generation job to the backend (asynchronous).
+
+        The backend queues the generation and returns a ``generation_id``.
+        The result is **not** available synchronously — there is currently no
+        public endpoint in the backend to poll for a generation job's output by
+        ``generation_id``. The generated prompt is surfaced through the
+        FutureAGI UI / job queue rather than through this SDK.
+
+        Use ``last_generation_id`` to retrieve the id for logging / correlation.
+        """
         if not self.template:
             raise ValueError("No template configured")
         response = self.request(
@@ -274,13 +312,20 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                 url=self._base_url + "/" + Routes.generate_prompt.value,
                 json={"statement": requirements},
             ),
-            response_handler=PromptResponseHandler,
+            response_handler=SimpleJsonResponseHandler,
         )
-        self.template.messages[-1].content = response["result"]["prompt"]
+        result = response.get("result", response) if isinstance(response, dict) else response
+        self._last_generation_id = (
+            result.get("generation_id") if isinstance(result, dict) else None
+        )
         return self
 
     def improve(self, requirements: str) -> "Prompt":
-        """Improve prompt and return self for chaining"""
+        """Submit a prompt-improvement job to the backend (asynchronous).
+
+        The backend queues the improvement and returns a ``generation_id``.
+        See ``generate()`` for notes on async result retrieval.
+        """
         if not self.template:
             raise ValueError("No template configured")
 
@@ -297,10 +342,22 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                     "improvement_requirements": requirements,
                 },
             ),
-            response_handler=PromptResponseHandler,
+            response_handler=SimpleJsonResponseHandler,
         )
-        self.template.messages[-1].content = improved_response["result"]["prompt"]
+        result = (
+            improved_response.get("result", improved_response)
+            if isinstance(improved_response, dict)
+            else improved_response
+        )
+        self._last_generation_id = (
+            result.get("generation_id") if isinstance(result, dict) else None
+        )
         return self
+
+    @property
+    def last_generation_id(self) -> Optional[str]:
+        """Return the generation_id from the most recent generate()/improve() call."""
+        return getattr(self, "_last_generation_id", None)
 
     def create(self, *, label: Optional[str] = None) -> "Prompt":
         """Create a draft prompt template and return self for chaining.
@@ -353,7 +410,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
 
         self.template.id = response["id"]
         self.template.name = response["name"]
-        self.template.version = response.get("template_version") or response.get("created_version") or "v1"
+        self.template.version = response.get("templateVersion") or response.get("template_version") or response.get("createdVersion") or "v1"
         self.template.metadata = response.get("metadata", {})
 
         # Remember label for assignment on commit (cannot assign on drafts)
@@ -411,7 +468,10 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             result = response.get("result")
             if isinstance(result, list) and result:
                 new_version_data = result[0]
-                self.template.version = new_version_data.get("template_version")
+                self.template.version = (
+                    new_version_data.get("templateVersion")
+                    or new_version_data.get("template_version")
+                )
         else:
             logger.error(
                 "Failed to create new version, unexpected response format from server."
@@ -425,6 +485,14 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         """
         if not self.template or not self.template.id:
             raise ValueError("Template ID missing; cannot delete.")
+
+        # Invalidate cache for this template before deleting so subsequent
+        # lookups don't return stale entries.
+        if self.template.name:
+            try:
+                prompt_cache.invalidate(self.template.name)
+            except Exception:
+                logger.debug("prompt_cache.invalidate failed during delete()", exc_info=True)
 
         self.request(
             config=RequestConfig(
@@ -461,7 +529,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             tmpl: PromptTemplate = client.request(
                 config=RequestConfig(
                     method=HttpMethod.GET,
-                    url=client._base_url + "/" + Routes.prompt_label_get_by_name.value,
+                    url=client._base_url + "/" + Routes.get_template_by_name.value,
                     params={"name": name},
                 ),
                 response_handler=PromptResponseHandler,
@@ -476,6 +544,10 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                 ),
                 response_handler=None,
             )
+            try:
+                prompt_cache.invalidate(name)
+            except Exception:
+                logger.debug("prompt_cache.invalidate failed during delete_template_by_name()", exc_info=True)
             return True
         finally:
             client.close()
@@ -486,7 +558,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         response = self.request(
             config=RequestConfig(
                 method=HttpMethod.GET,
-                url=self._base_url + "/" + Routes.prompt_label_get_by_name.value,
+                url=self._base_url + "/" + Routes.get_template_by_name.value,
                 params={"name": name},
             ),
             response_handler=PromptResponseHandler,
@@ -518,9 +590,9 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
     def list_template_versions(self):
         """Return full version history as provided by the backend.
 
-        Each element in the returned list is the raw JSON entry that includes
-        at least these keys: ``template_version``, ``is_draft`` and
-        ``created_at``.
+        Each element in the returned list is the raw JSON entry. The backend
+        returns snake_case keys (``template_version``, ``is_draft``,
+        ``created_at``); callers that need camelCase should normalize.
         """
         return self._fetch_template_version_history()
 
@@ -532,8 +604,10 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         """Check backend state to know if the current version is still draft."""
         history = self._fetch_template_version_history()
         for entry in history:
-            if entry.get("template_version") == self.template.version:
-                return bool(entry.get("is_draft"))
+            # Backend returns snake_case `template_version`; accept both for safety
+            entry_version = entry.get("templateVersion") or entry.get("template_version")
+            if entry_version == self.template.version:
+                return bool(entry.get("isDraft") or entry.get("is_draft"))
         # If not found assume draft (conservative)
         return True
 
