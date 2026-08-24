@@ -129,6 +129,7 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
             name_param = qs.get("name", [None])[0]
             raise TemplateNotFound(name_param or "unknown")
         if response.status_code == 400:
+            detail = None
             try:
                 detail = response.json()
                 error_code = detail.get("errorCode") if isinstance(detail, dict) else None
@@ -136,7 +137,7 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
                 error_code = None
 
             if error_code == "TEMPLATE_ALREADY_EXIST":
-                raise TemplateAlreadyExists(detail.get("name", "<unknown>"))
+                raise TemplateAlreadyExists(detail.get("name", "<unknown>") if isinstance(detail, dict) else "<unknown>")
 
             # Handle specific "No version found for label" error from get-by-name
             if isinstance(detail, dict) and "result" in detail and "No version found for label" in detail["result"]:
@@ -144,6 +145,7 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
 
             raise SDKException(
                 detail.get("message", "Bad request – please verify request body.")
+                if isinstance(detail, dict) else "Bad request – please verify request body."
             )
         else:
             response.raise_for_status()
