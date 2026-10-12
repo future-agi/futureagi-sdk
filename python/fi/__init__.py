@@ -1,11 +1,18 @@
 from importlib.metadata import PackageNotFoundError, version
+from pathlib import Path
 
 try:
     __version__ = version("futureagi")
 except PackageNotFoundError:
     # Source-tree fallback for environments that import `fi` before installing
-    # the package metadata. Keep this in sync with python/pyproject.toml.
-    __version__ = "0.6.13"
+    # the package metadata. Read the declared version so it cannot drift.
+    pyproject = Path(__file__).resolve().parents[1] / "pyproject.toml"
+    __version__ = "unknown"
+    for line in pyproject.read_text().splitlines():
+        stripped = line.strip()
+        if stripped.startswith("version = "):
+            __version__ = stripped.split("=", 1)[1].strip().strip('"').strip("'")
+            break
 __versions__ = __version__
 
 # Allow sibling `fi.*` packages (notably `fi.evals` shipped from the
