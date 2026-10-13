@@ -5,6 +5,7 @@ export { Dataset, DatasetResponseHandler } from './dataset';
 export {
     DataTypeChoices,
     SourceChoices,
+    ModelTypes,
     DataTypeUtils,
     createColumn,
     createRow,

@@ -1,5 +1,6 @@
 import { APIKeyAuth } from '../api/auth';
-import { HttpMethod, RequestConfig } from '../api/types';
+import { HttpMethod } from '../api/types';
+import type { RequestConfig } from '../api/types';
 import { Routes } from '../utils/routes';
 import { SDKException, InvalidAuthError } from '../utils/errors';
 import {

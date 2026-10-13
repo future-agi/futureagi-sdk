@@ -5,9 +5,6 @@ export const Routes = {
     // Healthcheck
     healthcheck: "healthcheck",
 
-    // Logging
-    log_model: "sdk/api/v1/log/model/",
-
     // Evaluation
     evaluate: "sdk/api/v1/eval/",
     evaluatev2: "sdk/api/v1/new-eval/",
@@ -50,8 +47,8 @@ export const Routes = {
     improve_prompt: "model-hub/prompt-templates/improve-prompt/",
     run_template: "model-hub/prompt-templates/{template_id}/run_template/",
     create_template: "model-hub/prompt-templates/create-draft/",
-    delete_template: "model-hub/prompt-templates/{template_id}",
-    get_template_by_id: "model-hub/prompt-templates/{template_id}",
+    delete_template: "model-hub/prompt-templates/{template_id}/",
+    get_template_by_id: "model-hub/prompt-templates/{template_id}/",
     get_template_id_by_name: "model-hub/prompt-templates/",
     list_templates: "model-hub/prompt-templates/",
     get_template_by_name: "model-hub/prompt-templates/get-template-by-name/",

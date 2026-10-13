@@ -1,0 +1,247 @@
+from __future__ import annotations
+
+import datetime
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
+from uuid import UUID
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+from dateutil.parser import isoparse
+
+from ..models.agent_version_list_response_status import AgentVersionListResponseStatus
+from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="AgentVersionListResponse")
+
+
+@_attrs_define
+class AgentVersionListResponse:
+    """
+    Attributes:
+        id (UUID | Unset):
+        version_number (int | Unset): Version number of the agent
+        version_name (None | str | Unset): Human-readable version name (e.g., 'v1.2.3')
+        version_name_display (str | Unset):
+        status (AgentVersionListResponseStatus | Unset): Current status of this version
+        status_display (str | Unset):
+        score (None | str | Unset): Performance score (0.0 to 10.0)
+        test_count (int | Unset): Number of tests run for this version
+        pass_rate (None | str | Unset): Test pass rate percentage
+        description (str | Unset): Description of changes in this version
+        commit_message (None | str | Unset): Commit message for the agent version
+        is_active (str | Unset):
+        is_latest (str | Unset):
+        created_at (datetime.datetime | Unset):
+    """
+
+    id: UUID | Unset = UNSET
+    version_number: int | Unset = UNSET
+    version_name: None | str | Unset = UNSET
+    version_name_display: str | Unset = UNSET
+    status: AgentVersionListResponseStatus | Unset = UNSET
+    status_display: str | Unset = UNSET
+    score: None | str | Unset = UNSET
+    test_count: int | Unset = UNSET
+    pass_rate: None | str | Unset = UNSET
+    description: str | Unset = UNSET
+    commit_message: None | str | Unset = UNSET
+    is_active: str | Unset = UNSET
+    is_latest: str | Unset = UNSET
+    created_at: datetime.datetime | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        id: str | Unset = UNSET
+        if not isinstance(self.id, Unset):
+            id = str(self.id)
+
+        version_number = self.version_number
+
+        version_name: None | str | Unset
+        if isinstance(self.version_name, Unset):
+            version_name = UNSET
+        else:
+            version_name = self.version_name
+
+        version_name_display = self.version_name_display
+
+        status: str | Unset = UNSET
+        if not isinstance(self.status, Unset):
+            status = self.status.value
+
+        status_display = self.status_display
+
+        score: None | str | Unset
+        if isinstance(self.score, Unset):
+            score = UNSET
+        else:
+            score = self.score
+
+        test_count = self.test_count
+
+        pass_rate: None | str | Unset
+        if isinstance(self.pass_rate, Unset):
+            pass_rate = UNSET
+        else:
+            pass_rate = self.pass_rate
+
+        description = self.description
+
+        commit_message: None | str | Unset
+        if isinstance(self.commit_message, Unset):
+            commit_message = UNSET
+        else:
+            commit_message = self.commit_message
+
+        is_active = self.is_active
+
+        is_latest = self.is_latest
+
+        created_at: str | Unset = UNSET
+        if not isinstance(self.created_at, Unset):
+            created_at = self.created_at.isoformat()
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update({})
+        if id is not UNSET:
+            field_dict["id"] = id
+        if version_number is not UNSET:
+            field_dict["version_number"] = version_number
+        if version_name is not UNSET:
+            field_dict["version_name"] = version_name
+        if version_name_display is not UNSET:
+            field_dict["version_name_display"] = version_name_display
+        if status is not UNSET:
+            field_dict["status"] = status
+        if status_display is not UNSET:
+            field_dict["status_display"] = status_display
+        if score is not UNSET:
+            field_dict["score"] = score
+        if test_count is not UNSET:
+            field_dict["test_count"] = test_count
+        if pass_rate is not UNSET:
+            field_dict["pass_rate"] = pass_rate
+        if description is not UNSET:
+            field_dict["description"] = description
+        if commit_message is not UNSET:
+            field_dict["commit_message"] = commit_message
+        if is_active is not UNSET:
+            field_dict["is_active"] = is_active
+        if is_latest is not UNSET:
+            field_dict["is_latest"] = is_latest
+        if created_at is not UNSET:
+            field_dict["created_at"] = created_at
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
+        _id = d.pop("id", UNSET)
+        id: UUID | Unset
+        if isinstance(_id, Unset):
+            id = UNSET
+        else:
+            id = UUID(_id)
+
+        version_number = d.pop("version_number", UNSET)
+
+        def _parse_version_name(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        version_name = _parse_version_name(d.pop("version_name", UNSET))
+
+        version_name_display = d.pop("version_name_display", UNSET)
+
+        _status = d.pop("status", UNSET)
+        status: AgentVersionListResponseStatus | Unset
+        if isinstance(_status, Unset):
+            status = UNSET
+        else:
+            status = AgentVersionListResponseStatus(_status)
+
+        status_display = d.pop("status_display", UNSET)
+
+        def _parse_score(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        score = _parse_score(d.pop("score", UNSET))
+
+        test_count = d.pop("test_count", UNSET)
+
+        def _parse_pass_rate(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        pass_rate = _parse_pass_rate(d.pop("pass_rate", UNSET))
+
+        description = d.pop("description", UNSET)
+
+        def _parse_commit_message(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        commit_message = _parse_commit_message(d.pop("commit_message", UNSET))
+
+        is_active = d.pop("is_active", UNSET)
+
+        is_latest = d.pop("is_latest", UNSET)
+
+        _created_at = d.pop("created_at", UNSET)
+        created_at: datetime.datetime | Unset
+        if isinstance(_created_at, Unset):
+            created_at = UNSET
+        else:
+            created_at = isoparse(_created_at)
+
+        agent_version_list_response = cls(
+            id=id,
+            version_number=version_number,
+            version_name=version_name,
+            version_name_display=version_name_display,
+            status=status,
+            status_display=status_display,
+            score=score,
+            test_count=test_count,
+            pass_rate=pass_rate,
+            description=description,
+            commit_message=commit_message,
+            is_active=is_active,
+            is_latest=is_latest,
+            created_at=created_at,
+        )
+
+        agent_version_list_response.additional_properties = d
+        return agent_version_list_response
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

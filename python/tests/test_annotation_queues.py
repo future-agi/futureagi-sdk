@@ -262,6 +262,8 @@ class TestQueueCRUD:
         assert config.method == HttpMethod.GET
         assert config.params["status"] == "active"
         assert config.params["search"] == "test"
+        assert config.params["page"] == 1
+        assert "page_size" not in config.params
         assert len(result) == 1
 
     def test_get(self, client, mock_request):

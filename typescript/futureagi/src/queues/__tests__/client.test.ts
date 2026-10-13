@@ -78,6 +78,8 @@ describe('AnnotationQueue', () => {
             expect(config.params.status).toBe('active');
             expect(config.params.search).toBe('test');
             expect(config.params.include_counts).toBe('true');
+            expect(config.params.page).toBe(1);
+            expect(config.params).not.toHaveProperty('page_size');
             expect(result).toHaveLength(1);
         });
     });

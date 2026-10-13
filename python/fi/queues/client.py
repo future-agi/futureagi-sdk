@@ -324,11 +324,10 @@ class AnnotationQueue(APIKeyAuth):
         search: Optional[str] = None,
         include_counts: bool = True,
         page: int = 1,
-        page_size: int = 20,
         timeout: Optional[int] = None,
     ) -> List[QueueDetail]:
         """List annotation queues."""
-        params: Dict[str, Any] = {"page": page, "page_size": page_size}
+        params: Dict[str, Any] = {"page": page}
         if status:
             params["status"] = status
         if search:

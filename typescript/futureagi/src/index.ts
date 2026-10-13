@@ -5,3 +5,4 @@ export * from './prompt';
 export * from './annotations';
 export * from './queues';
 export * from './utils';
+export * from './futureagi-client';

@@ -14,8 +14,10 @@
  * ```
  */
 
-import { APIKeyAuth, APIKeyAuthConfig, ResponseHandler } from '../api/auth';
-import { HttpMethod, RequestConfig } from '../api/types';
+import { APIKeyAuth, ResponseHandler } from '../api/auth';
+import type { APIKeyAuthConfig } from '../api/auth';
+import { HttpMethod } from '../api/types';
+import type { RequestConfig } from '../api/types';
 import { SDKException } from '../utils/errors';
 import { Routes } from '../utils/routes';
 import type { AnnotationLabel } from '../annotations/types';
@@ -231,12 +233,10 @@ export class AnnotationQueue extends APIKeyAuth {
         search?: string;
         includeCounts?: boolean;
         page?: number;
-        pageSize?: number;
         timeout?: number;
     }): Promise<QueueDetail[]> {
         const params: Record<string, any> = {
             page: options?.page ?? 1,
-            page_size: options?.pageSize ?? 20,
         };
         if (options?.status) params.status = options.status;
         if (options?.search) params.search = options.search;
