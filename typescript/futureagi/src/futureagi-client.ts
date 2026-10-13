@@ -623,7 +623,10 @@ export class ExperimentRunsClient {
     );
   }
 
-  compare(body: BodyOf<generatedTypes.CompareExperimentRunsData>) {
+  compare(
+    body: BodyOf<generatedTypes.CompareExperimentRunsData>,
+  ): Promise<generatedTypes.RunComparisonResponse> {
+    // The generator infers a fields wrapper even when dataOptions requests data.
     return generatedSdk.compareExperimentRuns(
       dataOptions(this.client, { body }),
     ) as unknown as Promise<generatedTypes.RunComparisonResponse>;
