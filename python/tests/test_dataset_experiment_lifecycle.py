@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from uuid import UUID
 
 import httpx
 import pytest
@@ -22,6 +23,11 @@ from fi.generated.openapi_client.models.run_comparison_request import (
     RunComparisonRequest,
 )
 from fi.generated.openapi_client.models.release_gate_report import ReleaseGateReport
+from fi.generated.openapi_client.models.release_gate_policy import ReleaseGatePolicy
+from fi.generated.openapi_client.models.trial_aggregate import TrialAggregate
+from fi.generated.openapi_client.models.trial_delta_aggregate import TrialDeltaAggregate
+from fi.generated.openapi_client.models.trial_stability import TrialStability
+from fi.generated.openapi_client.types import UNSET
 
 FIXTURES = Path(__file__).parents[2] / "tests/fixtures/dataset-experiments"
 DATASET = "00000000-0000-4000-8000-000000000001"
@@ -240,6 +246,92 @@ def test_compare_returns_gate_report_without_making_ci_decision(name):
             "pass" if name == "allowance" else "fail"
         )
     assert len(calls) == 1
+
+
+@pytest.mark.parametrize("flag", [UNSET, False, True])
+def test_compare_trial_stability_preserves_opt_in_and_typed_statistics(flag):
+    response = fixture("run-comparison-trial-stability.json")
+    if flag is not True:
+        response["result"].pop("trial_stability")
+    compare = {
+        "baseline_run_id": response["result"]["baseline_run_id"],
+        "candidate_run_id": response["result"]["candidate_run_id"],
+        "metric_id": response["result"]["metric_id"],
+    }
+    if flag is not UNSET:
+        compare["include_trial_stability"] = flag
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        assert request.method == "POST"
+        assert request.url.path == "/model-hub/experiment-runs/compare/"
+        assert json.loads(request.content) == compare
+        return httpx.Response(200, json=response)
+
+    with client_for(handler) as client:
+        parsed = client.experiment_runs.compare(RunComparisonRequest.from_dict(compare))
+        assert parsed.to_dict() == response
+        rows = parsed.result.trial_stability
+        if flag is True:
+            assert isinstance(rows, list)
+            observed, missing = rows
+            assert isinstance(observed, TrialStability)
+            assert isinstance(observed.baseline, TrialAggregate)
+            assert isinstance(observed.paired, TrialDeltaAggregate)
+            assert observed.baseline.score_stddev == 0.5
+            assert observed.candidate.score_stddev == 0
+            assert observed.paired.delta_average == 0
+            assert missing.baseline.missing_trial_count == 2
+            assert missing.baseline.score_stddev is None
+            assert missing.paired.delta_average is None
+        else:
+            assert rows is UNSET
+    assert len(calls) == 1
+
+
+def test_new_trial_flag_preserves_existing_positional_gate_argument():
+    request = RunComparisonRequest(
+        UUID(RUN),
+        UUID(VERSION),
+        UUID(EXAMPLE),
+        None,
+        True,
+        ReleaseGatePolicy(max_regressions=2),
+    )
+    assert request.to_dict()["release_gate"] == {"max_regressions": 2}
+    assert "include_trial_stability" not in request.to_dict()
+    request.include_trial_stability = False
+    assert request.to_dict()["include_trial_stability"] is False
+    body = request.to_dict()
+    assert RunComparisonRequest.from_dict(body).to_dict() == body
+    assert (
+        RunComparisonRequest.from_dict(dict(reversed(list(body.items())))).to_dict()
+        == body
+    )
+
+
+def test_compare_accepts_trial_stability_with_release_gate_without_changing_verdict():
+    response = fixture("run-comparison-gate-critical.json")
+    response["result"]["trial_stability"] = []
+    compare = RunComparisonRequest.from_dict(
+        {
+            "baseline_run_id": response["result"]["baseline_run_id"],
+            "candidate_run_id": response["result"]["candidate_run_id"],
+            "metric_id": response["result"]["metric_id"],
+            "include_trial_stability": True,
+            "release_gate": response["result"]["release_gate"]["policy"],
+        }
+    )
+
+    def handler(request):
+        assert json.loads(request.content) == compare.to_dict()
+        return httpx.Response(200, json=response)
+
+    with client_for(handler) as client:
+        parsed = client.experiment_runs.compare(compare)
+    assert parsed.result.trial_stability == []
+    assert parsed.result.release_gate.verdict.value == "fail"
 
 
 @pytest.mark.parametrize(

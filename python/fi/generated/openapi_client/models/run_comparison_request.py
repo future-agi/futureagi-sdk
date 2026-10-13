@@ -26,6 +26,7 @@ class RunComparisonRequest:
         passing_score (float | None | Unset):
         higher_is_better (bool | Unset):  Default: True.
         release_gate (ReleaseGatePolicy | Unset):
+        include_trial_stability (bool | Unset): Omitted unless set. Server default: False.
     """
 
     baseline_run_id: UUID
@@ -34,6 +35,7 @@ class RunComparisonRequest:
     passing_score: float | None | Unset = UNSET
     higher_is_better: bool | Unset = True
     release_gate: ReleaseGatePolicy | Unset = UNSET
+    include_trial_stability: bool | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -55,6 +57,8 @@ class RunComparisonRequest:
         if not isinstance(self.release_gate, Unset):
             release_gate = self.release_gate.to_dict()
 
+        include_trial_stability = self.include_trial_stability
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -70,6 +74,8 @@ class RunComparisonRequest:
             field_dict["higher_is_better"] = higher_is_better
         if release_gate is not UNSET:
             field_dict["release_gate"] = release_gate
+        if include_trial_stability is not UNSET:
+            field_dict["include_trial_stability"] = include_trial_stability
 
         return field_dict
 
@@ -102,6 +108,8 @@ class RunComparisonRequest:
         else:
             release_gate = ReleaseGatePolicy.from_dict(_release_gate)
 
+        include_trial_stability = d.pop("include_trial_stability", UNSET)
+
         run_comparison_request = cls(
             baseline_run_id=baseline_run_id,
             candidate_run_id=candidate_run_id,
@@ -109,6 +117,7 @@ class RunComparisonRequest:
             passing_score=passing_score,
             higher_is_better=higher_is_better,
             release_gate=release_gate,
+            include_trial_stability=include_trial_stability,
         )
 
         run_comparison_request.additional_properties = d

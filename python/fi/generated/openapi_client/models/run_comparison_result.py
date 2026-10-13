@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from ..models.run_case_trace_references import RunCaseTraceReferences
     from ..models.run_comparison_summary import RunComparisonSummary
     from ..models.run_counts import RunCounts
+    from ..models.trial_stability import TrialStability
 
 
 T = TypeVar("T", bound="RunComparisonResult")
@@ -35,6 +36,7 @@ class RunComparisonResult:
         missing_by_side (MissingRunItems):
         trace_refs (list[RunCaseTraceReferences]):
         release_gate (ReleaseGateReport | Unset):
+        trial_stability (list[TrialStability] | Unset):
     """
 
     baseline_run_id: UUID
@@ -48,6 +50,7 @@ class RunComparisonResult:
     missing_by_side: MissingRunItems
     trace_refs: list[RunCaseTraceReferences]
     release_gate: ReleaseGateReport | Unset = UNSET
+    trial_stability: list[TrialStability] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -78,6 +81,13 @@ class RunComparisonResult:
         if not isinstance(self.release_gate, Unset):
             release_gate = self.release_gate.to_dict()
 
+        trial_stability: list[dict[str, Any]] | Unset = UNSET
+        if not isinstance(self.trial_stability, Unset):
+            trial_stability = []
+            for trial_stability_item_data in self.trial_stability:
+                trial_stability_item = trial_stability_item_data.to_dict()
+                trial_stability.append(trial_stability_item)
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -96,6 +106,8 @@ class RunComparisonResult:
         )
         if release_gate is not UNSET:
             field_dict["release_gate"] = release_gate
+        if trial_stability is not UNSET:
+            field_dict["trial_stability"] = trial_stability
 
         return field_dict
 
@@ -106,6 +118,7 @@ class RunComparisonResult:
         from ..models.run_case_trace_references import RunCaseTraceReferences
         from ..models.run_comparison_summary import RunComparisonSummary
         from ..models.run_counts import RunCounts
+        from ..models.trial_stability import TrialStability
 
         d = dict(src_dict)
         baseline_run_id = UUID(d.pop("baseline_run_id"))
@@ -140,6 +153,17 @@ class RunComparisonResult:
         else:
             release_gate = ReleaseGateReport.from_dict(_release_gate)
 
+        _trial_stability = d.pop("trial_stability", UNSET)
+        trial_stability: list[TrialStability] | Unset = UNSET
+        if _trial_stability is not UNSET:
+            trial_stability = []
+            for trial_stability_item_data in _trial_stability:
+                trial_stability_item = TrialStability.from_dict(
+                    trial_stability_item_data
+                )
+
+                trial_stability.append(trial_stability_item)
+
         run_comparison_result = cls(
             baseline_run_id=baseline_run_id,
             candidate_run_id=candidate_run_id,
@@ -152,6 +176,7 @@ class RunComparisonResult:
             missing_by_side=missing_by_side,
             trace_refs=trace_refs,
             release_gate=release_gate,
+            trial_stability=trial_stability,
         )
 
         run_comparison_result.additional_properties = d

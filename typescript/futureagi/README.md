@@ -240,3 +240,24 @@ The backend owns the request and response shapes. These APIs require core PRs #3
 Each call makes one HTTP attempt. Snapshot creation is not idempotent; do not blindly retry an ambiguous timeout. Run/result replay is safe only with the same UUID or receipt keys and unchanged payload. Conflicts and parse failures surface to the caller without a second request.
 
 `examples/dataset-experiment-lifecycle.ts` demonstrates the deterministic end-to-end flow. Nullable outputs and trace references are preserved; no model or live Observe integration is implied.
+
+For per-example trial counts, observed score spread, and paired deltas, opt in on
+the existing comparison call (requires core PR #3483):
+
+```typescript
+const report = await client.experimentRuns.compare({
+  baseline_run_id: baselineRunId,
+  candidate_run_id: candidateRunId,
+  metric_id: metricId,
+  include_trial_stability: true,
+});
+for (const example of report.result.trial_stability ?? []) {
+  console.log(example.example_id, example.candidate.score_stddev);
+}
+```
+
+The optional `trial_stability` result is `undefined` when the backend omits it.
+Nullable statistics remain `null`; a standard deviation of `null` means fewer
+than two assessed values, while `0` means observed zero spread. This is
+descriptive analysis, not statistical significance. It can be requested with
+`release_gate` without changing the gate's verdict.

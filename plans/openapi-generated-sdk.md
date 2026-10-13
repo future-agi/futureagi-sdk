@@ -104,4 +104,23 @@ SDK_OPERATION_SCOPE="$PWD/openapi/sdk/lifecycle-source.json" \
 
 Generation pins swagger2openapi 7.0.8, @hey-api/openapi-ts 0.97.3 with TypeScript 5.8.3, and openapi-python-client 0.28.4. Python post-hooks use isolated Ruff configuration targeting Python 3.10, preventing ambient user rules from rewriting TypeVars to Python 3.11-only `typing.Self`. The JSON conversion preserves scalar/list/object/null values, explicit non-null snapshot inputs, and nullable enums.
 
+The trial-stability refresh is scoped to the existing comparison POST using core
+PR #3483 (`32ea09fa63d0ffa2e5178d1ede94f0f8b5796b7a`). It preserves all other
+operations and the six lifecycle response-style type hooks. Regenerate it with:
+
+```sh
+SDK_OPERATION_SCOPE="$PWD/openapi/sdk/trial-stability-source.json" \
+  scripts/generate-oss-sdk.sh /path/to/core-at-32ea09fa/api_contracts/openapi/swagger.json
+```
+
+`include_trial_stability` remains optional. Generated Python models and
+TypeScript types expose the optional `trial_stability` array and its nullable
+statistics; the facade and transport are unchanged. The SDK overlay keeps
+existing schema properties in their previous order and appends new fields so
+Python positional model arguments remain compatible. JSON property order has
+no API meaning. A narrow Python post-hook keeps the server's documented
+`false` default opt-in at the wire: omitted model fields remain omitted, while
+explicit `False` is still serialized. The deterministic SDK
+fixture is synthetic contract evidence, not a live API receipt.
+
 This SDK PR stacks on open compatibility PR #25 (`44f99aa`) and ports dev's dataset retry hardening (`1607f12`) without replacing its package-version fallback. PR #25 remains an independent integration prerequisite; this slice does not merge its generated Go/Java surface or publish packages.

@@ -1877,6 +1877,9 @@ from .trend_metric import TrendMetric
 from .trend_point import TrendPoint
 from .trends_tab_api_response import TrendsTabApiResponse
 from .trends_tab_response import TrendsTabResponse
+from .trial_aggregate import TrialAggregate
+from .trial_delta_aggregate import TrialDeltaAggregate
+from .trial_stability import TrialStability
 from .update_run_test import UpdateRunTest
 from .user import User
 from .user_alert_monitor import UserAlertMonitor
@@ -3301,6 +3304,9 @@ __all__ = (
     "TrendPoint",
     "TrendsTabApiResponse",
     "TrendsTabResponse",
+    "TrialAggregate",
+    "TrialDeltaAggregate",
+    "TrialStability",
     "UpdateRunTest",
     "User",
     "UserAlertMonitor",

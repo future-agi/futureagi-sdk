@@ -345,3 +345,25 @@ with FutureAGIClient(api_key=api_key, secret_key=secret_key, base_url=base_url) 
 Every facade call makes one HTTP attempt. Snapshot creation has no retry key: a retry after an ambiguous timeout can create another version. Run creation and result ingestion can be explicitly replayed only with the same run UUID or receipt keys and unchanged payload; conflicts are surfaced, not retried. Read and comparison failures are also returned without hidden retries.
 
 See `examples/dataset_experiment_lifecycle.py` for the complete deterministic snapshot → two caller-owned tasks → local scores → result uploads → comparison workflow, including idempotent replay checks. It is a data-path example, not model-quality or live Observe qualification.
+
+For per-example trial counts, observed score spread, and paired deltas, opt in on
+the existing comparison call (requires core PR #3483):
+
+```python
+from fi.generated.openapi_client.models.run_comparison_request import RunComparisonRequest
+
+report = client.experiment_runs.compare(RunComparisonRequest.from_dict({
+    "baseline_run_id": baseline_run_id,
+    "candidate_run_id": candidate_run_id,
+    "metric_id": metric_id,
+    "include_trial_stability": True,
+}))
+for example in report.result.trial_stability or []:
+    print(example.example_id, example.candidate.score_stddev)
+```
+
+The optional `trial_stability` result is `UNSET` when the backend omits it. Nullable
+statistics remain `None`; a standard deviation of `None` means fewer than two
+assessed values, while `0.0` means observed zero spread. This is descriptive
+analysis, not statistical significance. It can be requested with `release_gate`
+without changing the gate's verdict.
