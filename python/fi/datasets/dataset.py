@@ -3,7 +3,7 @@ import re
 from typing import Any, Dict, List, Optional, Union
 import time
 import logging
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 import pandas as pd
 from requests import Response
@@ -96,11 +96,23 @@ class DatasetResponseHandler(ResponseHandler[DatasetConfig, DatasetTable]):
         )
 
     @classmethod
-    def _parse_dataset_names(cls, data: Dict[str, Any]) -> DatasetConfig:
-        """Parses the response from the get-datasets-names endpoint."""
+    def _parse_dataset_names(cls, data: Dict[str, Any], response: Response) -> DatasetConfig:
+        """Parses the response from the get-datasets-names endpoint.
+
+        The endpoint matches ``search_text`` as a substring, so a name that is a
+        prefix of another (``foo`` vs ``foo-bar``) can return several rows. By-name
+        lookup is exact by contract, so resolve against the exact requested name
+        rather than trusting the server to return a single fuzzy match.
+        """
         datasets = data["result"]["datasets"]
         if not datasets:
             raise DatasetNotFoundError("No dataset found matching the criteria.")
+        requested_name = parse_qs(urlparse(response.url).query).get("search_text", [None])[0]
+        if requested_name is not None:
+            exact = [d for d in datasets if str(cls._get(d, "name")) == requested_name]
+            if not exact:
+                raise DatasetNotFoundError(f"No dataset named '{requested_name}' found.")
+            datasets = exact
         if len(datasets) > 1:
             raise ValueError("Multiple datasets found. Please specify a dataset name.")
         dataset = datasets[0]
@@ -177,7 +189,7 @@ class DatasetResponseHandler(ResponseHandler[DatasetConfig, DatasetTable]):
         parsed_path = urlparse(response.url).path
 
         if parsed_path.endswith(Routes.dataset_names.value):
-            return cls._parse_dataset_names(data)
+            return cls._parse_dataset_names(data, response)
 
         if Routes.dataset_table.value.split("/")[-2] in parsed_path:
             return cls._parse_dataset_table(data, response)
@@ -974,7 +986,9 @@ class Dataset(APIKeyAuth):
         while retries < max_retries:
             try:
                 return self.request(config=config, response_handler=response_handler)
-            except (ConnectionError, Timeout, ServerError, ServiceUnavailableError) as e:
+            except (ConnectionError, Timeout) as e:
+                # Transport-level only. 5xx/parse errors must not re-send a
+                # non-idempotent POST (would duplicate server-side writes).
                 last_exception = e
                 retries += 1
                 if retries >= max_retries:

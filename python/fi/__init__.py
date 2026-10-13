@@ -4,8 +4,6 @@ from pathlib import Path
 try:
     __version__ = version("futureagi")
 except PackageNotFoundError:
-    # Source-tree fallback for environments that import `fi` before installing
-    # the package metadata. Read the declared version so it cannot drift.
     pyproject = Path(__file__).resolve().parents[1] / "pyproject.toml"
     __version__ = "unknown"
     for line in pyproject.read_text().splitlines():
@@ -15,8 +13,7 @@ except PackageNotFoundError:
             break
 __versions__ = __version__
 
-# Allow sibling `fi.*` packages (notably `fi.evals` shipped from the
-# ai-evaluation repo) to extend this namespace when both are installed.
+# Allow sibling fi.* packages to extend this namespace.
 from pkgutil import extend_path
 
 __path__ = extend_path(__path__, __name__)
