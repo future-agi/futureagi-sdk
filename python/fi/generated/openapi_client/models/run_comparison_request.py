@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar, cast
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.release_gate_policy import ReleaseGatePolicy
+
 
 T = TypeVar("T", bound="RunComparisonRequest")
 
@@ -21,6 +25,7 @@ class RunComparisonRequest:
         metric_id (UUID):
         passing_score (float | None | Unset):
         higher_is_better (bool | Unset):  Default: True.
+        release_gate (ReleaseGatePolicy | Unset):
     """
 
     baseline_run_id: UUID
@@ -28,6 +33,7 @@ class RunComparisonRequest:
     metric_id: UUID
     passing_score: float | None | Unset = UNSET
     higher_is_better: bool | Unset = True
+    release_gate: ReleaseGatePolicy | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -45,6 +51,10 @@ class RunComparisonRequest:
 
         higher_is_better = self.higher_is_better
 
+        release_gate: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.release_gate, Unset):
+            release_gate = self.release_gate.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -58,11 +68,15 @@ class RunComparisonRequest:
             field_dict["passing_score"] = passing_score
         if higher_is_better is not UNSET:
             field_dict["higher_is_better"] = higher_is_better
+        if release_gate is not UNSET:
+            field_dict["release_gate"] = release_gate
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.release_gate_policy import ReleaseGatePolicy
+
         d = dict(src_dict)
         baseline_run_id = UUID(d.pop("baseline_run_id"))
 
@@ -81,12 +95,20 @@ class RunComparisonRequest:
 
         higher_is_better = d.pop("higher_is_better", UNSET)
 
+        _release_gate = d.pop("release_gate", UNSET)
+        release_gate: ReleaseGatePolicy | Unset
+        if isinstance(_release_gate, Unset):
+            release_gate = UNSET
+        else:
+            release_gate = ReleaseGatePolicy.from_dict(_release_gate)
+
         run_comparison_request = cls(
             baseline_run_id=baseline_run_id,
             candidate_run_id=candidate_run_id,
             metric_id=metric_id,
             passing_score=passing_score,
             higher_is_better=higher_is_better,
+            release_gate=release_gate,
         )
 
         run_comparison_request.additional_properties = d

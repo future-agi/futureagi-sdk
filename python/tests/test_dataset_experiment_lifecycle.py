@@ -5,6 +5,7 @@ from pathlib import Path
 
 import httpx
 import pytest
+from jsonschema import ValidationError
 
 from fi import FutureAGIClient
 from fi.futureagi_client import FutureAGIAPIError
@@ -20,6 +21,7 @@ from fi.generated.openapi_client.models.external_run_results_request import (
 from fi.generated.openapi_client.models.run_comparison_request import (
     RunComparisonRequest,
 )
+from fi.generated.openapi_client.models.release_gate_report import ReleaseGateReport
 
 FIXTURES = Path(__file__).parents[2] / "tests/fixtures/dataset-experiments"
 DATASET = "00000000-0000-4000-8000-000000000001"
@@ -210,6 +212,96 @@ def test_external_run_result_and_comparison_use_generated_wire_contract(
             == expected[2][2]
         )
     assert len(calls) == 3
+
+
+@pytest.mark.parametrize("name", ["allowance", "critical"])
+def test_compare_returns_gate_report_without_making_ci_decision(name):
+    response = fixture(f"run-comparison-gate-{name}.json")
+    compare = {
+        "baseline_run_id": response["result"]["baseline_run_id"],
+        "candidate_run_id": response["result"]["candidate_run_id"],
+        "metric_id": response["result"]["metric_id"],
+        "passing_score": 1,
+        "release_gate": response["result"]["release_gate"]["policy"],
+    }
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        assert request.method == "POST"
+        assert request.url.path == "/model-hub/experiment-runs/compare/"
+        assert json.loads(request.content) == compare
+        return httpx.Response(200, json=response)
+
+    with client_for(handler) as client:
+        parsed = client.experiment_runs.compare(RunComparisonRequest.from_dict(compare))
+        assert parsed.to_dict() == response
+        assert parsed.result.release_gate.verdict.value == (
+            "pass" if name == "allowance" else "fail"
+        )
+    assert len(calls) == 1
+
+
+@pytest.mark.parametrize(
+    "policy",
+    [
+        None,
+        [],
+        {"max_regressions": True},
+        {"max_regressions": 1.0},
+        {"max_regressions": -1},
+        {"max_regressions": None},
+        {"max_regresions": 10},
+        {"critical_cases": None},
+        {"critical_cases": [{"example_id": EXAMPLE, "trial_number": 0}]},
+        {"critical_cases": [{"example_id": EXAMPLE, "trial_number": 2147483648}]},
+        {"critical_cases": [{"example_id": EXAMPLE, "trial_number": True}]},
+        {"critical_cases": [{"example_id": EXAMPLE, "trial_number": 1, "typo": 1}]},
+    ],
+)
+def test_invalid_gate_cannot_be_silently_weakened_before_transport(policy):
+    calls = []
+    with client_for(lambda request: calls.append(request)) as client:
+        with pytest.raises((ValidationError, TypeError)):
+            client.experiment_runs.compare(
+                RunComparisonRequest.from_dict(
+                    {
+                        "baseline_run_id": RUN,
+                        "candidate_run_id": VERSION,
+                        "metric_id": EXAMPLE,
+                        "release_gate": policy,
+                    }
+                )
+            )
+    assert calls == []
+
+
+def test_gate_model_defaults_nulls_and_forward_compatible_report_fields():
+    from fi.generated.openapi_client.models.release_gate_policy import ReleaseGatePolicy
+
+    assert ReleaseGatePolicy.from_dict({}).to_dict() == {}
+    assert ReleaseGatePolicy().to_dict() == {"max_regressions": 0}
+    with pytest.raises(ValidationError):
+        ReleaseGatePolicy(max_regressions=True).to_dict()
+    payload = {
+        "verdict": "fail",
+        "expected_count": 0,
+        "comparable_count": 0,
+        "regression_count": 0,
+        "policy": {},
+        "passing_score": None,
+        "higher_is_better": True,
+        "blockers": [
+            {
+                "example_id": None,
+                "trial_number": None,
+                "reason": "empty_plan",
+                "new_detail": 0,
+            }
+        ],
+        "new_report_field": {"nested": [None, False]},
+    }
+    assert ReleaseGateReport.from_dict(payload).to_dict() == payload
 
 
 @pytest.mark.parametrize("failure", ["timeout", "invalid-json", "conflict"])

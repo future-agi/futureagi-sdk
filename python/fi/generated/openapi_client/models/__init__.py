@@ -1462,6 +1462,12 @@ from .queue_status_response import QueueStatusResponse
 from .queue_submit_annotations_response import QueueSubmitAnnotationsResponse
 from .queue_submit_annotations_result import QueueSubmitAnnotationsResult
 from .recommendation import Recommendation
+from .release_gate_blocker import ReleaseGateBlocker
+from .release_gate_blocker_reason import ReleaseGateBlockerReason
+from .release_gate_case import ReleaseGateCase
+from .release_gate_policy import ReleaseGatePolicy
+from .release_gate_report import ReleaseGateReport
+from .release_gate_report_verdict import ReleaseGateReportVerdict
 from .representative_trace import RepresentativeTrace
 from .representative_trace_recommendations_item import (
     RepresentativeTraceRecommendationsItem,
@@ -2998,6 +3004,12 @@ __all__ = (
     "QueueSubmitAnnotationsResponse",
     "QueueSubmitAnnotationsResult",
     "Recommendation",
+    "ReleaseGateBlocker",
+    "ReleaseGateBlockerReason",
+    "ReleaseGateCase",
+    "ReleaseGatePolicy",
+    "ReleaseGateReport",
+    "ReleaseGateReportVerdict",
     "RepresentativeTrace",
     "RepresentativeTraceRecommendationsItem",
     "RepresentativeTraceRootCausesItem",

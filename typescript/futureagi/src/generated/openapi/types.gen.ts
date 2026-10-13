@@ -16154,6 +16154,7 @@ export type RunComparisonRequest = {
      * Higher is better
      */
     higher_is_better?: boolean;
+    release_gate?: ReleaseGatePolicy;
 };
 
 export type RunComparisonResponse = {
@@ -16454,6 +16455,7 @@ export type RunComparisonResult = {
     candidate_counts: RunCounts;
     missing_by_side: MissingRunItems;
     trace_refs: Array<RunCaseTraceReferences>;
+    release_gate?: ReleaseGateReport;
 };
 
 export type DatasetVersionItemRead = {
@@ -16817,6 +16819,69 @@ export type RunTraceReference = {
      */
     root_span_id: string | null;
 } | null;
+
+export type ReleaseGatePolicy = {
+    /**
+     * Max regressions
+     */
+    max_regressions?: number;
+    critical_cases?: Array<ReleaseGateCase>;
+};
+
+export type ReleaseGateCase = {
+    /**
+     * Example id
+     */
+    example_id: string;
+    /**
+     * Trial number
+     */
+    trial_number: number;
+};
+
+export type ReleaseGateReport = {
+    /**
+     * Verdict
+     */
+    verdict: 'pass' | 'fail';
+    /**
+     * Expected count
+     */
+    expected_count: number;
+    /**
+     * Comparable count
+     */
+    comparable_count: number;
+    /**
+     * Regression count
+     */
+    regression_count: number;
+    policy: ReleaseGatePolicy;
+    /**
+     * Passing score
+     */
+    passing_score: number | null;
+    /**
+     * Higher is better
+     */
+    higher_is_better: boolean;
+    blockers: Array<ReleaseGateBlocker>;
+};
+
+export type ReleaseGateBlocker = {
+    /**
+     * Example id
+     */
+    example_id: string | null;
+    /**
+     * Trial number
+     */
+    trial_number: number | null;
+    /**
+     * Reason
+     */
+    reason: 'missing' | 'duplicate' | 'invalid' | 'error' | 'unknown' | 'unsupported' | 'not_assessed' | 'critical_regression' | 'critical_threshold' | 'regression_limit_exceeded' | 'empty_plan';
+};
 
 export type QueueLabelNestedWritable = {
     /**

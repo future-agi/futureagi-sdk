@@ -8,6 +8,7 @@ import { randomUUID } from "node:crypto";
 import { FutureAGIClient } from "../src/futureagi-client";
 
 async function main() {
+  const releaseGate = process.argv.includes("--release-gate");
   const datasetId = process.env.DATASET_ID!;
   const metricId = process.env.METRIC_ID!.toLowerCase();
   const client = new FutureAGIClient();
@@ -87,6 +88,7 @@ async function main() {
     candidate_run_id: runs.candidate,
     metric_id: metricId,
     passing_score: 1,
+    ...(releaseGate ? { release_gate: { max_regressions: 0 } } : {}),
   });
   const summary = comparison.result.comparison;
   if (
@@ -104,6 +106,13 @@ async function main() {
   console.log(
     "TypeScript SDK: equal means 0.5; improved=1, regressed=1; replay unchanged",
   );
+  // The application decides its CI exit after retaining the server report.
+  if (releaseGate) {
+    const verdict = comparison.result.release_gate?.verdict;
+    if (!verdict) throw new Error("Requested release gate report is missing");
+    console.log(`Release gate: ${verdict}`);
+    process.exitCode = verdict === "pass" ? 0 : 1;
+  }
 }
 
 main().catch((error) => {

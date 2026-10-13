@@ -5,6 +5,7 @@ must describe the local exact-match rule used here. Each invocation creates a
 new snapshot and two runs. No model, hosted evaluator or trace exporter runs.
 """
 
+import argparse
 import json
 import os
 from pathlib import Path
@@ -26,6 +27,9 @@ from fi.generated.openapi_client.models.run_comparison_request import (
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--release-gate", action="store_true")
+    args = parser.parse_args()
     dataset_id = str(UUID(os.environ["DATASET_ID"]))
     metric_id = str(UUID(os.environ["METRIC_ID"]))
     with FutureAGIClient() as client:
@@ -118,6 +122,11 @@ def main():
                     "candidate_run_id": runs["candidate"],
                     "metric_id": metric_id,
                     "passing_score": 1,
+                    **(
+                        {"release_gate": {"max_regressions": 0}}
+                        if args.release_gate
+                        else {}
+                    ),
                 }
             )
         )
@@ -135,6 +144,11 @@ def main():
         )
         Path("sdk-comparison.json").write_text(json.dumps(payload, indent=2) + "\n")
         print("Python SDK: equal means 0.5; improved=1, regressed=1; replay unchanged")
+        # The application decides its CI exit after retaining the server report.
+        if args.release_gate:
+            verdict = payload["result"]["release_gate"]["verdict"]
+            print(f"Release gate: {verdict}")
+            raise SystemExit(0 if verdict == "pass" else 1)
 
 
 if __name__ == "__main__":
