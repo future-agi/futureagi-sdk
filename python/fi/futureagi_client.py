@@ -44,6 +44,16 @@ from fi.generated.openapi_client.api.annotation_queues import (
     update_annotation_queue,
     update_annotation_queue_status,
 )
+from fi.generated.openapi_client.api.dataset_versions import (
+    create_dataset_version,
+    get_dataset_version,
+    list_dataset_versions,
+)
+from fi.generated.openapi_client.api.experiment_runs import (
+    compare_experiment_runs,
+    create_external_experiment_run,
+    ingest_external_experiment_results,
+)
 from fi.generated.openapi_client.client import Client as GeneratedOpenAPIClient
 from fi.generated.openapi_client.models.add_items import AddItems
 from fi.generated.openapi_client.models.annotation_queue import (
@@ -51,6 +61,18 @@ from fi.generated.openapi_client.models.annotation_queue import (
 )
 from fi.generated.openapi_client.models.assign_items import AssignItems
 from fi.generated.openapi_client.models.bulk_remove_items import BulkRemoveItems
+from fi.generated.openapi_client.models.dataset_version_create import (
+    DatasetVersionCreate,
+)
+from fi.generated.openapi_client.models.dataset_version_create_response import (
+    DatasetVersionCreateResponse,
+)
+from fi.generated.openapi_client.models.dataset_version_detail_response import (
+    DatasetVersionDetailResponse,
+)
+from fi.generated.openapi_client.models.dataset_version_list_response import (
+    DatasetVersionListResponse,
+)
 from fi.generated.openapi_client.models.discussion_comment_request import (
     DiscussionCommentRequest,
 )
@@ -61,6 +83,18 @@ from fi.generated.openapi_client.models.discussion_thread_status_request import 
     DiscussionThreadStatusRequest,
 )
 from fi.generated.openapi_client.models.empty_request import EmptyRequest
+from fi.generated.openapi_client.models.external_run_create_request import (
+    ExternalRunCreateRequest,
+)
+from fi.generated.openapi_client.models.external_run_create_response import (
+    ExternalRunCreateResponse,
+)
+from fi.generated.openapi_client.models.external_run_results_request import (
+    ExternalRunResultsRequest,
+)
+from fi.generated.openapi_client.models.external_run_results_response import (
+    ExternalRunResultsResponse,
+)
 from fi.generated.openapi_client.models.import_annotations import ImportAnnotations
 from fi.generated.openapi_client.models.list_annotation_queue_items_ordering import (
     ListAnnotationQueueItemsOrdering,
@@ -74,7 +108,14 @@ from fi.generated.openapi_client.models.queue_item_navigation_request import (
 from fi.generated.openapi_client.models.queue_label_request import QueueLabelRequest
 from fi.generated.openapi_client.models.queue_status_request import QueueStatusRequest
 from fi.generated.openapi_client.models.review_item_request import ReviewItemRequest
+from fi.generated.openapi_client.models.run_comparison_request import (
+    RunComparisonRequest,
+)
+from fi.generated.openapi_client.models.run_comparison_response import (
+    RunComparisonResponse,
+)
 from fi.generated.openapi_client.models.submit_annotations import SubmitAnnotations
+from fi.generated.openapi_client.types import Response as GeneratedResponse
 from fi.utils.constants import API_KEY_ENVVAR_NAME, SECRET_KEY_ENVVAR_NAME, get_base_url
 from fi.utils.errors import MissingAuthError, SDKException
 
@@ -91,6 +132,14 @@ class FutureAGIAPIError(SDKException):
 
     def get_error_code(self) -> str:
         return "FUTURE_AGI_API_ERROR"
+
+
+def _typed_result(response: GeneratedResponse[Any], expected: type[T]) -> T:
+    if response.status_code >= 400:
+        raise FutureAGIAPIError(int(response.status_code), _to_plain(response.parsed))
+    if not isinstance(response.parsed, expected):
+        raise FutureAGIAPIError(int(response.status_code), "Unexpected response shape")
+    return response.parsed
 
 
 def _as_uuid(value: str | UUID) -> UUID:
@@ -166,6 +215,7 @@ class FutureAGIClient:
         self.datasets = DatasetsClient(self.generated_client)
         self.evals = EvalsClient(self.generated_client)
         self.experiments = ExperimentsClient(self.generated_client)
+        self.experiment_runs = ExperimentRunsClient(self.generated_client)
         self.simulations = SimulationsClient(self.generated_client)
         self.tracing = TracingClient(self.generated_client)
         self.users = UsersClient(self.generated_client)
@@ -519,7 +569,54 @@ class AnnotationQueueReviewClient(BaseGeneratedClient):
         )
 
 
+class DatasetVersionsClient(BaseGeneratedClient):
+    """Immutable snapshots. Create makes one attempt and has no retry key."""
+
+    def list(
+        self, dataset_id: str | UUID, *, limit: int = 100, offset: int = 0
+    ) -> DatasetVersionListResponse:
+        return _typed_result(
+            list_dataset_versions.sync_detailed(
+                str(dataset_id), client=self._client, limit=limit, offset=offset
+            ),
+            DatasetVersionListResponse,
+        )
+
+    def get(
+        self,
+        dataset_id: str | UUID,
+        version_id: str | UUID,
+        *,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> DatasetVersionDetailResponse:
+        return _typed_result(
+            get_dataset_version.sync_detailed(
+                str(dataset_id),
+                str(version_id),
+                client=self._client,
+                limit=limit,
+                offset=offset,
+            ),
+            DatasetVersionDetailResponse,
+        )
+
+    def create(
+        self, dataset_id: str | UUID, body: DatasetVersionCreate
+    ) -> DatasetVersionCreateResponse:
+        return _typed_result(
+            create_dataset_version.sync_detailed(
+                str(dataset_id), client=self._client, body=body
+            ),
+            DatasetVersionCreateResponse,
+        )
+
+
 class DatasetsClient(BaseGeneratedClient):
+    def __init__(self, client: GeneratedOpenAPIClient) -> None:
+        super().__init__(client)
+        self.versions = DatasetVersionsClient(client)
+
     def list(self, **query: Any) -> Any:
         return self._raw_request(
             "GET", "/model-hub/develops/get-datasets/", query=query
@@ -639,6 +736,34 @@ class DatasetsClient(BaseGeneratedClient):
     def base_columns(self, **query: Any) -> Any:
         return self._raw_request(
             "GET", "/model-hub/datasets/get-base-columns/", query=query
+        )
+
+
+class ExperimentRunsClient(BaseGeneratedClient):
+    """Persist caller-executed evidence; replay requires unchanged IDs and payload."""
+
+    def create(self, body: ExternalRunCreateRequest) -> ExternalRunCreateResponse:
+        return _typed_result(
+            create_external_experiment_run.sync_detailed(
+                client=self._client, body=body
+            ),
+            ExternalRunCreateResponse,
+        )
+
+    def ingest_results(
+        self, run_id: str | UUID, body: ExternalRunResultsRequest
+    ) -> ExternalRunResultsResponse:
+        return _typed_result(
+            ingest_external_experiment_results.sync_detailed(
+                str(run_id), client=self._client, body=body
+            ),
+            ExternalRunResultsResponse,
+        )
+
+    def compare(self, body: RunComparisonRequest) -> RunComparisonResponse:
+        return _typed_result(
+            compare_experiment_runs.sync_detailed(client=self._client, body=body),
+            RunComparisonResponse,
         )
 
 

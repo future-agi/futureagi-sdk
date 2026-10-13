@@ -206,5 +206,15 @@
     "log": "getAlertLog",
     "logsForAlert": "listAlertLogsForAlert",
     "resolveLogs": "resolveAlertLogs"
+  },
+  "datasets.versions": {
+    "list": "listDatasetVersions",
+    "get": "getDatasetVersion",
+    "create": "createDatasetVersion"
+  },
+  "experimentRuns": {
+    "create": "createExternalExperimentRun",
+    "ingestResults": "ingestExternalExperimentResults",
+    "compare": "compareExperimentRuns"
   }
 }

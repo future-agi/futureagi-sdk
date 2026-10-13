@@ -550,5 +550,29 @@
   "POST /tracer/user-alert-logs/resolve/": {
     "operationId": "resolveAlertLogs",
     "tag": "Alerts"
+  },
+  "GET /model-hub/datasets/{dataset_id}/versions/": {
+    "operationId": "listDatasetVersions",
+    "tag": "Dataset Versions"
+  },
+  "GET /model-hub/datasets/{dataset_id}/versions/{version_id}/": {
+    "operationId": "getDatasetVersion",
+    "tag": "Dataset Versions"
+  },
+  "POST /model-hub/datasets/{dataset_id}/versions/": {
+    "operationId": "createDatasetVersion",
+    "tag": "Dataset Versions"
+  },
+  "POST /model-hub/experiment-runs/": {
+    "operationId": "createExternalExperimentRun",
+    "tag": "Experiment Runs"
+  },
+  "POST /model-hub/experiment-runs/{run_id}/results/": {
+    "operationId": "ingestExternalExperimentResults",
+    "tag": "Experiment Runs"
+  },
+  "POST /model-hub/experiment-runs/compare/": {
+    "operationId": "compareExperimentRuns",
+    "tag": "Experiment Runs"
   }
 }

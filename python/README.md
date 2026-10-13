@@ -315,3 +315,33 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 Made with ❤️ by the Future AGI Team
 
 </div>
+
+### Dataset versions and external experiment runs (draft)
+
+The typed `FutureAGIClient` facade supports immutable snapshots and caller-executed agent results against the dataset/experiment API stack. It does not execute your task or evaluator. These methods require the backend changes in core PRs #3473–#3475; this SDK branch is not a published release.
+
+```python
+from fi import FutureAGIClient
+from fi.generated.openapi_client.models.dataset_version_create import DatasetVersionCreate
+from fi.generated.openapi_client.models.external_run_create_request import ExternalRunCreateRequest
+
+with FutureAGIClient(api_key=api_key, secret_key=secret_key, base_url=base_url) as client:
+    snapshot = client.datasets.versions.create(dataset_id, DatasetVersionCreate.from_dict({
+        "items": [{"input": {"question": "2+2?"}, "expected": "4"}]
+    }))
+    version = snapshot.result
+    cases = client.datasets.versions.get(dataset_id, version.id)
+    run = client.experiment_runs.create(ExternalRunCreateRequest.from_dict({
+        "run_id": run_id,  # caller-generated UUID, retained for an explicit replay
+        "dataset_version_id": str(version.id),
+        "expected_items": [{"example_id": str(item.example_id), "trial_number": 1}
+                           for item in cases.result.items],
+        "evaluator_metric_ids": [metric_id],
+    }))
+```
+
+`datasets.versions.list(dataset_id, limit=100, offset=0)` and `.get(...)` return one bounded page. `experiment_runs.ingest_results(run_id, ExternalRunResultsRequest)` uploads a bounded batch; `.compare(RunComparisonRequest)` returns generated typed results. Construct requests with the generated models and use `.to_dict()` when a plain JSON-compatible dictionary is needed.
+
+Every facade call makes one HTTP attempt. Snapshot creation has no retry key: a retry after an ambiguous timeout can create another version. Run creation and result ingestion can be explicitly replayed only with the same run UUID or receipt keys and unchanged payload; conflicts are surfaced, not retried. Read and comparison failures are also returned without hidden retries.
+
+See `examples/dataset_experiment_lifecycle.py` for the complete deterministic snapshot → two caller-owned tasks → local scores → result uploads → comparison workflow, including idempotent replay checks. It is a data-path example, not model-quality or live Observe qualification.
