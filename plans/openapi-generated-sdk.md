@@ -130,7 +130,9 @@ optional `selection` receipt containing total and selected plan counts. The
 request fields and response receipt remain omitted when the server does not
 return them. `openapi/sdk/metadata-slices-source.json` records the reviewed
 source revision and operation closure. The generated overlay retains the
-existing trial-stability and release-gate model types; this slice does not
-introduce storage, transport, or a second comparison API.
+existing trial-stability and release-gate model types; core #3490's separate
+output-diff fields stay out of this metadata-only SDK stack and remain a
+separate reviewed SDK change. This slice does not introduce storage,
+transport, or a second comparison API.
 
 This SDK PR stacks on open compatibility PR #25 (`44f99aa`) and ports dev's dataset retry hardening (`1607f12`) without replacing its package-version fallback. PR #25 remains an independent integration prerequisite; this slice does not merge its generated Go/Java surface or publish packages.
