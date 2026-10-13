@@ -4967,7 +4967,7 @@ export const ingestExternalExperimentResults = <ThrowOnError extends boolean = f
 });
 
 /**
- * Compare compatible persisted runs. Requires the same dataset version, exact example/trial plan and selected evaluator binding. At most 10,000 planned and recorded items per run; excess evidence is rejected, never truncated. Tenant and workspace scope come from authentication. This endpoint does not execute tasks or make a CI decision.
+ * Compare compatible persisted runs. Requires the same dataset version, exact example/trial plan and selected evaluator binding. At most 10,000 planned and recorded items per run; excess evidence is rejected, never truncated. Tenant and workspace scope come from authentication. An optional release_gate derives a case-level verdict requiring valid evidence for the complete plan on both sides; a failed gate still returns 200. This endpoint does not execute tasks or attest caller-supplied evidence.
  */
 export const compareExperimentRuns = <ThrowOnError extends boolean = false>(options: Options<CompareExperimentRunsData, ThrowOnError>) => (options.client ?? client).post<CompareExperimentRunsResponses, CompareExperimentRunsErrors, ThrowOnError>({
     security: [{ name: 'X-Api-Key', type: 'apiKey' }, { name: 'X-Secret-Key', type: 'apiKey' }],

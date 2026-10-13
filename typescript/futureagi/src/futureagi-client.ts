@@ -626,7 +626,7 @@ export class ExperimentRunsClient {
   compare(body: BodyOf<generatedTypes.CompareExperimentRunsData>) {
     return generatedSdk.compareExperimentRuns(
       dataOptions(this.client, { body }),
-    );
+    ) as unknown as Promise<generatedTypes.RunComparisonResponse>;
   }
 }
 

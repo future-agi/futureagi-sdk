@@ -158,6 +158,45 @@ describe("dataset and external run lifecycle", () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
+  it.each(["allowance", "critical"])(
+    "returns the %s gate report without making a CI decision",
+    async (name) => {
+      const response = fixture(`run-comparison-gate-${name}.json`);
+      const compare = {
+        baseline_run_id: response.result.baseline_run_id,
+        candidate_run_id: response.result.candidate_run_id,
+        metric_id: response.result.metric_id,
+        passing_score: 1,
+        release_gate: response.result.release_gate.policy,
+      };
+      const fetchMock = jest.fn(async (request: Request) => {
+        expect(request.method).toBe("POST");
+        expect(new URL(request.url).pathname).toBe("/model-hub/experiment-runs/compare/");
+        expect(await request.json()).toEqual(compare);
+        return jsonResponse(response);
+      });
+      const result = await clientFor(fetchMock as typeof fetch).experimentRuns.compare(compare);
+      expect(result).toEqual(response);
+      expect(result.result.release_gate?.verdict).toBe(name === "allowance" ? "pass" : "fail");
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it("preserves runtime unknown policy fields for API rejection instead of dropping them", async () => {
+    const compare = {
+      baseline_run_id: RUN,
+      candidate_run_id: VERSION,
+      metric_id: EXAMPLE,
+      release_gate: { max_regressions: 0, max_regresions: 100 },
+    };
+    const fetchMock = jest.fn(async (request: Request) => {
+      expect(await request.json()).toEqual(compare);
+      return jsonResponse({ status: false, error: "Unknown release-gate field" }, 400);
+    });
+    await expect(clientFor(fetchMock as typeof fetch).experimentRuns.compare(compare)).rejects.toBeDefined();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it.each(["timeout", "invalid-json", "conflict"])(
     "does not retry snapshot after %s",
     async (failure) => {

@@ -7,8 +7,11 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..types import UNSET, Unset
+
 if TYPE_CHECKING:
     from ..models.missing_run_items import MissingRunItems
+    from ..models.release_gate_report import ReleaseGateReport
     from ..models.run_case_trace_references import RunCaseTraceReferences
     from ..models.run_comparison_summary import RunComparisonSummary
     from ..models.run_counts import RunCounts
@@ -31,6 +34,7 @@ class RunComparisonResult:
         candidate_counts (RunCounts):
         missing_by_side (MissingRunItems):
         trace_refs (list[RunCaseTraceReferences]):
+        release_gate (ReleaseGateReport | Unset):
     """
 
     baseline_run_id: UUID
@@ -43,6 +47,7 @@ class RunComparisonResult:
     candidate_counts: RunCounts
     missing_by_side: MissingRunItems
     trace_refs: list[RunCaseTraceReferences]
+    release_gate: ReleaseGateReport | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -69,6 +74,10 @@ class RunComparisonResult:
             trace_refs_item = trace_refs_item_data.to_dict()
             trace_refs.append(trace_refs_item)
 
+        release_gate: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.release_gate, Unset):
+            release_gate = self.release_gate.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -85,12 +94,15 @@ class RunComparisonResult:
                 "trace_refs": trace_refs,
             }
         )
+        if release_gate is not UNSET:
+            field_dict["release_gate"] = release_gate
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.missing_run_items import MissingRunItems
+        from ..models.release_gate_report import ReleaseGateReport
         from ..models.run_case_trace_references import RunCaseTraceReferences
         from ..models.run_comparison_summary import RunComparisonSummary
         from ..models.run_counts import RunCounts
@@ -121,6 +133,13 @@ class RunComparisonResult:
 
             trace_refs.append(trace_refs_item)
 
+        _release_gate = d.pop("release_gate", UNSET)
+        release_gate: ReleaseGateReport | Unset
+        if isinstance(_release_gate, Unset):
+            release_gate = UNSET
+        else:
+            release_gate = ReleaseGateReport.from_dict(_release_gate)
+
         run_comparison_result = cls(
             baseline_run_id=baseline_run_id,
             candidate_run_id=candidate_run_id,
@@ -132,6 +151,7 @@ class RunComparisonResult:
             candidate_counts=candidate_counts,
             missing_by_side=missing_by_side,
             trace_refs=trace_refs,
+            release_gate=release_gate,
         )
 
         run_comparison_result.additional_properties = d

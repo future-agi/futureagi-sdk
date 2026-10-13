@@ -26,4 +26,9 @@ uvx --from openapi-python-client==0.28.4 openapi-python-client generate \
   --overwrite \
   --output-path "$ROOT_DIR/python/fi/generated/openapi_client"
 
+python3 "$ROOT_DIR/scripts/validate-generated-release-gate.py" "$SPEC" \
+  "$ROOT_DIR/python/fi/generated/openapi_client/models"
+ruff format --isolated --target-version py310 \
+  "$ROOT_DIR/python/fi/generated/openapi_client/models/_release_gate_validation.py"
+
 echo "Generated TypeScript and Python low-level SDK clients."
