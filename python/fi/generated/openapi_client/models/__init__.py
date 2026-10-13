@@ -291,6 +291,11 @@ from .compare_preview_run_eval_request_dataset_info import (
     ComparePreviewRunEvalRequestDatasetInfo,
 )
 from .compare_start_evals_request import CompareStartEvalsRequest
+from .comparison_selection import ComparisonSelection
+from .comparison_selection_metadata_equals import ComparisonSelectionMetadataEquals
+from .comparison_selection_metadata_equals_additional_property_type_4_type_0 import (
+    ComparisonSelectionMetadataEqualsAdditionalPropertyType4Type0,
+)
 from .composite_child_item import CompositeChildItem
 from .composite_child_result import CompositeChildResult
 from .composite_child_result_error_localizer_result import (
@@ -1488,6 +1493,10 @@ from .run_case_comparison_missing_side import RunCaseComparisonMissingSide
 from .run_case_comparison_status import RunCaseComparisonStatus
 from .run_case_trace_references import RunCaseTraceReferences
 from .run_comparison_request import RunComparisonRequest
+from .run_comparison_request_metadata_equals import RunComparisonRequestMetadataEquals
+from .run_comparison_request_metadata_equals_additional_property_type_4_type_0 import (
+    RunComparisonRequestMetadataEqualsAdditionalPropertyType4Type0,
+)
 from .run_comparison_response import RunComparisonResponse
 from .run_comparison_result import RunComparisonResult
 from .run_comparison_summary import RunComparisonSummary
@@ -2149,6 +2158,9 @@ __all__ = (
     "ComparePreviewRunEvalRequestConfig",
     "ComparePreviewRunEvalRequestDatasetInfo",
     "CompareStartEvalsRequest",
+    "ComparisonSelection",
+    "ComparisonSelectionMetadataEquals",
+    "ComparisonSelectionMetadataEqualsAdditionalPropertyType4Type0",
     "CompositeChildItem",
     "CompositeChildResult",
     "CompositeChildResultErrorLocalizerResult",
@@ -3031,6 +3043,8 @@ __all__ = (
     "RunCaseComparisonStatus",
     "RunCaseTraceReferences",
     "RunComparisonRequest",
+    "RunComparisonRequestMetadataEquals",
+    "RunComparisonRequestMetadataEqualsAdditionalPropertyType4Type0",
     "RunComparisonResponse",
     "RunComparisonResult",
     "RunComparisonSummary",

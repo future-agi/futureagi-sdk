@@ -16159,6 +16159,18 @@ export type RunComparisonRequest = {
      * Include trial stability
      */
     include_trial_stability?: boolean;
+    /**
+     * Metadata equals
+     */
+    metadata_equals?: {
+        [key: string]: boolean | number | string | Array<unknown> | {
+            [key: string]: unknown;
+        } | null;
+    };
+    /**
+     * Split name
+     */
+    split_name?: string;
 };
 
 export type RunComparisonResponse = {
@@ -16461,6 +16473,7 @@ export type RunComparisonResult = {
     trace_refs: Array<RunCaseTraceReferences>;
     release_gate?: ReleaseGateReport;
     trial_stability?: Array<TrialStability>;
+    selection?: ComparisonSelection;
 };
 
 export type DatasetVersionItemRead = {
@@ -16946,6 +16959,17 @@ export type TrialDeltaAggregate = {
      * Delta stddev
      */
     delta_stddev: number | null;
+};
+
+export type ComparisonSelection = {
+    total_plan_count: number;
+    selected_count: number;
+    metadata_equals: {
+        [key: string]: boolean | number | string | Array<unknown> | {
+            [key: string]: unknown;
+        } | null;
+    };
+    split_name: string | null;
 };
 
 export type QueueLabelNestedWritable = {

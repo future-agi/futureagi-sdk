@@ -14,6 +14,7 @@ import type {
   ExternalRunCreateResponse,
   ExternalRunResultsResponse,
   IngestExternalExperimentResultsData,
+  ComparisonSelection,
   RunComparisonResponse,
   TrialStability,
 } from "../generated/openapi/types.gen";
@@ -78,6 +79,29 @@ type LifecycleResponseTypes = [
   >,
   Assert<Equal<TrialStability["baseline"]["score_stddev"], number | null>>,
   Assert<Equal<TrialStability["paired"]["delta_average"], number | null>>,
+  Assert<
+    Equal<
+      Parameters<ExperimentRunsClient["compare"]>[0]["metadata_equals"],
+      {
+        [key: string]:
+          | boolean
+          | number
+          | string
+          | Array<unknown>
+          | { [key: string]: unknown }
+          | null;
+      } | undefined
+    >
+  >,
+  Assert<
+    Equal<Parameters<ExperimentRunsClient["compare"]>[0]["split_name"], string | undefined>
+  >,
+  Assert<
+    Equal<
+      Awaited<ReturnType<ExperimentRunsClient["compare"]>>["result"]["selection"],
+      ComparisonSelection | undefined
+    >
+  >,
 ];
 
 const DATASET = "00000000-0000-4000-8000-000000000001";
@@ -318,6 +342,78 @@ describe("dataset and external run lifecycle", () => {
     ).experimentRuns.compare(compare);
     expect(parsed.result.trial_stability).toEqual([]);
     expect(parsed.result.release_gate?.verdict).toBe("fail");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("sends JSON metadata selectors and parses an optional selection receipt", async () => {
+    const response = fixture("run-comparison-missing.json");
+    response.result.selection = {
+      total_plan_count: 4,
+      selected_count: 2,
+      metadata_equals: { cohort: "A", enabled: true, weight: 0, expected: null },
+      split_name: null,
+    };
+    const compare = {
+      baseline_run_id: response.result.baseline_run_id,
+      candidate_run_id: response.result.candidate_run_id,
+      metric_id: response.result.metric_id,
+      metadata_equals: {
+        cohort: "A",
+        enabled: true,
+        weight: 0,
+        expected: null,
+        nested: { region: "us" },
+        labels: ["holdout", null],
+      },
+      split_name: "holdout",
+    };
+    const fetchMock = jest.fn(async (request: Request) => {
+      expect(await request.json()).toEqual(compare);
+      return jsonResponse(response);
+    });
+    const parsed = await clientFor(
+      fetchMock as typeof fetch,
+    ).experimentRuns.compare(compare);
+    expect(parsed.result.selection?.selected_count).toBe(2);
+    expect(parsed.result.selection?.metadata_equals.expected).toBeNull();
+    expect(parsed.result.selection?.split_name).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("omits optional metadata selectors when they are not set", async () => {
+    const compare = {
+      baseline_run_id: RUN,
+      candidate_run_id: VERSION,
+      metric_id: EXAMPLE,
+    };
+    const fetchMock = jest.fn(async (request: Request) => {
+      expect(await request.json()).toEqual(compare);
+      return jsonResponse(fixture("run-comparison-missing.json"));
+    });
+    await clientFor(fetchMock as typeof fetch).experimentRuns.compare(compare);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps a twenty-key JSON metadata selector typed and portable", async () => {
+    const response = fixture("run-comparison-missing.json");
+    const metadata_equals = Object.fromEntries(
+      Array.from({ length: 20 }, (_, index) => [
+        String(index),
+        { index, nullable: null },
+      ]),
+    );
+    const compare = {
+      baseline_run_id: response.result.baseline_run_id,
+      candidate_run_id: response.result.candidate_run_id,
+      metric_id: response.result.metric_id,
+      metadata_equals,
+      split_name: "train",
+    };
+    const fetchMock = jest.fn(async (request: Request) => {
+      expect(await request.json()).toEqual(compare);
+      return jsonResponse(response);
+    });
+    await clientFor(fetchMock as typeof fetch).experimentRuns.compare(compare);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 

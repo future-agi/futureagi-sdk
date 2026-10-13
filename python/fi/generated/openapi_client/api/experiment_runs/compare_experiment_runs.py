@@ -90,7 +90,9 @@ def sync_detailed(
 ]:
     """Compare compatible persisted runs. Requires the same dataset version, exact example/trial plan and
     selected evaluator binding. At most 10,000 planned and recorded items per run; excess evidence is
-    rejected, never truncated. Tenant and workspace scope come from authentication. Optional
+    rejected, never truncated. Tenant and workspace scope comes from authentication. Optional
+    metadata_equals and split_name selectors select whole case/trial identities when either side
+    matches; the response preserves both sides and reports selected/total counts. Optional
     include_trial_stability returns per-example counts, observed assessed-score population standard
     deviations and paired candidate-minus-baseline deltas; deviations are null below two assessed trials
     and imply no statistical significance. An optional release_gate derives a case-level verdict
@@ -126,7 +128,9 @@ def sync(
 ) -> ManagementAPIErrorResponse | ModelHubErrorResponse | RunComparisonResponse | None:
     """Compare compatible persisted runs. Requires the same dataset version, exact example/trial plan and
     selected evaluator binding. At most 10,000 planned and recorded items per run; excess evidence is
-    rejected, never truncated. Tenant and workspace scope come from authentication. Optional
+    rejected, never truncated. Tenant and workspace scope comes from authentication. Optional
+    metadata_equals and split_name selectors select whole case/trial identities when either side
+    matches; the response preserves both sides and reports selected/total counts. Optional
     include_trial_stability returns per-example counts, observed assessed-score population standard
     deviations and paired candidate-minus-baseline deltas; deviations are null below two assessed trials
     and imply no statistical significance. An optional release_gate derives a case-level verdict
@@ -159,7 +163,9 @@ async def asyncio_detailed(
 ]:
     """Compare compatible persisted runs. Requires the same dataset version, exact example/trial plan and
     selected evaluator binding. At most 10,000 planned and recorded items per run; excess evidence is
-    rejected, never truncated. Tenant and workspace scope come from authentication. Optional
+    rejected, never truncated. Tenant and workspace scope comes from authentication. Optional
+    metadata_equals and split_name selectors select whole case/trial identities when either side
+    matches; the response preserves both sides and reports selected/total counts. Optional
     include_trial_stability returns per-example counts, observed assessed-score population standard
     deviations and paired candidate-minus-baseline deltas; deviations are null below two assessed trials
     and imply no statistical significance. An optional release_gate derives a case-level verdict
@@ -193,7 +199,9 @@ async def asyncio(
 ) -> ManagementAPIErrorResponse | ModelHubErrorResponse | RunComparisonResponse | None:
     """Compare compatible persisted runs. Requires the same dataset version, exact example/trial plan and
     selected evaluator binding. At most 10,000 planned and recorded items per run; excess evidence is
-    rejected, never truncated. Tenant and workspace scope come from authentication. Optional
+    rejected, never truncated. Tenant and workspace scope comes from authentication. Optional
+    metadata_equals and split_name selectors select whole case/trial identities when either side
+    matches; the response preserves both sides and reports selected/total counts. Optional
     include_trial_stability returns per-example counts, observed assessed-score population standard
     deviations and paired candidate-minus-baseline deltas; deviations are null below two assessed trials
     and imply no statistical significance. An optional release_gate derives a case-level verdict

@@ -10,6 +10,7 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.comparison_selection import ComparisonSelection
     from ..models.missing_run_items import MissingRunItems
     from ..models.release_gate_report import ReleaseGateReport
     from ..models.run_case_trace_references import RunCaseTraceReferences
@@ -37,6 +38,7 @@ class RunComparisonResult:
         trace_refs (list[RunCaseTraceReferences]):
         release_gate (ReleaseGateReport | Unset):
         trial_stability (list[TrialStability] | Unset):
+        selection (ComparisonSelection | Unset):
     """
 
     baseline_run_id: UUID
@@ -51,6 +53,7 @@ class RunComparisonResult:
     trace_refs: list[RunCaseTraceReferences]
     release_gate: ReleaseGateReport | Unset = UNSET
     trial_stability: list[TrialStability] | Unset = UNSET
+    selection: ComparisonSelection | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -88,6 +91,10 @@ class RunComparisonResult:
                 trial_stability_item = trial_stability_item_data.to_dict()
                 trial_stability.append(trial_stability_item)
 
+        selection: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.selection, Unset):
+            selection = self.selection.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -108,11 +115,14 @@ class RunComparisonResult:
             field_dict["release_gate"] = release_gate
         if trial_stability is not UNSET:
             field_dict["trial_stability"] = trial_stability
+        if selection is not UNSET:
+            field_dict["selection"] = selection
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.comparison_selection import ComparisonSelection
         from ..models.missing_run_items import MissingRunItems
         from ..models.release_gate_report import ReleaseGateReport
         from ..models.run_case_trace_references import RunCaseTraceReferences
@@ -164,6 +174,13 @@ class RunComparisonResult:
 
                 trial_stability.append(trial_stability_item)
 
+        _selection = d.pop("selection", UNSET)
+        selection: ComparisonSelection | Unset
+        if isinstance(_selection, Unset):
+            selection = UNSET
+        else:
+            selection = ComparisonSelection.from_dict(_selection)
+
         run_comparison_result = cls(
             baseline_run_id=baseline_run_id,
             candidate_run_id=candidate_run_id,
@@ -177,6 +194,7 @@ class RunComparisonResult:
             trace_refs=trace_refs,
             release_gate=release_gate,
             trial_stability=trial_stability,
+            selection=selection,
         )
 
         run_comparison_result.additional_properties = d
