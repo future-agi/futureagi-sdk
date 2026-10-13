@@ -90,3 +90,18 @@ scripts/generate-go-java-sdk.sh
 When backend names are ugly or unstable, update `openapi/sdk/operation-aliases.json` first. When the public wrapper should expose a different name, update `openapi/sdk/wrapper-map.json` and the handwritten wrapper.
 
 Generated files should not contain product-level ergonomics. Keep auth defaults, retries, examples, and naming choices in the handwritten wrapper.
+
+## Dataset/experiment lifecycle slice
+
+The six lifecycle methods are derived from core commit `17d864bf578ba361f450fc71019dc660f57c79e9` (PR #3475). `openapi/sdk/lifecycle-source.json` records the reviewed operations and source revision. The scoped build updates those operations and their component closure in the existing SDK spec; other SDK operations/components remain unchanged. `futureagi-sdk.operations.txt` lists the final public operation IDs after aliases (467 operations: 461 existing plus six new).
+
+The default generator still refreshes the full public surface. To reproduce this additive slice, pass the explicit scope:
+
+```bash
+SDK_OPERATION_SCOPE="$PWD/openapi/sdk/lifecycle-source.json" \
+  scripts/generate-oss-sdk.sh /path/to/core-at-17d864bf/api_contracts/openapi/swagger.json
+```
+
+Generation pins swagger2openapi 7.0.8, @hey-api/openapi-ts 0.97.3 with TypeScript 5.8.3, and openapi-python-client 0.28.4. Python post-hooks use isolated Ruff configuration targeting Python 3.10, preventing ambient user rules from rewriting TypeVars to Python 3.11-only `typing.Self`. The JSON conversion preserves scalar/list/object/null values, explicit non-null snapshot inputs, and nullable enums.
+
+This SDK PR stacks on open compatibility PR #25 (`44f99aa`) and ports dev's dataset retry hardening (`1607f12`) without replacing its package-version fallback. PR #25 remains an independent integration prerequisite; this slice does not merge its generated Go/Java surface or publish packages.

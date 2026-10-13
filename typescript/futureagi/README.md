@@ -223,3 +223,20 @@ See `CONTRIBUTING.md` at the project root for more details.
 
 This project is distributed under a BSD-style license – see
 [LICENSE.md](../../LICENSE.md) for the full text.
+
+### Dataset versions and external experiment runs (draft)
+
+`FutureAGIClient` exposes six typed methods backed by the generated client:
+
+- `client.datasets.versions.list(datasetId, { limit, offset })`
+- `client.datasets.versions.get(datasetId, versionId, { limit, offset })`
+- `client.datasets.versions.create(datasetId, body)`
+- `client.experimentRuns.create(body)`
+- `client.experimentRuns.ingestResults(runId, { items })`
+- `client.experimentRuns.compare(body)`
+
+The backend owns the request and response shapes. These APIs require core PRs #3473–#3475 and are not yet claimed as a released SDK capability. You execute agent tasks and scorers in your process, then upload results with stable example/trial identities and pinned metric/version references.
+
+Each call makes one HTTP attempt. Snapshot creation is not idempotent; do not blindly retry an ambiguous timeout. Run/result replay is safe only with the same UUID or receipt keys and unchanged payload. Conflicts and parse failures surface to the caller without a second request.
+
+`examples/dataset-experiment-lifecycle.ts` demonstrates the deterministic end-to-end flow. Nullable outputs and trace references are preserved; no model or live Observe integration is implied.

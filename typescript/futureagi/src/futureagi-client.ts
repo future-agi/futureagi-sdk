@@ -64,6 +64,7 @@ const callGenerated = <TResult>(
 export class FutureAGIClient {
   readonly annotationQueues: AnnotationQueuesClient;
   readonly datasets: DatasetsClient;
+  readonly experimentRuns: ExperimentRunsClient;
   readonly evals: EvalsClient;
   readonly experiments: ExperimentsClient;
   readonly simulations: SimulationsClient;
@@ -91,6 +92,7 @@ export class FutureAGIClient {
     });
     this.annotationQueues = new AnnotationQueuesClient(this.generatedClient);
     this.datasets = new DatasetsClient(this.generatedClient);
+    this.experimentRuns = new ExperimentRunsClient(this.generatedClient);
     this.evals = new EvalsClient(this.generatedClient);
     this.experiments = new ExperimentsClient(this.generatedClient);
     this.simulations = new SimulationsClient(this.generatedClient);
@@ -423,8 +425,48 @@ export class AnnotationQueueReviewClient {
   }
 }
 
-export class DatasetsClient {
+export class DatasetVersionsClient {
   constructor(private readonly client: Client) {}
+
+  list(
+    datasetId: string,
+    query?: QueryOf<generatedTypes.ListDatasetVersionsData>,
+  ) {
+    return generatedSdk.listDatasetVersions<true, "data">(
+      dataOptions(this.client, { path: { dataset_id: datasetId }, query }),
+    );
+  }
+
+  get(
+    datasetId: string,
+    versionId: string,
+    query?: QueryOf<generatedTypes.GetDatasetVersionData>,
+  ) {
+    return generatedSdk.getDatasetVersion<true, "data">(
+      dataOptions(this.client, {
+        path: { dataset_id: datasetId, version_id: versionId },
+        query,
+      }),
+    );
+  }
+
+  /** One attempt. Retrying snapshot creation can create another version. */
+  create(
+    datasetId: string,
+    body: BodyOf<generatedTypes.CreateDatasetVersionData>,
+  ) {
+    return generatedSdk.createDatasetVersion<true, "data">(
+      dataOptions(this.client, { path: { dataset_id: datasetId }, body }),
+    );
+  }
+}
+
+export class DatasetsClient {
+  readonly versions: DatasetVersionsClient;
+
+  constructor(private readonly client: Client) {
+    this.versions = new DatasetVersionsClient(client);
+  }
 
   list(query?: LooseQuery) {
     return callGenerated(this.client, generatedSdk.listDatasets, { query });
@@ -558,6 +600,33 @@ export class DatasetsClient {
     return callGenerated(this.client, generatedSdk.listDatasetBaseColumns, {
       query,
     });
+  }
+}
+
+export class ExperimentRunsClient {
+  constructor(private readonly client: Client) {}
+
+  /** One attempt; explicit replay requires the same run UUID and payload. */
+  create(body: BodyOf<generatedTypes.CreateExternalExperimentRunData>) {
+    return generatedSdk.createExternalExperimentRun<true, "data">(
+      dataOptions(this.client, { body }),
+    );
+  }
+
+  /** One attempt; explicit replay requires the same receipt keys and payload. */
+  ingestResults(
+    runId: string,
+    body: BodyOf<generatedTypes.IngestExternalExperimentResultsData>,
+  ) {
+    return generatedSdk.ingestExternalExperimentResults<true, "data">(
+      dataOptions(this.client, { path: { run_id: runId }, body }),
+    );
+  }
+
+  compare(body: BodyOf<generatedTypes.CompareExperimentRunsData>) {
+    return generatedSdk.compareExperimentRuns<true, "data">(
+      dataOptions(this.client, { body }),
+    );
   }
 }
 

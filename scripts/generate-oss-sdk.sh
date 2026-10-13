@@ -5,21 +5,28 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SPEC="$ROOT_DIR/openapi/sdk/generated/futureagi-sdk.openapi.json"
 SOURCE_SWAGGER="${1:-"${SOURCE_SWAGGER:-"$ROOT_DIR/../future-agi/api_contracts/openapi/swagger.json"}"}"
 
-"$ROOT_DIR/scripts/build-sdk-openapi.sh" "$SOURCE_SWAGGER"
+OPENAPI_TS_PACKAGE="${OPENAPI_TS_PACKAGE:-@hey-api/openapi-ts@0.97.3}"
+OPERATION_SCOPE="${SDK_OPERATION_SCOPE:-}"
+"$ROOT_DIR/scripts/build-sdk-openapi.sh" "$SOURCE_SWAGGER" "$ROOT_DIR/openapi/sdk/generated" "$OPERATION_SCOPE"
 
 rm -rf "$ROOT_DIR/typescript/futureagi/src/generated/openapi"
-npx --yes @hey-api/openapi-ts \
+npx --yes --package typescript@5.8.3 --package "$OPENAPI_TS_PACKAGE" openapi-ts \
   -i "$SPEC" \
   -o "$ROOT_DIR/typescript/futureagi/src/generated/openapi" \
   -c @hey-api/client-fetch \
   -p @hey-api/typescript @hey-api/sdk \
   --silent
 
+node "$ROOT_DIR/scripts/fix-sdk-response-style.mjs" \
+  "$ROOT_DIR/typescript/futureagi/src/generated/openapi/sdk.gen.ts" \
+  "$SPEC" "$ROOT_DIR/openapi/sdk/lifecycle-source.json"
+
 rm -rf "$ROOT_DIR/python/fi/generated/openapi_client"
 mkdir -p "$ROOT_DIR/python/fi/generated"
-uvx --from openapi-python-client openapi-python-client generate \
+uvx --from openapi-python-client==0.28.4 openapi-python-client generate \
   --path "$SPEC" \
   --meta none \
+  --config "$ROOT_DIR/scripts/openapi-python-client.yaml" \
   --overwrite \
   --output-path "$ROOT_DIR/python/fi/generated/openapi_client"
 

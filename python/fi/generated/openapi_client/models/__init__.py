@@ -503,6 +503,36 @@ from .dataset_table_result_table_item import DatasetTableResultTableItem
 from .dataset_update_cell_value_request import DatasetUpdateCellValueRequest
 from .dataset_update_column_name_request import DatasetUpdateColumnNameRequest
 from .dataset_update_column_type_request import DatasetUpdateColumnTypeRequest
+from .dataset_version_create import DatasetVersionCreate
+from .dataset_version_create_metadata import DatasetVersionCreateMetadata
+from .dataset_version_create_metadata_additional_property_type_4_type_0 import (
+    DatasetVersionCreateMetadataAdditionalPropertyType4Type0,
+)
+from .dataset_version_create_response import DatasetVersionCreateResponse
+from .dataset_version_detail_response import DatasetVersionDetailResponse
+from .dataset_version_detail_result import DatasetVersionDetailResult
+from .dataset_version_item_create import DatasetVersionItemCreate
+from .dataset_version_item_create_expected_type_4_type_0 import (
+    DatasetVersionItemCreateExpectedType4Type0,
+)
+from .dataset_version_item_create_input_type_4 import DatasetVersionItemCreateInputType4
+from .dataset_version_item_create_metadata import DatasetVersionItemCreateMetadata
+from .dataset_version_item_create_metadata_additional_property_type_4_type_0 import (
+    DatasetVersionItemCreateMetadataAdditionalPropertyType4Type0,
+)
+from .dataset_version_item_read import DatasetVersionItemRead
+from .dataset_version_item_read_expected_type_4_type_0 import (
+    DatasetVersionItemReadExpectedType4Type0,
+)
+from .dataset_version_item_read_input_type_4 import DatasetVersionItemReadInputType4
+from .dataset_version_item_read_metadata import DatasetVersionItemReadMetadata
+from .dataset_version_item_read_metadata_additional_property_type_4_type_0 import (
+    DatasetVersionItemReadMetadataAdditionalPropertyType4Type0,
+)
+from .dataset_version_list_response import DatasetVersionListResponse
+from .dataset_version_list_result import DatasetVersionListResult
+from .dataset_version_read import DatasetVersionRead
+from .dataset_version_read_metadata import DatasetVersionReadMetadata
 from .deep_analysis_api_response import DeepAnalysisApiResponse
 from .deep_analysis_body import DeepAnalysisBody
 from .deep_analysis_dispatch_api_response import DeepAnalysisDispatchApiResponse
@@ -889,6 +919,57 @@ from .experiment_v2_detail_response import ExperimentV2DetailResponse
 from .experiment_workflow_response import ExperimentWorkflowResponse
 from .experiment_workflow_result import ExperimentWorkflowResult
 from .export_annotation_queue_export_format import ExportAnnotationQueueExportFormat
+from .external_run_binding import ExternalRunBinding
+from .external_run_binding_binding_config_type_4_type_0 import (
+    ExternalRunBindingBindingConfigType4Type0,
+)
+from .external_run_binding_choice_scores_type_4_type_0 import (
+    ExternalRunBindingChoiceScoresType4Type0,
+)
+from .external_run_binding_config_snapshot_type_4_type_0 import (
+    ExternalRunBindingConfigSnapshotType4Type0,
+)
+from .external_run_binding_prompt_messages_type_4_type_0 import (
+    ExternalRunBindingPromptMessagesType4Type0,
+)
+from .external_run_create_request import ExternalRunCreateRequest
+from .external_run_create_request_metadata import ExternalRunCreateRequestMetadata
+from .external_run_create_request_metadata_additional_property_type_4_type_0 import (
+    ExternalRunCreateRequestMetadataAdditionalPropertyType4Type0,
+)
+from .external_run_create_request_model_config import (
+    ExternalRunCreateRequestModelConfig,
+)
+from .external_run_create_request_model_config_additional_property_type_4_type_0 import (
+    ExternalRunCreateRequestModelConfigAdditionalPropertyType4Type0,
+)
+from .external_run_create_response import ExternalRunCreateResponse
+from .external_run_header import ExternalRunHeader
+from .external_run_header_metadata import ExternalRunHeaderMetadata
+from .external_run_header_metadata_additional_property_type_4_type_0 import (
+    ExternalRunHeaderMetadataAdditionalPropertyType4Type0,
+)
+from .external_run_header_model_config import ExternalRunHeaderModelConfig
+from .external_run_header_model_config_additional_property_type_4_type_0 import (
+    ExternalRunHeaderModelConfigAdditionalPropertyType4Type0,
+)
+from .external_run_header_status import ExternalRunHeaderStatus
+from .external_run_header_task_kind import ExternalRunHeaderTaskKind
+from .external_run_identity import ExternalRunIdentity
+from .external_run_item_receipt import ExternalRunItemReceipt
+from .external_run_item_receipt_status import ExternalRunItemReceiptStatus
+from .external_run_result import ExternalRunResult
+from .external_run_result_error_type_4_type_0 import ExternalRunResultErrorType4Type0
+from .external_run_result_output_type_4_type_0 import ExternalRunResultOutputType4Type0
+from .external_run_result_status import ExternalRunResultStatus
+from .external_run_result_token_usage_type_4_type_0 import (
+    ExternalRunResultTokenUsageType4Type0,
+)
+from .external_run_results_request import ExternalRunResultsRequest
+from .external_run_results_response import ExternalRunResultsResponse
+from .external_run_results_result import ExternalRunResultsResult
+from .external_run_score import ExternalRunScore
+from .external_run_score_status import ExternalRunScoreStatus
 from .extract_entities_request import ExtractEntitiesRequest
 from .extract_json_column_request import ExtractJsonColumnRequest
 from .failed_rerun_item import FailedRerunItem
@@ -1043,6 +1124,7 @@ from .member_workspace_access import MemberWorkspaceAccess
 from .merge_dataset_request import MergeDatasetRequest
 from .merge_dataset_response import MergeDatasetResponse
 from .merge_dataset_result import MergeDatasetResult
+from .missing_run_items import MissingRunItems
 from .model_hub_annotation_queues_automation_rules_list_response_200 import (
     ModelHubAnnotationQueuesAutomationRulesListResponse200,
 )
@@ -1392,6 +1474,20 @@ from .review_item_request import ReviewItemRequest
 from .review_item_request_action import ReviewItemRequestAction
 from .review_label_comment_request import ReviewLabelCommentRequest
 from .root_cause import RootCause
+from .run_aggregate import RunAggregate
+from .run_aggregate_score_status_counts import RunAggregateScoreStatusCounts
+from .run_aggregate_status_counts import RunAggregateStatusCounts
+from .run_case_comparison import RunCaseComparison
+from .run_case_comparison_missing_side import RunCaseComparisonMissingSide
+from .run_case_comparison_status import RunCaseComparisonStatus
+from .run_case_trace_references import RunCaseTraceReferences
+from .run_comparison_request import RunComparisonRequest
+from .run_comparison_response import RunComparisonResponse
+from .run_comparison_result import RunComparisonResult
+from .run_comparison_summary import RunComparisonSummary
+from .run_comparison_summary_status_counts import RunComparisonSummaryStatusCounts
+from .run_counts import RunCounts
+from .run_item_identity import RunItemIdentity
 from .run_new_evals_on_test_execution import RunNewEvalsOnTestExecution
 from .run_new_evals_response import RunNewEvalsResponse
 from .run_prompt_choice_option import RunPromptChoiceOption
@@ -1461,6 +1557,7 @@ from .run_test_response_simulator_agent_detail import (
 )
 from .run_test_response_source_type import RunTestResponseSourceType
 from .run_test_scenario_item_response import RunTestScenarioItemResponse
+from .run_trace_reference_type_0 import RunTraceReferenceType0
 from .scenario_add_columns_request import ScenarioAddColumnsRequest
 from .scenario_add_columns_response import ScenarioAddColumnsResponse
 from .scenario_add_rows_request import ScenarioAddRowsRequest
@@ -2188,6 +2285,26 @@ __all__ = (
     "DatasetUpdateCellValueRequest",
     "DatasetUpdateColumnNameRequest",
     "DatasetUpdateColumnTypeRequest",
+    "DatasetVersionCreate",
+    "DatasetVersionCreateMetadata",
+    "DatasetVersionCreateMetadataAdditionalPropertyType4Type0",
+    "DatasetVersionCreateResponse",
+    "DatasetVersionDetailResponse",
+    "DatasetVersionDetailResult",
+    "DatasetVersionItemCreate",
+    "DatasetVersionItemCreateExpectedType4Type0",
+    "DatasetVersionItemCreateInputType4",
+    "DatasetVersionItemCreateMetadata",
+    "DatasetVersionItemCreateMetadataAdditionalPropertyType4Type0",
+    "DatasetVersionItemRead",
+    "DatasetVersionItemReadExpectedType4Type0",
+    "DatasetVersionItemReadInputType4",
+    "DatasetVersionItemReadMetadata",
+    "DatasetVersionItemReadMetadataAdditionalPropertyType4Type0",
+    "DatasetVersionListResponse",
+    "DatasetVersionListResult",
+    "DatasetVersionRead",
+    "DatasetVersionReadMetadata",
     "DeepAnalysisApiResponse",
     "DeepAnalysisBody",
     "DeepAnalysisDispatchApiResponse",
@@ -2464,6 +2581,37 @@ __all__ = (
     "ExperimentWorkflowResponse",
     "ExperimentWorkflowResult",
     "ExportAnnotationQueueExportFormat",
+    "ExternalRunBinding",
+    "ExternalRunBindingBindingConfigType4Type0",
+    "ExternalRunBindingChoiceScoresType4Type0",
+    "ExternalRunBindingConfigSnapshotType4Type0",
+    "ExternalRunBindingPromptMessagesType4Type0",
+    "ExternalRunCreateRequest",
+    "ExternalRunCreateRequestMetadata",
+    "ExternalRunCreateRequestMetadataAdditionalPropertyType4Type0",
+    "ExternalRunCreateRequestModelConfig",
+    "ExternalRunCreateRequestModelConfigAdditionalPropertyType4Type0",
+    "ExternalRunCreateResponse",
+    "ExternalRunHeader",
+    "ExternalRunHeaderMetadata",
+    "ExternalRunHeaderMetadataAdditionalPropertyType4Type0",
+    "ExternalRunHeaderModelConfig",
+    "ExternalRunHeaderModelConfigAdditionalPropertyType4Type0",
+    "ExternalRunHeaderStatus",
+    "ExternalRunHeaderTaskKind",
+    "ExternalRunIdentity",
+    "ExternalRunItemReceipt",
+    "ExternalRunItemReceiptStatus",
+    "ExternalRunResult",
+    "ExternalRunResultErrorType4Type0",
+    "ExternalRunResultOutputType4Type0",
+    "ExternalRunResultsRequest",
+    "ExternalRunResultsResponse",
+    "ExternalRunResultsResult",
+    "ExternalRunResultStatus",
+    "ExternalRunResultTokenUsageType4Type0",
+    "ExternalRunScore",
+    "ExternalRunScoreStatus",
     "ExtractEntitiesRequest",
     "ExtractJsonColumnRequest",
     "FailedRerunItem",
@@ -2592,6 +2740,7 @@ __all__ = (
     "MergeDatasetRequest",
     "MergeDatasetResponse",
     "MergeDatasetResult",
+    "MissingRunItems",
     "ModelHubAnnotationQueuesAutomationRulesListResponse200",
     "ModelHubAnnotationQueuesForSourceSourceType",
     "ModelHubAnnotationsLabelsListType",
@@ -2859,6 +3008,20 @@ __all__ = (
     "ReviewItemRequestAction",
     "ReviewLabelCommentRequest",
     "RootCause",
+    "RunAggregate",
+    "RunAggregateScoreStatusCounts",
+    "RunAggregateStatusCounts",
+    "RunCaseComparison",
+    "RunCaseComparisonMissingSide",
+    "RunCaseComparisonStatus",
+    "RunCaseTraceReferences",
+    "RunComparisonRequest",
+    "RunComparisonResponse",
+    "RunComparisonResult",
+    "RunComparisonSummary",
+    "RunComparisonSummaryStatusCounts",
+    "RunCounts",
+    "RunItemIdentity",
     "RunNewEvalsOnTestExecution",
     "RunNewEvalsResponse",
     "RunPromptChoiceOption",
@@ -2908,6 +3071,7 @@ __all__ = (
     "RunTestResponseSimulatorAgentDetail",
     "RunTestResponseSourceType",
     "RunTestScenarioItemResponse",
+    "RunTraceReferenceType0",
     "ScenarioAddColumnsRequest",
     "ScenarioAddColumnsResponse",
     "ScenarioAddRowsRequest",

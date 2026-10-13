@@ -6,6 +6,9 @@ SOURCE_SWAGGER="${1:-"$ROOT_DIR/../future-agi/api_contracts/openapi/swagger.json
 OUT_DIR="${2:-"$ROOT_DIR/openapi/sdk/generated"}"
 ALIASES_FILE="$ROOT_DIR/openapi/sdk/operation-aliases.json"
 WRAPPER_MAP_FILE="$ROOT_DIR/openapi/sdk/wrapper-map.json"
+OPENAPI_TS_PACKAGE="${OPENAPI_TS_PACKAGE:-@hey-api/openapi-ts@0.97.3}"
+OPERATION_SCOPE="${3:-}"
+BASELINE_SPEC="$ROOT_DIR/openapi/sdk/generated/futureagi-sdk.openapi.json"
 
 mkdir -p "$OUT_DIR"
 
@@ -15,7 +18,7 @@ FILTERED="$OUT_DIR/futureagi-sdk.filtered.openapi.json"
 PRUNED="$OUT_DIR/futureagi-sdk.pruned.openapi.json"
 PUBLIC_SPEC="$OUT_DIR/futureagi-sdk.openapi.json"
 
-SDK_PATH_PATTERN='^/(model-hub/(annotation-queues|annotations-labels|scores|develops|dataset/|datasets|experiments/v2|api-keys|default-provider|knowledge-base|prompt-templates|prompt-labels|prompt-history-executions|api/models_list|model-providers/get-model-details|eval-templates|delete-eval-template)|sdk/api/v1|simulate/(agent-definitions|run-tests|test-executions|call-executions|api/(call-executions|run-tests|test-executions|personas)|scenarios|simulator-agents|prompt-templates/.*/simulations|prompt-simulations/scenarios|export)|tracer/(bulk-annotation|get-annotation-labels|project/list_projects|trace/|trace-session|trace-annotation|users|user-alerts|user-alert-logs|feed/issues)|accounts/(user-info|organization/members|workspace/list|workspace/switch|workspace/.*/members))'
+SDK_PATH_PATTERN='^/(model-hub/(annotation-queues|annotations-labels|scores|develops|dataset/|datasets|experiments/v2|experiment-runs|api-keys|default-provider|knowledge-base|prompt-templates|prompt-labels|prompt-history-executions|api/models_list|model-providers/get-model-details|eval-templates|delete-eval-template)|sdk/api/v1|simulate/(agent-definitions|run-tests|test-executions|call-executions|api/(call-executions|run-tests|test-executions|personas)|scenarios|simulator-agents|prompt-templates/.*/simulations|prompt-simulations/scenarios|export)|tracer/(bulk-annotation|get-annotation-labels|project/list_projects|trace/|trace-session|trace-annotation|users|user-alerts|user-alert-logs|feed/issues)|accounts/(user-info|organization/members|workspace/list|workspace/switch|workspace/.*/members))'
 
 jq -r --arg pattern "$SDK_PATH_PATTERN" '
   .paths
@@ -29,13 +32,13 @@ jq -r --arg pattern "$SDK_PATH_PATTERN" '
 
 OPERATIONS="$(paste -sd, "$OPS_FILE")"
 
-npx --yes swagger2openapi \
+npx --yes swagger2openapi@7.0.8 \
   --patch \
   --targetVersion 3.0.3 \
   --outfile "$CONVERTED" \
   "$SOURCE_SWAGGER" >/dev/null
 
-npx --yes @hey-api/openapi-ts \
+npx --yes --package typescript@5.8.3 --package "$OPENAPI_TS_PACKAGE" openapi-ts \
   --input "$CONVERTED" \
   --output "$OUT_DIR/.tmp-filter-check" \
   --dry-run \
@@ -160,7 +163,11 @@ jq --slurpfile aliases "$ALIASES_FILE" '
       | map({name: .})
     )
 ' "$PRUNED" > "$TMP_FILE"
-mv "$TMP_FILE" "$PUBLIC_SPEC"
+if [[ -n "$OPERATION_SCOPE" ]]; then
+  node "$ROOT_DIR/scripts/overlay-sdk-operations.mjs" "$BASELINE_SPEC" "$TMP_FILE" "$CONVERTED" "$OPERATION_SCOPE" "$PUBLIC_SPEC"
+else
+  mv "$TMP_FILE" "$PUBLIC_SPEC"
+fi
 chmod 0644 "$PUBLIC_SPEC"
 
 rm -rf "$OUT_DIR/.tmp-filter-check"
@@ -199,4 +206,5 @@ if (missing.length > 0) {
 }
 NODE
 
+jq -r '.paths[] | to_entries[] | select(.key | IN("get", "post", "put", "patch", "delete")) | .value.operationId' "$PUBLIC_SPEC" | sort -u > "$OPS_FILE"
 echo "Built $PUBLIC_SPEC with $(wc -l < "$OPS_FILE" | tr -d " ") operations."
