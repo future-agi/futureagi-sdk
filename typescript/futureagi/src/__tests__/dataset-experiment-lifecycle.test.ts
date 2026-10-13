@@ -1,11 +1,67 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { FutureAGIClient } from "../futureagi-client";
+import {
+  FutureAGIClient,
+  type DatasetVersionsClient,
+  type ExperimentRunsClient,
+} from "../futureagi-client";
 import type {
   CreateExternalExperimentRunData,
+  DatasetVersionCreateResponse,
+  DatasetVersionDetailResponse,
+  DatasetVersionListResponse,
+  ExternalRunCreateResponse,
+  ExternalRunResultsResponse,
   IngestExternalExperimentResultsData,
+  RunComparisonResponse,
 } from "../generated/openapi/types.gen";
+
+// Compile the consumer-visible results exactly: no fields wrapper, undefined,
+// or any escape hatch can satisfy these assertions.
+type Equal<Left, Right> =
+  (<T>() => T extends Left ? 1 : 2) extends <T>() => T extends Right ? 1 : 2
+    ? true
+    : false;
+type Assert<Condition extends true> = Condition;
+type LifecycleResponseTypes = [
+  Assert<
+    Equal<
+      Awaited<ReturnType<DatasetVersionsClient["list"]>>,
+      DatasetVersionListResponse
+    >
+  >,
+  Assert<
+    Equal<
+      Awaited<ReturnType<DatasetVersionsClient["get"]>>,
+      DatasetVersionDetailResponse
+    >
+  >,
+  Assert<
+    Equal<
+      Awaited<ReturnType<DatasetVersionsClient["create"]>>,
+      DatasetVersionCreateResponse
+    >
+  >,
+  Assert<
+    Equal<
+      Awaited<ReturnType<ExperimentRunsClient["create"]>>,
+      ExternalRunCreateResponse
+    >
+  >,
+  Assert<
+    Equal<
+      Awaited<ReturnType<ExperimentRunsClient["ingestResults"]>>,
+      ExternalRunResultsResponse
+    >
+  >,
+  Assert<
+    Equal<
+      Awaited<ReturnType<ExperimentRunsClient["compare"]>>,
+      RunComparisonResponse
+    >
+  >,
+];
 
 const DATASET = "00000000-0000-4000-8000-000000000001";
 const VERSION = "00000000-0000-4000-8000-000000000002";
