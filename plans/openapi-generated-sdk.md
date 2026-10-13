@@ -123,4 +123,14 @@ no API meaning. A narrow Python post-hook keeps the server's documented
 explicit `False` is still serialized. The deterministic SDK
 fixture is synthetic contract evidence, not a live API receipt.
 
+The metadata-slice refresh is scoped to the same comparison POST using core
+PR #3490 (`e0e40ac1eeebd2b91659fa419443c64a2fdb89289`). It adds optional
+`metadata_equals` (at most 20 JSON-valued keys), optional `split_name`, and an
+optional `selection` receipt containing total and selected plan counts. The
+request fields and response receipt remain omitted when the server does not
+return them. `openapi/sdk/metadata-slices-source.json` records the reviewed
+source revision and operation closure. The generated overlay retains the
+existing trial-stability and release-gate model types; this slice does not
+introduce storage, transport, or a second comparison API.
+
 This SDK PR stacks on open compatibility PR #25 (`44f99aa`) and ports dev's dataset retry hardening (`1607f12`) without replacing its package-version fallback. PR #25 remains an independent integration prerequisite; this slice does not merge its generated Go/Java surface or publish packages.
