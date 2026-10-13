@@ -16155,6 +16155,10 @@ export type RunComparisonRequest = {
      */
     higher_is_better?: boolean;
     release_gate?: ReleaseGatePolicy;
+    /**
+     * Include trial stability
+     */
+    include_trial_stability?: boolean;
 };
 
 export type RunComparisonResponse = {
@@ -16456,6 +16460,7 @@ export type RunComparisonResult = {
     missing_by_side: MissingRunItems;
     trace_refs: Array<RunCaseTraceReferences>;
     release_gate?: ReleaseGateReport;
+    trial_stability?: Array<TrialStability>;
 };
 
 export type DatasetVersionItemRead = {
@@ -16881,6 +16886,66 @@ export type ReleaseGateBlocker = {
      * Reason
      */
     reason: 'missing' | 'duplicate' | 'invalid' | 'error' | 'unknown' | 'unsupported' | 'not_assessed' | 'critical_regression' | 'critical_threshold' | 'regression_limit_exceeded' | 'empty_plan';
+};
+
+export type TrialStability = {
+    /**
+     * Example id
+     */
+    example_id: string;
+    /**
+     * Expected trial count
+     */
+    expected_trial_count: number;
+    baseline: TrialAggregate;
+    candidate: TrialAggregate;
+    paired: TrialDeltaAggregate;
+};
+
+export type TrialAggregate = {
+    /**
+     * Recorded trial count
+     */
+    recorded_trial_count: number;
+    /**
+     * Missing trial count
+     */
+    missing_trial_count: number;
+    /**
+     * Assessed trial count
+     */
+    assessed_trial_count: number;
+    /**
+     * Score average
+     */
+    score_average: number | null;
+    /**
+     * Score min
+     */
+    score_min: number | null;
+    /**
+     * Score max
+     */
+    score_max: number | null;
+    /**
+     * Score stddev
+     */
+    score_stddev: number | null;
+};
+
+export type TrialDeltaAggregate = {
+    /**
+     * Paired trial count
+     */
+    paired_trial_count: number;
+    /**
+     * Delta average
+     */
+    delta_average: number | null;
+    /**
+     * Delta stddev
+     */
+    delta_stddev: number | null;
 };
 
 export type QueueLabelNestedWritable = {

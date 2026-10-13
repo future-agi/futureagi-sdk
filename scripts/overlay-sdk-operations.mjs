@@ -49,6 +49,16 @@ while ([...references].some((ref) => !visited.has(ref))) {
   const converted = transform(source);
   result.components[section] ??= {};
   const existing = result.components[section][name];
+  // Generated Python attrs models accept positional arguments. Append new
+  // optional fields after existing fields to preserve constructor positions.
+  if (existing?.properties && converted.properties) {
+    const names = [...new Set([
+      ...Object.keys(existing.properties), ...Object.keys(converted.properties),
+    ])].filter((key) => Object.hasOwn(converted.properties, key));
+    converted.properties = Object.fromEntries(
+      names.map((key) => [key, converted.properties[key]]),
+    );
+  }
   // Shared components must remain identical. A cross-feature change needs its
   // own reviewed SDK refresh instead of being smuggled into this overlay.
   if (existing && !owned.has(ref) && JSON.stringify(existing) !== JSON.stringify(converted)) {

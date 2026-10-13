@@ -36625,7 +36625,7 @@
     "/model-hub/experiment-runs/compare/": {
       "post": {
         "operationId": "compareExperimentRuns",
-        "description": "Compare compatible persisted runs. Requires the same dataset version, exact example/trial plan and selected evaluator binding. At most 10,000 planned and recorded items per run; excess evidence is rejected, never truncated. Tenant and workspace scope come from authentication. An optional release_gate derives a case-level verdict requiring valid evidence for the complete plan on both sides; a failed gate still returns 200. This endpoint does not execute tasks or attest caller-supplied evidence.",
+        "description": "Compare compatible persisted runs. Requires the same dataset version, exact example/trial plan and selected evaluator binding. At most 10,000 planned and recorded items per run; excess evidence is rejected, never truncated. Tenant and workspace scope come from authentication. Optional include_trial_stability returns per-example counts, observed assessed-score population standard deviations and paired candidate-minus-baseline deltas; deviations are null below two assessed trials and imply no statistical significance. An optional release_gate derives a case-level verdict requiring valid evidence for the complete plan on both sides; a failed gate still returns 200. This endpoint does not execute tasks or attest caller-supplied evidence.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -63464,6 +63464,11 @@
           },
           "release_gate": {
             "$ref": "#/components/schemas/ReleaseGatePolicy"
+          },
+          "include_trial_stability": {
+            "title": "Include trial stability",
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -64128,6 +64133,12 @@
           },
           "release_gate": {
             "$ref": "#/components/schemas/ReleaseGateReport"
+          },
+          "trial_stability": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrialStability"
+            }
           }
         }
       },
@@ -65001,6 +65012,111 @@
             ]
           }
         }
+      },
+      "TrialStability": {
+        "required": [
+          "example_id",
+          "expected_trial_count",
+          "baseline",
+          "candidate",
+          "paired"
+        ],
+        "type": "object",
+        "properties": {
+          "example_id": {
+            "title": "Example id",
+            "type": "string",
+            "format": "uuid"
+          },
+          "expected_trial_count": {
+            "title": "Expected trial count",
+            "type": "integer",
+            "minimum": 1
+          },
+          "baseline": {
+            "$ref": "#/components/schemas/TrialAggregate"
+          },
+          "candidate": {
+            "$ref": "#/components/schemas/TrialAggregate"
+          },
+          "paired": {
+            "$ref": "#/components/schemas/TrialDeltaAggregate"
+          }
+        }
+      },
+      "TrialAggregate": {
+        "required": [
+          "recorded_trial_count",
+          "missing_trial_count",
+          "assessed_trial_count",
+          "score_average",
+          "score_min",
+          "score_max",
+          "score_stddev"
+        ],
+        "type": "object",
+        "properties": {
+          "recorded_trial_count": {
+            "title": "Recorded trial count",
+            "type": "integer",
+            "minimum": 0
+          },
+          "missing_trial_count": {
+            "title": "Missing trial count",
+            "type": "integer",
+            "minimum": 0
+          },
+          "assessed_trial_count": {
+            "title": "Assessed trial count",
+            "type": "integer",
+            "minimum": 0
+          },
+          "score_average": {
+            "title": "Score average",
+            "type": "number",
+            "nullable": true
+          },
+          "score_min": {
+            "title": "Score min",
+            "type": "number",
+            "nullable": true
+          },
+          "score_max": {
+            "title": "Score max",
+            "type": "number",
+            "nullable": true
+          },
+          "score_stddev": {
+            "title": "Score stddev",
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "TrialDeltaAggregate": {
+        "required": [
+          "paired_trial_count",
+          "delta_average",
+          "delta_stddev"
+        ],
+        "type": "object",
+        "properties": {
+          "paired_trial_count": {
+            "title": "Paired trial count",
+            "type": "integer",
+            "minimum": 0
+          },
+          "delta_average": {
+            "title": "Delta average",
+            "type": "number",
+            "nullable": true
+          },
+          "delta_stddev": {
+            "title": "Delta stddev",
+            "type": "number",
+            "nullable": true
+          }
+        }
       }
     }
   },
@@ -65076,7 +65192,7 @@
     }
   ],
   "x-backend-source": "future-agi/future-agi",
-  "x-backend-revision": "2b8a04c04984274ee44d4bfb3bf35b25f77c9eab",
+  "x-backend-revision": "32ea09fa63d0ffa2e5178d1ede94f0f8b5796b7a",
   "x-updated-operations": [
     "POST /model-hub/experiment-runs/compare/"
   ],
@@ -65095,6 +65211,9 @@
     "#/components/schemas/RunComparisonSummary",
     "#/components/schemas/RunCounts",
     "#/components/schemas/RunItemIdentity",
-    "#/components/schemas/RunTraceReference"
+    "#/components/schemas/RunTraceReference",
+    "#/components/schemas/TrialAggregate",
+    "#/components/schemas/TrialDeltaAggregate",
+    "#/components/schemas/TrialStability"
   ]
 }

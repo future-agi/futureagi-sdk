@@ -15,6 +15,7 @@ import type {
   ExternalRunResultsResponse,
   IngestExternalExperimentResultsData,
   RunComparisonResponse,
+  TrialStability,
 } from "../generated/openapi/types.gen";
 
 // Compile the consumer-visible results exactly: no fields wrapper, undefined,
@@ -61,6 +62,22 @@ type LifecycleResponseTypes = [
       RunComparisonResponse
     >
   >,
+  Assert<
+    Equal<
+      Parameters<ExperimentRunsClient["compare"]>[0]["include_trial_stability"],
+      boolean | undefined
+    >
+  >,
+  Assert<
+    Equal<
+      Awaited<
+        ReturnType<ExperimentRunsClient["compare"]>
+      >["result"]["trial_stability"],
+      TrialStability[] | undefined
+    >
+  >,
+  Assert<Equal<TrialStability["baseline"]["score_stddev"], number | null>>,
+  Assert<Equal<TrialStability["paired"]["delta_average"], number | null>>,
 ];
 
 const DATASET = "00000000-0000-4000-8000-000000000001";
@@ -227,16 +244,82 @@ describe("dataset and external run lifecycle", () => {
       };
       const fetchMock = jest.fn(async (request: Request) => {
         expect(request.method).toBe("POST");
-        expect(new URL(request.url).pathname).toBe("/model-hub/experiment-runs/compare/");
+        expect(new URL(request.url).pathname).toBe(
+          "/model-hub/experiment-runs/compare/",
+        );
         expect(await request.json()).toEqual(compare);
         return jsonResponse(response);
       });
-      const result = await clientFor(fetchMock as typeof fetch).experimentRuns.compare(compare);
+      const result = await clientFor(
+        fetchMock as typeof fetch,
+      ).experimentRuns.compare(compare);
       expect(result).toEqual(response);
-      expect(result.result.release_gate?.verdict).toBe(name === "allowance" ? "pass" : "fail");
+      expect(result.result.release_gate?.verdict).toBe(
+        name === "allowance" ? "pass" : "fail",
+      );
       expect(fetchMock).toHaveBeenCalledTimes(1);
     },
   );
+
+  it.each([undefined, false, true])(
+    "preserves trial-stability opt-in %s and nullable statistics",
+    async (flag) => {
+      const response = fixture("run-comparison-trial-stability.json");
+      if (flag !== true) delete response.result.trial_stability;
+      const compare = {
+        baseline_run_id: response.result.baseline_run_id,
+        candidate_run_id: response.result.candidate_run_id,
+        metric_id: response.result.metric_id,
+        ...(flag === undefined ? {} : { include_trial_stability: flag }),
+      };
+      const fetchMock = jest.fn(async (request: Request) => {
+        expect(request.method).toBe("POST");
+        expect(new URL(request.url).pathname).toBe(
+          "/model-hub/experiment-runs/compare/",
+        );
+        expect(await request.json()).toEqual(compare);
+        return jsonResponse(response);
+      });
+      const parsed = await clientFor(
+        fetchMock as typeof fetch,
+      ).experimentRuns.compare(compare);
+      expect(parsed).toEqual(response);
+      const rows = parsed.result.trial_stability;
+      if (flag === true) {
+        expect(rows?.[0].baseline.score_stddev).toBe(0.5);
+        expect(rows?.[0].candidate.score_stddev).toBe(0);
+        expect(rows?.[0].paired.delta_average).toBe(0);
+        expect(rows?.[1].baseline.missing_trial_count).toBe(2);
+        expect(rows?.[1].baseline.score_stddev).toBeNull();
+        expect(rows?.[1].paired.delta_average).toBeNull();
+      } else {
+        expect(rows).toBeUndefined();
+      }
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it("accepts stability alongside a failed release gate and preserves an empty result", async () => {
+    const response = fixture("run-comparison-gate-critical.json");
+    response.result.trial_stability = [];
+    const compare = {
+      baseline_run_id: response.result.baseline_run_id,
+      candidate_run_id: response.result.candidate_run_id,
+      metric_id: response.result.metric_id,
+      include_trial_stability: true,
+      release_gate: response.result.release_gate.policy,
+    };
+    const fetchMock = jest.fn(async (request: Request) => {
+      expect(await request.json()).toEqual(compare);
+      return jsonResponse(response);
+    });
+    const parsed = await clientFor(
+      fetchMock as typeof fetch,
+    ).experimentRuns.compare(compare);
+    expect(parsed.result.trial_stability).toEqual([]);
+    expect(parsed.result.release_gate?.verdict).toBe("fail");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 
   it("preserves runtime unknown policy fields for API rejection instead of dropping them", async () => {
     const compare = {
@@ -247,9 +330,14 @@ describe("dataset and external run lifecycle", () => {
     };
     const fetchMock = jest.fn(async (request: Request) => {
       expect(await request.json()).toEqual(compare);
-      return jsonResponse({ status: false, error: "Unknown release-gate field" }, 400);
+      return jsonResponse(
+        { status: false, error: "Unknown release-gate field" },
+        400,
+      );
     });
-    await expect(clientFor(fetchMock as typeof fetch).experimentRuns.compare(compare)).rejects.toBeDefined();
+    await expect(
+      clientFor(fetchMock as typeof fetch).experimentRuns.compare(compare),
+    ).rejects.toBeDefined();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
