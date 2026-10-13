@@ -17,6 +17,10 @@ npx --yes --package typescript@5.8.3 --package "$OPENAPI_TS_PACKAGE" openapi-ts 
   -p @hey-api/typescript @hey-api/sdk \
   --silent
 
+node "$ROOT_DIR/scripts/fix-sdk-response-style.mjs" \
+  "$ROOT_DIR/typescript/futureagi/src/generated/openapi/sdk.gen.ts" \
+  "$SPEC" "$ROOT_DIR/openapi/sdk/lifecycle-source.json"
+
 rm -rf "$ROOT_DIR/python/fi/generated/openapi_client"
 mkdir -p "$ROOT_DIR/python/fi/generated"
 uvx --from openapi-python-client==0.28.4 openapi-python-client generate \
