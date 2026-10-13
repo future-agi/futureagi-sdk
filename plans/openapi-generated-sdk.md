@@ -118,7 +118,9 @@ TypeScript types expose the optional `trial_stability` array and its nullable
 statistics; the facade and transport are unchanged. The SDK overlay keeps
 existing schema properties in their previous order and appends new fields so
 Python positional model arguments remain compatible. JSON property order has
-no API meaning. The deterministic SDK
+no API meaning. A narrow Python post-hook keeps the server's documented
+`false` default opt-in at the wire: omitted model fields remain omitted, while
+explicit `False` is still serialized. The deterministic SDK
 fixture is synthetic contract evidence, not a live API receipt.
 
 This SDK PR stacks on open compatibility PR #25 (`44f99aa`) and ports dev's dataset retry hardening (`1607f12`) without replacing its package-version fallback. PR #25 remains an independent integration prerequisite; this slice does not merge its generated Go/Java surface or publish packages.

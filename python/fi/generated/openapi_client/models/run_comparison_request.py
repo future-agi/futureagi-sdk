@@ -26,7 +26,7 @@ class RunComparisonRequest:
         passing_score (float | None | Unset):
         higher_is_better (bool | Unset):  Default: True.
         release_gate (ReleaseGatePolicy | Unset):
-        include_trial_stability (bool | Unset):  Default: False.
+        include_trial_stability (bool | Unset): Omitted unless set. Server default: False.
     """
 
     baseline_run_id: UUID
@@ -35,7 +35,7 @@ class RunComparisonRequest:
     passing_score: float | None | Unset = UNSET
     higher_is_better: bool | Unset = True
     release_gate: ReleaseGatePolicy | Unset = UNSET
-    include_trial_stability: bool | Unset = False
+    include_trial_stability: bool | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:

@@ -300,6 +300,8 @@ def test_new_trial_flag_preserves_existing_positional_gate_argument():
         ReleaseGatePolicy(max_regressions=2),
     )
     assert request.to_dict()["release_gate"] == {"max_regressions": 2}
+    assert "include_trial_stability" not in request.to_dict()
+    request.include_trial_stability = False
     assert request.to_dict()["include_trial_stability"] is False
     body = request.to_dict()
     assert RunComparisonRequest.from_dict(body).to_dict() == body
