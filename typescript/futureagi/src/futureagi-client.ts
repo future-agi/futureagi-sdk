@@ -432,7 +432,7 @@ export class DatasetVersionsClient {
     datasetId: string,
     query?: QueryOf<generatedTypes.ListDatasetVersionsData>,
   ) {
-    return generatedSdk.listDatasetVersions(
+    return generatedSdk.listDatasetVersions<true, "data">(
       dataOptions(this.client, { path: { dataset_id: datasetId }, query }),
     );
   }
@@ -442,7 +442,7 @@ export class DatasetVersionsClient {
     versionId: string,
     query?: QueryOf<generatedTypes.GetDatasetVersionData>,
   ) {
-    return generatedSdk.getDatasetVersion(
+    return generatedSdk.getDatasetVersion<true, "data">(
       dataOptions(this.client, {
         path: { dataset_id: datasetId, version_id: versionId },
         query,
@@ -455,7 +455,7 @@ export class DatasetVersionsClient {
     datasetId: string,
     body: BodyOf<generatedTypes.CreateDatasetVersionData>,
   ) {
-    return generatedSdk.createDatasetVersion(
+    return generatedSdk.createDatasetVersion<true, "data">(
       dataOptions(this.client, { path: { dataset_id: datasetId }, body }),
     );
   }
@@ -608,7 +608,7 @@ export class ExperimentRunsClient {
 
   /** One attempt; explicit replay requires the same run UUID and payload. */
   create(body: BodyOf<generatedTypes.CreateExternalExperimentRunData>) {
-    return generatedSdk.createExternalExperimentRun(
+    return generatedSdk.createExternalExperimentRun<true, "data">(
       dataOptions(this.client, { body }),
     );
   }
@@ -618,18 +618,15 @@ export class ExperimentRunsClient {
     runId: string,
     body: BodyOf<generatedTypes.IngestExternalExperimentResultsData>,
   ) {
-    return generatedSdk.ingestExternalExperimentResults(
+    return generatedSdk.ingestExternalExperimentResults<true, "data">(
       dataOptions(this.client, { path: { run_id: runId }, body }),
     );
   }
 
-  compare(
-    body: BodyOf<generatedTypes.CompareExperimentRunsData>,
-  ): Promise<generatedTypes.RunComparisonResponse> {
-    // The generator infers a fields wrapper even when dataOptions requests data.
-    return generatedSdk.compareExperimentRuns(
+  compare(body: BodyOf<generatedTypes.CompareExperimentRunsData>) {
+    return generatedSdk.compareExperimentRuns<true, "data">(
       dataOptions(this.client, { body }),
-    ) as unknown as Promise<generatedTypes.RunComparisonResponse>;
+    );
   }
 }
 
