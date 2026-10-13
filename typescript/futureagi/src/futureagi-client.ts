@@ -2,6 +2,14 @@ import { API_KEY_ENVVAR_NAME, SECRET_KEY_ENVVAR_NAME } from "./utils/constants";
 import { createClient, type Client } from "./generated/openapi/client";
 import * as generatedSdk from "./generated/openapi/sdk.gen";
 import type * as generatedTypes from "./generated/openapi/types.gen";
+import {
+  caseRecordsSize,
+  decodeVersionJsonl,
+  encodeVersionJsonl,
+  VERSION_JSONL_MAX_BYTES,
+  VERSION_JSONL_MAX_ITEMS,
+  type LegacyRowsPolicy,
+} from "./datasets/version-jsonl";
 
 type QueryOf<T> = T extends { query?: infer TQuery }
   ? NonNullable<TQuery>
@@ -458,6 +466,52 @@ export class DatasetVersionsClient {
     return generatedSdk.createDatasetVersion<true, "data">(
       dataOptions(this.client, { path: { dataset_id: datasetId }, body }),
     );
+  }
+
+  async exportJsonl(datasetId: string, versionId: string): Promise<string> {
+    let offset = 0;
+    let version: generatedTypes.DatasetVersionRead | undefined;
+    let receivedBytes = 0;
+    const items: generatedTypes.DatasetVersionItemRead[] = [];
+    while (true) {
+      const page = await this.get(datasetId, versionId, { limit: 500, offset });
+      const result = page.result;
+      if (
+        String(result.version.id).toLowerCase() !== versionId.toLowerCase() ||
+        String(result.version.dataset).toLowerCase() !== datasetId.toLowerCase()
+      )
+        throw new Error("Version page identity changed");
+      if (version && JSON.stringify(version) !== JSON.stringify(result.version))
+        throw new Error("Version metadata changed between pages");
+      version = result.version;
+      const count = version.item_count;
+      if (
+        typeof count !== "number" ||
+        !Number.isInteger(count) ||
+        count < 0 ||
+        count > VERSION_JSONL_MAX_ITEMS
+      )
+        throw new Error("Invalid version item_count");
+      if (result.offset !== offset || (result.has_more && !result.items.length))
+        throw new Error("Version pagination is incomplete");
+      receivedBytes += caseRecordsSize(result.items);
+      if (receivedBytes > VERSION_JSONL_MAX_BYTES)
+        throw new Error("Version pages exceed archive byte limit");
+      items.push(...result.items);
+      offset += result.items.length;
+      if (items.length > count || (result.has_more && items.length >= count))
+        throw new Error("Version pagination exceeds the declared item_count");
+      if (!result.has_more) return encodeVersionJsonl(version, items);
+    }
+  }
+
+  async importJsonl(
+    datasetId: string,
+    source: string | Uint8Array,
+    options: { parentVersionId?: string; legacyRows?: LegacyRowsPolicy } = {},
+  ) {
+    const body = await decodeVersionJsonl(source, datasetId, options);
+    return this.create(datasetId, body);
   }
 }
 

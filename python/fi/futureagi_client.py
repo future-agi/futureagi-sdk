@@ -116,6 +116,14 @@ from fi.generated.openapi_client.models.run_comparison_response import (
 )
 from fi.generated.openapi_client.models.submit_annotations import SubmitAnnotations
 from fi.generated.openapi_client.types import Response as GeneratedResponse
+from fi.datasets.version_jsonl import (
+    MAX_BYTES,
+    MAX_ITEMS,
+    LegacyRows,
+    case_records_size,
+    decode_version_jsonl,
+    encode_version_jsonl,
+)
 from fi.utils.constants import API_KEY_ENVVAR_NAME, SECRET_KEY_ENVVAR_NAME, get_base_url
 from fi.utils.errors import MissingAuthError, SDKException
 
@@ -609,6 +617,56 @@ class DatasetVersionsClient(BaseGeneratedClient):
                 str(dataset_id), client=self._client, body=body
             ),
             DatasetVersionCreateResponse,
+        )
+
+    def export_jsonl(self, dataset_id: str | UUID, version_id: str | UUID) -> str:
+        """Return one complete bounded archive; failures return no partial text."""
+        items: list[dict[str, Any]] = []
+        version = None
+        received_bytes = 0
+        while True:
+            page = self.get(
+                dataset_id, version_id, limit=500, offset=len(items)
+            ).result.to_dict()
+            current = page["version"]
+            if str(UUID(str(current.get("id")))) != str(UUID(str(version_id))) or str(
+                UUID(str(current.get("dataset")))
+            ) != str(UUID(str(dataset_id))):
+                raise ValueError("Version page does not match requested identity")
+            if version is not None and current != version:
+                raise ValueError("Version metadata changed between pages")
+            version = current
+            count = version.get("item_count")
+            if type(count) is not int or not 0 <= count <= MAX_ITEMS:
+                raise ValueError(f"Version must contain 0–{MAX_ITEMS} cases")
+            if page["offset"] != len(items) or (page["has_more"] and not page["items"]):
+                raise ValueError("Version pagination is incomplete")
+            received_bytes += case_records_size(page["items"])
+            if received_bytes > MAX_BYTES:
+                raise ValueError("Version pages exceed archive byte limit")
+            items.extend(page["items"])
+            if len(items) > count or (page["has_more"] and len(items) >= count):
+                raise ValueError("Version pagination exceeds declared item_count")
+            if not page["has_more"]:
+                return encode_version_jsonl(version, items)
+
+    def import_jsonl(
+        self,
+        dataset_id: str | UUID,
+        source: str | bytes,
+        *,
+        parent_version_id: str | UUID | None = None,
+        legacy_rows: LegacyRows = "reject",
+    ) -> DatasetVersionCreateResponse:
+        """Validate all records, then make one non-idempotent snapshot POST."""
+        return self.create(
+            dataset_id,
+            decode_version_jsonl(
+                source,
+                dataset_id,
+                parent_version_id=parent_version_id,
+                legacy_rows=legacy_rows,
+            ),
         )
 
 

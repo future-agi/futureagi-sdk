@@ -27,3 +27,5 @@ export {
 
 // Default export
 export { Dataset as default } from './dataset';
+export { decodeVersionJsonl, encodeVersionJsonl } from './version-jsonl';
+export type { LegacyRowsPolicy } from './version-jsonl';
