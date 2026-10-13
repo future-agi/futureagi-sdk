@@ -334,6 +334,85 @@ def test_compare_accepts_trial_stability_with_release_gate_without_changing_verd
     assert parsed.result.release_gate.verdict.value == "fail"
 
 
+def test_compare_metadata_slice_preserves_json_values_and_selection_receipt():
+    response = fixture("run-comparison-missing.json")
+    response["result"]["selection"] = {
+        "total_plan_count": 4,
+        "selected_count": 2,
+        "metadata_equals": {
+            "cohort": "A",
+            "enabled": True,
+            "weight": 0,
+            "expected": None,
+            "nested": {"region": "us"},
+            "labels": ["holdout", None],
+        },
+        "split_name": None,
+    }
+    metadata = {
+        "cohort": "A",
+        "enabled": True,
+        "weight": 0,
+        "expected": None,
+        "nested": {"region": "us"},
+        "labels": ["holdout", None],
+    }
+    compare = {
+        "baseline_run_id": response["result"]["baseline_run_id"],
+        "candidate_run_id": response["result"]["candidate_run_id"],
+        "metric_id": response["result"]["metric_id"],
+        "metadata_equals": metadata,
+        "split_name": "holdout",
+    }
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        assert json.loads(request.content) == compare
+        return httpx.Response(200, json=response)
+
+    with client_for(handler) as client:
+        parsed = client.experiment_runs.compare(
+            RunComparisonRequest.from_dict(dict(reversed(list(compare.items()))))
+        )
+
+    assert json.loads(calls[0].content) == compare
+    assert parsed.result.selection.selected_count == 2
+    assert parsed.result.selection.metadata_equals["expected"] is None
+    assert parsed.result.selection.metadata_equals["nested"].to_dict() == {
+        "region": "us"
+    }
+    assert parsed.result.selection.split_name is None
+
+
+def test_compare_metadata_slice_omits_optional_selectors_when_unset():
+    request = RunComparisonRequest.from_dict(
+        {
+            "baseline_run_id": RUN,
+            "candidate_run_id": VERSION,
+            "metric_id": EXAMPLE,
+        }
+    )
+    body = request.to_dict()
+    assert "metadata_equals" not in body
+    assert "split_name" not in body
+
+
+def test_compare_metadata_slice_supports_twenty_json_keys():
+    metadata = {str(index): {"index": index, "nullable": None} for index in range(20)}
+    body = RunComparisonRequest.from_dict(
+        {
+            "baseline_run_id": RUN,
+            "candidate_run_id": VERSION,
+            "metric_id": EXAMPLE,
+            "metadata_equals": metadata,
+            "split_name": "train",
+        }
+    ).to_dict()
+    assert body["metadata_equals"] == metadata
+    assert body["split_name"] == "train"
+
+
 @pytest.mark.parametrize(
     "policy",
     [

@@ -11,6 +11,9 @@ from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.release_gate_policy import ReleaseGatePolicy
+    from ..models.run_comparison_request_metadata_equals import (
+        RunComparisonRequestMetadataEquals,
+    )
 
 
 T = TypeVar("T", bound="RunComparisonRequest")
@@ -27,6 +30,8 @@ class RunComparisonRequest:
         higher_is_better (bool | Unset):  Default: True.
         release_gate (ReleaseGatePolicy | Unset):
         include_trial_stability (bool | Unset): Omitted unless set. Server default: False.
+        metadata_equals (RunComparisonRequestMetadataEquals | Unset):
+        split_name (str | Unset):
     """
 
     baseline_run_id: UUID
@@ -36,6 +41,8 @@ class RunComparisonRequest:
     higher_is_better: bool | Unset = True
     release_gate: ReleaseGatePolicy | Unset = UNSET
     include_trial_stability: bool | Unset = UNSET
+    metadata_equals: RunComparisonRequestMetadataEquals | Unset = UNSET
+    split_name: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -59,6 +66,12 @@ class RunComparisonRequest:
 
         include_trial_stability = self.include_trial_stability
 
+        metadata_equals: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.metadata_equals, Unset):
+            metadata_equals = self.metadata_equals.to_dict()
+
+        split_name = self.split_name
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -76,12 +89,19 @@ class RunComparisonRequest:
             field_dict["release_gate"] = release_gate
         if include_trial_stability is not UNSET:
             field_dict["include_trial_stability"] = include_trial_stability
+        if metadata_equals is not UNSET:
+            field_dict["metadata_equals"] = metadata_equals
+        if split_name is not UNSET:
+            field_dict["split_name"] = split_name
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.release_gate_policy import ReleaseGatePolicy
+        from ..models.run_comparison_request_metadata_equals import (
+            RunComparisonRequestMetadataEquals,
+        )
 
         d = dict(src_dict)
         baseline_run_id = UUID(d.pop("baseline_run_id"))
@@ -110,6 +130,17 @@ class RunComparisonRequest:
 
         include_trial_stability = d.pop("include_trial_stability", UNSET)
 
+        _metadata_equals = d.pop("metadata_equals", UNSET)
+        metadata_equals: RunComparisonRequestMetadataEquals | Unset
+        if isinstance(_metadata_equals, Unset):
+            metadata_equals = UNSET
+        else:
+            metadata_equals = RunComparisonRequestMetadataEquals.from_dict(
+                _metadata_equals
+            )
+
+        split_name = d.pop("split_name", UNSET)
+
         run_comparison_request = cls(
             baseline_run_id=baseline_run_id,
             candidate_run_id=candidate_run_id,
@@ -118,6 +149,8 @@ class RunComparisonRequest:
             higher_is_better=higher_is_better,
             release_gate=release_gate,
             include_trial_stability=include_trial_stability,
+            metadata_equals=metadata_equals,
+            split_name=split_name,
         )
 
         run_comparison_request.additional_properties = d
