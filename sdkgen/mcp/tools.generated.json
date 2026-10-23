@@ -1,0 +1,271 @@
+{
+  "schema_version": 1,
+  "source_contract_sha256": "1cecec132245767996473fb7d4ea21b6daf283265cb9dd9718455531b82f28ba",
+  "tool_count": 4,
+  "tools": [
+    {
+      "name": "list_datasets",
+      "description": "List datasets in the current workspace.",
+      "group": "datasets",
+      "stability": "stable",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "search_text": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": ""
+          },
+          "page": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          "page_size": {
+            "type": "integer",
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1
+          },
+          "sort": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "request": {
+        "method": "GET",
+        "path": "/model-hub/develops/get-datasets/",
+        "parameters": {
+          "path": [],
+          "query": [
+            "search_text",
+            "page",
+            "page_size",
+            "sort"
+          ],
+          "body": []
+        }
+      },
+      "response": {
+        "unwrap": "result"
+      },
+      "source": {
+        "catalogId": "datasets.list",
+        "operationId": "model-hub_develops_get-datasets_list"
+      }
+    },
+    {
+      "name": "create_dataset",
+      "description": "Create an empty dataset.",
+      "group": "datasets",
+      "stability": "stable",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "new_dataset_name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "New dataset name"
+          },
+          "model_type": {
+            "type": "string",
+            "default": "GenerativeLLM",
+            "description": "Model type"
+          },
+          "is_sdk": {
+            "type": "boolean",
+            "default": false,
+            "description": "Is sdk"
+          },
+          "row": {
+            "type": "integer",
+            "maximum": 10,
+            "minimum": 0,
+            "description": "Row"
+          }
+        },
+        "required": [
+          "new_dataset_name"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "request": {
+        "method": "POST",
+        "path": "/model-hub/develops/create-empty-dataset/",
+        "parameters": {
+          "path": [],
+          "query": [],
+          "body": [
+            "new_dataset_name",
+            "model_type",
+            "is_sdk",
+            "row"
+          ]
+        }
+      },
+      "response": {
+        "unwrap": "result"
+      },
+      "source": {
+        "catalogId": "datasets.create",
+        "operationId": "model-hub_develops_create-empty-dataset_create"
+      }
+    },
+    {
+      "name": "get_dataset",
+      "description": "Get a dataset's columns, rows and metadata.",
+      "group": "datasets",
+      "stability": "stable",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dataset_id": {
+            "type": "string"
+          },
+          "filters": {
+            "type": "string",
+            "default": "[]",
+            "minLength": 1
+          },
+          "sort": {
+            "type": "string",
+            "default": "[]",
+            "minLength": 1
+          },
+          "search": {
+            "type": "string",
+            "default": {}
+          },
+          "page_size": {
+            "type": "integer",
+            "default": 10,
+            "minimum": 1
+          },
+          "current_page_index": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          "column_config_only": {
+            "type": "boolean",
+            "default": false
+          },
+          "exact_snapshot": {
+            "type": "boolean",
+            "default": false,
+            "description": "Start an exact MVCC-bound dataset read. Exact reads start at page 0 and return a signed next_cursor when more rows remain."
+          },
+          "cursor": {
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1,
+            "description": "Signed next_cursor from the preceding exact dataset page. Keep the same page_size and current_page_index sequence."
+          }
+        },
+        "required": [
+          "dataset_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "request": {
+        "method": "GET",
+        "path": "/model-hub/develops/{dataset_id}/get-dataset-table/",
+        "parameters": {
+          "path": [
+            "dataset_id"
+          ],
+          "query": [
+            "filters",
+            "sort",
+            "search",
+            "page_size",
+            "current_page_index",
+            "column_config_only",
+            "exact_snapshot",
+            "cursor"
+          ],
+          "body": []
+        }
+      },
+      "response": {
+        "unwrap": "result"
+      },
+      "source": {
+        "catalogId": "datasets.get",
+        "operationId": "model-hub_develops_get-dataset-table_list"
+      }
+    },
+    {
+      "name": "datasets_columns_add",
+      "description": "Add columns to a dataset.",
+      "group": "datasets",
+      "stability": "stable",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dataset_id": {
+            "type": "string"
+          },
+          "new_columns_data": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "dataset_id",
+          "new_columns_data"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "request": {
+        "method": "POST",
+        "path": "/model-hub/develops/{dataset_id}/add_columns/",
+        "parameters": {
+          "path": [
+            "dataset_id"
+          ],
+          "query": [],
+          "body": [
+            "new_columns_data"
+          ]
+        }
+      },
+      "response": {
+        "unwrap": "result"
+      },
+      "source": {
+        "catalogId": "datasets.columns.add",
+        "operationId": "model-hub_develops_add_columns_create"
+      }
+    }
+  ]
+}
