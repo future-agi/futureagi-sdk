@@ -1,0 +1,57 @@
+# One catalog for every surface.
+#
+# Each operation has ONE shared id (`resource.method`). That id becomes:
+#   SDK  client.datasets.list()
+#   MCP  datasets_list            (unless the mcp block overrides the name)
+#
+# `surfaces` decides where an operation ships. A surface that is missing or set
+# to false does not get the operation, so MCP and the SDK roll out independently.
+#
+#   stability: stable | beta | deprecated   (per surface, default stable)
+#   mcp:  name (override), group, access (read | write | destructive)
+
+version: 1
+
+operations:
+  - id: datasets.list
+    description: List datasets in the current workspace.
+    operation: {method: GET, path: /model-hub/develops/get-datasets/}
+    pagination: {page_param: page, size_param: page_size, first_page: 0, items: datasets, total_pages: total_pages}  # 0-based: verified on a live backend (contract does not say)
+    surfaces:
+      sdk: {}
+      mcp: {name: list_datasets, group: datasets, access: read}   # keeps today's MCP name
+
+  - id: datasets.create
+    description: Create an empty dataset.
+    operation: {method: POST, path: /model-hub/develops/create-empty-dataset/}
+    surfaces:
+      sdk: {}
+      mcp: {name: create_dataset, group: datasets, access: write}
+
+  - id: datasets.get
+    description: Get a dataset's columns, rows and metadata.
+    operation: {method: GET, path: "/model-hub/develops/{dataset_id}/get-dataset-table/"}
+    surfaces:
+      sdk: {}
+      mcp: {name: get_dataset, group: datasets, access: read}
+
+  - id: datasets.columns.add
+    description: Add columns to a dataset.
+    operation: {method: POST, path: "/model-hub/develops/{dataset_id}/add_columns/"}
+    surfaces:
+      sdk: {}
+      mcp: {group: datasets, access: write}
+
+  - id: datasets.rows.add
+    description: Add rows to a dataset.
+    operation: {method: POST, path: "/model-hub/develops/{dataset_id}/add_rows/"}
+    surfaces:
+      sdk: {stability: beta}   # SDK beta first; not in MCP yet
+      mcp: false
+
+  - id: datasets.delete
+    description: Delete one or more datasets.
+    operation: {method: DELETE, path: /model-hub/develops/delete_dataset/}
+    surfaces:
+      sdk: {}
+      mcp: false               # destructive: kept out of MCP on purpose

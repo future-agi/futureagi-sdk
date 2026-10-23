@@ -1,0 +1,1411 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Future AGI Management API",
+    "description": "The endpoints defined below allow users to programmatically carry out various actions on the Future AGI platform.",
+    "termsOfService": "https://futureagi.com/legal",
+    "contact": {
+      "email": "help@futureagi.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "v1"
+  },
+  "securityDefinitions": {
+    "X-Api-Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-Api-Key"
+    },
+    "X-Secret-Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-Secret-Key"
+    }
+  },
+  "security": [
+    {
+      "X-Api-Key": []
+    },
+    {
+      "X-Secret-Key": []
+    }
+  ],
+  "x-source-sha256": "e3faac5732b8caa78103e3d7cfba7f72faa15a7efc482a72cbade951f5cdf65d",
+  "paths": {
+    "/model-hub/develops/create-empty-dataset/": {
+      "parameters": [],
+      "post": {
+        "operationId": "model-hub_develops_create-empty-dataset_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateEmptyDatasetRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DatasetCreateStartedResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DatasetLimitCheckFailedError"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/develops/delete_dataset/": {
+      "parameters": [],
+      "delete": {
+        "operationId": "model-hub_develops_delete_dataset_delete",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DatasetDelete"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DevelopDatasetMessageResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/develops/get-datasets/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_develops_get-datasets_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "search_text",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "",
+            "x-nullable": true
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 10,
+            "maximum": 100,
+            "minimum": 1
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-nullable": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DatasetListResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/develops/{dataset_id}/add_columns/": {
+      "parameters": [
+        {
+          "name": "dataset_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_develops_add_columns_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DatasetAddColumnsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DatasetColumnsMutationResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/develops/{dataset_id}/add_rows/": {
+      "parameters": [
+        {
+          "name": "dataset_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_develops_add_rows_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DatasetAddRowsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DevelopDatasetMessageResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/develops/{dataset_id}/get-dataset-table/": {
+      "parameters": [
+        {
+          "name": "dataset_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "operationId": "model-hub_develops_get-dataset-table_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "[]",
+            "minLength": 1
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "[]",
+            "minLength": 1
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": {}
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 10,
+            "minimum": 1
+          },
+          {
+            "name": "current_page_index",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          {
+            "name": "column_config_only",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "exact_snapshot",
+            "in": "query",
+            "description": "Start an exact MVCC-bound dataset read. Exact reads start at page 0 and return a signed next_cursor when more rows remain.",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Signed next_cursor from the preceding exact dataset page. Keep the same page_size and current_page_index sequence.",
+            "required": false,
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DatasetTableResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    }
+  },
+  "definitions": {
+    "Column": {
+      "required": [
+        "name",
+        "data_type",
+        "source"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 2000,
+          "minLength": 1
+        },
+        "data_type": {
+          "title": "Data type",
+          "type": "string",
+          "enum": [
+            "text",
+            "boolean",
+            "integer",
+            "float",
+            "json",
+            "array",
+            "image",
+            "images",
+            "datetime",
+            "audio",
+            "document",
+            "others",
+            "persona"
+          ]
+        },
+        "dataset": {
+          "title": "Dataset",
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "source": {
+          "title": "Source",
+          "type": "string",
+          "enum": [
+            "evaluation",
+            "evaluation_tags",
+            "evaluation_reason",
+            "run_prompt",
+            "experiment",
+            "optimisation",
+            "experiment_evaluation",
+            "experiment_evaluation_tags",
+            "optimisation_evaluation",
+            "annotation_label",
+            "optimisation_evaluation_tags",
+            "extracted_json",
+            "classification",
+            "extracted_entities",
+            "api_call",
+            "python_code",
+            "vector_db",
+            "conditional",
+            "eval_playground",
+            "OTHERS"
+          ]
+        },
+        "source_id": {
+          "title": "Source id",
+          "type": "string",
+          "maxLength": 2000,
+          "x-nullable": true
+        }
+      }
+    },
+    "CreateEmptyDatasetRequest": {
+      "required": [
+        "new_dataset_name"
+      ],
+      "type": "object",
+      "properties": {
+        "new_dataset_name": {
+          "title": "New dataset name",
+          "type": "string",
+          "minLength": 1
+        },
+        "model_type": {
+          "title": "Model type",
+          "type": "string",
+          "default": "GenerativeLLM"
+        },
+        "is_sdk": {
+          "title": "Is sdk",
+          "type": "boolean",
+          "default": false
+        },
+        "row": {
+          "title": "Row",
+          "type": "integer",
+          "maximum": 10,
+          "minimum": 0
+        }
+      }
+    },
+    "DatasetAddColumnsRequest": {
+      "required": [
+        "new_columns_data"
+      ],
+      "type": "object",
+      "properties": {
+        "new_columns_data": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "DatasetAddRowsRequest": {
+      "required": [
+        "rows"
+      ],
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatasetRowRequest"
+          }
+        }
+      }
+    },
+    "DatasetColumnsMutationResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/DatasetColumnsMutationResult"
+        }
+      }
+    },
+    "DatasetColumnsMutationResult": {
+      "required": [
+        "message"
+      ],
+      "type": "object",
+      "properties": {
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "minLength": 1
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Column"
+          }
+        }
+      }
+    },
+    "DatasetCreateStartedResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/DatasetCreateStartedResult"
+        }
+      }
+    },
+    "DatasetCreateStartedResult": {
+      "required": [
+        "message",
+        "dataset_id",
+        "dataset_name"
+      ],
+      "type": "object",
+      "properties": {
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_id": {
+          "title": "Dataset id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "dataset_name": {
+          "title": "Dataset name",
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_model_type": {
+          "title": "Dataset model type",
+          "type": "string",
+          "x-nullable": true
+        }
+      }
+    },
+    "DatasetDelete": {
+      "required": [
+        "dataset_ids"
+      ],
+      "type": "object",
+      "properties": {
+        "dataset_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "maxItems": 50
+        }
+      }
+    },
+    "DatasetLimitCheckFailedError": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "enum": [
+            "dataset_limit_check_failed"
+          ]
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string",
+          "x-nullable": true
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "title": "Details",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "DatasetListItem": {
+      "required": [
+        "id",
+        "name",
+        "number_of_datapoints",
+        "number_of_experiments",
+        "number_of_optimisations",
+        "derived_datasets",
+        "created_at",
+        "dataset_type"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "number_of_datapoints": {
+          "title": "Number of datapoints",
+          "type": "integer"
+        },
+        "number_of_experiments": {
+          "title": "Number of experiments",
+          "type": "integer"
+        },
+        "number_of_optimisations": {
+          "title": "Number of optimisations",
+          "type": "integer"
+        },
+        "derived_datasets": {
+          "title": "Derived datasets",
+          "type": "integer"
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_type": {
+          "title": "Dataset type",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "DatasetListResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/DatasetListResult"
+        }
+      }
+    },
+    "DatasetListResult": {
+      "required": [
+        "datasets",
+        "total_pages",
+        "total_count"
+      ],
+      "type": "object",
+      "properties": {
+        "datasets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatasetListItem"
+          }
+        },
+        "total_pages": {
+          "title": "Total pages",
+          "type": "integer"
+        },
+        "total_count": {
+          "title": "Total count",
+          "type": "integer"
+        }
+      }
+    },
+    "DatasetRowCellRequest": {
+      "required": [
+        "column_name"
+      ],
+      "type": "object",
+      "properties": {
+        "column_name": {
+          "title": "Column name",
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "title": "Value",
+          "type": "object",
+          "x-nullable": true,
+          "x-json-value": true,
+          "description": "Any valid JSON value."
+        }
+      }
+    },
+    "DatasetRowRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "cells": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatasetRowCellRequest"
+          },
+          "default": []
+        }
+      }
+    },
+    "DatasetTableColumn": {
+      "required": [
+        "id",
+        "name",
+        "data_type",
+        "is_visible",
+        "is_frozen",
+        "source_type",
+        "origin_type",
+        "source_id",
+        "order_index",
+        "status",
+        "average_score",
+        "reason_column",
+        "is_numeric_eval",
+        "is_numeric_eval_percentage",
+        "metadata",
+        "choices_map"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "data_type": {
+          "title": "Data type",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "is_visible": {
+          "title": "Is visible",
+          "type": "boolean"
+        },
+        "is_frozen": {
+          "title": "Is frozen",
+          "type": "boolean",
+          "x-nullable": true
+        },
+        "source_type": {
+          "title": "Source type",
+          "type": "string",
+          "minLength": 1
+        },
+        "origin_type": {
+          "title": "Origin type",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "source_id": {
+          "title": "Source id",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "order_index": {
+          "title": "Order index",
+          "type": "integer"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "average_score": {
+          "title": "Average score",
+          "type": "number",
+          "x-nullable": true
+        },
+        "reason_column": {
+          "title": "Reason column",
+          "type": "boolean"
+        },
+        "is_numeric_eval": {
+          "title": "Is numeric eval",
+          "type": "boolean"
+        },
+        "is_numeric_eval_percentage": {
+          "title": "Is numeric eval percentage",
+          "type": "boolean"
+        },
+        "eval_tag": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": []
+        },
+        "metadata": {
+          "title": "Metadata",
+          "type": "object"
+        },
+        "choices_map": {
+          "title": "Choices map",
+          "type": "object"
+        }
+      }
+    },
+    "DatasetTableMetadata": {
+      "required": [
+        "dataset_name"
+      ],
+      "type": "object",
+      "properties": {
+        "dataset_name": {
+          "title": "Dataset name",
+          "type": "string",
+          "minLength": 1
+        },
+        "experiment_id": {
+          "title": "Experiment id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "experiment_name": {
+          "title": "Experiment name",
+          "type": "string",
+          "minLength": 1
+        },
+        "total_rows": {
+          "title": "Total rows",
+          "type": "integer"
+        },
+        "total_pages": {
+          "title": "Total pages",
+          "type": "integer"
+        },
+        "page_size": {
+          "title": "Page size",
+          "description": "Row limit used for this page.",
+          "type": "integer"
+        },
+        "current_page_index": {
+          "title": "Current page index",
+          "description": "Zero-based page index returned by the server.",
+          "type": "integer"
+        },
+        "has_more": {
+          "title": "Has more",
+          "description": "Whether an exact continuation page remains.",
+          "type": "boolean"
+        },
+        "next_page_index": {
+          "title": "Next page index",
+          "description": "Next zero-based page index, or null at exact exhaustion.",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "next_cursor": {
+          "title": "Next cursor",
+          "description": "Signed exact continuation cursor, or null at exhaustion.",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "is_exact": {
+          "title": "Is exact",
+          "description": "True only for a successful exact, revision-bound page.",
+          "type": "boolean"
+        },
+        "snapshot_bound": {
+          "title": "Snapshot bound",
+          "description": "Whether this page is bound to the signed MVCC revision.",
+          "type": "boolean"
+        },
+        "error_messages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "status": {
+          "title": "Status",
+          "type": "object",
+          "x-nullable": true
+        }
+      }
+    },
+    "DatasetTableResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/DatasetTableResult"
+        }
+      }
+    },
+    "DatasetTableResult": {
+      "required": [
+        "column_config"
+      ],
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "$ref": "#/definitions/DatasetTableMetadata"
+        },
+        "column_config": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatasetTableColumn"
+          }
+        },
+        "table": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatasetTableRow"
+          }
+        },
+        "dataset_config": {
+          "title": "Dataset config",
+          "type": "object"
+        },
+        "synthetic_dataset": {
+          "title": "Synthetic dataset",
+          "type": "boolean"
+        },
+        "synthetic_dataset_percentage": {
+          "title": "Synthetic dataset percentage",
+          "type": "number",
+          "x-nullable": true
+        },
+        "synthetic_regenerate": {
+          "title": "Synthetic regenerate",
+          "type": "boolean"
+        },
+        "is_processing_data": {
+          "title": "Is processing data",
+          "type": "boolean"
+        }
+      }
+    },
+    "DatasetTableRow": {
+      "required": [
+        "row_id"
+      ],
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "title": "Row id",
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "DevelopDatasetMessageResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "ManagementAPIErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "x-nullable": true
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string",
+          "x-nullable": true
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "title": "Details",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "ModelHubErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "x-nullable": true
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string",
+          "x-nullable": true
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "title": "Details",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}
