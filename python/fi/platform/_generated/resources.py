@@ -625,7 +625,7 @@ class GatewaySessionsResource:
         query = {'limit': limit, **(extra_query or {})}
         return self._t.paginate(OP_GATEWAY_SESSIONS_LIST, path=path, query=query, model=models.AgentccSession)
 
-    def requests(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.AgentccSession:
+    def requests(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> Any:
         """List every request log belonging to one gateway session. Request logs carry no trace id, so grouping by session is the way to see what else happened around a failed request.
 
         GET /agentcc/sessions/{id}/requests/
@@ -633,7 +633,7 @@ class GatewaySessionsResource:
         path = {'id': id}
         query = {**(extra_query or {})}
         body = None
-        return self._t.call(OP_GATEWAY_SESSIONS_REQUESTS, path=path, query=query, body=body, model=models.AgentccSession)
+        return self._t.call(OP_GATEWAY_SESSIONS_REQUESTS, path=path, query=query, body=body, model=None)
 
 
 class PromptsVersionsResource:
@@ -1935,7 +1935,7 @@ class AsyncGatewaySessionsResource:
         query = {'limit': limit, **(extra_query or {})}
         return self._t.apaginate(OP_GATEWAY_SESSIONS_LIST, path=path, query=query, model=models.AgentccSession)
 
-    async def requests(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.AgentccSession:
+    async def requests(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> Any:
         """List every request log belonging to one gateway session. Request logs carry no trace id, so grouping by session is the way to see what else happened around a failed request.
 
         GET /agentcc/sessions/{id}/requests/
@@ -1943,7 +1943,7 @@ class AsyncGatewaySessionsResource:
         path = {'id': id}
         query = {**(extra_query or {})}
         body = None
-        return await self._t.acall(OP_GATEWAY_SESSIONS_REQUESTS, path=path, query=query, body=body, model=models.AgentccSession)
+        return await self._t.acall(OP_GATEWAY_SESSIONS_REQUESTS, path=path, query=query, body=body, model=None)
 
 
 class AsyncPromptsVersionsResource:

@@ -810,6 +810,7 @@ operations:
   description: List every request log belonging to one gateway session. Request logs carry no trace id, so grouping by session is the way to see
     what else happened around a failed request.
   operation: {method: GET, path: '/agentcc/sessions/{id}/requests/'}
+  contract_fix: {untyped: true, note: "contract says one AgentccSession; server returns the list of the session request logs"}
   surfaces:
     sdk: {}
     mcp: {name: list_gateway_session_requests, group: gateway, access: read}

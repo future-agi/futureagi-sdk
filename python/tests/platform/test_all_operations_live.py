@@ -268,7 +268,10 @@ def test_gateway_management(client):
     assert "rules" in client.gateway.guardrail_rules.list()
     sessions = client.gateway.sessions.list().to_list(limit=1)
     session_id = sessions[0].id if sessions else str(uuid.uuid4())
-    allow(lambda: client.gateway.sessions.requests(session_id), 400, 404)
+    if sessions:  # sessions exist once traffic with x-agentcc-session-id has gone through the gateway
+        assert isinstance(client.gateway.sessions.requests(session_id), list)
+    else:
+        allow(lambda: client.gateway.sessions.requests(session_id), 400, 404)
     overview = client.gateway.analytics()
     assert "total_requests" in overview
 

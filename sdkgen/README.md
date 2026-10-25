@@ -108,6 +108,7 @@ By default, a response that still doesn't match gives you the raw JSON and a `Re
   - `prompts.versions.list` returns a page of versions, not one template.
   - `gateway.analytics` returns overview stats, not request logs.
   - `gateway.guardrail_rules.list` returns `{rules}`.
+  - `gateway.sessions.requests` returns a list of request logs, not a session.
 - **Span ingestion race:** posting several spans for a new project in one call can fail on `unique_project_per_org_type`, because the server creates the project from parallel threads.
 - **Wrong request body type:** `create_otel_span` takes a JSON array, but the contract says object.
 
