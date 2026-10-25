@@ -138,6 +138,7 @@ class AgentCC:
                 http_client=self._http_client,
                 retry_policy=self._retry_policy,
             )
+            self._base_client._owner = self  # lets responses update the active session
         return self._base_client
 
     @property
@@ -454,6 +455,7 @@ class AsyncAgentCC:
                 http_client=self._http_client,
                 retry_policy=self._retry_policy,
             )
+            self._base_client._owner = self  # lets responses update the active session
         return self._base_client
 
     @property

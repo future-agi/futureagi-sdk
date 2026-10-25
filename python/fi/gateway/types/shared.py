@@ -11,7 +11,7 @@ class Usage(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     prompt_tokens: int
-    completion_tokens: int
+    completion_tokens: int = 0  # embedding responses have no completion tokens
     total_tokens: int
     prompt_tokens_details: dict[str, object] | None = None
     completion_tokens_details: dict[str, object] | None = None

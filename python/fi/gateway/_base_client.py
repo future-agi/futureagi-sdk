@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import random
 import time
@@ -13,6 +14,7 @@ import anyio
 import httpx
 
 from fi.gateway._constants import (
+    AGENTCC_PARAM_TO_HEADER,
     DEFAULT_KEEPALIVE_CONNECTIONS,
     DEFAULT_KEEPALIVE_EXPIRY,
     DEFAULT_MAX_CONNECTIONS,
@@ -22,7 +24,6 @@ from fi.gateway._constants import (
     HEADER_SDK_VERSION,
     HEADER_USER_AGENT,
     NOT_GIVEN,
-    AGENTCC_PARAM_TO_HEADER,
     RETRYABLE_STATUS_CODES,
     __version__,
 )
@@ -67,8 +68,30 @@ class RequestOptions:
     url: str
     body: dict[str, Any] | None = None
     headers: dict[str, str] = field(default_factory=dict)
+    files: dict[str, Any] | None = None  # multipart upload; `body` then goes as form fields
     timeout: httpx.Timeout | None = None
     max_retries: int | None = None
+
+
+def _track_session(base: Any, result: Any) -> None:
+    """Add a finished request's cost and tokens to the owning client's active session."""
+    session = getattr(getattr(base, "_owner", None), "_active_session", None)
+    if session is None:
+        return
+    meta = getattr(result, "agentcc", None)
+    usage = getattr(result, "usage", None)
+    session.track_request(cost=getattr(meta, "cost", None) or 0.0, tokens=getattr(usage, "total_tokens", None) or 0)
+
+
+def _payload(options: RequestOptions) -> dict[str, Any]:
+    """JSON body, or multipart form fields plus files for uploads."""
+    if not options.files:
+        return {"json": options.body}
+    data = {
+        k: v if isinstance(v, str) else json.dumps(v) if isinstance(v, (list, dict)) else str(v)
+        for k, v in (options.body or {}).items()
+    }
+    return {"data": data, "files": options.files}
 
 
 class BaseClient(ABC):
@@ -124,7 +147,8 @@ class BaseClient(ABC):
 
         # 1. SDK auto-headers
         headers[HEADER_USER_AGENT] = f"agentcc-python/{__version__}"
-        headers[HEADER_CONTENT_TYPE] = "application/json"
+        if not options.files:  # httpx sets the multipart boundary itself
+            headers[HEADER_CONTENT_TYPE] = "application/json"
         headers[HEADER_SDK_VERSION] = __version__
 
         # 2. Auth
@@ -278,9 +302,9 @@ class SyncBaseClient(BaseClient):
             response = client.request(
                 method=options.method,
                 url=url,
-                json=options.body,
                 headers=headers,
                 timeout=timeout,
+                **_payload(options),
             )
         except httpx.TimeoutException as e:
             raise APITimeoutError(f"Request timed out: {e}") from e
@@ -327,6 +351,7 @@ class SyncBaseClient(BaseClient):
             try:
                 result = self._request(options, response_cls, agentcc_params)
                 self._dispatch_callback("on_request_end", options, result)
+                _track_session(self, result)
                 return result
             except APIStatusError as exc:
                 last_exc = exc
@@ -388,9 +413,9 @@ class SyncBaseClient(BaseClient):
             response = client.request(
                 method=options.method,
                 url=url,
-                json=options.body,
                 headers=headers,
                 timeout=timeout,
+                **_payload(options),
             )
         except httpx.TimeoutException as e:
             raise APITimeoutError(f"Request timed out: {e}") from e
@@ -561,9 +586,9 @@ class AsyncBaseClient(BaseClient):
             response = await client.request(
                 method=options.method,
                 url=url,
-                json=options.body,
                 headers=headers,
                 timeout=timeout,
+                **_payload(options),
             )
         except httpx.TimeoutException as e:
             raise APITimeoutError(f"Request timed out: {e}") from e
@@ -608,6 +633,7 @@ class AsyncBaseClient(BaseClient):
             try:
                 result = await self._request(options, response_cls, agentcc_params)
                 self._dispatch_callback("on_request_end", options, result)
+                _track_session(self, result)
                 return result
             except APIStatusError as exc:
                 last_exc = exc
@@ -668,9 +694,9 @@ class AsyncBaseClient(BaseClient):
             response = await client.request(
                 method=options.method,
                 url=url,
-                json=options.body,
                 headers=headers,
                 timeout=timeout,
+                **_payload(options),
             )
         except httpx.TimeoutException as e:
             raise APITimeoutError(f"Request timed out: {e}") from e

@@ -421,7 +421,7 @@ def test_translations_create_all_params():
 
     client = AgentCC(api_key="sk-test", base_url=GATEWAY)
     result = client.audio.translations.create(
-        file="test_french.mp3",
+        file=("test_french.mp3", b"ID3audio"),
         model="whisper-1",
         prompt="Translate the following French audio to English.",
         response_format="text",
@@ -429,14 +429,14 @@ def test_translations_create_all_params():
     )
     assert result.text == "Translated text."
 
-    import json
-
-    body = json.loads(route.calls[0].request.content)
-    assert body["model"] == "whisper-1"
-    assert body["file"] == "test_french.mp3"
-    assert body["prompt"] == "Translate the following French audio to English."
-    assert body["response_format"] == "text"
-    assert body["temperature"] == 0.3
+    # Audio is uploaded as multipart/form-data: the file plus one form field per param.
+    request = route.calls[0].request
+    assert request.headers["content-type"].startswith("multipart/form-data")
+    body = request.content
+    assert b'name="file"; filename="test_french.mp3"' in body and b"ID3audio" in body
+    for name, value in [("model", b"whisper-1"), ("prompt", b"Translate the following French audio to English."),
+                        ("response_format", b"text"), ("temperature", b"0.3")]:
+        assert f'name="{name}"'.encode() in body and value in body
     client.close()
 
 
@@ -450,15 +450,13 @@ def test_translations_create_with_extra_body():
 
     client = AgentCC(api_key="sk-test", base_url=GATEWAY)
     client.audio.translations.create(
-        file="test.mp3",
+        file=("test.mp3", b"ID3"),
         model="whisper-1",
         extra_body={"custom_param": "value"},
     )
 
-    import json
-
-    body = json.loads(route.calls[0].request.content)
-    assert body["custom_param"] == "value"
+    body = route.calls[0].request.content
+    assert b'name="custom_param"' in body and b"value" in body
     client.close()
 
 

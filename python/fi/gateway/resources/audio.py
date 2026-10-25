@@ -4,9 +4,13 @@ from __future__ import annotations
 
 from typing import Any
 
+from fi.gateway._agentcc_params import (
+    build_extra_headers,
+    collect_agentcc_params,
+    merge_session_headers,
+)
 from fi.gateway._base_client import RequestOptions
 from fi.gateway._constants import NOT_GIVEN
-from fi.gateway._agentcc_params import build_extra_headers, collect_agentcc_params, merge_session_headers
 from fi.gateway.types.audio import Transcription, Translation
 
 # ---------------------------------------------------------------------------
@@ -47,7 +51,7 @@ class Transcriptions:
         timeout: Any = NOT_GIVEN,
         **kwargs: Any,
     ) -> Transcription:
-        body: dict[str, Any] = {"model": model, "file": file}
+        body: dict[str, Any] = {"model": model}
         for key, val in {
             "language": language,
             "prompt": prompt,
@@ -80,6 +84,7 @@ class Transcriptions:
             method="POST",
             url="/v1/audio/transcriptions",
             body=body,
+            files={"file": file},
             headers=extra_hdrs,
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
@@ -119,7 +124,7 @@ class AsyncTranscriptions:
         timeout: Any = NOT_GIVEN,
         **kwargs: Any,
     ) -> Transcription:
-        body: dict[str, Any] = {"model": model, "file": file}
+        body: dict[str, Any] = {"model": model}
         for key, val in {
             "language": language,
             "prompt": prompt,
@@ -152,6 +157,7 @@ class AsyncTranscriptions:
             method="POST",
             url="/v1/audio/transcriptions",
             body=body,
+            files={"file": file},
             headers=extra_hdrs,
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
@@ -341,7 +347,7 @@ class Translations:
         timeout: Any = NOT_GIVEN,
         **kwargs: Any,
     ) -> Translation:
-        body: dict[str, Any] = {"model": model, "file": file}
+        body: dict[str, Any] = {"model": model}
         for key, val in {
             "prompt": prompt,
             "response_format": response_format,
@@ -374,6 +380,7 @@ class Translations:
             method="POST",
             url="/v1/audio/translations",
             body=body,
+            files={"file": file},
             headers=extra_hdrs,
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
@@ -412,7 +419,7 @@ class AsyncTranslations:
         timeout: Any = NOT_GIVEN,
         **kwargs: Any,
     ) -> Translation:
-        body: dict[str, Any] = {"model": model, "file": file}
+        body: dict[str, Any] = {"model": model}
         for key, val in {
             "prompt": prompt,
             "response_format": response_format,
@@ -445,6 +452,7 @@ class AsyncTranslations:
             method="POST",
             url="/v1/audio/translations",
             body=body,
+            files={"file": file},
             headers=extra_hdrs,
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
