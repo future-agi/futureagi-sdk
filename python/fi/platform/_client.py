@@ -12,7 +12,7 @@ from ._transport import AsyncTransport, Config, SyncTransport
 DEFAULT_BASE_URL = "https://api.futureagi.com"
 
 
-def _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id) -> Config:
+def _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses) -> Config:
     api_key = api_key or os.environ.get("FI_API_KEY")
     secret_key = secret_key or os.environ.get("FI_SECRET_KEY")
     if not api_key or not secret_key:
@@ -24,6 +24,7 @@ def _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id) -
         timeout=timeout,
         max_retries=max_retries,
         workspace_id=workspace_id or os.environ.get("FI_WORKSPACE_ID"),
+        strict_responses=strict_responses,
     )
 
 
@@ -45,10 +46,11 @@ class Client(GeneratedResources):
         workspace_id: str | None = None,
         timeout: float = 60.0,
         max_retries: int = 2,
+        strict_responses: bool = False,
         http_client: httpx.Client | None = None,
     ) -> None:
         self._transport = SyncTransport(
-            _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id), http_client
+            _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses), http_client
         )
         self._init_resources(self._transport)
 
@@ -74,10 +76,11 @@ class AsyncClient(AsyncGeneratedResources):
         workspace_id: str | None = None,
         timeout: float = 60.0,
         max_retries: int = 2,
+        strict_responses: bool = False,
         http_client: httpx.AsyncClient | None = None,
     ) -> None:
         self._transport = AsyncTransport(
-            _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id), http_client
+            _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses), http_client
         )
         self._init_resources(self._transport)
 

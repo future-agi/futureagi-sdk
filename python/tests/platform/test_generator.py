@@ -37,16 +37,22 @@ def test_surfaces_ship_independently():
     from fi.platform import Client
 
     mcp_ids = {t["source"]["catalogId"] for t in MCP["tools"]}
-    assert mcp_ids == {"datasets.list", "datasets.create", "datasets.get", "datasets.columns.add"}
-    # rows.add and delete are SDK-only
+    sdk_ids = {e["id"] for e in CATALOG["operations"] if e["surfaces"].get("sdk") is not False}
+    assert sdk_ids - mcp_ids == {"datasets.columns.add"}  # SDK-only
     client = Client(api_key="k", secret_key="s", base_url="http://unused")
-    assert callable(client.datasets.rows.add) and callable(client.datasets.delete)
+    assert callable(client.datasets.columns.add)
 
 
 def test_mcp_names_keep_existing_tools_or_follow_the_id():
+    # Every catalog entry keeps the monorepo's MCP tool name: 105 tools, same names.
+    assert MCP["tool_count"] == 105
     names = {t["source"]["catalogId"]: t["name"] for t in MCP["tools"]}
-    assert names["datasets.list"] == "list_datasets"   # override = today's MCP name
-    assert names["datasets.columns.add"] == "datasets_columns_add"  # default = from the id
+    assert names["datasets.list"] == "list_datasets"
+    assert names["traces.list"] == "search_traces"
+    # Without an override the name follows the id.
+    catalog = _with("datasets.columns.add", surfaces={"sdk": {}, "mcp": {"group": "datasets", "access": "write"}})
+    op = next(o for o in generate.load(CONTRACT, catalog) if o.id == "datasets.columns.add")
+    assert op.surfaces["mcp"]["name"] == "datasets_columns_add"
 
 
 def test_mcp_input_schema_comes_from_the_contract():

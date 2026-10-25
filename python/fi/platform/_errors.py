@@ -15,6 +15,19 @@ class APIConnectionError(FutureAGIError):
     """The request never got a response (DNS, TLS, timeout, connection reset)."""
 
 
+class ResponseValidationError(FutureAGIError):
+    """The response did not match the API contract (raised only with `strict_responses=True`)."""
+
+    def __init__(self, op_id: str, error: Exception, data: Any) -> None:
+        super().__init__(f"{op_id}: response does not match the contract: {error}")
+        self.op_id = op_id
+        self.data = data
+
+
+class ResponseShapeWarning(UserWarning):
+    """The response did not match the contract; the raw JSON was returned instead of a model."""
+
+
 class APIError(FutureAGIError):
     """The API answered with an error status.
 
@@ -39,6 +52,7 @@ class APIError(FutureAGIError):
 class BadRequestError(APIError): ...
 class AuthenticationError(APIError): ...
 class PermissionDeniedError(APIError): ...
+class PaymentRequiredError(APIError): ...  # feature not on the organization's plan
 class NotFoundError(APIError): ...
 class ConflictError(APIError): ...
 class UnprocessableEntityError(APIError): ...
@@ -49,6 +63,7 @@ class InternalServerError(APIError): ...
 _BY_STATUS: dict[int, type[APIError]] = {
     400: BadRequestError,
     401: AuthenticationError,
+    402: PaymentRequiredError,
     403: PermissionDeniedError,
     404: NotFoundError,
     409: ConflictError,

@@ -19,8 +19,11 @@ from ._errors import (
     FutureAGIError,
     InternalServerError,
     NotFoundError,
+    PaymentRequiredError,
     PermissionDeniedError,
     RateLimitError,
+    ResponseShapeWarning,
+    ResponseValidationError,
     UnprocessableEntityError,
 )
 from ._generated import models
@@ -38,8 +41,11 @@ __all__ = [
     "FutureAGIError",
     "InternalServerError",
     "NotFoundError",
+    "PaymentRequiredError",
     "PermissionDeniedError",
     "RateLimitError",
+    "ResponseShapeWarning",
+    "ResponseValidationError",
     "UnprocessableEntityError",
     "models",
 ]

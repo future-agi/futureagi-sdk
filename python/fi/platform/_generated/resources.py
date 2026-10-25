@@ -3,43 +3,415 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Dict, List, Literal
 
 from .._pagination import AsyncPager, SyncPager
 from .._stability import _stability
 from .._transport import AsyncTransport, Operation, SyncTransport
 from . import models
 
+OP_ACCOUNT_WHOAMI = Operation(**{'id': 'account.whoami', 'method': 'GET', 'path': '/accounts/user-info/', 'unwrap': None, 'pagination': None})
+OP_WORKSPACES_LIST = Operation(**{'id': 'workspaces.list', 'method': 'GET', 'path': '/accounts/workspaces/', 'unwrap': 'result', 'pagination': None})
+OP_WORKSPACES_GET = Operation(**{'id': 'workspaces.get', 'method': 'GET', 'path': '/accounts/workspaces/{workspace_id}/', 'unwrap': 'result', 'pagination': None})
 OP_DATASETS_LIST = Operation(**{'id': 'datasets.list', 'method': 'GET', 'path': '/model-hub/develops/get-datasets/', 'unwrap': 'result', 'pagination': {'page_param': 'page', 'size_param': 'page_size', 'first_page': 0, 'items': 'datasets', 'total_pages': 'total_pages'}})
-OP_DATASETS_CREATE = Operation(**{'id': 'datasets.create', 'method': 'POST', 'path': '/model-hub/develops/create-empty-dataset/', 'unwrap': 'result', 'pagination': None})
 OP_DATASETS_GET = Operation(**{'id': 'datasets.get', 'method': 'GET', 'path': '/model-hub/develops/{dataset_id}/get-dataset-table/', 'unwrap': 'result', 'pagination': None})
-OP_DATASETS_COLUMNS_ADD = Operation(**{'id': 'datasets.columns.add', 'method': 'POST', 'path': '/model-hub/develops/{dataset_id}/add_columns/', 'unwrap': 'result', 'pagination': None})
+OP_DATASETS_CREATE = Operation(**{'id': 'datasets.create', 'method': 'POST', 'path': '/model-hub/develops/create-empty-dataset/', 'unwrap': 'result', 'pagination': None})
 OP_DATASETS_ROWS_ADD = Operation(**{'id': 'datasets.rows.add', 'method': 'POST', 'path': '/model-hub/develops/{dataset_id}/add_rows/', 'unwrap': 'result', 'pagination': None})
+OP_DATASETS_EVALS_RUN = Operation(**{'id': 'datasets.evals.run', 'method': 'POST', 'path': '/model-hub/develops/{dataset_id}/start_evals_process/', 'unwrap': 'result', 'pagination': None})
+OP_DATASETS_COLUMNS_ADD = Operation(**{'id': 'datasets.columns.add', 'method': 'POST', 'path': '/model-hub/develops/{dataset_id}/add_columns/', 'unwrap': 'result', 'pagination': None})
+OP_DATASETS_COLUMNS_ADD_STATIC = Operation(**{'id': 'datasets.columns.add_static', 'method': 'POST', 'path': '/model-hub/develops/{dataset_id}/add_static_column/', 'unwrap': 'result', 'pagination': None})
+OP_DATASETS_COLUMNS_RENAME = Operation(**{'id': 'datasets.columns.rename', 'method': 'PUT', 'path': '/model-hub/develops/{dataset_id}/update_column_name/{column_id}/', 'unwrap': 'result', 'pagination': None})
+OP_DATASETS_EVALS_ADD = Operation(**{'id': 'datasets.evals.add', 'method': 'POST', 'path': '/model-hub/develops/{dataset_id}/add_user_eval/', 'unwrap': 'result', 'pagination': None})
+OP_DATASETS_EVALS_LIST = Operation(**{'id': 'datasets.evals.list', 'method': 'GET', 'path': '/model-hub/develops/{dataset_id}/get_evals_list/', 'unwrap': 'result', 'pagination': None})
+OP_DATASETS_PROMPTS_ADD = Operation(**{'id': 'datasets.prompts.add', 'method': 'POST', 'path': '/model-hub/develops/add_run_prompt_column/', 'unwrap': 'result', 'pagination': None})
+OP_DATASETS_PROMPTS_UPDATE = Operation(**{'id': 'datasets.prompts.update', 'method': 'POST', 'path': '/model-hub/develops/edit_run_prompt_column/', 'unwrap': 'result', 'pagination': None})
+OP_DATASETS_PROMPTS_RUN = Operation(**{'id': 'datasets.prompts.run', 'method': 'POST', 'path': '/model-hub/run-prompt-for-rows/', 'unwrap': 'result', 'pagination': None})
+OP_DATASETS_PROMPTS_STATS = Operation(**{'id': 'datasets.prompts.stats', 'method': 'GET', 'path': '/model-hub/dataset/{dataset_id}/run-prompt-stats/', 'unwrap': 'result', 'pagination': None})
+OP_DATASETS_CELLS_UPDATE = Operation(**{'id': 'datasets.cells.update', 'method': 'POST', 'path': '/model-hub/develops/{dataset_id}/update_cell_value/', 'unwrap': 'result', 'pagination': None})
 OP_DATASETS_DELETE = Operation(**{'id': 'datasets.delete', 'method': 'DELETE', 'path': '/model-hub/develops/delete_dataset/', 'unwrap': 'result', 'pagination': None})
+OP_PROMPTS_LIST = Operation(**{'id': 'prompts.list', 'method': 'GET', 'path': '/model-hub/prompt-templates/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_PROMPTS_GET = Operation(**{'id': 'prompts.get', 'method': 'GET', 'path': '/model-hub/prompt-templates/{id}/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_VERSIONS_LIST = Operation(**{'id': 'prompts.versions.list', 'method': 'GET', 'path': '/model-hub/prompt-templates/{id}/versions/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_PROMPTS_CREATE = Operation(**{'id': 'prompts.create', 'method': 'POST', 'path': '/model-hub/prompt-templates/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_UPDATE = Operation(**{'id': 'prompts.update', 'method': 'PATCH', 'path': '/model-hub/prompt-templates/{id}/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_RUN = Operation(**{'id': 'prompts.run', 'method': 'POST', 'path': '/model-hub/prompt-templates/{id}/run_template/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_RUN_STATUS = Operation(**{'id': 'prompts.run_status', 'method': 'GET', 'path': '/model-hub/prompt-templates/{id}/get-run-status/', 'unwrap': 'result', 'pagination': None})
+OP_EVALS_TEMPLATES_LIST = Operation(**{'id': 'evals.templates.list', 'method': 'POST', 'path': '/model-hub/eval-templates/list/', 'unwrap': 'result', 'pagination': None})
+OP_EVALS_TEMPLATES_GET = Operation(**{'id': 'evals.templates.get', 'method': 'GET', 'path': '/model-hub/eval-templates/{template_id}/detail/', 'unwrap': 'result', 'pagination': None})
+OP_EVALS_TEMPLATES_CREATE = Operation(**{'id': 'evals.templates.create', 'method': 'POST', 'path': '/model-hub/eval-templates/create-v2/', 'unwrap': 'result', 'pagination': None})
+OP_EVALS_TEMPLATES_UPDATE = Operation(**{'id': 'evals.templates.update', 'method': 'PUT', 'path': '/model-hub/eval-templates/{template_id}/update/', 'unwrap': 'result', 'pagination': None})
+OP_EVALS_GROUPS_LIST = Operation(**{'id': 'evals.groups.list', 'method': 'GET', 'path': '/model-hub/eval-groups/', 'unwrap': None, 'pagination': None})
+OP_EVALS_GROUPS_GET = Operation(**{'id': 'evals.groups.get', 'method': 'GET', 'path': '/model-hub/eval-groups/{id}/', 'unwrap': None, 'pagination': None})
+OP_EVALS_TEST = Operation(**{'id': 'evals.test', 'method': 'POST', 'path': '/model-hub/test-evaluation/', 'unwrap': 'result', 'pagination': None})
+OP_PROJECTS_LIST = Operation(**{'id': 'projects.list', 'method': 'GET', 'path': '/tracer/project/', 'unwrap': None, 'pagination': None})
+OP_PROJECTS_GET = Operation(**{'id': 'projects.get', 'method': 'GET', 'path': '/tracer/project/{id}/', 'unwrap': 'result', 'pagination': None})
+OP_TRACES_LIST = Operation(**{'id': 'traces.list', 'method': 'GET', 'path': '/tracer/trace/list_traces_of_session/', 'unwrap': 'result', 'pagination': None})
+OP_TRACES_GET = Operation(**{'id': 'traces.get', 'method': 'GET', 'path': '/tracer/trace/{id}/', 'unwrap': 'result', 'pagination': None})
+OP_SPANS_LIST = Operation(**{'id': 'spans.list', 'method': 'GET', 'path': '/tracer/observation-span/list_spans_observe/', 'unwrap': 'result', 'pagination': None})
+OP_SPANS_GET = Operation(**{'id': 'spans.get', 'method': 'GET', 'path': '/tracer/observation-span/{id}/', 'unwrap': 'result', 'pagination': None})
+OP_SESSIONS_LIST = Operation(**{'id': 'sessions.list', 'method': 'GET', 'path': '/tracer/trace-session/list_sessions/', 'unwrap': 'result', 'pagination': None})
+OP_SESSIONS_GET = Operation(**{'id': 'sessions.get', 'method': 'GET', 'path': '/tracer/trace-session/{id}/query/', 'unwrap': 'result', 'pagination': None})
+OP_TRACES_ERROR_ANALYSIS = Operation(**{'id': 'traces.error_analysis', 'method': 'GET', 'path': '/tracer/trace-error-analysis/{trace_id}/', 'unwrap': 'result', 'pagination': None})
+OP_EVALS_TASKS_LIST = Operation(**{'id': 'evals.tasks.list', 'method': 'GET', 'path': '/tracer/eval-task/list_eval_tasks/', 'unwrap': 'result', 'pagination': None})
+OP_EVALS_TASKS_GET = Operation(**{'id': 'evals.tasks.get', 'method': 'GET', 'path': '/tracer/eval-task/{id}/', 'unwrap': None, 'pagination': None})
+OP_EVALS_TASKS_CREATE = Operation(**{'id': 'evals.tasks.create', 'method': 'POST', 'path': '/tracer/eval-task/', 'unwrap': 'result', 'pagination': None})
+OP_EVALS_TASKS_UPDATE = Operation(**{'id': 'evals.tasks.update', 'method': 'PATCH', 'path': '/tracer/eval-task/update_eval_task/', 'unwrap': 'result', 'pagination': None})
+OP_EVALS_CONFIGS_LIST = Operation(**{'id': 'evals.configs.list', 'method': 'GET', 'path': '/tracer/custom-eval-config/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_EVALS_CONFIGS_CREATE = Operation(**{'id': 'evals.configs.create', 'method': 'POST', 'path': '/tracer/custom-eval-config/', 'unwrap': None, 'pagination': None})
+OP_TRACES_PROPERTIES_LIST = Operation(**{'id': 'traces.properties.list', 'method': 'GET', 'path': '/tracer/dashboard/metrics/', 'unwrap': 'result', 'pagination': None})
+OP_ALERTS_LOGS_LIST = Operation(**{'id': 'alerts.logs.list', 'method': 'GET', 'path': '/tracer/user-alert-logs/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_ALERTS_RULES_LIST = Operation(**{'id': 'alerts.rules.list', 'method': 'GET', 'path': '/tracer/user-alerts/list_monitors/', 'unwrap': 'result', 'pagination': None})
+OP_EVALS_TASKS_PAUSE = Operation(**{'id': 'evals.tasks.pause', 'method': 'POST', 'path': '/tracer/eval-task/pause_eval_task/', 'unwrap': 'result', 'pagination': None})
+OP_EVALS_TASKS_RESUME = Operation(**{'id': 'evals.tasks.resume', 'method': 'POST', 'path': '/tracer/eval-task/unpause_eval_task/', 'unwrap': 'result', 'pagination': None})
+OP_ERROR_CLUSTERS_LIST = Operation(**{'id': 'error_clusters.list', 'method': 'GET', 'path': '/tracer/feed/issues/', 'unwrap': 'result', 'pagination': None})
+OP_ERROR_CLUSTERS_GET = Operation(**{'id': 'error_clusters.get', 'method': 'GET', 'path': '/tracer/feed/issues/{cluster_id}/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_LIST = Operation(**{'id': 'annotation_queues.list', 'method': 'GET', 'path': '/model-hub/annotation-queues/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_ANNOTATION_QUEUES_GET = Operation(**{'id': 'annotation_queues.get', 'method': 'GET', 'path': '/model-hub/annotation-queues/{id}/', 'unwrap': None, 'pagination': None})
+OP_ANNOTATION_QUEUES_ITEMS_LIST = Operation(**{'id': 'annotation_queues.items.list', 'method': 'GET', 'path': '/model-hub/annotation-queues/{queue_id}/items/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_ANNOTATION_QUEUES_ITEMS_ANNOTATE_DETAIL = Operation(**{'id': 'annotation_queues.items.annotate_detail', 'method': 'GET', 'path': '/model-hub/annotation-queues/{queue_id}/items/{id}/annotate-detail/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_ITEMS_SUBMIT = Operation(**{'id': 'annotation_queues.items.submit', 'method': 'POST', 'path': '/model-hub/annotation-queues/{queue_id}/items/{id}/annotations/submit/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_ITEMS_COMPLETE = Operation(**{'id': 'annotation_queues.items.complete', 'method': 'POST', 'path': '/model-hub/annotation-queues/{queue_id}/items/{id}/complete/', 'unwrap': 'result', 'pagination': None})
+OP_EXPERIMENTS_LIST = Operation(**{'id': 'experiments.list', 'method': 'GET', 'path': '/model-hub/experiments/v2/list/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_EXPERIMENTS_GET = Operation(**{'id': 'experiments.get', 'method': 'GET', 'path': '/model-hub/experiments/v2/{experiment_id}/', 'unwrap': 'result', 'pagination': None})
+OP_EXPERIMENTS_CREATE = Operation(**{'id': 'experiments.create', 'method': 'POST', 'path': '/model-hub/experiments/v2/', 'unwrap': 'result', 'pagination': None})
+OP_OPTIMIZATIONS_LIST = Operation(**{'id': 'optimizations.list', 'method': 'GET', 'path': '/model-hub/dataset-optimization/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'table', 'total_items': 'metadata.total_rows'}})
+OP_OPTIMIZATIONS_GET = Operation(**{'id': 'optimizations.get', 'method': 'GET', 'path': '/model-hub/dataset-optimization/{id}/', 'unwrap': 'result', 'pagination': None})
+OP_OPTIMIZATIONS_CREATE = Operation(**{'id': 'optimizations.create', 'method': 'POST', 'path': '/model-hub/dataset-optimization/', 'unwrap': None, 'pagination': None})
+OP_AGENTS_LIST = Operation(**{'id': 'agents.list', 'method': 'GET', 'path': '/simulate/agent-definitions/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_AGENTS_GET = Operation(**{'id': 'agents.get', 'method': 'GET', 'path': '/simulate/agent-definitions/{agent_id}/', 'unwrap': None, 'pagination': None})
+OP_SIMULATION_SCENARIOS_LIST = Operation(**{'id': 'simulation.scenarios.list', 'method': 'GET', 'path': '/simulate/scenarios/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_SIMULATION_EXECUTIONS_LIST = Operation(**{'id': 'simulation.executions.list', 'method': 'GET', 'path': '/simulate/api/test-executions/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_SIMULATION_EXECUTIONS_GET = Operation(**{'id': 'simulation.executions.get', 'method': 'GET', 'path': '/simulate/test-executions/{test_execution_id}/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_SIMULATION_TESTS_RUN = Operation(**{'id': 'simulation.tests.run', 'method': 'POST', 'path': '/simulate/run-tests/{run_test_id}/execute/', 'unwrap': None, 'pagination': None})
+OP_SIMULATION_SCENARIOS_GET = Operation(**{'id': 'simulation.scenarios.get', 'method': 'GET', 'path': '/simulate/scenarios/{scenario_id}/', 'unwrap': None, 'pagination': None})
+OP_SIMULATION_EXECUTIONS_ANALYTICS = Operation(**{'id': 'simulation.executions.analytics', 'method': 'GET', 'path': '/simulate/test-executions/{test_execution_id}/analytics/', 'unwrap': None, 'pagination': None})
+OP_AGENTS_CREATE = Operation(**{'id': 'agents.create', 'method': 'POST', 'path': '/simulate/agent-definitions/create/', 'unwrap': None, 'pagination': None})
+OP_AGENTS_UPDATE = Operation(**{'id': 'agents.update', 'method': 'PUT', 'path': '/simulate/agent-definitions/{agent_id}/edit/', 'unwrap': None, 'pagination': None})
+OP_AGENTS_VERSIONS_CREATE = Operation(**{'id': 'agents.versions.create', 'method': 'POST', 'path': '/simulate/agent-definitions/{agent_id}/versions/create/', 'unwrap': None, 'pagination': None})
+OP_SIMULATION_SCENARIOS_CREATE = Operation(**{'id': 'simulation.scenarios.create', 'method': 'POST', 'path': '/simulate/scenarios/create/', 'unwrap': None, 'pagination': None})
+OP_SIMULATION_SCENARIOS_UPDATE = Operation(**{'id': 'simulation.scenarios.update', 'method': 'PUT', 'path': '/simulate/scenarios/{scenario_id}/edit/', 'unwrap': None, 'pagination': None})
+OP_SIMULATION_TESTS_LIST = Operation(**{'id': 'simulation.tests.list', 'method': 'GET', 'path': '/simulate/run-tests/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_SIMULATION_TESTS_GET = Operation(**{'id': 'simulation.tests.get', 'method': 'GET', 'path': '/simulate/run-tests/{run_test_id}/', 'unwrap': None, 'pagination': None})
+OP_SIMULATION_TESTS_CREATE = Operation(**{'id': 'simulation.tests.create', 'method': 'POST', 'path': '/simulate/run-tests/create/', 'unwrap': None, 'pagination': None})
+OP_GATEWAY_LIST = Operation(**{'id': 'gateway.list', 'method': 'GET', 'path': '/agentcc/gateways/', 'unwrap': 'result', 'pagination': None})
+OP_GATEWAY_CONFIG = Operation(**{'id': 'gateway.config', 'method': 'GET', 'path': '/agentcc/gateways/{id}/config/', 'unwrap': 'result', 'pagination': None})
+OP_GATEWAY_REQUEST_LOGS_LIST = Operation(**{'id': 'gateway.request_logs.list', 'method': 'GET', 'path': '/agentcc/request-logs/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_GATEWAY_GUARDRAIL_RULES_LIST = Operation(**{'id': 'gateway.guardrail_rules.list', 'method': 'GET', 'path': '/agentcc/analytics/guardrail-rules/', 'unwrap': None, 'pagination': None})
+OP_GATEWAY_SESSIONS_LIST = Operation(**{'id': 'gateway.sessions.list', 'method': 'GET', 'path': '/agentcc/sessions/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_GATEWAY_SESSIONS_REQUESTS = Operation(**{'id': 'gateway.sessions.requests', 'method': 'GET', 'path': '/agentcc/sessions/{id}/requests/', 'unwrap': None, 'pagination': None})
+OP_GATEWAY_ANALYTICS = Operation(**{'id': 'gateway.analytics', 'method': 'GET', 'path': '/agentcc/analytics/overview/', 'unwrap': None, 'pagination': None})
+OP_KNOWLEDGE_BASES_LIST = Operation(**{'id': 'knowledge_bases.list', 'method': 'GET', 'path': '/model-hub/kb/', 'unwrap': 'result', 'pagination': None})
+OP_KNOWLEDGE_BASES_GET = Operation(**{'id': 'knowledge_bases.get', 'method': 'GET', 'path': '/model-hub/kb/{id}/', 'unwrap': 'result', 'pagination': None})
+OP_DASHBOARDS_LIST = Operation(**{'id': 'dashboards.list', 'method': 'GET', 'path': '/tracer/dashboard/', 'unwrap': None, 'pagination': None})
+OP_DASHBOARDS_GET = Operation(**{'id': 'dashboards.get', 'method': 'GET', 'path': '/tracer/dashboard/{id}/', 'unwrap': None, 'pagination': None})
+OP_DASHBOARDS_CREATE = Operation(**{'id': 'dashboards.create', 'method': 'POST', 'path': '/tracer/dashboard/', 'unwrap': None, 'pagination': None})
+OP_DASHBOARDS_UPDATE = Operation(**{'id': 'dashboards.update', 'method': 'PATCH', 'path': '/tracer/dashboard/{id}/', 'unwrap': None, 'pagination': None})
+OP_DASHBOARDS_WIDGETS_LIST = Operation(**{'id': 'dashboards.widgets.list', 'method': 'GET', 'path': '/tracer/dashboard/{dashboard_pk}/widgets/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_DASHBOARDS_WIDGETS_GET = Operation(**{'id': 'dashboards.widgets.get', 'method': 'GET', 'path': '/tracer/dashboard/{dashboard_pk}/widgets/{id}/', 'unwrap': None, 'pagination': None})
+OP_DASHBOARDS_WIDGETS_CREATE = Operation(**{'id': 'dashboards.widgets.create', 'method': 'POST', 'path': '/tracer/dashboard/{dashboard_pk}/widgets/', 'unwrap': None, 'pagination': None})
+OP_DASHBOARDS_WIDGETS_UPDATE = Operation(**{'id': 'dashboards.widgets.update', 'method': 'PATCH', 'path': '/tracer/dashboard/{dashboard_pk}/widgets/{id}/', 'unwrap': None, 'pagination': None})
+OP_DASHBOARDS_WIDGETS_QUERY = Operation(**{'id': 'dashboards.widgets.query', 'method': 'POST', 'path': '/tracer/dashboard/{dashboard_pk}/widgets/{id}/query/', 'unwrap': 'result', 'pagination': None})
+OP_DASHBOARDS_DELETE = Operation(**{'id': 'dashboards.delete', 'method': 'DELETE', 'path': '/tracer/dashboard/{id}/', 'unwrap': None, 'pagination': None})
+OP_DASHBOARDS_QUERY = Operation(**{'id': 'dashboards.query', 'method': 'POST', 'path': '/tracer/dashboard/query/', 'unwrap': 'result', 'pagination': None})
+OP_DASHBOARDS_METRICS_LIST = Operation(**{'id': 'dashboards.metrics.list', 'method': 'GET', 'path': '/tracer/dashboard/metrics/', 'unwrap': 'result', 'pagination': None})
+OP_DASHBOARDS_FILTER_VALUES = Operation(**{'id': 'dashboards.filter_values', 'method': 'GET', 'path': '/tracer/dashboard/filter_values/', 'unwrap': 'result', 'pagination': None})
+OP_USAGE_OVERVIEW = Operation(**{'id': 'usage.overview', 'method': 'GET', 'path': '/usage/v2/usage-overview/', 'unwrap': 'result', 'pagination': None})
 
+
+
+class AgentsVersionsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def create(self, agent_id: str, *, agent_name: str | None = None, agent_type: Literal['voice', 'text'] | None = None, description: str | None = None, provider: str | None = None, api_key: str | None = None, assistant_id: str | None = None, authentication_method: Literal['api_key'] | None = None, language: str | None = None, languages: List[str] | None = None, contact_number: str | None = None, inbound: bool | None = None, target_speaks_first: bool | None = None, knowledge_base: str | None = None, model: str | None = None, model_details: Dict[str, Any] | None = None, livekit_url: str | None = None, livekit_api_key: str | None = None, livekit_api_secret: str | None = None, livekit_agent_name: str | None = None, livekit_config_json: Dict[str, Any] | None = None, livekit_max_concurrency: int | None = None, commit_message: str | None = None, observability_enabled: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.AgentVersionCreateResponse:
+        """Snapshot agent configuration into a new version and activate it. Can also update agent configuration. Use the returned version when creating a simulation test; existing tests may remain pinned to an older version.
+
+        POST /simulate/agent-definitions/{agent_id}/versions/create/
+        """
+        path = {'agent_id': agent_id}
+        query = {**(extra_query or {})}
+        body = {'agent_name': agent_name, 'agent_type': agent_type, 'description': description, 'provider': provider, 'api_key': api_key, 'assistant_id': assistant_id, 'authentication_method': authentication_method, 'language': language, 'languages': languages, 'contact_number': contact_number, 'inbound': inbound, 'target_speaks_first': target_speaks_first, 'knowledge_base': knowledge_base, 'model': model, 'model_details': model_details, 'livekit_url': livekit_url, 'livekit_api_key': livekit_api_key, 'livekit_api_secret': livekit_api_secret, 'livekit_agent_name': livekit_agent_name, 'livekit_config_json': livekit_config_json, 'livekit_max_concurrency': livekit_max_concurrency, 'commit_message': commit_message, 'observability_enabled': observability_enabled, **(extra_body or {})}
+        return self._t.call(OP_AGENTS_VERSIONS_CREATE, path=path, query=query, body=body, model=models.AgentVersionCreateResponse)
+
+
+class AlertsLogsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.UserAlertMonitorLog]:
+        """List alerts that have fired in numbered pages. Use this to find out what the platform has already flagged before digging into traces or error clusters.
+
+        GET /tracer/user-alert-logs/
+        """
+        path = None
+        query = {'limit': limit, **(extra_query or {})}
+        return self._t.paginate(OP_ALERTS_LOGS_LIST, path=path, query=query, model=models.UserAlertMonitorLog)
+
+
+class AlertsRulesResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def list(self, *, page_number: int | None = None, page_size: int | None = None, search_text: str | None = None, project_id: List[str] | None = None, status: List[Literal['triggered', 'healthy']] | None = None, metric_type: List[str] | None = None, sort_by: str | None = None, sort_direction: Literal['asc', 'desc'] | None = None, extra_query: Dict[str, Any] | None = None) -> models.UserAlertMonitorListResult:
+        """List the configured alert monitors - what each one watches, its threshold and its project. Pair with list_fired_alerts to explain why an alert fired, or to see that no monitor covers a condition the user expected to be caught.
+
+        GET /tracer/user-alerts/list_monitors/
+        """
+        path = None
+        query = {'page_number': page_number, 'page_size': page_size, 'search_text': search_text, 'project_id': project_id, 'status': status, 'metric_type': metric_type, 'sort_by': sort_by, 'sort_direction': sort_direction, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_ALERTS_RULES_LIST, path=path, query=query, body=body, model=models.UserAlertMonitorListResult)
+
+
+class AnnotationQueuesItemsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def annotate_detail(self, queue_id: str, id: str, *, annotator_id: str | None = None, include_completed: bool | None = None, view_mode: str | None = None, review_status: str | None = None, exclude_review_status: str | None = None, include_all_annotations: bool | None = None, reserve: bool | None = None, extra_query: Dict[str, Any] | None = None) -> models.QueueAnnotateDetailResult:
+        """Return everything needed to annotate one queue item; reserve=true acquires an editing reservation for the caller. Includes its source content, the queue instructions, every label with its settings (the allowed values a submitted value must match), any annotations already recorded, and the next/previous item ids. Call this before submit_annotation; the label settings are not available anywhere else.
+
+        GET /model-hub/annotation-queues/{queue_id}/items/{id}/annotate-detail/
+        """
+        path = {'queue_id': queue_id, 'id': id}
+        query = {'annotator_id': annotator_id, 'include_completed': include_completed, 'view_mode': view_mode, 'review_status': review_status, 'exclude_review_status': exclude_review_status, 'include_all_annotations': include_all_annotations, 'reserve': reserve, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_ANNOTATION_QUEUES_ITEMS_ANNOTATE_DETAIL, path=path, query=query, body=body, model=models.QueueAnnotateDetailResult)
+
+    def complete(self, queue_id: str, id: str, *, exclude: List[str] | None = None, exclude_review_status: str | None = None, include_completed: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueNavigationResult:
+        """Mark an annotated queue item complete and return the next item to work on. Required to finish an item - submit_annotation alone leaves it in_progress and the queue never closes.
+
+        POST /model-hub/annotation-queues/{queue_id}/items/{id}/complete/
+        """
+        path = {'queue_id': queue_id, 'id': id}
+        query = {**(extra_query or {})}
+        body = {'exclude': exclude, 'exclude_review_status': exclude_review_status, 'include_completed': include_completed, **(extra_body or {})}
+        return self._t.call(OP_ANNOTATION_QUEUES_ITEMS_COMPLETE, path=path, query=query, body=body, model=models.QueueNavigationResult)
+
+    def list(self, queue_id: str, *, limit: int | None = None, status: List[str] | None = None, source_type: List[str] | None = None, assigned_to: str | None = None, review_status: str | None = None, ordering: Literal['created_at', '-created_at'] | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.QueueItem]:
+        """List items belonging to an annotation queue.
+
+        GET /model-hub/annotation-queues/{queue_id}/items/
+        """
+        path = {'queue_id': queue_id}
+        query = {'limit': limit, 'status': status, 'source_type': source_type, 'assigned_to': assigned_to, 'review_status': review_status, 'ordering': ordering, **(extra_query or {})}
+        return self._t.paginate(OP_ANNOTATION_QUEUES_ITEMS_LIST, path=path, query=query, model=models.QueueItem)
+
+    def submit(self, queue_id: str, id: str, *, annotations: List[Dict[str, Any]], notes: str | None = None, item_notes: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueSubmitAnnotationsResult:
+        """Submit annotation values for an item in an annotation queue. The value shape must match the label's settings from get_annotation_item_detail. Submitting moves the item to in_progress only; call complete_annotation_item to finish it.
+
+        POST /model-hub/annotation-queues/{queue_id}/items/{id}/annotations/submit/
+        """
+        path = {'queue_id': queue_id, 'id': id}
+        query = {**(extra_query or {})}
+        body = {'annotations': annotations, 'notes': notes, 'item_notes': item_notes, **(extra_body or {})}
+        return self._t.call(OP_ANNOTATION_QUEUES_ITEMS_SUBMIT, path=path, query=query, body=body, model=models.QueueSubmitAnnotationsResult)
+
+
+class DashboardsMetricsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def list(self, *, workflow: Literal['observability', 'dataset', 'simulation'] | None = None, project_ids: str | None = None, agent_definition_id: str | None = None, per_eval_config: bool | None = None, exclude_custom_attributes: bool | None = None, search: str | None = None, category: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None = None, role: Literal['metric', 'dimension'] | None = None, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'simulation', 'both', 'all'] | None = None, page: int | None = None, page_size: int | None = None, cursor_mode: bool | None = None, cursor: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.DashboardMetricsCatalogResult:
+        """List the metrics available to dashboard queries across traces, datasets, and simulations.
+
+        GET /tracer/dashboard/metrics/
+        """
+        path = None
+        query = {'workflow': workflow, 'project_ids': project_ids, 'agent_definition_id': agent_definition_id, 'per_eval_config': per_eval_config, 'exclude_custom_attributes': exclude_custom_attributes, 'search': search, 'category': category, 'role': role, 'source': source, 'page': page, 'page_size': page_size, 'cursor_mode': cursor_mode, 'cursor': cursor, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_DASHBOARDS_METRICS_LIST, path=path, query=query, body=body, model=models.DashboardMetricsCatalogResult)
+
+
+class DashboardsWidgetsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def create(self, dashboard_pk: str, *, name: str | None = None, description: str | None = None, position: int | None = None, width: int | None = None, height: int | None = None, query_config: Dict[str, Any] | None = None, chart_config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DashboardWidget:
+        """Add a widget to a dashboard. query_config uses the query_dashboard_metrics request shape (time_range plus metrics); discover metric names with list_dashboard_metrics.
+
+        POST /tracer/dashboard/{dashboard_pk}/widgets/
+        """
+        path = {'dashboard_pk': dashboard_pk}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, 'position': position, 'width': width, 'height': height, 'query_config': query_config, 'chart_config': chart_config, **(extra_body or {})}
+        return self._t.call(OP_DASHBOARDS_WIDGETS_CREATE, path=path, query=query, body=body, model=models.DashboardWidget)
+
+    def get(self, dashboard_pk: str, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.DashboardWidget:
+        """Return a dashboard widget, including its query_config and chart_config.
+
+        GET /tracer/dashboard/{dashboard_pk}/widgets/{id}/
+        """
+        path = {'dashboard_pk': dashboard_pk, 'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_DASHBOARDS_WIDGETS_GET, path=path, query=query, body=body, model=models.DashboardWidget)
+
+    def list(self, dashboard_pk: str, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.DashboardWidget]:
+        """List the widgets on a dashboard.
+
+        GET /tracer/dashboard/{dashboard_pk}/widgets/
+        """
+        path = {'dashboard_pk': dashboard_pk}
+        query = {'limit': limit, **(extra_query or {})}
+        return self._t.paginate(OP_DASHBOARDS_WIDGETS_LIST, path=path, query=query, model=models.DashboardWidget)
+
+    def query(self, dashboard_pk: str, id: str, *, allow_sampled: bool | None = None, refresh: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DashboardQueryResult:
+        """Execute a saved widget's query and return its chart data.
+
+        POST /tracer/dashboard/{dashboard_pk}/widgets/{id}/query/
+        """
+        path = {'dashboard_pk': dashboard_pk, 'id': id}
+        query = {'refresh': refresh, **(extra_query or {})}
+        body = {'allow_sampled': allow_sampled, **(extra_body or {})}
+        return self._t.call(OP_DASHBOARDS_WIDGETS_QUERY, path=path, query=query, body=body, model=models.DashboardQueryResult)
+
+    def update(self, dashboard_pk: str, id: str, *, name: str | None = None, description: str | None = None, position: int | None = None, width: int | None = None, height: int | None = None, query_config: Dict[str, Any] | None = None, chart_config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DashboardWidget:
+        """Update selected fields on a dashboard widget, such as its query_config, chart_config, or layout.
+
+        PATCH /tracer/dashboard/{dashboard_pk}/widgets/{id}/
+        """
+        path = {'dashboard_pk': dashboard_pk, 'id': id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, 'position': position, 'width': width, 'height': height, 'query_config': query_config, 'chart_config': chart_config, **(extra_body or {})}
+        return self._t.call(OP_DASHBOARDS_WIDGETS_UPDATE, path=path, query=query, body=body, model=models.DashboardWidget)
+
+
+class DatasetsCellsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def update(self, dataset_id: str, *, row_id: str, column_id: str, new_value: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Set the value of a single dataset cell. Use this to correct one value; add_dataset_rows only appends and cannot edit an existing row.
+
+        POST /model-hub/develops/{dataset_id}/update_cell_value/
+        """
+        path = {'dataset_id': dataset_id}
+        query = {**(extra_query or {})}
+        body = {'row_id': row_id, 'column_id': column_id, 'new_value': new_value, **(extra_body or {})}
+        return self._t.call(OP_DATASETS_CELLS_UPDATE, path=path, query=query, body=body, model=None)
 
 
 class DatasetsColumnsResource:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
 
-    def add(self, dataset_id: str, *, new_columns_data: list[dict[str, Any]]) -> models.DatasetColumnsMutationResult:
+    def add(self, dataset_id: str, *, new_columns_data: List[Dict[str, Any]], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DatasetColumnsMutationResult:
         """Add columns to a dataset.
 
         POST /model-hub/develops/{dataset_id}/add_columns/
         """
         path = {'dataset_id': dataset_id}
-        query = None
-        body = {'new_columns_data': new_columns_data}
+        query = {**(extra_query or {})}
+        body = {'new_columns_data': new_columns_data, **(extra_body or {})}
         return self._t.call(OP_DATASETS_COLUMNS_ADD, path=path, query=query, body=body, model=models.DatasetColumnsMutationResult)
+
+    def add_static(self, dataset_id: str, *, new_column_name: str, column_type: str, source: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Create a named static input column before adding dataset rows. Supply column_type using the API schema.
+
+        POST /model-hub/develops/{dataset_id}/add_static_column/
+        """
+        path = {'dataset_id': dataset_id}
+        query = {**(extra_query or {})}
+        body = {'new_column_name': new_column_name, 'column_type': column_type, 'source': source, **(extra_body or {})}
+        return self._t.call(OP_DATASETS_COLUMNS_ADD_STATIC, path=path, query=query, body=body, model=None)
+
+    def rename(self, dataset_id: str, column_id: str, *, new_column_name: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Rename an existing dataset column. This does not change its type or cell values.
+
+        PUT /model-hub/develops/{dataset_id}/update_column_name/{column_id}/
+        """
+        path = {'dataset_id': dataset_id, 'column_id': column_id}
+        query = {**(extra_query or {})}
+        body = {'new_column_name': new_column_name, **(extra_body or {})}
+        return self._t.call(OP_DATASETS_COLUMNS_RENAME, path=path, query=query, body=body, model=None)
+
+
+class DatasetsEvalsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def add(self, dataset_id: str, *, name: str, template_id: str, config: Dict[str, Any], kb_id: str | None = None, error_localizer: bool | None = None, model: str | None = None, eval_type: str | None = None, run: bool | None = None, save_as_template: bool | None = None, experiment_id: str | None = None, composite_weight_overrides: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Attach an evaluation template to a dataset with a lowercase name (letters, digits, hyphens or underscores; no spaces) and config.mapping column mappings. Set run=false for setup only; run=true marks it for processing. Use list_dataset_evaluations to discover the attached evaluation ID.
+
+        POST /model-hub/develops/{dataset_id}/add_user_eval/
+        """
+        path = {'dataset_id': dataset_id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'template_id': template_id, 'config': config, 'kb_id': kb_id, 'error_localizer': error_localizer, 'model': model, 'eval_type': eval_type, 'run': run, 'save_as_template': save_as_template, 'experiment_id': experiment_id, 'composite_weight_overrides': composite_weight_overrides, **(extra_body or {})}
+        return self._t.call(OP_DATASETS_EVALS_ADD, path=path, query=query, body=body, model=None)
+
+    def list(self, dataset_id: str, *, eval_type: str | None = None, search_text: str | None = None, eval_categories: str | None = None, eval_tags: List[str] | None = None, use_cases: List[str] | None = None, experiment_id: str | None = None, order: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.EvalListResult:
+        """List evaluations attached to a dataset by supplying eval_type=user, including their IDs, configuration and status. These IDs, not template IDs, are used by run_dataset_evals. Without eval_type=user, the API lists available evaluation templates.
+
+        GET /model-hub/develops/{dataset_id}/get_evals_list/
+        """
+        path = {'dataset_id': dataset_id}
+        query = {'eval_type': eval_type, 'search_text': search_text, 'eval_categories': eval_categories, 'eval_tags': eval_tags, 'use_cases': use_cases, 'experiment_id': experiment_id, 'order': order, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_DATASETS_EVALS_LIST, path=path, query=query, body=body, model=models.EvalListResult)
+
+    def run(self, dataset_id: str, *, user_eval_ids: List[str], experiment_id: str | None = None, failed_only: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Start the configured evaluations for a dataset.
+
+        POST /model-hub/develops/{dataset_id}/start_evals_process/
+        """
+        path = {'dataset_id': dataset_id}
+        query = {**(extra_query or {})}
+        body = {'user_eval_ids': user_eval_ids, 'experiment_id': experiment_id, 'failed_only': failed_only, **(extra_body or {})}
+        return self._t.call(OP_DATASETS_EVALS_RUN, path=path, query=query, body=body, model=None)
+
+
+class DatasetsPromptsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def add(self, *, dataset_id: str, name: str, config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Create a dataset prompt output column and immediately schedule processing of dataset rows. This can incur model usage charges. Supply dataset_id, name and config; this is separate from workbench run_prompt.
+
+        POST /model-hub/develops/add_run_prompt_column/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'dataset_id': dataset_id, 'name': name, 'config': config, **(extra_body or {})}
+        return self._t.call(OP_DATASETS_PROMPTS_ADD, path=path, query=query, body=body, model=None)
+
+    def run(self, *, run_prompt_ids: List[str], row_ids: List[str] | None = None, selected_all_rows: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.ModelHubSuccessMessageResult:
+        """Queue configured dataset prompts by run_prompt_ids. Supply row_ids for selected rows, or selected_all_rows=true for all rows; with selected_all_rows=true, row_ids are EXCLUDED. Poll get_dataset for cell results and status.
+
+        POST /model-hub/run-prompt-for-rows/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'run_prompt_ids': run_prompt_ids, 'row_ids': row_ids, 'selected_all_rows': selected_all_rows, **(extra_body or {})}
+        return self._t.call(OP_DATASETS_PROMPTS_RUN, path=path, query=query, body=body, model=models.ModelHubSuccessMessageResult)
+
+    def stats(self, dataset_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.DatasetRunPromptStatsResult:
+        """Return dataset prompt IDs and token, cost and timing statistics. This is not execution status; use get_dataset for cell outputs and status.
+
+        GET /model-hub/dataset/{dataset_id}/run-prompt-stats/
+        """
+        path = {'dataset_id': dataset_id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_DATASETS_PROMPTS_STATS, path=path, query=query, body=body, model=models.DatasetRunPromptStatsResult)
+
+    def update(self, *, dataset_id: str, column_id: str, name: str | None = None, config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Update a dataset prompt column using dataset_id, column_id and config. This can schedule processing and incur model usage charges.
+
+        POST /model-hub/develops/edit_run_prompt_column/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'dataset_id': dataset_id, 'column_id': column_id, 'name': name, 'config': config, **(extra_body or {})}
+        return self._t.call(OP_DATASETS_PROMPTS_UPDATE, path=path, query=query, body=body, model=None)
 
 
 class DatasetsRowsResource:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
 
-    def add(self, dataset_id: str, *, rows: list[dict[str, Any]]) -> str:
-        """Add rows to a dataset.
+    def add(self, dataset_id: str, *, rows: List[Dict[str, Any]], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Add rows to an existing dataset using cells with column_name and value. Column names must already exist in the dataset.
 
         .. beta:: this method may change without notice.
 
@@ -47,85 +419,1309 @@ class DatasetsRowsResource:
         """
         _stability('datasets.rows.add', 'beta')
         path = {'dataset_id': dataset_id}
-        query = None
-        body = {'rows': rows}
+        query = {**(extra_query or {})}
+        body = {'rows': rows, **(extra_body or {})}
         return self._t.call(OP_DATASETS_ROWS_ADD, path=path, query=query, body=body, model=None)
+
+
+class EvalsConfigsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def create(self, *, eval_template: str, project: str, name: str | None = None, config: Dict[str, Any] | None = None, mapping: Dict[str, Any] | None = None, filters: Dict[str, Any] | None = None, error_localizer: bool | None = None, kb_id: str | None = None, model: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.CustomEvalConfig:
+        """Create a custom evaluation configuration from an eval template so it can be attached to an online evaluation task. Use when list_eval_configs has no entry for the template you want to run over spans.
+
+        POST /tracer/custom-eval-config/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'eval_template': eval_template, 'project': project, 'name': name, 'config': config, 'mapping': mapping, 'filters': filters, 'error_localizer': error_localizer, 'kb_id': kb_id, 'model': model, **(extra_body or {})}
+        return self._t.call(OP_EVALS_CONFIGS_CREATE, path=path, query=query, body=body, model=models.CustomEvalConfig)
+
+    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.CustomEvalConfig]:
+        """List the custom evaluation configurations available for online evaluation tasks. The ids returned here are what create_eval_task takes in its `evals` argument - eval templates are a different object and their ids are not accepted there.
+
+        GET /tracer/custom-eval-config/
+        """
+        path = None
+        query = {'limit': limit, **(extra_query or {})}
+        return self._t.paginate(OP_EVALS_CONFIGS_LIST, path=path, query=query, model=models.CustomEvalConfig)
+
+
+class EvalsGroupsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def get(self, id: str, *, name: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.EvalGroup:
+        """Return an evaluation group by its identifier.
+
+        GET /model-hub/eval-groups/{id}/
+        """
+        path = {'id': id}
+        query = {'name': name, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_EVALS_GROUPS_GET, path=path, query=query, body=body, model=models.EvalGroup)
+
+    def list(self, *, name: str | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None) -> Any:
+        """List evaluation groups in the current workspace.
+
+        GET /model-hub/eval-groups/
+        """
+        path = None
+        query = {'name': name, 'page_number': page_number, 'page_size': page_size, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_EVALS_GROUPS_LIST, path=path, query=query, body=body, model=None)
+
+
+class EvalsTasksResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def create(self, *, project: str, name: str, sampling_rate: float, run_type: Literal['continuous', 'historical'], evals: List[str], filters: Dict[str, Any] | None = None, last_run: str | None = None, spans_limit: int | None = None, row_type: Literal['spans', 'traces', 'sessions', 'voiceCalls'] | None = None, status: Literal['pending', 'running', 'completed', 'failed', 'paused', 'deleted'] | None = None, start_time: str | None = None, end_time: str | None = None, evals_details: Dict[str, Any] | None = None, failed_spans: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalTaskCreateResult:
+        """Create an online evaluation task.
+
+        POST /tracer/eval-task/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'project': project, 'name': name, 'sampling_rate': sampling_rate, 'run_type': run_type, 'evals': evals, 'filters': filters, 'last_run': last_run, 'spans_limit': spans_limit, 'row_type': row_type, 'status': status, 'start_time': start_time, 'end_time': end_time, 'evals_details': evals_details, 'failed_spans': failed_spans, **(extra_body or {})}
+        return self._t.call(OP_EVALS_TASKS_CREATE, path=path, query=query, body=body, model=models.EvalTaskCreateResult)
+
+    def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.EvalTask:
+        """Return an online evaluation task by its identifier.
+
+        GET /tracer/eval-task/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_EVALS_TASKS_GET, path=path, query=query, body=body, model=models.EvalTask)
+
+    def list(self, *, project_id: str | None = None, name: str | None = None, filters: str | None = None, sort_params: str | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None) -> models._EvalTaskListResultResponse:
+        """List online evaluation tasks in the current workspace.
+
+        GET /tracer/eval-task/list_eval_tasks/
+        """
+        path = None
+        query = {'project_id': project_id, 'name': name, 'filters': filters, 'sort_params': sort_params, 'page_number': page_number, 'page_size': page_size, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_EVALS_TASKS_LIST, path=path, query=query, body=body, model=models._EvalTaskListResultResponse)
+
+    def pause(self, *, eval_task_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalTaskMessageResult:
+        """Pause a running online evaluation task by eval_task_id. Already-launched evaluations may finish before the worker stops.
+
+        POST /tracer/eval-task/pause_eval_task/
+        """
+        path = None
+        query = {'eval_task_id': eval_task_id, **(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(OP_EVALS_TASKS_PAUSE, path=path, query=query, body=body, model=models.EvalTaskMessageResult)
+
+    def resume(self, *, eval_task_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalTaskMessageResult:
+        """Resume a paused online evaluation task by eval_task_id, scheduling remaining evaluations. May incur evaluation charges.
+
+        POST /tracer/eval-task/unpause_eval_task/
+        """
+        path = None
+        query = {'eval_task_id': eval_task_id, **(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(OP_EVALS_TASKS_RESUME, path=path, query=query, body=body, model=models.EvalTaskMessageResult)
+
+    def update(self, *, edit_type: Literal['edit_rerun', 'fresh_run'], eval_task_id: str, name: str | None = None, filters: Dict[str, Any] | None = None, sampling_rate: float | None = None, spans_limit: int | None = None, run_type: Literal['continuous', 'historical'] | None = None, row_type: Literal['spans', 'traces', 'sessions', 'voiceCalls'] | None = None, status: Literal['pending', 'running', 'completed', 'failed', 'paused', 'deleted'] | None = None, evals: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalTaskUpdateResult:
+        """Update and rerun an online evaluation task using eval_task_id and edit_type. Pause a running task first. edit_rerun preserves existing results; fresh_run DELETES previous results and starts again. May incur evaluation charges.
+
+        PATCH /tracer/eval-task/update_eval_task/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'edit_type': edit_type, 'eval_task_id': eval_task_id, 'name': name, 'filters': filters, 'sampling_rate': sampling_rate, 'spans_limit': spans_limit, 'run_type': run_type, 'row_type': row_type, 'status': status, 'evals': evals, **(extra_body or {})}
+        return self._t.call(OP_EVALS_TASKS_UPDATE, path=path, query=query, body=body, model=models.EvalTaskUpdateResult)
+
+
+class EvalsTemplatesResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def create(self, *, name: str | None = None, is_draft: bool | None = None, eval_type: Literal['llm', 'code', 'agent'] | None = None, instructions: str | None = None, model: str | None = None, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None = None, pass_threshold: float | None = None, choice_scores: Dict[str, Any] | None = None, description: str | None = None, tags: List[str] | None = None, check_internet: bool | None = None, code: str | None = None, code_language: Literal['python', 'javascript'] | None = None, messages: List[Dict[str, Any]] | None = None, few_shot_examples: List[Dict[str, Any]] | None = None, mode: Literal['auto', 'agent', 'quick'] | None = None, tools: Dict[str, Any] | None = None, knowledge_bases: List[str] | None = None, data_injection: Dict[str, Any] | None = None, summary: Dict[str, Any] | None = None, error_localizer_enabled: bool | None = None, template_format: Literal['mustache', 'jinja'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalTemplateCreateResponseResult:
+        """Create an evaluation template.
+
+        POST /model-hub/eval-templates/create-v2/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'is_draft': is_draft, 'eval_type': eval_type, 'instructions': instructions, 'model': model, 'output_type': output_type, 'pass_threshold': pass_threshold, 'choice_scores': choice_scores, 'description': description, 'tags': tags, 'check_internet': check_internet, 'code': code, 'code_language': code_language, 'messages': messages, 'few_shot_examples': few_shot_examples, 'mode': mode, 'tools': tools, 'knowledge_bases': knowledge_bases, 'data_injection': data_injection, 'summary': summary, 'error_localizer_enabled': error_localizer_enabled, 'template_format': template_format, **(extra_body or {})}
+        return self._t.call(OP_EVALS_TEMPLATES_CREATE, path=path, query=query, body=body, model=models.EvalTemplateCreateResponseResult)
+
+    def get(self, template_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.EvalTemplateDetailResponseResult:
+        """Return an evaluation template by its identifier.
+
+        GET /model-hub/eval-templates/{template_id}/detail/
+        """
+        path = {'template_id': template_id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_EVALS_TEMPLATES_GET, path=path, query=query, body=body, model=models.EvalTemplateDetailResponseResult)
+
+    def list(self, *, page: int | None = None, page_size: int | None = None, search: str | None = None, owner_filter: Literal['all', 'user', 'system'] | None = None, filters: Dict[str, Any] | None = None, sort_by: Literal['name', 'updated_at', 'created_at'] | None = None, sort_order: Literal['asc', 'desc'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalTemplateListResponseResult:
+        """List evaluation templates using the supplied filters.
+
+        POST /model-hub/eval-templates/list/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'page': page, 'page_size': page_size, 'search': search, 'owner_filter': owner_filter, 'filters': filters, 'sort_by': sort_by, 'sort_order': sort_order, **(extra_body or {})}
+        return self._t.call(OP_EVALS_TEMPLATES_LIST, path=path, query=query, body=body, model=models.EvalTemplateListResponseResult)
+
+    def update(self, template_id: str, *, name: str | None = None, eval_type: Literal['llm', 'code', 'agent'] | None = None, instructions: str | None = None, model: str | None = None, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None = None, pass_threshold: float | None = None, choice_scores: Dict[str, Any] | None = None, multi_choice: bool | None = None, description: str | None = None, tags: List[str] | None = None, check_internet: bool | None = None, code: str | None = None, code_language: Literal['python', 'javascript'] | None = None, messages: List[Dict[str, Any]] | None = None, few_shot_examples: List[Dict[str, Any]] | None = None, mode: Literal['auto', 'agent', 'quick'] | None = None, tools: Dict[str, Any] | None = None, knowledge_bases: List[str] | None = None, data_injection: Dict[str, Any] | None = None, summary: Dict[str, Any] | None = None, error_localizer_enabled: bool | None = None, publish: bool | None = None, template_format: Literal['mustache', 'jinja'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalTemplateUpdateResponseResult:
+        """Update an existing evaluation template.
+
+        PUT /model-hub/eval-templates/{template_id}/update/
+        """
+        path = {'template_id': template_id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'eval_type': eval_type, 'instructions': instructions, 'model': model, 'output_type': output_type, 'pass_threshold': pass_threshold, 'choice_scores': choice_scores, 'multi_choice': multi_choice, 'description': description, 'tags': tags, 'check_internet': check_internet, 'code': code, 'code_language': code_language, 'messages': messages, 'few_shot_examples': few_shot_examples, 'mode': mode, 'tools': tools, 'knowledge_bases': knowledge_bases, 'data_injection': data_injection, 'summary': summary, 'error_localizer_enabled': error_localizer_enabled, 'publish': publish, 'template_format': template_format, **(extra_body or {})}
+        return self._t.call(OP_EVALS_TEMPLATES_UPDATE, path=path, query=query, body=body, model=models.EvalTemplateUpdateResponseResult)
+
+
+class GatewayGuardrailRulesResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def list(self, *, page: int | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> Any:
+        """Per-rule guardrail trigger breakdown - which guardrail rules exist and how often each has fired. Request logs report guardrail_triggered but not which rule caused it; this is what turns "the request was blocked" into "the PII rule blocked it".
+
+        GET /agentcc/analytics/guardrail-rules/
+        """
+        path = None
+        query = {'page': page, 'limit': limit, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_GATEWAY_GUARDRAIL_RULES_LIST, path=path, query=query, body=body, model=None)
+
+
+class GatewayRequestLogsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def list(self, *, limit: int | None = None, user_id: str | None = None, session_id: str | None = None, api_key_id: str | None = None, request_id: str | None = None, model: str | None = None, provider: str | None = None, status_code: str | None = None, min_status_code: int | None = None, max_status_code: int | None = None, is_error: bool | None = None, cache_hit: bool | None = None, fallback_used: bool | None = None, guardrail_triggered: bool | None = None, is_stream: bool | None = None, started_after: str | None = None, started_before: str | None = None, min_latency: int | None = None, max_latency: int | None = None, min_cost: float | None = None, max_cost: float | None = None, min_tokens: int | None = None, max_tokens: int | None = None, q: str | None = None, search: str | None = None, ordering: str | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.AgentccRequestLog]:
+        """List request logs recorded by the AI gateway.
+
+        GET /agentcc/request-logs/
+        """
+        path = None
+        query = {'limit': limit, 'user_id': user_id, 'session_id': session_id, 'api_key_id': api_key_id, 'request_id': request_id, 'model': model, 'provider': provider, 'status_code': status_code, 'min_status_code': min_status_code, 'max_status_code': max_status_code, 'is_error': is_error, 'cache_hit': cache_hit, 'fallback_used': fallback_used, 'guardrail_triggered': guardrail_triggered, 'is_stream': is_stream, 'started_after': started_after, 'started_before': started_before, 'min_latency': min_latency, 'max_latency': max_latency, 'min_cost': min_cost, 'max_cost': max_cost, 'min_tokens': min_tokens, 'max_tokens': max_tokens, 'q': q, 'search': search, 'ordering': ordering, **(extra_query or {})}
+        return self._t.paginate(OP_GATEWAY_REQUEST_LOGS_LIST, path=path, query=query, model=models.AgentccRequestLog)
+
+
+class GatewaySessionsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.AgentccSession]:
+        """List AI gateway sessions with their stats. These are gateway sessions, distinct from the tracing sessions returned by list_sessions. Use this to obtain a session id for list_gateway_session_requests.
+
+        GET /agentcc/sessions/
+        """
+        path = None
+        query = {'limit': limit, **(extra_query or {})}
+        return self._t.paginate(OP_GATEWAY_SESSIONS_LIST, path=path, query=query, model=models.AgentccSession)
+
+    def requests(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.AgentccSession:
+        """List every request log belonging to one gateway session. Request logs carry no trace id, so grouping by session is the way to see what else happened around a failed request.
+
+        GET /agentcc/sessions/{id}/requests/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_GATEWAY_SESSIONS_REQUESTS, path=path, query=query, body=body, model=models.AgentccSession)
+
+
+class PromptsVersionsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def list(self, id: str, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[Any]:
+        """List versions of a prompt template.
+
+        GET /model-hub/prompt-templates/{id}/versions/
+        """
+        path = {'id': id}
+        query = {'limit': limit, **(extra_query or {})}
+        return self._t.paginate(OP_PROMPTS_VERSIONS_LIST, path=path, query=query, model=None)
+
+
+class SimulationExecutionsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def analytics(self, test_execution_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.TestExecutionAnalytics:
+        """Return aggregated analytics for a simulation test execution.
+
+        GET /simulate/test-executions/{test_execution_id}/analytics/
+        """
+        path = {'test_execution_id': test_execution_id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_SIMULATION_EXECUTIONS_ANALYTICS, path=path, query=query, body=body, model=models.TestExecutionAnalytics)
+
+    def get(self, test_execution_id: str, *, search: str | None = None, filters: str | None = None, row_groups: str | None = None, group_keys: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[Any]:
+        """Return a simulation test execution by its identifier.
+
+        GET /simulate/test-executions/{test_execution_id}/
+        """
+        path = {'test_execution_id': test_execution_id}
+        query = {'search': search, 'filters': filters, 'row_groups': row_groups, 'group_keys': group_keys, 'limit': limit, **(extra_query or {})}
+        return self._t.paginate(OP_SIMULATION_EXECUTIONS_GET, path=path, query=query, model=None)
+
+    def list(self, *, search: str | None = None, status: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.TestExecution]:
+        """List simulation test executions.
+
+        GET /simulate/api/test-executions/
+        """
+        path = None
+        query = {'search': search, 'status': status, 'limit': limit, **(extra_query or {})}
+        return self._t.paginate(OP_SIMULATION_EXECUTIONS_LIST, path=path, query=query, model=models.TestExecution)
+
+
+class SimulationScenariosResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def create(self, *, name: str, description: str | None = None, dataset_id: str | None = None, kind: Literal['graph', 'script', 'dataset'] | None = None, script_url: str | None = None, agent_definition_id: str | None = None, agent_definition_version_id: str | None = None, custom_instruction: str | None = None, no_of_rows: int | None = None, generate_graph: bool | None = None, graph: Dict[str, Any] | None = None, source_type: Literal['agent_definition', 'prompt'] | None = None, prompt_template_id: str | None = None, prompt_version_id: str | None = None, add_persona_automatically: bool | None = None, personas: List[str] | None = None, custom_columns: List[Dict[str, Any]] | None = None, agent_name: str | None = None, agent_prompt: str | None = None, voice_provider: str | None = None, voice_name: str | None = None, model: str | None = None, llm_temperature: float | None = None, initial_message: str | None = None, max_call_duration_in_minutes: int | None = None, interrupt_sensitivity: float | None = None, conversation_speed: float | None = None, finished_speaking_sensitivity: float | None = None, initial_message_delay: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Create an agent or prompt simulation scenario of kind dataset, script or graph. Generation is asynchronous and may incur usage charges; poll get_scenario until ready before running tests. Requires the applicable plan entitlement.
+
+        POST /simulate/scenarios/create/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, 'dataset_id': dataset_id, 'kind': kind, 'script_url': script_url, 'agent_definition_id': agent_definition_id, 'agent_definition_version_id': agent_definition_version_id, 'custom_instruction': custom_instruction, 'no_of_rows': no_of_rows, 'generate_graph': generate_graph, 'graph': graph, 'source_type': source_type, 'prompt_template_id': prompt_template_id, 'prompt_version_id': prompt_version_id, 'add_persona_automatically': add_persona_automatically, 'personas': personas, 'custom_columns': custom_columns, 'agent_name': agent_name, 'agent_prompt': agent_prompt, 'voice_provider': voice_provider, 'voice_name': voice_name, 'model': model, 'llm_temperature': llm_temperature, 'initial_message': initial_message, 'max_call_duration_in_minutes': max_call_duration_in_minutes, 'interrupt_sensitivity': interrupt_sensitivity, 'conversation_speed': conversation_speed, 'finished_speaking_sensitivity': finished_speaking_sensitivity, 'initial_message_delay': initial_message_delay, **(extra_body or {})}
+        return self._t.call(OP_SIMULATION_SCENARIOS_CREATE, path=path, query=query, body=body, model=None)
+
+    def get(self, scenario_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.ScenarioDetailResponse:
+        """Return a simulation scenario by its identifier.
+
+        GET /simulate/scenarios/{scenario_id}/
+        """
+        path = {'scenario_id': scenario_id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_SIMULATION_SCENARIOS_GET, path=path, query=query, body=body, model=models.ScenarioDetailResponse)
+
+    def list(self, *, search: str | None = None, agent_definition_id: str | None = None, agent_type: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.ScenarioResponse]:
+        """List simulation scenarios in the current workspace.
+
+        GET /simulate/scenarios/
+        """
+        path = None
+        query = {'search': search, 'agent_definition_id': agent_definition_id, 'agent_type': agent_type, 'limit': limit, **(extra_query or {})}
+        return self._t.paginate(OP_SIMULATION_SCENARIOS_LIST, path=path, query=query, model=models.ScenarioResponse)
+
+    def update(self, scenario_id: str, *, name: str | None = None, description: str | None = None, graph: Dict[str, Any] | None = None, prompt: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.ScenarioEditResponse:
+        """Edit supported scenario fields such as name, description, graph or prompt. This is not a dataset-row editor or a simulation execution.
+
+        PUT /simulate/scenarios/{scenario_id}/edit/
+        """
+        path = {'scenario_id': scenario_id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, 'graph': graph, 'prompt': prompt, **(extra_body or {})}
+        return self._t.call(OP_SIMULATION_SCENARIOS_UPDATE, path=path, query=query, body=body, model=models.ScenarioEditResponse)
+
+
+class SimulationTestsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def create(self, *, name: str, agent_definition_id: str, scenario_ids: List[str], description: str | None = None, dataset_row_ids: List[str] | None = None, eval_config_ids: List[str] | None = None, evaluations_config: List[Dict[str, Any]] | None = None, enable_tool_evaluation: bool | None = None, replay_session_id: str | None = None, agent_version: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.RunTestResponse:
+        """Save a simulation test using name, agent_definition_id and scenario_ids, optionally agent_version and evaluations_config. Does not execute it; pass the returned test ID to run_simulation.
+
+        POST /simulate/run-tests/create/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'agent_definition_id': agent_definition_id, 'scenario_ids': scenario_ids, 'description': description, 'dataset_row_ids': dataset_row_ids, 'eval_config_ids': eval_config_ids, 'evaluations_config': evaluations_config, 'enable_tool_evaluation': enable_tool_evaluation, 'replay_session_id': replay_session_id, 'agent_version': agent_version, **(extra_body or {})}
+        return self._t.call(OP_SIMULATION_TESTS_CREATE, path=path, query=query, body=body, model=models.RunTestResponse)
+
+    def get(self, run_test_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.RunTestResponse:
+        """Read a saved simulation test configuration, its agent/version and scenarios.
+
+        GET /simulate/run-tests/{run_test_id}/
+        """
+        path = {'run_test_id': run_test_id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_SIMULATION_TESTS_GET, path=path, query=query, body=body, model=models.RunTestResponse)
+
+    def list(self, *, search: str | None = None, simulation_type: Literal['agent_definition', 'prompt'] | None = None, prompt_template_id: str | None = None, limit: int | None = None, summary: bool | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.RunTestResponse]:
+        """List saved simulation test configurations. A test configuration is distinct from its executions; use list_test_executions to inspect runs.
+
+        GET /simulate/run-tests/
+        """
+        path = None
+        query = {'search': search, 'simulation_type': simulation_type, 'prompt_template_id': prompt_template_id, 'limit': limit, 'summary': summary, **(extra_query or {})}
+        return self._t.paginate(OP_SIMULATION_TESTS_LIST, path=path, query=query, model=models.RunTestResponse)
+
+    def run(self, run_test_id: str, *, scenario_ids: List[str] | None = None, simulator_id: str | None = None, select_all: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.RunTestExecutionResponse:
+        """Start a saved simulation test asynchronously. Omit scenario_ids to run all configured scenarios. Uses existing provider/worker infrastructure and can incur usage charges. Poll get_test_execution with the returned execution_id, then read get_test_execution_analytics.
+
+        POST /simulate/run-tests/{run_test_id}/execute/
+        """
+        path = {'run_test_id': run_test_id}
+        query = {**(extra_query or {})}
+        body = {'scenario_ids': scenario_ids, 'simulator_id': simulator_id, 'select_all': select_all, **(extra_body or {})}
+        return self._t.call(OP_SIMULATION_TESTS_RUN, path=path, query=query, body=body, model=models.RunTestExecutionResponse)
+
+
+class TracesPropertiesResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def list(self, *, workflow: Literal['observability', 'dataset', 'simulation'] | None = None, project_ids: str | None = None, agent_definition_id: str | None = None, per_eval_config: bool | None = None, exclude_custom_attributes: bool | None = None, search: str | None = None, category: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None = None, role: Literal['metric', 'dimension'] | None = None, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'simulation', 'both', 'all'] | None = None, page: int | None = None, page_size: int | None = None, cursor_mode: bool | None = None, cursor: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.DashboardMetricsCatalogResult:
+        """Discover filter properties from the shared metrics catalog. Pass cursor_mode=true, page_size (at most 50), source=traces (search_traces) or source=spans (list_spans), per_eval_config=true and project_ids when known. Use role=dimension to narrow to dimensions. Use name as column_id; set filter_config.col_type by mapping category system_metric to SYSTEM_METRIC, custom_attribute to SPAN_ATTRIBUTE, eval_metric to EVAL_METRIC, and annotation_metric to ANNOTATION. Preserve property_id and source for typed attribute bindings. Follow has_more/next_cursor by passing cursor; omit page and exclude_custom_attributes in cursor mode.
+
+        GET /tracer/dashboard/metrics/
+        """
+        path = None
+        query = {'workflow': workflow, 'project_ids': project_ids, 'agent_definition_id': agent_definition_id, 'per_eval_config': per_eval_config, 'exclude_custom_attributes': exclude_custom_attributes, 'search': search, 'category': category, 'role': role, 'source': source, 'page': page, 'page_size': page_size, 'cursor_mode': cursor_mode, 'cursor': cursor, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_TRACES_PROPERTIES_LIST, path=path, query=query, body=body, model=models.DashboardMetricsCatalogResult)
+
+
+class AccountResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def whoami(self, *, extra_query: Dict[str, Any] | None = None) -> models.UserInfoResponse:
+        """Return the authenticated user, organization, and workspace context.
+
+        GET /accounts/user-info/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_ACCOUNT_WHOAMI, path=path, query=query, body=body, model=models.UserInfoResponse)
+
+
+class AgentsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+        self.versions = AgentsVersionsResource(transport)
+
+    def create(self, *, agent_name: str, agent_type: Literal['voice', 'text'], commit_message: str, inbound: bool | None = None, target_speaks_first: bool | None = None, description: str | None = None, provider: str | None = None, api_key: str | None = None, assistant_id: str | None = None, authentication_method: Literal['api_key'] | None = None, language: str | None = None, languages: List[str] | None = None, contact_number: str | None = None, knowledge_base: str | None = None, observability_enabled: bool | None = None, model: str | None = None, model_details: Dict[str, Any] | None = None, websocket_url: str | None = None, websocket_headers: Dict[str, Any] | None = None, replay_session_id: str | None = None, livekit_url: str | None = None, livekit_api_key: str | None = None, livekit_api_secret: str | None = None, livekit_agent_name: str | None = None, livekit_config_json: Dict[str, Any] | None = None, livekit_max_concurrency: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.AgentDefinitionCreateResponse:
+        """Create a text or voice agent definition and its first active version. Supply agent_name, agent_type and commit_message plus the configuration required for the chosen provider.
+
+        POST /simulate/agent-definitions/create/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'agent_name': agent_name, 'agent_type': agent_type, 'commit_message': commit_message, 'inbound': inbound, 'target_speaks_first': target_speaks_first, 'description': description, 'provider': provider, 'api_key': api_key, 'assistant_id': assistant_id, 'authentication_method': authentication_method, 'language': language, 'languages': languages, 'contact_number': contact_number, 'knowledge_base': knowledge_base, 'observability_enabled': observability_enabled, 'model': model, 'model_details': model_details, 'websocket_url': websocket_url, 'websocket_headers': websocket_headers, 'replay_session_id': replay_session_id, 'livekit_url': livekit_url, 'livekit_api_key': livekit_api_key, 'livekit_api_secret': livekit_api_secret, 'livekit_agent_name': livekit_agent_name, 'livekit_config_json': livekit_config_json, 'livekit_max_concurrency': livekit_max_concurrency, **(extra_body or {})}
+        return self._t.call(OP_AGENTS_CREATE, path=path, query=query, body=body, model=models.AgentDefinitionCreateResponse)
+
+    def get(self, agent_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.AgentDefinitionDetailResponse:
+        """Return an agent definition by its identifier.
+
+        GET /simulate/agent-definitions/{agent_id}/
+        """
+        path = {'agent_id': agent_id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_AGENTS_GET, path=path, query=query, body=body, model=models.AgentDefinitionDetailResponse)
+
+    def list(self, *, search: str | None = None, agent_type: Literal['voice', 'text'] | None = None, agent_definition_id: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.AgentDefinitionListResponse]:
+        """List agent definitions in the current workspace.
+
+        GET /simulate/agent-definitions/
+        """
+        path = None
+        query = {'search': search, 'agent_type': agent_type, 'agent_definition_id': agent_definition_id, 'limit': limit, **(extra_query or {})}
+        return self._t.paginate(OP_AGENTS_LIST, path=path, query=query, model=models.AgentDefinitionListResponse)
+
+    def update(self, agent_id: str, *, observability_enabled: bool | None = None, agent_name: str | None = None, agent_type: Literal['voice', 'text'] | None = None, description: str | None = None, provider: str | None = None, api_key: str | None = None, assistant_id: str | None = None, authentication_method: Literal['api_key'] | None = None, language: str | None = None, languages: List[str] | None = None, contact_number: str | None = None, inbound: bool | None = None, target_speaks_first: bool | None = None, knowledge_base: str | None = None, model: str | None = None, model_details: Dict[str, Any] | None = None, websocket_url: str | None = None, websocket_headers: Dict[str, Any] | None = None, livekit_url: str | None = None, livekit_api_key: str | None = None, livekit_api_secret: str | None = None, livekit_agent_name: str | None = None, livekit_config_json: Dict[str, Any] | None = None, livekit_max_concurrency: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.AgentDefinitionEditResponse:
+        """Edit an agent definition. Leave observability_enabled out to keep observability as it is; send true or false to turn it on or off. To use changed configuration in a versioned simulation, subsequently call create_agent_version, or supply the changes directly to create_agent_version.
+
+        PUT /simulate/agent-definitions/{agent_id}/edit/
+        """
+        path = {'agent_id': agent_id}
+        query = {**(extra_query or {})}
+        body = {'observability_enabled': observability_enabled, 'agent_name': agent_name, 'agent_type': agent_type, 'description': description, 'provider': provider, 'api_key': api_key, 'assistant_id': assistant_id, 'authentication_method': authentication_method, 'language': language, 'languages': languages, 'contact_number': contact_number, 'inbound': inbound, 'target_speaks_first': target_speaks_first, 'knowledge_base': knowledge_base, 'model': model, 'model_details': model_details, 'websocket_url': websocket_url, 'websocket_headers': websocket_headers, 'livekit_url': livekit_url, 'livekit_api_key': livekit_api_key, 'livekit_api_secret': livekit_api_secret, 'livekit_agent_name': livekit_agent_name, 'livekit_config_json': livekit_config_json, 'livekit_max_concurrency': livekit_max_concurrency, **(extra_body or {})}
+        return self._t.call(OP_AGENTS_UPDATE, path=path, query=query, body=body, model=models.AgentDefinitionEditResponse)
+
+
+class AlertsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+        self.logs = AlertsLogsResource(transport)
+        self.rules = AlertsRulesResource(transport)
+
+
+class AnnotationQueuesResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+        self.items = AnnotationQueuesItemsResource(transport)
+
+    def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.AnnotationQueue:
+        """Return an annotation queue by its identifier.
+
+        GET /model-hub/annotation-queues/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_ANNOTATION_QUEUES_GET, path=path, query=query, body=body, model=models.AnnotationQueue)
+
+    def list(self, *, limit: int | None = None, status: str | None = None, search: str | None = None, include_counts: bool | None = None, archived: bool | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.AnnotationQueue]:
+        """List annotation queues in the current workspace.
+
+        GET /model-hub/annotation-queues/
+        """
+        path = None
+        query = {'limit': limit, 'status': status, 'search': search, 'include_counts': include_counts, 'archived': archived, 'page_size': page_size, **(extra_query or {})}
+        return self._t.paginate(OP_ANNOTATION_QUEUES_LIST, path=path, query=query, model=models.AnnotationQueue)
+
+
+class DashboardsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+        self.metrics = DashboardsMetricsResource(transport)
+        self.widgets = DashboardsWidgetsResource(transport)
+
+    def create(self, *, name: str, description: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DashboardCreateUpdate:
+        """Create an empty dashboard in the current workspace; add widgets with create_dashboard_widget.
+
+        POST /tracer/dashboard/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, **(extra_body or {})}
+        return self._t.call(OP_DASHBOARDS_CREATE, path=path, query=query, body=body, model=models.DashboardCreateUpdate)
+
+    def delete(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Delete a dashboard and the widgets on it. This is the only way to remove a dashboard created earlier.
+
+        DELETE /tracer/dashboard/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(OP_DASHBOARDS_DELETE, path=path, query=query, body=body, model=None)
+
+    def filter_values(self, *, property_id: str | None = None, metric_name: str | None = None, metric_type: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None = None, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'dataset_column', 'simulation', 'both', 'all'] | None = None, project_ids: str | None = None, dataset_id: str | None = None, search: str | None = None, page_size: int | None = None, cursor: str | None = None, attribute_type: Literal['string', 'number', 'boolean', 'array', 'map', 'json'] | None = None, extra_query: Dict[str, Any] | None = None) -> models.DashboardFilterValuesResult:
+        """List the distinct values of a metric or attribute for use in dashboard filters.
+
+        GET /tracer/dashboard/filter_values/
+        """
+        path = None
+        query = {'property_id': property_id, 'metric_name': metric_name, 'metric_type': metric_type, 'source': source, 'project_ids': project_ids, 'dataset_id': dataset_id, 'search': search, 'page_size': page_size, 'cursor': cursor, 'attribute_type': attribute_type, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_DASHBOARDS_FILTER_VALUES, path=path, query=query, body=body, model=models.DashboardFilterValuesResult)
+
+    def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.DashboardDetail:
+        """Return a dashboard and its widgets by identifier.
+
+        GET /tracer/dashboard/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_DASHBOARDS_GET, path=path, query=query, body=body, model=models.DashboardDetail)
+
+    def list(self, *, extra_query: Dict[str, Any] | None = None) -> List[models.Dashboard]:
+        """List dashboards in the current workspace with their widget counts.
+
+        GET /tracer/dashboard/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_DASHBOARDS_LIST, path=path, query=query, body=body, model=List[models.Dashboard])
+
+    def query(self, *, time_range: Dict[str, Any], metrics: List[Dict[str, Any]], workflow: Literal['observability', 'dataset', 'simulation'] | None = None, project_ids: List[str] | None = None, granularity: Literal['minute', 'hour', 'day', 'week', 'month'] | None = None, filters: List[Dict[str, Any]] | None = None, breakdowns: List[Dict[str, Any]] | None = None, allow_sampled: bool | None = None, refresh: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DashboardQueryResult:
+        """Run an ad-hoc dashboard query (time_range and metrics, with optional filters and breakdowns) and return chart data without saving a widget.
+
+        POST /tracer/dashboard/query/
+        """
+        path = None
+        query = {'refresh': refresh, **(extra_query or {})}
+        body = {'time_range': time_range, 'metrics': metrics, 'workflow': workflow, 'project_ids': project_ids, 'granularity': granularity, 'filters': filters, 'breakdowns': breakdowns, 'allow_sampled': allow_sampled, **(extra_body or {})}
+        return self._t.call(OP_DASHBOARDS_QUERY, path=path, query=query, body=body, model=models.DashboardQueryResult)
+
+    def update(self, id: str, *, name: str, description: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DashboardCreateUpdate:
+        """Update the name or description of an existing dashboard.
+
+        PATCH /tracer/dashboard/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, **(extra_body or {})}
+        return self._t.call(OP_DASHBOARDS_UPDATE, path=path, query=query, body=body, model=models.DashboardCreateUpdate)
 
 
 class DatasetsResource:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
+        self.cells = DatasetsCellsResource(transport)
         self.columns = DatasetsColumnsResource(transport)
+        self.evals = DatasetsEvalsResource(transport)
+        self.prompts = DatasetsPromptsResource(transport)
         self.rows = DatasetsRowsResource(transport)
 
-    def create(self, *, new_dataset_name: str, model_type: str | None = None, is_sdk: bool | None = None, row: int | None = None) -> models.DatasetCreateStartedResult:
-        """Create an empty dataset.
+    def create(self, *, new_dataset_name: str, model_type: str | None = None, is_sdk: bool | None = None, row: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DatasetCreateStartedResult:
+        """Create an empty dataset in the current workspace. Use create_dataset_column before add_dataset_rows.
 
         POST /model-hub/develops/create-empty-dataset/
         """
         path = None
-        query = None
-        body = {'new_dataset_name': new_dataset_name, 'model_type': model_type, 'is_sdk': is_sdk, 'row': row}
+        query = {**(extra_query or {})}
+        body = {'new_dataset_name': new_dataset_name, 'model_type': model_type, 'is_sdk': is_sdk, 'row': row, **(extra_body or {})}
         return self._t.call(OP_DATASETS_CREATE, path=path, query=query, body=body, model=models.DatasetCreateStartedResult)
 
-    def delete(self, *, dataset_ids: list[str]) -> str:
-        """Delete one or more datasets.
+    def delete(self, *, dataset_ids: List[str], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Soft-delete one or more datasets by passing dataset_ids. This is the only way to remove a dataset created earlier; deletion cascades to the dataset's rows, columns and attached evaluations.
 
         DELETE /model-hub/develops/delete_dataset/
         """
         path = None
-        query = None
-        body = {'dataset_ids': dataset_ids}
+        query = {**(extra_query or {})}
+        body = {'dataset_ids': dataset_ids, **(extra_body or {})}
         return self._t.call(OP_DATASETS_DELETE, path=path, query=query, body=body, model=None)
 
-    def get(self, dataset_id: str, *, filters: str | None = None, sort: str | None = None, search: str | None = None, page_size: int | None = None, current_page_index: int | None = None, column_config_only: bool | None = None, exact_snapshot: bool | None = None, cursor: str | None = None) -> models.DatasetTableResult:
-        """Get a dataset's columns, rows and metadata.
+    def get(self, dataset_id: str, *, filters: str | None = None, sort: str | None = None, search: str | None = None, page_size: int | None = None, current_page_index: int | None = None, column_config_only: bool | None = None, exact_snapshot: bool | None = None, cursor: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.DatasetTableResult:
+        """Return the rows, columns, and metadata for a dataset.
 
         GET /model-hub/develops/{dataset_id}/get-dataset-table/
         """
         path = {'dataset_id': dataset_id}
-        query = {'filters': filters, 'sort': sort, 'search': search, 'page_size': page_size, 'current_page_index': current_page_index, 'column_config_only': column_config_only, 'exact_snapshot': exact_snapshot, 'cursor': cursor}
+        query = {'filters': filters, 'sort': sort, 'search': search, 'page_size': page_size, 'current_page_index': current_page_index, 'column_config_only': column_config_only, 'exact_snapshot': exact_snapshot, 'cursor': cursor, **(extra_query or {})}
         body = None
         return self._t.call(OP_DATASETS_GET, path=path, query=query, body=body, model=models.DatasetTableResult)
 
-    def list(self, *, search_text: str | None = None, page_size: int | None = None, sort: str | None = None) -> SyncPager[models.DatasetListItem]:
-        """List datasets in the current workspace.
+    def list(self, *, search_text: str | None = None, page_size: int | None = None, sort: str | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.DatasetListItem]:
+        """List datasets available in the current workspace.
 
         GET /model-hub/develops/get-datasets/
         """
         path = None
-        query = {'search_text': search_text, 'page_size': page_size, 'sort': sort}
+        query = {'search_text': search_text, 'page_size': page_size, 'sort': sort, **(extra_query or {})}
         return self._t.paginate(OP_DATASETS_LIST, path=path, query=query, model=models.DatasetListItem)
+
+
+class ErrorClustersResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def get(self, cluster_id: str, *, project_id: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.FeedDetailCore:
+        """Return an error issue and its grouped trace information.
+
+        GET /tracer/feed/issues/{cluster_id}/
+        """
+        path = {'cluster_id': cluster_id}
+        query = {'project_id': project_id, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_ERROR_CLUSTERS_GET, path=path, query=query, body=body, model=models.FeedDetailCore)
+
+    def list(self, *, project_id: str | None = None, search: str | None = None, status: Literal['escalating', 'for_review', 'acknowledged', 'resolved'] | None = None, severity: Literal['critical', 'high', 'medium', 'low'] | None = None, fix_layer: str | None = None, source: Literal['scanner', 'eval'] | None = None, issue_group: str | None = None, time_range_days: int | None = None, sort_by: Literal['last_seen', 'first_seen', 'error_count', 'unique_traces', 'severity'] | None = None, sort_dir: Literal['asc', 'desc'] | None = None, limit: int | None = None, offset: int | None = None, extra_query: Dict[str, Any] | None = None) -> models.FeedListResponse:
+        """List grouped error issues detected in project traces.
+
+        GET /tracer/feed/issues/
+        """
+        path = None
+        query = {'project_id': project_id, 'search': search, 'status': status, 'severity': severity, 'fix_layer': fix_layer, 'source': source, 'issue_group': issue_group, 'time_range_days': time_range_days, 'sort_by': sort_by, 'sort_dir': sort_dir, 'limit': limit, 'offset': offset, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_ERROR_CLUSTERS_LIST, path=path, query=query, body=body, model=models.FeedListResponse)
+
+
+class EvalsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+        self.configs = EvalsConfigsResource(transport)
+        self.groups = EvalsGroupsResource(transport)
+        self.tasks = EvalsTasksResource(transport)
+        self.templates = EvalsTemplatesResource(transport)
+
+    def test(self, *, config: Dict[str, Any], name: str, output_type: str, model: str | None = None, eval_tags: List[str] | None = None, criteria: str | None = None, multi_choice: bool | None = None, choices: Dict[str, Any] | None = None, input_data_types: Dict[str, Any] | None = None, description: str | None = None, check_internet: bool | None = None, required_keys: List[str] | None = None, template_type: str | None = None, eval_type_id: str | None = None, template_id: str | None = None, eval_type: str | None = None, error_localizer: bool | None = None, reason_column: bool | None = None, optional_keys: List[str] | None = None, variable_keys: Dict[str, Any] | None = None, run_prompt_column: bool | None = None, template_name: str | None = None, mapping: Dict[str, Any] | None = None, output: str | None = None, config_params_desc: Dict[str, Any] | None = None, config_params_option: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalExecutionResponseResult:
+        """Execute an evaluation template against supplied test inputs.
+
+        POST /model-hub/test-evaluation/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'config': config, 'name': name, 'output_type': output_type, 'model': model, 'eval_tags': eval_tags, 'criteria': criteria, 'multi_choice': multi_choice, 'choices': choices, 'input_data_types': input_data_types, 'description': description, 'check_internet': check_internet, 'required_keys': required_keys, 'template_type': template_type, 'eval_type_id': eval_type_id, 'template_id': template_id, 'eval_type': eval_type, 'error_localizer': error_localizer, 'reason_column': reason_column, 'optional_keys': optional_keys, 'variable_keys': variable_keys, 'run_prompt_column': run_prompt_column, 'template_name': template_name, 'mapping': mapping, 'output': output, 'config_params_desc': config_params_desc, 'config_params_option': config_params_option, **(extra_body or {})}
+        return self._t.call(OP_EVALS_TEST, path=path, query=query, body=body, model=models.EvalExecutionResponseResult)
+
+
+class ExperimentsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def create(self, *, name: str, dataset_id: str, prompt_config: List[Dict[str, Any]], user_eval_metrics: List[Dict[str, Any]], column_id: str | None = None, experiment_type: Literal['llm', 'tts', 'stt', 'image'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Create and start an experiment. The new experiment's id is returned inside the `result` message as `experiment_id=<uuid>`; pass it to get_experiment to follow the run.
+
+        POST /model-hub/experiments/v2/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'dataset_id': dataset_id, 'prompt_config': prompt_config, 'user_eval_metrics': user_eval_metrics, 'column_id': column_id, 'experiment_type': experiment_type, **(extra_body or {})}
+        return self._t.call(OP_EXPERIMENTS_CREATE, path=path, query=query, body=body, model=None)
+
+    def get(self, experiment_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.ExperimentDetailV2:
+        """Return an experiment by its identifier.
+
+        GET /model-hub/experiments/v2/{experiment_id}/
+        """
+        path = {'experiment_id': experiment_id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_EXPERIMENTS_GET, path=path, query=query, body=body, model=models.ExperimentDetailV2)
+
+    def list(self, *, created_at: str | None = None, status: str | None = None, dataset_id: str | None = None, search: str | None = None, ordering: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.ExperimentListV2]:
+        """List experiments in the current workspace.
+
+        GET /model-hub/experiments/v2/list/
+        """
+        path = None
+        query = {'created_at': created_at, 'status': status, 'dataset_id': dataset_id, 'search': search, 'ordering': ordering, 'limit': limit, **(extra_query or {})}
+        return self._t.paginate(OP_EXPERIMENTS_LIST, path=path, query=query, model=models.ExperimentListV2)
+
+
+class GatewayResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+        self.guardrail_rules = GatewayGuardrailRulesResource(transport)
+        self.request_logs = GatewayRequestLogsResource(transport)
+        self.sessions = GatewaySessionsResource(transport)
+
+    def analytics(self, *, start: str | None = None, end: str | None = None, granularity: str | None = None, api_key_id: str | None = None, extra_query: Dict[str, Any] | None = None) -> Any:
+        """Return overview usage, latency, error, and cost analytics for the AI gateway.
+
+        GET /agentcc/analytics/overview/
+        """
+        path = None
+        query = {'start': start, 'end': end, 'granularity': granularity, 'api_key_id': api_key_id, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_GATEWAY_ANALYTICS, path=path, query=query, body=body, model=None)
+
+    def config(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.GatewayConfigResult:
+        """Return the effective configuration for an AI gateway.
+
+        GET /agentcc/gateways/{id}/config/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_GATEWAY_CONFIG, path=path, query=query, body=body, model=models.GatewayConfigResult)
+
+    def list(self, *, extra_query: Dict[str, Any] | None = None) -> List[models.GatewaySummaryResult]:
+        """List configured AI gateways.
+
+        GET /agentcc/gateways/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_GATEWAY_LIST, path=path, query=query, body=body, model=List[models.GatewaySummaryResult])
+
+
+class KnowledgeBasesResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.KnowledgeBaseItem:
+        """Return a knowledge base and its configuration.
+
+        GET /model-hub/kb/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_KNOWLEDGE_BASES_GET, path=path, query=query, body=body, model=models.KnowledgeBaseItem)
+
+    def list(self, *, search: str | None = None, page: int | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> models.KnowledgeBasePaginatedResult:
+        """List knowledge bases in the current workspace.
+
+        GET /model-hub/kb/
+        """
+        path = None
+        query = {'search': search, 'page': page, 'limit': limit, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_KNOWLEDGE_BASES_LIST, path=path, query=query, body=body, model=models.KnowledgeBasePaginatedResult)
+
+
+class OptimizationsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def create(self, *, name: str, column_id: str, optimizer_algorithm: Literal['random_search', 'bayesian', 'metaprompt', 'protegi', 'promptwizard', 'gepa'], optimizer_model_id: str | None = None, optimizer_config: Dict[str, Any] | None = None, user_eval_template_ids: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DatasetOptimizationCreate:
+        """Create a dataset optimization run.
+
+        POST /model-hub/dataset-optimization/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'column_id': column_id, 'optimizer_algorithm': optimizer_algorithm, 'optimizer_model_id': optimizer_model_id, 'optimizer_config': optimizer_config, 'user_eval_template_ids': user_eval_template_ids, **(extra_body or {})}
+        return self._t.call(OP_OPTIMIZATIONS_CREATE, path=path, query=query, body=body, model=models.DatasetOptimizationCreate)
+
+    def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.DatasetOptimizationDetail:
+        """Return a dataset optimization run by its identifier.
+
+        GET /model-hub/dataset-optimization/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_OPTIMIZATIONS_GET, path=path, query=query, body=body, model=models.DatasetOptimizationDetail)
+
+    def list(self, *, dataset_id: str | None = None, column_id: str | None = None, develop_id: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[Any]:
+        """List dataset optimization runs.
+
+        GET /model-hub/dataset-optimization/
+        """
+        path = None
+        query = {'dataset_id': dataset_id, 'column_id': column_id, 'develop_id': develop_id, 'limit': limit, **(extra_query or {})}
+        return self._t.paginate(OP_OPTIMIZATIONS_LIST, path=path, query=query, model=None)
+
+
+class ProjectsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.ProjectDetailResult:
+        """Return a tracing project by its identifier.
+
+        GET /tracer/project/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_PROJECTS_GET, path=path, query=query, body=body, model=models.ProjectDetailResult)
+
+    def list(self, *, name: str | None = None, project_type: str | None = None, tags: str | None = None, filters: str | None = None, sort_by: str | None = None, sort_direction: Literal['asc', 'desc'] | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None) -> Any:
+        """List tracing projects available in the current workspace.
+
+        GET /tracer/project/
+        """
+        path = None
+        query = {'name': name, 'project_type': project_type, 'tags': tags, 'filters': filters, 'sort_by': sort_by, 'sort_direction': sort_direction, 'page_number': page_number, 'page_size': page_size, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_PROJECTS_LIST, path=path, query=query, body=body, model=None)
+
+
+class PromptsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+        self.versions = PromptsVersionsResource(transport)
+
+    def create(self, *, name: str, description: str | None = None, variable_names: Dict[str, Any] | None = None, prompt_folder: str | None = None, placeholders: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.PromptTemplate:
+        """Create a prompt template in the current workspace.
+
+        POST /model-hub/prompt-templates/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, 'variable_names': variable_names, 'prompt_folder': prompt_folder, 'placeholders': placeholders, **(extra_body or {})}
+        return self._t.call(OP_PROMPTS_CREATE, path=path, query=query, body=body, model=models.PromptTemplate)
+
+    def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.PromptTemplate:
+        """Open a prompt template by its identifier, creating its workbench draft if needed.
+
+        GET /model-hub/prompt-templates/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_PROMPTS_GET, path=path, query=query, body=body, model=models.PromptTemplate)
+
+    def list(self, *, name: str | None = None, version: str | None = None, created_at: str | None = None, search: str | None = None, ordering: str | None = None, limit: int | None = None, modality: List[str] | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.PromptTemplate]:
+        """List prompt templates available in the current workspace.
+
+        GET /model-hub/prompt-templates/
+        """
+        path = None
+        query = {'name': name, 'version': version, 'created_at': created_at, 'search': search, 'ordering': ordering, 'limit': limit, 'modality': modality, **(extra_query or {})}
+        return self._t.paginate(OP_PROMPTS_LIST, path=path, query=query, model=models.PromptTemplate)
+
+    def run(self, id: str, *, name: str | None = None, version: str | None = None, prompt_config: List[Dict[str, Any]] | None = None, variable_names: Dict[str, Any] | None = None, placeholders: Dict[str, Any] | None = None, evaluation_configs: List[Dict[str, Any]] | None = None, source: str | None = None, is_run: Dict[str, Any] | None = None, is_sdk: bool | None = None, run_index: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.PromptRunRequest:
+        """Run a configured prompt version by supplying version and is_run="prompt". Optionally replace prompt_config or variable_names. Returns an asynchronous receipt; read get_prompt_run with template_version for status and output.
+
+        POST /model-hub/prompt-templates/{id}/run_template/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'version': version, 'prompt_config': prompt_config, 'variable_names': variable_names, 'placeholders': placeholders, 'evaluation_configs': evaluation_configs, 'source': source, 'is_run': is_run, 'is_sdk': is_sdk, 'run_index': run_index, **(extra_body or {})}
+        return self._t.call(OP_PROMPTS_RUN, path=path, query=query, body=body, model=models.PromptRunRequest)
+
+    def run_status(self, id: str, *, template_version: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.PromptRunStatusResult:
+        """Read workbench prompt execution status and outputs. Supply template_version matching the version returned by run_prompt to read that version, otherwise the API chooses the default/latest version.
+
+        GET /model-hub/prompt-templates/{id}/get-run-status/
+        """
+        path = {'id': id}
+        query = {'template_version': template_version, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_PROMPTS_RUN_STATUS, path=path, query=query, body=body, model=models.PromptRunStatusResult)
+
+    def update(self, id: str, *, name: str | None = None, description: str | None = None, variable_names: Dict[str, Any] | None = None, prompt_folder: str | None = None, placeholders: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.PromptTemplatePatch:
+        """Update selected fields on an existing prompt template.
+
+        PATCH /model-hub/prompt-templates/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, 'variable_names': variable_names, 'prompt_folder': prompt_folder, 'placeholders': placeholders, **(extra_body or {})}
+        return self._t.call(OP_PROMPTS_UPDATE, path=path, query=query, body=body, model=models.PromptTemplatePatch)
+
+
+class SessionsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def get(self, id: str, *, navigation_context: str | None = None, user_id: str | None = None, filters: str | None = None, sort_params: str | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None) -> models.TraceSessionDetailResult:
+        """Return a trace session by its identifier.
+
+        GET /tracer/trace-session/{id}/query/
+        """
+        path = {'id': id}
+        query = {'navigation_context': navigation_context, 'user_id': user_id, 'filters': filters, 'sort_params': sort_params, 'page_number': page_number, 'page_size': page_size, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_SESSIONS_GET, path=path, query=query, body=body, model=models.TraceSessionDetailResult)
+
+    def list(self, *, project_id: str | None = None, user_id: str | None = None, bookmarked: bool | None = None, filters: str | None = None, sort_params: str | None = None, page_number: int | None = None, page_size: int | None = None, cursor: str | None = None, cursor_mode: bool | None = None, interval: str | None = None, allow_sampled: bool | None = None, extra_query: Dict[str, Any] | None = None) -> models.TraceSessionListResult:
+        """List trace sessions using the supplied filters.
+
+        GET /tracer/trace-session/list_sessions/
+        """
+        path = None
+        query = {'project_id': project_id, 'user_id': user_id, 'bookmarked': bookmarked, 'filters': filters, 'sort_params': sort_params, 'page_number': page_number, 'page_size': page_size, 'cursor': cursor, 'cursor_mode': cursor_mode, 'interval': interval, 'allow_sampled': allow_sampled, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_SESSIONS_LIST, path=path, query=query, body=body, model=models.TraceSessionListResult)
+
+
+class SimulationResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+        self.executions = SimulationExecutionsResource(transport)
+        self.scenarios = SimulationScenariosResource(transport)
+        self.tests = SimulationTestsResource(transport)
+
+
+class SpansResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def get(self, id: str, *, test_execution_id: str | None = None, call_execution_id: str | None = None, project_id: str | None = None, trace_id: str | None = None, start_hour: str | None = None, observation_type: str | None = None, service_name: str | None = None, expected_start_time: str | None = None, expected_version: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.ObservationSpanDetailResult:
+        """Return an observation span by its identifier.
+
+        GET /tracer/observation-span/{id}/
+        """
+        path = {'id': id}
+        query = {'test_execution_id': test_execution_id, 'call_execution_id': call_execution_id, 'project_id': project_id, 'trace_id': trace_id, 'start_hour': start_hour, 'observation_type': observation_type, 'service_name': service_name, 'expected_start_time': expected_start_time, 'expected_version': expected_version, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_SPANS_GET, path=path, query=query, body=body, model=models.ObservationSpanDetailResult)
+
+    def list(self, *, project_id: str | None = None, user_id: str | None = None, filters: str | None = None, page_number: int | None = None, page_size: int | None = None, cursor: str | None = None, cursor_mode: bool | None = None, allow_sampled: bool | None = None, extra_query: Dict[str, Any] | None = None) -> models.SpanObserveListResult:
+        """List observation spans using the supplied filters.
+
+        GET /tracer/observation-span/list_spans_observe/
+        """
+        path = None
+        query = {'project_id': project_id, 'user_id': user_id, 'filters': filters, 'page_number': page_number, 'page_size': page_size, 'cursor': cursor, 'cursor_mode': cursor_mode, 'allow_sampled': allow_sampled, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_SPANS_LIST, path=path, query=query, body=body, model=models.SpanObserveListResult)
+
+
+class TracesResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+        self.properties = TracesPropertiesResource(transport)
+
+    def error_analysis(self, trace_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.TraceErrorAnalysisResult:
+        """Return the recorded error analysis for a trace.
+
+        GET /tracer/trace-error-analysis/{trace_id}/
+        """
+        path = {'trace_id': trace_id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_TRACES_ERROR_ANALYSIS, path=path, query=query, body=body, model=models.TraceErrorAnalysisResult)
+
+    def get(self, id: str, *, test_execution_id: str | None = None, call_execution_id: str | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.TraceDetailResult:
+        """Return a trace by its identifier.
+
+        GET /tracer/trace/{id}/
+        """
+        path = {'id': id}
+        query = {'test_execution_id': test_execution_id, 'call_execution_id': call_execution_id, 'project_id': project_id, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_TRACES_GET, path=path, query=query, body=body, model=models.TraceDetailResult)
+
+    def list(self, *, project_id: str | None = None, project_version_id: str | None = None, session_id: str | None = None, filters: str | None = None, page_number: int | None = None, page_size: int | None = None, cursor: str | None = None, cursor_mode: bool | None = None, attribute_keys: str | None = None, allow_sampled: bool | None = None, interval: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.TraceObserveListResult:
+        """Search traces using project, time range, status, and attribute filters.
+
+        GET /tracer/trace/list_traces_of_session/
+        """
+        path = None
+        query = {'project_id': project_id, 'project_version_id': project_version_id, 'session_id': session_id, 'filters': filters, 'page_number': page_number, 'page_size': page_size, 'cursor': cursor, 'cursor_mode': cursor_mode, 'attribute_keys': attribute_keys, 'allow_sampled': allow_sampled, 'interval': interval, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_TRACES_LIST, path=path, query=query, body=body, model=models.TraceObserveListResult)
+
+
+class UsageResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def overview(self, *, period: str | None = None, period_end: str | None = None, workspace_id: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.UsageOverviewResult:
+        """Return the current organization's usage and cost overview.
+
+        GET /usage/v2/usage-overview/
+        """
+        path = None
+        query = {'period': period, 'period_end': period_end, 'workspace_id': workspace_id, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_USAGE_OVERVIEW, path=path, query=query, body=body, model=models.UsageOverviewResult)
+
+
+class WorkspacesResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def get(self, workspace_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.WorkspaceManagementListResult:
+        """Return a workspace by its identifier.
+
+        GET /accounts/workspaces/{workspace_id}/
+        """
+        path = {'workspace_id': workspace_id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_WORKSPACES_GET, path=path, query=query, body=body, model=models.WorkspaceManagementListResult)
+
+    def list(self, *, extra_query: Dict[str, Any] | None = None) -> models.WorkspaceManagementListResult:
+        """List workspaces available to the authenticated user.
+
+        GET /accounts/workspaces/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_WORKSPACES_LIST, path=path, query=query, body=body, model=models.WorkspaceManagementListResult)
 
 
 class GeneratedResources:
     """Mixed into Client: one attribute per top-level resource."""
 
     def _init_resources(self, transport: SyncTransport) -> None:
+        self.account = AccountResource(transport)
+        self.agents = AgentsResource(transport)
+        self.alerts = AlertsResource(transport)
+        self.annotation_queues = AnnotationQueuesResource(transport)
+        self.dashboards = DashboardsResource(transport)
         self.datasets = DatasetsResource(transport)
+        self.error_clusters = ErrorClustersResource(transport)
+        self.evals = EvalsResource(transport)
+        self.experiments = ExperimentsResource(transport)
+        self.gateway = GatewayResource(transport)
+        self.knowledge_bases = KnowledgeBasesResource(transport)
+        self.optimizations = OptimizationsResource(transport)
+        self.projects = ProjectsResource(transport)
+        self.prompts = PromptsResource(transport)
+        self.sessions = SessionsResource(transport)
+        self.simulation = SimulationResource(transport)
+        self.spans = SpansResource(transport)
+        self.traces = TracesResource(transport)
+        self.usage = UsageResource(transport)
+        self.workspaces = WorkspacesResource(transport)
+
+
+class AsyncAgentsVersionsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def create(self, agent_id: str, *, agent_name: str | None = None, agent_type: Literal['voice', 'text'] | None = None, description: str | None = None, provider: str | None = None, api_key: str | None = None, assistant_id: str | None = None, authentication_method: Literal['api_key'] | None = None, language: str | None = None, languages: List[str] | None = None, contact_number: str | None = None, inbound: bool | None = None, target_speaks_first: bool | None = None, knowledge_base: str | None = None, model: str | None = None, model_details: Dict[str, Any] | None = None, livekit_url: str | None = None, livekit_api_key: str | None = None, livekit_api_secret: str | None = None, livekit_agent_name: str | None = None, livekit_config_json: Dict[str, Any] | None = None, livekit_max_concurrency: int | None = None, commit_message: str | None = None, observability_enabled: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.AgentVersionCreateResponse:
+        """Snapshot agent configuration into a new version and activate it. Can also update agent configuration. Use the returned version when creating a simulation test; existing tests may remain pinned to an older version.
+
+        POST /simulate/agent-definitions/{agent_id}/versions/create/
+        """
+        path = {'agent_id': agent_id}
+        query = {**(extra_query or {})}
+        body = {'agent_name': agent_name, 'agent_type': agent_type, 'description': description, 'provider': provider, 'api_key': api_key, 'assistant_id': assistant_id, 'authentication_method': authentication_method, 'language': language, 'languages': languages, 'contact_number': contact_number, 'inbound': inbound, 'target_speaks_first': target_speaks_first, 'knowledge_base': knowledge_base, 'model': model, 'model_details': model_details, 'livekit_url': livekit_url, 'livekit_api_key': livekit_api_key, 'livekit_api_secret': livekit_api_secret, 'livekit_agent_name': livekit_agent_name, 'livekit_config_json': livekit_config_json, 'livekit_max_concurrency': livekit_max_concurrency, 'commit_message': commit_message, 'observability_enabled': observability_enabled, **(extra_body or {})}
+        return await self._t.acall(OP_AGENTS_VERSIONS_CREATE, path=path, query=query, body=body, model=models.AgentVersionCreateResponse)
+
+
+class AsyncAlertsLogsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.UserAlertMonitorLog]:
+        """List alerts that have fired in numbered pages. Use this to find out what the platform has already flagged before digging into traces or error clusters.
+
+        GET /tracer/user-alert-logs/
+        """
+        path = None
+        query = {'limit': limit, **(extra_query or {})}
+        return self._t.apaginate(OP_ALERTS_LOGS_LIST, path=path, query=query, model=models.UserAlertMonitorLog)
+
+
+class AsyncAlertsRulesResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def list(self, *, page_number: int | None = None, page_size: int | None = None, search_text: str | None = None, project_id: List[str] | None = None, status: List[Literal['triggered', 'healthy']] | None = None, metric_type: List[str] | None = None, sort_by: str | None = None, sort_direction: Literal['asc', 'desc'] | None = None, extra_query: Dict[str, Any] | None = None) -> models.UserAlertMonitorListResult:
+        """List the configured alert monitors - what each one watches, its threshold and its project. Pair with list_fired_alerts to explain why an alert fired, or to see that no monitor covers a condition the user expected to be caught.
+
+        GET /tracer/user-alerts/list_monitors/
+        """
+        path = None
+        query = {'page_number': page_number, 'page_size': page_size, 'search_text': search_text, 'project_id': project_id, 'status': status, 'metric_type': metric_type, 'sort_by': sort_by, 'sort_direction': sort_direction, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_ALERTS_RULES_LIST, path=path, query=query, body=body, model=models.UserAlertMonitorListResult)
+
+
+class AsyncAnnotationQueuesItemsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def annotate_detail(self, queue_id: str, id: str, *, annotator_id: str | None = None, include_completed: bool | None = None, view_mode: str | None = None, review_status: str | None = None, exclude_review_status: str | None = None, include_all_annotations: bool | None = None, reserve: bool | None = None, extra_query: Dict[str, Any] | None = None) -> models.QueueAnnotateDetailResult:
+        """Return everything needed to annotate one queue item; reserve=true acquires an editing reservation for the caller. Includes its source content, the queue instructions, every label with its settings (the allowed values a submitted value must match), any annotations already recorded, and the next/previous item ids. Call this before submit_annotation; the label settings are not available anywhere else.
+
+        GET /model-hub/annotation-queues/{queue_id}/items/{id}/annotate-detail/
+        """
+        path = {'queue_id': queue_id, 'id': id}
+        query = {'annotator_id': annotator_id, 'include_completed': include_completed, 'view_mode': view_mode, 'review_status': review_status, 'exclude_review_status': exclude_review_status, 'include_all_annotations': include_all_annotations, 'reserve': reserve, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_ANNOTATION_QUEUES_ITEMS_ANNOTATE_DETAIL, path=path, query=query, body=body, model=models.QueueAnnotateDetailResult)
+
+    async def complete(self, queue_id: str, id: str, *, exclude: List[str] | None = None, exclude_review_status: str | None = None, include_completed: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueNavigationResult:
+        """Mark an annotated queue item complete and return the next item to work on. Required to finish an item - submit_annotation alone leaves it in_progress and the queue never closes.
+
+        POST /model-hub/annotation-queues/{queue_id}/items/{id}/complete/
+        """
+        path = {'queue_id': queue_id, 'id': id}
+        query = {**(extra_query or {})}
+        body = {'exclude': exclude, 'exclude_review_status': exclude_review_status, 'include_completed': include_completed, **(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATION_QUEUES_ITEMS_COMPLETE, path=path, query=query, body=body, model=models.QueueNavigationResult)
+
+    def list(self, queue_id: str, *, limit: int | None = None, status: List[str] | None = None, source_type: List[str] | None = None, assigned_to: str | None = None, review_status: str | None = None, ordering: Literal['created_at', '-created_at'] | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.QueueItem]:
+        """List items belonging to an annotation queue.
+
+        GET /model-hub/annotation-queues/{queue_id}/items/
+        """
+        path = {'queue_id': queue_id}
+        query = {'limit': limit, 'status': status, 'source_type': source_type, 'assigned_to': assigned_to, 'review_status': review_status, 'ordering': ordering, **(extra_query or {})}
+        return self._t.apaginate(OP_ANNOTATION_QUEUES_ITEMS_LIST, path=path, query=query, model=models.QueueItem)
+
+    async def submit(self, queue_id: str, id: str, *, annotations: List[Dict[str, Any]], notes: str | None = None, item_notes: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueSubmitAnnotationsResult:
+        """Submit annotation values for an item in an annotation queue. The value shape must match the label's settings from get_annotation_item_detail. Submitting moves the item to in_progress only; call complete_annotation_item to finish it.
+
+        POST /model-hub/annotation-queues/{queue_id}/items/{id}/annotations/submit/
+        """
+        path = {'queue_id': queue_id, 'id': id}
+        query = {**(extra_query or {})}
+        body = {'annotations': annotations, 'notes': notes, 'item_notes': item_notes, **(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATION_QUEUES_ITEMS_SUBMIT, path=path, query=query, body=body, model=models.QueueSubmitAnnotationsResult)
+
+
+class AsyncDashboardsMetricsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def list(self, *, workflow: Literal['observability', 'dataset', 'simulation'] | None = None, project_ids: str | None = None, agent_definition_id: str | None = None, per_eval_config: bool | None = None, exclude_custom_attributes: bool | None = None, search: str | None = None, category: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None = None, role: Literal['metric', 'dimension'] | None = None, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'simulation', 'both', 'all'] | None = None, page: int | None = None, page_size: int | None = None, cursor_mode: bool | None = None, cursor: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.DashboardMetricsCatalogResult:
+        """List the metrics available to dashboard queries across traces, datasets, and simulations.
+
+        GET /tracer/dashboard/metrics/
+        """
+        path = None
+        query = {'workflow': workflow, 'project_ids': project_ids, 'agent_definition_id': agent_definition_id, 'per_eval_config': per_eval_config, 'exclude_custom_attributes': exclude_custom_attributes, 'search': search, 'category': category, 'role': role, 'source': source, 'page': page, 'page_size': page_size, 'cursor_mode': cursor_mode, 'cursor': cursor, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_DASHBOARDS_METRICS_LIST, path=path, query=query, body=body, model=models.DashboardMetricsCatalogResult)
+
+
+class AsyncDashboardsWidgetsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def create(self, dashboard_pk: str, *, name: str | None = None, description: str | None = None, position: int | None = None, width: int | None = None, height: int | None = None, query_config: Dict[str, Any] | None = None, chart_config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DashboardWidget:
+        """Add a widget to a dashboard. query_config uses the query_dashboard_metrics request shape (time_range plus metrics); discover metric names with list_dashboard_metrics.
+
+        POST /tracer/dashboard/{dashboard_pk}/widgets/
+        """
+        path = {'dashboard_pk': dashboard_pk}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, 'position': position, 'width': width, 'height': height, 'query_config': query_config, 'chart_config': chart_config, **(extra_body or {})}
+        return await self._t.acall(OP_DASHBOARDS_WIDGETS_CREATE, path=path, query=query, body=body, model=models.DashboardWidget)
+
+    async def get(self, dashboard_pk: str, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.DashboardWidget:
+        """Return a dashboard widget, including its query_config and chart_config.
+
+        GET /tracer/dashboard/{dashboard_pk}/widgets/{id}/
+        """
+        path = {'dashboard_pk': dashboard_pk, 'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_DASHBOARDS_WIDGETS_GET, path=path, query=query, body=body, model=models.DashboardWidget)
+
+    def list(self, dashboard_pk: str, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.DashboardWidget]:
+        """List the widgets on a dashboard.
+
+        GET /tracer/dashboard/{dashboard_pk}/widgets/
+        """
+        path = {'dashboard_pk': dashboard_pk}
+        query = {'limit': limit, **(extra_query or {})}
+        return self._t.apaginate(OP_DASHBOARDS_WIDGETS_LIST, path=path, query=query, model=models.DashboardWidget)
+
+    async def query(self, dashboard_pk: str, id: str, *, allow_sampled: bool | None = None, refresh: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DashboardQueryResult:
+        """Execute a saved widget's query and return its chart data.
+
+        POST /tracer/dashboard/{dashboard_pk}/widgets/{id}/query/
+        """
+        path = {'dashboard_pk': dashboard_pk, 'id': id}
+        query = {'refresh': refresh, **(extra_query or {})}
+        body = {'allow_sampled': allow_sampled, **(extra_body or {})}
+        return await self._t.acall(OP_DASHBOARDS_WIDGETS_QUERY, path=path, query=query, body=body, model=models.DashboardQueryResult)
+
+    async def update(self, dashboard_pk: str, id: str, *, name: str | None = None, description: str | None = None, position: int | None = None, width: int | None = None, height: int | None = None, query_config: Dict[str, Any] | None = None, chart_config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DashboardWidget:
+        """Update selected fields on a dashboard widget, such as its query_config, chart_config, or layout.
+
+        PATCH /tracer/dashboard/{dashboard_pk}/widgets/{id}/
+        """
+        path = {'dashboard_pk': dashboard_pk, 'id': id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, 'position': position, 'width': width, 'height': height, 'query_config': query_config, 'chart_config': chart_config, **(extra_body or {})}
+        return await self._t.acall(OP_DASHBOARDS_WIDGETS_UPDATE, path=path, query=query, body=body, model=models.DashboardWidget)
+
+
+class AsyncDatasetsCellsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def update(self, dataset_id: str, *, row_id: str, column_id: str, new_value: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Set the value of a single dataset cell. Use this to correct one value; add_dataset_rows only appends and cannot edit an existing row.
+
+        POST /model-hub/develops/{dataset_id}/update_cell_value/
+        """
+        path = {'dataset_id': dataset_id}
+        query = {**(extra_query or {})}
+        body = {'row_id': row_id, 'column_id': column_id, 'new_value': new_value, **(extra_body or {})}
+        return await self._t.acall(OP_DATASETS_CELLS_UPDATE, path=path, query=query, body=body, model=None)
 
 
 class AsyncDatasetsColumnsResource:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
 
-    async def add(self, dataset_id: str, *, new_columns_data: list[dict[str, Any]]) -> models.DatasetColumnsMutationResult:
+    async def add(self, dataset_id: str, *, new_columns_data: List[Dict[str, Any]], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DatasetColumnsMutationResult:
         """Add columns to a dataset.
 
         POST /model-hub/develops/{dataset_id}/add_columns/
         """
         path = {'dataset_id': dataset_id}
-        query = None
-        body = {'new_columns_data': new_columns_data}
+        query = {**(extra_query or {})}
+        body = {'new_columns_data': new_columns_data, **(extra_body or {})}
         return await self._t.acall(OP_DATASETS_COLUMNS_ADD, path=path, query=query, body=body, model=models.DatasetColumnsMutationResult)
+
+    async def add_static(self, dataset_id: str, *, new_column_name: str, column_type: str, source: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Create a named static input column before adding dataset rows. Supply column_type using the API schema.
+
+        POST /model-hub/develops/{dataset_id}/add_static_column/
+        """
+        path = {'dataset_id': dataset_id}
+        query = {**(extra_query or {})}
+        body = {'new_column_name': new_column_name, 'column_type': column_type, 'source': source, **(extra_body or {})}
+        return await self._t.acall(OP_DATASETS_COLUMNS_ADD_STATIC, path=path, query=query, body=body, model=None)
+
+    async def rename(self, dataset_id: str, column_id: str, *, new_column_name: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Rename an existing dataset column. This does not change its type or cell values.
+
+        PUT /model-hub/develops/{dataset_id}/update_column_name/{column_id}/
+        """
+        path = {'dataset_id': dataset_id, 'column_id': column_id}
+        query = {**(extra_query or {})}
+        body = {'new_column_name': new_column_name, **(extra_body or {})}
+        return await self._t.acall(OP_DATASETS_COLUMNS_RENAME, path=path, query=query, body=body, model=None)
+
+
+class AsyncDatasetsEvalsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def add(self, dataset_id: str, *, name: str, template_id: str, config: Dict[str, Any], kb_id: str | None = None, error_localizer: bool | None = None, model: str | None = None, eval_type: str | None = None, run: bool | None = None, save_as_template: bool | None = None, experiment_id: str | None = None, composite_weight_overrides: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Attach an evaluation template to a dataset with a lowercase name (letters, digits, hyphens or underscores; no spaces) and config.mapping column mappings. Set run=false for setup only; run=true marks it for processing. Use list_dataset_evaluations to discover the attached evaluation ID.
+
+        POST /model-hub/develops/{dataset_id}/add_user_eval/
+        """
+        path = {'dataset_id': dataset_id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'template_id': template_id, 'config': config, 'kb_id': kb_id, 'error_localizer': error_localizer, 'model': model, 'eval_type': eval_type, 'run': run, 'save_as_template': save_as_template, 'experiment_id': experiment_id, 'composite_weight_overrides': composite_weight_overrides, **(extra_body or {})}
+        return await self._t.acall(OP_DATASETS_EVALS_ADD, path=path, query=query, body=body, model=None)
+
+    async def list(self, dataset_id: str, *, eval_type: str | None = None, search_text: str | None = None, eval_categories: str | None = None, eval_tags: List[str] | None = None, use_cases: List[str] | None = None, experiment_id: str | None = None, order: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.EvalListResult:
+        """List evaluations attached to a dataset by supplying eval_type=user, including their IDs, configuration and status. These IDs, not template IDs, are used by run_dataset_evals. Without eval_type=user, the API lists available evaluation templates.
+
+        GET /model-hub/develops/{dataset_id}/get_evals_list/
+        """
+        path = {'dataset_id': dataset_id}
+        query = {'eval_type': eval_type, 'search_text': search_text, 'eval_categories': eval_categories, 'eval_tags': eval_tags, 'use_cases': use_cases, 'experiment_id': experiment_id, 'order': order, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_DATASETS_EVALS_LIST, path=path, query=query, body=body, model=models.EvalListResult)
+
+    async def run(self, dataset_id: str, *, user_eval_ids: List[str], experiment_id: str | None = None, failed_only: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Start the configured evaluations for a dataset.
+
+        POST /model-hub/develops/{dataset_id}/start_evals_process/
+        """
+        path = {'dataset_id': dataset_id}
+        query = {**(extra_query or {})}
+        body = {'user_eval_ids': user_eval_ids, 'experiment_id': experiment_id, 'failed_only': failed_only, **(extra_body or {})}
+        return await self._t.acall(OP_DATASETS_EVALS_RUN, path=path, query=query, body=body, model=None)
+
+
+class AsyncDatasetsPromptsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def add(self, *, dataset_id: str, name: str, config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Create a dataset prompt output column and immediately schedule processing of dataset rows. This can incur model usage charges. Supply dataset_id, name and config; this is separate from workbench run_prompt.
+
+        POST /model-hub/develops/add_run_prompt_column/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'dataset_id': dataset_id, 'name': name, 'config': config, **(extra_body or {})}
+        return await self._t.acall(OP_DATASETS_PROMPTS_ADD, path=path, query=query, body=body, model=None)
+
+    async def run(self, *, run_prompt_ids: List[str], row_ids: List[str] | None = None, selected_all_rows: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.ModelHubSuccessMessageResult:
+        """Queue configured dataset prompts by run_prompt_ids. Supply row_ids for selected rows, or selected_all_rows=true for all rows; with selected_all_rows=true, row_ids are EXCLUDED. Poll get_dataset for cell results and status.
+
+        POST /model-hub/run-prompt-for-rows/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'run_prompt_ids': run_prompt_ids, 'row_ids': row_ids, 'selected_all_rows': selected_all_rows, **(extra_body or {})}
+        return await self._t.acall(OP_DATASETS_PROMPTS_RUN, path=path, query=query, body=body, model=models.ModelHubSuccessMessageResult)
+
+    async def stats(self, dataset_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.DatasetRunPromptStatsResult:
+        """Return dataset prompt IDs and token, cost and timing statistics. This is not execution status; use get_dataset for cell outputs and status.
+
+        GET /model-hub/dataset/{dataset_id}/run-prompt-stats/
+        """
+        path = {'dataset_id': dataset_id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_DATASETS_PROMPTS_STATS, path=path, query=query, body=body, model=models.DatasetRunPromptStatsResult)
+
+    async def update(self, *, dataset_id: str, column_id: str, name: str | None = None, config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Update a dataset prompt column using dataset_id, column_id and config. This can schedule processing and incur model usage charges.
+
+        POST /model-hub/develops/edit_run_prompt_column/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'dataset_id': dataset_id, 'column_id': column_id, 'name': name, 'config': config, **(extra_body or {})}
+        return await self._t.acall(OP_DATASETS_PROMPTS_UPDATE, path=path, query=query, body=body, model=None)
 
 
 class AsyncDatasetsRowsResource:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
 
-    async def add(self, dataset_id: str, *, rows: list[dict[str, Any]]) -> str:
-        """Add rows to a dataset.
+    async def add(self, dataset_id: str, *, rows: List[Dict[str, Any]], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Add rows to an existing dataset using cells with column_name and value. Column names must already exist in the dataset.
 
         .. beta:: this method may change without notice.
 
@@ -133,60 +1729,1012 @@ class AsyncDatasetsRowsResource:
         """
         _stability('datasets.rows.add', 'beta')
         path = {'dataset_id': dataset_id}
-        query = None
-        body = {'rows': rows}
+        query = {**(extra_query or {})}
+        body = {'rows': rows, **(extra_body or {})}
         return await self._t.acall(OP_DATASETS_ROWS_ADD, path=path, query=query, body=body, model=None)
+
+
+class AsyncEvalsConfigsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def create(self, *, eval_template: str, project: str, name: str | None = None, config: Dict[str, Any] | None = None, mapping: Dict[str, Any] | None = None, filters: Dict[str, Any] | None = None, error_localizer: bool | None = None, kb_id: str | None = None, model: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.CustomEvalConfig:
+        """Create a custom evaluation configuration from an eval template so it can be attached to an online evaluation task. Use when list_eval_configs has no entry for the template you want to run over spans.
+
+        POST /tracer/custom-eval-config/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'eval_template': eval_template, 'project': project, 'name': name, 'config': config, 'mapping': mapping, 'filters': filters, 'error_localizer': error_localizer, 'kb_id': kb_id, 'model': model, **(extra_body or {})}
+        return await self._t.acall(OP_EVALS_CONFIGS_CREATE, path=path, query=query, body=body, model=models.CustomEvalConfig)
+
+    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.CustomEvalConfig]:
+        """List the custom evaluation configurations available for online evaluation tasks. The ids returned here are what create_eval_task takes in its `evals` argument - eval templates are a different object and their ids are not accepted there.
+
+        GET /tracer/custom-eval-config/
+        """
+        path = None
+        query = {'limit': limit, **(extra_query or {})}
+        return self._t.apaginate(OP_EVALS_CONFIGS_LIST, path=path, query=query, model=models.CustomEvalConfig)
+
+
+class AsyncEvalsGroupsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def get(self, id: str, *, name: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.EvalGroup:
+        """Return an evaluation group by its identifier.
+
+        GET /model-hub/eval-groups/{id}/
+        """
+        path = {'id': id}
+        query = {'name': name, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_EVALS_GROUPS_GET, path=path, query=query, body=body, model=models.EvalGroup)
+
+    async def list(self, *, name: str | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None) -> Any:
+        """List evaluation groups in the current workspace.
+
+        GET /model-hub/eval-groups/
+        """
+        path = None
+        query = {'name': name, 'page_number': page_number, 'page_size': page_size, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_EVALS_GROUPS_LIST, path=path, query=query, body=body, model=None)
+
+
+class AsyncEvalsTasksResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def create(self, *, project: str, name: str, sampling_rate: float, run_type: Literal['continuous', 'historical'], evals: List[str], filters: Dict[str, Any] | None = None, last_run: str | None = None, spans_limit: int | None = None, row_type: Literal['spans', 'traces', 'sessions', 'voiceCalls'] | None = None, status: Literal['pending', 'running', 'completed', 'failed', 'paused', 'deleted'] | None = None, start_time: str | None = None, end_time: str | None = None, evals_details: Dict[str, Any] | None = None, failed_spans: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalTaskCreateResult:
+        """Create an online evaluation task.
+
+        POST /tracer/eval-task/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'project': project, 'name': name, 'sampling_rate': sampling_rate, 'run_type': run_type, 'evals': evals, 'filters': filters, 'last_run': last_run, 'spans_limit': spans_limit, 'row_type': row_type, 'status': status, 'start_time': start_time, 'end_time': end_time, 'evals_details': evals_details, 'failed_spans': failed_spans, **(extra_body or {})}
+        return await self._t.acall(OP_EVALS_TASKS_CREATE, path=path, query=query, body=body, model=models.EvalTaskCreateResult)
+
+    async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.EvalTask:
+        """Return an online evaluation task by its identifier.
+
+        GET /tracer/eval-task/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_EVALS_TASKS_GET, path=path, query=query, body=body, model=models.EvalTask)
+
+    async def list(self, *, project_id: str | None = None, name: str | None = None, filters: str | None = None, sort_params: str | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None) -> models._EvalTaskListResultResponse:
+        """List online evaluation tasks in the current workspace.
+
+        GET /tracer/eval-task/list_eval_tasks/
+        """
+        path = None
+        query = {'project_id': project_id, 'name': name, 'filters': filters, 'sort_params': sort_params, 'page_number': page_number, 'page_size': page_size, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_EVALS_TASKS_LIST, path=path, query=query, body=body, model=models._EvalTaskListResultResponse)
+
+    async def pause(self, *, eval_task_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalTaskMessageResult:
+        """Pause a running online evaluation task by eval_task_id. Already-launched evaluations may finish before the worker stops.
+
+        POST /tracer/eval-task/pause_eval_task/
+        """
+        path = None
+        query = {'eval_task_id': eval_task_id, **(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(OP_EVALS_TASKS_PAUSE, path=path, query=query, body=body, model=models.EvalTaskMessageResult)
+
+    async def resume(self, *, eval_task_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalTaskMessageResult:
+        """Resume a paused online evaluation task by eval_task_id, scheduling remaining evaluations. May incur evaluation charges.
+
+        POST /tracer/eval-task/unpause_eval_task/
+        """
+        path = None
+        query = {'eval_task_id': eval_task_id, **(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(OP_EVALS_TASKS_RESUME, path=path, query=query, body=body, model=models.EvalTaskMessageResult)
+
+    async def update(self, *, edit_type: Literal['edit_rerun', 'fresh_run'], eval_task_id: str, name: str | None = None, filters: Dict[str, Any] | None = None, sampling_rate: float | None = None, spans_limit: int | None = None, run_type: Literal['continuous', 'historical'] | None = None, row_type: Literal['spans', 'traces', 'sessions', 'voiceCalls'] | None = None, status: Literal['pending', 'running', 'completed', 'failed', 'paused', 'deleted'] | None = None, evals: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalTaskUpdateResult:
+        """Update and rerun an online evaluation task using eval_task_id and edit_type. Pause a running task first. edit_rerun preserves existing results; fresh_run DELETES previous results and starts again. May incur evaluation charges.
+
+        PATCH /tracer/eval-task/update_eval_task/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'edit_type': edit_type, 'eval_task_id': eval_task_id, 'name': name, 'filters': filters, 'sampling_rate': sampling_rate, 'spans_limit': spans_limit, 'run_type': run_type, 'row_type': row_type, 'status': status, 'evals': evals, **(extra_body or {})}
+        return await self._t.acall(OP_EVALS_TASKS_UPDATE, path=path, query=query, body=body, model=models.EvalTaskUpdateResult)
+
+
+class AsyncEvalsTemplatesResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def create(self, *, name: str | None = None, is_draft: bool | None = None, eval_type: Literal['llm', 'code', 'agent'] | None = None, instructions: str | None = None, model: str | None = None, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None = None, pass_threshold: float | None = None, choice_scores: Dict[str, Any] | None = None, description: str | None = None, tags: List[str] | None = None, check_internet: bool | None = None, code: str | None = None, code_language: Literal['python', 'javascript'] | None = None, messages: List[Dict[str, Any]] | None = None, few_shot_examples: List[Dict[str, Any]] | None = None, mode: Literal['auto', 'agent', 'quick'] | None = None, tools: Dict[str, Any] | None = None, knowledge_bases: List[str] | None = None, data_injection: Dict[str, Any] | None = None, summary: Dict[str, Any] | None = None, error_localizer_enabled: bool | None = None, template_format: Literal['mustache', 'jinja'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalTemplateCreateResponseResult:
+        """Create an evaluation template.
+
+        POST /model-hub/eval-templates/create-v2/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'is_draft': is_draft, 'eval_type': eval_type, 'instructions': instructions, 'model': model, 'output_type': output_type, 'pass_threshold': pass_threshold, 'choice_scores': choice_scores, 'description': description, 'tags': tags, 'check_internet': check_internet, 'code': code, 'code_language': code_language, 'messages': messages, 'few_shot_examples': few_shot_examples, 'mode': mode, 'tools': tools, 'knowledge_bases': knowledge_bases, 'data_injection': data_injection, 'summary': summary, 'error_localizer_enabled': error_localizer_enabled, 'template_format': template_format, **(extra_body or {})}
+        return await self._t.acall(OP_EVALS_TEMPLATES_CREATE, path=path, query=query, body=body, model=models.EvalTemplateCreateResponseResult)
+
+    async def get(self, template_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.EvalTemplateDetailResponseResult:
+        """Return an evaluation template by its identifier.
+
+        GET /model-hub/eval-templates/{template_id}/detail/
+        """
+        path = {'template_id': template_id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_EVALS_TEMPLATES_GET, path=path, query=query, body=body, model=models.EvalTemplateDetailResponseResult)
+
+    async def list(self, *, page: int | None = None, page_size: int | None = None, search: str | None = None, owner_filter: Literal['all', 'user', 'system'] | None = None, filters: Dict[str, Any] | None = None, sort_by: Literal['name', 'updated_at', 'created_at'] | None = None, sort_order: Literal['asc', 'desc'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalTemplateListResponseResult:
+        """List evaluation templates using the supplied filters.
+
+        POST /model-hub/eval-templates/list/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'page': page, 'page_size': page_size, 'search': search, 'owner_filter': owner_filter, 'filters': filters, 'sort_by': sort_by, 'sort_order': sort_order, **(extra_body or {})}
+        return await self._t.acall(OP_EVALS_TEMPLATES_LIST, path=path, query=query, body=body, model=models.EvalTemplateListResponseResult)
+
+    async def update(self, template_id: str, *, name: str | None = None, eval_type: Literal['llm', 'code', 'agent'] | None = None, instructions: str | None = None, model: str | None = None, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None = None, pass_threshold: float | None = None, choice_scores: Dict[str, Any] | None = None, multi_choice: bool | None = None, description: str | None = None, tags: List[str] | None = None, check_internet: bool | None = None, code: str | None = None, code_language: Literal['python', 'javascript'] | None = None, messages: List[Dict[str, Any]] | None = None, few_shot_examples: List[Dict[str, Any]] | None = None, mode: Literal['auto', 'agent', 'quick'] | None = None, tools: Dict[str, Any] | None = None, knowledge_bases: List[str] | None = None, data_injection: Dict[str, Any] | None = None, summary: Dict[str, Any] | None = None, error_localizer_enabled: bool | None = None, publish: bool | None = None, template_format: Literal['mustache', 'jinja'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalTemplateUpdateResponseResult:
+        """Update an existing evaluation template.
+
+        PUT /model-hub/eval-templates/{template_id}/update/
+        """
+        path = {'template_id': template_id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'eval_type': eval_type, 'instructions': instructions, 'model': model, 'output_type': output_type, 'pass_threshold': pass_threshold, 'choice_scores': choice_scores, 'multi_choice': multi_choice, 'description': description, 'tags': tags, 'check_internet': check_internet, 'code': code, 'code_language': code_language, 'messages': messages, 'few_shot_examples': few_shot_examples, 'mode': mode, 'tools': tools, 'knowledge_bases': knowledge_bases, 'data_injection': data_injection, 'summary': summary, 'error_localizer_enabled': error_localizer_enabled, 'publish': publish, 'template_format': template_format, **(extra_body or {})}
+        return await self._t.acall(OP_EVALS_TEMPLATES_UPDATE, path=path, query=query, body=body, model=models.EvalTemplateUpdateResponseResult)
+
+
+class AsyncGatewayGuardrailRulesResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def list(self, *, page: int | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> Any:
+        """Per-rule guardrail trigger breakdown - which guardrail rules exist and how often each has fired. Request logs report guardrail_triggered but not which rule caused it; this is what turns "the request was blocked" into "the PII rule blocked it".
+
+        GET /agentcc/analytics/guardrail-rules/
+        """
+        path = None
+        query = {'page': page, 'limit': limit, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_GATEWAY_GUARDRAIL_RULES_LIST, path=path, query=query, body=body, model=None)
+
+
+class AsyncGatewayRequestLogsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    def list(self, *, limit: int | None = None, user_id: str | None = None, session_id: str | None = None, api_key_id: str | None = None, request_id: str | None = None, model: str | None = None, provider: str | None = None, status_code: str | None = None, min_status_code: int | None = None, max_status_code: int | None = None, is_error: bool | None = None, cache_hit: bool | None = None, fallback_used: bool | None = None, guardrail_triggered: bool | None = None, is_stream: bool | None = None, started_after: str | None = None, started_before: str | None = None, min_latency: int | None = None, max_latency: int | None = None, min_cost: float | None = None, max_cost: float | None = None, min_tokens: int | None = None, max_tokens: int | None = None, q: str | None = None, search: str | None = None, ordering: str | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.AgentccRequestLog]:
+        """List request logs recorded by the AI gateway.
+
+        GET /agentcc/request-logs/
+        """
+        path = None
+        query = {'limit': limit, 'user_id': user_id, 'session_id': session_id, 'api_key_id': api_key_id, 'request_id': request_id, 'model': model, 'provider': provider, 'status_code': status_code, 'min_status_code': min_status_code, 'max_status_code': max_status_code, 'is_error': is_error, 'cache_hit': cache_hit, 'fallback_used': fallback_used, 'guardrail_triggered': guardrail_triggered, 'is_stream': is_stream, 'started_after': started_after, 'started_before': started_before, 'min_latency': min_latency, 'max_latency': max_latency, 'min_cost': min_cost, 'max_cost': max_cost, 'min_tokens': min_tokens, 'max_tokens': max_tokens, 'q': q, 'search': search, 'ordering': ordering, **(extra_query or {})}
+        return self._t.apaginate(OP_GATEWAY_REQUEST_LOGS_LIST, path=path, query=query, model=models.AgentccRequestLog)
+
+
+class AsyncGatewaySessionsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.AgentccSession]:
+        """List AI gateway sessions with their stats. These are gateway sessions, distinct from the tracing sessions returned by list_sessions. Use this to obtain a session id for list_gateway_session_requests.
+
+        GET /agentcc/sessions/
+        """
+        path = None
+        query = {'limit': limit, **(extra_query or {})}
+        return self._t.apaginate(OP_GATEWAY_SESSIONS_LIST, path=path, query=query, model=models.AgentccSession)
+
+    async def requests(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.AgentccSession:
+        """List every request log belonging to one gateway session. Request logs carry no trace id, so grouping by session is the way to see what else happened around a failed request.
+
+        GET /agentcc/sessions/{id}/requests/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_GATEWAY_SESSIONS_REQUESTS, path=path, query=query, body=body, model=models.AgentccSession)
+
+
+class AsyncPromptsVersionsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    def list(self, id: str, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[Any]:
+        """List versions of a prompt template.
+
+        GET /model-hub/prompt-templates/{id}/versions/
+        """
+        path = {'id': id}
+        query = {'limit': limit, **(extra_query or {})}
+        return self._t.apaginate(OP_PROMPTS_VERSIONS_LIST, path=path, query=query, model=None)
+
+
+class AsyncSimulationExecutionsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def analytics(self, test_execution_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.TestExecutionAnalytics:
+        """Return aggregated analytics for a simulation test execution.
+
+        GET /simulate/test-executions/{test_execution_id}/analytics/
+        """
+        path = {'test_execution_id': test_execution_id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_SIMULATION_EXECUTIONS_ANALYTICS, path=path, query=query, body=body, model=models.TestExecutionAnalytics)
+
+    def get(self, test_execution_id: str, *, search: str | None = None, filters: str | None = None, row_groups: str | None = None, group_keys: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[Any]:
+        """Return a simulation test execution by its identifier.
+
+        GET /simulate/test-executions/{test_execution_id}/
+        """
+        path = {'test_execution_id': test_execution_id}
+        query = {'search': search, 'filters': filters, 'row_groups': row_groups, 'group_keys': group_keys, 'limit': limit, **(extra_query or {})}
+        return self._t.apaginate(OP_SIMULATION_EXECUTIONS_GET, path=path, query=query, model=None)
+
+    def list(self, *, search: str | None = None, status: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.TestExecution]:
+        """List simulation test executions.
+
+        GET /simulate/api/test-executions/
+        """
+        path = None
+        query = {'search': search, 'status': status, 'limit': limit, **(extra_query or {})}
+        return self._t.apaginate(OP_SIMULATION_EXECUTIONS_LIST, path=path, query=query, model=models.TestExecution)
+
+
+class AsyncSimulationScenariosResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def create(self, *, name: str, description: str | None = None, dataset_id: str | None = None, kind: Literal['graph', 'script', 'dataset'] | None = None, script_url: str | None = None, agent_definition_id: str | None = None, agent_definition_version_id: str | None = None, custom_instruction: str | None = None, no_of_rows: int | None = None, generate_graph: bool | None = None, graph: Dict[str, Any] | None = None, source_type: Literal['agent_definition', 'prompt'] | None = None, prompt_template_id: str | None = None, prompt_version_id: str | None = None, add_persona_automatically: bool | None = None, personas: List[str] | None = None, custom_columns: List[Dict[str, Any]] | None = None, agent_name: str | None = None, agent_prompt: str | None = None, voice_provider: str | None = None, voice_name: str | None = None, model: str | None = None, llm_temperature: float | None = None, initial_message: str | None = None, max_call_duration_in_minutes: int | None = None, interrupt_sensitivity: float | None = None, conversation_speed: float | None = None, finished_speaking_sensitivity: float | None = None, initial_message_delay: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Create an agent or prompt simulation scenario of kind dataset, script or graph. Generation is asynchronous and may incur usage charges; poll get_scenario until ready before running tests. Requires the applicable plan entitlement.
+
+        POST /simulate/scenarios/create/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, 'dataset_id': dataset_id, 'kind': kind, 'script_url': script_url, 'agent_definition_id': agent_definition_id, 'agent_definition_version_id': agent_definition_version_id, 'custom_instruction': custom_instruction, 'no_of_rows': no_of_rows, 'generate_graph': generate_graph, 'graph': graph, 'source_type': source_type, 'prompt_template_id': prompt_template_id, 'prompt_version_id': prompt_version_id, 'add_persona_automatically': add_persona_automatically, 'personas': personas, 'custom_columns': custom_columns, 'agent_name': agent_name, 'agent_prompt': agent_prompt, 'voice_provider': voice_provider, 'voice_name': voice_name, 'model': model, 'llm_temperature': llm_temperature, 'initial_message': initial_message, 'max_call_duration_in_minutes': max_call_duration_in_minutes, 'interrupt_sensitivity': interrupt_sensitivity, 'conversation_speed': conversation_speed, 'finished_speaking_sensitivity': finished_speaking_sensitivity, 'initial_message_delay': initial_message_delay, **(extra_body or {})}
+        return await self._t.acall(OP_SIMULATION_SCENARIOS_CREATE, path=path, query=query, body=body, model=None)
+
+    async def get(self, scenario_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.ScenarioDetailResponse:
+        """Return a simulation scenario by its identifier.
+
+        GET /simulate/scenarios/{scenario_id}/
+        """
+        path = {'scenario_id': scenario_id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_SIMULATION_SCENARIOS_GET, path=path, query=query, body=body, model=models.ScenarioDetailResponse)
+
+    def list(self, *, search: str | None = None, agent_definition_id: str | None = None, agent_type: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.ScenarioResponse]:
+        """List simulation scenarios in the current workspace.
+
+        GET /simulate/scenarios/
+        """
+        path = None
+        query = {'search': search, 'agent_definition_id': agent_definition_id, 'agent_type': agent_type, 'limit': limit, **(extra_query or {})}
+        return self._t.apaginate(OP_SIMULATION_SCENARIOS_LIST, path=path, query=query, model=models.ScenarioResponse)
+
+    async def update(self, scenario_id: str, *, name: str | None = None, description: str | None = None, graph: Dict[str, Any] | None = None, prompt: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.ScenarioEditResponse:
+        """Edit supported scenario fields such as name, description, graph or prompt. This is not a dataset-row editor or a simulation execution.
+
+        PUT /simulate/scenarios/{scenario_id}/edit/
+        """
+        path = {'scenario_id': scenario_id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, 'graph': graph, 'prompt': prompt, **(extra_body or {})}
+        return await self._t.acall(OP_SIMULATION_SCENARIOS_UPDATE, path=path, query=query, body=body, model=models.ScenarioEditResponse)
+
+
+class AsyncSimulationTestsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def create(self, *, name: str, agent_definition_id: str, scenario_ids: List[str], description: str | None = None, dataset_row_ids: List[str] | None = None, eval_config_ids: List[str] | None = None, evaluations_config: List[Dict[str, Any]] | None = None, enable_tool_evaluation: bool | None = None, replay_session_id: str | None = None, agent_version: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.RunTestResponse:
+        """Save a simulation test using name, agent_definition_id and scenario_ids, optionally agent_version and evaluations_config. Does not execute it; pass the returned test ID to run_simulation.
+
+        POST /simulate/run-tests/create/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'agent_definition_id': agent_definition_id, 'scenario_ids': scenario_ids, 'description': description, 'dataset_row_ids': dataset_row_ids, 'eval_config_ids': eval_config_ids, 'evaluations_config': evaluations_config, 'enable_tool_evaluation': enable_tool_evaluation, 'replay_session_id': replay_session_id, 'agent_version': agent_version, **(extra_body or {})}
+        return await self._t.acall(OP_SIMULATION_TESTS_CREATE, path=path, query=query, body=body, model=models.RunTestResponse)
+
+    async def get(self, run_test_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.RunTestResponse:
+        """Read a saved simulation test configuration, its agent/version and scenarios.
+
+        GET /simulate/run-tests/{run_test_id}/
+        """
+        path = {'run_test_id': run_test_id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_SIMULATION_TESTS_GET, path=path, query=query, body=body, model=models.RunTestResponse)
+
+    def list(self, *, search: str | None = None, simulation_type: Literal['agent_definition', 'prompt'] | None = None, prompt_template_id: str | None = None, limit: int | None = None, summary: bool | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.RunTestResponse]:
+        """List saved simulation test configurations. A test configuration is distinct from its executions; use list_test_executions to inspect runs.
+
+        GET /simulate/run-tests/
+        """
+        path = None
+        query = {'search': search, 'simulation_type': simulation_type, 'prompt_template_id': prompt_template_id, 'limit': limit, 'summary': summary, **(extra_query or {})}
+        return self._t.apaginate(OP_SIMULATION_TESTS_LIST, path=path, query=query, model=models.RunTestResponse)
+
+    async def run(self, run_test_id: str, *, scenario_ids: List[str] | None = None, simulator_id: str | None = None, select_all: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.RunTestExecutionResponse:
+        """Start a saved simulation test asynchronously. Omit scenario_ids to run all configured scenarios. Uses existing provider/worker infrastructure and can incur usage charges. Poll get_test_execution with the returned execution_id, then read get_test_execution_analytics.
+
+        POST /simulate/run-tests/{run_test_id}/execute/
+        """
+        path = {'run_test_id': run_test_id}
+        query = {**(extra_query or {})}
+        body = {'scenario_ids': scenario_ids, 'simulator_id': simulator_id, 'select_all': select_all, **(extra_body or {})}
+        return await self._t.acall(OP_SIMULATION_TESTS_RUN, path=path, query=query, body=body, model=models.RunTestExecutionResponse)
+
+
+class AsyncTracesPropertiesResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def list(self, *, workflow: Literal['observability', 'dataset', 'simulation'] | None = None, project_ids: str | None = None, agent_definition_id: str | None = None, per_eval_config: bool | None = None, exclude_custom_attributes: bool | None = None, search: str | None = None, category: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None = None, role: Literal['metric', 'dimension'] | None = None, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'simulation', 'both', 'all'] | None = None, page: int | None = None, page_size: int | None = None, cursor_mode: bool | None = None, cursor: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.DashboardMetricsCatalogResult:
+        """Discover filter properties from the shared metrics catalog. Pass cursor_mode=true, page_size (at most 50), source=traces (search_traces) or source=spans (list_spans), per_eval_config=true and project_ids when known. Use role=dimension to narrow to dimensions. Use name as column_id; set filter_config.col_type by mapping category system_metric to SYSTEM_METRIC, custom_attribute to SPAN_ATTRIBUTE, eval_metric to EVAL_METRIC, and annotation_metric to ANNOTATION. Preserve property_id and source for typed attribute bindings. Follow has_more/next_cursor by passing cursor; omit page and exclude_custom_attributes in cursor mode.
+
+        GET /tracer/dashboard/metrics/
+        """
+        path = None
+        query = {'workflow': workflow, 'project_ids': project_ids, 'agent_definition_id': agent_definition_id, 'per_eval_config': per_eval_config, 'exclude_custom_attributes': exclude_custom_attributes, 'search': search, 'category': category, 'role': role, 'source': source, 'page': page, 'page_size': page_size, 'cursor_mode': cursor_mode, 'cursor': cursor, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_TRACES_PROPERTIES_LIST, path=path, query=query, body=body, model=models.DashboardMetricsCatalogResult)
+
+
+class AsyncAccountResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def whoami(self, *, extra_query: Dict[str, Any] | None = None) -> models.UserInfoResponse:
+        """Return the authenticated user, organization, and workspace context.
+
+        GET /accounts/user-info/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_ACCOUNT_WHOAMI, path=path, query=query, body=body, model=models.UserInfoResponse)
+
+
+class AsyncAgentsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+        self.versions = AsyncAgentsVersionsResource(transport)
+
+    async def create(self, *, agent_name: str, agent_type: Literal['voice', 'text'], commit_message: str, inbound: bool | None = None, target_speaks_first: bool | None = None, description: str | None = None, provider: str | None = None, api_key: str | None = None, assistant_id: str | None = None, authentication_method: Literal['api_key'] | None = None, language: str | None = None, languages: List[str] | None = None, contact_number: str | None = None, knowledge_base: str | None = None, observability_enabled: bool | None = None, model: str | None = None, model_details: Dict[str, Any] | None = None, websocket_url: str | None = None, websocket_headers: Dict[str, Any] | None = None, replay_session_id: str | None = None, livekit_url: str | None = None, livekit_api_key: str | None = None, livekit_api_secret: str | None = None, livekit_agent_name: str | None = None, livekit_config_json: Dict[str, Any] | None = None, livekit_max_concurrency: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.AgentDefinitionCreateResponse:
+        """Create a text or voice agent definition and its first active version. Supply agent_name, agent_type and commit_message plus the configuration required for the chosen provider.
+
+        POST /simulate/agent-definitions/create/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'agent_name': agent_name, 'agent_type': agent_type, 'commit_message': commit_message, 'inbound': inbound, 'target_speaks_first': target_speaks_first, 'description': description, 'provider': provider, 'api_key': api_key, 'assistant_id': assistant_id, 'authentication_method': authentication_method, 'language': language, 'languages': languages, 'contact_number': contact_number, 'knowledge_base': knowledge_base, 'observability_enabled': observability_enabled, 'model': model, 'model_details': model_details, 'websocket_url': websocket_url, 'websocket_headers': websocket_headers, 'replay_session_id': replay_session_id, 'livekit_url': livekit_url, 'livekit_api_key': livekit_api_key, 'livekit_api_secret': livekit_api_secret, 'livekit_agent_name': livekit_agent_name, 'livekit_config_json': livekit_config_json, 'livekit_max_concurrency': livekit_max_concurrency, **(extra_body or {})}
+        return await self._t.acall(OP_AGENTS_CREATE, path=path, query=query, body=body, model=models.AgentDefinitionCreateResponse)
+
+    async def get(self, agent_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.AgentDefinitionDetailResponse:
+        """Return an agent definition by its identifier.
+
+        GET /simulate/agent-definitions/{agent_id}/
+        """
+        path = {'agent_id': agent_id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_AGENTS_GET, path=path, query=query, body=body, model=models.AgentDefinitionDetailResponse)
+
+    def list(self, *, search: str | None = None, agent_type: Literal['voice', 'text'] | None = None, agent_definition_id: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.AgentDefinitionListResponse]:
+        """List agent definitions in the current workspace.
+
+        GET /simulate/agent-definitions/
+        """
+        path = None
+        query = {'search': search, 'agent_type': agent_type, 'agent_definition_id': agent_definition_id, 'limit': limit, **(extra_query or {})}
+        return self._t.apaginate(OP_AGENTS_LIST, path=path, query=query, model=models.AgentDefinitionListResponse)
+
+    async def update(self, agent_id: str, *, observability_enabled: bool | None = None, agent_name: str | None = None, agent_type: Literal['voice', 'text'] | None = None, description: str | None = None, provider: str | None = None, api_key: str | None = None, assistant_id: str | None = None, authentication_method: Literal['api_key'] | None = None, language: str | None = None, languages: List[str] | None = None, contact_number: str | None = None, inbound: bool | None = None, target_speaks_first: bool | None = None, knowledge_base: str | None = None, model: str | None = None, model_details: Dict[str, Any] | None = None, websocket_url: str | None = None, websocket_headers: Dict[str, Any] | None = None, livekit_url: str | None = None, livekit_api_key: str | None = None, livekit_api_secret: str | None = None, livekit_agent_name: str | None = None, livekit_config_json: Dict[str, Any] | None = None, livekit_max_concurrency: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.AgentDefinitionEditResponse:
+        """Edit an agent definition. Leave observability_enabled out to keep observability as it is; send true or false to turn it on or off. To use changed configuration in a versioned simulation, subsequently call create_agent_version, or supply the changes directly to create_agent_version.
+
+        PUT /simulate/agent-definitions/{agent_id}/edit/
+        """
+        path = {'agent_id': agent_id}
+        query = {**(extra_query or {})}
+        body = {'observability_enabled': observability_enabled, 'agent_name': agent_name, 'agent_type': agent_type, 'description': description, 'provider': provider, 'api_key': api_key, 'assistant_id': assistant_id, 'authentication_method': authentication_method, 'language': language, 'languages': languages, 'contact_number': contact_number, 'inbound': inbound, 'target_speaks_first': target_speaks_first, 'knowledge_base': knowledge_base, 'model': model, 'model_details': model_details, 'websocket_url': websocket_url, 'websocket_headers': websocket_headers, 'livekit_url': livekit_url, 'livekit_api_key': livekit_api_key, 'livekit_api_secret': livekit_api_secret, 'livekit_agent_name': livekit_agent_name, 'livekit_config_json': livekit_config_json, 'livekit_max_concurrency': livekit_max_concurrency, **(extra_body or {})}
+        return await self._t.acall(OP_AGENTS_UPDATE, path=path, query=query, body=body, model=models.AgentDefinitionEditResponse)
+
+
+class AsyncAlertsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+        self.logs = AsyncAlertsLogsResource(transport)
+        self.rules = AsyncAlertsRulesResource(transport)
+
+
+class AsyncAnnotationQueuesResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+        self.items = AsyncAnnotationQueuesItemsResource(transport)
+
+    async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.AnnotationQueue:
+        """Return an annotation queue by its identifier.
+
+        GET /model-hub/annotation-queues/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_ANNOTATION_QUEUES_GET, path=path, query=query, body=body, model=models.AnnotationQueue)
+
+    def list(self, *, limit: int | None = None, status: str | None = None, search: str | None = None, include_counts: bool | None = None, archived: bool | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.AnnotationQueue]:
+        """List annotation queues in the current workspace.
+
+        GET /model-hub/annotation-queues/
+        """
+        path = None
+        query = {'limit': limit, 'status': status, 'search': search, 'include_counts': include_counts, 'archived': archived, 'page_size': page_size, **(extra_query or {})}
+        return self._t.apaginate(OP_ANNOTATION_QUEUES_LIST, path=path, query=query, model=models.AnnotationQueue)
+
+
+class AsyncDashboardsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+        self.metrics = AsyncDashboardsMetricsResource(transport)
+        self.widgets = AsyncDashboardsWidgetsResource(transport)
+
+    async def create(self, *, name: str, description: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DashboardCreateUpdate:
+        """Create an empty dashboard in the current workspace; add widgets with create_dashboard_widget.
+
+        POST /tracer/dashboard/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, **(extra_body or {})}
+        return await self._t.acall(OP_DASHBOARDS_CREATE, path=path, query=query, body=body, model=models.DashboardCreateUpdate)
+
+    async def delete(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Delete a dashboard and the widgets on it. This is the only way to remove a dashboard created earlier.
+
+        DELETE /tracer/dashboard/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(OP_DASHBOARDS_DELETE, path=path, query=query, body=body, model=None)
+
+    async def filter_values(self, *, property_id: str | None = None, metric_name: str | None = None, metric_type: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None = None, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'dataset_column', 'simulation', 'both', 'all'] | None = None, project_ids: str | None = None, dataset_id: str | None = None, search: str | None = None, page_size: int | None = None, cursor: str | None = None, attribute_type: Literal['string', 'number', 'boolean', 'array', 'map', 'json'] | None = None, extra_query: Dict[str, Any] | None = None) -> models.DashboardFilterValuesResult:
+        """List the distinct values of a metric or attribute for use in dashboard filters.
+
+        GET /tracer/dashboard/filter_values/
+        """
+        path = None
+        query = {'property_id': property_id, 'metric_name': metric_name, 'metric_type': metric_type, 'source': source, 'project_ids': project_ids, 'dataset_id': dataset_id, 'search': search, 'page_size': page_size, 'cursor': cursor, 'attribute_type': attribute_type, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_DASHBOARDS_FILTER_VALUES, path=path, query=query, body=body, model=models.DashboardFilterValuesResult)
+
+    async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.DashboardDetail:
+        """Return a dashboard and its widgets by identifier.
+
+        GET /tracer/dashboard/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_DASHBOARDS_GET, path=path, query=query, body=body, model=models.DashboardDetail)
+
+    async def list(self, *, extra_query: Dict[str, Any] | None = None) -> List[models.Dashboard]:
+        """List dashboards in the current workspace with their widget counts.
+
+        GET /tracer/dashboard/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_DASHBOARDS_LIST, path=path, query=query, body=body, model=List[models.Dashboard])
+
+    async def query(self, *, time_range: Dict[str, Any], metrics: List[Dict[str, Any]], workflow: Literal['observability', 'dataset', 'simulation'] | None = None, project_ids: List[str] | None = None, granularity: Literal['minute', 'hour', 'day', 'week', 'month'] | None = None, filters: List[Dict[str, Any]] | None = None, breakdowns: List[Dict[str, Any]] | None = None, allow_sampled: bool | None = None, refresh: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DashboardQueryResult:
+        """Run an ad-hoc dashboard query (time_range and metrics, with optional filters and breakdowns) and return chart data without saving a widget.
+
+        POST /tracer/dashboard/query/
+        """
+        path = None
+        query = {'refresh': refresh, **(extra_query or {})}
+        body = {'time_range': time_range, 'metrics': metrics, 'workflow': workflow, 'project_ids': project_ids, 'granularity': granularity, 'filters': filters, 'breakdowns': breakdowns, 'allow_sampled': allow_sampled, **(extra_body or {})}
+        return await self._t.acall(OP_DASHBOARDS_QUERY, path=path, query=query, body=body, model=models.DashboardQueryResult)
+
+    async def update(self, id: str, *, name: str, description: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DashboardCreateUpdate:
+        """Update the name or description of an existing dashboard.
+
+        PATCH /tracer/dashboard/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, **(extra_body or {})}
+        return await self._t.acall(OP_DASHBOARDS_UPDATE, path=path, query=query, body=body, model=models.DashboardCreateUpdate)
 
 
 class AsyncDatasetsResource:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
+        self.cells = AsyncDatasetsCellsResource(transport)
         self.columns = AsyncDatasetsColumnsResource(transport)
+        self.evals = AsyncDatasetsEvalsResource(transport)
+        self.prompts = AsyncDatasetsPromptsResource(transport)
         self.rows = AsyncDatasetsRowsResource(transport)
 
-    async def create(self, *, new_dataset_name: str, model_type: str | None = None, is_sdk: bool | None = None, row: int | None = None) -> models.DatasetCreateStartedResult:
-        """Create an empty dataset.
+    async def create(self, *, new_dataset_name: str, model_type: str | None = None, is_sdk: bool | None = None, row: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DatasetCreateStartedResult:
+        """Create an empty dataset in the current workspace. Use create_dataset_column before add_dataset_rows.
 
         POST /model-hub/develops/create-empty-dataset/
         """
         path = None
-        query = None
-        body = {'new_dataset_name': new_dataset_name, 'model_type': model_type, 'is_sdk': is_sdk, 'row': row}
+        query = {**(extra_query or {})}
+        body = {'new_dataset_name': new_dataset_name, 'model_type': model_type, 'is_sdk': is_sdk, 'row': row, **(extra_body or {})}
         return await self._t.acall(OP_DATASETS_CREATE, path=path, query=query, body=body, model=models.DatasetCreateStartedResult)
 
-    async def delete(self, *, dataset_ids: list[str]) -> str:
-        """Delete one or more datasets.
+    async def delete(self, *, dataset_ids: List[str], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Soft-delete one or more datasets by passing dataset_ids. This is the only way to remove a dataset created earlier; deletion cascades to the dataset's rows, columns and attached evaluations.
 
         DELETE /model-hub/develops/delete_dataset/
         """
         path = None
-        query = None
-        body = {'dataset_ids': dataset_ids}
+        query = {**(extra_query or {})}
+        body = {'dataset_ids': dataset_ids, **(extra_body or {})}
         return await self._t.acall(OP_DATASETS_DELETE, path=path, query=query, body=body, model=None)
 
-    async def get(self, dataset_id: str, *, filters: str | None = None, sort: str | None = None, search: str | None = None, page_size: int | None = None, current_page_index: int | None = None, column_config_only: bool | None = None, exact_snapshot: bool | None = None, cursor: str | None = None) -> models.DatasetTableResult:
-        """Get a dataset's columns, rows and metadata.
+    async def get(self, dataset_id: str, *, filters: str | None = None, sort: str | None = None, search: str | None = None, page_size: int | None = None, current_page_index: int | None = None, column_config_only: bool | None = None, exact_snapshot: bool | None = None, cursor: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.DatasetTableResult:
+        """Return the rows, columns, and metadata for a dataset.
 
         GET /model-hub/develops/{dataset_id}/get-dataset-table/
         """
         path = {'dataset_id': dataset_id}
-        query = {'filters': filters, 'sort': sort, 'search': search, 'page_size': page_size, 'current_page_index': current_page_index, 'column_config_only': column_config_only, 'exact_snapshot': exact_snapshot, 'cursor': cursor}
+        query = {'filters': filters, 'sort': sort, 'search': search, 'page_size': page_size, 'current_page_index': current_page_index, 'column_config_only': column_config_only, 'exact_snapshot': exact_snapshot, 'cursor': cursor, **(extra_query or {})}
         body = None
         return await self._t.acall(OP_DATASETS_GET, path=path, query=query, body=body, model=models.DatasetTableResult)
 
-    def list(self, *, search_text: str | None = None, page_size: int | None = None, sort: str | None = None) -> AsyncPager[models.DatasetListItem]:
-        """List datasets in the current workspace.
+    def list(self, *, search_text: str | None = None, page_size: int | None = None, sort: str | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.DatasetListItem]:
+        """List datasets available in the current workspace.
 
         GET /model-hub/develops/get-datasets/
         """
         path = None
-        query = {'search_text': search_text, 'page_size': page_size, 'sort': sort}
+        query = {'search_text': search_text, 'page_size': page_size, 'sort': sort, **(extra_query or {})}
         return self._t.apaginate(OP_DATASETS_LIST, path=path, query=query, model=models.DatasetListItem)
+
+
+class AsyncErrorClustersResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def get(self, cluster_id: str, *, project_id: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.FeedDetailCore:
+        """Return an error issue and its grouped trace information.
+
+        GET /tracer/feed/issues/{cluster_id}/
+        """
+        path = {'cluster_id': cluster_id}
+        query = {'project_id': project_id, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_ERROR_CLUSTERS_GET, path=path, query=query, body=body, model=models.FeedDetailCore)
+
+    async def list(self, *, project_id: str | None = None, search: str | None = None, status: Literal['escalating', 'for_review', 'acknowledged', 'resolved'] | None = None, severity: Literal['critical', 'high', 'medium', 'low'] | None = None, fix_layer: str | None = None, source: Literal['scanner', 'eval'] | None = None, issue_group: str | None = None, time_range_days: int | None = None, sort_by: Literal['last_seen', 'first_seen', 'error_count', 'unique_traces', 'severity'] | None = None, sort_dir: Literal['asc', 'desc'] | None = None, limit: int | None = None, offset: int | None = None, extra_query: Dict[str, Any] | None = None) -> models.FeedListResponse:
+        """List grouped error issues detected in project traces.
+
+        GET /tracer/feed/issues/
+        """
+        path = None
+        query = {'project_id': project_id, 'search': search, 'status': status, 'severity': severity, 'fix_layer': fix_layer, 'source': source, 'issue_group': issue_group, 'time_range_days': time_range_days, 'sort_by': sort_by, 'sort_dir': sort_dir, 'limit': limit, 'offset': offset, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_ERROR_CLUSTERS_LIST, path=path, query=query, body=body, model=models.FeedListResponse)
+
+
+class AsyncEvalsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+        self.configs = AsyncEvalsConfigsResource(transport)
+        self.groups = AsyncEvalsGroupsResource(transport)
+        self.tasks = AsyncEvalsTasksResource(transport)
+        self.templates = AsyncEvalsTemplatesResource(transport)
+
+    async def test(self, *, config: Dict[str, Any], name: str, output_type: str, model: str | None = None, eval_tags: List[str] | None = None, criteria: str | None = None, multi_choice: bool | None = None, choices: Dict[str, Any] | None = None, input_data_types: Dict[str, Any] | None = None, description: str | None = None, check_internet: bool | None = None, required_keys: List[str] | None = None, template_type: str | None = None, eval_type_id: str | None = None, template_id: str | None = None, eval_type: str | None = None, error_localizer: bool | None = None, reason_column: bool | None = None, optional_keys: List[str] | None = None, variable_keys: Dict[str, Any] | None = None, run_prompt_column: bool | None = None, template_name: str | None = None, mapping: Dict[str, Any] | None = None, output: str | None = None, config_params_desc: Dict[str, Any] | None = None, config_params_option: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.EvalExecutionResponseResult:
+        """Execute an evaluation template against supplied test inputs.
+
+        POST /model-hub/test-evaluation/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'config': config, 'name': name, 'output_type': output_type, 'model': model, 'eval_tags': eval_tags, 'criteria': criteria, 'multi_choice': multi_choice, 'choices': choices, 'input_data_types': input_data_types, 'description': description, 'check_internet': check_internet, 'required_keys': required_keys, 'template_type': template_type, 'eval_type_id': eval_type_id, 'template_id': template_id, 'eval_type': eval_type, 'error_localizer': error_localizer, 'reason_column': reason_column, 'optional_keys': optional_keys, 'variable_keys': variable_keys, 'run_prompt_column': run_prompt_column, 'template_name': template_name, 'mapping': mapping, 'output': output, 'config_params_desc': config_params_desc, 'config_params_option': config_params_option, **(extra_body or {})}
+        return await self._t.acall(OP_EVALS_TEST, path=path, query=query, body=body, model=models.EvalExecutionResponseResult)
+
+
+class AsyncExperimentsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def create(self, *, name: str, dataset_id: str, prompt_config: List[Dict[str, Any]], user_eval_metrics: List[Dict[str, Any]], column_id: str | None = None, experiment_type: Literal['llm', 'tts', 'stt', 'image'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Create and start an experiment. The new experiment's id is returned inside the `result` message as `experiment_id=<uuid>`; pass it to get_experiment to follow the run.
+
+        POST /model-hub/experiments/v2/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'dataset_id': dataset_id, 'prompt_config': prompt_config, 'user_eval_metrics': user_eval_metrics, 'column_id': column_id, 'experiment_type': experiment_type, **(extra_body or {})}
+        return await self._t.acall(OP_EXPERIMENTS_CREATE, path=path, query=query, body=body, model=None)
+
+    async def get(self, experiment_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.ExperimentDetailV2:
+        """Return an experiment by its identifier.
+
+        GET /model-hub/experiments/v2/{experiment_id}/
+        """
+        path = {'experiment_id': experiment_id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_EXPERIMENTS_GET, path=path, query=query, body=body, model=models.ExperimentDetailV2)
+
+    def list(self, *, created_at: str | None = None, status: str | None = None, dataset_id: str | None = None, search: str | None = None, ordering: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.ExperimentListV2]:
+        """List experiments in the current workspace.
+
+        GET /model-hub/experiments/v2/list/
+        """
+        path = None
+        query = {'created_at': created_at, 'status': status, 'dataset_id': dataset_id, 'search': search, 'ordering': ordering, 'limit': limit, **(extra_query or {})}
+        return self._t.apaginate(OP_EXPERIMENTS_LIST, path=path, query=query, model=models.ExperimentListV2)
+
+
+class AsyncGatewayResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+        self.guardrail_rules = AsyncGatewayGuardrailRulesResource(transport)
+        self.request_logs = AsyncGatewayRequestLogsResource(transport)
+        self.sessions = AsyncGatewaySessionsResource(transport)
+
+    async def analytics(self, *, start: str | None = None, end: str | None = None, granularity: str | None = None, api_key_id: str | None = None, extra_query: Dict[str, Any] | None = None) -> Any:
+        """Return overview usage, latency, error, and cost analytics for the AI gateway.
+
+        GET /agentcc/analytics/overview/
+        """
+        path = None
+        query = {'start': start, 'end': end, 'granularity': granularity, 'api_key_id': api_key_id, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_GATEWAY_ANALYTICS, path=path, query=query, body=body, model=None)
+
+    async def config(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.GatewayConfigResult:
+        """Return the effective configuration for an AI gateway.
+
+        GET /agentcc/gateways/{id}/config/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_GATEWAY_CONFIG, path=path, query=query, body=body, model=models.GatewayConfigResult)
+
+    async def list(self, *, extra_query: Dict[str, Any] | None = None) -> List[models.GatewaySummaryResult]:
+        """List configured AI gateways.
+
+        GET /agentcc/gateways/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_GATEWAY_LIST, path=path, query=query, body=body, model=List[models.GatewaySummaryResult])
+
+
+class AsyncKnowledgeBasesResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.KnowledgeBaseItem:
+        """Return a knowledge base and its configuration.
+
+        GET /model-hub/kb/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_KNOWLEDGE_BASES_GET, path=path, query=query, body=body, model=models.KnowledgeBaseItem)
+
+    async def list(self, *, search: str | None = None, page: int | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> models.KnowledgeBasePaginatedResult:
+        """List knowledge bases in the current workspace.
+
+        GET /model-hub/kb/
+        """
+        path = None
+        query = {'search': search, 'page': page, 'limit': limit, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_KNOWLEDGE_BASES_LIST, path=path, query=query, body=body, model=models.KnowledgeBasePaginatedResult)
+
+
+class AsyncOptimizationsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def create(self, *, name: str, column_id: str, optimizer_algorithm: Literal['random_search', 'bayesian', 'metaprompt', 'protegi', 'promptwizard', 'gepa'], optimizer_model_id: str | None = None, optimizer_config: Dict[str, Any] | None = None, user_eval_template_ids: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DatasetOptimizationCreate:
+        """Create a dataset optimization run.
+
+        POST /model-hub/dataset-optimization/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'column_id': column_id, 'optimizer_algorithm': optimizer_algorithm, 'optimizer_model_id': optimizer_model_id, 'optimizer_config': optimizer_config, 'user_eval_template_ids': user_eval_template_ids, **(extra_body or {})}
+        return await self._t.acall(OP_OPTIMIZATIONS_CREATE, path=path, query=query, body=body, model=models.DatasetOptimizationCreate)
+
+    async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.DatasetOptimizationDetail:
+        """Return a dataset optimization run by its identifier.
+
+        GET /model-hub/dataset-optimization/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_OPTIMIZATIONS_GET, path=path, query=query, body=body, model=models.DatasetOptimizationDetail)
+
+    def list(self, *, dataset_id: str | None = None, column_id: str | None = None, develop_id: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[Any]:
+        """List dataset optimization runs.
+
+        GET /model-hub/dataset-optimization/
+        """
+        path = None
+        query = {'dataset_id': dataset_id, 'column_id': column_id, 'develop_id': develop_id, 'limit': limit, **(extra_query or {})}
+        return self._t.apaginate(OP_OPTIMIZATIONS_LIST, path=path, query=query, model=None)
+
+
+class AsyncProjectsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.ProjectDetailResult:
+        """Return a tracing project by its identifier.
+
+        GET /tracer/project/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_PROJECTS_GET, path=path, query=query, body=body, model=models.ProjectDetailResult)
+
+    async def list(self, *, name: str | None = None, project_type: str | None = None, tags: str | None = None, filters: str | None = None, sort_by: str | None = None, sort_direction: Literal['asc', 'desc'] | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None) -> Any:
+        """List tracing projects available in the current workspace.
+
+        GET /tracer/project/
+        """
+        path = None
+        query = {'name': name, 'project_type': project_type, 'tags': tags, 'filters': filters, 'sort_by': sort_by, 'sort_direction': sort_direction, 'page_number': page_number, 'page_size': page_size, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_PROJECTS_LIST, path=path, query=query, body=body, model=None)
+
+
+class AsyncPromptsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+        self.versions = AsyncPromptsVersionsResource(transport)
+
+    async def create(self, *, name: str, description: str | None = None, variable_names: Dict[str, Any] | None = None, prompt_folder: str | None = None, placeholders: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.PromptTemplate:
+        """Create a prompt template in the current workspace.
+
+        POST /model-hub/prompt-templates/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, 'variable_names': variable_names, 'prompt_folder': prompt_folder, 'placeholders': placeholders, **(extra_body or {})}
+        return await self._t.acall(OP_PROMPTS_CREATE, path=path, query=query, body=body, model=models.PromptTemplate)
+
+    async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.PromptTemplate:
+        """Open a prompt template by its identifier, creating its workbench draft if needed.
+
+        GET /model-hub/prompt-templates/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_PROMPTS_GET, path=path, query=query, body=body, model=models.PromptTemplate)
+
+    def list(self, *, name: str | None = None, version: str | None = None, created_at: str | None = None, search: str | None = None, ordering: str | None = None, limit: int | None = None, modality: List[str] | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.PromptTemplate]:
+        """List prompt templates available in the current workspace.
+
+        GET /model-hub/prompt-templates/
+        """
+        path = None
+        query = {'name': name, 'version': version, 'created_at': created_at, 'search': search, 'ordering': ordering, 'limit': limit, 'modality': modality, **(extra_query or {})}
+        return self._t.apaginate(OP_PROMPTS_LIST, path=path, query=query, model=models.PromptTemplate)
+
+    async def run(self, id: str, *, name: str | None = None, version: str | None = None, prompt_config: List[Dict[str, Any]] | None = None, variable_names: Dict[str, Any] | None = None, placeholders: Dict[str, Any] | None = None, evaluation_configs: List[Dict[str, Any]] | None = None, source: str | None = None, is_run: Dict[str, Any] | None = None, is_sdk: bool | None = None, run_index: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.PromptRunRequest:
+        """Run a configured prompt version by supplying version and is_run="prompt". Optionally replace prompt_config or variable_names. Returns an asynchronous receipt; read get_prompt_run with template_version for status and output.
+
+        POST /model-hub/prompt-templates/{id}/run_template/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'version': version, 'prompt_config': prompt_config, 'variable_names': variable_names, 'placeholders': placeholders, 'evaluation_configs': evaluation_configs, 'source': source, 'is_run': is_run, 'is_sdk': is_sdk, 'run_index': run_index, **(extra_body or {})}
+        return await self._t.acall(OP_PROMPTS_RUN, path=path, query=query, body=body, model=models.PromptRunRequest)
+
+    async def run_status(self, id: str, *, template_version: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.PromptRunStatusResult:
+        """Read workbench prompt execution status and outputs. Supply template_version matching the version returned by run_prompt to read that version, otherwise the API chooses the default/latest version.
+
+        GET /model-hub/prompt-templates/{id}/get-run-status/
+        """
+        path = {'id': id}
+        query = {'template_version': template_version, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_PROMPTS_RUN_STATUS, path=path, query=query, body=body, model=models.PromptRunStatusResult)
+
+    async def update(self, id: str, *, name: str | None = None, description: str | None = None, variable_names: Dict[str, Any] | None = None, prompt_folder: str | None = None, placeholders: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.PromptTemplatePatch:
+        """Update selected fields on an existing prompt template.
+
+        PATCH /model-hub/prompt-templates/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, 'variable_names': variable_names, 'prompt_folder': prompt_folder, 'placeholders': placeholders, **(extra_body or {})}
+        return await self._t.acall(OP_PROMPTS_UPDATE, path=path, query=query, body=body, model=models.PromptTemplatePatch)
+
+
+class AsyncSessionsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def get(self, id: str, *, navigation_context: str | None = None, user_id: str | None = None, filters: str | None = None, sort_params: str | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None) -> models.TraceSessionDetailResult:
+        """Return a trace session by its identifier.
+
+        GET /tracer/trace-session/{id}/query/
+        """
+        path = {'id': id}
+        query = {'navigation_context': navigation_context, 'user_id': user_id, 'filters': filters, 'sort_params': sort_params, 'page_number': page_number, 'page_size': page_size, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_SESSIONS_GET, path=path, query=query, body=body, model=models.TraceSessionDetailResult)
+
+    async def list(self, *, project_id: str | None = None, user_id: str | None = None, bookmarked: bool | None = None, filters: str | None = None, sort_params: str | None = None, page_number: int | None = None, page_size: int | None = None, cursor: str | None = None, cursor_mode: bool | None = None, interval: str | None = None, allow_sampled: bool | None = None, extra_query: Dict[str, Any] | None = None) -> models.TraceSessionListResult:
+        """List trace sessions using the supplied filters.
+
+        GET /tracer/trace-session/list_sessions/
+        """
+        path = None
+        query = {'project_id': project_id, 'user_id': user_id, 'bookmarked': bookmarked, 'filters': filters, 'sort_params': sort_params, 'page_number': page_number, 'page_size': page_size, 'cursor': cursor, 'cursor_mode': cursor_mode, 'interval': interval, 'allow_sampled': allow_sampled, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_SESSIONS_LIST, path=path, query=query, body=body, model=models.TraceSessionListResult)
+
+
+class AsyncSimulationResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+        self.executions = AsyncSimulationExecutionsResource(transport)
+        self.scenarios = AsyncSimulationScenariosResource(transport)
+        self.tests = AsyncSimulationTestsResource(transport)
+
+
+class AsyncSpansResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def get(self, id: str, *, test_execution_id: str | None = None, call_execution_id: str | None = None, project_id: str | None = None, trace_id: str | None = None, start_hour: str | None = None, observation_type: str | None = None, service_name: str | None = None, expected_start_time: str | None = None, expected_version: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.ObservationSpanDetailResult:
+        """Return an observation span by its identifier.
+
+        GET /tracer/observation-span/{id}/
+        """
+        path = {'id': id}
+        query = {'test_execution_id': test_execution_id, 'call_execution_id': call_execution_id, 'project_id': project_id, 'trace_id': trace_id, 'start_hour': start_hour, 'observation_type': observation_type, 'service_name': service_name, 'expected_start_time': expected_start_time, 'expected_version': expected_version, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_SPANS_GET, path=path, query=query, body=body, model=models.ObservationSpanDetailResult)
+
+    async def list(self, *, project_id: str | None = None, user_id: str | None = None, filters: str | None = None, page_number: int | None = None, page_size: int | None = None, cursor: str | None = None, cursor_mode: bool | None = None, allow_sampled: bool | None = None, extra_query: Dict[str, Any] | None = None) -> models.SpanObserveListResult:
+        """List observation spans using the supplied filters.
+
+        GET /tracer/observation-span/list_spans_observe/
+        """
+        path = None
+        query = {'project_id': project_id, 'user_id': user_id, 'filters': filters, 'page_number': page_number, 'page_size': page_size, 'cursor': cursor, 'cursor_mode': cursor_mode, 'allow_sampled': allow_sampled, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_SPANS_LIST, path=path, query=query, body=body, model=models.SpanObserveListResult)
+
+
+class AsyncTracesResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+        self.properties = AsyncTracesPropertiesResource(transport)
+
+    async def error_analysis(self, trace_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.TraceErrorAnalysisResult:
+        """Return the recorded error analysis for a trace.
+
+        GET /tracer/trace-error-analysis/{trace_id}/
+        """
+        path = {'trace_id': trace_id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_TRACES_ERROR_ANALYSIS, path=path, query=query, body=body, model=models.TraceErrorAnalysisResult)
+
+    async def get(self, id: str, *, test_execution_id: str | None = None, call_execution_id: str | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.TraceDetailResult:
+        """Return a trace by its identifier.
+
+        GET /tracer/trace/{id}/
+        """
+        path = {'id': id}
+        query = {'test_execution_id': test_execution_id, 'call_execution_id': call_execution_id, 'project_id': project_id, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_TRACES_GET, path=path, query=query, body=body, model=models.TraceDetailResult)
+
+    async def list(self, *, project_id: str | None = None, project_version_id: str | None = None, session_id: str | None = None, filters: str | None = None, page_number: int | None = None, page_size: int | None = None, cursor: str | None = None, cursor_mode: bool | None = None, attribute_keys: str | None = None, allow_sampled: bool | None = None, interval: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.TraceObserveListResult:
+        """Search traces using project, time range, status, and attribute filters.
+
+        GET /tracer/trace/list_traces_of_session/
+        """
+        path = None
+        query = {'project_id': project_id, 'project_version_id': project_version_id, 'session_id': session_id, 'filters': filters, 'page_number': page_number, 'page_size': page_size, 'cursor': cursor, 'cursor_mode': cursor_mode, 'attribute_keys': attribute_keys, 'allow_sampled': allow_sampled, 'interval': interval, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_TRACES_LIST, path=path, query=query, body=body, model=models.TraceObserveListResult)
+
+
+class AsyncUsageResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def overview(self, *, period: str | None = None, period_end: str | None = None, workspace_id: str | None = None, extra_query: Dict[str, Any] | None = None) -> models.UsageOverviewResult:
+        """Return the current organization's usage and cost overview.
+
+        GET /usage/v2/usage-overview/
+        """
+        path = None
+        query = {'period': period, 'period_end': period_end, 'workspace_id': workspace_id, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_USAGE_OVERVIEW, path=path, query=query, body=body, model=models.UsageOverviewResult)
+
+
+class AsyncWorkspacesResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def get(self, workspace_id: str, *, extra_query: Dict[str, Any] | None = None) -> models.WorkspaceManagementListResult:
+        """Return a workspace by its identifier.
+
+        GET /accounts/workspaces/{workspace_id}/
+        """
+        path = {'workspace_id': workspace_id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_WORKSPACES_GET, path=path, query=query, body=body, model=models.WorkspaceManagementListResult)
+
+    async def list(self, *, extra_query: Dict[str, Any] | None = None) -> models.WorkspaceManagementListResult:
+        """List workspaces available to the authenticated user.
+
+        GET /accounts/workspaces/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_WORKSPACES_LIST, path=path, query=query, body=body, model=models.WorkspaceManagementListResult)
 
 
 class AsyncGeneratedResources:
     """Mixed into AsyncClient: one attribute per top-level resource."""
 
     def _init_resources(self, transport: AsyncTransport) -> None:
+        self.account = AsyncAccountResource(transport)
+        self.agents = AsyncAgentsResource(transport)
+        self.alerts = AsyncAlertsResource(transport)
+        self.annotation_queues = AsyncAnnotationQueuesResource(transport)
+        self.dashboards = AsyncDashboardsResource(transport)
         self.datasets = AsyncDatasetsResource(transport)
+        self.error_clusters = AsyncErrorClustersResource(transport)
+        self.evals = AsyncEvalsResource(transport)
+        self.experiments = AsyncExperimentsResource(transport)
+        self.gateway = AsyncGatewayResource(transport)
+        self.knowledge_bases = AsyncKnowledgeBasesResource(transport)
+        self.optimizations = AsyncOptimizationsResource(transport)
+        self.projects = AsyncProjectsResource(transport)
+        self.prompts = AsyncPromptsResource(transport)
+        self.sessions = AsyncSessionsResource(transport)
+        self.simulation = AsyncSimulationResource(transport)
+        self.spans = AsyncSpansResource(transport)
+        self.traces = AsyncTracesResource(transport)
+        self.usage = AsyncUsageResource(transport)
+        self.workspaces = AsyncWorkspacesResource(transport)
 

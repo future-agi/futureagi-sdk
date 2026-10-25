@@ -1,57 +1,954 @@
 # One catalog for every surface.
 #
 # Each operation has ONE shared id (`resource.method`). That id becomes:
-#   SDK  client.datasets.list()
-#   MCP  datasets_list            (unless the mcp block overrides the name)
+#   SDK  client.datasets.rows.add()
+#   MCP  datasets_rows_add          (unless mcp.name overrides it; every entry below
+#                                    keeps today's MCP tool name from the monorepo)
 #
 # `surfaces` decides where an operation ships. A surface that is missing or set
 # to false does not get the operation, so MCP and the SDK roll out independently.
 #
 #   stability: stable | beta | deprecated   (per surface, default stable)
-#   mcp:  name (override), group, access (read | write | destructive)
+#   mcp:  name, group, access (read | write | destructive), open_world, max_page_size
+#   pagination: how the SDK auto-paginates (page param, size param, first page,
+#               where the items are, and `next` or `total_pages` to know when to stop)
+#
+# Imported from future-agi/futureagi/mcp_server/catalog/tools.yaml (all 105 tools).
 
 version: 1
-
 operations:
-  - id: datasets.list
-    description: List datasets in the current workspace.
-    operation: {method: GET, path: /model-hub/develops/get-datasets/}
-    pagination: {page_param: page, size_param: page_size, first_page: 0, items: datasets, total_pages: total_pages}  # 0-based: verified on a live backend (contract does not say)
-    surfaces:
-      sdk: {}
-      mcp: {name: list_datasets, group: datasets, access: read}   # keeps today's MCP name
 
-  - id: datasets.create
-    description: Create an empty dataset.
-    operation: {method: POST, path: /model-hub/develops/create-empty-dataset/}
-    surfaces:
-      sdk: {}
-      mcp: {name: create_dataset, group: datasets, access: write}
+- id: account.whoami
+  description: Return the authenticated user, organization, and workspace context.
+  operation: {method: GET, path: /accounts/user-info/}
+  surfaces:
+    sdk: {}
+    mcp: {name: whoami, group: context, access: read}
 
-  - id: datasets.get
-    description: Get a dataset's columns, rows and metadata.
-    operation: {method: GET, path: "/model-hub/develops/{dataset_id}/get-dataset-table/"}
-    surfaces:
-      sdk: {}
-      mcp: {name: get_dataset, group: datasets, access: read}
+- id: workspaces.list
+  description: List workspaces available to the authenticated user.
+  operation: {method: GET, path: /accounts/workspaces/}
+  surfaces:
+    sdk: {}
+    mcp: {name: list_workspaces, group: context, access: read}
 
-  - id: datasets.columns.add
-    description: Add columns to a dataset.
-    operation: {method: POST, path: "/model-hub/develops/{dataset_id}/add_columns/"}
-    surfaces:
-      sdk: {}
-      mcp: {group: datasets, access: write}
+- id: workspaces.get
+  description: Return a workspace by its identifier.
+  operation: {method: GET, path: '/accounts/workspaces/{workspace_id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_workspace, group: context, access: read}
 
-  - id: datasets.rows.add
-    description: Add rows to a dataset.
-    operation: {method: POST, path: "/model-hub/develops/{dataset_id}/add_rows/"}
-    surfaces:
-      sdk: {stability: beta}   # SDK beta first; not in MCP yet
-      mcp: false
+- id: datasets.list
+  description: List datasets available in the current workspace.
+  operation: {method: GET, path: /model-hub/develops/get-datasets/}
+  pagination: {page_param: page, size_param: page_size, first_page: 0, items: datasets, total_pages: total_pages}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_datasets
+      group: datasets
+      access: read
+      max_page_size: {page_size: 100}
 
-  - id: datasets.delete
-    description: Delete one or more datasets.
-    operation: {method: DELETE, path: /model-hub/develops/delete_dataset/}
-    surfaces:
-      sdk: {}
-      mcp: false               # destructive: kept out of MCP on purpose
+- id: datasets.get
+  description: Return the rows, columns, and metadata for a dataset.
+  operation: {method: GET, path: '/model-hub/develops/{dataset_id}/get-dataset-table/'}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: get_dataset
+      group: datasets
+      access: read
+      max_page_size: {page_size: 100}
+
+- id: datasets.create
+  description: Create an empty dataset in the current workspace. Use create_dataset_column before add_dataset_rows.
+  operation: {method: POST, path: /model-hub/develops/create-empty-dataset/}
+  surfaces:
+    sdk: {}
+    mcp: {name: create_dataset, group: datasets, access: write}
+
+- id: datasets.rows.add
+  description: Add rows to an existing dataset using cells with column_name and value. Column names must already exist in the dataset.
+  operation: {method: POST, path: '/model-hub/develops/{dataset_id}/add_rows/'}
+  surfaces:
+    sdk: {stability: beta}
+    mcp: {name: add_dataset_rows, group: datasets, access: write}
+
+- id: datasets.evals.run
+  description: Start the configured evaluations for a dataset.
+  operation: {method: POST, path: '/model-hub/develops/{dataset_id}/start_evals_process/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: run_dataset_evals, group: datasets, access: write, open_world: true}
+
+- id: datasets.columns.add
+  description: Add columns to a dataset.
+  operation: {method: POST, path: '/model-hub/develops/{dataset_id}/add_columns/'}
+  surfaces:
+    sdk: {}
+    mcp: false
+
+- id: datasets.columns.add_static
+  description: Create a named static input column before adding dataset rows. Supply column_type using the API schema.
+  operation: {method: POST, path: '/model-hub/develops/{dataset_id}/add_static_column/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: create_dataset_column, group: datasets, access: write}
+
+- id: datasets.columns.rename
+  description: Rename an existing dataset column. This does not change its type or cell values.
+  operation: {method: PUT, path: '/model-hub/develops/{dataset_id}/update_column_name/{column_id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: rename_dataset_column, group: datasets, access: write}
+
+- id: datasets.evals.add
+  description: Attach an evaluation template to a dataset with a lowercase name (letters, digits, hyphens or underscores; no spaces) and config.mapping
+    column mappings. Set run=false for setup only; run=true marks it for processing. Use list_dataset_evaluations to discover the attached evaluation
+    ID.
+  operation: {method: POST, path: '/model-hub/develops/{dataset_id}/add_user_eval/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: configure_dataset_evaluation, group: datasets, access: write}
+
+- id: datasets.evals.list
+  description: List evaluations attached to a dataset by supplying eval_type=user, including their IDs, configuration and status. These IDs, not
+    template IDs, are used by run_dataset_evals. Without eval_type=user, the API lists available evaluation templates.
+  operation: {method: GET, path: '/model-hub/develops/{dataset_id}/get_evals_list/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: list_dataset_evaluations, group: datasets, access: read}
+
+- id: datasets.prompts.add
+  description: Create a dataset prompt output column and immediately schedule processing of dataset rows. This can incur model usage charges.
+    Supply dataset_id, name and config; this is separate from workbench run_prompt.
+  operation: {method: POST, path: /model-hub/develops/add_run_prompt_column/}
+  surfaces:
+    sdk: {}
+    mcp: {name: add_dataset_prompt, group: datasets, access: write, open_world: true}
+
+- id: datasets.prompts.update
+  description: Update a dataset prompt column using dataset_id, column_id and config. This can schedule processing and incur model usage charges.
+  operation: {method: POST, path: /model-hub/develops/edit_run_prompt_column/}
+  surfaces:
+    sdk: {}
+    mcp: {name: update_dataset_prompt, group: datasets, access: write, open_world: true}
+
+- id: datasets.prompts.run
+  description: Queue configured dataset prompts by run_prompt_ids. Supply row_ids for selected rows, or selected_all_rows=true for all rows; with
+    selected_all_rows=true, row_ids are EXCLUDED. Poll get_dataset for cell results and status.
+  operation: {method: POST, path: /model-hub/run-prompt-for-rows/}
+  surfaces:
+    sdk: {}
+    mcp: {name: run_dataset_prompts, group: datasets, access: write, open_world: true}
+
+- id: datasets.prompts.stats
+  description: Return dataset prompt IDs and token, cost and timing statistics. This is not execution status; use get_dataset for cell outputs
+    and status.
+  operation: {method: GET, path: '/model-hub/dataset/{dataset_id}/run-prompt-stats/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_dataset_prompt_stats, group: datasets, access: read}
+
+- id: datasets.cells.update
+  description: Set the value of a single dataset cell. Use this to correct one value; add_dataset_rows only appends and cannot edit an existing
+    row.
+  operation: {method: POST, path: '/model-hub/develops/{dataset_id}/update_cell_value/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: update_dataset_cell, group: datasets, access: write}
+
+- id: datasets.delete
+  description: Soft-delete one or more datasets by passing dataset_ids. This is the only way to remove a dataset created earlier; deletion cascades
+    to the dataset's rows, columns and attached evaluations.
+  operation: {method: DELETE, path: /model-hub/develops/delete_dataset/}
+  surfaces:
+    sdk: {}
+    mcp: {name: delete_datasets, group: datasets, access: destructive}
+
+- id: prompts.list
+  description: List prompt templates available in the current workspace.
+  operation: {method: GET, path: /model-hub/prompt-templates/}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_prompt_templates
+      group: prompts
+      access: read
+      max_page_size: {limit: 100}
+
+- id: prompts.get
+  description: Open a prompt template by its identifier, creating its workbench draft if needed.
+  operation: {method: GET, path: '/model-hub/prompt-templates/{id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_prompt_template, group: prompts, access: write}
+
+- id: prompts.versions.list
+  description: List versions of a prompt template.
+  operation: {method: GET, path: '/model-hub/prompt-templates/{id}/versions/'}
+  contract_fix: {untyped: true, note: "contract says one PromptTemplate; server returns a DRF page {count, next, results} of versions"}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_prompt_versions
+      group: prompts
+      access: read
+      max_page_size: {limit: 100}
+
+- id: prompts.create
+  description: Create a prompt template in the current workspace.
+  operation: {method: POST, path: /model-hub/prompt-templates/}
+  surfaces:
+    sdk: {}
+    mcp: {name: create_prompt_template, group: prompts, access: write}
+
+- id: prompts.update
+  description: Update selected fields on an existing prompt template.
+  operation: {method: PATCH, path: '/model-hub/prompt-templates/{id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: update_prompt_template, group: prompts, access: write}
+
+- id: prompts.run
+  description: Run a configured prompt version by supplying version and is_run="prompt". Optionally replace prompt_config or variable_names. Returns
+    an asynchronous receipt; read get_prompt_run with template_version for status and output.
+  operation: {method: POST, path: '/model-hub/prompt-templates/{id}/run_template/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: run_prompt, group: prompts, access: write, open_world: true}
+
+- id: prompts.run_status
+  description: Read workbench prompt execution status and outputs. Supply template_version matching the version returned by run_prompt to read
+    that version, otherwise the API chooses the default/latest version.
+  operation: {method: GET, path: '/model-hub/prompt-templates/{id}/get-run-status/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_prompt_run, group: prompts, access: read}
+
+- id: evals.templates.list
+  description: List evaluation templates using the supplied filters.
+  operation: {method: POST, path: /model-hub/eval-templates/list/}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_eval_templates
+      group: evaluations
+      access: read
+      max_page_size: {page_size: 100}
+
+- id: evals.templates.get
+  description: Return an evaluation template by its identifier.
+  operation: {method: GET, path: '/model-hub/eval-templates/{template_id}/detail/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_eval_template, group: evaluations, access: read}
+
+- id: evals.templates.create
+  description: Create an evaluation template.
+  operation: {method: POST, path: /model-hub/eval-templates/create-v2/}
+  surfaces:
+    sdk: {}
+    mcp: {name: create_eval_template, group: evaluations, access: write}
+
+- id: evals.templates.update
+  description: Update an existing evaluation template.
+  operation: {method: PUT, path: '/model-hub/eval-templates/{template_id}/update/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: update_eval_template, group: evaluations, access: write}
+
+- id: evals.groups.list
+  description: List evaluation groups in the current workspace.
+  operation: {method: GET, path: /model-hub/eval-groups/}
+  contract_fix: {untyped: true, note: "contract says a DRF page; server returns {status, result: {data, total_count, total_pages}}"}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_eval_groups
+      group: evaluations
+      access: read
+      max_page_size: {page_size: 100}
+
+- id: evals.groups.get
+  description: Return an evaluation group by its identifier.
+  operation: {method: GET, path: '/model-hub/eval-groups/{id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_eval_group, group: evaluations, access: read}
+
+- id: evals.test
+  description: Execute an evaluation template against supplied test inputs.
+  operation: {method: POST, path: /model-hub/test-evaluation/}
+  surfaces:
+    sdk: {}
+    mcp: {name: test_evaluation, group: evaluations, access: write, open_world: true}
+
+- id: projects.list
+  description: List tracing projects available in the current workspace.
+  operation: {method: GET, path: /tracer/project/}
+  contract_fix: {untyped: true, note: "contract says a DRF page; server returns {status, result: {projects, total_count}}"}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_projects
+      group: observability
+      access: read
+      max_page_size: {page_size: 100}
+
+- id: projects.get
+  description: Return a tracing project by its identifier.
+  operation: {method: GET, path: '/tracer/project/{id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_project, group: observability, access: read}
+
+- id: traces.list
+  description: Search traces using project, time range, status, and attribute filters.
+  operation: {method: GET, path: /tracer/trace/list_traces_of_session/}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: search_traces
+      group: observability
+      access: read
+      max_page_size: {page_size: 100}
+
+- id: traces.get
+  description: Return a trace by its identifier.
+  operation: {method: GET, path: '/tracer/trace/{id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_trace, group: observability, access: read}
+
+- id: spans.list
+  description: List observation spans using the supplied filters.
+  operation: {method: GET, path: /tracer/observation-span/list_spans_observe/}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_spans
+      group: observability
+      access: read
+      max_page_size: {page_size: 100}
+
+- id: spans.get
+  description: Return an observation span by its identifier.
+  operation: {method: GET, path: '/tracer/observation-span/{id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_span, group: observability, access: read}
+
+- id: sessions.list
+  description: List trace sessions using the supplied filters.
+  operation: {method: GET, path: /tracer/trace-session/list_sessions/}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_sessions
+      group: observability
+      access: read
+      max_page_size: {page_size: 100}
+
+- id: sessions.get
+  description: Return a trace session by its identifier.
+  operation: {method: GET, path: '/tracer/trace-session/{id}/query/'}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: get_session
+      group: observability
+      access: read
+      max_page_size: {page_size: 100}
+
+- id: traces.error_analysis
+  description: Return the recorded error analysis for a trace.
+  operation: {method: GET, path: '/tracer/trace-error-analysis/{trace_id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_trace_error_analysis, group: observability, access: read}
+
+- id: evals.tasks.list
+  description: List online evaluation tasks in the current workspace.
+  operation: {method: GET, path: /tracer/eval-task/list_eval_tasks/}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_eval_tasks
+      group: observability
+      access: read
+      max_page_size: {page_size: 100}
+
+- id: evals.tasks.get
+  description: Return an online evaluation task by its identifier.
+  operation: {method: GET, path: '/tracer/eval-task/{id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_eval_task, group: observability, access: read}
+
+- id: evals.tasks.create
+  description: Create an online evaluation task.
+  operation: {method: POST, path: /tracer/eval-task/}
+  surfaces:
+    sdk: {}
+    mcp: {name: create_eval_task, group: observability, access: write, open_world: true}
+
+- id: evals.tasks.update
+  description: Update and rerun an online evaluation task using eval_task_id and edit_type. Pause a running task first. edit_rerun preserves existing
+    results; fresh_run DELETES previous results and starts again. May incur evaluation charges.
+  operation: {method: PATCH, path: /tracer/eval-task/update_eval_task/}
+  surfaces:
+    sdk: {}
+    mcp: {name: update_eval_task, group: observability, access: destructive, open_world: true}
+
+- id: evals.configs.list
+  description: List the custom evaluation configurations available for online evaluation tasks. The ids returned here are what create_eval_task
+    takes in its `evals` argument - eval templates are a different object and their ids are not accepted there.
+  operation: {method: GET, path: /tracer/custom-eval-config/}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_eval_configs
+      group: observability
+      access: read
+      max_page_size: {limit: 100}
+
+- id: evals.configs.create
+  description: Create a custom evaluation configuration from an eval template so it can be attached to an online evaluation task. Use when list_eval_configs
+    has no entry for the template you want to run over spans.
+  operation: {method: POST, path: /tracer/custom-eval-config/}
+  surfaces:
+    sdk: {}
+    mcp: {name: create_eval_config, group: observability, access: write}
+
+- id: traces.properties.list
+  description: Discover filter properties from the shared metrics catalog. Pass cursor_mode=true, page_size (at most 50), source=traces (search_traces)
+    or source=spans (list_spans), per_eval_config=true and project_ids when known. Use role=dimension to narrow to dimensions. Use name as column_id;
+    set filter_config.col_type by mapping category system_metric to SYSTEM_METRIC, custom_attribute to SPAN_ATTRIBUTE, eval_metric to EVAL_METRIC,
+    and annotation_metric to ANNOTATION. Preserve property_id and source for typed attribute bindings. Follow has_more/next_cursor by passing
+    cursor; omit page and exclude_custom_attributes in cursor mode.
+  operation: {method: GET, path: /tracer/dashboard/metrics/}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_trace_properties
+      group: observability
+      access: read
+      max_page_size: {page_size: 50}
+
+- id: alerts.logs.list
+  description: List alerts that have fired in numbered pages. Use this to find out what the platform has already flagged before digging into traces
+    or error clusters.
+  operation: {method: GET, path: /tracer/user-alert-logs/}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_fired_alerts
+      group: observability
+      access: read
+      max_page_size: {limit: 100}
+
+- id: alerts.rules.list
+  description: List the configured alert monitors - what each one watches, its threshold and its project. Pair with list_fired_alerts to explain
+    why an alert fired, or to see that no monitor covers a condition the user expected to be caught.
+  operation: {method: GET, path: /tracer/user-alerts/list_monitors/}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_alert_rules
+      group: observability
+      access: read
+      max_page_size: {page_size: 100}
+
+- id: evals.tasks.pause
+  description: Pause a running online evaluation task by eval_task_id. Already-launched evaluations may finish before the worker stops.
+  operation: {method: POST, path: /tracer/eval-task/pause_eval_task/}
+  surfaces:
+    sdk: {}
+    mcp: {name: pause_eval_task, group: observability, access: write}
+
+- id: evals.tasks.resume
+  description: Resume a paused online evaluation task by eval_task_id, scheduling remaining evaluations. May incur evaluation charges.
+  operation: {method: POST, path: /tracer/eval-task/unpause_eval_task/}
+  surfaces:
+    sdk: {}
+    mcp: {name: resume_eval_task, group: observability, access: write, open_world: true}
+
+- id: error_clusters.list
+  description: List grouped error issues detected in project traces.
+  operation: {method: GET, path: /tracer/feed/issues/}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_error_clusters
+      group: error_feed
+      access: read
+      max_page_size: {limit: 100}
+
+- id: error_clusters.get
+  description: Return an error issue and its grouped trace information.
+  operation: {method: GET, path: '/tracer/feed/issues/{cluster_id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_error_cluster, group: error_feed, access: read}
+
+- id: annotation_queues.list
+  description: List annotation queues in the current workspace.
+  operation: {method: GET, path: /model-hub/annotation-queues/}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_annotation_queues
+      group: annotations
+      access: read
+      max_page_size: {limit: 100, page_size: 100}
+
+- id: annotation_queues.get
+  description: Return an annotation queue by its identifier.
+  operation: {method: GET, path: '/model-hub/annotation-queues/{id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_annotation_queue, group: annotations, access: read}
+
+- id: annotation_queues.items.list
+  description: List items belonging to an annotation queue.
+  operation: {method: GET, path: '/model-hub/annotation-queues/{queue_id}/items/'}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_annotation_queue_items
+      group: annotations
+      access: read
+      max_page_size: {limit: 100}
+
+- id: annotation_queues.items.annotate_detail
+  description: Return everything needed to annotate one queue item; reserve=true acquires an editing reservation for the caller. Includes its
+    source content, the queue instructions, every label with its settings (the allowed values a submitted value must match), any annotations already
+    recorded, and the next/previous item ids. Call this before submit_annotation; the label settings are not available anywhere else.
+  operation: {method: GET, path: '/model-hub/annotation-queues/{queue_id}/items/{id}/annotate-detail/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_annotation_item_detail, group: annotations, access: write}
+
+- id: annotation_queues.items.submit
+  description: Submit annotation values for an item in an annotation queue. The value shape must match the label's settings from get_annotation_item_detail.
+    Submitting moves the item to in_progress only; call complete_annotation_item to finish it.
+  operation: {method: POST, path: '/model-hub/annotation-queues/{queue_id}/items/{id}/annotations/submit/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: submit_annotation, group: annotations, access: write}
+
+- id: annotation_queues.items.complete
+  description: Mark an annotated queue item complete and return the next item to work on. Required to finish an item - submit_annotation alone
+    leaves it in_progress and the queue never closes.
+  operation: {method: POST, path: '/model-hub/annotation-queues/{queue_id}/items/{id}/complete/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: complete_annotation_item, group: annotations, access: write}
+
+- id: experiments.list
+  description: List experiments in the current workspace.
+  operation: {method: GET, path: /model-hub/experiments/v2/list/}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_experiments
+      group: experiments
+      access: read
+      max_page_size: {limit: 100}
+
+- id: experiments.get
+  description: Return an experiment by its identifier.
+  operation: {method: GET, path: '/model-hub/experiments/v2/{experiment_id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_experiment, group: experiments, access: read}
+
+- id: experiments.create
+  description: Create and start an experiment. The new experiment's id is returned inside the `result` message as `experiment_id=<uuid>`; pass
+    it to get_experiment to follow the run.
+  operation: {method: POST, path: /model-hub/experiments/v2/}
+  surfaces:
+    sdk: {}
+    mcp: {name: create_experiment, group: experiments, access: write, open_world: true}
+
+- id: optimizations.list
+  description: List dataset optimization runs.
+  operation: {method: GET, path: /model-hub/dataset-optimization/}
+  contract_fix: {untyped: true, note: "contract says a DRF page; server returns {status, result: {metadata: {total_rows}, table}}"}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: table, total_items: metadata.total_rows}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_optimization_runs
+      group: optimization
+      access: read
+      max_page_size: {limit: 100}
+
+- id: optimizations.get
+  description: Return a dataset optimization run by its identifier.
+  operation: {method: GET, path: '/model-hub/dataset-optimization/{id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_optimization_run, group: optimization, access: read}
+
+- id: optimizations.create
+  description: Create a dataset optimization run.
+  operation: {method: POST, path: /model-hub/dataset-optimization/}
+  surfaces:
+    sdk: {}
+    mcp: {name: create_optimization_run, group: optimization, access: write, open_world: true}
+
+- id: agents.list
+  description: List agent definitions in the current workspace.
+  operation: {method: GET, path: /simulate/agent-definitions/}
+  contract_fix: {page_items: results, note: "contract says a bare array; server returns a DRF page {count, next, results}"}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_agents
+      group: agents
+      access: read
+      max_page_size: {limit: 100}
+
+- id: agents.get
+  description: Return an agent definition by its identifier.
+  operation: {method: GET, path: '/simulate/agent-definitions/{agent_id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_agent, group: agents, access: read}
+
+- id: simulation.scenarios.list
+  description: List simulation scenarios in the current workspace.
+  operation: {method: GET, path: /simulate/scenarios/}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_scenarios
+      group: agents
+      access: read
+      max_page_size: {limit: 100}
+
+- id: simulation.executions.list
+  description: List simulation test executions.
+  operation: {method: GET, path: /simulate/api/test-executions/}
+  contract_fix: {page_items: results, note: "contract says a bare array; server returns a DRF page {count, next, results}"}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_test_executions
+      group: agents
+      access: read
+      max_page_size: {limit: 100}
+
+- id: simulation.executions.get
+  description: Return a simulation test execution by its identifier.
+  operation: {method: GET, path: '/simulate/test-executions/{test_execution_id}/'}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: get_test_execution
+      group: agents
+      access: read
+      max_page_size: {limit: 100}
+
+- id: simulation.tests.run
+  description: Start a saved simulation test asynchronously. Omit scenario_ids to run all configured scenarios. Uses existing provider/worker
+    infrastructure and can incur usage charges. Poll get_test_execution with the returned execution_id, then read get_test_execution_analytics.
+  operation: {method: POST, path: '/simulate/run-tests/{run_test_id}/execute/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: run_simulation, group: agents, access: write, open_world: true}
+
+- id: simulation.scenarios.get
+  description: Return a simulation scenario by its identifier.
+  operation: {method: GET, path: '/simulate/scenarios/{scenario_id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_scenario, group: simulation, access: read}
+
+- id: simulation.executions.analytics
+  description: Return aggregated analytics for a simulation test execution.
+  operation: {method: GET, path: '/simulate/test-executions/{test_execution_id}/analytics/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_test_execution_analytics, group: simulation, access: read}
+
+- id: agents.create
+  description: Create a text or voice agent definition and its first active version. Supply agent_name, agent_type and commit_message plus the
+    configuration required for the chosen provider.
+  operation: {method: POST, path: /simulate/agent-definitions/create/}
+  surfaces:
+    sdk: {}
+    mcp: {name: create_agent, group: simulation, access: write}
+
+- id: agents.update
+  description: Edit an agent definition. Leave observability_enabled out to keep observability as it is; send true or false to turn it on or off.
+    To use changed configuration in a versioned simulation, subsequently call create_agent_version, or supply the changes directly to create_agent_version.
+  operation: {method: PUT, path: '/simulate/agent-definitions/{agent_id}/edit/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: update_agent, group: simulation, access: write}
+
+- id: agents.versions.create
+  description: Snapshot agent configuration into a new version and activate it. Can also update agent configuration. Use the returned version
+    when creating a simulation test; existing tests may remain pinned to an older version.
+  operation: {method: POST, path: '/simulate/agent-definitions/{agent_id}/versions/create/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: create_agent_version, group: simulation, access: write}
+
+- id: simulation.scenarios.create
+  description: Create an agent or prompt simulation scenario of kind dataset, script or graph. Generation is asynchronous and may incur usage
+    charges; poll get_scenario until ready before running tests. Requires the applicable plan entitlement.
+  operation: {method: POST, path: /simulate/scenarios/create/}
+  surfaces:
+    sdk: {}
+    mcp: {name: create_scenario, group: simulation, access: write, open_world: true}
+
+- id: simulation.scenarios.update
+  description: Edit supported scenario fields such as name, description, graph or prompt. This is not a dataset-row editor or a simulation execution.
+  operation: {method: PUT, path: '/simulate/scenarios/{scenario_id}/edit/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: update_scenario, group: simulation, access: write}
+
+- id: simulation.tests.list
+  description: List saved simulation test configurations. A test configuration is distinct from its executions; use list_test_executions to inspect
+    runs.
+  operation: {method: GET, path: /simulate/run-tests/}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_simulation_tests
+      group: simulation
+      access: read
+      max_page_size: {limit: 100}
+
+- id: simulation.tests.get
+  description: Read a saved simulation test configuration, its agent/version and scenarios.
+  operation: {method: GET, path: '/simulate/run-tests/{run_test_id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_simulation_test, group: simulation, access: read}
+
+- id: simulation.tests.create
+  description: Save a simulation test using name, agent_definition_id and scenario_ids, optionally agent_version and evaluations_config. Does
+    not execute it; pass the returned test ID to run_simulation.
+  operation: {method: POST, path: /simulate/run-tests/create/}
+  surfaces:
+    sdk: {}
+    mcp: {name: create_simulation_test, group: simulation, access: write}
+
+- id: gateway.list
+  description: List configured AI gateways.
+  operation: {method: GET, path: /agentcc/gateways/}
+  surfaces:
+    sdk: {}
+    mcp: {name: list_gateways, group: gateway, access: read}
+
+- id: gateway.config
+  description: Return the effective configuration for an AI gateway.
+  operation: {method: GET, path: '/agentcc/gateways/{id}/config/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_gateway_config, group: gateway, access: read}
+
+- id: gateway.request_logs.list
+  description: List request logs recorded by the AI gateway.
+  operation: {method: GET, path: /agentcc/request-logs/}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_gateway_request_logs
+      group: gateway
+      access: read
+      max_page_size: {limit: 100}
+
+- id: gateway.guardrail_rules.list
+  description: Per-rule guardrail trigger breakdown - which guardrail rules exist and how often each has fired. Request logs report guardrail_triggered
+    but not which rule caused it; this is what turns "the request was blocked" into "the PII rule blocked it".
+  operation: {method: GET, path: /agentcc/analytics/guardrail-rules/}
+  contract_fix: {untyped: true, note: "contract says a DRF page; server returns {status, result: {rules}} with no paging"}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_guardrail_rules
+      group: gateway
+      access: read
+      max_page_size: {limit: 100}
+
+- id: gateway.sessions.list
+  description: List AI gateway sessions with their stats. These are gateway sessions, distinct from the tracing sessions returned by list_sessions.
+    Use this to obtain a session id for list_gateway_session_requests.
+  operation: {method: GET, path: /agentcc/sessions/}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_gateway_sessions
+      group: gateway
+      access: read
+      max_page_size: {limit: 100}
+
+- id: gateway.sessions.requests
+  description: List every request log belonging to one gateway session. Request logs carry no trace id, so grouping by session is the way to see
+    what else happened around a failed request.
+  operation: {method: GET, path: '/agentcc/sessions/{id}/requests/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: list_gateway_session_requests, group: gateway, access: read}
+
+- id: gateway.analytics
+  description: Return overview usage, latency, error, and cost analytics for the AI gateway.
+  operation: {method: GET, path: /agentcc/analytics/overview/}
+  contract_fix: {untyped: true, note: "contract says a list of AgentccRequestLog; server returns {status, result: {total_requests, total_tokens, ...}} overview stats"}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_gateway_analytics, group: gateway, access: read}
+
+- id: knowledge_bases.list
+  description: List knowledge bases in the current workspace.
+  operation: {method: GET, path: /model-hub/kb/}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_knowledge_bases
+      group: datasets
+      access: read
+      max_page_size: {limit: 100}
+
+- id: knowledge_bases.get
+  description: Return a knowledge base and its configuration.
+  operation: {method: GET, path: '/model-hub/kb/{id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_knowledge_base, group: datasets, access: read}
+
+- id: dashboards.list
+  description: List dashboards in the current workspace with their widget counts.
+  operation: {method: GET, path: /tracer/dashboard/}
+  surfaces:
+    sdk: {}
+    mcp: {name: list_dashboards, group: dashboards, access: read}
+
+- id: dashboards.get
+  description: Return a dashboard and its widgets by identifier.
+  operation: {method: GET, path: '/tracer/dashboard/{id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_dashboard, group: dashboards, access: read}
+
+- id: dashboards.create
+  description: Create an empty dashboard in the current workspace; add widgets with create_dashboard_widget.
+  operation: {method: POST, path: /tracer/dashboard/}
+  surfaces:
+    sdk: {}
+    mcp: {name: create_dashboard, group: dashboards, access: write}
+
+- id: dashboards.update
+  description: Update the name or description of an existing dashboard.
+  operation: {method: PATCH, path: '/tracer/dashboard/{id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: update_dashboard, group: dashboards, access: write}
+
+- id: dashboards.widgets.list
+  description: List the widgets on a dashboard.
+  operation: {method: GET, path: '/tracer/dashboard/{dashboard_pk}/widgets/'}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_dashboard_widgets
+      group: dashboards
+      access: read
+      max_page_size: {limit: 100}
+
+- id: dashboards.widgets.get
+  description: Return a dashboard widget, including its query_config and chart_config.
+  operation: {method: GET, path: '/tracer/dashboard/{dashboard_pk}/widgets/{id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_dashboard_widget, group: dashboards, access: read}
+
+- id: dashboards.widgets.create
+  description: Add a widget to a dashboard. query_config uses the query_dashboard_metrics request shape (time_range plus metrics); discover metric
+    names with list_dashboard_metrics.
+  operation: {method: POST, path: '/tracer/dashboard/{dashboard_pk}/widgets/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: create_dashboard_widget, group: dashboards, access: write}
+
+- id: dashboards.widgets.update
+  description: Update selected fields on a dashboard widget, such as its query_config, chart_config, or layout.
+  operation: {method: PATCH, path: '/tracer/dashboard/{dashboard_pk}/widgets/{id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: update_dashboard_widget, group: dashboards, access: write}
+
+- id: dashboards.widgets.query
+  description: Execute a saved widget's query and return its chart data.
+  operation: {method: POST, path: '/tracer/dashboard/{dashboard_pk}/widgets/{id}/query/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: query_dashboard_widget, group: dashboards, access: read}
+
+- id: dashboards.delete
+  description: Delete a dashboard and the widgets on it. This is the only way to remove a dashboard created earlier.
+  operation: {method: DELETE, path: '/tracer/dashboard/{id}/'}
+  surfaces:
+    sdk: {}
+    mcp: {name: delete_dashboard, group: dashboards, access: destructive}
+
+- id: dashboards.query
+  description: Run an ad-hoc dashboard query (time_range and metrics, with optional filters and breakdowns) and return chart data without saving
+    a widget.
+  operation: {method: POST, path: /tracer/dashboard/query/}
+  surfaces:
+    sdk: {}
+    mcp: {name: query_dashboard_metrics, group: dashboards, access: read}
+
+- id: dashboards.metrics.list
+  description: List the metrics available to dashboard queries across traces, datasets, and simulations.
+  operation: {method: GET, path: /tracer/dashboard/metrics/}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_dashboard_metrics
+      group: dashboards
+      access: read
+      max_page_size: {page_size: 100}
+
+- id: dashboards.filter_values
+  description: List the distinct values of a metric or attribute for use in dashboard filters.
+  operation: {method: GET, path: /tracer/dashboard/filter_values/}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: get_dashboard_filter_values
+      group: dashboards
+      access: read
+      max_page_size: {page_size: 100}
+
+- id: usage.overview
+  description: Return the current organization's usage and cost overview.
+  operation: {method: GET, path: /usage/v2/usage-overview/}
+  surfaces:
+    sdk: {}
+    mcp: {name: get_usage_overview, group: usage, access: read}

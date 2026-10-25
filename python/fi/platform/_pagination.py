@@ -3,6 +3,7 @@
 Each catalog operation states its style, e.g.
     {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
     {page_param: page_number, size_param: page_size, first_page: 0, items: table, total_pages: metadata.total_pages}
+    {page_param: page, size_param: limit, first_page: 1, items: table, total_items: metadata.total_rows}
 so one pager handles all of them.
 """
 
@@ -40,11 +41,14 @@ class _PagerBase(Generic[T]):
     def _items(self, data: Any) -> list[T]:
         return [self._parse(item) for item in (_get(data, self._spec["items"]) or [])]
 
-    def _is_last(self, data: Any, page: int, count: int) -> bool:
+    def _is_last(self, data: Any, page: int, count: int, seen: int) -> bool:
         if count == 0:
             return True
         if "next" in self._spec:
             return not _get(data, self._spec["next"])
+        if "total_items" in self._spec:
+            total = _get(data, self._spec["total_items"])
+            return total is None or seen >= total
         total = _get(data, self._spec["total_pages"])
         return total is None or page - self._spec["first_page"] + 1 >= total
 
@@ -62,12 +66,13 @@ class SyncPager(_PagerBase[T]):
         return Page(self._items(data), page, data)
 
     def __iter__(self) -> Iterator[T]:
-        page = self._spec["first_page"]
+        page, seen = self._spec["first_page"], 0
         for _ in range(MAX_PAGES):
             data = self._fetch(page)
             items = self._items(data)
+            seen += len(items)
             yield from items
-            if self._is_last(data, page, len(items)):
+            if self._is_last(data, page, len(items), seen):
                 return
             page += 1
 
@@ -93,13 +98,14 @@ class AsyncPager(_PagerBase[T]):
         return Page(self._items(data), page, data)
 
     async def __aiter__(self) -> AsyncIterator[T]:
-        page = self._spec["first_page"]
+        page, seen = self._spec["first_page"], 0
         for _ in range(MAX_PAGES):
             data = await self._fetch(page)
             items = self._items(data)
+            seen += len(items)
             for item in items:
                 yield item
-            if self._is_last(data, page, len(items)):
+            if self._is_last(data, page, len(items), seen):
                 return
             page += 1
 

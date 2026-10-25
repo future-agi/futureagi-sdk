@@ -3,16 +3,24 @@
 from __future__ import annotations
 
 import asyncio
+import functools
 import random
 import time
+import warnings
 from dataclasses import dataclass
 from typing import Any
 from urllib.parse import quote
 
 import httpx
+from pydantic import TypeAdapter, ValidationError
 
-from ._errors import APIConnectionError, error_from_response
-from ._pagination import AsyncPager, SyncPager
+from ._errors import (
+    APIConnectionError,
+    ResponseShapeWarning,
+    ResponseValidationError,
+    error_from_response,
+)
+from ._pagination import AsyncPager, SyncPager, _get
 
 RETRY_STATUSES = {408, 429, 500, 502, 503, 504}
 
@@ -36,6 +44,7 @@ class Config:
     timeout: float
     max_retries: int
     workspace_id: str | None = None
+    strict_responses: bool = False
 
     def headers(self) -> dict[str, str]:
         headers = {
@@ -55,9 +64,10 @@ def _url(op: Operation, path: dict | None) -> str:
     return url
 
 
-def _clean(params: dict | None) -> dict | None:
-    if params is None:
-        return None
+def _clean(params: Any) -> Any:
+    """Drop unset (None) fields; a non-dict body (e.g. a list) is sent as is."""
+    if not isinstance(params, dict):
+        return params
     return {k: v for k, v in params.items() if v is not None}
 
 
@@ -67,13 +77,45 @@ def _decode(op: Operation, response: httpx.Response) -> Any:
     data = response.json()
     if op.unwrap and isinstance(data, dict) and op.unwrap in data:
         return data[op.unwrap]
+    # The backend wraps most successes in {status, result}, but the contract often leaves
+    # the envelope out, so unwrap it whenever it is exactly that shape.
+    if isinstance(data, dict) and data.keys() == {"status", "result"} and data["status"] is True:
+        return data["result"]
     return data
 
 
-def _parse(model: Any, data: Any) -> Any:
+@functools.lru_cache(maxsize=None)
+def _adapter(model: Any) -> TypeAdapter:
+    return TypeAdapter(model)
+
+
+def _parse(op: Operation, model: Any, data: Any, strict: bool) -> Any:
+    """Validate into the generated model (or `List[model]`); untyped responses pass through.
+
+    A response that does not match the contract never breaks a call by default: the
+    caller gets the raw JSON and a ResponseShapeWarning. Tests run strict to catch drift.
+    """
     if model is None or data is None:
         return data
-    return model.model_validate(data)
+    try:
+        return _adapter(model).validate_python(data)
+    except ValidationError as exc:
+        if strict:
+            raise ResponseValidationError(op.id, exc, data) from exc
+        warnings.warn(f"{op.id}: response does not match the contract; returning raw JSON", ResponseShapeWarning, stacklevel=4)
+        return data
+
+
+def _check_page(op: Operation, data: Any, strict: bool) -> Any:
+    """A page without its items list means the contract's page shape is wrong; never
+    let that look like an empty result."""
+    if isinstance(_get(data, op.pagination["items"]), list):
+        return data
+    message = f"{op.id}: page has no {op.pagination['items']!r} list"
+    if strict:
+        raise ResponseValidationError(op.id, ValueError(message), data)
+    warnings.warn(message, ResponseShapeWarning, stacklevel=4)
+    return data
 
 
 def _backoff(attempt: int, response: httpx.Response | None) -> float:
@@ -114,15 +156,16 @@ class SyncTransport:
         raise AssertionError("unreachable")
 
     def call(self, op: Operation, *, path=None, query=None, body=None, model=None) -> Any:
-        return _parse(model, self.request(op, path=path, query=query, body=body))
+        return _parse(op, model, self.request(op, path=path, query=query, body=body), self.config.strict_responses)
 
     def paginate(self, op: Operation, *, path=None, query=None, model=None) -> SyncPager:
         spec = op.pagination
 
         def fetch(page: int) -> Any:
-            return self.request(op, path=path, query={**(query or {}), spec["page_param"]: page})
+            data = self.request(op, path=path, query={**(query or {}), spec["page_param"]: page})
+            return _check_page(op, data, self.config.strict_responses)
 
-        return SyncPager(fetch, spec, lambda item: _parse(model, item))
+        return SyncPager(fetch, spec, lambda item: _parse(op, model, item, self.config.strict_responses))
 
     def close(self) -> None:
         self._http.close()
@@ -156,15 +199,16 @@ class AsyncTransport:
         raise AssertionError("unreachable")
 
     async def acall(self, op: Operation, *, path=None, query=None, body=None, model=None) -> Any:
-        return _parse(model, await self.request(op, path=path, query=query, body=body))
+        return _parse(op, model, await self.request(op, path=path, query=query, body=body), self.config.strict_responses)
 
     def apaginate(self, op: Operation, *, path=None, query=None, model=None) -> AsyncPager:
         spec = op.pagination
 
         async def fetch(page: int) -> Any:
-            return await self.request(op, path=path, query={**(query or {}), spec["page_param"]: page})
+            data = await self.request(op, path=path, query={**(query or {}), spec["page_param"]: page})
+            return _check_page(op, data, self.config.strict_responses)
 
-        return AsyncPager(fetch, spec, lambda item: _parse(model, item))
+        return AsyncPager(fetch, spec, lambda item: _parse(op, model, item, self.config.strict_responses))
 
     async def aclose(self) -> None:
         await self._http.aclose()
