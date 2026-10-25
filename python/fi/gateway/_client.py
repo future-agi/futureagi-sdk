@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
-import os
 import threading
 from collections.abc import Callable
 from typing import Any
 
-from fi.gateway._constants import DEFAULT_MAX_RETRIES, NOT_GIVEN
+from fi.gateway._constants import (
+    AGENTCC_PARAM_TO_HEADER,
+    DEFAULT_MAX_RETRIES,
+    NOT_GIVEN,
+)
+from fi.gateway._env import clean_base_url, env_api_key, env_base_url
 
 
 class AgentCC:
@@ -47,16 +51,18 @@ class AgentCC:
     ) -> None:
         from fi.gateway._exceptions import AgentCCError
 
-        self._api_key = api_key or os.environ.get("AGENTCC_API_KEY") or ""
+        self._api_key = api_key or env_api_key()
         if not self._api_key:
             raise AgentCCError(
-                "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+                "api_key is required. Pass it as a parameter or set the FI_GATEWAY_API_KEY "
+                "(or AGENTCC_API_KEY) environment variable."
             )
 
-        self._base_url = base_url or os.environ.get("AGENTCC_BASE_URL") or ""
+        self._base_url = clean_base_url(base_url or env_base_url())
         if not self._base_url:
             raise AgentCCError(
-                "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+                "base_url is required. Pass it as a parameter or set the FI_GATEWAY_URL "
+                "(or AGENTCC_BASE_URL) environment variable."
             )
 
         self._timeout = timeout
@@ -282,6 +288,8 @@ class AgentCC:
         new_headers = dict(self._default_headers or {})
         if extra_headers:
             new_headers.update(extra_headers)
+        if trace_id is not NOT_GIVEN and trace_id is not None:
+            new_headers[AGENTCC_PARAM_TO_HEADER["trace_id"]] = str(trace_id)
 
         new_query = dict(self._default_query or {})
         if extra_query:
@@ -303,10 +311,13 @@ class AgentCC:
             pre_call_rules=self._pre_call_rules,
             modify_params=self._modify_params,
             enable_json_schema_validation=self._enable_json_schema_validation,
+            retry_policy=self._retry_policy,
+            redact_messages=self._redact_messages,
         )
-        # Share the underlying HTTP client
+        # Share the connection pool only: timeout, retries, headers, session and metadata
+        # live on the base client, so the new client needs its own.
         if self._base_client is not None:
-            new._base_client = self._base_client
+            new._http_client = self._base_client._ensure_client()
         new._user_copied = True
         return new
 
@@ -364,16 +375,18 @@ class AsyncAgentCC:
     ) -> None:
         from fi.gateway._exceptions import AgentCCError
 
-        self._api_key = api_key or os.environ.get("AGENTCC_API_KEY") or ""
+        self._api_key = api_key or env_api_key()
         if not self._api_key:
             raise AgentCCError(
-                "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+                "api_key is required. Pass it as a parameter or set the FI_GATEWAY_API_KEY "
+                "(or AGENTCC_API_KEY) environment variable."
             )
 
-        self._base_url = base_url or os.environ.get("AGENTCC_BASE_URL") or ""
+        self._base_url = clean_base_url(base_url or env_base_url())
         if not self._base_url:
             raise AgentCCError(
-                "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+                "base_url is required. Pass it as a parameter or set the FI_GATEWAY_URL "
+                "(or AGENTCC_BASE_URL) environment variable."
             )
 
         self._timeout = timeout
@@ -598,6 +611,8 @@ class AsyncAgentCC:
         new_headers = dict(self._default_headers or {})
         if extra_headers:
             new_headers.update(extra_headers)
+        if trace_id is not NOT_GIVEN and trace_id is not None:
+            new_headers[AGENTCC_PARAM_TO_HEADER["trace_id"]] = str(trace_id)
 
         new_query = dict(self._default_query or {})
         if extra_query:
@@ -619,9 +634,11 @@ class AsyncAgentCC:
             pre_call_rules=self._pre_call_rules,
             modify_params=self._modify_params,
             enable_json_schema_validation=self._enable_json_schema_validation,
+            retry_policy=self._retry_policy,
+            redact_messages=self._redact_messages,
         )
         if self._base_client is not None:
-            new._base_client = self._base_client
+            new._http_client = self._base_client._ensure_client()
         new._user_copied = True
         return new
 

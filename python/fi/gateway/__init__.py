@@ -5,7 +5,8 @@
 
 This is the AgentCC SDK (formerly the separate ``agentcc`` package), vendored
 into ``futureagi``. ``AgentCC`` / ``AsyncAgentCC`` keep their original behaviour.
-Gateway management (keys, providers, logs) is on ``fi.Client().gateway``.
+Gateway management (keys, providers, logs) is a platform API: ``fi.Client().gateway``
+(the generated platform client, PR #35).
 """
 
 from __future__ import annotations

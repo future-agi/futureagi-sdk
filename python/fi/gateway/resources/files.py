@@ -4,9 +4,13 @@ from __future__ import annotations
 
 from typing import Any
 
+from fi.gateway._agentcc_params import (
+    build_extra_headers,
+    collect_agentcc_params,
+    merge_session_headers,
+)
 from fi.gateway._base_client import RequestOptions
 from fi.gateway._constants import NOT_GIVEN
-from fi.gateway._agentcc_params import build_extra_headers, collect_agentcc_params, merge_session_headers
 from fi.gateway.types.files import FileDeleted, FileList, FileObject
 
 
@@ -50,24 +54,9 @@ class Files:
             headers=extra_hdrs,
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        base = self._client._get_base_client()
-        url = base._build_url(opts.url)
-        headers = base._build_headers(opts, agentcc_params)
-        headers.pop("Content-Type", None)
-        headers.pop("content-type", None)
-        timeout_val = opts.timeout or base._timeout
-        client = base._ensure_client()
-        response = client.request(
-            method=opts.method,
-            url=url,
-            files={"file": file},
-            data={"purpose": purpose},
-            headers=headers,
-            timeout=timeout_val,
-        )
-        if response.status_code >= 400:
-            base._process_error(response)
-        return base._process_response_body(response, FileObject)
+        opts.body = {"purpose": purpose}
+        opts.files = {"file": file}
+        return self._client._get_base_client()._request_with_retry(opts, FileObject, agentcc_params)
 
     def list(
         self,
@@ -122,20 +111,7 @@ class Files:
             headers=extra_headers or {},
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        base = self._client._get_base_client()
-        url = base._build_url(opts.url)
-        headers = base._build_headers(opts)
-        timeout_val = opts.timeout or base._timeout
-        client = base._ensure_client()
-        response = client.request(
-            method=opts.method,
-            url=url,
-            headers=headers,
-            timeout=timeout_val,
-        )
-        if response.status_code >= 400:
-            base._process_error(response)
-        return response.content
+        return self._client._get_base_client()._request_raw_with_retry(opts)
 
     def delete(
         self,
@@ -195,24 +171,9 @@ class AsyncFiles:
             headers=extra_hdrs,
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        base = self._client._get_base_client()
-        url = base._build_url(opts.url)
-        headers = base._build_headers(opts, agentcc_params)
-        headers.pop("Content-Type", None)
-        headers.pop("content-type", None)
-        timeout_val = opts.timeout or base._timeout
-        client = base._ensure_client()
-        response = await client.request(
-            method=opts.method,
-            url=url,
-            files={"file": file},
-            data={"purpose": purpose},
-            headers=headers,
-            timeout=timeout_val,
-        )
-        if response.status_code >= 400:
-            base._process_error(response)
-        return base._process_response_body(response, FileObject)
+        opts.body = {"purpose": purpose}
+        opts.files = {"file": file}
+        return await self._client._get_base_client()._request_with_retry(opts, FileObject, agentcc_params)
 
     async def list(
         self,
@@ -267,20 +228,7 @@ class AsyncFiles:
             headers=extra_headers or {},
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        base = self._client._get_base_client()
-        url = base._build_url(opts.url)
-        headers = base._build_headers(opts)
-        timeout_val = opts.timeout or base._timeout
-        client = base._ensure_client()
-        response = await client.request(
-            method=opts.method,
-            url=url,
-            headers=headers,
-            timeout=timeout_val,
-        )
-        if response.status_code >= 400:
-            base._process_error(response)
-        return response.content
+        return await self._client._get_base_client()._request_raw_with_retry(opts)
 
     async def delete(
         self,

@@ -73,6 +73,21 @@ class RequestOptions:
     max_retries: int | None = None
 
 
+def _callback_response(result: Any) -> Any:
+    """What on_request_end hands to callbacks: the status, headers and metadata of the response."""
+    from fi.gateway.callbacks.base import CallbackResponse
+
+    meta = getattr(result, "agentcc", None)
+    http = getattr(meta, "http_response", None)
+    body = result.model_dump() if hasattr(result, "model_dump") else None
+    return CallbackResponse(
+        status_code=getattr(http, "status_code", 200),
+        headers=dict(getattr(http, "headers", None) or {}),
+        agentcc=meta,
+        body=body,
+    )
+
+
 def _track_session(base: Any, result: Any) -> None:
     """Add a finished request's cost and tokens to the owning client's active session."""
     session = getattr(getattr(base, "_owner", None), "_active_session", None)
@@ -350,7 +365,8 @@ class SyncBaseClient(BaseClient):
         for attempt in range(loop_max + 1):
             try:
                 result = self._request(options, response_cls, agentcc_params)
-                self._dispatch_callback("on_request_end", options, result)
+                if self._callbacks:
+                    self._dispatch_callback("on_request_end", options, _callback_response(result))
                 _track_session(self, result)
                 return result
             except APIStatusError as exc:
@@ -458,7 +474,8 @@ class SyncBaseClient(BaseClient):
         for attempt in range(loop_max + 1):
             try:
                 result = self._request_raw(options, agentcc_params)
-                self._dispatch_callback("on_request_end", options, result)
+                if self._callbacks:
+                    self._dispatch_callback("on_request_end", options, _callback_response(result))
                 return result
             except APIStatusError as exc:
                 last_exc = exc
@@ -531,9 +548,14 @@ class SyncBaseClient(BaseClient):
         except httpx.ConnectError as e:
             raise APIConnectionError(f"Connection error: {e}") from e
 
-        if response.status_code >= 400:
-            response.read()
-            self._process_error(response)
+        if response.status_code >= 400 or response.status_code == 246:
+            try:
+                response.read()
+                if response.status_code == 246:
+                    self._process_guardrail_warning(response)
+                self._process_error(response)
+            finally:
+                response.close()
 
         return response
 
@@ -632,7 +654,8 @@ class AsyncBaseClient(BaseClient):
         for attempt in range(loop_max + 1):
             try:
                 result = await self._request(options, response_cls, agentcc_params)
-                self._dispatch_callback("on_request_end", options, result)
+                if self._callbacks:
+                    self._dispatch_callback("on_request_end", options, _callback_response(result))
                 _track_session(self, result)
                 return result
             except APIStatusError as exc:
@@ -739,7 +762,8 @@ class AsyncBaseClient(BaseClient):
         for attempt in range(loop_max + 1):
             try:
                 result = await self._request_raw(options, agentcc_params)
-                self._dispatch_callback("on_request_end", options, result)
+                if self._callbacks:
+                    self._dispatch_callback("on_request_end", options, _callback_response(result))
                 return result
             except APIStatusError as exc:
                 last_exc = exc
@@ -811,9 +835,14 @@ class AsyncBaseClient(BaseClient):
         except httpx.ConnectError as e:
             raise APIConnectionError(f"Connection error: {e}") from e
 
-        if response.status_code >= 400:
-            await response.aread()
-            self._process_error(response)
+        if response.status_code >= 400 or response.status_code == 246:
+            try:
+                await response.aread()
+                if response.status_code == 246:
+                    self._process_guardrail_warning(response)
+                self._process_error(response)
+            finally:
+                await response.aclose()
 
         return response
 

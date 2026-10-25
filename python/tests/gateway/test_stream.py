@@ -133,7 +133,7 @@ def test_stream_cache_hit_json() -> None:
         "x-agentcc-request-id": "req-cached",
         "x-agentcc-cache": "hit_exact",
     }
-    resp.json.return_value = body
+    resp.read.return_value = json.dumps(body).encode()  # a streamed response is read first
     resp.close = MagicMock()
 
     stream = Stream(resp)

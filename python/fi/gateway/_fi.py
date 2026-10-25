@@ -7,32 +7,22 @@ the platform's FI_API_KEY / FI_SECRET_KEY pair, so it reads its own variables:
     FI_GATEWAY_URL       (fallback: AGENTCC_BASE_URL, then the hosted gateway)
 
 Managing gateways (keys, providers, logs, analytics) is a platform API and lives
-on ``fi.Client().gateway``; this module is the data plane only.
+on ``fi.Client().gateway`` (the generated platform client, PR #35); this module is
+the data plane only.
 """
 
 from __future__ import annotations
 
-import os
 from typing import Any
 
 from fi.gateway._client import AgentCC, AsyncAgentCC
+from fi.gateway._env import clean_base_url, env_api_key, env_base_url
 
 DEFAULT_GATEWAY_URL = "https://gateway.futureagi.com"
 
 
 def _resolve(api_key: str | None, base_url: str | None) -> tuple[str | None, str]:
-    api_key = api_key or os.environ.get("FI_GATEWAY_API_KEY") or os.environ.get("AGENTCC_API_KEY")
-    base_url = (
-        base_url
-        or os.environ.get("FI_GATEWAY_URL")
-        or os.environ.get("AGENTCC_BASE_URL")
-        or DEFAULT_GATEWAY_URL
-    ).rstrip("/")
-    # Resources already add /v1/...; accept the OpenAI-style ".../v1" URL too,
-    # which the agentcc README shows and would otherwise call /v1/v1/...
-    if base_url.endswith("/v1"):
-        base_url = base_url[: -len("/v1")]
-    return api_key, base_url
+    return api_key or env_api_key() or None, clean_base_url(base_url or env_base_url() or DEFAULT_GATEWAY_URL)
 
 
 class Gateway(AgentCC):

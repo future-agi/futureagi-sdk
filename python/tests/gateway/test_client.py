@@ -7,7 +7,7 @@ import os
 import pytest
 import respx
 
-from fi.gateway._client import AsyncAgentCC, AgentCC
+from fi.gateway._client import AgentCC, AsyncAgentCC
 
 GATEWAY_RESPONSE = {
     "id": "chatcmpl-abc123",
@@ -108,7 +108,10 @@ class TestClientConstruction:
         # Force base client creation
         _ = client._get_base_client()
         new = client.with_options(timeout=30.0)
-        assert new._base_client is client._base_client
+        # The pool is shared; the base client is not, so the overrides take effect.
+        assert new._get_base_client() is not client._base_client
+        assert new._get_base_client()._ensure_client() is client._base_client._ensure_client()
+        assert new._get_base_client()._timeout.read == 30.0
 
 
 # --- End-to-end tests with mocked gateway ---

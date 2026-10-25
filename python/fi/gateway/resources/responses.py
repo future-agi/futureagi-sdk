@@ -4,9 +4,13 @@ from __future__ import annotations
 
 from typing import Any
 
+from fi.gateway._agentcc_params import (
+    build_extra_headers,
+    collect_agentcc_params,
+    merge_session_headers,
+)
 from fi.gateway._base_client import RequestOptions
 from fi.gateway._constants import NOT_GIVEN
-from fi.gateway._agentcc_params import build_extra_headers, collect_agentcc_params, merge_session_headers
 from fi.gateway.types.responses import ResponseObject
 
 
@@ -161,19 +165,7 @@ class Responses:
             headers=extra_headers or {},
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        base = self._client._get_base_client()
-        url = base._build_url(opts.url)
-        headers = base._build_headers(opts)
-        timeout_val = opts.timeout or base._timeout
-        client = base._ensure_client()
-        response = client.request(
-            method=opts.method,
-            url=url,
-            headers=headers,
-            timeout=timeout_val,
-        )
-        if response.status_code >= 400:
-            base._process_error(response)
+        self._client._get_base_client()._request_raw_with_retry(opts)
 
 
 class AsyncResponses:
@@ -287,16 +279,4 @@ class AsyncResponses:
             headers=extra_headers or {},
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        base = self._client._get_base_client()
-        url = base._build_url(opts.url)
-        headers = base._build_headers(opts)
-        timeout_val = opts.timeout or base._timeout
-        client = base._ensure_client()
-        response = await client.request(
-            method=opts.method,
-            url=url,
-            headers=headers,
-            timeout=timeout_val,
-        )
-        if response.status_code >= 400:
-            base._process_error(response)
+        await self._client._get_base_client()._request_raw_with_retry(opts)

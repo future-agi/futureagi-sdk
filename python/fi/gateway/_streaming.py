@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import codecs
 import contextlib
 import json as _json
 from collections.abc import AsyncIterator, Iterator
@@ -9,6 +10,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from fi.gateway._exceptions import StreamError
+from fi.gateway.types.agentcc_metadata import AgentCCMetadata
 from fi.gateway.types.chat.chat_completion import ChatCompletion, Choice
 from fi.gateway.types.chat.chat_completion_chunk import (
     ChatCompletionChunk,
@@ -17,8 +19,11 @@ from fi.gateway.types.chat.chat_completion_chunk import (
     StreamChoice,
     ToolCallDelta,
 )
-from fi.gateway.types.chat.chat_completion_message import ChatCompletionMessage, FunctionCall, ToolCall
-from fi.gateway.types.agentcc_metadata import AgentCCMetadata
+from fi.gateway.types.chat.chat_completion_message import (
+    ChatCompletionMessage,
+    FunctionCall,
+    ToolCall,
+)
 from fi.gateway.types.shared import Usage
 
 # ---------------------------------------------------------------------------
@@ -53,9 +58,15 @@ class SSEParser:
         buf_id: str | None = None
         buf_retry: int | None = None
 
+        # A chunk boundary can fall anywhere, even inside a multibyte character, so
+        # decode incrementally and only hand out complete lines.
+        decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
+        pending = ""
         for raw_chunk in self._byte_stream:
-            text = raw_chunk.decode("utf-8", errors="replace")
-            for line in text.splitlines():
+            pending += decoder.decode(raw_chunk)
+            *lines, pending = pending.split("\n")
+            for line in lines:
+                line = line.rstrip("\r")
                 if not line:
                     # Empty line = event boundary
                     if buf_data:
@@ -89,7 +100,10 @@ class SSEParser:
                     with contextlib.suppress(ValueError):
                         buf_retry = int(line[7:])
 
-        # Flush remaining
+        # Flush remaining: a last line without a newline, then the open event.
+        pending += decoder.decode(b"", final=True)
+        if pending.strip().startswith("data:"):
+            buf_data.append(pending.strip()[5:].lstrip())
         if buf_data:
             yield SSEEvent(data="\n".join(buf_data), event=buf_event, id=buf_id, retry=buf_retry)
 
@@ -106,9 +120,15 @@ class AsyncSSEParser:
         buf_id: str | None = None
         buf_retry: int | None = None
 
+        # A chunk boundary can fall anywhere, even inside a multibyte character, so
+        # decode incrementally and only hand out complete lines.
+        decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
+        pending = ""
         async for raw_chunk in self._byte_stream:
-            text = raw_chunk.decode("utf-8", errors="replace")
-            for line in text.splitlines():
+            pending += decoder.decode(raw_chunk)
+            *lines, pending = pending.split("\n")
+            for line in lines:
+                line = line.rstrip("\r")
                 if not line:
                     if buf_data:
                         data = "\n".join(buf_data)
@@ -141,6 +161,9 @@ class AsyncSSEParser:
                     with contextlib.suppress(ValueError):
                         buf_retry = int(line[7:])
 
+        pending += decoder.decode(b"", final=True)
+        if pending.strip().startswith("data:"):
+            buf_data.append(pending.strip()[5:].lstrip())
         if buf_data:
             yield SSEEvent(data="\n".join(buf_data), event=buf_event, id=buf_id, retry=buf_retry)
 
@@ -162,7 +185,7 @@ class Stream:
         content_type = response.headers.get("content-type", "")
         if "application/json" in content_type:
             self._is_cache_hit = True
-            body = response.json()
+            body = _json.loads(response.read())
             self._iterator: Iterator[ChatCompletionChunk] = self._cache_hit_iterator(body)
         else:
             parser = SSEParser(response.iter_bytes())

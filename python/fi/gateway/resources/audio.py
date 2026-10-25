@@ -220,14 +220,6 @@ class Speech:
         )
         extra_hdrs = merge_session_headers(self._client, extra_hdrs)
 
-        # Add agentcc params as headers manually for raw requests
-        from fi.gateway._constants import AGENTCC_PARAM_TO_HEADER
-
-        for key, val in agentcc_params.items():
-            hdr_name = AGENTCC_PARAM_TO_HEADER.get(key)
-            if hdr_name:
-                extra_hdrs[hdr_name] = str(val) if not isinstance(val, str) else val
-
         from fi.gateway._utils import parse_timeout
 
         opts = RequestOptions(
@@ -237,7 +229,7 @@ class Speech:
             headers=extra_hdrs,
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        return self._client._get_base_client()._request_raw_with_retry(opts)
+        return self._client._get_base_client()._request_raw_with_retry(opts, agentcc_params)
 
 
 class AsyncSpeech:
@@ -291,13 +283,6 @@ class AsyncSpeech:
         )
         extra_hdrs = merge_session_headers(self._client, extra_hdrs)
 
-        from fi.gateway._constants import AGENTCC_PARAM_TO_HEADER
-
-        for key, val in agentcc_params.items():
-            hdr_name = AGENTCC_PARAM_TO_HEADER.get(key)
-            if hdr_name:
-                extra_hdrs[hdr_name] = str(val) if not isinstance(val, str) else val
-
         from fi.gateway._utils import parse_timeout
 
         opts = RequestOptions(
@@ -307,7 +292,7 @@ class AsyncSpeech:
             headers=extra_hdrs,
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        return await self._client._get_base_client()._request_raw_with_retry(opts)
+        return await self._client._get_base_client()._request_raw_with_retry(opts, agentcc_params)
 
 
 # ---------------------------------------------------------------------------

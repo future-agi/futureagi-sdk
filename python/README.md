@@ -236,7 +236,7 @@ print(reply.choices[0].message.content)
 - Routing, fallbacks, caching and guardrails: pass `config=fi.gateway.GatewayConfig(...)`.
 - The gateway uses its own virtual keys (`sk-agentcc-*`), not `FI_API_KEY`/`FI_SECRET_KEY`. `AGENTCC_API_KEY` and `AGENTCC_BASE_URL` still work, and the URL may end in `/v1` or not.
 - Code written for `agentcc` keeps working by changing the import: `from fi.gateway import AgentCC`.
-- Managing gateways (keys, providers, request logs, analytics) is a platform API: use `fi.Client().gateway`.
+- Managing gateways (keys, providers, request logs, analytics) is a platform API: `fi.Client().gateway`, which arrives with the generated platform client (#35).
 
 ---
 

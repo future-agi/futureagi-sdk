@@ -91,7 +91,9 @@ class APIStatusError(AgentCCError):
 
         try:
             body = response.json()
-            error_data = body.get("error", {}) if isinstance(body, dict) else {}
+            if isinstance(body, dict):
+                raw = body.get("error", {})
+                error_data = raw if isinstance(raw, dict) else ({"message": str(raw)} if raw else {})
         except Exception:
             pass
 

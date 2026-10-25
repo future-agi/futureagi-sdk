@@ -7,7 +7,12 @@ import logging
 from datetime import datetime, timezone
 from typing import Any
 
-from fi.gateway.callbacks.base import CallbackHandler, CallbackRequest, CallbackResponse, StreamInfo
+from fi.gateway.callbacks.base import (
+    CallbackHandler,
+    CallbackRequest,
+    CallbackResponse,
+    StreamInfo,
+)
 
 
 class JSONLoggingCallbackHandler(CallbackHandler):
@@ -41,7 +46,7 @@ class JSONLoggingCallbackHandler(CallbackHandler):
                 "prompt": response.body.get("usage", {}).get("prompt_tokens") if isinstance(response.body, dict) else None,
                 "completion": response.body.get("usage", {}).get("completion_tokens") if isinstance(response.body, dict) else None,
             },
-            "cache_hit": response.agentcc.cache_hit if response.agentcc else None,
+            "cache_hit": response.agentcc.cache_status if response.agentcc else None,
         }
         self._write_log(log_entry)
 
