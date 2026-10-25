@@ -6,21 +6,31 @@ from pkgutil import extend_path
 
 __path__ = extend_path(__path__, __name__)
 
+from fi.annotations import Annotation, BulkAnnotationResponse
 from fi.queues import (
-    AnnotationQueue,
+    AddItemsResponse,
     AnnotationLabel,
+    AnnotationQueue,
+    ExportToDatasetResponse,
+    ImportAnnotationsResponse,
+    QueueAgreement,
+    QueueAnalytics,
     QueueDetail,
     QueueItem,
     QueueProgress,
-    QueueAnalytics,
-    QueueAgreement,
     Score,
-    AddItemsResponse,
-    ExportToDatasetResponse,
-    ImportAnnotationsResponse,
 )
-from fi.annotations import Annotation, BulkAnnotationResponse
-from fi.platform import AsyncClient, Client
+
+
+def __getattr__(name):
+    # `fi.Client` / `fi.AsyncClient` load fi.platform (httpx + the generated models) on first
+    # use, so `import fi` stays as cheap as before for the existing modules.
+    if name in ("Client", "AsyncClient"):
+        from fi import platform
+
+        return getattr(platform, name)
+    raise AttributeError(f"module 'fi' has no attribute {name!r}")
+
 
 __all__ = [
     "__version__",

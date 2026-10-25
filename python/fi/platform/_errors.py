@@ -2,13 +2,23 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 import httpx
 
+from fi.utils.errors import SDKException
 
-class FutureAGIError(Exception):
-    """Base class for every error this SDK raises."""
+
+class FutureAGIError(SDKException):
+    """Base class for every error this SDK raises.
+
+    It derives from the package's existing `SDKException`, so one `except` covers
+    errors from both the legacy modules and `fi.Client`.
+    """
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
 
 
 class APIConnectionError(FutureAGIError):
@@ -80,6 +90,8 @@ def error_from_response(response: httpx.Response) -> APIError:
     message = None
     if isinstance(body, dict):
         message = body.get("message") or body.get("error") or body.get("detail")
+        if message is not None and not isinstance(message, str):
+            message = json.dumps(message, default=str)  # DRF field errors: {"field": ["..."]}
     if not isinstance(message, str):
         message = f"HTTP {response.status_code}"
     cls = _BY_STATUS.get(response.status_code) or (InternalServerError if response.status_code >= 500 else APIError)

@@ -61,6 +61,13 @@ def dataset(client):
 
 
 @pytest.fixture
+def prompt(client):
+    created = client.prompts.create(name=_name("prompt"), description="sdk test")
+    yield created
+    allow(lambda: raw(client, "DELETE", f"/model-hub/prompt-templates/{created.id}/"), 400, 404)
+
+
+@pytest.fixture
 def code_template(client):
     return client.evals.templates.create(
         name=_name("tpl").replace("-", "_"), eval_type="code", code_language="python", code=CODE_EVAL, output_type="pass_fail"
@@ -143,8 +150,7 @@ def test_eval_templates_and_groups(client, code_template):
                                     config={"mapping": {"input": "input"}}, mapping={"input": "hello"}), 400)
 
 
-def test_prompts_lifecycle(client):
-    prompt = client.prompts.create(name=_name("prompt"), description="sdk test")
+def test_prompts_lifecycle(client, prompt):
     assert client.prompts.get(prompt.id).name == prompt.name
     assert client.prompts.update(prompt.id, description="updated").description == "updated"
     assert [p.id for p in client.prompts.list(search=prompt.name)] == [prompt.id]
@@ -207,9 +213,8 @@ def test_annotation_queue_workflow(client, dataset):
     assert client.annotation_queues.items.complete(queue["id"], items[0].id).completed_item_id == items[0].id
 
 
-def test_experiments_and_optimizations(client, dataset, code_template):
+def test_experiments_and_optimizations(client, dataset, code_template, prompt):
     ds, (question, _) = dataset
-    prompt = client.prompts.create(name=_name("prompt"))
     client.prompts.get(prompt.id)  # materializes the v1 draft
     raw(client, "POST", f"/model-hub/prompt-templates/{prompt.id}/commit/", body={"version_name": "v1", "message": "init", "set_default": True})
     version = client.prompts.versions.list(prompt.id).to_list()[0]["id"]
@@ -229,7 +234,7 @@ def test_experiments_and_optimizations(client, dataset, code_template):
     assert run.id in [r["id"] for r in client.optimizations.list()]
 
 
-def test_agents_and_simulation(client):
+def test_agents_and_simulation(client, request):
     agent = client.agents.create(agent_name=_name("agent"), agent_type="text", commit_message="v1", provider="custom", model="gpt-4o-mini")
     agent_id = agent.agent.id
     assert client.agents.get(agent_id).agent_name == agent.agent.agent_name
@@ -238,6 +243,8 @@ def test_agents_and_simulation(client):
     assert agent_id in [a.id for a in client.agents.list(search=agent.agent.agent_name)]
 
     ds = client.datasets.create(new_dataset_name=_name("scenario-src"))
+    request.addfinalizer(lambda: allow(lambda: client.datasets.delete(dataset_ids=[ds.dataset_id]), 400, 404))
+    request.addfinalizer(lambda: allow(lambda: raw(client, "DELETE", f"/simulate/agent-definitions/{agent_id}/delete/"), 400, 404))
     client.datasets.columns.add(ds.dataset_id, new_columns_data=[{"name": "situation", "data_type": "text"}])
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", fi.BetaWarning)

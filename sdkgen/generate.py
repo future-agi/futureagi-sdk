@@ -208,7 +208,15 @@ def load(spec: dict, catalog: dict) -> list[Op]:
         returns, unwrap = _apply_contract_fix(op_id, entry.get("contract_fix"), returns, unwrap)
 
         pagination = entry.get("pagination")
+        sends_body = method in ("post", "put", "patch", "delete") and not pagination
+        if any(p.location == "body" for p in params) and not sends_body:
+            raise CatalogError(f"{op_id}: has body params, but a {method.upper()}{' paginated' if pagination else ''} call sends no body")
         if pagination:
+            for key in ("page_param", "size_param", "first_page", "items"):
+                if key not in pagination:
+                    raise CatalogError(f"{op_id}: pagination.{key} is required")
+            if not isinstance(pagination["first_page"], int):
+                raise CatalogError(f"{op_id}: pagination.first_page must be an integer")
             query_names = {p.name for p in params if p.location == "query"}
             for key in ("page_param", "size_param"):
                 if pagination[key] not in query_names:

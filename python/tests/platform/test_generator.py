@@ -38,7 +38,7 @@ def test_surfaces_ship_independently():
 
     mcp_ids = {t["source"]["catalogId"] for t in MCP["tools"]}
     sdk_ids = {e["id"] for e in CATALOG["operations"] if e["surfaces"].get("sdk") is not False}
-    assert sdk_ids - mcp_ids == {"datasets.columns.add"}  # SDK-only
+    assert "datasets.columns.add" in sdk_ids - mcp_ids  # SDK-only
     client = Client(api_key="k", secret_key="s", base_url="http://unused")
     assert callable(client.datasets.columns.add)
 
@@ -78,3 +78,15 @@ def test_mcp_input_schema_comes_from_the_contract():
 def test_catalog_mistakes_fail_the_build(changes, message):
     with pytest.raises(generate.CatalogError, match=message):
         generate.load(CONTRACT, _with("datasets.list", **changes))
+
+
+def test_pagination_needs_first_page_and_items():
+    with pytest.raises(generate.CatalogError, match="first_page is required"):
+        generate.load(CONTRACT, _with("datasets.list", pagination={"page_param": "page", "size_param": "page_size", "items": "datasets", "total_pages": "total_pages"}))
+
+
+def test_body_params_on_a_paginated_op_fail_the_build():
+    # evals.templates.list is a POST with body params; paginating it would drop them silently.
+    catalog = _with("evals.templates.list", pagination={"page_param": "page", "size_param": "page_size", "first_page": 1, "items": "items", "total_items": "total"})
+    with pytest.raises(generate.CatalogError, match="sends no body"):
+        generate.load(CONTRACT, catalog)

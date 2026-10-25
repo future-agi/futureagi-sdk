@@ -35,7 +35,9 @@ client.datasets.delete(dataset_ids=[ds.dataset_id])
 - **Async:** `AsyncClient` has the same methods (`await`, `async for`).
 - **Envelope removed:** the backend's `{status, result}` wrapper is unwrapped before you get the result.
 - **Typed errors:** `fi.platform.BadRequestError`, `NotFoundError`, `AuthenticationError`, ..., carrying the backend's `type`, `code` and `detail`.
-- **Retries:** automatic retries on 408, 429 and 5xx.
+- **Retries:** 429 is retried for every call. Timeouts, 5xx and dropped connections are retried only for calls that are safe to repeat (GET, PUT, DELETE), so a POST the server already applied is never sent twice.
+- **Your own `httpx` client:** `Client(http_client=...)` uses it as given and never closes it.
+- **One error family:** every error derives from `fi.utils.errors.SDKException`, like the existing modules.
 - **Old code still works:** the existing modules (`fi.datasets.Dataset`, `fi.queues`, ...) are untouched and keep working.
 
 `client.<resource>`: `account`, `workspaces`, `datasets` (`.columns`, `.rows`, `.cells`, `.evals`, `.prompts`), `knowledge_bases`, `prompts` (`.versions`), `evals` (`.templates`, `.groups`, `.tasks`, `.configs`), `projects`, `traces` (`.properties`), `spans`, `sessions`, `alerts` (`.logs`, `.rules`), `error_clusters`, `annotation_queues` (`.items`), `experiments`, `optimizations`, `agents` (`.versions`), `simulation` (`.scenarios`, `.tests`, `.executions`), `gateway` (`.request_logs`, `.guardrail_rules`, `.sessions`), `dashboards` (`.widgets`, `.metrics`), `usage`.

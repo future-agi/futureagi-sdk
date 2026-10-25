@@ -6,21 +6,21 @@ import os
 
 import httpx
 
+from fi.utils.constants import API_KEY_ENVVAR_NAME, SECRET_KEY_ENVVAR_NAME, get_base_url
+
 from ._generated.resources import AsyncGeneratedResources, GeneratedResources
 from ._transport import AsyncTransport, Config, SyncTransport
 
-DEFAULT_BASE_URL = "https://api.futureagi.com"
-
 
 def _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses) -> Config:
-    api_key = api_key or os.environ.get("FI_API_KEY")
-    secret_key = secret_key or os.environ.get("FI_SECRET_KEY")
+    api_key = api_key or os.environ.get(API_KEY_ENVVAR_NAME)
+    secret_key = secret_key or os.environ.get(SECRET_KEY_ENVVAR_NAME)
     if not api_key or not secret_key:
-        raise ValueError("pass api_key= and secret_key=, or set FI_API_KEY and FI_SECRET_KEY")
+        raise ValueError(f"pass api_key= and secret_key=, or set {API_KEY_ENVVAR_NAME} and {SECRET_KEY_ENVVAR_NAME}")
     return Config(
         api_key=api_key,
         secret_key=secret_key,
-        base_url=(base_url or os.environ.get("FI_BASE_URL") or DEFAULT_BASE_URL).rstrip("/"),
+        base_url=(base_url or get_base_url()).rstrip("/"),
         timeout=timeout,
         max_retries=max_retries,
         workspace_id=workspace_id or os.environ.get("FI_WORKSPACE_ID"),
