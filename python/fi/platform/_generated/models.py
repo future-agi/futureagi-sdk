@@ -224,6 +224,45 @@ class AnnotationQueue(_Model):
     created_at: Optional[str] = Field(default=None)
 
 
+class AnnotationsLabels(_Model):
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    type: Optional[str] = Field(default=None)  # one of: text, numeric, categorical, star, thumbs_up_down
+    organization: Optional[str] = Field(default=None)
+    settings: Optional[Any] = Field(default=None)
+    project: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    allow_notes: Optional[bool] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    trace_annotations_count: Optional[int] = Field(default=None)
+    annotation_count: Optional[int] = Field(default=None)
+    archived: Optional[bool] = Field(default=None)
+
+
+class ApiKeyResponse(_Model):
+    id: Optional[str] = Field(default=None)
+    provider: Optional[str] = Field(default=None)
+    organization: Optional[str] = Field(default=None)
+    masked_actual_key: Optional[Any] = Field(default=None)
+
+
+class BulkAnnotationResponseResult(_Model):
+    message: Optional[str] = Field(default=None)
+    annotations_created: Optional[int] = Field(default=None)
+    annotations_updated: Optional[int] = Field(default=None)
+    notes_created: Optional[int] = Field(default=None)
+    succeeded_count: Optional[int] = Field(default=None)
+    errors_count: Optional[int] = Field(default=None)
+    warnings_count: Optional[int] = Field(default=None)
+    warnings: Optional[List[Optional[Any]]] = Field(default=None)
+    errors: Optional[List[Optional[Any]]] = Field(default=None)
+
+
+class BulkCreateScoresResult(_Model):
+    scores: Optional[List[Optional[Score]]] = Field(default=None)
+    errors: Optional[List[Optional[str]]] = Field(default=None)
+
+
 class CallExecution(_Model):
     id: Optional[str] = Field(default=None)
     phone_number: Optional[str] = Field(default=None)
@@ -500,6 +539,25 @@ class DatasetCreateStartedResult(_Model):
     dataset_model_type: Optional[str] = Field(default=None)
 
 
+class DatasetEvalStatsItem(_Model):
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    output_type: Optional[str] = Field(default=None)
+    result: Optional[List[Optional[DatasetEvalStatsMetric]]] = Field(default=None)
+    total_pass_rate: Optional[float] = Field(default=None)
+    total_avg: Optional[Any] = Field(default=None)
+    total_choices_avg: Optional[Any] = Field(default=None)
+    is_numeric_eval: Optional[bool] = Field(default=None)
+    is_numeric_eval_percentage: Optional[bool] = Field(default=None)
+
+
+class DatasetEvalStatsMetric(_Model):
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    total_cells: Optional[int] = Field(default=None)
+    output: Optional[Any] = Field(default=None)
+
+
 class DatasetListItem(_Model):
     id: Optional[str] = Field(default=None)
     name: Optional[str] = Field(default=None)
@@ -509,6 +567,16 @@ class DatasetListItem(_Model):
     derived_datasets: Optional[int] = Field(default=None)
     created_at: Optional[str] = Field(default=None)
     dataset_type: Optional[str] = Field(default=None)
+
+
+class DatasetNameItem(_Model):
+    dataset_id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    model_type: Optional[str] = Field(default=None)
+
+
+class DatasetNamesResult(_Model):
+    datasets: Optional[List[Optional[DatasetNameItem]]] = Field(default=None)
 
 
 class DatasetOptimizationColumnConfigItem(_Model):
@@ -959,6 +1027,61 @@ class KnowledgeBasePaginatedResult(_Model):
     total_queries: Optional[int] = Field(default=None)
 
 
+class LegacyKnowledgeBaseCreateResult(_Model):
+    detail: Optional[str] = Field(default=None)
+    kb_id: Optional[str] = Field(default=None)
+    kb_name: Optional[str] = Field(default=None)
+    file_ids: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class LegacyKnowledgeBaseFileRow(_Model):
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    file_size: Optional[int] = Field(default=None)
+    status: Optional[str] = Field(default=None)
+    updated: Optional[str] = Field(default=None)
+    updated_by: Optional[str] = Field(default=None)
+    error: Optional[str] = Field(default=None)
+
+
+class LegacyKnowledgeBaseFilesResult(_Model):
+    table_data: Optional[List[Optional[LegacyKnowledgeBaseFileRow]]] = Field(default=None)
+    last_updated: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)
+    status_count: Optional[int] = Field(default=None)
+    total_rows: Optional[int] = Field(default=None)
+
+
+class LegacyKnowledgeBaseListResult(_Model):
+    table_data: Optional[List[Optional[LegacyKnowledgeBaseOption]]] = Field(default=None)
+
+
+class LegacyKnowledgeBaseMutationResult(_Model):
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    organization: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)
+    files: Optional[List[Optional[str]]] = Field(default=None)
+    updated_at: Optional[str] = Field(default=None)
+    created_by: Optional[str] = Field(default=None)
+    last_error: Optional[str] = Field(default=None)
+
+
+class LegacyKnowledgeBaseOption(_Model):
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+
+
+class LocalFileDatasetCreateStartedResult(_Model):
+    message: Optional[str] = Field(default=None)
+    dataset_id: Optional[str] = Field(default=None)
+    dataset_name: Optional[str] = Field(default=None)
+    dataset_model_type: Optional[str] = Field(default=None)
+    processing_status: Optional[str] = Field(default=None)
+    estimated_rows: Optional[int] = Field(default=None)
+    estimated_columns: Optional[int] = Field(default=None)
+
+
 class MessageItem(_Model):
     role: Optional[str] = Field(default=None)
     content: Optional[Any] = Field(default=None)
@@ -966,6 +1089,13 @@ class MessageItem(_Model):
     tool_calls: Optional[Any] = Field(default=None)
     tool_call_id: Optional[str] = Field(default=None)
     id: Optional[str] = Field(default=None)
+
+
+class ModelHubPaginatedResponse(_Model):
+    count: Optional[int] = Field(default=None)
+    next: Optional[str] = Field(default=None)
+    previous: Optional[str] = Field(default=None)
+    results: Optional[List[Optional[Any]]] = Field(default=None)
 
 
 class ModelHubSuccessMessageResult(_Model):
@@ -1027,6 +1157,16 @@ class PromptHistoryExecution(_Model):
     labels: Optional[Any] = Field(default=None)
     placeholders: Optional[Any] = Field(default=None)
     prompt_base_template: Optional[str] = Field(default=None)
+
+
+class PromptLabel(_Model):
+    id: Optional[str] = Field(default=None)
+    organization: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    type: Optional[str] = Field(default=None)  # one of: system, custom
+    metadata: Optional[Any] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    updated_at: Optional[str] = Field(default=None)
 
 
 class PromptRunConfiguration(_Model):
@@ -1092,6 +1232,73 @@ class PromptTemplatePatch(_Model):
     created_by: Optional[str] = Field(default=None)
 
 
+class QueueAddItemsResult(_Model):
+    added: Optional[int] = Field(default=None)
+    duplicates: Optional[int] = Field(default=None)
+    errors: Optional[List[Optional[str]]] = Field(default=None)
+    queue_status: Optional[str] = Field(default=None)
+    total_matching: Optional[int] = Field(default=None)
+    total_matching_is_lower_bound: Optional[bool] = Field(default=None)
+    has_more: Optional[bool] = Field(default=None)
+    next_cursor: Optional[str] = Field(default=None)
+    next_cursor_fingerprint: Optional[str] = Field(default=None)
+
+
+class QueueAddLabelResult(_Model):
+    label: Optional[QueueLabelResult] = Field(default=None)
+    created: Optional[bool] = Field(default=None)
+    reopened_items: Optional[int] = Field(default=None)
+    queue_status: Optional[str] = Field(default=None)
+
+
+class QueueAgreementAnnotatorPair(_Model):
+    annotator_1_id: Optional[str] = Field(default=None)
+    annotator_2_id: Optional[str] = Field(default=None)
+    agreement_pct: Optional[float] = Field(default=None)
+    total_comparisons: Optional[int] = Field(default=None)
+
+
+class QueueAgreementLabel(_Model):
+    label_name: Optional[str] = Field(default=None)
+    label_type: Optional[str] = Field(default=None)
+    agreement_pct: Optional[float] = Field(default=None)
+    cohens_kappa: Optional[float] = Field(default=None)
+    disagreement_count: Optional[int] = Field(default=None)
+    disagreement_items: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class QueueAgreementResult(_Model):
+    overall_agreement: Optional[float] = Field(default=None)
+    labels: Optional[Any] = Field(default=None)
+    annotator_pairs: Optional[List[Optional[QueueAgreementAnnotatorPair]]] = Field(default=None)
+
+
+class QueueAnalyticsAnnotatorPerformance(_Model):
+    user_id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    completed: Optional[int] = Field(default=None)
+    last_active: Optional[str] = Field(default=None)
+
+
+class QueueAnalyticsResult(_Model):
+    throughput: Optional[QueueAnalyticsThroughput] = Field(default=None)
+    annotator_performance: Optional[List[Optional[QueueAnalyticsAnnotatorPerformance]]] = Field(default=None)
+    label_distribution: Optional[Any] = Field(default=None)
+    status_breakdown: Optional[Any] = Field(default=None)
+    total: Optional[int] = Field(default=None)
+
+
+class QueueAnalyticsThroughput(_Model):
+    daily: Optional[List[Optional[QueueAnalyticsThroughputDaily]]] = Field(default=None)
+    total_completed: Optional[int] = Field(default=None)
+    avg_per_day: Optional[float] = Field(default=None)
+
+
+class QueueAnalyticsThroughputDaily(_Model):
+    date: Optional[str] = Field(default=None)
+    count: Optional[int] = Field(default=None)
+
+
 class QueueAnnotateDetailResult(_Model):
     item: Optional[Any] = Field(default=None)
     queue: Optional[Any] = Field(default=None)
@@ -1114,6 +1321,25 @@ class QueueAnnotatorNested(_Model):
     email: Optional[str] = Field(default=None)
     role: Optional[str] = Field(default=None)
     roles: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class QueueAssignItemsResult(_Model):
+    assigned: Optional[int] = Field(default=None)
+
+
+class QueueBulkRemoveItemsResult(_Model):
+    removed: Optional[int] = Field(default=None)
+
+
+class QueueExportToDatasetResult(_Model):
+    dataset_id: Optional[str] = Field(default=None)
+    dataset_name: Optional[str] = Field(default=None)
+    rows_created: Optional[int] = Field(default=None)
+    columns: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class QueueImportAnnotationsResult(_Model):
+    imported: Optional[int] = Field(default=None)
 
 
 class QueueItem(_Model):
@@ -1159,10 +1385,57 @@ class QueueLabelNested(_Model):
     order: Optional[int] = Field(default=None)
 
 
+class QueueLabelResult(_Model):
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    type: Optional[str] = Field(default=None)
+    settings: Optional[Any] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    allow_notes: Optional[bool] = Field(default=None)
+    required: Optional[bool] = Field(default=None)
+    order: Optional[int] = Field(default=None)
+
+
 class QueueNavigationResult(_Model):
     completed_item_id: Optional[str] = Field(default=None)
     skipped_item_id: Optional[str] = Field(default=None)
     next_item: Optional[Any] = Field(default=None)
+
+
+class QueueProgressAnnotatorStat(_Model):
+    user_id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    completed: Optional[int] = Field(default=None)
+    pending: Optional[int] = Field(default=None)
+    in_progress: Optional[int] = Field(default=None)
+    in_review: Optional[int] = Field(default=None)
+    annotations_count: Optional[int] = Field(default=None)
+
+
+class QueueProgressResult(_Model):
+    total: Optional[int] = Field(default=None)
+    pending: Optional[int] = Field(default=None)
+    in_progress: Optional[int] = Field(default=None)
+    in_review: Optional[int] = Field(default=None)
+    completed: Optional[int] = Field(default=None)
+    skipped: Optional[int] = Field(default=None)
+    progress_pct: Optional[float] = Field(default=None)
+    annotator_stats: Optional[List[Optional[QueueProgressAnnotatorStat]]] = Field(default=None)
+    user_progress: Optional[QueueProgressUserProgress] = Field(default=None)
+
+
+class QueueProgressUserProgress(_Model):
+    total: Optional[int] = Field(default=None)
+    completed: Optional[int] = Field(default=None)
+    pending: Optional[int] = Field(default=None)
+    in_progress: Optional[int] = Field(default=None)
+    in_review: Optional[int] = Field(default=None)
+    skipped: Optional[int] = Field(default=None)
+    progress_pct: Optional[float] = Field(default=None)
+
+
+class QueueRemoveLabelResult(_Model):
+    removed: Optional[bool] = Field(default=None)
 
 
 class QueueSubmitAnnotationsResult(_Model):
@@ -1292,6 +1565,28 @@ class ScenarioResponse(_Model):
     status: Optional[str] = Field(default=None)  # one of: NotStarted, Queued, Running, Completed, Editing, Inactive, Failed, PartialRun, ExperimentEvaluation, Uploading, PartialExtracted, Processing, Deleting, PartialCompleted, OptimizationEvaluation, Error, Cancelled
     deleted_at: Optional[str] = Field(default=None)
     agent_type: Optional[Any] = Field(default=None)
+
+
+class Score(_Model):
+    id: Optional[str] = Field(default=None)
+    source_type: Optional[str] = Field(default=None)  # one of: dataset_row, trace, observation_span, prototype_run, call_execution, trace_session
+    source_id: Optional[Any] = Field(default=None)
+    label_id: Optional[str] = Field(default=None)
+    label_name: Optional[str] = Field(default=None)
+    label_type: Optional[str] = Field(default=None)
+    label_settings: Optional[Any] = Field(default=None)
+    label_allow_notes: Optional[bool] = Field(default=None)
+    value: Optional[Any] = Field(default=None)
+    value_history: Optional[Any] = Field(default=None)
+    score_source: Optional[str] = Field(default=None)  # one of: human, api, auto, imported
+    notes: Optional[str] = Field(default=None)
+    annotator: Optional[str] = Field(default=None)
+    annotator_name: Optional[str] = Field(default=None)
+    annotator_email: Optional[str] = Field(default=None)
+    queue_item: Optional[str] = Field(default=None)
+    queue_id: Optional[Any] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    updated_at: Optional[str] = Field(default=None)
 
 
 class SimulateEvalConfigResponse(_Model):
@@ -1715,6 +2010,10 @@ AgentVersionResponse.model_rebuild()
 AgentccRequestLog.model_rebuild()
 AgentccSession.model_rebuild()
 AnnotationQueue.model_rebuild()
+AnnotationsLabels.model_rebuild()
+ApiKeyResponse.model_rebuild()
+BulkAnnotationResponseResult.model_rebuild()
+BulkCreateScoresResult.model_rebuild()
 CallExecution.model_rebuild()
 CallExecutionErrorLocalizerTask.model_rebuild()
 Column.model_rebuild()
@@ -1735,7 +2034,11 @@ DashboardWidget.model_rebuild()
 DatasetColumnConfigEntry.model_rebuild()
 DatasetColumnsMutationResult.model_rebuild()
 DatasetCreateStartedResult.model_rebuild()
+DatasetEvalStatsItem.model_rebuild()
+DatasetEvalStatsMetric.model_rebuild()
 DatasetListItem.model_rebuild()
+DatasetNameItem.model_rebuild()
+DatasetNamesResult.model_rebuild()
 DatasetOptimizationColumnConfigItem.model_rebuild()
 DatasetOptimizationCreate.model_rebuild()
 DatasetOptimizationDetail.model_rebuild()
@@ -1777,24 +2080,51 @@ GatewayStatus.model_rebuild()
 GatewaySummaryResult.model_rebuild()
 KnowledgeBaseItem.model_rebuild()
 KnowledgeBasePaginatedResult.model_rebuild()
+LegacyKnowledgeBaseCreateResult.model_rebuild()
+LegacyKnowledgeBaseFileRow.model_rebuild()
+LegacyKnowledgeBaseFilesResult.model_rebuild()
+LegacyKnowledgeBaseListResult.model_rebuild()
+LegacyKnowledgeBaseMutationResult.model_rebuild()
+LegacyKnowledgeBaseOption.model_rebuild()
+LocalFileDatasetCreateStartedResult.model_rebuild()
 MessageItem.model_rebuild()
+ModelHubPaginatedResponse.model_rebuild()
 ModelHubSuccessMessageResult.model_rebuild()
 ObservationSpanDetailResult.model_rebuild()
 Organization.model_rebuild()
 ProjectDetailResult.model_rebuild()
 PromptHistoryExecution.model_rebuild()
+PromptLabel.model_rebuild()
 PromptRunConfiguration.model_rebuild()
 PromptRunModelConfiguration.model_rebuild()
 PromptRunRequest.model_rebuild()
 PromptRunStatusResult.model_rebuild()
 PromptTemplate.model_rebuild()
 PromptTemplatePatch.model_rebuild()
+QueueAddItemsResult.model_rebuild()
+QueueAddLabelResult.model_rebuild()
+QueueAgreementAnnotatorPair.model_rebuild()
+QueueAgreementLabel.model_rebuild()
+QueueAgreementResult.model_rebuild()
+QueueAnalyticsAnnotatorPerformance.model_rebuild()
+QueueAnalyticsResult.model_rebuild()
+QueueAnalyticsThroughput.model_rebuild()
+QueueAnalyticsThroughputDaily.model_rebuild()
 QueueAnnotateDetailResult.model_rebuild()
 QueueAnnotatorNested.model_rebuild()
+QueueAssignItemsResult.model_rebuild()
+QueueBulkRemoveItemsResult.model_rebuild()
+QueueExportToDatasetResult.model_rebuild()
+QueueImportAnnotationsResult.model_rebuild()
 QueueItem.model_rebuild()
 QueueItemAssignedUser.model_rebuild()
 QueueLabelNested.model_rebuild()
+QueueLabelResult.model_rebuild()
 QueueNavigationResult.model_rebuild()
+QueueProgressAnnotatorStat.model_rebuild()
+QueueProgressResult.model_rebuild()
+QueueProgressUserProgress.model_rebuild()
+QueueRemoveLabelResult.model_rebuild()
 QueueSubmitAnnotationsResult.model_rebuild()
 RcaSummary.model_rebuild()
 RcaTrailStep.model_rebuild()
@@ -1805,6 +2135,7 @@ ScenarioDetailResponse.model_rebuild()
 ScenarioEditResponse.model_rebuild()
 ScenarioPromptItem.model_rebuild()
 ScenarioResponse.model_rebuild()
+Score.model_rebuild()
 SimulateEvalConfigResponse.model_rebuild()
 SpanListColumnConfig.model_rebuild()
 SpanListMetadata.model_rebuild()
@@ -1852,6 +2183,10 @@ __all__ = [
     'AgentccRequestLog',
     'AgentccSession',
     'AnnotationQueue',
+    'AnnotationsLabels',
+    'ApiKeyResponse',
+    'BulkAnnotationResponseResult',
+    'BulkCreateScoresResult',
     'CallExecution',
     'CallExecutionErrorLocalizerTask',
     'Column',
@@ -1872,7 +2207,11 @@ __all__ = [
     'DatasetColumnConfigEntry',
     'DatasetColumnsMutationResult',
     'DatasetCreateStartedResult',
+    'DatasetEvalStatsItem',
+    'DatasetEvalStatsMetric',
     'DatasetListItem',
+    'DatasetNameItem',
+    'DatasetNamesResult',
     'DatasetOptimizationColumnConfigItem',
     'DatasetOptimizationCreate',
     'DatasetOptimizationDetail',
@@ -1914,24 +2253,51 @@ __all__ = [
     'GatewaySummaryResult',
     'KnowledgeBaseItem',
     'KnowledgeBasePaginatedResult',
+    'LegacyKnowledgeBaseCreateResult',
+    'LegacyKnowledgeBaseFileRow',
+    'LegacyKnowledgeBaseFilesResult',
+    'LegacyKnowledgeBaseListResult',
+    'LegacyKnowledgeBaseMutationResult',
+    'LegacyKnowledgeBaseOption',
+    'LocalFileDatasetCreateStartedResult',
     'MessageItem',
+    'ModelHubPaginatedResponse',
     'ModelHubSuccessMessageResult',
     'ObservationSpanDetailResult',
     'Organization',
     'ProjectDetailResult',
     'PromptHistoryExecution',
+    'PromptLabel',
     'PromptRunConfiguration',
     'PromptRunModelConfiguration',
     'PromptRunRequest',
     'PromptRunStatusResult',
     'PromptTemplate',
     'PromptTemplatePatch',
+    'QueueAddItemsResult',
+    'QueueAddLabelResult',
+    'QueueAgreementAnnotatorPair',
+    'QueueAgreementLabel',
+    'QueueAgreementResult',
+    'QueueAnalyticsAnnotatorPerformance',
+    'QueueAnalyticsResult',
+    'QueueAnalyticsThroughput',
+    'QueueAnalyticsThroughputDaily',
     'QueueAnnotateDetailResult',
     'QueueAnnotatorNested',
+    'QueueAssignItemsResult',
+    'QueueBulkRemoveItemsResult',
+    'QueueExportToDatasetResult',
+    'QueueImportAnnotationsResult',
     'QueueItem',
     'QueueItemAssignedUser',
     'QueueLabelNested',
+    'QueueLabelResult',
     'QueueNavigationResult',
+    'QueueProgressAnnotatorStat',
+    'QueueProgressResult',
+    'QueueProgressUserProgress',
+    'QueueRemoveLabelResult',
     'QueueSubmitAnnotationsResult',
     'RcaSummary',
     'RcaTrailStep',
@@ -1942,6 +2308,7 @@ __all__ = [
     'ScenarioEditResponse',
     'ScenarioPromptItem',
     'ScenarioResponse',
+    'Score',
     'SimulateEvalConfigResponse',
     'SpanListColumnConfig',
     'SpanListMetadata',

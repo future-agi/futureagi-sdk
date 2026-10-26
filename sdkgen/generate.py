@@ -56,11 +56,16 @@ class CatalogError(Exception):
 
 @dataclass
 class Param:
-    name: str
+    name: str  # as sent on the wire
     location: str  # path | query | body
     schema: dict
     required: bool
     description: str = ""
+    py_name: str | None = None  # Python argument name, when it should differ from the wire name
+
+    @property
+    def arg(self) -> str:
+        return self.py_name or _field_name(self.name)
 
 
 @dataclass
@@ -75,6 +80,7 @@ class Op:
     pagination: dict | None
     unwrap: str | None
     returns: dict | None  # schema of what the caller gets (an item, for paginated ops)
+    multipart: bool = False  # form fields + file uploads instead of a JSON body
 
     @property
     def namespace(self) -> list[str]:
@@ -130,7 +136,49 @@ def _walk(spec: dict, schema: dict | None, dotted: str) -> dict | None:
     return schema
 
 
-CONTRACT_FIXES = {"note", "untyped", "page_items"}
+CONTRACT_FIXES = {"note", "untyped", "page_items", "body", "body_required", "query"}
+FIX_TYPES = {"string", "integer", "number", "boolean", "object", "array", "file"}
+
+
+def _fix_schema(op_id: str, type_name: str) -> dict:
+    """`string`, `object`, `file`, ... or `X[]` for a list of X, as written in a contract_fix."""
+    if type_name.endswith("[]"):
+        return {"type": "array", "items": _fix_schema(op_id, type_name[:-2])}
+    if type_name not in FIX_TYPES:
+        raise CatalogError(f"{op_id}: contract_fix type {type_name!r} is not one of {sorted(FIX_TYPES)} or `X[]`")
+    return {"type": "array", "items": {}} if type_name == "array" else {"type": type_name}
+
+
+def _apply_request_fix(op_id: str, fix: dict | None, params: list[Param]) -> list[Param]:
+    """Catalog corrections for request parameters the contract describes wrongly.
+
+    body: {name: type}       replaces the contract's body fields (drf-yasg often documents the
+                             response serializer as the request body); a value may also be
+                             {type: T, as: python_name} when the wire name makes a poor argument
+    body_required: [name]    overrides which body fields are required (e.g. none, on a PATCH)
+    query: {name: type}      adds query parameters the contract leaves out
+    """
+    if not fix or not ({"body", "body_required", "query"} & set(fix)):
+        return params
+    if "body" in fix:
+        params = [p for p in params if p.location != "body"]
+        for name, kind in fix["body"].items():
+            py_name = None
+            if isinstance(kind, dict):
+                kind, py_name = kind["type"], kind.get("as")
+            params.append(Param(name, "body", _fix_schema(op_id, kind), False, py_name=py_name))
+    if "body_required" in fix:
+        body_names = {p.name for p in params if p.location == "body"}
+        unknown = set(fix["body_required"]) - body_names
+        if unknown:
+            raise CatalogError(f"{op_id}: contract_fix.body_required names unknown body fields {sorted(unknown)}")
+        for p in params:
+            if p.location == "body":
+                p.required = p.name in fix["body_required"]
+    for name, kind in fix.get("query", {}).items():
+        params = [p for p in params if not (p.location == "query" and p.name == name)]
+        params.append(Param(name, "query", _fix_schema(op_id, kind), False))
+    return params
 
 
 def _apply_contract_fix(op_id: str, fix: dict | None, returns: dict | None, unwrap: str | None):
@@ -140,6 +188,7 @@ def _apply_contract_fix(op_id: str, fix: dict | None, returns: dict | None, unwr
     untyped: true      the contract's schema is wrong; return the raw JSON
     Every fix needs a `note` so the backend bug can be fixed at the source. (A missing
     {status, result} envelope needs no fix: the transport unwraps it whenever present.)
+    Request-side keys (`body`, `body_required`, `query`) are handled by _apply_request_fix.
     """
     if not fix:
         return returns, unwrap
@@ -190,6 +239,14 @@ def load(spec: dict, catalog: dict) -> list[Op]:
                 params.append(Param(p["name"], p["in"], schema, p["in"] == "path" or p.get("required", False), p.get("description", "")))
             else:
                 raise CatalogError(f"{op_id}: unsupported parameter location {p['in']!r}")
+        params = _apply_request_fix(op_id, entry.get("contract_fix"), params)
+
+        multipart = bool(entry["operation"].get("multipart", False))
+        file_params = [p.name for p in params if p.location == "body" and _is_file(p.schema)]
+        if multipart and method not in ("post", "put", "patch"):
+            raise CatalogError(f"{op_id}: multipart is only meaningful on POST/PUT/PATCH")
+        if file_params and not multipart:
+            raise CatalogError(f"{op_id}: file params {file_params} need `operation.multipart: true`")
 
         placeholders = set(re.findall(r"{(\w+)}", path))
         path_params = {p.name for p in params if p.location == "path"}
@@ -253,6 +310,7 @@ def load(spec: dict, catalog: dict) -> list[Op]:
                 pagination=pagination,
                 unwrap=unwrap,
                 returns=returns,
+                multipart=multipart,
             )
         )
 
@@ -281,9 +339,16 @@ def _class_name(ref: str) -> str:
     return ref.rsplit("/", 1)[-1]
 
 
+def _is_file(schema: dict | None) -> bool:
+    schema = schema or {}
+    return schema.get("type") == "file" or (schema.get("type") == "array" and _is_file(schema.get("items")))
+
+
 def _py_type(schema: dict | None, *, for_input: bool) -> str:
     if not schema:
         return "Any"
+    if for_input and schema.get("type") == "file":
+        return "FileInput"
     if "$ref" in schema:
         return "dict[str, Any]" if for_input else _class_name(schema["$ref"])
     if "enum" in schema:
@@ -410,13 +475,13 @@ def _signature(op: Op) -> tuple[list[str], list[tuple[Param, str]]]:
     rest.sort(key=lambda p: not p.required)
     named: list[tuple[Param, str]] = []
     for p in path:
-        args.append(f"{_field_name(p.name)}: str")
-        named.append((p, _field_name(p.name)))
+        args.append(f"{p.arg}: str")
+        named.append((p, p.arg))
     if rest:
         args.append("*")
     for p in rest:
         py = _py_type(p.schema, for_input=True)
-        arg = _field_name(p.name)
+        arg = p.arg
         args.append(f"{arg}: {py}" if p.required else f"{arg}: {py} | None = None")
         named.append((p, arg))
     # Escape hatches for fields the contract does not (yet) describe.
@@ -442,7 +507,7 @@ def _method(op: Op, *, is_async: bool) -> str:
     if stability != "stable":
         lines.append(f"        _stability({op.id!r}, {stability!r})\n")
     for location in ("path", "query", "body") if _has_body(op) else ("path", "query"):
-        group = [(p, a) for p, a in named if p.location == location]
+        group = [(p, a) for p, a in named if p.location == location and not (location == "body" and _is_file(p.schema))]
         extra = {"query": "extra_query", "body": "extra_body"}.get(location)
         items = ", ".join(f"{p.name!r}: {a}" for p, a in group)
         if extra:
@@ -451,13 +516,17 @@ def _method(op: Op, *, is_async: bool) -> str:
         lines.append(f"        {location} = {{{items}}}\n" if items else f"        {location} = None\n")
     if not _has_body(op) and not op.pagination:
         lines.append("        body = None\n")
+    if op.multipart:  # file params travel separately from the form fields
+        uploads = ", ".join(f"{p.name!r}: {a}" for p, a in named if p.location == "body" and _is_file(p.schema))
+        lines.append(f"        files = {{{uploads}}}\n")
     model_arg = model or "None"
     if op.pagination:
         fn = "apaginate" if is_async else "paginate"
         lines.append(f"        return self._t.{fn}({_op_constant(op)}, path=path, query=query, model={model_arg})\n")
     else:
         prefix = "await self._t.acall" if is_async else "self._t.call"
-        lines.append(f"        return {prefix}({_op_constant(op)}, path=path, query=query, body=body, model={model_arg})\n")
+        files_arg = ", files=files" if op.multipart else ""
+        lines.append(f"        return {prefix}({_op_constant(op)}, path=path, query=query, body=body{files_arg}, model={model_arg})\n")
     return "".join(lines)
 
 
@@ -480,8 +549,12 @@ def emit_resources(ops: list[Op]) -> str:
         "from .._transport import AsyncTransport, Operation, SyncTransport\n",
         "from . import models\n\n",
     ]
+    if any(op.multipart for op in sdk_ops):
+        out[-2] = "from .._transport import AsyncTransport, FileInput, Operation, SyncTransport\n"
     for op in sdk_ops:
         spec = {"id": op.id, "method": op.method, "path": op.path, "unwrap": op.unwrap, "pagination": op.pagination}
+        if op.multipart:
+            spec["multipart"] = True
         out.append(f"{_op_constant(op)} = Operation(**{spec!r})\n")
     out.append("\n")
 

@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import asyncio
 import functools
+import os
 import random
 import time
 import warnings
 from dataclasses import dataclass
-from typing import Any
+from typing import IO, Any, Dict, List, Tuple, Union
 from urllib.parse import quote
 
 import httpx
@@ -48,6 +49,46 @@ class Operation:
     path: str
     unwrap: str | None
     pagination: dict | None
+    multipart: bool = False  # body fields go as form data, file params as uploads
+
+
+# What a caller may pass for a file parameter: a path, raw bytes, an open binary
+# file, or an explicit (filename, bytes-or-file) pair.
+FileInput = Union[str, "os.PathLike[str]", bytes, IO[bytes], Tuple[str, Union[bytes, IO[bytes]]]]
+
+
+def _file_tuple(value: FileInput) -> Tuple[str, bytes]:
+    """Read a file input into (filename, bytes) so a retried request can resend it."""
+    if isinstance(value, tuple):
+        name, data = value
+        return name, data if isinstance(data, bytes) else data.read()
+    if isinstance(value, bytes):
+        return "upload", value
+    if isinstance(value, (str, os.PathLike)):
+        with open(value, "rb") as fh:
+            return os.path.basename(os.fspath(value)), fh.read()
+    name = getattr(value, "name", None)
+    return (os.path.basename(str(name)) if name else "upload"), value.read()
+
+
+def _files(files: Dict[str, Any] | None) -> List[Tuple[str, Tuple[str, bytes]]] | None:
+    """{field: FileInput | [FileInput]} -> httpx `files` list; unset (None) fields are dropped."""
+    if not files:
+        return None
+    out: List[Tuple[str, Tuple[str, bytes]]] = []
+    for field, value in files.items():
+        if value is None:
+            continue
+        for item in value if isinstance(value, list) else [value]:
+            out.append((field, _file_tuple(item)))
+    return out or None
+
+
+def _form(body: Any) -> Any:
+    """Form fields are strings; booleans and numbers are rendered the way DRF parses them."""
+    if not isinstance(body, dict):
+        return body
+    return {k: (str(v).lower() if isinstance(v, bool) else v) for k, v in body.items() if v is not None}
 
 
 @dataclass
@@ -83,6 +124,15 @@ def _clean(params: Any) -> Any:
     if not isinstance(params, dict):
         return params
     return {k: v for k, v in params.items() if v is not None}
+
+
+def _payload(op: Operation, body: Any, files: Dict[str, Any] | None) -> Dict[str, Any]:
+    """httpx keyword arguments for the request body: JSON, or form fields plus uploads."""
+    if op.multipart:
+        return {"data": _form(body), "files": _files(files)}
+    if files:
+        raise TypeError(f"{op.id}: files are only accepted by multipart operations")
+    return {"json": _clean(body)}
 
 
 def _decode(op: Operation, response: httpx.Response) -> Any:
@@ -156,13 +206,13 @@ class SyncTransport:
         self._owns_http = http_client is None
         self._http = http_client or httpx.Client(follow_redirects=True)
 
-    def request(self, op: Operation, *, path=None, query=None, body=None) -> Any:
+    def request(self, op: Operation, *, path=None, query=None, body=None, files=None) -> Any:
         url = self.config.base_url + _url(op, path)
+        payload = _payload(op, body, files)
         for attempt in range(self.config.max_retries + 1):
             try:
                 response = self._http.request(
-                    op.method, url, params=_clean(query), json=_clean(body),
-                    headers=self.config.headers(), timeout=self.config.timeout,
+                    op.method, url, params=_clean(query), headers=self.config.headers(), timeout=self.config.timeout, **payload
                 )
             except httpx.TransportError as exc:
                 if _can_retry(op, None, attempt, self.config.max_retries):
@@ -177,8 +227,9 @@ class SyncTransport:
             return _decode(op, response)
         raise AssertionError("unreachable")
 
-    def call(self, op: Operation, *, path=None, query=None, body=None, model=None) -> Any:
-        return _parse(op, model, self.request(op, path=path, query=query, body=body), self.config.strict_responses)
+    def call(self, op: Operation, *, path=None, query=None, body=None, files=None, model=None) -> Any:
+        data = self.request(op, path=path, query=query, body=body, files=files)
+        return _parse(op, model, data, self.config.strict_responses)
 
     def paginate(self, op: Operation, *, path=None, query=None, model=None) -> SyncPager:
         spec = op.pagination
@@ -200,13 +251,13 @@ class AsyncTransport:
         self._owns_http = http_client is None
         self._http = http_client or httpx.AsyncClient(follow_redirects=True)
 
-    async def request(self, op: Operation, *, path=None, query=None, body=None) -> Any:
+    async def request(self, op: Operation, *, path=None, query=None, body=None, files=None) -> Any:
         url = self.config.base_url + _url(op, path)
+        payload = _payload(op, body, files)
         for attempt in range(self.config.max_retries + 1):
             try:
                 response = await self._http.request(
-                    op.method, url, params=_clean(query), json=_clean(body),
-                    headers=self.config.headers(), timeout=self.config.timeout,
+                    op.method, url, params=_clean(query), headers=self.config.headers(), timeout=self.config.timeout, **payload
                 )
             except httpx.TransportError as exc:
                 if _can_retry(op, None, attempt, self.config.max_retries):
@@ -221,8 +272,9 @@ class AsyncTransport:
             return _decode(op, response)
         raise AssertionError("unreachable")
 
-    async def acall(self, op: Operation, *, path=None, query=None, body=None, model=None) -> Any:
-        return _parse(op, model, await self.request(op, path=path, query=query, body=body), self.config.strict_responses)
+    async def acall(self, op: Operation, *, path=None, query=None, body=None, files=None, model=None) -> Any:
+        data = await self.request(op, path=path, query=query, body=body, files=files)
+        return _parse(op, model, data, self.config.strict_responses)
 
     def apaginate(self, op: Operation, *, path=None, query=None, model=None) -> AsyncPager:
         spec = op.pagination

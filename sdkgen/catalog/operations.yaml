@@ -953,3 +953,348 @@ operations:
   surfaces:
     sdk: {}
     mcp: {name: get_usage_overview, group: usage, access: read}
+
+# --------------------------------------------------------------------------- #
+# SDK-only operations: parity with the hand-written fi.datasets, fi.prompt,
+# fi.kb, fi.queues and fi.annotations modules, so those can be retired.
+# None of these ship to MCP (mcp: false); the MCP manifest stays at 105 tools.
+# --------------------------------------------------------------------------- #
+
+# datasets
+
+- id: datasets.list_names
+  description: Return the id and name of every dataset in the workspace, without paging.
+  operation: {method: GET, path: /model-hub/develops/get-datasets-names/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: datasets.create_from_file
+  description: Create a dataset by uploading a local CSV, JSON, JSONL or Excel file. Processing is asynchronous; read datasets.get for the result.
+  operation: {method: POST, path: /model-hub/develops/create-dataset-from-local-file/, multipart: true}
+  contract_fix:
+    body: {file: file, new_dataset_name: string, model_type: string, source: string}
+    body_required: [file, new_dataset_name, model_type]
+    note: "multipart upload; the contract types `file` as a string uri inside a JSON body and marks nothing required, but the server rejects a missing model_type (with a 500, not a 400)"
+  surfaces: {sdk: {}, mcp: false}
+
+- id: datasets.create_from_huggingface
+  description: Create a dataset from a Hugging Face dataset split.
+  operation: {method: POST, path: /model-hub/develops/create-dataset-from-huggingface/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: datasets.evals.stats
+  description: Per-evaluation score statistics for a dataset.
+  operation: {method: GET, path: '/model-hub/dataset/{dataset_id}/eval-stats/'}
+  surfaces: {sdk: {}, mcp: false}
+
+# prompts
+
+- id: prompts.create_draft
+  description: Create a prompt template together with its first draft version (messages, model configuration, variables).
+  operation: {method: POST, path: /model-hub/prompt-templates/create-draft/}
+  contract_fix:
+    body: {name: string, prompt_config: 'object[]', variable_names: object, evaluation_configs: 'object[]', metadata: object, placeholders: object}
+    body_required: [name, prompt_config]
+    note: "contract documents the PromptTemplate response serializer as the request body"
+  surfaces: {sdk: {}, mcp: false}
+
+- id: prompts.add_draft
+  description: Add new draft versions to a prompt template. Each entry carries prompt_config, variable_names, evaluation_configs, metadata and placeholders.
+  operation: {method: POST, path: '/model-hub/prompt-templates/{id}/add-new-draft/'}
+  contract_fix:
+    body: {new_prompts: 'object[]'}
+    body_required: [new_prompts]
+    untyped: true
+    note: "contract documents the PromptTemplate serializer as request and response; the server takes {new_prompts: [...]} and returns the created drafts"
+  surfaces: {sdk: {}, mcp: false}
+
+- id: prompts.commit
+  description: Commit the current draft of a prompt template as a named version, optionally making it the default.
+  operation: {method: POST, path: '/model-hub/prompt-templates/{id}/commit/'}
+  contract_fix:
+    body: {version_name: string, message: string, set_default: boolean, is_draft: boolean, metadata: object}
+    body_required: [version_name]
+    untyped: true
+    note: "contract documents the PromptTemplate serializer as request and response; the server returns a message string"
+  surfaces: {sdk: {}, mcp: false}
+
+- id: prompts.delete
+  description: Delete a prompt template and all its versions.
+  operation: {method: DELETE, path: '/model-hub/prompt-templates/{id}/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: prompts.generate
+  description: Generate a prompt from a plain-language statement of what it should do.
+  operation: {method: POST, path: /model-hub/prompt-templates/generate-prompt/}
+  contract_fix:
+    body: {statement: string}
+    body_required: [statement]
+    untyped: true
+    note: "contract documents the PromptTemplate serializer as both request and response"
+  surfaces: {sdk: {}, mcp: false}
+
+- id: prompts.improve
+  description: Rewrite an existing prompt according to the given improvement requirements.
+  operation: {method: POST, path: /model-hub/prompt-templates/improve-prompt/}
+  contract_fix:
+    body: {existing_prompt: string, improvement_requirements: string}
+    body_required: [existing_prompt, improvement_requirements]
+    untyped: true
+    note: "contract documents the PromptTemplate serializer as both request and response"
+  surfaces: {sdk: {}, mcp: false}
+
+- id: prompts.get_by_name
+  description: Fetch a prompt template by name; the default version unless `version` is given.
+  operation: {method: GET, path: /model-hub/prompt-templates/get-template-by-name/}
+  contract_fix: {untyped: true, note: "contract says a DRF page; server returns one template version"}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: prompts.history
+  description: List past prompt executions, optionally for one template.
+  operation: {method: GET, path: /model-hub/prompt-history-executions/}
+  contract_fix: {query: {template_id: string}, note: "server filters by template_id, which the contract leaves out"}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: prompts.labels.list
+  description: List prompt labels (e.g. production, staging) in the organization.
+  operation: {method: GET, path: /model-hub/prompt-labels/}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: prompts.labels.create
+  description: Create a prompt label.
+  operation: {method: POST, path: /model-hub/prompt-labels/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: prompts.labels.get_template
+  description: Fetch the prompt template version a label points to, by template name and label (or version).
+  operation: {method: GET, path: /model-hub/prompt-labels/get-by-name/}
+  contract_fix:
+    query: {name: string, label: string, version: string}
+    untyped: true
+    note: "contract says a DRF page with only paging params; server takes name/label/version and returns one template version"
+  surfaces: {sdk: {}, mcp: false}
+
+- id: prompts.labels.for_template
+  description: List the labels assigned to a prompt template's versions.
+  operation: {method: GET, path: /model-hub/prompt-labels/template-labels/}
+  contract_fix:
+    query: {template_id: string, template_name: string}
+    untyped: true
+    note: "contract says a DRF page with only paging params; server takes template_id or template_name"
+  surfaces: {sdk: {}, mcp: false}
+
+- id: prompts.labels.assign
+  description: Assign a label to one version of a prompt template.
+  operation: {method: POST, path: '/model-hub/prompt-labels/{template_id}/{label_id}/assign-label-by-id/'}
+  contract_fix:
+    body: {version: string}
+    body_required: [version]
+    untyped: true
+    note: "contract documents the label serializer as both request and response"
+  surfaces: {sdk: {}, mcp: false}
+
+- id: prompts.labels.remove
+  description: Remove a label from a prompt template version.
+  operation: {method: POST, path: /model-hub/prompt-labels/remove/}
+  contract_fix:
+    body: {label_id: string, version_id: string}
+    body_required: [label_id, version_id]
+    untyped: true
+    note: "contract documents the label serializer as both request and response"
+  surfaces: {sdk: {}, mcp: false}
+
+- id: prompts.labels.set_default
+  description: Make a version the default for a prompt template, by template name.
+  operation: {method: POST, path: /model-hub/prompt-labels/set-default/}
+  contract_fix:
+    body: {template_name: string, version: string}
+    body_required: [template_name, version]
+    untyped: true
+    note: "contract documents the label serializer as both request and response"
+  surfaces: {sdk: {}, mcp: false}
+
+# model providers
+
+- id: models.list
+  description: List the LLM models available to prompts and evaluations, with their providers.
+  operation: {method: GET, path: /model-hub/api/models_list/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: provider_keys.list
+  description: List the model-provider API keys configured for the organization (values are masked).
+  operation: {method: GET, path: /model-hub/api-keys/}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces: {sdk: {}, mcp: false}
+
+# knowledge bases
+
+- id: knowledge_bases.create
+  description: Create a knowledge base, optionally uploading its first files (pdf, docx, txt, rtf).
+  operation: {method: POST, path: /model-hub/knowledge-base/, multipart: true}
+  contract_fix:
+    body: {name: string, file: {type: 'file[]', as: files}}
+    body_required: [name]
+    note: "multipart upload; files go in the repeated `file` form field, which the contract calls `files` inside a JSON body"
+  surfaces: {sdk: {}, mcp: false}
+
+- id: knowledge_bases.update
+  description: Rename a knowledge base and/or upload more files to it.
+  operation: {method: PATCH, path: /model-hub/knowledge-base/, multipart: true}
+  contract_fix:
+    body: {kb_id: string, name: string, file: {type: 'file[]', as: files}}
+    body_required: [kb_id]
+    note: "multipart upload; files go in the repeated `file` form field, which the contract calls `files` inside a JSON body"
+  surfaces: {sdk: {}, mcp: false}
+
+- id: knowledge_bases.list_names
+  description: Return the id and name of every knowledge base created through knowledge_bases.create, without paging.
+  operation: {method: GET, path: /model-hub/knowledge-base/list/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: knowledge_bases.delete
+  description: Delete knowledge bases by id.
+  operation: {method: DELETE, path: /model-hub/knowledge-base/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: knowledge_bases.files.list
+  description: List the files in a knowledge base, with their processing status.
+  operation: {method: POST, path: /model-hub/knowledge-base/files/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: knowledge_bases.files.delete
+  description: Delete files from a knowledge base, by id or name, or all of them.
+  operation: {method: DELETE, path: /model-hub/knowledge-base/files/}
+  surfaces: {sdk: {}, mcp: false}
+
+# annotations and scores
+
+- id: annotations.bulk_create
+  description: Create or update annotations and notes on spans in bulk.
+  operation: {method: POST, path: /tracer/bulk-annotation/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotations.labels.list
+  description: List annotation labels, optionally filtered by project, type or search text.
+  operation: {method: GET, path: /model-hub/annotations-labels/}
+  contract_fix: {page_items: results, note: "contract says an array; server returns a DRF page {count, next, results}"}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotations.labels.create
+  description: Create an annotation label (text, label, score, ...) with its settings.
+  operation: {method: POST, path: /model-hub/annotations-labels/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotations.labels.get
+  description: Return an annotation label by id.
+  operation: {method: GET, path: '/model-hub/annotations-labels/{id}/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotations.labels.delete
+  description: Delete (archive) an annotation label.
+  operation: {method: DELETE, path: '/model-hub/annotations-labels/{id}/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: scores.create
+  description: Record one score (annotation value) against a source such as a span or dataset row.
+  operation: {method: POST, path: /model-hub/scores/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: scores.create_bulk
+  description: Record several scores against one source in a single call.
+  operation: {method: POST, path: /model-hub/scores/bulk/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: scores.list_for_source
+  description: List the scores recorded against one source.
+  operation: {method: GET, path: /model-hub/scores/for-source/}
+  surfaces: {sdk: {}, mcp: false}
+
+# annotation queues
+
+- id: annotation_queues.create
+  description: Create an annotation queue with its labels and annotators.
+  operation: {method: POST, path: /model-hub/annotation-queues/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.update
+  description: Update selected fields of an annotation queue.
+  operation: {method: PATCH, path: '/model-hub/annotation-queues/{id}/'}
+  contract_fix: {body_required: [], note: "PATCH is partial, but the contract marks name and label_ids required"}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.delete
+  description: Delete an annotation queue.
+  operation: {method: DELETE, path: '/model-hub/annotation-queues/{id}/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.update_status
+  description: Change a queue's status (draft, active, paused, completed, archived).
+  operation: {method: POST, path: '/model-hub/annotation-queues/{id}/update-status/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.progress
+  description: Item counts by status and per-annotator progress for a queue.
+  operation: {method: GET, path: '/model-hub/annotation-queues/{id}/progress/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.analytics
+  description: Throughput, annotator performance and label distribution for a queue.
+  operation: {method: GET, path: '/model-hub/annotation-queues/{id}/analytics/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.agreement
+  description: Inter-annotator agreement for a queue.
+  operation: {method: GET, path: '/model-hub/annotation-queues/{id}/agreement/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.export
+  description: Export a queue's annotations.
+  operation: {method: GET, path: '/model-hub/annotation-queues/{id}/export/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.export_to_dataset
+  description: Write a queue's annotations into a new or existing dataset.
+  operation: {method: POST, path: '/model-hub/annotation-queues/{id}/export-to-dataset/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.add_label
+  description: Add an annotation label to a queue.
+  operation: {method: POST, path: '/model-hub/annotation-queues/{id}/add-label/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.remove_label
+  description: Remove an annotation label from a queue.
+  operation: {method: POST, path: '/model-hub/annotation-queues/{id}/remove-label/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.items.add
+  description: Add items (spans, traces, dataset rows) to a queue, by id or by a selection filter.
+  operation: {method: POST, path: '/model-hub/annotation-queues/{queue_id}/items/add-items/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.items.assign
+  description: Assign or unassign queue items to annotators.
+  operation: {method: POST, path: '/model-hub/annotation-queues/{queue_id}/items/assign/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.items.remove
+  description: Remove items from a queue.
+  operation: {method: POST, path: '/model-hub/annotation-queues/{queue_id}/items/bulk-remove/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.items.skip
+  description: Skip a queue item and return the next one to work on.
+  operation: {method: POST, path: '/model-hub/annotation-queues/{queue_id}/items/{id}/skip/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.items.list_annotations
+  description: List the annotations recorded on a queue item.
+  operation: {method: GET, path: '/model-hub/annotation-queues/{queue_id}/items/{id}/annotations/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: annotation_queues.items.import_annotations
+  description: Import existing annotations onto a queue item, optionally on behalf of an annotator.
+  operation: {method: POST, path: '/model-hub/annotation-queues/{queue_id}/items/{id}/annotations/import/'}
+  surfaces: {sdk: {}, mcp: false}

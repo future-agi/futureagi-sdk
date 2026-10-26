@@ -119,6 +119,32 @@ def test_errors_share_the_packages_base_exception():
         client.datasets.get("missing")
 
 
+def test_multipart_operation_sends_form_fields_and_files(tmp_path):
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["content_type"] = request.headers["content-type"]
+        seen["body"] = request.read()
+        return httpx.Response(200, json={"status": True, "result": {"detail": "ok", "kb_id": "kb1", "kb_name": "x", "file_ids": ["f1", "f2"]}})
+
+    path = tmp_path / "notes.txt"
+    path.write_bytes(b"from a path")
+    client = _client(handler)
+    result = client.knowledge_bases.create(name="x", files=[path, ("inline.txt", b"from bytes")])
+    assert result.kb_id == "kb1"
+    assert seen["content_type"].startswith("multipart/form-data")
+    body = seen["body"]
+    assert b'name="name"\r\n\r\nx' in body
+    assert b'name="file"; filename="notes.txt"' in body and b"from a path" in body
+    assert b'name="file"; filename="inline.txt"' in body and b"from bytes" in body
+
+
+def test_files_on_a_json_operation_are_rejected():
+    client = _client(lambda r: _dataset_response())
+    with pytest.raises(TypeError, match="multipart"):
+        client._transport.request(fp._generated.resources.OP_DATASETS_CREATE, body={"new_dataset_name": "x"}, files={"file": b"x"})
+
+
 def test_import_fi_does_not_load_the_platform_client():
     code = "import fi, sys; print(json.dumps(['fi.platform' in sys.modules, fi.Client.__name__, 'fi.platform' in sys.modules]))"
     out = subprocess.run([sys.executable, "-c", "import json; " + code], capture_output=True, text=True, check=True).stdout

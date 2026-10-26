@@ -824,6 +824,37 @@
           "model-hub"
         ],
         "x-runtime-request-validation": true
+      },
+      "post": {
+        "operationId": "model-hub_annotation-queues_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AnnotationQueue"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AnnotationQueue"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
       }
     },
     "/model-hub/annotation-queues/{id}/": {
@@ -858,6 +889,638 @@
         "tags": [
           "model-hub"
         ]
+      },
+      "patch": {
+        "operationId": "model-hub_annotation-queues_partial_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AnnotationQueue"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AnnotationQueue"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      },
+      "delete": {
+        "operationId": "model-hub_annotation-queues_delete",
+        "summary": "Archive a queue (soft delete).",
+        "description": "``BaseModel.delete()`` flips ``deleted=True`` instead of removing\nthe row. Attached automation rules go dormant (the scheduler\nfilters ``queue__deleted=False``), items stay invisible but\nrecoverable, label bindings preserved.\n\nFor truly destructive removal, use the ``hard-delete`` action\nbelow.",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/annotation-queues/{id}/add-label/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A UUID string identifying this annotation queue.",
+          "required": true,
+          "type": "string",
+          "format": "uuid"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_annotation-queues_add_label",
+        "description": "Add a label to an annotation queue.\nLabels apply to all sources in the queue's project (for default queues).\nQueue items are created lazily when someone actually annotates.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/QueueLabelRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/QueueAddLabelResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/annotation-queues/{id}/agreement/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A UUID string identifying this annotation queue.",
+          "required": true,
+          "type": "string",
+          "format": "uuid"
+        }
+      ],
+      "get": {
+        "operationId": "model-hub_annotation-queues_agreement",
+        "description": "Calculate inter-annotator agreement metrics.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/QueueAgreementResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/annotation-queues/{id}/analytics/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A UUID string identifying this annotation queue.",
+          "required": true,
+          "type": "string",
+          "format": "uuid"
+        }
+      ],
+      "get": {
+        "operationId": "model-hub_annotation-queues_analytics",
+        "description": "Queue analytics: throughput, annotator performance, label distribution.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/QueueAnalyticsResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/annotation-queues/{id}/export-to-dataset/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A UUID string identifying this annotation queue.",
+          "required": true,
+          "type": "string",
+          "format": "uuid"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_annotation-queues_export_to_dataset",
+        "description": "Export queue items to a dataset using a user-editable column mapping.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/QueueExportToDatasetRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/QueueExportToDatasetResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/annotation-queues/{id}/export/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A UUID string identifying this annotation queue.",
+          "required": true,
+          "type": "string",
+          "format": "uuid"
+        }
+      ],
+      "get": {
+        "operationId": "model-hub_annotation-queues_export_annotations",
+        "description": "Export all items with their annotations.",
+        "parameters": [
+          {
+            "name": "export_format",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "json",
+              "csv"
+            ]
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/QueueExportAnnotationsResponse"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/annotation-queues/{id}/progress/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A UUID string identifying this annotation queue.",
+          "required": true,
+          "type": "string",
+          "format": "uuid"
+        }
+      ],
+      "get": {
+        "operationId": "model-hub_annotation-queues_progress",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/QueueProgressResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/annotation-queues/{id}/remove-label/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A UUID string identifying this annotation queue.",
+          "required": true,
+          "type": "string",
+          "format": "uuid"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_annotation-queues_remove_label",
+        "description": "Remove a label from an annotation queue.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/QueueLabelRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/QueueRemoveLabelResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/annotation-queues/{id}/update-status/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A UUID string identifying this annotation queue.",
+          "required": true,
+          "type": "string",
+          "format": "uuid"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_annotation-queues_update_status",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/QueueStatusRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/QueueStatusResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
       }
     },
     "/model-hub/annotation-queues/{queue_id}/items/": {
@@ -975,6 +1638,225 @@
         "x-runtime-request-validation": true
       }
     },
+    "/model-hub/annotation-queues/{queue_id}/items/add-items/": {
+      "parameters": [
+        {
+          "name": "queue_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_annotation-queues_items_add_items",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddItems"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/QueueAddItemsResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTooLargeError"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/annotation-queues/{queue_id}/items/assign/": {
+      "parameters": [
+        {
+          "name": "queue_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_annotation-queues_items_assign_items",
+        "description": "Assign items to one or more annotators.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AssignItems"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/QueueAssignItemsResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/annotation-queues/{queue_id}/items/bulk-remove/": {
+      "parameters": [
+        {
+          "name": "queue_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_annotation-queues_items_bulk_remove",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkRemoveItems"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/QueueBulkRemoveItemsResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
     "/model-hub/annotation-queues/{queue_id}/items/{id}/annotate-detail/": {
       "parameters": [
         {
@@ -1045,6 +1927,157 @@
             "description": "",
             "schema": {
               "$ref": "#/definitions/QueueAnnotateDetailResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/annotation-queues/{queue_id}/items/{id}/annotations/": {
+      "parameters": [
+        {
+          "name": "queue_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A UUID string identifying this queue item.",
+          "required": true,
+          "type": "string",
+          "format": "uuid"
+        }
+      ],
+      "get": {
+        "operationId": "model-hub_annotation-queues_items_annotations_list",
+        "description": "List all annotations for a queue item (across all annotators).",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/QueueItemAnnotationsResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/annotation-queues/{queue_id}/items/{id}/annotations/import/": {
+      "parameters": [
+        {
+          "name": "queue_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A UUID string identifying this queue item.",
+          "required": true,
+          "type": "string",
+          "format": "uuid"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_annotation-queues_items_annotations_import_annotations",
+        "description": "Import annotations from external sources.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ImportAnnotations"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/QueueImportAnnotationsResponse"
             }
           },
           "400": {
@@ -1253,6 +2286,426 @@
         "x-runtime-response-validation": true
       }
     },
+    "/model-hub/annotation-queues/{queue_id}/items/{id}/skip/": {
+      "parameters": [
+        {
+          "name": "queue_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A UUID string identifying this queue item.",
+          "required": true,
+          "type": "string",
+          "format": "uuid"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_annotation-queues_items_skip_item",
+        "description": "Mark item as skipped and return next pending item.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/QueueItemNavigationRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/QueueNavigationResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/annotations-labels/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_annotations-labels_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "dataset",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "text",
+              "numeric",
+              "categorical",
+              "star",
+              "thumbs_up_down"
+            ]
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "include_usage_count",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "include_archived",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "archived",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AnnotationsLabels"
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      },
+      "post": {
+        "operationId": "model-hub_annotations-labels_create",
+        "description": "Custom create to provide clearer error responses in GM format.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AnnotationsLabels"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AnnotationLabelCreateResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/annotations-labels/{id}/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "operationId": "model-hub_annotations-labels_read",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AnnotationsLabels"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      },
+      "delete": {
+        "operationId": "model-hub_annotations-labels_delete",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/api-keys/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_api-keys_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiKeyListResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/api/models_list/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_api_models_list_list",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubPaginatedResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
     "/model-hub/dataset-optimization/": {
       "parameters": [],
       "get": {
@@ -1405,6 +2858,68 @@
         ]
       }
     },
+    "/model-hub/dataset/{dataset_id}/eval-stats/": {
+      "parameters": [
+        {
+          "name": "dataset_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "operationId": "model-hub_dataset_eval-stats_list",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DatasetEvalStatsResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
     "/model-hub/dataset/{dataset_id}/run-prompt-stats/": {
       "parameters": [
         {
@@ -1517,6 +3032,150 @@
             "description": "",
             "schema": {
               "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/develops/create-dataset-from-huggingface/": {
+      "parameters": [],
+      "post": {
+        "operationId": "model-hub_develops_create-dataset-from-huggingface_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HuggingFaceDatasetCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DatasetCreateStartedResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DatasetLimitCheckFailedError"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/develops/create-dataset-from-local-file/": {
+      "parameters": [],
+      "post": {
+        "operationId": "model-hub_develops_create-dataset-from-local-file_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateDatasetFromLocalFileRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/LocalFileDatasetCreateStartedResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DatasetLimitCheckFailedError"
             }
           },
           "default": {
@@ -1735,6 +3394,61 @@
         ],
         "x-runtime-request-validation": true,
         "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/develops/get-datasets-names/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_develops_get-datasets-names_list",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DatasetNamesResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
       }
     },
     "/model-hub/develops/get-datasets/": {
@@ -3358,6 +5072,1034 @@
         ]
       }
     },
+    "/model-hub/knowledge-base/": {
+      "parameters": [],
+      "post": {
+        "operationId": "model-hub_knowledge-base_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LegacyKnowledgeBaseMutationRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/LegacyKnowledgeBaseCreateResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "patch": {
+        "operationId": "model-hub_knowledge-base_partial_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LegacyKnowledgeBaseMutationRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/LegacyKnowledgeBaseMutationResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "delete": {
+        "operationId": "model-hub_knowledge-base_delete",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LegacyKnowledgeBaseBulkDeleteRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubStringResultResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/knowledge-base/files/": {
+      "parameters": [],
+      "post": {
+        "operationId": "model-hub_knowledge-base_files_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LegacyKnowledgeBaseFilesRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/LegacyKnowledgeBaseFilesResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "delete": {
+        "operationId": "model-hub_knowledge-base_files_delete",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LegacyKnowledgeBaseFileDeleteRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubStringResultResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/knowledge-base/list/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_knowledge-base_list_list",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/LegacyKnowledgeBaseListResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/prompt-history-executions/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_prompt-history-executions_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "template_name",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "template_version",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "created_at",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/PromptHistoryExecution"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/prompt-labels/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_prompt-labels_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/PromptLabel"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      },
+      "post": {
+        "operationId": "model-hub_prompt-labels_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PromptLabel"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/PromptLabel"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/prompt-labels/get-by-name/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_prompt-labels_get_by_name",
+        "summary": "Fetch a prompt version by template name and either explicit version or label.",
+        "description": "Query params:\n  - name: template name (required)\n  - version: version name like v1 (optional)\n  - label: label name like Production/Staging/Development or custom (optional)",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/PromptLabel"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/prompt-labels/remove/": {
+      "parameters": [],
+      "post": {
+        "operationId": "model-hub_prompt-labels_remove_label_from_version",
+        "description": "Detach label from a prompt version.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PromptLabel"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/PromptLabel"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/prompt-labels/set-default/": {
+      "parameters": [],
+      "post": {
+        "operationId": "model-hub_prompt-labels_set_default",
+        "description": "Set default version for a template by name and version.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PromptLabel"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/PromptLabel"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/prompt-labels/template-labels/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_prompt-labels_template_labels",
+        "description": "List versions with labels for a template by name or id.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/PromptLabel"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/prompt-labels/{template_id}/{label_id}/assign-label-by-id/": {
+      "parameters": [
+        {
+          "name": "template_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "label_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_prompt-labels_assign_label_by_id",
+        "description": "Assign a label to a specific version by template name and version name.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PromptLabel"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/PromptLabel"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
     "/model-hub/prompt-templates/": {
       "parameters": [],
       "get": {
@@ -3500,6 +6242,208 @@
         ]
       }
     },
+    "/model-hub/prompt-templates/create-draft/": {
+      "parameters": [],
+      "post": {
+        "operationId": "model-hub_prompt-templates_create_draft",
+        "description": "Create a draft version of the PromptTemplate and return its details.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PromptTemplate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/PromptTemplate"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/prompt-templates/generate-prompt/": {
+      "parameters": [],
+      "post": {
+        "operationId": "model-hub_prompt-templates_generate_prompt",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PromptTemplate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/PromptTemplate"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/prompt-templates/get-template-by-name/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_prompt-templates_get_template_by_name",
+        "description": "Retrieve a prompt template by name.\nIf no version is specified, returns the default version (is_default=True).\nIf a version is specified, returns that specific version.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "created_at",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/PromptTemplate"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/prompt-templates/improve-prompt/": {
+      "parameters": [],
+      "post": {
+        "operationId": "model-hub_prompt-templates_improve_prompt",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PromptTemplate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/PromptTemplate"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
     "/model-hub/prompt-templates/{id}/": {
       "parameters": [
         {
@@ -3551,6 +6495,111 @@
             "description": "",
             "schema": {
               "$ref": "#/definitions/PromptTemplatePatch"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      },
+      "delete": {
+        "operationId": "model-hub_prompt-templates_delete",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/prompt-templates/{id}/add-new-draft/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A UUID string identifying this prompt template.",
+          "required": true,
+          "type": "string",
+          "format": "uuid"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_prompt-templates_add_new_draft",
+        "description": "Create a new draft version of the PromptTemplate and return its details.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PromptTemplate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/PromptTemplate"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/prompt-templates/{id}/commit/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A UUID string identifying this prompt template.",
+          "required": true,
+          "type": "string",
+          "format": "uuid"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_prompt-templates_commit",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PromptTemplate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/PromptTemplate"
             }
           },
           "default": {
@@ -3782,6 +6831,240 @@
             "description": "",
             "schema": {
               "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/scores/": {
+      "parameters": [],
+      "post": {
+        "operationId": "model-hub_scores_create",
+        "description": "Create a single score.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateScore"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ScoreResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/scores/bulk/": {
+      "parameters": [],
+      "post": {
+        "operationId": "model-hub_scores_bulk_create",
+        "description": "Create multiple scores on a single source (e.g. from inline annotator).",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkCreateScores"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/BulkCreateScoresResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/scores/for-source/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_scores_for_source",
+        "description": "Get all scores for a specific source.\nGET /model-hub/scores/for-source/?source_type=trace&source_id=<uuid>",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "source_type",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "dataset_row",
+              "trace",
+              "observation_span",
+              "prototype_run",
+              "call_execution",
+              "trace_session"
+            ]
+          },
+          {
+            "name": "source_id",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "description": "Tracer project the trace / span was opened from. The same id can exist in several projects; when supplied, only that project's scores are listed.",
+            "required": false,
+            "type": "string",
+            "format": "uuid",
+            "x-nullable": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ScoreForSourceResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiTextErrorResponse"
             }
           },
           "default": {
@@ -4872,6 +8155,54 @@
         "tags": [
           "simulate"
         ]
+      }
+    },
+    "/tracer/bulk-annotation/": {
+      "parameters": [],
+      "post": {
+        "operationId": "tracer_bulk-annotation_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkAnnotationRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/BulkAnnotationResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
       }
     },
     "/tracer/custom-eval-config/": {
@@ -7556,6 +10887,51 @@
         }
       }
     },
+    "AddItems": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AddQueueItem"
+          }
+        },
+        "selection": {
+          "$ref": "#/definitions/Selection"
+        },
+        "project_id": {
+          "title": "Project id",
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "AddQueueItem": {
+      "required": [
+        "source_type",
+        "source_id"
+      ],
+      "type": "object",
+      "properties": {
+        "source_type": {
+          "title": "Source type",
+          "type": "string",
+          "enum": [
+            "call_execution",
+            "dataset_row",
+            "observation_span",
+            "prototype_run",
+            "trace",
+            "trace_session"
+          ]
+        },
+        "source_id": {
+          "title": "Source id",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
     "AddRunPrompt": {
       "required": [
         "dataset_id",
@@ -9294,6 +12670,22 @@
         }
       }
     },
+    "AnnotationLabelCreateResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/AnnotationsLabels"
+        }
+      }
+    },
     "AnnotationQueue": {
       "required": [
         "name",
@@ -9496,6 +12888,83 @@
         }
       }
     },
+    "AnnotationsLabels": {
+      "required": [
+        "name",
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "text",
+            "numeric",
+            "categorical",
+            "star",
+            "thumbs_up_down"
+          ]
+        },
+        "organization": {
+          "title": "Organization",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "settings": {
+          "title": "Settings",
+          "type": "object"
+        },
+        "project": {
+          "title": "Project",
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "x-nullable": true
+        },
+        "allow_notes": {
+          "title": "Allow notes",
+          "type": "boolean"
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "trace_annotations_count": {
+          "title": "Trace annotations count",
+          "type": "integer",
+          "readOnly": true
+        },
+        "annotation_count": {
+          "title": "Annotation count",
+          "type": "integer",
+          "readOnly": true
+        },
+        "archived": {
+          "title": "Archived",
+          "type": "boolean",
+          "readOnly": true
+        }
+      }
+    },
     "ApiErrorResponse": {
       "type": "object",
       "properties": {
@@ -9640,6 +13109,65 @@
         }
       }
     },
+    "ApiKeyListResponse": {
+      "required": [
+        "count",
+        "results"
+      ],
+      "type": "object",
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "next": {
+          "title": "Next",
+          "type": "string",
+          "x-nullable": true
+        },
+        "previous": {
+          "title": "Previous",
+          "type": "string",
+          "x-nullable": true
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ApiKeyResponse"
+          }
+        }
+      }
+    },
+    "ApiKeyResponse": {
+      "required": [
+        "provider"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 1
+        },
+        "organization": {
+          "title": "Organization",
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "masked_actual_key": {
+          "title": "Masked actual key",
+          "type": "object",
+          "x-nullable": true
+        }
+      }
+    },
     "ApiTextErrorResponse": {
       "type": "object",
       "properties": {
@@ -9710,6 +13238,424 @@
               "minLength": 1
             }
           }
+        }
+      }
+    },
+    "ApiTooLargeError": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "enum": [
+            "export_too_large",
+            "items_too_large"
+          ]
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string",
+          "x-nullable": true
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "title": "Details",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "AssignItems": {
+      "required": [
+        "item_ids"
+      ],
+      "type": "object",
+      "properties": {
+        "item_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minItems": 1
+        },
+        "user_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "default": []
+        },
+        "action": {
+          "title": "Action",
+          "type": "string",
+          "enum": [
+            "add",
+            "set",
+            "remove"
+          ],
+          "default": "add"
+        }
+      }
+    },
+    "BulkAnnotationAnnotationRequest": {
+      "required": [
+        "annotation_label_id"
+      ],
+      "type": "object",
+      "properties": {
+        "annotation_label_id": {
+          "title": "Annotation label id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        },
+        "value_float": {
+          "title": "Value float",
+          "type": "number"
+        },
+        "value_bool": {
+          "title": "Value bool",
+          "type": "boolean"
+        },
+        "value_str_list": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "BulkAnnotationNoteRequest": {
+      "required": [
+        "text"
+      ],
+      "type": "object",
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "BulkAnnotationRecordRequest": {
+      "required": [
+        "observation_span_id"
+      ],
+      "type": "object",
+      "properties": {
+        "observation_span_id": {
+          "title": "Observation span id",
+          "type": "string",
+          "minLength": 1
+        },
+        "annotations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BulkAnnotationAnnotationRequest"
+          },
+          "default": []
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BulkAnnotationNoteRequest"
+          },
+          "default": []
+        }
+      }
+    },
+    "BulkAnnotationRequest": {
+      "required": [
+        "records"
+      ],
+      "type": "object",
+      "properties": {
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BulkAnnotationRecordRequest"
+          }
+        }
+      }
+    },
+    "BulkAnnotationResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/BulkAnnotationResponseResult"
+        }
+      }
+    },
+    "BulkAnnotationResponseResult": {
+      "required": [
+        "message",
+        "annotations_created",
+        "annotations_updated",
+        "notes_created",
+        "succeeded_count",
+        "errors_count",
+        "warnings_count"
+      ],
+      "type": "object",
+      "properties": {
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "minLength": 1
+        },
+        "annotations_created": {
+          "title": "Annotations created",
+          "type": "integer"
+        },
+        "annotations_updated": {
+          "title": "Annotations updated",
+          "type": "integer"
+        },
+        "notes_created": {
+          "title": "Notes created",
+          "type": "integer"
+        },
+        "succeeded_count": {
+          "title": "Succeeded count",
+          "type": "integer"
+        },
+        "errors_count": {
+          "title": "Errors count",
+          "type": "integer"
+        },
+        "warnings_count": {
+          "title": "Warnings count",
+          "type": "integer"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "x-nullable": true
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "x-nullable": true
+        }
+      }
+    },
+    "BulkCreateScoreItem": {
+      "required": [
+        "label_id",
+        "value"
+      ],
+      "type": "object",
+      "properties": {
+        "label_id": {
+          "title": "Label id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "title": "Value",
+          "type": "object"
+        },
+        "notes": {
+          "title": "Notes",
+          "type": "string",
+          "default": ""
+        },
+        "score_source": {
+          "title": "Score source",
+          "type": "string",
+          "enum": [
+            "human",
+            "api",
+            "auto",
+            "imported"
+          ],
+          "default": "human"
+        }
+      }
+    },
+    "BulkCreateScores": {
+      "required": [
+        "source_type",
+        "source_id",
+        "scores"
+      ],
+      "type": "object",
+      "properties": {
+        "source_type": {
+          "title": "Source type",
+          "type": "string",
+          "enum": [
+            "dataset_row",
+            "trace",
+            "observation_span",
+            "prototype_run",
+            "call_execution",
+            "trace_session"
+          ]
+        },
+        "source_id": {
+          "title": "Source id",
+          "type": "string",
+          "minLength": 1
+        },
+        "scores": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BulkCreateScoreItem"
+          }
+        },
+        "notes": {
+          "title": "Notes",
+          "type": "string",
+          "default": ""
+        },
+        "span_notes": {
+          "title": "Span notes",
+          "type": "string",
+          "x-nullable": true
+        },
+        "span_notes_source_id": {
+          "title": "Span notes source id",
+          "type": "string",
+          "x-nullable": true
+        },
+        "queue_item_id": {
+          "title": "Queue item id",
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "project_id": {
+          "title": "Project id",
+          "description": "Tracer project the trace / span was opened from. The same id can exist in several projects; when supplied, the score is written to that project's copy.",
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        }
+      }
+    },
+    "BulkCreateScoresResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/BulkCreateScoresResult"
+        }
+      }
+    },
+    "BulkCreateScoresResult": {
+      "required": [
+        "scores",
+        "errors"
+      ],
+      "type": "object",
+      "properties": {
+        "scores": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Score"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "BulkRemoveItems": {
+      "required": [
+        "item_ids"
+      ],
+      "type": "object",
+      "properties": {
+        "item_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minItems": 1
         }
       }
     },
@@ -10217,6 +14163,29 @@
         }
       }
     },
+    "CreateDatasetFromLocalFileRequest": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "title": "File",
+          "type": "string",
+          "readOnly": true,
+          "format": "uri"
+        },
+        "new_dataset_name": {
+          "title": "New dataset name",
+          "type": "string"
+        },
+        "model_type": {
+          "title": "Model type",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        }
+      }
+    },
     "CreateEmptyDatasetRequest": {
       "required": [
         "new_dataset_name"
@@ -10316,6 +14285,65 @@
         "agent_version": {
           "title": "Agent version",
           "description": "Optional agent version to bind to this test run",
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        }
+      }
+    },
+    "CreateScore": {
+      "required": [
+        "source_type",
+        "source_id",
+        "label_id",
+        "value"
+      ],
+      "type": "object",
+      "properties": {
+        "source_type": {
+          "title": "Source type",
+          "type": "string",
+          "enum": [
+            "dataset_row",
+            "trace",
+            "observation_span",
+            "prototype_run",
+            "call_execution",
+            "trace_session"
+          ]
+        },
+        "source_id": {
+          "title": "Source id",
+          "type": "string",
+          "minLength": 1
+        },
+        "label_id": {
+          "title": "Label id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "title": "Value",
+          "type": "object"
+        },
+        "notes": {
+          "title": "Notes",
+          "type": "string",
+          "default": ""
+        },
+        "score_source": {
+          "title": "Score source",
+          "type": "string",
+          "enum": [
+            "human",
+            "api",
+            "auto",
+            "imported"
+          ],
+          "default": "human"
+        },
+        "queue_item_id": {
+          "title": "Queue item id",
           "type": "string",
           "format": "uuid",
           "x-nullable": true
@@ -11969,6 +15997,108 @@
         }
       }
     },
+    "DatasetEvalStatsItem": {
+      "required": [
+        "id",
+        "name",
+        "output_type",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "output_type": {
+          "title": "Output type",
+          "type": "string",
+          "minLength": 1
+        },
+        "result": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatasetEvalStatsMetric"
+          }
+        },
+        "total_pass_rate": {
+          "title": "Total pass rate",
+          "type": "number",
+          "x-nullable": true
+        },
+        "total_avg": {
+          "title": "Total avg",
+          "type": "object",
+          "x-nullable": true
+        },
+        "total_choices_avg": {
+          "title": "Total choices avg",
+          "type": "object",
+          "x-nullable": true
+        },
+        "is_numeric_eval": {
+          "title": "Is numeric eval",
+          "type": "boolean"
+        },
+        "is_numeric_eval_percentage": {
+          "title": "Is numeric eval percentage",
+          "type": "boolean"
+        }
+      }
+    },
+    "DatasetEvalStatsMetric": {
+      "required": [
+        "name",
+        "output"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "total_cells": {
+          "title": "Total cells",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "output": {
+          "title": "Output",
+          "type": "object"
+        }
+      }
+    },
+    "DatasetEvalStatsResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatasetEvalStatsItem"
+          }
+        }
+      }
+    },
     "DatasetLimitCheckFailedError": {
       "type": "object",
       "properties": {
@@ -12132,6 +16262,59 @@
         "total_count": {
           "title": "Total count",
           "type": "integer"
+        }
+      }
+    },
+    "DatasetNameItem": {
+      "required": [
+        "dataset_id",
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "dataset_id": {
+          "title": "Dataset id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "model_type": {
+          "title": "Model type",
+          "type": "string"
+        }
+      }
+    },
+    "DatasetNamesResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/DatasetNamesResult"
+        }
+      }
+    },
+    "DatasetNamesResult": {
+      "required": [
+        "datasets"
+      ],
+      "type": "object",
+      "properties": {
+        "datasets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatasetNameItem"
+          }
         }
       }
     },
@@ -16085,6 +20268,89 @@
         }
       }
     },
+    "HuggingFaceDatasetCreateRequest": {
+      "required": [
+        "huggingface_dataset_name",
+        "huggingface_dataset_split"
+      ],
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "default": ""
+        },
+        "model_type": {
+          "title": "Model type",
+          "type": "string",
+          "default": ""
+        },
+        "num_rows": {
+          "title": "Num rows",
+          "type": "integer",
+          "minimum": 0
+        },
+        "huggingface_dataset_name": {
+          "title": "Huggingface dataset name",
+          "type": "string",
+          "minLength": 1
+        },
+        "huggingface_dataset_config": {
+          "title": "Huggingface dataset config",
+          "type": "string"
+        },
+        "huggingface_dataset_split": {
+          "title": "Huggingface dataset split",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "ImportAnnotationEntry": {
+      "required": [
+        "label_id",
+        "value"
+      ],
+      "type": "object",
+      "properties": {
+        "label_id": {
+          "title": "Label id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "title": "Value",
+          "type": "object"
+        },
+        "notes": {
+          "title": "Notes",
+          "type": "string"
+        },
+        "score_source": {
+          "title": "Score source",
+          "type": "string"
+        }
+      }
+    },
+    "ImportAnnotations": {
+      "required": [
+        "annotations"
+      ],
+      "type": "object",
+      "properties": {
+        "annotations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ImportAnnotationEntry"
+          }
+        },
+        "annotator_id": {
+          "title": "Annotator id",
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
     "KnowledgeBaseItem": {
       "required": [
         "id",
@@ -16205,6 +20471,448 @@
         },
         "result": {
           "$ref": "#/definitions/KnowledgeBaseItem"
+        }
+      }
+    },
+    "LegacyKnowledgeBaseBulkDeleteRequest": {
+      "type": "object",
+      "properties": {
+        "kb_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "default": []
+        }
+      }
+    },
+    "LegacyKnowledgeBaseCreateResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/LegacyKnowledgeBaseCreateResult"
+        }
+      }
+    },
+    "LegacyKnowledgeBaseCreateResult": {
+      "required": [
+        "detail",
+        "kb_id",
+        "kb_name",
+        "file_ids"
+      ],
+      "type": "object",
+      "properties": {
+        "detail": {
+          "title": "Detail",
+          "type": "string",
+          "minLength": 1
+        },
+        "kb_id": {
+          "title": "Kb id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "kb_name": {
+          "title": "Kb name",
+          "type": "string",
+          "minLength": 1
+        },
+        "file_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      }
+    },
+    "LegacyKnowledgeBaseFileDeleteRequest": {
+      "type": "object",
+      "properties": {
+        "kb_id": {
+          "title": "Kb id",
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "delete_all": {
+          "title": "Delete all",
+          "type": "boolean",
+          "default": false
+        },
+        "file_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "default": []
+        },
+        "excluded_file_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "default": []
+        },
+        "file_names": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": []
+        }
+      }
+    },
+    "LegacyKnowledgeBaseFileRow": {
+      "required": [
+        "id",
+        "name",
+        "file_size",
+        "status",
+        "updated",
+        "updated_by"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "file_size": {
+          "title": "File size",
+          "type": "integer"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "minLength": 1
+        },
+        "updated": {
+          "title": "Updated",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_by": {
+          "title": "Updated by",
+          "type": "string",
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        }
+      }
+    },
+    "LegacyKnowledgeBaseFilesRequest": {
+      "required": [
+        "kb_id"
+      ],
+      "type": "object",
+      "properties": {
+        "kb_id": {
+          "title": "Kb id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "search": {
+          "title": "Search",
+          "type": "string",
+          "x-nullable": true
+        },
+        "sort": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": []
+        },
+        "page_number": {
+          "title": "Page number",
+          "type": "integer",
+          "default": 0
+        },
+        "page_size": {
+          "title": "Page size",
+          "type": "integer",
+          "default": 10
+        }
+      }
+    },
+    "LegacyKnowledgeBaseFilesResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/LegacyKnowledgeBaseFilesResult"
+        }
+      }
+    },
+    "LegacyKnowledgeBaseFilesResult": {
+      "required": [
+        "table_data",
+        "last_updated",
+        "status",
+        "status_count",
+        "total_rows"
+      ],
+      "type": "object",
+      "properties": {
+        "table_data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LegacyKnowledgeBaseFileRow"
+          }
+        },
+        "last_updated": {
+          "title": "Last updated",
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "minLength": 1
+        },
+        "status_count": {
+          "title": "Status count",
+          "type": "integer"
+        },
+        "total_rows": {
+          "title": "Total rows",
+          "type": "integer"
+        }
+      }
+    },
+    "LegacyKnowledgeBaseListResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/LegacyKnowledgeBaseListResult"
+        }
+      }
+    },
+    "LegacyKnowledgeBaseListResult": {
+      "required": [
+        "table_data"
+      ],
+      "type": "object",
+      "properties": {
+        "table_data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LegacyKnowledgeBaseOption"
+          }
+        }
+      }
+    },
+    "LegacyKnowledgeBaseMutationRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "kb_id": {
+          "title": "Kb id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "default": []
+        }
+      }
+    },
+    "LegacyKnowledgeBaseMutationResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/LegacyKnowledgeBaseMutationResult"
+        }
+      }
+    },
+    "LegacyKnowledgeBaseMutationResult": {
+      "required": [
+        "id",
+        "name",
+        "organization",
+        "status",
+        "files",
+        "updated_at",
+        "created_by",
+        "last_error"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "organization": {
+          "title": "Organization",
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "minLength": 1
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_by": {
+          "title": "Created by",
+          "type": "string",
+          "x-nullable": true
+        },
+        "last_error": {
+          "title": "Last error",
+          "type": "string",
+          "x-nullable": true
+        }
+      }
+    },
+    "LegacyKnowledgeBaseOption": {
+      "required": [
+        "id",
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "LocalFileDatasetCreateStartedResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/LocalFileDatasetCreateStartedResult"
+        }
+      }
+    },
+    "LocalFileDatasetCreateStartedResult": {
+      "required": [
+        "message",
+        "dataset_id",
+        "dataset_name",
+        "processing_status",
+        "estimated_rows",
+        "estimated_columns"
+      ],
+      "type": "object",
+      "properties": {
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_id": {
+          "title": "Dataset id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "dataset_name": {
+          "title": "Dataset name",
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_model_type": {
+          "title": "Dataset model type",
+          "type": "string",
+          "x-nullable": true
+        },
+        "processing_status": {
+          "title": "Processing status",
+          "type": "string",
+          "minLength": 1
+        },
+        "estimated_rows": {
+          "title": "Estimated rows",
+          "type": "integer"
+        },
+        "estimated_columns": {
+          "title": "Estimated columns",
+          "type": "integer"
         }
       }
     },
@@ -16391,6 +21099,53 @@
         }
       }
     },
+    "ModelHubPaginatedResponse": {
+      "required": [
+        "count",
+        "results"
+      ],
+      "type": "object",
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "next": {
+          "title": "Next",
+          "type": "string",
+          "x-nullable": true
+        },
+        "previous": {
+          "title": "Previous",
+          "type": "string",
+          "x-nullable": true
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "ModelHubStringResultResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
     "ModelHubSuccessMessageResponse": {
       "required": [
         "status",
@@ -16417,6 +21172,77 @@
           "title": "Success",
           "type": "string",
           "minLength": 1
+        }
+      }
+    },
+    "ModelHubTextErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "x-nullable": true
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string",
+          "x-nullable": true
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "title": "Details",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
         }
       }
     },
@@ -17206,6 +22032,58 @@
         }
       }
     },
+    "PromptLabel": {
+      "required": [
+        "name",
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "organization": {
+          "title": "Organization",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 2000,
+          "minLength": 1
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "system",
+            "custom"
+          ]
+        },
+        "metadata": {
+          "title": "Metadata",
+          "type": "object",
+          "x-nullable": true
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    },
     "PromptModelParams": {
       "type": "object",
       "properties": {
@@ -17552,6 +22430,364 @@
         }
       }
     },
+    "QueueAddItemsResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/QueueAddItemsResult"
+        }
+      }
+    },
+    "QueueAddItemsResult": {
+      "required": [
+        "added",
+        "duplicates",
+        "errors",
+        "queue_status"
+      ],
+      "type": "object",
+      "properties": {
+        "added": {
+          "title": "Added",
+          "type": "integer"
+        },
+        "duplicates": {
+          "title": "Duplicates",
+          "type": "integer"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "queue_status": {
+          "title": "Queue status",
+          "type": "string",
+          "minLength": 1
+        },
+        "total_matching": {
+          "title": "Total matching",
+          "type": "integer"
+        },
+        "total_matching_is_lower_bound": {
+          "title": "Total matching is lower bound",
+          "type": "boolean"
+        },
+        "has_more": {
+          "title": "Has more",
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "title": "Next cursor",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "next_cursor_fingerprint": {
+          "title": "Next cursor fingerprint",
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "minLength": 1,
+          "x-nullable": true
+        }
+      }
+    },
+    "QueueAddLabelResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/QueueAddLabelResult"
+        }
+      }
+    },
+    "QueueAddLabelResult": {
+      "required": [
+        "label",
+        "created",
+        "reopened_items",
+        "queue_status"
+      ],
+      "type": "object",
+      "properties": {
+        "label": {
+          "$ref": "#/definitions/QueueLabelResult"
+        },
+        "created": {
+          "title": "Created",
+          "type": "boolean"
+        },
+        "reopened_items": {
+          "title": "Reopened items",
+          "type": "integer"
+        },
+        "queue_status": {
+          "title": "Queue status",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "QueueAgreementAnnotatorPair": {
+      "required": [
+        "annotator_1_id",
+        "annotator_2_id",
+        "agreement_pct",
+        "total_comparisons"
+      ],
+      "type": "object",
+      "properties": {
+        "annotator_1_id": {
+          "title": "Annotator 1 id",
+          "type": "string",
+          "minLength": 1
+        },
+        "annotator_2_id": {
+          "title": "Annotator 2 id",
+          "type": "string",
+          "minLength": 1
+        },
+        "agreement_pct": {
+          "title": "Agreement pct",
+          "type": "number"
+        },
+        "total_comparisons": {
+          "title": "Total comparisons",
+          "type": "integer"
+        }
+      }
+    },
+    "QueueAgreementLabel": {
+      "required": [
+        "label_name",
+        "label_type",
+        "agreement_pct",
+        "cohens_kappa",
+        "disagreement_count",
+        "disagreement_items"
+      ],
+      "type": "object",
+      "properties": {
+        "label_name": {
+          "title": "Label name",
+          "type": "string",
+          "x-nullable": true
+        },
+        "label_type": {
+          "title": "Label type",
+          "type": "string",
+          "x-nullable": true
+        },
+        "agreement_pct": {
+          "title": "Agreement pct",
+          "type": "number",
+          "x-nullable": true
+        },
+        "cohens_kappa": {
+          "title": "Cohens kappa",
+          "type": "number",
+          "x-nullable": true
+        },
+        "disagreement_count": {
+          "title": "Disagreement count",
+          "type": "integer"
+        },
+        "disagreement_items": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "QueueAgreementResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/QueueAgreementResult"
+        }
+      }
+    },
+    "QueueAgreementResult": {
+      "required": [
+        "overall_agreement",
+        "labels",
+        "annotator_pairs"
+      ],
+      "type": "object",
+      "properties": {
+        "overall_agreement": {
+          "title": "Overall agreement",
+          "type": "number",
+          "x-nullable": true
+        },
+        "labels": {
+          "title": "Labels",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/QueueAgreementLabel"
+          }
+        },
+        "annotator_pairs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QueueAgreementAnnotatorPair"
+          }
+        }
+      }
+    },
+    "QueueAnalyticsAnnotatorPerformance": {
+      "required": [
+        "completed"
+      ],
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "title": "User id",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "x-nullable": true
+        },
+        "completed": {
+          "title": "Completed",
+          "type": "integer"
+        },
+        "last_active": {
+          "title": "Last active",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        }
+      }
+    },
+    "QueueAnalyticsResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/QueueAnalyticsResult"
+        }
+      }
+    },
+    "QueueAnalyticsResult": {
+      "required": [
+        "throughput",
+        "annotator_performance",
+        "label_distribution",
+        "status_breakdown",
+        "total"
+      ],
+      "type": "object",
+      "properties": {
+        "throughput": {
+          "$ref": "#/definitions/QueueAnalyticsThroughput"
+        },
+        "annotator_performance": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QueueAnalyticsAnnotatorPerformance"
+          }
+        },
+        "label_distribution": {
+          "title": "Label distribution",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          }
+        },
+        "status_breakdown": {
+          "title": "Status breakdown",
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      }
+    },
+    "QueueAnalyticsThroughput": {
+      "required": [
+        "daily",
+        "total_completed",
+        "avg_per_day"
+      ],
+      "type": "object",
+      "properties": {
+        "daily": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QueueAnalyticsThroughputDaily"
+          }
+        },
+        "total_completed": {
+          "title": "Total completed",
+          "type": "integer"
+        },
+        "avg_per_day": {
+          "title": "Avg per day",
+          "type": "number"
+        }
+      }
+    },
+    "QueueAnalyticsThroughputDaily": {
+      "required": [
+        "date",
+        "count"
+      ],
+      "type": "object",
+      "properties": {
+        "date": {
+          "title": "Date",
+          "type": "string",
+          "minLength": 1
+        },
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        }
+      }
+    },
     "QueueAnnotateDetailResponse": {
       "required": [
         "result"
@@ -17691,6 +22927,208 @@
             "minLength": 1
           },
           "readOnly": true
+        }
+      }
+    },
+    "QueueAssignItemsResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/QueueAssignItemsResult"
+        }
+      }
+    },
+    "QueueAssignItemsResult": {
+      "required": [
+        "assigned"
+      ],
+      "type": "object",
+      "properties": {
+        "assigned": {
+          "title": "Assigned",
+          "type": "integer"
+        }
+      }
+    },
+    "QueueBulkRemoveItemsResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/QueueBulkRemoveItemsResult"
+        }
+      }
+    },
+    "QueueBulkRemoveItemsResult": {
+      "required": [
+        "removed"
+      ],
+      "type": "object",
+      "properties": {
+        "removed": {
+          "title": "Removed",
+          "type": "integer"
+        }
+      }
+    },
+    "QueueExportAnnotationsResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "QueueExportColumnMapping": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "column": {
+          "title": "Column",
+          "type": "string"
+        },
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "default": {
+        "enabled": true
+      }
+    },
+    "QueueExportToDatasetRequest": {
+      "type": "object",
+      "properties": {
+        "dataset_id": {
+          "title": "Dataset id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "dataset_name": {
+          "title": "Dataset name",
+          "type": "string"
+        },
+        "status_filter": {
+          "title": "Status filter",
+          "type": "string",
+          "default": "completed"
+        },
+        "column_mapping": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QueueExportColumnMapping"
+          },
+          "default": []
+        }
+      }
+    },
+    "QueueExportToDatasetResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/QueueExportToDatasetResult"
+        }
+      }
+    },
+    "QueueExportToDatasetResult": {
+      "required": [
+        "dataset_id",
+        "dataset_name",
+        "rows_created",
+        "columns"
+      ],
+      "type": "object",
+      "properties": {
+        "dataset_id": {
+          "title": "Dataset id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "dataset_name": {
+          "title": "Dataset name",
+          "type": "string",
+          "minLength": 1
+        },
+        "rows_created": {
+          "title": "Rows created",
+          "type": "integer"
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "QueueImportAnnotationsResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/QueueImportAnnotationsResult"
+        }
+      }
+    },
+    "QueueImportAnnotationsResult": {
+      "required": [
+        "imported"
+      ],
+      "type": "object",
+      "properties": {
+        "imported": {
+          "title": "Imported",
+          "type": "integer"
         }
       }
     },
@@ -17859,6 +23297,25 @@
         }
       }
     },
+    "QueueItemAnnotationsResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Score"
+          }
+        }
+      }
+    },
     "QueueItemAssignedUser": {
       "required": [
         "id",
@@ -17949,6 +23406,73 @@
         }
       }
     },
+    "QueueLabelRequest": {
+      "required": [
+        "label_id"
+      ],
+      "type": "object",
+      "properties": {
+        "label_id": {
+          "title": "Label id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "required": {
+          "title": "Required",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "QueueLabelResult": {
+      "required": [
+        "id",
+        "name",
+        "type",
+        "settings",
+        "allow_notes",
+        "required",
+        "order"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "minLength": 1
+        },
+        "settings": {
+          "title": "Settings",
+          "type": "object"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "allow_notes": {
+          "title": "Allow notes",
+          "type": "boolean"
+        },
+        "required": {
+          "title": "Required",
+          "type": "boolean"
+        },
+        "order": {
+          "title": "Order",
+          "type": "integer"
+        }
+      }
+    },
     "QueueNavigationResponse": {
       "required": [
         "result"
@@ -17985,6 +23509,223 @@
           "title": "Next item",
           "type": "object",
           "x-nullable": true
+        }
+      }
+    },
+    "QueueProgressAnnotatorStat": {
+      "required": [
+        "user_id",
+        "completed",
+        "pending",
+        "in_progress",
+        "in_review",
+        "annotations_count"
+      ],
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "title": "User id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "completed": {
+          "title": "Completed",
+          "type": "integer"
+        },
+        "pending": {
+          "title": "Pending",
+          "type": "integer"
+        },
+        "in_progress": {
+          "title": "In progress",
+          "type": "integer"
+        },
+        "in_review": {
+          "title": "In review",
+          "type": "integer"
+        },
+        "annotations_count": {
+          "title": "Annotations count",
+          "type": "integer"
+        }
+      }
+    },
+    "QueueProgressResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/QueueProgressResult"
+        }
+      }
+    },
+    "QueueProgressResult": {
+      "required": [
+        "total",
+        "pending",
+        "in_progress",
+        "in_review",
+        "completed",
+        "skipped",
+        "progress_pct",
+        "annotator_stats",
+        "user_progress"
+      ],
+      "type": "object",
+      "properties": {
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "pending": {
+          "title": "Pending",
+          "type": "integer"
+        },
+        "in_progress": {
+          "title": "In progress",
+          "type": "integer"
+        },
+        "in_review": {
+          "title": "In review",
+          "type": "integer"
+        },
+        "completed": {
+          "title": "Completed",
+          "type": "integer"
+        },
+        "skipped": {
+          "title": "Skipped",
+          "type": "integer"
+        },
+        "progress_pct": {
+          "title": "Progress pct",
+          "type": "number"
+        },
+        "annotator_stats": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QueueProgressAnnotatorStat"
+          }
+        },
+        "user_progress": {
+          "$ref": "#/definitions/QueueProgressUserProgress"
+        }
+      }
+    },
+    "QueueProgressUserProgress": {
+      "required": [
+        "total",
+        "completed",
+        "pending",
+        "in_progress",
+        "in_review",
+        "skipped",
+        "progress_pct"
+      ],
+      "type": "object",
+      "properties": {
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "completed": {
+          "title": "Completed",
+          "type": "integer"
+        },
+        "pending": {
+          "title": "Pending",
+          "type": "integer"
+        },
+        "in_progress": {
+          "title": "In progress",
+          "type": "integer"
+        },
+        "in_review": {
+          "title": "In review",
+          "type": "integer"
+        },
+        "skipped": {
+          "title": "Skipped",
+          "type": "integer"
+        },
+        "progress_pct": {
+          "title": "Progress pct",
+          "type": "number"
+        }
+      }
+    },
+    "QueueRemoveLabelResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/QueueRemoveLabelResult"
+        }
+      }
+    },
+    "QueueRemoveLabelResult": {
+      "required": [
+        "removed"
+      ],
+      "type": "object",
+      "properties": {
+        "removed": {
+          "title": "Removed",
+          "type": "boolean"
+        }
+      }
+    },
+    "QueueStatusRequest": {
+      "required": [
+        "status"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "enum": [
+            "draft",
+            "active",
+            "paused",
+            "completed"
+          ]
+        }
+      }
+    },
+    "QueueStatusResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/AnnotationQueue"
         }
       }
     },
@@ -19204,6 +24945,303 @@
           "title": "Agent type",
           "type": "string",
           "readOnly": true
+        }
+      }
+    },
+    "Score": {
+      "required": [
+        "source_type",
+        "value"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "source_type": {
+          "title": "Source type",
+          "type": "string",
+          "enum": [
+            "dataset_row",
+            "trace",
+            "observation_span",
+            "prototype_run",
+            "call_execution",
+            "trace_session"
+          ]
+        },
+        "source_id": {
+          "title": "Source id",
+          "type": "string",
+          "readOnly": true
+        },
+        "label_id": {
+          "title": "Label id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "label_name": {
+          "title": "Label name",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "label_type": {
+          "title": "Label type",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "label_settings": {
+          "title": "Label settings",
+          "type": "object",
+          "readOnly": true
+        },
+        "label_allow_notes": {
+          "title": "Label allow notes",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "value": {
+          "title": "Value",
+          "type": "object"
+        },
+        "value_history": {
+          "title": "Value history",
+          "type": "object"
+        },
+        "score_source": {
+          "title": "Score source",
+          "type": "string",
+          "enum": [
+            "human",
+            "api",
+            "auto",
+            "imported"
+          ],
+          "default": "human"
+        },
+        "notes": {
+          "title": "Notes",
+          "type": "string",
+          "x-nullable": true
+        },
+        "annotator": {
+          "title": "Annotator",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "annotator_name": {
+          "title": "Annotator name",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "annotator_email": {
+          "title": "Annotator email",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "queue_item": {
+          "title": "Queue item",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "queue_id": {
+          "title": "Queue id",
+          "type": "string",
+          "readOnly": true
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    },
+    "ScoreForSourceResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Score"
+          }
+        },
+        "span_notes": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "ScoreResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/Score"
+        }
+      }
+    },
+    "Selection": {
+      "required": [
+        "mode",
+        "source_type",
+        "project_id"
+      ],
+      "type": "object",
+      "properties": {
+        "mode": {
+          "title": "Mode",
+          "type": "string",
+          "enum": [
+            "filter"
+          ]
+        },
+        "source_type": {
+          "title": "Source type",
+          "type": "string",
+          "enum": [
+            "call_execution",
+            "observation_span",
+            "trace",
+            "trace_session"
+          ]
+        },
+        "project_id": {
+          "title": "Project id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "filter": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "column_id": {
+                "type": "string",
+                "description": "Column or attribute id to filter on."
+              },
+              "property_id": {
+                "type": "string",
+                "description": "Optional stable namespaced Property Registry identity."
+              },
+              "display_name": {
+                "type": "string",
+                "description": "Optional UI label for chips and saved views."
+              },
+              "source": {
+                "type": "string",
+                "description": "Optional source surface for mixed-source filters, for example traces, datasets, or simulation."
+              },
+              "output_type": {
+                "type": "string",
+                "description": "Optional metric output type metadata used by eval and annotation filters."
+              },
+              "filter_config": {
+                "type": "object",
+                "properties": {
+                  "filter_type": {
+                    "type": "string",
+                    "description": "Canonical field type, for example text, number, boolean, datetime, categorical, thumbs, annotator, array, or map. Legacy json is value-sensitive for SPAN_ATTRIBUTE filters: list values become array and object values become map."
+                  },
+                  "filter_op": {
+                    "type": "string",
+                    "description": "Canonical operator from api_contracts/filter_contract.json, for example equals, not_equals, in, not_in, between, not_between, is_null, or is_not_null."
+                  },
+                  "filter_value": {
+                    "description": "Scalar, list, range tuple, boolean, or null depending on filter_op and filter_type."
+                  },
+                  "col_type": {
+                    "type": "string",
+                    "description": "Column family such as SYSTEM_METRIC, SPAN_ATTRIBUTE, EVAL_METRIC, ANNOTATION, or NORMAL."
+                  },
+                  "attribute_value_types": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "string",
+                        "number",
+                        "boolean"
+                      ],
+                      "x-nullable": true
+                    },
+                    "description": "Optional storage-family provenance aligned one-for-one with filter_value for mixed SPAN_ATTRIBUTE in/not_in filters. Null entries retain filter_type semantics for manually entered values."
+                  }
+                },
+                "required": [
+                  "filter_type",
+                  "filter_op"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "column_id",
+              "filter_config"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "exclude_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": []
+        },
+        "cursor": {
+          "title": "Cursor",
+          "description": "Opaque continuation returned by a previous filter-mode add. Reuse the same selection fields and queue when continuing.",
+          "type": "string",
+          "maxLength": 4096,
+          "minLength": 1
+        },
+        "remove_simulation_calls": {
+          "title": "Remove simulation calls",
+          "type": "boolean",
+          "default": false
+        },
+        "is_voice_call": {
+          "title": "Is voice call",
+          "type": "boolean",
+          "default": false
         }
       }
     },

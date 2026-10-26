@@ -90,3 +90,48 @@ def test_body_params_on_a_paginated_op_fail_the_build():
     catalog = _with("evals.templates.list", pagination={"page_param": "page", "size_param": "page_size", "first_page": 1, "items": "items", "total_items": "total"})
     with pytest.raises(generate.CatalogError, match="sends no body"):
         generate.load(CONTRACT, catalog)
+
+
+def test_sdk_only_parity_ops_do_not_reach_mcp():
+    """The hand-written modules' operations ship to the SDK only; the MCP manifest keeps its 105 tools."""
+    mcp_ids = {t["source"]["catalogId"] for t in MCP["tools"]}
+    for op_id in ("prompts.commit", "knowledge_bases.create", "annotation_queues.create", "scores.create", "datasets.create_from_file"):
+        assert op_id not in mcp_ids
+    from fi.platform import Client
+
+    client = Client(api_key="k", secret_key="s", base_url="http://unused")
+    assert callable(client.prompts.labels.assign) and callable(client.knowledge_bases.files.delete)
+
+
+def test_request_fixes_replace_what_the_contract_gets_wrong():
+    ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
+    # body: drf-yasg documented the response serializer as the request; the fix names the real fields.
+    commit = ops["prompts.commit"]
+    assert [(p.name, p.required) for p in commit.params if p.location == "body"][:2] == [("version_name", True), ("message", False)]
+    assert commit.returns is None  # untyped: the server answers with a message string
+    # body_required: a PATCH is partial even though the contract marks fields required.
+    assert not any(p.required for p in ops["annotation_queues.update"].params if p.location == "body")
+    # query: a filter the contract leaves out.
+    assert "template_id" in {p.name for p in ops["prompts.history"].params if p.location == "query"}
+    # `as`: the wire field is `file`, the Python argument is `files`.
+    upload = next(p for p in ops["knowledge_bases.create"].params if p.name == "file")
+    assert upload.arg == "files" and ops["knowledge_bases.create"].multipart
+
+
+@pytest.mark.parametrize(
+    "fix, message",
+    [
+        ({"body": {"x": "blob"}, "note": "n"}, "not one of"),
+        ({"body_required": ["nope"], "note": "n"}, "unknown body fields"),
+        ({"body": {"upload": "file"}, "note": "n"}, "need `operation.multipart: true`"),
+    ],
+)
+def test_request_fix_mistakes_fail_the_build(fix, message):
+    with pytest.raises(generate.CatalogError, match=message):
+        generate.load(CONTRACT, _with("datasets.create", contract_fix=fix))
+
+
+def test_multipart_needs_a_method_that_sends_a_body():
+    catalog = _with("datasets.list_names", operation={"method": "GET", "path": "/model-hub/develops/get-datasets-names/", "multipart": True})
+    with pytest.raises(generate.CatalogError, match="multipart is only meaningful"):
+        generate.load(CONTRACT, catalog)

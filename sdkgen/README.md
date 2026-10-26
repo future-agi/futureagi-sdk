@@ -2,7 +2,7 @@
 
 `sdkgen` generates `fi.platform`, the one-client SDK (`from fi import Client`), from the backend's API contract plus a small catalog. The same catalog also produces the MCP tool list, so an operation has the same name in both, and each operation can still ship to just one of them.
 
-It covers **all 105 MCP tools** (imported from the monorepo's `futureagi/mcp_server/catalog/tools.yaml`, keeping every MCP tool name), plus one SDK-only operation: 106 operations across 20 resources.
+It covers **all 105 MCP tools** (imported from the monorepo's `futureagi/mcp_server/catalog/tools.yaml`, keeping every MCP tool name), plus **53 SDK-only operations** that give `fi.Client` everything the hand-written `fi.datasets`, `fi.prompt`, `fi.kb`, `fi.queues` and `fi.annotations` modules can do: 158 operations across 24 resources. The MCP manifest still has exactly 105 tools.
 
 ```
 future-agi/api_contracts/openapi/swagger.json ──sync_contract.py──▶ sdkgen/contracts/swagger.json
@@ -95,7 +95,8 @@ Live testing showed the contract is often wrong about responses. The SDK handles
 
 - **The transport** unwraps the backend's `{status, result}` envelope whenever it is present, because the contract leaves it out on many operations.
 - **The generator** loosens patterns drf-yasg always gets wrong. Every `SerializerMethodField` comes out as a read-only `string`, and untyped `ListField`s come out as lists of strings; both are typed `Any`. Free-form `object` fields are `Any`. Output list items may be null. Numbers are accepted where the contract says string.
-- **`contract_fix`** in the catalog corrects one operation, with a `note` naming the backend bug. Its options are `page_items` (an "array" that is really a page object) and `untyped` (the schema is simply wrong).
+- **`contract_fix`** in the catalog corrects one operation, with a `note` naming the backend bug. Response-side options: `page_items` (an "array" that is really a page object) and `untyped` (the schema is simply wrong). Request-side options, for the many endpoints where drf-yasg documents the *response* serializer as the request body: `body: {field: type}` replaces the body fields, `body_required: [...]` overrides which are required (a PATCH is partial), and `query: {field: type}` adds filters the contract leaves out. Types are `string | integer | number | boolean | object | array | file`, or `X[]` for a list; a body value may be `{type: T, as: python_name}` when the wire name makes a poor argument.
+- **`operation.multipart: true`** sends body fields as form data and `file`-typed params as uploads (`client.knowledge_bases.create(name=..., files=[path, ("a.txt", b"...")])`). A file argument is a path, bytes, an open binary file, or a `(filename, bytes)` pair.
 
 By default, a response that still doesn't match gives you the raw JSON and a `ResponseShapeWarning`, so a backend change never breaks a user's call. `Client(strict_responses=True)` raises `ResponseValidationError` instead; the tests run strict.
 
@@ -111,6 +112,11 @@ By default, a response that still doesn't match gives you the raw JSON and a `Re
   - `gateway.analytics` returns overview stats, not request logs.
   - `gateway.guardrail_rules.list` returns `{rules}`.
   - `gateway.sessions.requests` returns a list of request logs, not a session.
+- **Wrong request bodies:** `prompt-templates/create-draft`, `{id}/commit`, `{id}/add-new-draft`, `generate-prompt`, `improve-prompt` and every `prompt-labels/*` action document the response serializer as the request body; `annotation-queues/{id}` PATCH marks `name` and `label_ids` required. Fixed with `contract_fix.body` / `body_required`.
+- **Missing query params:** `prompt-history-executions` (`template_id`), `prompt-labels/get-by-name` (`name`, `label`, `version`) and `prompt-labels/template-labels` (`template_id`, `template_name`) are documented with paging params only.
+- **Multipart uploads documented as JSON:** `create-dataset-from-local-file` and `knowledge-base` POST/PATCH take `multipart/form-data` with a repeated `file` field; the contract shows a JSON body with a string `file`. A missing `model_type` on the dataset upload returns **500**, not 400.
+- **Two knowledge-base stores:** `/model-hub/kb/` (used by MCP's list/get) does not see knowledge bases created through `/model-hub/knowledge-base/` (the upload API the SDK has always used), and `get` on one returns 404.
+- **`annotations-labels` list** returns a DRF page, not an array; **`prompt-templates/{id}/commit`** returns a message string, not the template.
 - **Span ingestion race:** posting several spans for a new project in one call can fail on `unique_project_per_org_type`, because the server creates the project from parallel threads.
 - **Wrong request body type:** `create_otel_span` takes a JSON array, but the contract says object.
 
@@ -119,13 +125,14 @@ By default, a response that still doesn't match gives you the raw JSON and a `Re
 `python/tests/platform/test_all_operations_live.py` calls **every** catalog operation against a live backend. Its last test fails if any operation was never called, and prints what each one returned.
 
 Against a local `bin/install` backend:
-- **92 of 106** operations succeed, and their responses validate strictly.
-- **14** return the backend's typed error:
+- **145 of 158** operations succeed, and their responses validate strictly.
+- **13** return the backend's typed error:
   - plan-gated features (`402`);
   - `usage.overview`, which self-hosted installs don't serve (`404`);
   - trace, span and session reads, which wait on ClickHouse indexing;
   - simulation runs, which wait on scenario generation;
   - `evals.test`, which needs a model provider;
+  - `datasets.create_from_huggingface`, which needs outbound access to huggingface.co;
   - lookups of ids that don't exist on a fresh install.
 
 ## Next steps

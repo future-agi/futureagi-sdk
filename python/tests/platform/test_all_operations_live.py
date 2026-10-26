@@ -64,7 +64,16 @@ def dataset(client):
 def prompt(client):
     created = client.prompts.create(name=_name("prompt"), description="sdk test")
     yield created
-    allow(lambda: raw(client, "DELETE", f"/model-hub/prompt-templates/{created.id}/"), 400, 404)
+    allow(lambda: client.prompts.delete(created.id), 400, 404)
+
+
+@pytest.fixture
+def text_label(client):
+    label = client.annotations.labels.create(
+        name=_name("label"), type="text", settings={"placeholder": "notes", "max_length": 200, "min_length": 0}
+    )
+    yield label
+    allow(lambda: client.annotations.labels.delete(label.id), 400, 404)
 
 
 @pytest.fixture
@@ -132,6 +141,25 @@ def test_datasets_full_lifecycle(client, dataset, code_template):
     # Queues an LLM call; succeeds whether or not a provider key is configured.
     allow(lambda: client.datasets.prompts.run(run_prompt_ids=[stats.prompts[0].id], selected_all_rows=True), 400)
 
+    assert ds.dataset_id in [d.dataset_id for d in client.datasets.list_names().datasets]
+    client.datasets.evals.stats(ds.dataset_id)
+
+
+def test_datasets_from_file_and_huggingface(client):
+    csv = ("qa.csv", b"question,answer\n1+1?,2\n2+2?,4\n")
+    started = client.datasets.create_from_file(file=csv, new_dataset_name=_name("csv"), model_type="GenerativeLLM")
+    try:
+        assert started.dataset_id
+        # Rows are loaded by a background worker; the table exists right away.
+        assert client.datasets.get(started.dataset_id).column_config is not None
+    finally:
+        allow(lambda: client.datasets.delete(dataset_ids=[started.dataset_id]), 400, 404)
+    # Needs outbound access to huggingface.co; a self-hosted install may not have it.
+    hf = allow(lambda: client.datasets.create_from_huggingface(
+        name=_name("hf"), huggingface_dataset_name="rajpurkar/squad", huggingface_dataset_split="validation", num_rows=5), 400, 500, 502, 503)
+    if hf:
+        allow(lambda: client.datasets.delete(dataset_ids=[hf.dataset_id]), 400, 404)
+
 
 def test_eval_templates_and_groups(client, code_template):
     page = client.evals.templates.list(page_size=5, owner_filter="system")
@@ -159,6 +187,48 @@ def test_prompts_lifecycle(client, prompt):
     receipt = client.prompts.run(prompt.id, version="v1", is_run="prompt", prompt_config=config)
     assert receipt.template_id == prompt.id
     assert client.prompts.run_status(prompt.id, template_version="v1").status
+
+
+PROMPT_CONFIG = [{"messages": [{"role": "user", "content": [{"type": "text", "text": "Say hi to {{name}}"}]}],
+                  "configuration": {"model": "gpt-4o-mini", "temperature": 0.5, "max_tokens": 64}, "placeholders": []}]
+
+
+def test_prompt_drafts_commits_and_labels(client):
+    """The fi.prompt module's flow: draft -> commit -> label -> fetch by name/label."""
+    name = _name("draft")
+    template = client.prompts.create_draft(name=name, prompt_config=PROMPT_CONFIG, variable_names={"name": "world"}, placeholders={})
+    try:
+        assert template.id and template.name == name
+        committed = client.prompts.commit(template.id, version_name="v1", message="initial", set_default=True)
+        assert "v1" in committed  # the server answers with a message string
+        client.prompts.add_draft(template.id, new_prompts=[{"prompt_config": PROMPT_CONFIG, "variable_names": {"name": "world"}, "evaluation_configs": [], "metadata": {}, "placeholders": {}}])
+        versions = client.prompts.versions.list(template.id).to_list()
+        assert len(versions) >= 2
+        v1 = next(v for v in versions if v["template_version"] == "v1")
+
+        by_name = client.prompts.get_by_name(name=name)
+        assert by_name["id"] == template.id
+        client.prompts.history(template_id=template.id).first_page()
+
+        label_name = _name("lbl")
+        label = client.prompts.labels.create(name=label_name, type="custom")
+        try:
+            assert label.id in [lbl.id for lbl in client.prompts.labels.list()]
+            client.prompts.labels.assign(template.id, label.id, version="v1")
+            assert client.prompts.labels.for_template(template_id=template.id)
+            assert client.prompts.labels.get_template(name=name, label=label_name)["id"] == template.id
+            client.prompts.labels.set_default(template_name=name, version="v1")
+            client.prompts.labels.remove(label_id=label.id, version_id=v1["id"])
+        finally:
+            allow(lambda: raw(client, "DELETE", f"/model-hub/prompt-labels/{label.id}/"), 400, 404)
+
+        # Both call an LLM on the backend, which a self-hosted install may have no provider for.
+        allow(lambda: client.prompts.generate(statement="Summarise a support ticket in one line."), 400, 402, 500)
+        allow(lambda: client.prompts.improve(existing_prompt="Summarise this.", improvement_requirements="Be specific."), 400, 402, 500)
+    finally:
+        client.prompts.delete(template.id)
+    with pytest.raises((fi.NotFoundError, fi.BadRequestError)):
+        client.prompts.get(template.id)
 
 
 def test_observability(client, project, code_template):
@@ -195,28 +265,74 @@ def test_observability(client, project, code_template):
     allow(lambda: client.error_clusters.get(str(uuid.uuid4())), 400, 402, 404)
 
 
-def test_annotation_queue_workflow(client, dataset):
-    ds, _ = dataset
-    row = client.datasets.get(ds.dataset_id).table[0].row_id
-    label = raw(client, "POST", "/model-hub/annotations-labels/", body={"name": _name("label"), "type": "text", "settings": {"placeholder": "notes", "max_length": 200, "min_length": 0}})
-    queue = raw(client, "POST", "/model-hub/annotation-queues/", body={"name": _name("queue"), "label_ids": [label["id"]], "dataset": ds.dataset_id})
-    raw(client, "POST", f"/model-hub/annotation-queues/{queue['id']}/items/add-items/", body={"items": [{"source_type": "dataset_row", "source_id": row}]})
-    raw(client, "POST", f"/model-hub/annotation-queues/{queue['id']}/update-status/", body={"status": "active"})
+def test_annotation_labels(client, text_label, project):
+    assert client.annotations.labels.get(text_label.id).name == text_label.name
+    assert text_label.id in [lbl.id for lbl in client.annotations.labels.list(search=text_label.name)]
+    # Annotates spans by id; spans are visible to this endpoint once ClickHouse has indexed them.
+    _, _, span_ids = project
+    records = [{"observation_span_id": span_ids[0], "annotations": [{"annotation_label_id": text_label.id, "value": "fine"}], "notes": [{"text": "sdk"}]}]
+    allow(lambda: client.annotations.bulk_create(records=records), 400, 404)
 
-    assert [q.id for q in client.annotation_queues.list(search=queue["name"])] == [queue["id"]]
-    assert client.annotation_queues.get(queue["id"]).status == "active"
-    items = client.annotation_queues.items.list(queue["id"]).to_list()
-    assert len(items) == 1
-    detail = client.annotation_queues.items.annotate_detail(queue["id"], items[0].id)
-    assert detail.item["id"] == items[0].id
-    assert client.annotation_queues.items.submit(queue["id"], items[0].id, annotations=[{"label_id": label["id"], "value": "looks right"}]).submitted == 1
-    assert client.annotation_queues.items.complete(queue["id"], items[0].id).completed_item_id == items[0].id
+
+def test_annotation_queue_workflow(client, dataset, text_label):
+    ds, _ = dataset
+    rows = [r.row_id for r in client.datasets.get(ds.dataset_id).table[:3]]
+    me = client.account.whoami()
+    queue = client.annotation_queues.create(name=_name("queue"), label_ids=[text_label.id], extra_body={"dataset": ds.dataset_id})
+    exported_dataset = None
+    try:
+        assert client.annotation_queues.update(queue.id, description="updated").description == "updated"
+        added = client.annotation_queues.items.add(queue.id, items=[{"source_type": "dataset_row", "source_id": r} for r in rows])
+        assert added.added == 3
+        assert client.annotation_queues.update_status(queue.id, status="active").status == "active"
+
+        assert [q.id for q in client.annotation_queues.list(search=queue.name)] == [queue.id]
+        assert client.annotation_queues.get(queue.id).status == "active"
+        items = client.annotation_queues.items.list(queue.id).to_list()
+        assert len(items) == 3
+        first, second, third = (item.id for item in items)
+
+        allow(lambda: client.annotation_queues.items.assign(queue.id, item_ids=[first, second], user_ids=[me.id]), 400)
+        detail = client.annotation_queues.items.annotate_detail(queue.id, first)
+        assert detail.item["id"] == first
+        assert client.annotation_queues.items.submit(queue.id, first, annotations=[{"label_id": text_label.id, "value": "looks right"}]).submitted == 1
+        assert client.annotation_queues.items.list_annotations(queue.id, first)
+        assert client.annotation_queues.items.complete(queue.id, first).completed_item_id == first
+        client.annotation_queues.items.skip(queue.id, second)
+        allow(lambda: client.annotation_queues.items.import_annotations(queue.id, third, annotations=[{"label_id": text_label.id, "value": "imported"}]), 400)
+        assert client.annotation_queues.items.remove(queue.id, item_ids=[third]).removed == 1
+
+        progress = client.annotation_queues.progress(queue.id)
+        assert progress.total == 2 and progress.completed == 1
+        client.annotation_queues.analytics(queue.id)
+        client.annotation_queues.agreement(queue.id)
+        assert isinstance(client.annotation_queues.export(queue.id), list)
+        exported = client.annotation_queues.export_to_dataset(queue.id, dataset_name=_name("export"))
+        exported_dataset = exported.dataset_id
+
+        extra = client.annotations.labels.create(name=_name("extra"), type="text", settings={"placeholder": "x", "max_length": 50, "min_length": 0})
+        try:
+            assert client.annotation_queues.add_label(queue.id, label_id=extra.id).created
+            assert client.annotation_queues.remove_label(queue.id, label_id=extra.id).removed
+        finally:
+            allow(lambda: client.annotations.labels.delete(extra.id), 400, 404)
+
+        # Scores: the unified annotation store behind queues and span annotations.
+        score = client.scores.create(source_type="dataset_row", source_id=rows[1], label_id=text_label.id, value="direct")
+        assert score.label_id == text_label.id
+        bulk = client.scores.create_bulk(source_type="dataset_row", source_id=rows[1], scores=[{"label_id": text_label.id, "value": "bulk"}])
+        assert bulk.scores and not bulk.errors
+        assert len(client.scores.list_for_source(source_type="dataset_row", source_id=rows[1])) >= 1
+    finally:
+        allow(lambda: client.annotation_queues.delete(queue.id), 400, 404)
+        if exported_dataset:
+            allow(lambda: client.datasets.delete(dataset_ids=[exported_dataset]), 400, 404)
 
 
 def test_experiments_and_optimizations(client, dataset, code_template, prompt):
     ds, (question, _) = dataset
     client.prompts.get(prompt.id)  # materializes the v1 draft
-    raw(client, "POST", f"/model-hub/prompt-templates/{prompt.id}/commit/", body={"version_name": "v1", "message": "init", "set_default": True})
+    client.prompts.commit(prompt.id, version_name="v1", message="init", set_default=True)
     version = client.prompts.versions.list(prompt.id).to_list()[0]["id"]
 
     message = client.experiments.create(
@@ -284,10 +400,30 @@ def test_gateway_management(client):
 
 
 def test_knowledge_bases_and_usage(client):
-    kbs = client.knowledge_bases.list()
-    kb_id = kbs.results[0]["id"] if kbs.results else str(uuid.uuid4())
-    allow(lambda: client.knowledge_bases.get(kb_id), 404)
+    created = client.knowledge_bases.create(name=_name("kb"), files=[("notes.txt", b"The SDK uploads files as multipart form data.\n")])
+    kb_id = created.kb_id
+    try:
+        assert kb_id and created.file_ids
+        assert kb_id in [kb.id for kb in client.knowledge_bases.list_names().table_data]
+        # Backend: /model-hub/kb/ (list, get) and /model-hub/knowledge-base/ (create, files) are two
+        # separate stores, so a knowledge base made here is invisible to list() and 404s on get().
+        client.knowledge_bases.list()
+        allow(lambda: client.knowledge_bases.get(kb_id), 404)
+        updated = client.knowledge_bases.update(kb_id=kb_id, name=created.kb_name + "-u", files=[("more.txt", b"A second file.\n")])
+        assert updated.name.endswith("-u")
+        files = client.knowledge_bases.files.list(kb_id=kb_id)
+        assert files.total_rows == 2
+        assert client.knowledge_bases.files.delete(kb_id=kb_id, file_ids=[files.table_data[0].id])
+        assert client.knowledge_bases.files.list(kb_id=kb_id).total_rows == 1
+    finally:
+        client.knowledge_bases.delete(kb_ids=[kb_id])
     allow(lambda: client.usage.overview(), 404)  # not served by self-hosted installs
+
+
+def test_models_and_provider_keys(client):
+    models = client.models.list()
+    assert models.results is not None
+    client.provider_keys.list().first_page()
 
 
 def test_dashboards_lifecycle(client):

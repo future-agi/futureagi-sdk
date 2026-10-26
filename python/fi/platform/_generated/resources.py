@@ -3,11 +3,11 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Literal
+from typing import Any, Dict, List, Literal, Optional
 
 from .._pagination import AsyncPager, SyncPager
 from .._stability import _stability
-from .._transport import AsyncTransport, Operation, SyncTransport
+from .._transport import AsyncTransport, FileInput, Operation, SyncTransport
 from . import models
 
 OP_ACCOUNT_WHOAMI = Operation(**{'id': 'account.whoami', 'method': 'GET', 'path': '/accounts/user-info/', 'unwrap': None, 'pagination': None})
@@ -116,6 +116,58 @@ OP_DASHBOARDS_QUERY = Operation(**{'id': 'dashboards.query', 'method': 'POST', '
 OP_DASHBOARDS_METRICS_LIST = Operation(**{'id': 'dashboards.metrics.list', 'method': 'GET', 'path': '/tracer/dashboard/metrics/', 'unwrap': 'result', 'pagination': None})
 OP_DASHBOARDS_FILTER_VALUES = Operation(**{'id': 'dashboards.filter_values', 'method': 'GET', 'path': '/tracer/dashboard/filter_values/', 'unwrap': 'result', 'pagination': None})
 OP_USAGE_OVERVIEW = Operation(**{'id': 'usage.overview', 'method': 'GET', 'path': '/usage/v2/usage-overview/', 'unwrap': 'result', 'pagination': None})
+OP_DATASETS_LIST_NAMES = Operation(**{'id': 'datasets.list_names', 'method': 'GET', 'path': '/model-hub/develops/get-datasets-names/', 'unwrap': 'result', 'pagination': None})
+OP_DATASETS_CREATE_FROM_FILE = Operation(**{'id': 'datasets.create_from_file', 'method': 'POST', 'path': '/model-hub/develops/create-dataset-from-local-file/', 'unwrap': 'result', 'pagination': None, 'multipart': True})
+OP_DATASETS_CREATE_FROM_HUGGINGFACE = Operation(**{'id': 'datasets.create_from_huggingface', 'method': 'POST', 'path': '/model-hub/develops/create-dataset-from-huggingface/', 'unwrap': 'result', 'pagination': None})
+OP_DATASETS_EVALS_STATS = Operation(**{'id': 'datasets.evals.stats', 'method': 'GET', 'path': '/model-hub/dataset/{dataset_id}/eval-stats/', 'unwrap': 'result', 'pagination': None})
+OP_PROMPTS_CREATE_DRAFT = Operation(**{'id': 'prompts.create_draft', 'method': 'POST', 'path': '/model-hub/prompt-templates/create-draft/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_ADD_DRAFT = Operation(**{'id': 'prompts.add_draft', 'method': 'POST', 'path': '/model-hub/prompt-templates/{id}/add-new-draft/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_COMMIT = Operation(**{'id': 'prompts.commit', 'method': 'POST', 'path': '/model-hub/prompt-templates/{id}/commit/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_DELETE = Operation(**{'id': 'prompts.delete', 'method': 'DELETE', 'path': '/model-hub/prompt-templates/{id}/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_GENERATE = Operation(**{'id': 'prompts.generate', 'method': 'POST', 'path': '/model-hub/prompt-templates/generate-prompt/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_IMPROVE = Operation(**{'id': 'prompts.improve', 'method': 'POST', 'path': '/model-hub/prompt-templates/improve-prompt/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_GET_BY_NAME = Operation(**{'id': 'prompts.get_by_name', 'method': 'GET', 'path': '/model-hub/prompt-templates/get-template-by-name/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_HISTORY = Operation(**{'id': 'prompts.history', 'method': 'GET', 'path': '/model-hub/prompt-history-executions/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_PROMPTS_LABELS_LIST = Operation(**{'id': 'prompts.labels.list', 'method': 'GET', 'path': '/model-hub/prompt-labels/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_PROMPTS_LABELS_CREATE = Operation(**{'id': 'prompts.labels.create', 'method': 'POST', 'path': '/model-hub/prompt-labels/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_LABELS_GET_TEMPLATE = Operation(**{'id': 'prompts.labels.get_template', 'method': 'GET', 'path': '/model-hub/prompt-labels/get-by-name/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_LABELS_FOR_TEMPLATE = Operation(**{'id': 'prompts.labels.for_template', 'method': 'GET', 'path': '/model-hub/prompt-labels/template-labels/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_LABELS_ASSIGN = Operation(**{'id': 'prompts.labels.assign', 'method': 'POST', 'path': '/model-hub/prompt-labels/{template_id}/{label_id}/assign-label-by-id/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_LABELS_REMOVE = Operation(**{'id': 'prompts.labels.remove', 'method': 'POST', 'path': '/model-hub/prompt-labels/remove/', 'unwrap': None, 'pagination': None})
+OP_PROMPTS_LABELS_SET_DEFAULT = Operation(**{'id': 'prompts.labels.set_default', 'method': 'POST', 'path': '/model-hub/prompt-labels/set-default/', 'unwrap': None, 'pagination': None})
+OP_MODELS_LIST = Operation(**{'id': 'models.list', 'method': 'GET', 'path': '/model-hub/api/models_list/', 'unwrap': None, 'pagination': None})
+OP_PROVIDER_KEYS_LIST = Operation(**{'id': 'provider_keys.list', 'method': 'GET', 'path': '/model-hub/api-keys/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_KNOWLEDGE_BASES_CREATE = Operation(**{'id': 'knowledge_bases.create', 'method': 'POST', 'path': '/model-hub/knowledge-base/', 'unwrap': 'result', 'pagination': None, 'multipart': True})
+OP_KNOWLEDGE_BASES_UPDATE = Operation(**{'id': 'knowledge_bases.update', 'method': 'PATCH', 'path': '/model-hub/knowledge-base/', 'unwrap': 'result', 'pagination': None, 'multipart': True})
+OP_KNOWLEDGE_BASES_LIST_NAMES = Operation(**{'id': 'knowledge_bases.list_names', 'method': 'GET', 'path': '/model-hub/knowledge-base/list/', 'unwrap': 'result', 'pagination': None})
+OP_KNOWLEDGE_BASES_DELETE = Operation(**{'id': 'knowledge_bases.delete', 'method': 'DELETE', 'path': '/model-hub/knowledge-base/', 'unwrap': 'result', 'pagination': None})
+OP_KNOWLEDGE_BASES_FILES_LIST = Operation(**{'id': 'knowledge_bases.files.list', 'method': 'POST', 'path': '/model-hub/knowledge-base/files/', 'unwrap': 'result', 'pagination': None})
+OP_KNOWLEDGE_BASES_FILES_DELETE = Operation(**{'id': 'knowledge_bases.files.delete', 'method': 'DELETE', 'path': '/model-hub/knowledge-base/files/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATIONS_BULK_CREATE = Operation(**{'id': 'annotations.bulk_create', 'method': 'POST', 'path': '/tracer/bulk-annotation/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATIONS_LABELS_LIST = Operation(**{'id': 'annotations.labels.list', 'method': 'GET', 'path': '/model-hub/annotations-labels/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'next': 'next'}})
+OP_ANNOTATIONS_LABELS_CREATE = Operation(**{'id': 'annotations.labels.create', 'method': 'POST', 'path': '/model-hub/annotations-labels/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATIONS_LABELS_GET = Operation(**{'id': 'annotations.labels.get', 'method': 'GET', 'path': '/model-hub/annotations-labels/{id}/', 'unwrap': None, 'pagination': None})
+OP_ANNOTATIONS_LABELS_DELETE = Operation(**{'id': 'annotations.labels.delete', 'method': 'DELETE', 'path': '/model-hub/annotations-labels/{id}/', 'unwrap': None, 'pagination': None})
+OP_SCORES_CREATE = Operation(**{'id': 'scores.create', 'method': 'POST', 'path': '/model-hub/scores/', 'unwrap': 'result', 'pagination': None})
+OP_SCORES_CREATE_BULK = Operation(**{'id': 'scores.create_bulk', 'method': 'POST', 'path': '/model-hub/scores/bulk/', 'unwrap': 'result', 'pagination': None})
+OP_SCORES_LIST_FOR_SOURCE = Operation(**{'id': 'scores.list_for_source', 'method': 'GET', 'path': '/model-hub/scores/for-source/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_CREATE = Operation(**{'id': 'annotation_queues.create', 'method': 'POST', 'path': '/model-hub/annotation-queues/', 'unwrap': None, 'pagination': None})
+OP_ANNOTATION_QUEUES_UPDATE = Operation(**{'id': 'annotation_queues.update', 'method': 'PATCH', 'path': '/model-hub/annotation-queues/{id}/', 'unwrap': None, 'pagination': None})
+OP_ANNOTATION_QUEUES_DELETE = Operation(**{'id': 'annotation_queues.delete', 'method': 'DELETE', 'path': '/model-hub/annotation-queues/{id}/', 'unwrap': None, 'pagination': None})
+OP_ANNOTATION_QUEUES_UPDATE_STATUS = Operation(**{'id': 'annotation_queues.update_status', 'method': 'POST', 'path': '/model-hub/annotation-queues/{id}/update-status/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_PROGRESS = Operation(**{'id': 'annotation_queues.progress', 'method': 'GET', 'path': '/model-hub/annotation-queues/{id}/progress/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_ANALYTICS = Operation(**{'id': 'annotation_queues.analytics', 'method': 'GET', 'path': '/model-hub/annotation-queues/{id}/analytics/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_AGREEMENT = Operation(**{'id': 'annotation_queues.agreement', 'method': 'GET', 'path': '/model-hub/annotation-queues/{id}/agreement/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_EXPORT = Operation(**{'id': 'annotation_queues.export', 'method': 'GET', 'path': '/model-hub/annotation-queues/{id}/export/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_EXPORT_TO_DATASET = Operation(**{'id': 'annotation_queues.export_to_dataset', 'method': 'POST', 'path': '/model-hub/annotation-queues/{id}/export-to-dataset/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_ADD_LABEL = Operation(**{'id': 'annotation_queues.add_label', 'method': 'POST', 'path': '/model-hub/annotation-queues/{id}/add-label/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_REMOVE_LABEL = Operation(**{'id': 'annotation_queues.remove_label', 'method': 'POST', 'path': '/model-hub/annotation-queues/{id}/remove-label/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_ITEMS_ADD = Operation(**{'id': 'annotation_queues.items.add', 'method': 'POST', 'path': '/model-hub/annotation-queues/{queue_id}/items/add-items/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_ITEMS_ASSIGN = Operation(**{'id': 'annotation_queues.items.assign', 'method': 'POST', 'path': '/model-hub/annotation-queues/{queue_id}/items/assign/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_ITEMS_REMOVE = Operation(**{'id': 'annotation_queues.items.remove', 'method': 'POST', 'path': '/model-hub/annotation-queues/{queue_id}/items/bulk-remove/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_ITEMS_SKIP = Operation(**{'id': 'annotation_queues.items.skip', 'method': 'POST', 'path': '/model-hub/annotation-queues/{queue_id}/items/{id}/skip/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_ITEMS_LIST_ANNOTATIONS = Operation(**{'id': 'annotation_queues.items.list_annotations', 'method': 'GET', 'path': '/model-hub/annotation-queues/{queue_id}/items/{id}/annotations/', 'unwrap': 'result', 'pagination': None})
+OP_ANNOTATION_QUEUES_ITEMS_IMPORT_ANNOTATIONS = Operation(**{'id': 'annotation_queues.items.import_annotations', 'method': 'POST', 'path': '/model-hub/annotation-queues/{queue_id}/items/{id}/annotations/import/', 'unwrap': 'result', 'pagination': None})
 
 
 
@@ -167,6 +219,16 @@ class AnnotationQueuesItemsResource:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
 
+    def add(self, queue_id: str, *, items: List[Dict[str, Any]] | None = None, selection: Dict[str, Any] | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueAddItemsResult:
+        """Add items (spans, traces, dataset rows) to a queue, by id or by a selection filter.
+
+        POST /model-hub/annotation-queues/{queue_id}/items/add-items/
+        """
+        path = {'queue_id': queue_id}
+        query = {**(extra_query or {})}
+        body = {'items': items, 'selection': selection, 'project_id': project_id, **(extra_body or {})}
+        return self._t.call(OP_ANNOTATION_QUEUES_ITEMS_ADD, path=path, query=query, body=body, model=models.QueueAddItemsResult)
+
     def annotate_detail(self, queue_id: str, id: str, *, annotator_id: str | None = None, include_completed: bool | None = None, view_mode: str | None = None, review_status: str | None = None, exclude_review_status: str | None = None, include_all_annotations: bool | None = None, reserve: bool | None = None, extra_query: Dict[str, Any] | None = None) -> models.QueueAnnotateDetailResult:
         """Return everything needed to annotate one queue item; reserve=true acquires an editing reservation for the caller. Includes its source content, the queue instructions, every label with its settings (the allowed values a submitted value must match), any annotations already recorded, and the next/previous item ids. Call this before submit_annotation; the label settings are not available anywhere else.
 
@@ -176,6 +238,16 @@ class AnnotationQueuesItemsResource:
         query = {'annotator_id': annotator_id, 'include_completed': include_completed, 'view_mode': view_mode, 'review_status': review_status, 'exclude_review_status': exclude_review_status, 'include_all_annotations': include_all_annotations, 'reserve': reserve, **(extra_query or {})}
         body = None
         return self._t.call(OP_ANNOTATION_QUEUES_ITEMS_ANNOTATE_DETAIL, path=path, query=query, body=body, model=models.QueueAnnotateDetailResult)
+
+    def assign(self, queue_id: str, *, item_ids: List[str], user_ids: List[str] | None = None, action: Literal['add', 'set', 'remove'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueAssignItemsResult:
+        """Assign or unassign queue items to annotators.
+
+        POST /model-hub/annotation-queues/{queue_id}/items/assign/
+        """
+        path = {'queue_id': queue_id}
+        query = {**(extra_query or {})}
+        body = {'item_ids': item_ids, 'user_ids': user_ids, 'action': action, **(extra_body or {})}
+        return self._t.call(OP_ANNOTATION_QUEUES_ITEMS_ASSIGN, path=path, query=query, body=body, model=models.QueueAssignItemsResult)
 
     def complete(self, queue_id: str, id: str, *, exclude: List[str] | None = None, exclude_review_status: str | None = None, include_completed: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueNavigationResult:
         """Mark an annotated queue item complete and return the next item to work on. Required to finish an item - submit_annotation alone leaves it in_progress and the queue never closes.
@@ -187,6 +259,16 @@ class AnnotationQueuesItemsResource:
         body = {'exclude': exclude, 'exclude_review_status': exclude_review_status, 'include_completed': include_completed, **(extra_body or {})}
         return self._t.call(OP_ANNOTATION_QUEUES_ITEMS_COMPLETE, path=path, query=query, body=body, model=models.QueueNavigationResult)
 
+    def import_annotations(self, queue_id: str, id: str, *, annotations: List[Dict[str, Any]], annotator_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueImportAnnotationsResult:
+        """Import existing annotations onto a queue item, optionally on behalf of an annotator.
+
+        POST /model-hub/annotation-queues/{queue_id}/items/{id}/annotations/import/
+        """
+        path = {'queue_id': queue_id, 'id': id}
+        query = {**(extra_query or {})}
+        body = {'annotations': annotations, 'annotator_id': annotator_id, **(extra_body or {})}
+        return self._t.call(OP_ANNOTATION_QUEUES_ITEMS_IMPORT_ANNOTATIONS, path=path, query=query, body=body, model=models.QueueImportAnnotationsResult)
+
     def list(self, queue_id: str, *, limit: int | None = None, status: List[str] | None = None, source_type: List[str] | None = None, assigned_to: str | None = None, review_status: str | None = None, ordering: Literal['created_at', '-created_at'] | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.QueueItem]:
         """List items belonging to an annotation queue.
 
@@ -195,6 +277,36 @@ class AnnotationQueuesItemsResource:
         path = {'queue_id': queue_id}
         query = {'limit': limit, 'status': status, 'source_type': source_type, 'assigned_to': assigned_to, 'review_status': review_status, 'ordering': ordering, **(extra_query or {})}
         return self._t.paginate(OP_ANNOTATION_QUEUES_ITEMS_LIST, path=path, query=query, model=models.QueueItem)
+
+    def list_annotations(self, queue_id: str, id: str, *, extra_query: Dict[str, Any] | None = None) -> List[models.Score]:
+        """List the annotations recorded on a queue item.
+
+        GET /model-hub/annotation-queues/{queue_id}/items/{id}/annotations/
+        """
+        path = {'queue_id': queue_id, 'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_ANNOTATION_QUEUES_ITEMS_LIST_ANNOTATIONS, path=path, query=query, body=body, model=List[models.Score])
+
+    def remove(self, queue_id: str, *, item_ids: List[str], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueBulkRemoveItemsResult:
+        """Remove items from a queue.
+
+        POST /model-hub/annotation-queues/{queue_id}/items/bulk-remove/
+        """
+        path = {'queue_id': queue_id}
+        query = {**(extra_query or {})}
+        body = {'item_ids': item_ids, **(extra_body or {})}
+        return self._t.call(OP_ANNOTATION_QUEUES_ITEMS_REMOVE, path=path, query=query, body=body, model=models.QueueBulkRemoveItemsResult)
+
+    def skip(self, queue_id: str, id: str, *, exclude: List[str] | None = None, exclude_review_status: str | None = None, include_completed: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueNavigationResult:
+        """Skip a queue item and return the next one to work on.
+
+        POST /model-hub/annotation-queues/{queue_id}/items/{id}/skip/
+        """
+        path = {'queue_id': queue_id, 'id': id}
+        query = {**(extra_query or {})}
+        body = {'exclude': exclude, 'exclude_review_status': exclude_review_status, 'include_completed': include_completed, **(extra_body or {})}
+        return self._t.call(OP_ANNOTATION_QUEUES_ITEMS_SKIP, path=path, query=query, body=body, model=models.QueueNavigationResult)
 
     def submit(self, queue_id: str, id: str, *, annotations: List[Dict[str, Any]], notes: str | None = None, item_notes: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueSubmitAnnotationsResult:
         """Submit annotation values for an item in an annotation queue. The value shape must match the label's settings from get_annotation_item_detail. Submitting moves the item to in_progress only; call complete_annotation_item to finish it.
@@ -205,6 +317,50 @@ class AnnotationQueuesItemsResource:
         query = {**(extra_query or {})}
         body = {'annotations': annotations, 'notes': notes, 'item_notes': item_notes, **(extra_body or {})}
         return self._t.call(OP_ANNOTATION_QUEUES_ITEMS_SUBMIT, path=path, query=query, body=body, model=models.QueueSubmitAnnotationsResult)
+
+
+class AnnotationsLabelsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def create(self, *, name: str, type: Literal['text', 'numeric', 'categorical', 'star', 'thumbs_up_down'], settings: Dict[str, Any] | None = None, project: str | None = None, description: str | None = None, allow_notes: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.AnnotationsLabels:
+        """Create an annotation label (text, label, score, ...) with its settings.
+
+        POST /model-hub/annotations-labels/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'type': type, 'settings': settings, 'project': project, 'description': description, 'allow_notes': allow_notes, **(extra_body or {})}
+        return self._t.call(OP_ANNOTATIONS_LABELS_CREATE, path=path, query=query, body=body, model=models.AnnotationsLabels)
+
+    def delete(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Delete (archive) an annotation label.
+
+        DELETE /model-hub/annotations-labels/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(OP_ANNOTATIONS_LABELS_DELETE, path=path, query=query, body=body, model=None)
+
+    def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.AnnotationsLabels:
+        """Return an annotation label by id.
+
+        GET /model-hub/annotations-labels/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_ANNOTATIONS_LABELS_GET, path=path, query=query, body=body, model=models.AnnotationsLabels)
+
+    def list(self, *, limit: int | None = None, dataset: str | None = None, project_id: str | None = None, type: Literal['text', 'numeric', 'categorical', 'star', 'thumbs_up_down'] | None = None, search: str | None = None, include_usage_count: bool | None = None, include_archived: bool | None = None, archived: bool | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.AnnotationsLabels]:
+        """List annotation labels, optionally filtered by project, type or search text.
+
+        GET /model-hub/annotations-labels/
+        """
+        path = None
+        query = {'limit': limit, 'dataset': dataset, 'project_id': project_id, 'type': type, 'search': search, 'include_usage_count': include_usage_count, 'include_archived': include_archived, 'archived': archived, **(extra_query or {})}
+        return self._t.paginate(OP_ANNOTATIONS_LABELS_LIST, path=path, query=query, model=models.AnnotationsLabels)
 
 
 class DashboardsMetricsResource:
@@ -359,6 +515,16 @@ class DatasetsEvalsResource:
         query = {**(extra_query or {})}
         body = {'user_eval_ids': user_eval_ids, 'experiment_id': experiment_id, 'failed_only': failed_only, **(extra_body or {})}
         return self._t.call(OP_DATASETS_EVALS_RUN, path=path, query=query, body=body, model=None)
+
+    def stats(self, dataset_id: str, *, extra_query: Dict[str, Any] | None = None) -> List[models.DatasetEvalStatsItem]:
+        """Per-evaluation score statistics for a dataset.
+
+        GET /model-hub/dataset/{dataset_id}/eval-stats/
+        """
+        path = {'dataset_id': dataset_id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_DATASETS_EVALS_STATS, path=path, query=query, body=body, model=List[models.DatasetEvalStatsItem])
 
 
 class DatasetsPromptsResource:
@@ -636,6 +802,105 @@ class GatewaySessionsResource:
         return self._t.call(OP_GATEWAY_SESSIONS_REQUESTS, path=path, query=query, body=body, model=None)
 
 
+class KnowledgeBasesFilesResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def delete(self, *, kb_id: str | None = None, delete_all: bool | None = None, file_ids: List[str] | None = None, excluded_file_ids: List[str] | None = None, file_names: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Delete files from a knowledge base, by id or name, or all of them.
+
+        DELETE /model-hub/knowledge-base/files/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_id': kb_id, 'delete_all': delete_all, 'file_ids': file_ids, 'excluded_file_ids': excluded_file_ids, 'file_names': file_names, **(extra_body or {})}
+        return self._t.call(OP_KNOWLEDGE_BASES_FILES_DELETE, path=path, query=query, body=body, model=None)
+
+    def list(self, *, kb_id: str, search: str | None = None, sort: List[Dict[str, Any]] | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.LegacyKnowledgeBaseFilesResult:
+        """List the files in a knowledge base, with their processing status.
+
+        POST /model-hub/knowledge-base/files/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_id': kb_id, 'search': search, 'sort': sort, 'page_number': page_number, 'page_size': page_size, **(extra_body or {})}
+        return self._t.call(OP_KNOWLEDGE_BASES_FILES_LIST, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseFilesResult)
+
+
+class PromptsLabelsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def assign(self, template_id: str, label_id: str, *, version: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Assign a label to one version of a prompt template.
+
+        POST /model-hub/prompt-labels/{template_id}/{label_id}/assign-label-by-id/
+        """
+        path = {'template_id': template_id, 'label_id': label_id}
+        query = {**(extra_query or {})}
+        body = {'version': version, **(extra_body or {})}
+        return self._t.call(OP_PROMPTS_LABELS_ASSIGN, path=path, query=query, body=body, model=None)
+
+    def create(self, *, name: str, type: Literal['system', 'custom'], metadata: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.PromptLabel:
+        """Create a prompt label.
+
+        POST /model-hub/prompt-labels/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'type': type, 'metadata': metadata, **(extra_body or {})}
+        return self._t.call(OP_PROMPTS_LABELS_CREATE, path=path, query=query, body=body, model=models.PromptLabel)
+
+    def for_template(self, *, page: int | None = None, limit: int | None = None, template_id: str | None = None, template_name: str | None = None, extra_query: Dict[str, Any] | None = None) -> Any:
+        """List the labels assigned to a prompt template's versions.
+
+        GET /model-hub/prompt-labels/template-labels/
+        """
+        path = None
+        query = {'page': page, 'limit': limit, 'template_id': template_id, 'template_name': template_name, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_PROMPTS_LABELS_FOR_TEMPLATE, path=path, query=query, body=body, model=None)
+
+    def get_template(self, *, page: int | None = None, limit: int | None = None, name: str | None = None, label: str | None = None, version: str | None = None, extra_query: Dict[str, Any] | None = None) -> Any:
+        """Fetch the prompt template version a label points to, by template name and label (or version).
+
+        GET /model-hub/prompt-labels/get-by-name/
+        """
+        path = None
+        query = {'page': page, 'limit': limit, 'name': name, 'label': label, 'version': version, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_PROMPTS_LABELS_GET_TEMPLATE, path=path, query=query, body=body, model=None)
+
+    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.PromptLabel]:
+        """List prompt labels (e.g. production, staging) in the organization.
+
+        GET /model-hub/prompt-labels/
+        """
+        path = None
+        query = {'limit': limit, **(extra_query or {})}
+        return self._t.paginate(OP_PROMPTS_LABELS_LIST, path=path, query=query, model=models.PromptLabel)
+
+    def remove(self, *, label_id: str, version_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Remove a label from a prompt template version.
+
+        POST /model-hub/prompt-labels/remove/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'label_id': label_id, 'version_id': version_id, **(extra_body or {})}
+        return self._t.call(OP_PROMPTS_LABELS_REMOVE, path=path, query=query, body=body, model=None)
+
+    def set_default(self, *, template_name: str, version: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Make a version the default for a prompt template, by template name.
+
+        POST /model-hub/prompt-labels/set-default/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'template_name': template_name, 'version': version, **(extra_body or {})}
+        return self._t.call(OP_PROMPTS_LABELS_SET_DEFAULT, path=path, query=query, body=body, model=None)
+
+
 class PromptsVersionsResource:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
@@ -858,6 +1123,76 @@ class AnnotationQueuesResource:
         self._t = transport
         self.items = AnnotationQueuesItemsResource(transport)
 
+    def add_label(self, id: str, *, label_id: str, required: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueAddLabelResult:
+        """Add an annotation label to a queue.
+
+        POST /model-hub/annotation-queues/{id}/add-label/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'label_id': label_id, 'required': required, **(extra_body or {})}
+        return self._t.call(OP_ANNOTATION_QUEUES_ADD_LABEL, path=path, query=query, body=body, model=models.QueueAddLabelResult)
+
+    def agreement(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.QueueAgreementResult:
+        """Inter-annotator agreement for a queue.
+
+        GET /model-hub/annotation-queues/{id}/agreement/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_ANNOTATION_QUEUES_AGREEMENT, path=path, query=query, body=body, model=models.QueueAgreementResult)
+
+    def analytics(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.QueueAnalyticsResult:
+        """Throughput, annotator performance and label distribution for a queue.
+
+        GET /model-hub/annotation-queues/{id}/analytics/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_ANNOTATION_QUEUES_ANALYTICS, path=path, query=query, body=body, model=models.QueueAnalyticsResult)
+
+    def create(self, *, name: str, label_ids: List[str], description: str | None = None, instructions: str | None = None, assignment_strategy: Literal['manual', 'round_robin', 'load_balanced'] | None = None, annotations_required: int | None = None, reservation_timeout_minutes: int | None = None, requires_review: bool | None = None, auto_assign: bool | None = None, annotator_ids: List[str] | None = None, annotator_roles: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.AnnotationQueue:
+        """Create an annotation queue with its labels and annotators.
+
+        POST /model-hub/annotation-queues/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'label_ids': label_ids, 'description': description, 'instructions': instructions, 'assignment_strategy': assignment_strategy, 'annotations_required': annotations_required, 'reservation_timeout_minutes': reservation_timeout_minutes, 'requires_review': requires_review, 'auto_assign': auto_assign, 'annotator_ids': annotator_ids, 'annotator_roles': annotator_roles, **(extra_body or {})}
+        return self._t.call(OP_ANNOTATION_QUEUES_CREATE, path=path, query=query, body=body, model=models.AnnotationQueue)
+
+    def delete(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Delete an annotation queue.
+
+        DELETE /model-hub/annotation-queues/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(OP_ANNOTATION_QUEUES_DELETE, path=path, query=query, body=body, model=None)
+
+    def export(self, id: str, *, export_format: Literal['json', 'csv'] | None = None, status: str | None = None, extra_query: Dict[str, Any] | None = None) -> List[Optional[Any]]:
+        """Export a queue's annotations.
+
+        GET /model-hub/annotation-queues/{id}/export/
+        """
+        path = {'id': id}
+        query = {'export_format': export_format, 'status': status, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_ANNOTATION_QUEUES_EXPORT, path=path, query=query, body=body, model=None)
+
+    def export_to_dataset(self, id: str, *, dataset_id: str | None = None, dataset_name: str | None = None, status_filter: str | None = None, column_mapping: List[Dict[str, Any]] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueExportToDatasetResult:
+        """Write a queue's annotations into a new or existing dataset.
+
+        POST /model-hub/annotation-queues/{id}/export-to-dataset/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'dataset_id': dataset_id, 'dataset_name': dataset_name, 'status_filter': status_filter, 'column_mapping': column_mapping, **(extra_body or {})}
+        return self._t.call(OP_ANNOTATION_QUEUES_EXPORT_TO_DATASET, path=path, query=query, body=body, model=models.QueueExportToDatasetResult)
+
     def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.AnnotationQueue:
         """Return an annotation queue by its identifier.
 
@@ -876,6 +1211,62 @@ class AnnotationQueuesResource:
         path = None
         query = {'limit': limit, 'status': status, 'search': search, 'include_counts': include_counts, 'archived': archived, 'page_size': page_size, **(extra_query or {})}
         return self._t.paginate(OP_ANNOTATION_QUEUES_LIST, path=path, query=query, model=models.AnnotationQueue)
+
+    def progress(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.QueueProgressResult:
+        """Item counts by status and per-annotator progress for a queue.
+
+        GET /model-hub/annotation-queues/{id}/progress/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_ANNOTATION_QUEUES_PROGRESS, path=path, query=query, body=body, model=models.QueueProgressResult)
+
+    def remove_label(self, id: str, *, label_id: str, required: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueRemoveLabelResult:
+        """Remove an annotation label from a queue.
+
+        POST /model-hub/annotation-queues/{id}/remove-label/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'label_id': label_id, 'required': required, **(extra_body or {})}
+        return self._t.call(OP_ANNOTATION_QUEUES_REMOVE_LABEL, path=path, query=query, body=body, model=models.QueueRemoveLabelResult)
+
+    def update(self, id: str, *, name: str | None = None, description: str | None = None, instructions: str | None = None, assignment_strategy: Literal['manual', 'round_robin', 'load_balanced'] | None = None, annotations_required: int | None = None, reservation_timeout_minutes: int | None = None, requires_review: bool | None = None, auto_assign: bool | None = None, label_ids: List[str] | None = None, annotator_ids: List[str] | None = None, annotator_roles: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.AnnotationQueue:
+        """Update selected fields of an annotation queue.
+
+        PATCH /model-hub/annotation-queues/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, 'instructions': instructions, 'assignment_strategy': assignment_strategy, 'annotations_required': annotations_required, 'reservation_timeout_minutes': reservation_timeout_minutes, 'requires_review': requires_review, 'auto_assign': auto_assign, 'label_ids': label_ids, 'annotator_ids': annotator_ids, 'annotator_roles': annotator_roles, **(extra_body or {})}
+        return self._t.call(OP_ANNOTATION_QUEUES_UPDATE, path=path, query=query, body=body, model=models.AnnotationQueue)
+
+    def update_status(self, id: str, *, status: Literal['draft', 'active', 'paused', 'completed'], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.AnnotationQueue:
+        """Change a queue's status (draft, active, paused, completed, archived).
+
+        POST /model-hub/annotation-queues/{id}/update-status/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'status': status, **(extra_body or {})}
+        return self._t.call(OP_ANNOTATION_QUEUES_UPDATE_STATUS, path=path, query=query, body=body, model=models.AnnotationQueue)
+
+
+class AnnotationsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+        self.labels = AnnotationsLabelsResource(transport)
+
+    def bulk_create(self, *, records: List[Dict[str, Any]], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.BulkAnnotationResponseResult:
+        """Create or update annotations and notes on spans in bulk.
+
+        POST /tracer/bulk-annotation/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'records': records, **(extra_body or {})}
+        return self._t.call(OP_ANNOTATIONS_BULK_CREATE, path=path, query=query, body=body, model=models.BulkAnnotationResponseResult)
 
 
 class DashboardsResource:
@@ -974,6 +1365,27 @@ class DatasetsResource:
         body = {'new_dataset_name': new_dataset_name, 'model_type': model_type, 'is_sdk': is_sdk, 'row': row, **(extra_body or {})}
         return self._t.call(OP_DATASETS_CREATE, path=path, query=query, body=body, model=models.DatasetCreateStartedResult)
 
+    def create_from_file(self, *, file: FileInput, new_dataset_name: str, model_type: str, source: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.LocalFileDatasetCreateStartedResult:
+        """Create a dataset by uploading a local CSV, JSON, JSONL or Excel file. Processing is asynchronous; read datasets.get for the result.
+
+        POST /model-hub/develops/create-dataset-from-local-file/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'new_dataset_name': new_dataset_name, 'model_type': model_type, 'source': source, **(extra_body or {})}
+        files = {'file': file}
+        return self._t.call(OP_DATASETS_CREATE_FROM_FILE, path=path, query=query, body=body, files=files, model=models.LocalFileDatasetCreateStartedResult)
+
+    def create_from_huggingface(self, *, huggingface_dataset_name: str, huggingface_dataset_split: str, name: str | None = None, model_type: str | None = None, num_rows: int | None = None, huggingface_dataset_config: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DatasetCreateStartedResult:
+        """Create a dataset from a Hugging Face dataset split.
+
+        POST /model-hub/develops/create-dataset-from-huggingface/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'huggingface_dataset_name': huggingface_dataset_name, 'huggingface_dataset_split': huggingface_dataset_split, 'name': name, 'model_type': model_type, 'num_rows': num_rows, 'huggingface_dataset_config': huggingface_dataset_config, **(extra_body or {})}
+        return self._t.call(OP_DATASETS_CREATE_FROM_HUGGINGFACE, path=path, query=query, body=body, model=models.DatasetCreateStartedResult)
+
     def delete(self, *, dataset_ids: List[str], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
         """Soft-delete one or more datasets by passing dataset_ids. This is the only way to remove a dataset created earlier; deletion cascades to the dataset's rows, columns and attached evaluations.
 
@@ -1002,6 +1414,16 @@ class DatasetsResource:
         path = None
         query = {'search_text': search_text, 'page_size': page_size, 'sort': sort, **(extra_query or {})}
         return self._t.paginate(OP_DATASETS_LIST, path=path, query=query, model=models.DatasetListItem)
+
+    def list_names(self, *, extra_query: Dict[str, Any] | None = None) -> models.DatasetNamesResult:
+        """Return the id and name of every dataset in the workspace, without paging.
+
+        GET /model-hub/develops/get-datasets-names/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_DATASETS_LIST_NAMES, path=path, query=query, body=body, model=models.DatasetNamesResult)
 
 
 class ErrorClustersResource:
@@ -1123,6 +1545,28 @@ class GatewayResource:
 class KnowledgeBasesResource:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
+        self.files = KnowledgeBasesFilesResource(transport)
+
+    def create(self, *, name: str, files: List[FileInput] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.LegacyKnowledgeBaseCreateResult:
+        """Create a knowledge base, optionally uploading its first files (pdf, docx, txt, rtf).
+
+        POST /model-hub/knowledge-base/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, **(extra_body or {})}
+        files = {'file': files}
+        return self._t.call(OP_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseCreateResult)
+
+    def delete(self, *, kb_ids: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Delete knowledge bases by id.
+
+        DELETE /model-hub/knowledge-base/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_ids': kb_ids, **(extra_body or {})}
+        return self._t.call(OP_KNOWLEDGE_BASES_DELETE, path=path, query=query, body=body, model=None)
 
     def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.KnowledgeBaseItem:
         """Return a knowledge base and its configuration.
@@ -1143,6 +1587,42 @@ class KnowledgeBasesResource:
         query = {'search': search, 'page': page, 'limit': limit, **(extra_query or {})}
         body = None
         return self._t.call(OP_KNOWLEDGE_BASES_LIST, path=path, query=query, body=body, model=models.KnowledgeBasePaginatedResult)
+
+    def list_names(self, *, extra_query: Dict[str, Any] | None = None) -> models.LegacyKnowledgeBaseListResult:
+        """Return the id and name of every knowledge base created through knowledge_bases.create, without paging.
+
+        GET /model-hub/knowledge-base/list/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_KNOWLEDGE_BASES_LIST_NAMES, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseListResult)
+
+    def update(self, *, kb_id: str, name: str | None = None, files: List[FileInput] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.LegacyKnowledgeBaseMutationResult:
+        """Rename a knowledge base and/or upload more files to it.
+
+        PATCH /model-hub/knowledge-base/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_id': kb_id, 'name': name, **(extra_body or {})}
+        files = {'file': files}
+        return self._t.call(OP_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseMutationResult)
+
+
+class ModelsResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def list(self, *, extra_query: Dict[str, Any] | None = None) -> models.ModelHubPaginatedResponse:
+        """List the LLM models available to prompts and evaluations, with their providers.
+
+        GET /model-hub/api/models_list/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(OP_MODELS_LIST, path=path, query=query, body=body, model=models.ModelHubPaginatedResponse)
 
 
 class OptimizationsResource:
@@ -1207,7 +1687,28 @@ class ProjectsResource:
 class PromptsResource:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
+        self.labels = PromptsLabelsResource(transport)
         self.versions = PromptsVersionsResource(transport)
+
+    def add_draft(self, id: str, *, new_prompts: List[Dict[str, Any]], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Add new draft versions to a prompt template. Each entry carries prompt_config, variable_names, evaluation_configs, metadata and placeholders.
+
+        POST /model-hub/prompt-templates/{id}/add-new-draft/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'new_prompts': new_prompts, **(extra_body or {})}
+        return self._t.call(OP_PROMPTS_ADD_DRAFT, path=path, query=query, body=body, model=None)
+
+    def commit(self, id: str, *, version_name: str, message: str | None = None, set_default: bool | None = None, is_draft: bool | None = None, metadata: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Commit the current draft of a prompt template as a named version, optionally making it the default.
+
+        POST /model-hub/prompt-templates/{id}/commit/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'version_name': version_name, 'message': message, 'set_default': set_default, 'is_draft': is_draft, 'metadata': metadata, **(extra_body or {})}
+        return self._t.call(OP_PROMPTS_COMMIT, path=path, query=query, body=body, model=None)
 
     def create(self, *, name: str, description: str | None = None, variable_names: Dict[str, Any] | None = None, prompt_folder: str | None = None, placeholders: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.PromptTemplate:
         """Create a prompt template in the current workspace.
@@ -1219,6 +1720,36 @@ class PromptsResource:
         body = {'name': name, 'description': description, 'variable_names': variable_names, 'prompt_folder': prompt_folder, 'placeholders': placeholders, **(extra_body or {})}
         return self._t.call(OP_PROMPTS_CREATE, path=path, query=query, body=body, model=models.PromptTemplate)
 
+    def create_draft(self, *, name: str, prompt_config: List[Dict[str, Any]], variable_names: Dict[str, Any] | None = None, evaluation_configs: List[Dict[str, Any]] | None = None, metadata: Dict[str, Any] | None = None, placeholders: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.PromptTemplate:
+        """Create a prompt template together with its first draft version (messages, model configuration, variables).
+
+        POST /model-hub/prompt-templates/create-draft/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'prompt_config': prompt_config, 'variable_names': variable_names, 'evaluation_configs': evaluation_configs, 'metadata': metadata, 'placeholders': placeholders, **(extra_body or {})}
+        return self._t.call(OP_PROMPTS_CREATE_DRAFT, path=path, query=query, body=body, model=models.PromptTemplate)
+
+    def delete(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Delete a prompt template and all its versions.
+
+        DELETE /model-hub/prompt-templates/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(OP_PROMPTS_DELETE, path=path, query=query, body=body, model=None)
+
+    def generate(self, *, statement: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Generate a prompt from a plain-language statement of what it should do.
+
+        POST /model-hub/prompt-templates/generate-prompt/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'statement': statement, **(extra_body or {})}
+        return self._t.call(OP_PROMPTS_GENERATE, path=path, query=query, body=body, model=None)
+
     def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.PromptTemplate:
         """Open a prompt template by its identifier, creating its workbench draft if needed.
 
@@ -1228,6 +1759,35 @@ class PromptsResource:
         query = {**(extra_query or {})}
         body = None
         return self._t.call(OP_PROMPTS_GET, path=path, query=query, body=body, model=models.PromptTemplate)
+
+    def get_by_name(self, *, name: str | None = None, version: str | None = None, created_at: str | None = None, search: str | None = None, ordering: str | None = None, page: int | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> Any:
+        """Fetch a prompt template by name; the default version unless `version` is given.
+
+        GET /model-hub/prompt-templates/get-template-by-name/
+        """
+        path = None
+        query = {'name': name, 'version': version, 'created_at': created_at, 'search': search, 'ordering': ordering, 'page': page, 'limit': limit, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_PROMPTS_GET_BY_NAME, path=path, query=query, body=body, model=None)
+
+    def history(self, *, template_name: str | None = None, template_version: str | None = None, created_at: str | None = None, search: str | None = None, ordering: str | None = None, limit: int | None = None, template_id: str | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.PromptHistoryExecution]:
+        """List past prompt executions, optionally for one template.
+
+        GET /model-hub/prompt-history-executions/
+        """
+        path = None
+        query = {'template_name': template_name, 'template_version': template_version, 'created_at': created_at, 'search': search, 'ordering': ordering, 'limit': limit, 'template_id': template_id, **(extra_query or {})}
+        return self._t.paginate(OP_PROMPTS_HISTORY, path=path, query=query, model=models.PromptHistoryExecution)
+
+    def improve(self, *, existing_prompt: str, improvement_requirements: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Rewrite an existing prompt according to the given improvement requirements.
+
+        POST /model-hub/prompt-templates/improve-prompt/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'existing_prompt': existing_prompt, 'improvement_requirements': improvement_requirements, **(extra_body or {})}
+        return self._t.call(OP_PROMPTS_IMPROVE, path=path, query=query, body=body, model=None)
 
     def list(self, *, name: str | None = None, version: str | None = None, created_at: str | None = None, search: str | None = None, ordering: str | None = None, limit: int | None = None, modality: List[str] | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.PromptTemplate]:
         """List prompt templates available in the current workspace.
@@ -1267,6 +1827,55 @@ class PromptsResource:
         query = {**(extra_query or {})}
         body = {'name': name, 'description': description, 'variable_names': variable_names, 'prompt_folder': prompt_folder, 'placeholders': placeholders, **(extra_body or {})}
         return self._t.call(OP_PROMPTS_UPDATE, path=path, query=query, body=body, model=models.PromptTemplatePatch)
+
+
+class ProviderKeysResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> SyncPager[models.ApiKeyResponse]:
+        """List the model-provider API keys configured for the organization (values are masked).
+
+        GET /model-hub/api-keys/
+        """
+        path = None
+        query = {'limit': limit, **(extra_query or {})}
+        return self._t.paginate(OP_PROVIDER_KEYS_LIST, path=path, query=query, model=models.ApiKeyResponse)
+
+
+class ScoresResource:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def create(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, label_id: str, value: Dict[str, Any], notes: str | None = None, score_source: Literal['human', 'api', 'auto', 'imported'] | None = None, queue_item_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.Score:
+        """Record one score (annotation value) against a source such as a span or dataset row.
+
+        POST /model-hub/scores/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'source_type': source_type, 'source_id': source_id, 'label_id': label_id, 'value': value, 'notes': notes, 'score_source': score_source, 'queue_item_id': queue_item_id, **(extra_body or {})}
+        return self._t.call(OP_SCORES_CREATE, path=path, query=query, body=body, model=models.Score)
+
+    def create_bulk(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, scores: List[Dict[str, Any]], notes: str | None = None, span_notes: str | None = None, span_notes_source_id: str | None = None, queue_item_id: str | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.BulkCreateScoresResult:
+        """Record several scores against one source in a single call.
+
+        POST /model-hub/scores/bulk/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'source_type': source_type, 'source_id': source_id, 'scores': scores, 'notes': notes, 'span_notes': span_notes, 'span_notes_source_id': span_notes_source_id, 'queue_item_id': queue_item_id, 'project_id': project_id, **(extra_body or {})}
+        return self._t.call(OP_SCORES_CREATE_BULK, path=path, query=query, body=body, model=models.BulkCreateScoresResult)
+
+    def list_for_source(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, page: int | None = None, limit: int | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None) -> List[models.Score]:
+        """List the scores recorded against one source.
+
+        GET /model-hub/scores/for-source/
+        """
+        path = None
+        query = {'source_type': source_type, 'source_id': source_id, 'page': page, 'limit': limit, 'project_id': project_id, **(extra_query or {})}
+        body = None
+        return self._t.call(OP_SCORES_LIST_FOR_SOURCE, path=path, query=query, body=body, model=List[models.Score])
 
 
 class SessionsResource:
@@ -1411,6 +2020,7 @@ class GeneratedResources:
         self.agents = AgentsResource(transport)
         self.alerts = AlertsResource(transport)
         self.annotation_queues = AnnotationQueuesResource(transport)
+        self.annotations = AnnotationsResource(transport)
         self.dashboards = DashboardsResource(transport)
         self.datasets = DatasetsResource(transport)
         self.error_clusters = ErrorClustersResource(transport)
@@ -1418,9 +2028,12 @@ class GeneratedResources:
         self.experiments = ExperimentsResource(transport)
         self.gateway = GatewayResource(transport)
         self.knowledge_bases = KnowledgeBasesResource(transport)
+        self.models = ModelsResource(transport)
         self.optimizations = OptimizationsResource(transport)
         self.projects = ProjectsResource(transport)
         self.prompts = PromptsResource(transport)
+        self.provider_keys = ProviderKeysResource(transport)
+        self.scores = ScoresResource(transport)
         self.sessions = SessionsResource(transport)
         self.simulation = SimulationResource(transport)
         self.spans = SpansResource(transport)
@@ -1477,6 +2090,16 @@ class AsyncAnnotationQueuesItemsResource:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
 
+    async def add(self, queue_id: str, *, items: List[Dict[str, Any]] | None = None, selection: Dict[str, Any] | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueAddItemsResult:
+        """Add items (spans, traces, dataset rows) to a queue, by id or by a selection filter.
+
+        POST /model-hub/annotation-queues/{queue_id}/items/add-items/
+        """
+        path = {'queue_id': queue_id}
+        query = {**(extra_query or {})}
+        body = {'items': items, 'selection': selection, 'project_id': project_id, **(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATION_QUEUES_ITEMS_ADD, path=path, query=query, body=body, model=models.QueueAddItemsResult)
+
     async def annotate_detail(self, queue_id: str, id: str, *, annotator_id: str | None = None, include_completed: bool | None = None, view_mode: str | None = None, review_status: str | None = None, exclude_review_status: str | None = None, include_all_annotations: bool | None = None, reserve: bool | None = None, extra_query: Dict[str, Any] | None = None) -> models.QueueAnnotateDetailResult:
         """Return everything needed to annotate one queue item; reserve=true acquires an editing reservation for the caller. Includes its source content, the queue instructions, every label with its settings (the allowed values a submitted value must match), any annotations already recorded, and the next/previous item ids. Call this before submit_annotation; the label settings are not available anywhere else.
 
@@ -1486,6 +2109,16 @@ class AsyncAnnotationQueuesItemsResource:
         query = {'annotator_id': annotator_id, 'include_completed': include_completed, 'view_mode': view_mode, 'review_status': review_status, 'exclude_review_status': exclude_review_status, 'include_all_annotations': include_all_annotations, 'reserve': reserve, **(extra_query or {})}
         body = None
         return await self._t.acall(OP_ANNOTATION_QUEUES_ITEMS_ANNOTATE_DETAIL, path=path, query=query, body=body, model=models.QueueAnnotateDetailResult)
+
+    async def assign(self, queue_id: str, *, item_ids: List[str], user_ids: List[str] | None = None, action: Literal['add', 'set', 'remove'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueAssignItemsResult:
+        """Assign or unassign queue items to annotators.
+
+        POST /model-hub/annotation-queues/{queue_id}/items/assign/
+        """
+        path = {'queue_id': queue_id}
+        query = {**(extra_query or {})}
+        body = {'item_ids': item_ids, 'user_ids': user_ids, 'action': action, **(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATION_QUEUES_ITEMS_ASSIGN, path=path, query=query, body=body, model=models.QueueAssignItemsResult)
 
     async def complete(self, queue_id: str, id: str, *, exclude: List[str] | None = None, exclude_review_status: str | None = None, include_completed: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueNavigationResult:
         """Mark an annotated queue item complete and return the next item to work on. Required to finish an item - submit_annotation alone leaves it in_progress and the queue never closes.
@@ -1497,6 +2130,16 @@ class AsyncAnnotationQueuesItemsResource:
         body = {'exclude': exclude, 'exclude_review_status': exclude_review_status, 'include_completed': include_completed, **(extra_body or {})}
         return await self._t.acall(OP_ANNOTATION_QUEUES_ITEMS_COMPLETE, path=path, query=query, body=body, model=models.QueueNavigationResult)
 
+    async def import_annotations(self, queue_id: str, id: str, *, annotations: List[Dict[str, Any]], annotator_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueImportAnnotationsResult:
+        """Import existing annotations onto a queue item, optionally on behalf of an annotator.
+
+        POST /model-hub/annotation-queues/{queue_id}/items/{id}/annotations/import/
+        """
+        path = {'queue_id': queue_id, 'id': id}
+        query = {**(extra_query or {})}
+        body = {'annotations': annotations, 'annotator_id': annotator_id, **(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATION_QUEUES_ITEMS_IMPORT_ANNOTATIONS, path=path, query=query, body=body, model=models.QueueImportAnnotationsResult)
+
     def list(self, queue_id: str, *, limit: int | None = None, status: List[str] | None = None, source_type: List[str] | None = None, assigned_to: str | None = None, review_status: str | None = None, ordering: Literal['created_at', '-created_at'] | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.QueueItem]:
         """List items belonging to an annotation queue.
 
@@ -1505,6 +2148,36 @@ class AsyncAnnotationQueuesItemsResource:
         path = {'queue_id': queue_id}
         query = {'limit': limit, 'status': status, 'source_type': source_type, 'assigned_to': assigned_to, 'review_status': review_status, 'ordering': ordering, **(extra_query or {})}
         return self._t.apaginate(OP_ANNOTATION_QUEUES_ITEMS_LIST, path=path, query=query, model=models.QueueItem)
+
+    async def list_annotations(self, queue_id: str, id: str, *, extra_query: Dict[str, Any] | None = None) -> List[models.Score]:
+        """List the annotations recorded on a queue item.
+
+        GET /model-hub/annotation-queues/{queue_id}/items/{id}/annotations/
+        """
+        path = {'queue_id': queue_id, 'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_ANNOTATION_QUEUES_ITEMS_LIST_ANNOTATIONS, path=path, query=query, body=body, model=List[models.Score])
+
+    async def remove(self, queue_id: str, *, item_ids: List[str], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueBulkRemoveItemsResult:
+        """Remove items from a queue.
+
+        POST /model-hub/annotation-queues/{queue_id}/items/bulk-remove/
+        """
+        path = {'queue_id': queue_id}
+        query = {**(extra_query or {})}
+        body = {'item_ids': item_ids, **(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATION_QUEUES_ITEMS_REMOVE, path=path, query=query, body=body, model=models.QueueBulkRemoveItemsResult)
+
+    async def skip(self, queue_id: str, id: str, *, exclude: List[str] | None = None, exclude_review_status: str | None = None, include_completed: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueNavigationResult:
+        """Skip a queue item and return the next one to work on.
+
+        POST /model-hub/annotation-queues/{queue_id}/items/{id}/skip/
+        """
+        path = {'queue_id': queue_id, 'id': id}
+        query = {**(extra_query or {})}
+        body = {'exclude': exclude, 'exclude_review_status': exclude_review_status, 'include_completed': include_completed, **(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATION_QUEUES_ITEMS_SKIP, path=path, query=query, body=body, model=models.QueueNavigationResult)
 
     async def submit(self, queue_id: str, id: str, *, annotations: List[Dict[str, Any]], notes: str | None = None, item_notes: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueSubmitAnnotationsResult:
         """Submit annotation values for an item in an annotation queue. The value shape must match the label's settings from get_annotation_item_detail. Submitting moves the item to in_progress only; call complete_annotation_item to finish it.
@@ -1515,6 +2188,50 @@ class AsyncAnnotationQueuesItemsResource:
         query = {**(extra_query or {})}
         body = {'annotations': annotations, 'notes': notes, 'item_notes': item_notes, **(extra_body or {})}
         return await self._t.acall(OP_ANNOTATION_QUEUES_ITEMS_SUBMIT, path=path, query=query, body=body, model=models.QueueSubmitAnnotationsResult)
+
+
+class AsyncAnnotationsLabelsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def create(self, *, name: str, type: Literal['text', 'numeric', 'categorical', 'star', 'thumbs_up_down'], settings: Dict[str, Any] | None = None, project: str | None = None, description: str | None = None, allow_notes: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.AnnotationsLabels:
+        """Create an annotation label (text, label, score, ...) with its settings.
+
+        POST /model-hub/annotations-labels/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'type': type, 'settings': settings, 'project': project, 'description': description, 'allow_notes': allow_notes, **(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATIONS_LABELS_CREATE, path=path, query=query, body=body, model=models.AnnotationsLabels)
+
+    async def delete(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Delete (archive) an annotation label.
+
+        DELETE /model-hub/annotations-labels/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATIONS_LABELS_DELETE, path=path, query=query, body=body, model=None)
+
+    async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.AnnotationsLabels:
+        """Return an annotation label by id.
+
+        GET /model-hub/annotations-labels/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_ANNOTATIONS_LABELS_GET, path=path, query=query, body=body, model=models.AnnotationsLabels)
+
+    def list(self, *, limit: int | None = None, dataset: str | None = None, project_id: str | None = None, type: Literal['text', 'numeric', 'categorical', 'star', 'thumbs_up_down'] | None = None, search: str | None = None, include_usage_count: bool | None = None, include_archived: bool | None = None, archived: bool | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.AnnotationsLabels]:
+        """List annotation labels, optionally filtered by project, type or search text.
+
+        GET /model-hub/annotations-labels/
+        """
+        path = None
+        query = {'limit': limit, 'dataset': dataset, 'project_id': project_id, 'type': type, 'search': search, 'include_usage_count': include_usage_count, 'include_archived': include_archived, 'archived': archived, **(extra_query or {})}
+        return self._t.apaginate(OP_ANNOTATIONS_LABELS_LIST, path=path, query=query, model=models.AnnotationsLabels)
 
 
 class AsyncDashboardsMetricsResource:
@@ -1669,6 +2386,16 @@ class AsyncDatasetsEvalsResource:
         query = {**(extra_query or {})}
         body = {'user_eval_ids': user_eval_ids, 'experiment_id': experiment_id, 'failed_only': failed_only, **(extra_body or {})}
         return await self._t.acall(OP_DATASETS_EVALS_RUN, path=path, query=query, body=body, model=None)
+
+    async def stats(self, dataset_id: str, *, extra_query: Dict[str, Any] | None = None) -> List[models.DatasetEvalStatsItem]:
+        """Per-evaluation score statistics for a dataset.
+
+        GET /model-hub/dataset/{dataset_id}/eval-stats/
+        """
+        path = {'dataset_id': dataset_id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_DATASETS_EVALS_STATS, path=path, query=query, body=body, model=List[models.DatasetEvalStatsItem])
 
 
 class AsyncDatasetsPromptsResource:
@@ -1946,6 +2673,105 @@ class AsyncGatewaySessionsResource:
         return await self._t.acall(OP_GATEWAY_SESSIONS_REQUESTS, path=path, query=query, body=body, model=None)
 
 
+class AsyncKnowledgeBasesFilesResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def delete(self, *, kb_id: str | None = None, delete_all: bool | None = None, file_ids: List[str] | None = None, excluded_file_ids: List[str] | None = None, file_names: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Delete files from a knowledge base, by id or name, or all of them.
+
+        DELETE /model-hub/knowledge-base/files/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_id': kb_id, 'delete_all': delete_all, 'file_ids': file_ids, 'excluded_file_ids': excluded_file_ids, 'file_names': file_names, **(extra_body or {})}
+        return await self._t.acall(OP_KNOWLEDGE_BASES_FILES_DELETE, path=path, query=query, body=body, model=None)
+
+    async def list(self, *, kb_id: str, search: str | None = None, sort: List[Dict[str, Any]] | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.LegacyKnowledgeBaseFilesResult:
+        """List the files in a knowledge base, with their processing status.
+
+        POST /model-hub/knowledge-base/files/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_id': kb_id, 'search': search, 'sort': sort, 'page_number': page_number, 'page_size': page_size, **(extra_body or {})}
+        return await self._t.acall(OP_KNOWLEDGE_BASES_FILES_LIST, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseFilesResult)
+
+
+class AsyncPromptsLabelsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def assign(self, template_id: str, label_id: str, *, version: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Assign a label to one version of a prompt template.
+
+        POST /model-hub/prompt-labels/{template_id}/{label_id}/assign-label-by-id/
+        """
+        path = {'template_id': template_id, 'label_id': label_id}
+        query = {**(extra_query or {})}
+        body = {'version': version, **(extra_body or {})}
+        return await self._t.acall(OP_PROMPTS_LABELS_ASSIGN, path=path, query=query, body=body, model=None)
+
+    async def create(self, *, name: str, type: Literal['system', 'custom'], metadata: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.PromptLabel:
+        """Create a prompt label.
+
+        POST /model-hub/prompt-labels/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'type': type, 'metadata': metadata, **(extra_body or {})}
+        return await self._t.acall(OP_PROMPTS_LABELS_CREATE, path=path, query=query, body=body, model=models.PromptLabel)
+
+    async def for_template(self, *, page: int | None = None, limit: int | None = None, template_id: str | None = None, template_name: str | None = None, extra_query: Dict[str, Any] | None = None) -> Any:
+        """List the labels assigned to a prompt template's versions.
+
+        GET /model-hub/prompt-labels/template-labels/
+        """
+        path = None
+        query = {'page': page, 'limit': limit, 'template_id': template_id, 'template_name': template_name, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_PROMPTS_LABELS_FOR_TEMPLATE, path=path, query=query, body=body, model=None)
+
+    async def get_template(self, *, page: int | None = None, limit: int | None = None, name: str | None = None, label: str | None = None, version: str | None = None, extra_query: Dict[str, Any] | None = None) -> Any:
+        """Fetch the prompt template version a label points to, by template name and label (or version).
+
+        GET /model-hub/prompt-labels/get-by-name/
+        """
+        path = None
+        query = {'page': page, 'limit': limit, 'name': name, 'label': label, 'version': version, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_PROMPTS_LABELS_GET_TEMPLATE, path=path, query=query, body=body, model=None)
+
+    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.PromptLabel]:
+        """List prompt labels (e.g. production, staging) in the organization.
+
+        GET /model-hub/prompt-labels/
+        """
+        path = None
+        query = {'limit': limit, **(extra_query or {})}
+        return self._t.apaginate(OP_PROMPTS_LABELS_LIST, path=path, query=query, model=models.PromptLabel)
+
+    async def remove(self, *, label_id: str, version_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Remove a label from a prompt template version.
+
+        POST /model-hub/prompt-labels/remove/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'label_id': label_id, 'version_id': version_id, **(extra_body or {})}
+        return await self._t.acall(OP_PROMPTS_LABELS_REMOVE, path=path, query=query, body=body, model=None)
+
+    async def set_default(self, *, template_name: str, version: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Make a version the default for a prompt template, by template name.
+
+        POST /model-hub/prompt-labels/set-default/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'template_name': template_name, 'version': version, **(extra_body or {})}
+        return await self._t.acall(OP_PROMPTS_LABELS_SET_DEFAULT, path=path, query=query, body=body, model=None)
+
+
 class AsyncPromptsVersionsResource:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
@@ -2168,6 +2994,76 @@ class AsyncAnnotationQueuesResource:
         self._t = transport
         self.items = AsyncAnnotationQueuesItemsResource(transport)
 
+    async def add_label(self, id: str, *, label_id: str, required: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueAddLabelResult:
+        """Add an annotation label to a queue.
+
+        POST /model-hub/annotation-queues/{id}/add-label/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'label_id': label_id, 'required': required, **(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATION_QUEUES_ADD_LABEL, path=path, query=query, body=body, model=models.QueueAddLabelResult)
+
+    async def agreement(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.QueueAgreementResult:
+        """Inter-annotator agreement for a queue.
+
+        GET /model-hub/annotation-queues/{id}/agreement/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_ANNOTATION_QUEUES_AGREEMENT, path=path, query=query, body=body, model=models.QueueAgreementResult)
+
+    async def analytics(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.QueueAnalyticsResult:
+        """Throughput, annotator performance and label distribution for a queue.
+
+        GET /model-hub/annotation-queues/{id}/analytics/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_ANNOTATION_QUEUES_ANALYTICS, path=path, query=query, body=body, model=models.QueueAnalyticsResult)
+
+    async def create(self, *, name: str, label_ids: List[str], description: str | None = None, instructions: str | None = None, assignment_strategy: Literal['manual', 'round_robin', 'load_balanced'] | None = None, annotations_required: int | None = None, reservation_timeout_minutes: int | None = None, requires_review: bool | None = None, auto_assign: bool | None = None, annotator_ids: List[str] | None = None, annotator_roles: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.AnnotationQueue:
+        """Create an annotation queue with its labels and annotators.
+
+        POST /model-hub/annotation-queues/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'label_ids': label_ids, 'description': description, 'instructions': instructions, 'assignment_strategy': assignment_strategy, 'annotations_required': annotations_required, 'reservation_timeout_minutes': reservation_timeout_minutes, 'requires_review': requires_review, 'auto_assign': auto_assign, 'annotator_ids': annotator_ids, 'annotator_roles': annotator_roles, **(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATION_QUEUES_CREATE, path=path, query=query, body=body, model=models.AnnotationQueue)
+
+    async def delete(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Delete an annotation queue.
+
+        DELETE /model-hub/annotation-queues/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATION_QUEUES_DELETE, path=path, query=query, body=body, model=None)
+
+    async def export(self, id: str, *, export_format: Literal['json', 'csv'] | None = None, status: str | None = None, extra_query: Dict[str, Any] | None = None) -> List[Optional[Any]]:
+        """Export a queue's annotations.
+
+        GET /model-hub/annotation-queues/{id}/export/
+        """
+        path = {'id': id}
+        query = {'export_format': export_format, 'status': status, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_ANNOTATION_QUEUES_EXPORT, path=path, query=query, body=body, model=None)
+
+    async def export_to_dataset(self, id: str, *, dataset_id: str | None = None, dataset_name: str | None = None, status_filter: str | None = None, column_mapping: List[Dict[str, Any]] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueExportToDatasetResult:
+        """Write a queue's annotations into a new or existing dataset.
+
+        POST /model-hub/annotation-queues/{id}/export-to-dataset/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'dataset_id': dataset_id, 'dataset_name': dataset_name, 'status_filter': status_filter, 'column_mapping': column_mapping, **(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATION_QUEUES_EXPORT_TO_DATASET, path=path, query=query, body=body, model=models.QueueExportToDatasetResult)
+
     async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.AnnotationQueue:
         """Return an annotation queue by its identifier.
 
@@ -2186,6 +3082,62 @@ class AsyncAnnotationQueuesResource:
         path = None
         query = {'limit': limit, 'status': status, 'search': search, 'include_counts': include_counts, 'archived': archived, 'page_size': page_size, **(extra_query or {})}
         return self._t.apaginate(OP_ANNOTATION_QUEUES_LIST, path=path, query=query, model=models.AnnotationQueue)
+
+    async def progress(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.QueueProgressResult:
+        """Item counts by status and per-annotator progress for a queue.
+
+        GET /model-hub/annotation-queues/{id}/progress/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_ANNOTATION_QUEUES_PROGRESS, path=path, query=query, body=body, model=models.QueueProgressResult)
+
+    async def remove_label(self, id: str, *, label_id: str, required: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.QueueRemoveLabelResult:
+        """Remove an annotation label from a queue.
+
+        POST /model-hub/annotation-queues/{id}/remove-label/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'label_id': label_id, 'required': required, **(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATION_QUEUES_REMOVE_LABEL, path=path, query=query, body=body, model=models.QueueRemoveLabelResult)
+
+    async def update(self, id: str, *, name: str | None = None, description: str | None = None, instructions: str | None = None, assignment_strategy: Literal['manual', 'round_robin', 'load_balanced'] | None = None, annotations_required: int | None = None, reservation_timeout_minutes: int | None = None, requires_review: bool | None = None, auto_assign: bool | None = None, label_ids: List[str] | None = None, annotator_ids: List[str] | None = None, annotator_roles: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.AnnotationQueue:
+        """Update selected fields of an annotation queue.
+
+        PATCH /model-hub/annotation-queues/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'name': name, 'description': description, 'instructions': instructions, 'assignment_strategy': assignment_strategy, 'annotations_required': annotations_required, 'reservation_timeout_minutes': reservation_timeout_minutes, 'requires_review': requires_review, 'auto_assign': auto_assign, 'label_ids': label_ids, 'annotator_ids': annotator_ids, 'annotator_roles': annotator_roles, **(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATION_QUEUES_UPDATE, path=path, query=query, body=body, model=models.AnnotationQueue)
+
+    async def update_status(self, id: str, *, status: Literal['draft', 'active', 'paused', 'completed'], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.AnnotationQueue:
+        """Change a queue's status (draft, active, paused, completed, archived).
+
+        POST /model-hub/annotation-queues/{id}/update-status/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'status': status, **(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATION_QUEUES_UPDATE_STATUS, path=path, query=query, body=body, model=models.AnnotationQueue)
+
+
+class AsyncAnnotationsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+        self.labels = AsyncAnnotationsLabelsResource(transport)
+
+    async def bulk_create(self, *, records: List[Dict[str, Any]], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.BulkAnnotationResponseResult:
+        """Create or update annotations and notes on spans in bulk.
+
+        POST /tracer/bulk-annotation/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'records': records, **(extra_body or {})}
+        return await self._t.acall(OP_ANNOTATIONS_BULK_CREATE, path=path, query=query, body=body, model=models.BulkAnnotationResponseResult)
 
 
 class AsyncDashboardsResource:
@@ -2284,6 +3236,27 @@ class AsyncDatasetsResource:
         body = {'new_dataset_name': new_dataset_name, 'model_type': model_type, 'is_sdk': is_sdk, 'row': row, **(extra_body or {})}
         return await self._t.acall(OP_DATASETS_CREATE, path=path, query=query, body=body, model=models.DatasetCreateStartedResult)
 
+    async def create_from_file(self, *, file: FileInput, new_dataset_name: str, model_type: str, source: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.LocalFileDatasetCreateStartedResult:
+        """Create a dataset by uploading a local CSV, JSON, JSONL or Excel file. Processing is asynchronous; read datasets.get for the result.
+
+        POST /model-hub/develops/create-dataset-from-local-file/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'new_dataset_name': new_dataset_name, 'model_type': model_type, 'source': source, **(extra_body or {})}
+        files = {'file': file}
+        return await self._t.acall(OP_DATASETS_CREATE_FROM_FILE, path=path, query=query, body=body, files=files, model=models.LocalFileDatasetCreateStartedResult)
+
+    async def create_from_huggingface(self, *, huggingface_dataset_name: str, huggingface_dataset_split: str, name: str | None = None, model_type: str | None = None, num_rows: int | None = None, huggingface_dataset_config: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.DatasetCreateStartedResult:
+        """Create a dataset from a Hugging Face dataset split.
+
+        POST /model-hub/develops/create-dataset-from-huggingface/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'huggingface_dataset_name': huggingface_dataset_name, 'huggingface_dataset_split': huggingface_dataset_split, 'name': name, 'model_type': model_type, 'num_rows': num_rows, 'huggingface_dataset_config': huggingface_dataset_config, **(extra_body or {})}
+        return await self._t.acall(OP_DATASETS_CREATE_FROM_HUGGINGFACE, path=path, query=query, body=body, model=models.DatasetCreateStartedResult)
+
     async def delete(self, *, dataset_ids: List[str], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
         """Soft-delete one or more datasets by passing dataset_ids. This is the only way to remove a dataset created earlier; deletion cascades to the dataset's rows, columns and attached evaluations.
 
@@ -2312,6 +3285,16 @@ class AsyncDatasetsResource:
         path = None
         query = {'search_text': search_text, 'page_size': page_size, 'sort': sort, **(extra_query or {})}
         return self._t.apaginate(OP_DATASETS_LIST, path=path, query=query, model=models.DatasetListItem)
+
+    async def list_names(self, *, extra_query: Dict[str, Any] | None = None) -> models.DatasetNamesResult:
+        """Return the id and name of every dataset in the workspace, without paging.
+
+        GET /model-hub/develops/get-datasets-names/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_DATASETS_LIST_NAMES, path=path, query=query, body=body, model=models.DatasetNamesResult)
 
 
 class AsyncErrorClustersResource:
@@ -2433,6 +3416,28 @@ class AsyncGatewayResource:
 class AsyncKnowledgeBasesResource:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
+        self.files = AsyncKnowledgeBasesFilesResource(transport)
+
+    async def create(self, *, name: str, files: List[FileInput] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.LegacyKnowledgeBaseCreateResult:
+        """Create a knowledge base, optionally uploading its first files (pdf, docx, txt, rtf).
+
+        POST /model-hub/knowledge-base/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, **(extra_body or {})}
+        files = {'file': files}
+        return await self._t.acall(OP_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseCreateResult)
+
+    async def delete(self, *, kb_ids: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> str:
+        """Delete knowledge bases by id.
+
+        DELETE /model-hub/knowledge-base/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_ids': kb_ids, **(extra_body or {})}
+        return await self._t.acall(OP_KNOWLEDGE_BASES_DELETE, path=path, query=query, body=body, model=None)
 
     async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.KnowledgeBaseItem:
         """Return a knowledge base and its configuration.
@@ -2453,6 +3458,42 @@ class AsyncKnowledgeBasesResource:
         query = {'search': search, 'page': page, 'limit': limit, **(extra_query or {})}
         body = None
         return await self._t.acall(OP_KNOWLEDGE_BASES_LIST, path=path, query=query, body=body, model=models.KnowledgeBasePaginatedResult)
+
+    async def list_names(self, *, extra_query: Dict[str, Any] | None = None) -> models.LegacyKnowledgeBaseListResult:
+        """Return the id and name of every knowledge base created through knowledge_bases.create, without paging.
+
+        GET /model-hub/knowledge-base/list/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_KNOWLEDGE_BASES_LIST_NAMES, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseListResult)
+
+    async def update(self, *, kb_id: str, name: str | None = None, files: List[FileInput] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.LegacyKnowledgeBaseMutationResult:
+        """Rename a knowledge base and/or upload more files to it.
+
+        PATCH /model-hub/knowledge-base/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_id': kb_id, 'name': name, **(extra_body or {})}
+        files = {'file': files}
+        return await self._t.acall(OP_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseMutationResult)
+
+
+class AsyncModelsResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def list(self, *, extra_query: Dict[str, Any] | None = None) -> models.ModelHubPaginatedResponse:
+        """List the LLM models available to prompts and evaluations, with their providers.
+
+        GET /model-hub/api/models_list/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_MODELS_LIST, path=path, query=query, body=body, model=models.ModelHubPaginatedResponse)
 
 
 class AsyncOptimizationsResource:
@@ -2517,7 +3558,28 @@ class AsyncProjectsResource:
 class AsyncPromptsResource:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
+        self.labels = AsyncPromptsLabelsResource(transport)
         self.versions = AsyncPromptsVersionsResource(transport)
+
+    async def add_draft(self, id: str, *, new_prompts: List[Dict[str, Any]], extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Add new draft versions to a prompt template. Each entry carries prompt_config, variable_names, evaluation_configs, metadata and placeholders.
+
+        POST /model-hub/prompt-templates/{id}/add-new-draft/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'new_prompts': new_prompts, **(extra_body or {})}
+        return await self._t.acall(OP_PROMPTS_ADD_DRAFT, path=path, query=query, body=body, model=None)
+
+    async def commit(self, id: str, *, version_name: str, message: str | None = None, set_default: bool | None = None, is_draft: bool | None = None, metadata: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Commit the current draft of a prompt template as a named version, optionally making it the default.
+
+        POST /model-hub/prompt-templates/{id}/commit/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'version_name': version_name, 'message': message, 'set_default': set_default, 'is_draft': is_draft, 'metadata': metadata, **(extra_body or {})}
+        return await self._t.acall(OP_PROMPTS_COMMIT, path=path, query=query, body=body, model=None)
 
     async def create(self, *, name: str, description: str | None = None, variable_names: Dict[str, Any] | None = None, prompt_folder: str | None = None, placeholders: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.PromptTemplate:
         """Create a prompt template in the current workspace.
@@ -2529,6 +3591,36 @@ class AsyncPromptsResource:
         body = {'name': name, 'description': description, 'variable_names': variable_names, 'prompt_folder': prompt_folder, 'placeholders': placeholders, **(extra_body or {})}
         return await self._t.acall(OP_PROMPTS_CREATE, path=path, query=query, body=body, model=models.PromptTemplate)
 
+    async def create_draft(self, *, name: str, prompt_config: List[Dict[str, Any]], variable_names: Dict[str, Any] | None = None, evaluation_configs: List[Dict[str, Any]] | None = None, metadata: Dict[str, Any] | None = None, placeholders: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.PromptTemplate:
+        """Create a prompt template together with its first draft version (messages, model configuration, variables).
+
+        POST /model-hub/prompt-templates/create-draft/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, 'prompt_config': prompt_config, 'variable_names': variable_names, 'evaluation_configs': evaluation_configs, 'metadata': metadata, 'placeholders': placeholders, **(extra_body or {})}
+        return await self._t.acall(OP_PROMPTS_CREATE_DRAFT, path=path, query=query, body=body, model=models.PromptTemplate)
+
+    async def delete(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Delete a prompt template and all its versions.
+
+        DELETE /model-hub/prompt-templates/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(OP_PROMPTS_DELETE, path=path, query=query, body=body, model=None)
+
+    async def generate(self, *, statement: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Generate a prompt from a plain-language statement of what it should do.
+
+        POST /model-hub/prompt-templates/generate-prompt/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'statement': statement, **(extra_body or {})}
+        return await self._t.acall(OP_PROMPTS_GENERATE, path=path, query=query, body=body, model=None)
+
     async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None) -> models.PromptTemplate:
         """Open a prompt template by its identifier, creating its workbench draft if needed.
 
@@ -2538,6 +3630,35 @@ class AsyncPromptsResource:
         query = {**(extra_query or {})}
         body = None
         return await self._t.acall(OP_PROMPTS_GET, path=path, query=query, body=body, model=models.PromptTemplate)
+
+    async def get_by_name(self, *, name: str | None = None, version: str | None = None, created_at: str | None = None, search: str | None = None, ordering: str | None = None, page: int | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> Any:
+        """Fetch a prompt template by name; the default version unless `version` is given.
+
+        GET /model-hub/prompt-templates/get-template-by-name/
+        """
+        path = None
+        query = {'name': name, 'version': version, 'created_at': created_at, 'search': search, 'ordering': ordering, 'page': page, 'limit': limit, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_PROMPTS_GET_BY_NAME, path=path, query=query, body=body, model=None)
+
+    def history(self, *, template_name: str | None = None, template_version: str | None = None, created_at: str | None = None, search: str | None = None, ordering: str | None = None, limit: int | None = None, template_id: str | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.PromptHistoryExecution]:
+        """List past prompt executions, optionally for one template.
+
+        GET /model-hub/prompt-history-executions/
+        """
+        path = None
+        query = {'template_name': template_name, 'template_version': template_version, 'created_at': created_at, 'search': search, 'ordering': ordering, 'limit': limit, 'template_id': template_id, **(extra_query or {})}
+        return self._t.apaginate(OP_PROMPTS_HISTORY, path=path, query=query, model=models.PromptHistoryExecution)
+
+    async def improve(self, *, existing_prompt: str, improvement_requirements: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> Any:
+        """Rewrite an existing prompt according to the given improvement requirements.
+
+        POST /model-hub/prompt-templates/improve-prompt/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'existing_prompt': existing_prompt, 'improvement_requirements': improvement_requirements, **(extra_body or {})}
+        return await self._t.acall(OP_PROMPTS_IMPROVE, path=path, query=query, body=body, model=None)
 
     def list(self, *, name: str | None = None, version: str | None = None, created_at: str | None = None, search: str | None = None, ordering: str | None = None, limit: int | None = None, modality: List[str] | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.PromptTemplate]:
         """List prompt templates available in the current workspace.
@@ -2577,6 +3698,55 @@ class AsyncPromptsResource:
         query = {**(extra_query or {})}
         body = {'name': name, 'description': description, 'variable_names': variable_names, 'prompt_folder': prompt_folder, 'placeholders': placeholders, **(extra_body or {})}
         return await self._t.acall(OP_PROMPTS_UPDATE, path=path, query=query, body=body, model=models.PromptTemplatePatch)
+
+
+class AsyncProviderKeysResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None) -> AsyncPager[models.ApiKeyResponse]:
+        """List the model-provider API keys configured for the organization (values are masked).
+
+        GET /model-hub/api-keys/
+        """
+        path = None
+        query = {'limit': limit, **(extra_query or {})}
+        return self._t.apaginate(OP_PROVIDER_KEYS_LIST, path=path, query=query, model=models.ApiKeyResponse)
+
+
+class AsyncScoresResource:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def create(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, label_id: str, value: Dict[str, Any], notes: str | None = None, score_source: Literal['human', 'api', 'auto', 'imported'] | None = None, queue_item_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.Score:
+        """Record one score (annotation value) against a source such as a span or dataset row.
+
+        POST /model-hub/scores/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'source_type': source_type, 'source_id': source_id, 'label_id': label_id, 'value': value, 'notes': notes, 'score_source': score_source, 'queue_item_id': queue_item_id, **(extra_body or {})}
+        return await self._t.acall(OP_SCORES_CREATE, path=path, query=query, body=body, model=models.Score)
+
+    async def create_bulk(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, scores: List[Dict[str, Any]], notes: str | None = None, span_notes: str | None = None, span_notes_source_id: str | None = None, queue_item_id: str | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None) -> models.BulkCreateScoresResult:
+        """Record several scores against one source in a single call.
+
+        POST /model-hub/scores/bulk/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'source_type': source_type, 'source_id': source_id, 'scores': scores, 'notes': notes, 'span_notes': span_notes, 'span_notes_source_id': span_notes_source_id, 'queue_item_id': queue_item_id, 'project_id': project_id, **(extra_body or {})}
+        return await self._t.acall(OP_SCORES_CREATE_BULK, path=path, query=query, body=body, model=models.BulkCreateScoresResult)
+
+    async def list_for_source(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, page: int | None = None, limit: int | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None) -> List[models.Score]:
+        """List the scores recorded against one source.
+
+        GET /model-hub/scores/for-source/
+        """
+        path = None
+        query = {'source_type': source_type, 'source_id': source_id, 'page': page, 'limit': limit, 'project_id': project_id, **(extra_query or {})}
+        body = None
+        return await self._t.acall(OP_SCORES_LIST_FOR_SOURCE, path=path, query=query, body=body, model=List[models.Score])
 
 
 class AsyncSessionsResource:
@@ -2721,6 +3891,7 @@ class AsyncGeneratedResources:
         self.agents = AsyncAgentsResource(transport)
         self.alerts = AsyncAlertsResource(transport)
         self.annotation_queues = AsyncAnnotationQueuesResource(transport)
+        self.annotations = AsyncAnnotationsResource(transport)
         self.dashboards = AsyncDashboardsResource(transport)
         self.datasets = AsyncDatasetsResource(transport)
         self.error_clusters = AsyncErrorClustersResource(transport)
@@ -2728,9 +3899,12 @@ class AsyncGeneratedResources:
         self.experiments = AsyncExperimentsResource(transport)
         self.gateway = AsyncGatewayResource(transport)
         self.knowledge_bases = AsyncKnowledgeBasesResource(transport)
+        self.models = AsyncModelsResource(transport)
         self.optimizations = AsyncOptimizationsResource(transport)
         self.projects = AsyncProjectsResource(transport)
         self.prompts = AsyncPromptsResource(transport)
+        self.provider_keys = AsyncProviderKeysResource(transport)
+        self.scores = AsyncScoresResource(transport)
         self.sessions = AsyncSessionsResource(transport)
         self.simulation = AsyncSimulationResource(transport)
         self.spans = AsyncSpansResource(transport)
