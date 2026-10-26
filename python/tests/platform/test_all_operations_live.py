@@ -17,7 +17,6 @@ from pathlib import Path
 import fi.platform as fi
 import pytest
 import yaml
-from fi.platform._transport import Operation
 
 CATALOG = Path(__file__).resolve().parents[3] / "sdkgen" / "catalog" / "operations.yaml"
 
@@ -28,12 +27,6 @@ def _name(prefix: str) -> str:
     return f"sdk-{prefix}-{uuid.uuid4().hex[:8]}"
 
 
-def raw(client, method: str, path: str, body=None):
-    """Setup calls for endpoints that are not in the catalog (yet)."""
-    op = Operation(id="raw", method=method, path=path, unwrap="result", pagination=None)
-    return client._transport.request(op, body=body)
-
-
 def allow(fn, *statuses: int):
     """Call fn; return None instead of raising for the listed HTTP statuses."""
     try:
@@ -42,6 +35,30 @@ def allow(fn, *statuses: int):
         if exc.status_code in statuses:
             return None
         raise
+
+
+def wait_until(predicate, timeout: float = 20.0, every: float = 0.25) -> bool:
+    """Poll a backend state change made by a background worker."""
+    deadline = time.monotonic() + timeout
+    while not predicate():
+        if time.monotonic() > deadline:
+            return False
+        time.sleep(every)
+    return True
+
+
+def eventually(fn, *statuses: int, timeout: float = 20.0):
+    """Retry fn while it fails with one of the statuses (backend background work); None if it never succeeds."""
+    deadline = time.monotonic() + timeout
+    while True:
+        try:
+            return fn()
+        except fi.APIError as exc:
+            if exc.status_code not in statuses:
+                raise
+            if time.monotonic() > deadline:
+                return None
+            time.sleep(0.5)
 
 
 @pytest.fixture
@@ -96,11 +113,11 @@ def project(client):
         }
         for i in range(2)
     ]
-    # One span first: the backend creates a new project from parallel threads, so a first
+    # One span per call: the backend creates a new project from parallel threads, so a first
     # batch of several spans can race on the project's unique constraint (backend bug).
     ids = []
     for span in spans:
-        ids += raw(client, "POST", "/tracer/observation-span/create_otel_span/", body=[span])["ids"]
+        ids += client.spans.ingest([span])["ids"]  # hand-written in fi/platform/resources/spans.py
     project_id = client.projects.list(name=name)["projects"][0]["id"]
     return project_id, spans, ids
 
@@ -220,7 +237,7 @@ def test_prompt_drafts_commits_and_labels(client):
             client.prompts.labels.set_default(template_name=name, version="v1")
             client.prompts.labels.remove(label_id=label.id, version_id=v1["id"])
         finally:
-            allow(lambda: raw(client, "DELETE", f"/model-hub/prompt-labels/{label.id}/"), 400, 404)
+            allow(lambda: client.request("DELETE", f"/model-hub/prompt-labels/{label.id}/"), 400, 404)  # not in the catalog
 
         # Both call an LLM on the backend, which a self-hosted install may have no provider for.
         allow(lambda: client.prompts.generate(statement="Summarise a support ticket in one line."), 400, 402, 500)
@@ -253,8 +270,10 @@ def test_observability(client, project, code_template):
     task = client.evals.tasks.create(project=project_id, name=_name("task"), sampling_rate=100, run_type="historical", evals=[config.id], spans_limit=10)
     assert [row.id for row in client.evals.tasks.list(project_id=project_id).table] == [task.id]
     assert client.evals.tasks.get(task.id).project == project_id
-    # The task's status moves on in a background worker, so only the first pause is certain.
-    assert client.evals.tasks.pause(eval_task_id=task.id).message
+    # A background worker moves the task from 'pending' to 'running', and only a running task can
+    # be paused; after that its status keeps moving, so the later transitions may be refused.
+    paused = eventually(lambda: client.evals.tasks.pause(eval_task_id=task.id), 400)
+    assert paused is None or paused.message
     allow(lambda: client.evals.tasks.resume(eval_task_id=task.id), 400)
     allow(lambda: client.evals.tasks.pause(eval_task_id=task.id), 400)  # updates need a paused task
     allow(lambda: client.evals.tasks.update(eval_task_id=task.id, edit_type="fresh_run", name="renamed"), 400)
@@ -360,7 +379,7 @@ def test_agents_and_simulation(client, request):
 
     ds = client.datasets.create(new_dataset_name=_name("scenario-src"))
     request.addfinalizer(lambda: allow(lambda: client.datasets.delete(dataset_ids=[ds.dataset_id]), 400, 404))
-    request.addfinalizer(lambda: allow(lambda: raw(client, "DELETE", f"/simulate/agent-definitions/{agent_id}/delete/"), 400, 404))
+    request.addfinalizer(lambda: allow(lambda: client.request("DELETE", f"/simulate/agent-definitions/{agent_id}/delete/"), 400, 404))
     client.datasets.columns.add(ds.dataset_id, new_columns_data=[{"name": "situation", "data_type": "text"}])
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", fi.BetaWarning)
@@ -409,12 +428,19 @@ def test_knowledge_bases_and_usage(client):
         # separate stores, so a knowledge base made here is invisible to list() and 404s on get().
         client.knowledge_bases.list()
         allow(lambda: client.knowledge_bases.get(kb_id), 404)
+        # Backend: an update that adds files is refused (400) while an earlier upload is still
+        # being processed, and the refused update stores its file anyway. Wait for the worker.
+        def processed() -> bool:
+            return all(f.status != "Processing" for f in client.knowledge_bases.files.list(kb_id=kb_id).table_data)
+
+        assert wait_until(processed)
         updated = client.knowledge_bases.update(kb_id=kb_id, name=created.kb_name + "-u", files=[("more.txt", b"A second file.\n")])
         assert updated.name.endswith("-u")
         files = client.knowledge_bases.files.list(kb_id=kb_id)
         assert files.total_rows == 2
+        assert wait_until(processed)  # a file being processed is not deleted
         assert client.knowledge_bases.files.delete(kb_id=kb_id, file_ids=[files.table_data[0].id])
-        assert client.knowledge_bases.files.list(kb_id=kb_id).total_rows == 1
+        assert wait_until(lambda: client.knowledge_bases.files.list(kb_id=kb_id).total_rows == 1)
     finally:
         client.knowledge_bases.delete(kb_ids=[kb_id])
     allow(lambda: client.usage.overview(), 404)  # not served by self-hosted installs

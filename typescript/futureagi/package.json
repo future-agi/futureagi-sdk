@@ -31,7 +31,8 @@
     "clean": "rimraf dist",
     "dev": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
-    "prepare": "pnpm run build"
+    "prepare": "pnpm run build",
+    "test:live": "jest --testPathPattern platform/__tests__/live"
   },
   "keywords": [
     "ai",
@@ -59,6 +60,7 @@
   },
   "packageManager": "pnpm@8.15.0",
   "devDependencies": {
+    "@jest/globals": "^29.5.0",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
@@ -77,6 +79,7 @@
   "dependencies": {
     "@types/uuid": "^10.0.0",
     "axios": "^1.6.0",
+    "form-data": "^4.0.0",
     "uuid": "^11.1.0",
     "winston": "^3.11.0"
   },

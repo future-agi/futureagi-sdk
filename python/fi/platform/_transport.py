@@ -9,7 +9,7 @@ import random
 import time
 import warnings
 from dataclasses import dataclass
-from typing import IO, Any, Dict, List, Tuple, Union
+from typing import IO, Any, Dict, List, Mapping, Optional, Tuple, Union
 from urllib.parse import quote
 
 import httpx
@@ -50,6 +50,15 @@ class Operation:
     unwrap: str | None
     pagination: dict | None
     multipart: bool = False  # body fields go as form data, file params as uploads
+
+
+@dataclass(frozen=True)
+class RequestOptions:
+    """Per-call overrides, accepted by every generated method as `options=`."""
+
+    headers: Optional[Mapping[str, str]] = None  # added to (and overriding) the client's headers
+    timeout: Optional[float] = None
+    max_retries: Optional[int] = None
 
 
 # What a caller may pass for a file parameter: a path, raw bytes, an open binary
@@ -100,16 +109,33 @@ class Config:
     max_retries: int
     workspace_id: str | None = None
     strict_responses: bool = False
+    default_headers: Optional[Mapping[str, str]] = None
 
-    def headers(self) -> dict[str, str]:
+    def headers(self, options: RequestOptions | None = None) -> dict[str, str]:
         headers = {
             "X-Api-Key": self.api_key,
             "X-Secret-Key": self.secret_key,
-            "User-Agent": "futureagi-python/poc",
+            "User-Agent": "futureagi-python",
         }
         if self.workspace_id:
             headers["X-Workspace-Id"] = self.workspace_id
+        headers.update(self.default_headers or {})
+        if options and options.headers:
+            headers.update(options.headers)
         return headers
+
+    def timeout_for(self, options: RequestOptions | None) -> float:
+        return options.timeout if options and options.timeout is not None else self.timeout
+
+    def retries_for(self, options: RequestOptions | None) -> int:
+        return options.max_retries if options and options.max_retries is not None else self.max_retries
+
+
+def raw_operation(method: str, path: str, *, unwrap: str | None = "result", multipart: bool = False) -> Operation:
+    """An ad-hoc operation for an endpoint the catalog does not describe (`client.request`)."""
+    if not path.startswith("/"):
+        raise ValueError(f"path must start with '/', got {path!r}")
+    return Operation(id=f"raw:{method.upper()} {path}", method=method.upper(), path=path, unwrap=unwrap, pagination=None, multipart=multipart)
 
 
 def _url(op: Operation, path: dict | None) -> str:
@@ -206,20 +232,20 @@ class SyncTransport:
         self._owns_http = http_client is None
         self._http = http_client or httpx.Client(follow_redirects=True)
 
-    def request(self, op: Operation, *, path=None, query=None, body=None, files=None) -> Any:
+    def request(self, op: Operation, *, path=None, query=None, body=None, files=None, options: RequestOptions | None = None) -> Any:
+        """One HTTP call for `op`: auth, retries, envelope unwrap, typed errors. Returns decoded JSON."""
         url = self.config.base_url + _url(op, path)
         payload = _payload(op, body, files)
-        for attempt in range(self.config.max_retries + 1):
+        headers, timeout, retries = self.config.headers(options), self.config.timeout_for(options), self.config.retries_for(options)
+        for attempt in range(retries + 1):
             try:
-                response = self._http.request(
-                    op.method, url, params=_clean(query), headers=self.config.headers(), timeout=self.config.timeout, **payload
-                )
+                response = self._http.request(op.method, url, params=_clean(query), headers=headers, timeout=timeout, **payload)
             except httpx.TransportError as exc:
-                if _can_retry(op, None, attempt, self.config.max_retries):
+                if _can_retry(op, None, attempt, retries):
                     time.sleep(_backoff(attempt, None))
                     continue
                 raise APIConnectionError(str(exc)) from exc
-            if _can_retry(op, response.status_code, attempt, self.config.max_retries):
+            if _can_retry(op, response.status_code, attempt, retries):
                 time.sleep(_backoff(attempt, response))
                 continue
             if response.status_code >= 300:  # a redirect we did not follow is not a result
@@ -227,15 +253,19 @@ class SyncTransport:
             return _decode(op, response)
         raise AssertionError("unreachable")
 
-    def call(self, op: Operation, *, path=None, query=None, body=None, files=None, model=None) -> Any:
-        data = self.request(op, path=path, query=query, body=body, files=files)
+    def raw(self, method: str, path: str, *, query=None, body=None, files=None, unwrap: str | None = "result", multipart: bool = False, options: RequestOptions | None = None) -> Any:
+        """Call an endpoint the catalog does not describe; the usual auth, retries and errors apply."""
+        return self.request(raw_operation(method, path, unwrap=unwrap, multipart=multipart), query=query, body=body, files=files, options=options)
+
+    def call(self, op: Operation, *, path=None, query=None, body=None, files=None, model=None, options: RequestOptions | None = None) -> Any:
+        data = self.request(op, path=path, query=query, body=body, files=files, options=options)
         return _parse(op, model, data, self.config.strict_responses)
 
-    def paginate(self, op: Operation, *, path=None, query=None, model=None) -> SyncPager:
+    def paginate(self, op: Operation, *, path=None, query=None, model=None, options: RequestOptions | None = None) -> SyncPager:
         spec = op.pagination
 
         def fetch(page: int) -> Any:
-            data = self.request(op, path=path, query={**(query or {}), spec["page_param"]: page})
+            data = self.request(op, path=path, query={**(query or {}), spec["page_param"]: page}, options=options)
             return _check_page(op, data, self.config.strict_responses)
 
         return SyncPager(fetch, spec, lambda item: _parse(op, model, item, self.config.strict_responses))
@@ -251,20 +281,19 @@ class AsyncTransport:
         self._owns_http = http_client is None
         self._http = http_client or httpx.AsyncClient(follow_redirects=True)
 
-    async def request(self, op: Operation, *, path=None, query=None, body=None, files=None) -> Any:
+    async def request(self, op: Operation, *, path=None, query=None, body=None, files=None, options: RequestOptions | None = None) -> Any:
         url = self.config.base_url + _url(op, path)
         payload = _payload(op, body, files)
-        for attempt in range(self.config.max_retries + 1):
+        headers, timeout, retries = self.config.headers(options), self.config.timeout_for(options), self.config.retries_for(options)
+        for attempt in range(retries + 1):
             try:
-                response = await self._http.request(
-                    op.method, url, params=_clean(query), headers=self.config.headers(), timeout=self.config.timeout, **payload
-                )
+                response = await self._http.request(op.method, url, params=_clean(query), headers=headers, timeout=timeout, **payload)
             except httpx.TransportError as exc:
-                if _can_retry(op, None, attempt, self.config.max_retries):
+                if _can_retry(op, None, attempt, retries):
                     await asyncio.sleep(_backoff(attempt, None))
                     continue
                 raise APIConnectionError(str(exc)) from exc
-            if _can_retry(op, response.status_code, attempt, self.config.max_retries):
+            if _can_retry(op, response.status_code, attempt, retries):
                 await asyncio.sleep(_backoff(attempt, response))
                 continue
             if response.status_code >= 300:
@@ -272,15 +301,18 @@ class AsyncTransport:
             return _decode(op, response)
         raise AssertionError("unreachable")
 
-    async def acall(self, op: Operation, *, path=None, query=None, body=None, files=None, model=None) -> Any:
-        data = await self.request(op, path=path, query=query, body=body, files=files)
+    async def raw(self, method: str, path: str, *, query=None, body=None, files=None, unwrap: str | None = "result", multipart: bool = False, options: RequestOptions | None = None) -> Any:
+        return await self.request(raw_operation(method, path, unwrap=unwrap, multipart=multipart), query=query, body=body, files=files, options=options)
+
+    async def acall(self, op: Operation, *, path=None, query=None, body=None, files=None, model=None, options: RequestOptions | None = None) -> Any:
+        data = await self.request(op, path=path, query=query, body=body, files=files, options=options)
         return _parse(op, model, data, self.config.strict_responses)
 
-    def apaginate(self, op: Operation, *, path=None, query=None, model=None) -> AsyncPager:
+    def apaginate(self, op: Operation, *, path=None, query=None, model=None, options: RequestOptions | None = None) -> AsyncPager:
         spec = op.pagination
 
         async def fetch(page: int) -> Any:
-            data = await self.request(op, path=path, query={**(query or {}), spec["page_param"]: page})
+            data = await self.request(op, path=path, query={**(query or {}), spec["page_param"]: page}, options=options)
             return _check_page(op, data, self.config.strict_responses)
 
         return AsyncPager(fetch, spec, lambda item: _parse(op, model, item, self.config.strict_responses))

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import subprocess
 import sys
@@ -149,3 +150,58 @@ def test_import_fi_does_not_load_the_platform_client():
     code = "import fi, sys; print(json.dumps(['fi.platform' in sys.modules, fi.Client.__name__, 'fi.platform' in sys.modules]))"
     out = subprocess.run([sys.executable, "-c", "import json; " + code], capture_output=True, text=True, check=True).stdout
     assert json.loads(out) == [False, "Client", True]
+
+
+def test_per_call_options_override_headers_timeout_and_retries():
+    seen: list[dict] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append({"headers": dict(request.headers), "timeout": request.extensions.get("timeout")})
+        if len(seen) == 1:
+            return httpx.Response(503)
+        if request.method == "GET":
+            return httpx.Response(200, json={"status": True, "result": {"datasets": [], "total_pages": 1}})
+        return _dataset_response()
+
+    client = _client(handler, timeout=30, max_retries=0, default_headers={"X-Team": "sdk", "User-Agent": "mine"})
+    options = fp.RequestOptions(headers={"X-Trace": "t1", "X-Team": "override"}, timeout=3, max_retries=1)
+    page = client.datasets.list(options=options).first_page()  # the first 503 is retried
+    assert page.number == 0 and len(seen) == 2  # the per-call max_retries allowed one retry of the GET
+    headers = seen[-1]["headers"]
+    assert headers["x-api-key"] == "k" and headers["x-trace"] == "t1" and headers["x-team"] == "override" and headers["user-agent"] == "mine"
+    assert seen[-1]["timeout"]["read"] == 3
+    client.datasets.create(new_dataset_name="x")  # without options: client defaults
+    assert seen[-1]["timeout"]["read"] == 30 and seen[-1]["headers"]["x-team"] == "sdk" and "x-trace" not in seen[-1]["headers"]
+
+
+def test_client_request_reaches_any_endpoint_with_the_same_plumbing():
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["url"], seen["body"], seen["auth"] = str(request.url), request.read(), request.headers.get("x-api-key")
+        if request.method == "DELETE":
+            return httpx.Response(404, json={"status": False, "detail": "gone"})
+        return httpx.Response(200, json={"status": True, "result": {"ids": ["s1"]}, "message": "created"})
+
+    client = _client(handler)
+    assert client.request("POST", "/tracer/observation-span/create_otel_span/", body=[{"name": "s"}], query={"v": 1}) == {"ids": ["s1"]}
+    assert seen["url"] == f"{BASE}/tracer/observation-span/create_otel_span/?v=1" and seen["body"] == b'[{"name":"s"}]' and seen["auth"] == "k"
+    assert client.request("POST", "/x/", unwrap=None) == {"status": True, "result": {"ids": ["s1"]}, "message": "created"}
+    with pytest.raises(fp.NotFoundError):
+        client.request("DELETE", "/x/")
+    with pytest.raises(ValueError, match="start with"):
+        client.request("GET", "relative/")
+    assert client.spans.ingest([{"name": "s"}]) == {"ids": ["s1"]}  # the hand-written resource method uses the same path
+
+
+def test_async_client_request_and_options():
+    async def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"status": True, "result": {"ids": [request.headers["x-trace"]]}})
+
+    async def scenario() -> None:
+        http = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+        async with fp.AsyncClient(api_key="k", secret_key="s", base_url=BASE, http_client=http) as client:
+            assert await client.spans.ingest([{}], options=fp.RequestOptions(headers={"X-Trace": "a"})) == {"ids": ["a"]}
+            assert await client.request("GET", "/x/", options=fp.RequestOptions(headers={"X-Trace": "b"})) == {"ids": ["b"]}
+
+    asyncio.run(scenario())  # plain pytest, no asyncio plugin needed

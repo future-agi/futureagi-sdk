@@ -84,6 +84,32 @@ const ds = await Dataset.open('my-dataset', {
 
 ## Quick-start
 
+### 0. The platform client (every API, one object)
+
+`Client` covers the whole platform (158 operations across datasets, prompts, evals, traces, annotation
+queues, knowledge bases, gateways, dashboards, ...). It is generated from the API contract, so method
+names match the Python SDK and the MCP tools; see `sdkgen/README.md` in the repository.
+
+```ts
+import { Client } from '@future-agi/sdk';
+
+const client = new Client();   // FI_API_KEY, FI_SECRET_KEY, FI_BASE_URL (or pass apiKey/secretKey/baseUrl)
+
+const ds = await client.datasets.create({ new_dataset_name: 'qa-set' });
+await client.datasets.columns.add(ds.dataset_id!, { new_columns_data: [{ name: 'question', data_type: 'text' }] });
+for await (const d of client.datasets.list({ search_text: 'qa' })) console.log(d.name);   // walks every page
+await client.knowledgeBases.create({ name: 'docs', file: ['./notes.txt'] });               // multipart upload
+await client.datasets.get(ds.dataset_id!, {}, { timeout: 5_000, headers: { 'X-Trace': 't1' } });  // per-call options
+await client.request('GET', '/some/new/endpoint/', { query: { page: 1 } });              // anything else, same auth/retries
+```
+
+Errors are typed (`platform.NotFoundError`, `platform.BadRequestError`, ...) and carry the backend's `type`,
+`code` and `detail`; 429 is retried, and 5xx only for calls that are safe to repeat. Extend the client by
+adding methods in `src/platform/resources/<name>.ts` (never regenerated) or passing your own classes:
+`new Client({ resources: { datasets: MyDatasets } })`.
+
+The classes below (`Dataset`, `Prompt`, `KnowledgeBase`, ...) keep working unchanged.
+
 ### 1. Create a dataset & add rows
 
 ```ts

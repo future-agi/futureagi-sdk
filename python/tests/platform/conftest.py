@@ -50,7 +50,7 @@ def record_calls():
     sync_request, async_request = SyncTransport.request, AsyncTransport.request
 
     def record(op, outcome):
-        if op.id != "raw":
+        if not op.id.startswith("raw:"):  # client.request() / resource .raw() calls are not catalog ops
             CALLED.setdefault(op.id, []).append(outcome)
 
     def request(self, op, **kwargs):

@@ -1,0 +1,272 @@
+// The one HTTP layer every resource uses: auth, retries, envelope unwrap, errors.
+// Mirrors the Python `fi/platform/_transport.py`; the same catalog drives both.
+
+import { APIConnectionError, APIError, errorFromResponse, isRecord } from "./errors";
+import { getPath, Pager, Pagination } from "./pagination";
+
+/** What generated code passes in for each call (emitted from the catalog). */
+export interface Operation {
+  id: string;
+  method: string;
+  path: string;
+  unwrap: string | null;
+  pagination: Pagination | null;
+  /** Body fields go as form data, file params as uploads. */
+  multipart?: boolean;
+}
+
+/** A file parameter: a path (Node only), raw bytes, a Blob, or an explicit name + content. */
+export type FileInput = string | Uint8Array | Blob | { name: string; data: Uint8Array | Blob | string };
+
+/** Per-call overrides, accepted by every generated method as its last argument. */
+export interface RequestOptions {
+  /** Added to (and overriding) the client's headers. */
+  headers?: Record<string, string>;
+  /** Milliseconds. */
+  timeout?: number;
+  maxRetries?: number;
+  /** Query fields the contract does not describe yet. */
+  extraQuery?: Record<string, unknown>;
+  /** Body fields the contract does not describe yet (JSON and form bodies). */
+  extraBody?: Record<string, unknown>;
+}
+
+export interface RequestArgs {
+  path?: Record<string, string>;
+  query?: Record<string, unknown>;
+  body?: unknown;
+  files?: Record<string, FileInput | FileInput[] | undefined>;
+}
+
+export type FetchLike = (url: string, init: RequestInit) => Promise<Response>;
+
+export interface ResolvedConfig {
+  apiKey: string;
+  secretKey: string;
+  baseUrl: string;
+  workspaceId?: string;
+  /** Milliseconds. */
+  timeout: number;
+  maxRetries: number;
+  defaultHeaders?: Record<string, string>;
+  fetch: FetchLike;
+}
+
+// 429 means the server did not process the request, so any method may retry it. A
+// timeout, a 5xx or a dropped connection may have happened after a write was applied,
+// so those are retried only for methods that are safe to repeat.
+const RETRY_ANY_METHOD = new Set([429]);
+const RETRY_IDEMPOTENT = new Set([408, 500, 502, 503, 504]);
+const IDEMPOTENT_METHODS = new Set(["GET", "HEAD", "OPTIONS", "PUT", "DELETE"]);
+
+function canRetry(op: Operation, status: number | null, attempt: number, maxRetries: number): boolean {
+  if (attempt >= maxRetries) {
+    return false;
+  }
+  if (status === null) {
+    return IDEMPOTENT_METHODS.has(op.method); // transport error: the request may have reached the server
+  }
+  return RETRY_ANY_METHOD.has(status) || (RETRY_IDEMPOTENT.has(status) && IDEMPOTENT_METHODS.has(op.method));
+}
+
+function backoffMs(attempt: number, retryAfter: string | null): number {
+  if (retryAfter) {
+    const seconds = Number(retryAfter);
+    if (!Number.isNaN(seconds)) {
+      return Math.min(seconds, 30) * 1000;
+    }
+  }
+  return Math.min(500 * 2 ** attempt, 8000) * (0.75 + Math.random() / 2);
+}
+
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+/** An ad-hoc operation for an endpoint the catalog does not describe (`client.request`). */
+export function rawOperation(method: string, path: string, unwrap: string | null = "result", multipart = false): Operation {
+  if (!path.startsWith("/")) {
+    throw new Error(`path must start with '/', got ${JSON.stringify(path)}`);
+  }
+  return { id: `raw:${method.toUpperCase()} ${path}`, method: method.toUpperCase(), path, unwrap, pagination: null, multipart };
+}
+
+function buildUrl(config: ResolvedConfig, op: Operation, args: RequestArgs, options?: RequestOptions): string {
+  let path = op.path;
+  for (const [name, value] of Object.entries(args.path ?? {})) {
+    path = path.replace(`{${name}}`, encodeURIComponent(String(value)));
+  }
+  const url = new URL(config.baseUrl + path);
+  for (const [key, value] of Object.entries({ ...(args.query ?? {}), ...(options?.extraQuery ?? {}) })) {
+    if (value === undefined || value === null) {
+      continue;
+    }
+    for (const item of Array.isArray(value) ? value : [value]) {
+      url.searchParams.append(key, formValue(item));
+    }
+  }
+  return url.toString();
+}
+
+function formValue(value: unknown): string {
+  if (typeof value === "boolean") {
+    return value ? "true" : "false"; // the way DRF parses them
+  }
+  return typeof value === "object" ? JSON.stringify(value) : String(value);
+}
+
+function cleanBody(body: unknown, extra?: Record<string, unknown>): unknown {
+  if (!isRecord(body)) {
+    return body; // a non-object body (e.g. a list) is sent as is
+  }
+  const merged: Record<string, unknown> = { ...body, ...(extra ?? {}) };
+  for (const key of Object.keys(merged)) {
+    if (merged[key] === undefined || merged[key] === null) {
+      delete merged[key];
+    }
+  }
+  return merged;
+}
+
+async function toBlob(file: FileInput): Promise<{ name: string; blob: Blob }> {
+  if (typeof file === "string") {
+    const { readFile } = await import("node:fs/promises");
+    const { basename } = await import("node:path");
+    return { name: basename(file), blob: new Blob([new Uint8Array(await readFile(file))]) };
+  }
+  if (file instanceof Uint8Array) {
+    return { name: "upload", blob: new Blob([file]) };
+  }
+  if (file instanceof Blob) {
+    return { name: (file as File).name ?? "upload", blob: file };
+  }
+  const data = file.data instanceof Blob ? file.data : new Blob([typeof file.data === "string" ? file.data : new Uint8Array(file.data)]);
+  return { name: file.name, blob: data };
+}
+
+async function buildBody(op: Operation, args: RequestArgs, options?: RequestOptions): Promise<{ body?: RequestInit["body"]; headers: Record<string, string> }> {
+  if (!op.multipart) {
+    if (args.files && Object.values(args.files).some((v) => v !== undefined)) {
+      throw new TypeError(`${op.id}: files are only accepted by multipart operations`);
+    }
+    if (args.body === undefined) {
+      return { headers: {} };
+    }
+    return { body: JSON.stringify(cleanBody(args.body, options?.extraBody)), headers: { "Content-Type": "application/json" } };
+  }
+  const form = new FormData();
+  const fields = cleanBody(args.body ?? {}, options?.extraBody);
+  if (isRecord(fields)) {
+    for (const [key, value] of Object.entries(fields)) {
+      form.append(key, formValue(value));
+    }
+  }
+  for (const [field, value] of Object.entries(args.files ?? {})) {
+    if (value === undefined || value === null) {
+      continue;
+    }
+    for (const item of Array.isArray(value) ? value : [value]) {
+      const { name, blob } = await toBlob(item);
+      form.append(field, blob, name);
+    }
+  }
+  return { body: form, headers: {} }; // fetch sets the multipart boundary itself
+}
+
+async function decode(op: Operation, response: Response): Promise<unknown> {
+  const text = await response.text();
+  if (response.status === 204 || text.length === 0) {
+    return null;
+  }
+  let data: unknown;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    const contentType = response.headers.get("content-type") ?? "unknown";
+    throw new APIError(`${response.status} non-JSON response (${contentType})`, response.status, text, response.headers.get("x-request-id"));
+  }
+  if (op.unwrap && isRecord(data) && op.unwrap in data) {
+    return data[op.unwrap];
+  }
+  // The backend wraps most successes in {status, result}, but the contract often leaves
+  // the envelope out, so unwrap it whenever it is exactly that shape.
+  if (isRecord(data) && Object.keys(data).length === 2 && data.status === true && "result" in data) {
+    return data.result;
+  }
+  return data;
+}
+
+export class Transport {
+  constructor(readonly config: ResolvedConfig) {}
+
+  headers(options?: RequestOptions): Record<string, string> {
+    const headers: Record<string, string> = {
+      "X-Api-Key": this.config.apiKey,
+      "X-Secret-Key": this.config.secretKey,
+      "User-Agent": "futureagi-typescript",
+    };
+    if (this.config.workspaceId) {
+      headers["X-Workspace-Id"] = this.config.workspaceId;
+    }
+    return { ...headers, ...(this.config.defaultHeaders ?? {}), ...(options?.headers ?? {}) };
+  }
+
+  /** One HTTP call for `op`: auth, retries, envelope unwrap, typed errors. Resolves to decoded JSON. */
+  async request(op: Operation, args: RequestArgs = {}, options?: RequestOptions): Promise<unknown> {
+    const url = buildUrl(this.config, op, args, options);
+    const timeout = options?.timeout ?? this.config.timeout;
+    const maxRetries = options?.maxRetries ?? this.config.maxRetries;
+    for (let attempt = 0; ; attempt++) {
+      const { body, headers } = await buildBody(op, args, options); // rebuilt per attempt: a FormData stream is single-use
+      let response: Response;
+      try {
+        response = await this.config.fetch(url, {
+          method: op.method,
+          headers: { ...this.headers(options), ...headers },
+          body,
+          signal: AbortSignal.timeout(timeout),
+          redirect: "follow",
+        });
+      } catch (error) {
+        if (canRetry(op, null, attempt, maxRetries)) {
+          await sleep(backoffMs(attempt, null));
+          continue;
+        }
+        throw new APIConnectionError(error instanceof Error ? error.message : String(error));
+      }
+      if (canRetry(op, response.status, attempt, maxRetries)) {
+        await sleep(backoffMs(attempt, response.headers.get("retry-after")));
+        continue;
+      }
+      if (response.status >= 300) {
+        // a redirect we did not follow is not a result
+        throw errorFromResponse(response.status, await response.text(), response.headers.get("x-request-id"));
+      }
+      return decode(op, response);
+    }
+  }
+
+  /** Call an endpoint the catalog does not describe; the usual auth, retries and errors apply. */
+  raw(method: string, path: string, args: RequestArgs & { unwrap?: string | null; multipart?: boolean } = {}, options?: RequestOptions): Promise<unknown> {
+    const { unwrap, multipart, ...rest } = args;
+    return this.request(rawOperation(method, path, unwrap === undefined ? "result" : unwrap, multipart ?? false), rest, options);
+  }
+
+  /** The typed form of `request`: the result is the contract's response type (no runtime validation). */
+  call<T>(op: Operation, args: RequestArgs = {}, options?: RequestOptions): Promise<T> {
+    return this.request(op, args, options) as Promise<T>;
+  }
+
+  paginate<T>(op: Operation, args: RequestArgs = {}, options?: RequestOptions): Pager<T> {
+    const spec = op.pagination;
+    if (!spec) {
+      throw new Error(`${op.id} is not paginated`);
+    }
+    return new Pager<T>(async (page: number) => {
+      const data = await this.request(op, { ...args, query: { ...(args.query ?? {}), [spec.page_param]: page } }, options);
+      if (!Array.isArray(getPath(data, spec.items))) {
+        // A page without its items list means the contract's page shape is wrong; never let that look like an empty result.
+        throw new APIError(`${op.id}: page has no '${spec.items}' list`, 200, data);
+      }
+      return data;
+    }, spec);
+  }
+}

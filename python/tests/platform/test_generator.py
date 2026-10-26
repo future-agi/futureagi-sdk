@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import copy
-import importlib.util
 import json
 import sys
 from pathlib import Path
@@ -12,10 +11,10 @@ import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
-spec_ = importlib.util.spec_from_file_location("generate", ROOT / "sdkgen" / "generate.py")
-generate = importlib.util.module_from_spec(spec_)
-sys.modules["generate"] = generate
-spec_.loader.exec_module(generate)
+sys.path.insert(0, str(ROOT))
+from sdkgen import generator as generate  # noqa: E402
+from sdkgen.generator import python as pygen  # noqa: E402
+from sdkgen.generator import typescript as tsgen  # noqa: E402
 
 CONTRACT = json.loads((ROOT / "sdkgen" / "contracts" / "swagger.json").read_text())
 CATALOG = yaml.safe_load((ROOT / "sdkgen" / "catalog" / "operations.yaml").read_text())
@@ -31,6 +30,75 @@ def _with(op_id: str, **changes) -> dict:
 def test_committed_outputs_are_up_to_date():
     stale = [str(p.relative_to(ROOT)) for p, text in generate.build().items() if p.read_text() != text]
     assert not stale, f"run python sdkgen/generate.py: {stale}"
+    missing = [str(p.relative_to(ROOT)) for p in generate.scaffolds() if not p.exists()]
+    assert not missing, f"run python sdkgen/generate.py to scaffold: {missing}"
+
+
+def test_scaffolds_are_owned_by_hand():
+    """A resource module is created once and never regenerated: spans.py has a hand-written method."""
+    scaffolds = generate.scaffolds()
+    spans_py = generate.PY_PLATFORM / "resources" / "spans.py"
+    spans_ts = generate.TS_PLATFORM / "resources" / "spans.ts"
+    assert spans_py in scaffolds and spans_py not in generate.build()
+    assert "def ingest" in spans_py.read_text() and "def ingest" not in scaffolds[spans_py]
+    assert "ingest(" in spans_ts.read_text() and "ingest(" not in scaffolds[spans_ts]
+
+
+def test_resources_can_be_swapped_and_extended():
+    from fi.platform import Client
+    from fi.platform._generated.resources import (
+        DatasetsColumnsResource,
+        DatasetsResource,
+    )
+    from fi.platform.resources import Datasets
+
+    class Columns(DatasetsColumnsResource):
+        def mine(self) -> str:
+            return "custom columns"
+
+    class MyDatasets(Datasets):
+        _children = {**DatasetsResource._children, "columns": Columns}
+
+        def mine(self) -> str:
+            return "custom datasets"
+
+    class Billing:
+        def __init__(self, transport) -> None:
+            self._t = transport
+
+    class MyClient(Client):
+        _resources = {**Client._resources, "datasets": MyDatasets, "billing": Billing}
+
+    client = MyClient(api_key="k", secret_key="s", base_url="http://unused")
+    assert client.datasets.mine() == "custom datasets" and client.datasets.columns.mine() == "custom columns"
+    assert callable(client.datasets.columns.add) and callable(client.datasets.rows.add)  # generated methods still there
+    assert client.billing._t is client._transport
+    assert callable(client.spans.ingest)  # hand-written in fi/platform/resources/spans.py
+    assert callable(client.request)
+
+
+def test_generated_methods_cannot_shadow_the_hand_written_client():
+    catalog = copy.deepcopy(CATALOG)
+    next(e for e in catalog["operations"] if e["id"] == "datasets.list_names")["id"] = "datasets.request"
+    with pytest.raises(generate.CatalogError, match="reserved"):
+        pygen.emit_resources(generate.load(CONTRACT, catalog))
+
+
+def test_typescript_mirrors_the_python_client():
+    ops = generate.load(CONTRACT, CATALOG)
+    ts = tsgen.emit_resources(ops)
+    by_id = {op.id: op for op in ops}
+    assert tsgen.ts_method(by_id["datasets.create_from_file"]) == "createFromFile"
+    assert tsgen.ts_attr("knowledge_bases") == "knowledgeBases"
+    # Same operations, same wire fields, same path params; only the casing differs.
+    assert "export class KnowledgeBasesResource extends Resource" in ts
+    assert "createFromFile(params: DatasetsCreateFromFileParams, options?: RequestOptions): Promise<models.LocalFileDatasetCreateStartedResult>" in ts
+    assert "get(datasetId: string, params: DatasetsGetParams = {}, options?: RequestOptions): Promise<models.DatasetTableResult>" in ts
+    assert "list(params: DatasetsListParams = {}, options?: RequestOptions): Pager<models.DatasetListItem>" in ts
+    assert "whoami(options?: RequestOptions): Promise<models.UserInfoResponse>" in ts  # no params at all
+    assert 'files: { file: params.file }' in ts
+    index = tsgen.emit_resource_index(ops)
+    assert "knowledgeBases: KnowledgeBases" in index and "annotationQueues: AnnotationQueues" in index
 
 
 def test_surfaces_ship_independently():
@@ -115,7 +183,7 @@ def test_request_fixes_replace_what_the_contract_gets_wrong():
     assert "template_id" in {p.name for p in ops["prompts.history"].params if p.location == "query"}
     # `as`: the wire field is `file`, the Python argument is `files`.
     upload = next(p for p in ops["knowledge_bases.create"].params if p.name == "file")
-    assert upload.arg == "files" and ops["knowledge_bases.create"].multipart
+    assert upload.arg_name == "files" and ops["knowledge_bases.create"].multipart
 
 
 @pytest.mark.parametrize(
