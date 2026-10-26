@@ -217,6 +217,27 @@ kb_client.delete_files_from_kb(file_ids=["file_id_here"])
 kb_client.delete_kb(kb_ids=[kb.kb.id])
 ```
 
+### 🛰️ Gateway (Agent Command Center)
+
+Call any LLM through the Future AGI gateway with an OpenAI-compatible client. This is the AgentCC SDK (formerly the separate `agentcc` package), now part of `futureagi`:
+
+```python
+from fi.gateway import Gateway
+
+gw = Gateway(session_id="checkout-flow")   # FI_GATEWAY_API_KEY (sk-agentcc-...), FI_GATEWAY_URL
+reply = gw.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello"}],
+)
+print(reply.choices[0].message.content)
+```
+
+- `AsyncGateway` is the async version (`async with AsyncGateway() as gw: ...`).
+- Routing, fallbacks, caching and guardrails: pass `config=fi.gateway.GatewayConfig(...)`.
+- The gateway uses its own virtual keys (`sk-agentcc-*`), not `FI_API_KEY`/`FI_SECRET_KEY`. `AGENTCC_API_KEY` and `AGENTCC_BASE_URL` still work, and the URL may end in `/v1` or not.
+- Code written for `agentcc` keeps working by changing the import: `from fi.gateway import AgentCC`.
+- Managing gateways (keys, providers, request logs, analytics) is a platform API: `fi.Client().gateway`, which arrives with the generated platform client (#35).
+
 ---
 
 ## 🎯 Core Use Cases
