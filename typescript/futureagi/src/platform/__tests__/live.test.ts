@@ -57,7 +57,12 @@ async function waitUntil(predicate: () => Promise<boolean>, ms = 20_000): Promis
 
 live("platform client against a live backend", () => {
   jest.setTimeout(120_000);
-  const client = new Client({ timeout: 60_000 });
+  // Built in beforeAll: jest evaluates a skipped describe's body too, and the
+  // constructor throws without credentials.
+  let client: Client;
+  beforeAll(() => {
+    client = new Client({ timeout: 60_000 });
+  });
 
   test("context", async () => {
     const me = await client.account.whoami();
