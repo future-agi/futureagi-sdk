@@ -1,17 +1,17 @@
-# sdkgen: Python SDK, TypeScript SDK and MCP tools from one contract and one catalog
+# sdkgen: Python SDK and TypeScript SDK from one contract and one catalog
 
-`sdkgen` generates the platform client for both SDKs (`fi.Client` in Python, `new Client()` in TypeScript) from the backend's API contract plus a small catalog. The same catalog produces the MCP tool list, so an operation has the same name everywhere, and each operation can still ship to just one surface.
+`sdkgen` generates the platform client for both SDKs (`fi.Client` in Python, `new Client()` in TypeScript) from the backend's API contract plus a small catalog. The catalog records, for each operation, the MCP tool it corresponds to in the monorepo (`futureagi/mcp_server/catalog/tools.yaml`), so an operation has the same name in the SDKs and in MCP; the MCP server itself is generated and served from the monorepo, not here.
 
-It covers **all 105 MCP tools** (imported from the monorepo's `futureagi/mcp_server/catalog/tools.yaml`, keeping every MCP tool name) plus **53 SDK-only operations** that give the clients everything the hand-written `fi.datasets`, `fi.prompt`, `fi.kb`, `fi.queues` and `fi.annotations` modules can do: 158 operations across 24 resources. The MCP manifest still has exactly 105 tools.
+It covers the operations behind **all 105 MCP tools** (same names) plus **53 SDK-only operations** that give the clients everything the hand-written `fi.datasets`, `fi.prompt`, `fi.kb`, `fi.queues` and `fi.annotations` modules can do: 158 operations across 24 resources. The monorepo's E2E CI checks that the catalog's MCP names still match the monorepo's tool list.
 
 ```
 future-agi/api_contracts/openapi/swagger.json ──sync_contract.py──▶ sdkgen/contracts/swagger.json
                                                                     sdkgen/catalog/operations.yaml
                                                                             │
                                                                     sdkgen/generate.py  (CLI)
-                                                                    sdkgen/generator/   (catalog.py → python.py, typescript.py, mcp.py)
+                                                                    sdkgen/generator/   (catalog.py → python.py, typescript.py)
                         ┌───────────────────────────────────────────────────┼───────────────────────────────────────┐
-     python/fi/platform/_generated/{models,resources}.py   typescript/futureagi/src/platform/_generated/{models,resources}.ts   sdkgen/mcp/tools.generated.json
+     python/fi/platform/_generated/{models,resources}.py   typescript/futureagi/src/platform/_generated/{models,resources}.ts
      python/fi/platform/resources/__init__.py              typescript/futureagi/src/platform/resources/index.ts
                         │                                                   │
      hand-written: python/fi/platform/{_client,_transport,_pagination,_errors,_resource}.py
@@ -120,7 +120,7 @@ pip install -e ./python pytest pyyaml
 
 python sdkgen/sync_contract.py ../future-agi/api_contracts/openapi/swagger.json   # refresh the contract slice
 python sdkgen/generate.py                            # regenerate everything, scaffold new resources
-python sdkgen/generate.py --only python mcp          # one or more of: python, typescript, mcp
+python sdkgen/generate.py --only python              # one or both of: python, typescript
 python sdkgen/generate.py --check                    # CI: exit 1 if generated code is stale or a scaffold is missing
 
 # Live tests against a real backend, e.g. a local install of the monorepo (./bin/install)
@@ -132,7 +132,7 @@ cd typescript/futureagi && pnpm install && pnpm test:live   # TypeScript: transp
 
 Without `.env.local` or `FI_*` env vars, the live tests are skipped and only the generator and transport tests run. With `FI_E2E_REQUIRED=1` (CI) they fail instead.
 
-`sdkgen/generator/` is one module per concern: `catalog.py` loads and validates (every emitter starts from its `Op` list), `python.py`, `typescript.py` and `mcp.py` only emit text, and `__init__.py` maps outputs to paths. Adding a surface is a new emitter plus one entry in `build()`.
+`sdkgen/generator/` is one module per concern: `catalog.py` loads and validates (every emitter starts from its `Op` list), `python.py` and `typescript.py` only emit text, and `__init__.py` maps outputs to paths. Adding a surface is a new emitter plus one entry in `build()`.
 
 ## Responses that don't match the contract
 
@@ -177,7 +177,7 @@ Against a local `bin/install` backend:
 
 `typescript/futureagi/src/platform/__tests__/` covers the TypeScript transport and generated code against an injected `fetch` (bodies, encoding, every pagination style, retries, errors, uploads, per-call options, resource overrides) and, with `pnpm test:live`, the same flows against the backend: datasets, uploads, prompts with drafts and labels, the hand-written `spans.ingest`, annotation labels and queues, knowledge bases, typed errors.
 
-`python/tests/platform/test_generator.py` fails if any generated file (Python, TypeScript or MCP) is stale or a resource scaffold is missing.
+`python/tests/platform/test_generator.py` fails if any generated file (Python or TypeScript) is stale or a resource scaffold is missing.
 
 ## CI
 
@@ -200,5 +200,5 @@ A backend release becomes an SDK release on its own:
 One-time setup, repository admin: install the org's release bot app on this repository and expose `RELEASE_BOT_APP_ID` / `RELEASE_BOT_PRIVATE_KEY` (the monorepo's release-please secrets; pull requests opened with the default token get no CI runs); enable "Allow auto-merge"; require `CI Pass` and `E2E Tests Pass` on `dev` and `main`; register the trusted publisher on PyPI (`futureagi`, workflow `publish.yml`, environment `pypi`); add `NPM_TOKEN`. Without the app secrets the sync still opens its PR with a warning instead of auto-merging; without auto-merge every step above is the same, with a human clicking merge.
 
 - Run `generate.py --check`, `pytest python/tests/platform` and `pnpm test` in CI against a backend started from the monorepo.
-- Move `operations.yaml` into the monorepo next to the MCP catalog, so `tool_generation.py` reads the MCP entries from it.
+- Move `operations.yaml` into the monorepo next to the MCP catalog (`tools.yaml`), so one file drives MCP and the SDKs and the sync workflow copies it here with the contract.
 - Deprecate the hand-written modules (`fi.datasets`, `fi.prompt`, `fi.kb`, `fi.queues`, `fi.annotations`, and their TypeScript counterparts) in favour of the generated client, then remove them in a major release.

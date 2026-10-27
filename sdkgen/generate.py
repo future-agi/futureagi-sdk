@@ -1,8 +1,8 @@
-"""Regenerate the SDKs and the MCP manifest from the contract + catalog.
+"""Regenerate the SDKs from the contract + catalog.
 
     python sdkgen/generate.py                      write every output, scaffold new resources
     python sdkgen/generate.py --check              exit 1 if any output is stale (CI drift check)
-    python sdkgen/generate.py --only python mcp    limit to some targets (python, typescript, mcp)
+    python sdkgen/generate.py --only python        limit to some targets (python, typescript)
 
 The emitters live in sdkgen/generator/; this file is just the command line.
 """

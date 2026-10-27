@@ -31,9 +31,9 @@ jobs:
       - name: Install the generator's dependencies
         run: python -m pip install --quiet pyyaml ruff
       - name: Regenerate and compare
-        # Fails when python/fi/platform/_generated, the TypeScript _generated
-        # directory or sdkgen/mcp/tools.generated.json differ from what the
-        # contract and catalog produce, or when a resource scaffold is missing.
+        # Fails when python/fi/platform/_generated or the TypeScript _generated
+        # directory differ from what the contract and catalog produce, or when
+        # a resource scaffold is missing.
         run: python sdkgen/generate.py --check
       - name: Lint the generator, the platform client and its tests
         run: ruff check --isolated --select E,F,W,I --ignore E501 sdkgen python/fi/platform python/tests/platform

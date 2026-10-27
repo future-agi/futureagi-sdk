@@ -18,7 +18,10 @@ from sdkgen.generator import typescript as tsgen  # noqa: E402
 
 CONTRACT = json.loads((ROOT / "sdkgen" / "contracts" / "swagger.json").read_text())
 CATALOG = yaml.safe_load((ROOT / "sdkgen" / "catalog" / "operations.yaml").read_text())
-MCP = json.loads((ROOT / "sdkgen" / "mcp" / "tools.generated.json").read_text())
+# The MCP server and its manifest live in the monorepo (futureagi/mcp_server/catalog); the
+# catalog here only records which MCP tool each operation corresponds to. The monorepo's
+# E2E CI compares the two.
+MCP_IDS = {e["id"] for e in CATALOG["operations"] if e["surfaces"].get("mcp") not in (None, False)}
 
 
 def _with(op_id: str, **changes) -> dict:
@@ -104,30 +107,23 @@ def test_typescript_mirrors_the_python_client():
 def test_surfaces_ship_independently():
     from fi.platform import Client
 
-    mcp_ids = {t["source"]["catalogId"] for t in MCP["tools"]}
     sdk_ids = {e["id"] for e in CATALOG["operations"] if e["surfaces"].get("sdk") is not False}
-    assert "datasets.columns.add" in sdk_ids - mcp_ids  # SDK-only
+    assert "datasets.columns.add" in sdk_ids - MCP_IDS  # SDK-only
     client = Client(api_key="k", secret_key="s", base_url="http://unused")
     assert callable(client.datasets.columns.add)
 
 
 def test_mcp_names_keep_existing_tools_or_follow_the_id():
     # Every catalog entry keeps the monorepo's MCP tool name: 105 tools, same names.
-    assert MCP["tool_count"] == 105
-    names = {t["source"]["catalogId"]: t["name"] for t in MCP["tools"]}
+    ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
+    names = {op_id: ops[op_id].surfaces["mcp"]["name"] for op_id in MCP_IDS}
+    assert len(names) == 105
     assert names["datasets.list"] == "list_datasets"
     assert names["traces.list"] == "search_traces"
     # Without an override the name follows the id.
     catalog = _with("datasets.columns.add", surfaces={"sdk": {}, "mcp": {"group": "datasets", "access": "write"}})
     op = next(o for o in generate.load(CONTRACT, catalog) if o.id == "datasets.columns.add")
     assert op.surfaces["mcp"]["name"] == "datasets_columns_add"
-
-
-def test_mcp_input_schema_comes_from_the_contract():
-    tool = next(t for t in MCP["tools"] if t["name"] == "create_dataset")
-    assert tool["inputSchema"]["required"] == ["new_dataset_name"]
-    assert tool["request"] == {"method": "POST", "path": "/model-hub/develops/create-empty-dataset/",
-                               "parameters": {"path": [], "query": [], "body": ["new_dataset_name", "model_type", "is_sdk", "row"]}}
 
 
 @pytest.mark.parametrize(
@@ -161,10 +157,9 @@ def test_body_params_on_a_paginated_op_fail_the_build():
 
 
 def test_sdk_only_parity_ops_do_not_reach_mcp():
-    """The hand-written modules' operations ship to the SDK only; the MCP manifest keeps its 105 tools."""
-    mcp_ids = {t["source"]["catalogId"] for t in MCP["tools"]}
+    """The hand-written modules' operations ship to the SDK only; the MCP tool list keeps its 105 tools."""
     for op_id in ("prompts.commit", "knowledge_bases.create", "annotation_queues.create", "scores.create", "datasets.create_from_file"):
-        assert op_id not in mcp_ids
+        assert op_id not in MCP_IDS
     from fi.platform import Client
 
     client = Client(api_key="k", secret_key="s", base_url="http://unused")

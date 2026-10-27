@@ -1,15 +1,16 @@
-"""Generate the Python SDK, the TypeScript SDK and the MCP tool list from one contract + one catalog.
+"""Generate the Python SDK and the TypeScript SDK from one contract + one catalog.
 
 Inputs
     sdkgen/contracts/swagger.json    API contract (sliced from the monorepo by sync_contract.py)
-    sdkgen/catalog/operations.yaml   shared names + which surface ships what
+    sdkgen/catalog/operations.yaml   shared names + which surface ships what (the `mcp` surface
+                                     records the monorepo's MCP tool each operation corresponds to;
+                                     the MCP server itself is generated in the monorepo)
 
 Outputs (never edited by hand)
     python/fi/platform/_generated/{models,resources}.py           pydantic models, resource classes
     python/fi/platform/resources/__init__.py                      what fi.Client exposes
     typescript/futureagi/src/platform/_generated/{models,resources}.ts
     typescript/futureagi/src/platform/resources/index.ts
-    sdkgen/mcp/tools.generated.json                               MCP tool manifest
 
 Scaffolds (written once when a resource first appears, then owned by hand)
     python/fi/platform/resources/<resource>.py
@@ -24,7 +25,7 @@ from pathlib import Path
 
 import yaml
 
-from . import mcp, python, typescript
+from . import python, typescript
 from .catalog import CatalogError, Op, Param, load
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -33,9 +34,8 @@ CONTRACT = SDKGEN / "contracts" / "swagger.json"
 CATALOG = SDKGEN / "catalog" / "operations.yaml"
 PY_PLATFORM = ROOT / "python" / "fi" / "platform"
 TS_PLATFORM = ROOT / "typescript" / "futureagi" / "src" / "platform"
-OUT_MCP = SDKGEN / "mcp" / "tools.generated.json"
 
-TARGETS = ("python", "typescript", "mcp")
+TARGETS = ("python", "typescript")
 
 __all__ = ["CatalogError", "Op", "Param", "TARGETS", "build", "load", "load_ops", "scaffolds"]
 
@@ -50,7 +50,7 @@ def load_ops() -> tuple[dict, list[Op], str]:
 
 def build(targets: tuple[str, ...] = TARGETS) -> dict[Path, str]:
     """Generated files: {path: text}. Each one is overwritten on every run."""
-    spec, ops, contract_sha = load_ops()
+    spec, ops, _ = load_ops()
     out: dict[Path, str] = {}
     if "python" in targets:
         out[PY_PLATFORM / "_generated" / "models.py"] = python.emit_models(spec, ops)
@@ -60,8 +60,6 @@ def build(targets: tuple[str, ...] = TARGETS) -> dict[Path, str]:
         out[TS_PLATFORM / "_generated" / "models.ts"] = typescript.emit_models(spec, ops)
         out[TS_PLATFORM / "_generated" / "resources.ts"] = typescript.emit_resources(ops)
         out[TS_PLATFORM / "resources" / "index.ts"] = typescript.emit_resource_index(ops)
-    if "mcp" in targets:
-        out[OUT_MCP] = mcp.emit_mcp(spec, ops, contract_sha)
     return out
 
 
