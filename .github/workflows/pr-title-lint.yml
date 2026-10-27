@@ -1,0 +1,40 @@
+name: pr-title-lint
+
+# This repository squash-merges, so a pull request's title becomes the commit
+# message release-please reads: `feat` bumps the minor version, `fix` the
+# patch, `feat!`/`fix!` the major, anything else ships with no version bump and
+# no changelog line. A title that does not follow Conventional Commits is a
+# release that silently never happens, so the format is a merge gate (same
+# rule as the monorepo). Skips release-please's own PRs and dev -> main.
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches: [dev, main]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: >-
+      !startsWith(github.head_ref, 'release-please--') &&
+      !(github.head_ref == 'dev' && github.base_ref == 'main')
+    steps:
+      - uses: amannn/action-semantic-pull-request@e32d7e603df1aa1ba07e981f2a23455dee596825 # v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            chore
+            docs
+            refactor
+            test
+            perf
+            ci
+            revert
+          requireScope: false

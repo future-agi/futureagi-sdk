@@ -16,8 +16,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 - CI: `ci.yml` (generated code current, Python 3.9/3.11/3.13 unit suite, TypeScript type check, tests and build) and `e2e.yml` (the live suites against the Standalone backend, booted from the monorepo's compose files and the released image, with a fresh account from `sdkgen/local_api_key.py --signup`). `FI_E2E_REQUIRED=1` turns a skipped live suite into a failure.
 - Release cycle: a backend release is synced in by the monorepo's `sdk-sync` workflow (contract slice, regenerated clients, `sdkgen/contracts/BACKEND_VERSION`), promoted from `dev` to `main` (`promote.yml`), versioned by release-please (`python-vX.Y.Z`, `typescript-vX.Y.Z`, per-package changelogs) and published to PyPI and npm (`publish.yml`).
 
+- `pr-title-lint.yml`: pull request titles must follow Conventional Commits, since squash-merged titles are what release-please versions from. `publish.yml` installs the just-published package from PyPI and npm into a clean environment and runs a quickstart (CommonJS and ESM for npm) before the release counts as done.
+
 ### Fixed
 - TypeScript package: `form-data` and `@jest/globals` are now declared, so a fresh `pnpm install` builds and tests.
+- TypeScript package: `require("@future-agi/sdk")` works. The CommonJS build under `dist/src/` had no `package.json` of its own, so the root `"type": "module"` made Node load it as ESM and fail on the first `require("./api")`. The build now writes `{"type": "commonjs"}` there.
 
 ---
 

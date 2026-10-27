@@ -61,6 +61,37 @@ jobs:
           packages-dir: python/dist
           skip-existing: true
 
+      - name: Install the published package from PyPI and run the quickstart
+        # What a user gets, not what we built: a fresh venv, no local files,
+        # the exact version from the index. PyPI's CDN can lag the upload by
+        # a minute or two.
+        run: |
+          version="${TAG#python-v}"
+          python -m venv "$RUNNER_TEMP/smoke"
+          for attempt in $(seq 1 20); do
+            if "$RUNNER_TEMP/smoke/bin/pip" install --quiet --no-cache-dir "futureagi==$version"; then
+              break
+            fi
+            [ "$attempt" -lt 20 ] || { echo "::error::futureagi==$version not installable from PyPI after 10 minutes"; exit 1; }
+            sleep 30
+          done
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/smoke/bin/python" - <<'EOF'
+          import fi
+          from fi import Client
+          from fi.platform import AsyncClient, APIError, NotFoundError, RequestOptions
+          from fi.gateway import Gateway
+
+          client = Client(api_key="smoke", secret_key="smoke", base_url="http://127.0.0.1:9")
+          assert callable(client.datasets.create) and callable(client.spans.ingest)
+          assert len(Client._resources) >= 24, Client._resources
+          try:
+              client.account.whoami(options=RequestOptions(max_retries=0, timeout=1))
+          except Exception as error:  # no server on port 9: the transport must raise its own error type
+              assert type(error).__module__.startswith("fi.platform"), type(error)
+          print("futureagi", fi.__version__, "installed from PyPI; client, gateway and resources import")
+          EOF
+
   typescript:
     name: npm
     if: startsWith(inputs.tag || github.event.release.tag_name, 'typescript-v')
@@ -103,3 +134,37 @@ jobs:
           fi
           [ -n "$NODE_AUTH_TOKEN" ] || { echo "::error::NPM_TOKEN is not set"; exit 1; }
           pnpm publish --access public --provenance --no-git-checks
+
+      - name: Install the published package from npm and run the quickstart
+        # A fresh project, the exact version from the registry, both module
+        # systems the package ships (CommonJS and ESM).
+        working-directory: ${{ runner.temp }}
+        run: |
+          version="${TAG#typescript-v}"
+          mkdir smoke && cd smoke && npm init -y >/dev/null
+          for attempt in $(seq 1 20); do
+            if npm install --no-audit --no-fund "@future-agi/sdk@$version" >/dev/null 2>&1; then
+              break
+            fi
+            [ "$attempt" -lt 20 ] || { echo "::error::@future-agi/sdk@$version not installable from npm after 10 minutes"; exit 1; }
+            sleep 30
+          done
+          node - <<'EOF'
+          const { Client, platform } = require("@future-agi/sdk");
+          const client = new Client({ apiKey: "smoke", secretKey: "smoke", baseUrl: "http://127.0.0.1:9", maxRetries: 0, timeout: 1000 });
+          if (typeof client.datasets.create !== "function" || typeof client.spans.ingest !== "function") throw new Error("resources missing");
+          client.account.whoami().then(
+            () => { throw new Error("unexpected success"); },
+            (error) => {
+              if (!(error instanceof platform.APIConnectionError)) throw error;
+              console.log("@future-agi/sdk installed from npm (CommonJS); client and resources load");
+            },
+          );
+          EOF
+          cat > smoke.mjs <<'EOF'
+          import { Client } from "@future-agi/sdk";
+          const client = new Client({ apiKey: "smoke", secretKey: "smoke", baseUrl: "http://127.0.0.1:9" });
+          if (typeof client.datasets.createFromFile !== "function" || typeof client.knowledgeBases.create !== "function") throw new Error("ESM resources missing");
+          console.log("ESM import ok");
+          EOF
+          node smoke.mjs
