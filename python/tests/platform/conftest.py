@@ -22,7 +22,10 @@ _load_env_file()
 
 def _require_backend() -> None:
     if not (os.environ.get("FI_API_KEY") and os.environ.get("FI_SECRET_KEY") and os.environ.get("FI_BASE_URL")):
-        pytest.skip("no backend configured: run sdkgen/local_api_key.py (writes .env.local)")
+        message = "no backend configured: run sdkgen/local_api_key.py (writes .env.local)"
+        if os.environ.get("FI_E2E_REQUIRED"):  # CI: a missing account is a failure, not a skip
+            pytest.fail(message)
+        pytest.skip(message)
 
 
 @pytest.fixture

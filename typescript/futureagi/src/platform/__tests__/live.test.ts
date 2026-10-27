@@ -24,6 +24,9 @@ if (existsSync(ENV_FILE)) {
   }
 }
 const configured = Boolean(process.env.FI_API_KEY && process.env.FI_SECRET_KEY && process.env.FI_BASE_URL);
+if (!configured && process.env.FI_E2E_REQUIRED) {
+  throw new Error("FI_E2E_REQUIRED is set but no backend is configured: run sdkgen/local_api_key.py (writes .env.local)");
+}
 const live = configured ? describe : describe.skip;
 
 const name = (prefix: string) => `sdk-ts-${prefix}-${randomUUID().slice(0, 8)}`;

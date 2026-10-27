@@ -125,11 +125,12 @@ python sdkgen/generate.py --check                    # CI: exit 1 if generated c
 
 # Live tests against a real backend, e.g. a local install of the monorepo (./bin/install)
 python sdkgen/local_api_key.py --email <admin email> --password-file <file>       # writes .env.local (gitignored)
+python sdkgen/local_api_key.py --signup --base-url http://localhost:8100           # or: a fresh account on a throwaway stack
 pytest python/tests/platform -v                      # Python: every catalog operation
 cd typescript/futureagi && pnpm install && pnpm test:live   # TypeScript: transport, uploads, pagination, errors, hand-written method
 ```
 
-Without `.env.local` or `FI_*` env vars, the live tests are skipped and only the generator and transport tests run.
+Without `.env.local` or `FI_*` env vars, the live tests are skipped and only the generator and transport tests run. With `FI_E2E_REQUIRED=1` (CI) they fail instead.
 
 `sdkgen/generator/` is one module per concern: `catalog.py` loads and validates (every emitter starts from its `Op` list), `python.py`, `typescript.py` and `mcp.py` only emit text, and `__init__.py` maps outputs to paths. Adding a surface is a new emitter plus one entry in `build()`.
 
@@ -178,7 +179,14 @@ Against a local `bin/install` backend:
 
 `python/tests/platform/test_generator.py` fails if any generated file (Python, TypeScript or MCP) is stale or a resource scaffold is missing.
 
-## Next steps
+## CI
+
+Two workflows in this repository, both on every pull request and on pushes to `dev` and `main`:
+
+- `.github/workflows/ci.yml`: `generate.py --check`, ruff on the generator and the platform client, the Python unit suite on 3.9, 3.11 and 3.13, and the TypeScript type check, platform tests and build. Gate: `CI Pass`.
+- `.github/workflows/e2e.yml`: the live suites against a real backend. It boots the Standalone setup the way the monorepo's E2E CI does (its `docker-compose.yml` plus `e2e/stack/docker-compose.standalone-e2e.yml`, the released `futureagi/standalone:latest` image, the mock LLM), signs up a fresh account with `local_api_key.py --signup`, and runs `python/tests/platform` on 3.9 and 3.12 and `pnpm test:live`. Also nightly, and on demand with another image tag. Gate: `E2E Tests Pass`.
+
+The monorepo's E2E CI (`future-agi/.github/workflows/e2e-ci.yml`, PRs and pushes on `dev` and `main`) runs the same two live suites against every backend build, so a backend change that breaks the SDK fails there before it is released. It checks out this repository at the branch named like the monorepo PR's branch if one exists, else the base branch (`dev` or `main`).
 
 - Run `generate.py --check`, `pytest python/tests/platform` and `pnpm test` in CI against a backend started from the monorepo.
 - Move `operations.yaml` into the monorepo next to the MCP catalog, so `tool_generation.py` reads the MCP entries from it.

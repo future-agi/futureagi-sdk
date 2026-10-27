@@ -1,0 +1,164 @@
+name: E2E
+
+# The SDKs against a real backend. Boots the Future AGI Standalone setup the
+# way the monorepo's own E2E CI does (docker-compose.yml plus the
+# e2e/stack/standalone-e2e overlay: one app container, Postgres, ClickHouse and
+# the deterministic mock LLM), signs up a fresh account, and runs the live
+# suites: python/tests/platform calls every catalog operation,
+# src/platform/__tests__/live.test.ts covers the TypeScript transport.
+#
+# The backend is the released image (futureagi/standalone:latest) unless the
+# run is dispatched with another tag. The monorepo runs the same suites against
+# every pull request's own build in its E2E CI, so a backend change that breaks
+# the SDK fails there before it is released.
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  # Nightly against the newest release: catches a backend release that drifts
+  # from the SDK between pushes.
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      backend-version:
+        description: futureagi/standalone image tag to test against
+        default: latest
+        type: string
+      backend-ref:
+        description: future-agi ref that provides the compose files
+        default: main
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  BACKEND_VERSION: ${{ inputs.backend-version || 'latest' }}
+  BACKEND_REF: ${{ inputs.backend-ref || 'main' }}
+  # e2e/stack/standalone-e2e.env maps the app's API onto this port.
+  FI_BASE_URL: http://localhost:8100
+  # Make the live suites fail, not skip, when no account was provisioned.
+  FI_E2E_REQUIRED: "1"
+
+jobs:
+  e2e:
+    name: e2e (python ${{ matrix.python }}${{ matrix.typescript && ', typescript' || '' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The floor and a current interpreter; TypeScript rides along once.
+          - python: "3.9"
+            typescript: false
+          - python: "3.12"
+            typescript: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out the monorepo's stack definition
+        # Only the files docker-compose.yml and the E2E overlay mount; the
+        # app itself is the published image.
+        uses: actions/checkout@v4
+        with:
+          repository: future-agi/future-agi
+          ref: ${{ env.BACKEND_REF }}
+          path: future-agi
+          sparse-checkout: |
+            e2e/stack
+            deploy/clickhouse
+            deploy/standalone/clickhouse
+            futureagi/.ci
+          fetch-depth: 1
+
+      - name: Boot the Standalone stack
+        id: boot
+        working-directory: future-agi
+        env:
+          FUTURE_AGI_VERSION: ${{ env.BACKEND_VERSION }}
+        run: |
+          docker compose --env-file e2e/stack/standalone-e2e.env \
+            -f docker-compose.yml -f e2e/stack/docker-compose.standalone-e2e.yml \
+            -p futureagi-e2e-standalone \
+            up -d --wait --wait-timeout 1500 app postgres clickhouse mock-llm
+          # A first boot migrates an empty database before the API answers.
+          deadline=$((SECONDS + 1500))
+          until curl -fsS "$FI_BASE_URL/health/" >/dev/null 2>&1; do
+            if (( SECONDS > deadline )); then
+              echo "::error::backend not healthy on $FI_BASE_URL in 1500s"
+              exit 1
+            fi
+            sleep 5
+          done
+          echo "backend healthy after ${SECONDS}s"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install the Python SDK
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ./python pytest pyyaml
+
+      - name: Sign up an account and write .env.local
+        run: python sdkgen/local_api_key.py --signup --base-url "$FI_BASE_URL" --label "gh${{ github.run_id }}"
+
+      - name: Python live suite (every catalog operation)
+        run: PYTHONPATH=python pytest -q python/tests/platform
+
+      - uses: pnpm/action-setup@v4
+        if: matrix.typescript
+        with:
+          version: 8.15.0
+      - uses: actions/setup-node@v4
+        if: matrix.typescript
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: typescript/futureagi/pnpm-lock.yaml
+      - name: Install the TypeScript SDK
+        if: matrix.typescript
+        working-directory: typescript/futureagi
+        run: pnpm install --ignore-workspace --frozen-lockfile --ignore-scripts
+      - name: TypeScript live suite
+        if: matrix.typescript
+        working-directory: typescript/futureagi
+        run: pnpm run test:live
+
+      - name: Dump the stack on failure
+        if: failure()
+        working-directory: future-agi
+        run: |
+          docker compose -p futureagi-e2e-standalone ps
+          docker compose -p futureagi-e2e-standalone logs --tail 200 app
+
+      - name: Tear the stack down
+        if: always() && steps.boot.outcome != 'skipped'
+        working-directory: future-agi
+        run: docker compose -p futureagi-e2e-standalone down -v --remove-orphans || true
+
+  e2e-tests:
+    name: E2E Tests Pass
+    needs: e2e
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fail closed unless every leg succeeded
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS" | jq 'with_entries(.value |= .result)
+            | to_entries
+            | map(select(.value != "success"))
+            | if length > 0 then ("failing: " + (map(.key) | join(", ")) | halt_error)
+              else "all legs green" end'
