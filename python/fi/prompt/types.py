@@ -76,7 +76,7 @@ class ModelConfig(BaseModel):
     presence_penalty: Optional[float] = Field(default=0, ge=-2, le=2)
     max_tokens: Optional[int] = Field(default=1000, gt=0)
     top_p: Optional[float] = Field(default=1.0, ge=0, le=1)
-    response_format: Optional[dict | str] = None
+    response_format: Optional[Union[dict, str]] = None
     tool_choice: Optional[str] = None
     tools: Optional[List[dict]] = None
 

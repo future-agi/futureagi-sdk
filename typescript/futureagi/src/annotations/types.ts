@@ -19,12 +19,12 @@ export interface Project {
 
 export interface BulkAnnotationResponse {
   message: string;
-  annotationsCreated: number;
-  annotationsUpdated: number;
-  notesCreated: number;
-  succeededCount: number;
-  errorsCount: number;
-  warningsCount: number;
+  annotations_created: number;
+  annotations_updated: number;
+  notes_created: number;
+  succeeded_count: number;
+  errors_count: number;
+  warnings_count: number;
   warnings?: Array<Record<string, any>>;
   errors?: Array<Record<string, any>>;
 }

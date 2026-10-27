@@ -93,8 +93,8 @@ export class PromptLabels {
     } as RequestConfig)) as AxiosResponse;
     const history = (res.data ?? res).results ?? [];
     for (const e of history) {
-      if (String(e.templateVersion) === versionName) {
-        for (const key of ['id', 'versionId', 'executionId']) {
+      if (String(e.template_version) === versionName) {
+        for (const key of ['id', 'version_id', 'execution_id']) {
           if (e[key]) return String(e[key]);
         }
       }
@@ -169,9 +169,9 @@ export async function assignLabelToTemplateVersion(
       params: { template_id: templateId },
     } as RequestConfig)) as AxiosResponse;
     const history = (hist.data ?? hist).results ?? [];
-    const entry = history.find((e: any) => String(e.templateVersion) === version);
+    const entry = history.find((e: any) => String(e.template_version) === version);
     if (!entry) throw new SDKException(`No version '${version}' found for template '${templateName}'`);
-    if (entry.isDraft === true) throw new SDKException('Cannot assign label to a draft version. Commit first.');
+    if (entry.is_draft === true) throw new SDKException('Cannot assign label to a draft version. Commit first.');
 
     // Resolve label id by name
     const labelsResp = (await client.request({
@@ -226,8 +226,8 @@ export async function removeLabelFromTemplateVersion(
     const history = (hist.data ?? hist).results ?? [];
     let versionId: string | undefined;
     for (const e of history) {
-      if (String(e.templateVersion) === version) {
-        for (const key of ['id', 'versionId', 'executionId']) {
+      if (String(e.template_version) === version) {
+        for (const key of ['id', 'version_id', 'execution_id']) {
           if (e[key]) { versionId = String(e[key]); break; }
         }
         break;
