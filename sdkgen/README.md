@@ -12,7 +12,8 @@ future-agi/api_contracts/openapi/swagger.json ──sync_contract.py──▶ sd
                                                                     sdkgen/generator/   (catalog.py → python.py, typescript.py)
                         ┌───────────────────────────────────────────────────┼───────────────────────────────────────┐
      python/fi/platform/models.py                          typescript/futureagi/src/platform/models.ts      (public: response models)
-     python/fi/platform/_generated/resources.py            typescript/futureagi/src/platform/_generated/resources.ts
+     python/fi/platform/resources/base.py                  typescript/futureagi/src/platform/resources/base.ts    (public: resource base classes)
+     python/fi/platform/_operations.py                     typescript/futureagi/src/platform/_operations.ts       (one Operation per call)
      python/fi/platform/resources/__init__.py              typescript/futureagi/src/platform/resources/index.ts
                         │                                                   │
      hand-written: python/fi/platform/{_client,_transport,_pagination,_errors,_resource}.py

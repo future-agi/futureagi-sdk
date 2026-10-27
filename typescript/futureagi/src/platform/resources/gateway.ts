@@ -1,7 +1,7 @@
 // Hand-written additions to `client.gateway`.
 //
 // Scaffolded once by sdkgen/generate.py and never overwritten: methods added here survive
-// regeneration. The generated methods live in `../_generated/resources`.
+// regeneration. The generated methods live in `./base`.
 //
 //   export class Datasets extends DatasetsResource {
 //     async getByName(name: string) {
@@ -10,7 +10,7 @@
 //     }
 //   }
 
-import { GatewayResource } from "../_generated/resources";
+import { GatewayResource } from "./base";
 
 /** `client.gateway`: every generated `gateway.*` method, plus the hand-written additions in this file. */
 export class Gateway extends GatewayResource {}

@@ -1,7 +1,7 @@
 // Hand-written additions to `client.projects`.
 //
 // Scaffolded once by sdkgen/generate.py and never overwritten: methods added here survive
-// regeneration. The generated methods live in `../_generated/resources`.
+// regeneration. The generated methods live in `./base`.
 //
 //   export class Datasets extends DatasetsResource {
 //     async getByName(name: string) {
@@ -10,7 +10,7 @@
 //     }
 //   }
 
-import { ProjectsResource } from "../_generated/resources";
+import { ProjectsResource } from "./base";
 
 /** `client.projects`: every generated `projects.*` method, plus the hand-written additions in this file. */
 export class Projects extends ProjectsResource {}

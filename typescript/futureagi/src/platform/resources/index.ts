@@ -29,6 +29,9 @@ import { Traces } from "./traces";
 import { Usage } from "./usage";
 import { Workspaces } from "./workspaces";
 
+// The generated base classes (nested resources are these) and every method's `params` type.
+export * from "./base";
+
 export interface Resources {
   account: Account;
   agents: Agents;

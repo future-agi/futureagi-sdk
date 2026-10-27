@@ -1,7 +1,7 @@
 // Hand-written additions to `client.traces`.
 //
 // Scaffolded once by sdkgen/generate.py and never overwritten: methods added here survive
-// regeneration. The generated methods live in `../_generated/resources`.
+// regeneration. The generated methods live in `./base`.
 //
 //   export class Datasets extends DatasetsResource {
 //     async getByName(name: string) {
@@ -10,7 +10,7 @@
 //     }
 //   }
 
-import { TracesResource } from "../_generated/resources";
+import { TracesResource } from "./base";
 
 /** `client.traces`: every generated `traces.*` method, plus the hand-written additions in this file. */
 export class Traces extends TracesResource {}

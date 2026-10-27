@@ -1,7 +1,7 @@
 """Hand-written additions to `client.projects`.
 
 Scaffolded once by sdkgen/generate.py and never overwritten: methods added here survive
-regeneration. The generated methods live in `fi.platform._generated.resources`.
+regeneration. The generated methods live in `fi.platform.resources.base`.
 
     class Datasets(DatasetsResource):
         def get_by_name(self, name: str):
@@ -11,7 +11,7 @@ regeneration. The generated methods live in `fi.platform._generated.resources`.
 
 from __future__ import annotations
 
-from .._generated.resources import AsyncProjectsResource, ProjectsResource
+from .base import AsyncProjectsResource, ProjectsResource
 
 
 class Projects(ProjectsResource):

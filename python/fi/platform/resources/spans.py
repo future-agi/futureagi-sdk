@@ -1,15 +1,15 @@
 """Hand-written additions to `client.spans`.
 
 Scaffolded once by sdkgen/generate.py and never overwritten: methods added here survive
-regeneration. The generated methods live in `fi.platform._generated.resources`.
+regeneration. The generated methods live in `fi.platform.resources.base`.
 """
 
 from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from .._generated.resources import AsyncSpansResource, SpansResource
 from .._transport import RequestOptions
+from .base import AsyncSpansResource, SpansResource
 
 INGEST_PATH = "/tracer/observation-span/create_otel_span/"
 

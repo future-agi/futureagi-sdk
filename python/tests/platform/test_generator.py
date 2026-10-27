@@ -49,11 +49,11 @@ def test_scaffolds_are_owned_by_hand():
 
 def test_resources_can_be_swapped_and_extended():
     from fi.platform import Client
-    from fi.platform._generated.resources import (
+    from fi.platform.resources import Datasets
+    from fi.platform.resources.base import (
         DatasetsColumnsResource,
         DatasetsResource,
     )
-    from fi.platform.resources import Datasets
 
     class Columns(DatasetsColumnsResource):
         def mine(self) -> str:

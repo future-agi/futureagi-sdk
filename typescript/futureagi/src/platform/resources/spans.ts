@@ -1,9 +1,9 @@
 // Hand-written additions to `client.spans`.
 //
 // Scaffolded once by sdkgen/generate.py and never overwritten: methods added here survive
-// regeneration. The generated methods live in `../_generated/resources`.
+// regeneration. The generated methods live in `./base`.
 
-import { SpansResource } from "../_generated/resources";
+import { SpansResource } from "./base";
 import type { RequestOptions } from "../transport";
 
 const INGEST_PATH = "/tracer/observation-span/create_otel_span/";

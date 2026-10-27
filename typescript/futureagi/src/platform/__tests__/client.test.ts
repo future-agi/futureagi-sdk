@@ -1,7 +1,8 @@
 // What the catalog guarantees about the generated client, and how it is extended (no backend).
 
 import { Client } from "../client";
-import { DatasetsColumnsResource, DatasetsResource, OP_DATASETS_ROWS_ADD } from "../_generated/resources";
+import { OP_DATASETS_ROWS_ADD } from "../_operations";
+import { DatasetsColumnsResource, DatasetsResource } from "../resources/base";
 import { Datasets } from "../resources/datasets";
 import { resetStabilityWarnings } from "../stability";
 import type { FetchLike, Transport } from "../transport";

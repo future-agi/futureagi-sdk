@@ -143,7 +143,7 @@ def test_multipart_operation_sends_form_fields_and_files(tmp_path):
 def test_files_on_a_json_operation_are_rejected():
     client = _client(lambda r: _dataset_response())
     with pytest.raises(TypeError, match="multipart"):
-        client._transport.request(fp._generated.resources.OP_DATASETS_CREATE, body={"new_dataset_name": "x"}, files={"file": b"x"})
+        client._transport.request(fp._operations.OP_DATASETS_CREATE, body={"new_dataset_name": "x"}, files={"file": b"x"})
 
 
 def test_import_fi_does_not_load_the_platform_client():

@@ -2,7 +2,8 @@
 
 Generated (overwritten on every run)
     python/fi/platform/models.py                  response models (public, `fi.platform.models`)
-    python/fi/platform/_generated/resources.py    <Name>Resource / Async<Name>Resource classes
+    python/fi/platform/_operations.py             one `Operation` per call (method, path, unwrap, pagination)
+    python/fi/platform/resources/base.py          <Name>Resource / Async<Name>Resource classes (public, documented)
     python/fi/platform/resources/__init__.py      the Resources mixins the clients inherit
 
 Scaffolded (written once, then owned by hand)
@@ -119,12 +120,26 @@ def emit_models(spec: dict, ops: list[Op]) -> str:
 
 
 # --------------------------------------------------------------------------- #
-# resources.py
+# _operations.py and resources/base.py
 # --------------------------------------------------------------------------- #
 
 
 def op_constant(op: Op) -> str:
     return "OP_" + op.id.upper().replace(".", "_")
+
+
+def emit_operations(ops: list[Op]) -> str:
+    out = [
+        HEADER,
+        '"""One `Operation` per generated call: method, path, response envelope key, pagination."""\n\n',
+        "from ._transport import Operation\n\n",
+    ]
+    for op in sdk_ops(ops):
+        spec = {"id": op.id, "method": op.method, "path": op.path, "unwrap": op.unwrap, "pagination": op.pagination}
+        if op.multipart:
+            spec["multipart"] = True
+        out.append(f"{op_constant(op)} = Operation(**{spec!r})\n")
+    return "".join(out)
 
 
 def _return_annotation(op: Op, *, is_async: bool) -> tuple[str, str | None]:
@@ -192,11 +207,11 @@ def _method(op: Op, *, is_async: bool) -> str:
     model_arg = model or "None"
     if op.pagination:
         fn = "apaginate" if is_async else "paginate"
-        lines.append(f"        return self._t.{fn}({op_constant(op)}, path=path, query=query, model={model_arg}, options=options)\n")
+        lines.append(f"        return self._t.{fn}(_ops.{op_constant(op)}, path=path, query=query, model={model_arg}, options=options)\n")
     else:
         prefix = "await self._t.acall" if is_async else "self._t.call"
         files_arg = ", files=files" if op.multipart else ""
-        lines.append(f"        return {prefix}({op_constant(op)}, path=path, query=query, body=body{files_arg}, model={model_arg}, options=options)\n")
+        lines.append(f"        return {prefix}(_ops.{op_constant(op)}, path=path, query=query, body=body{files_arg}, model={model_arg}, options=options)\n")
     return "".join(lines)
 
 
@@ -221,22 +236,20 @@ def emit_resources(ops: list[Op]) -> str:
     tree = namespace_tree(ops)
     out = [
         HEADER,
-        '"""Resource classes. Names come from catalog ids, so they match the MCP tools.\n\n',
-        "The hand-written subclasses in `fi.platform.resources` are what `Client` exposes; add\n",
-        'custom methods there, not here.\n"""\n\n',
+        '"""Resource base classes, one per catalog namespace: every generated method lives here.\n\n',
+        "Names come from catalog ids, so they match the MCP tools. `Client` exposes the hand-written\n",
+        "subclasses in `fi.platform.resources` (`Datasets(DatasetsResource)`); nested resources\n",
+        "(`client.datasets.rows`) are these classes directly. Add custom methods to the subclasses,\n",
+        'not here.\n"""\n\n',
         "from __future__ import annotations\n\n",
         "{typing}",
+        "from .. import _operations as _ops\n",
         "from .. import models\n",
         "from .._pagination import AsyncPager, SyncPager\n",
         "from .._resource import Resource\n",
         "from .._stability import _stability\n",
-        "from .._transport import (\n    AsyncTransport,\n    FileInput,\n    Operation,\n    RequestOptions,\n    SyncTransport,\n)\n\n",
+        "from .._transport import (\n    AsyncTransport,\n    FileInput,\n    RequestOptions,\n    SyncTransport,\n)\n",
     ]
-    for op in sdk_ops(ops):
-        spec = {"id": op.id, "method": op.method, "path": op.path, "unwrap": op.unwrap, "pagination": op.pagination}
-        if op.multipart:
-            spec["multipart"] = True
-        out.append(f"{op_constant(op)} = Operation(**{spec!r})\n")
     for is_async in (False, True):
         for ns in sorted(tree, key=lambda ns: (-len(ns), ns)):  # children before parents
             out.append(_resource_class(tree, ns, is_async=is_async))
@@ -308,14 +321,14 @@ def scaffold_resource(ns: tuple[str, ...]) -> str:
     return (
         f'"""Hand-written additions to `client.{ns[0]}`.\n\n'
         "Scaffolded once by sdkgen/generate.py and never overwritten: methods added here survive\n"
-        "regeneration. The generated methods live in `fi.platform._generated.resources`.\n\n"
+        "regeneration. The generated methods live in `fi.platform.resources.base`.\n\n"
         "    class Datasets(DatasetsResource):\n"
         "        def get_by_name(self, name: str):\n"
         "            ...                                     # compose generated methods, or\n"
         '            return self._t.raw("GET", "/some/path/")  # call an endpoint the catalog lacks\n'
         '"""\n\n'
         "from __future__ import annotations\n\n"
-        f"from .._generated.resources import {', '.join(sorted([async_cls, sync_cls]))}\n\n\n"
+        f"from .base import {', '.join(sorted([async_cls, sync_cls]))}\n\n\n"
         f'class {public_class(ns, is_async=False)}({sync_cls}):\n    """{sync_doc}"""\n\n\n'
         f'class {public_class(ns, is_async=True)}({async_cls}):\n    """{async_doc}"""\n'
     )

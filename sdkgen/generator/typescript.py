@@ -2,7 +2,8 @@
 
 Generated (overwritten on every run)
     typescript/futureagi/src/platform/models.ts                  response interfaces (public, `@future-agi/sdk/platform/models`)
-    typescript/futureagi/src/platform/_generated/resources.ts    <Name>Resource classes + params types
+    typescript/futureagi/src/platform/_operations.ts             one `Operation` per call
+    typescript/futureagi/src/platform/resources/base.ts          <Name>Resource classes + params types (public, documented)
     typescript/futureagi/src/platform/resources/index.ts         what `Client` exposes
 
 Scaffolded (written once, then owned by hand)
@@ -115,12 +116,26 @@ def emit_models(spec: dict, ops: list[Op]) -> str:
 
 
 # --------------------------------------------------------------------------- #
-# resources.ts
+# _operations.ts and resources/base.ts
 # --------------------------------------------------------------------------- #
 
 
 def op_constant(op: Op) -> str:
     return "OP_" + op.id.upper().replace(".", "_")
+
+
+def emit_operations(ops: list[Op]) -> str:
+    out = [
+        HEADER,
+        "// One `Operation` per generated call: method, path, response envelope key, pagination.\n\n",
+        "import type { Operation } from \"./transport\";\n\n",
+    ]
+    for op in sdk_ops(ops):
+        spec = {"id": op.id, "method": op.method, "path": op.path, "unwrap": op.unwrap, "pagination": op.pagination}
+        if op.multipart:
+            spec["multipart"] = True
+        out.append(f"export const {op_constant(op)}: Operation = {json.dumps(spec)};\n")
+    return "".join(out)
 
 
 def _return_type(op: Op) -> str:
@@ -179,7 +194,7 @@ def _method(op: Op, fields: list[Param]) -> str:
         parts.append(f"files: {{ {uploads} }}")
     call = "paginate" if op.pagination else "call"
     generic = _return_type(op)[len("Pager<") if op.pagination else len("Promise<") : -1]
-    lines.append(f"    return this._t.{call}<{generic}>({op_constant(op)}, {{ {', '.join(parts)} }}, options);\n")
+    lines.append(f"    return this._t.{call}<{generic}>(ops.{op_constant(op)}, {{ {', '.join(parts)} }}, options);\n")
     lines.append("  }\n")
     return "".join(lines)
 
@@ -206,21 +221,19 @@ def emit_resources(ops: list[Op]) -> str:
     tree = namespace_tree(ops)
     out = [
         HEADER,
-        "// Resource classes. Names come from catalog ids, so they match the Python SDK and the MCP tools.\n",
-        "// The hand-written subclasses in `../resources` are what `Client` exposes; add custom methods there.\n\n",
+        "// Resource base classes, one per catalog namespace: every generated method lives here, with\n",
+        "// the `params` type of each method. Names come from catalog ids, so they match the Python SDK\n",
+        "// and the MCP tools. `Client` exposes the hand-written subclasses in this folder\n",
+        "// (`Datasets extends DatasetsResource`); nested resources (`client.datasets.rows`) are these\n",
+        "// classes directly. Add custom methods to the subclasses, not here.\n\n",
         "/* eslint-disable @typescript-eslint/no-unused-vars */\n",
+        "import * as ops from \"../_operations\";\n",
         "import type * as models from \"../models\";\n",
         "import { Pager } from \"../pagination\";\n",
         "import { Resource } from \"../resource\";\n",
         "import { warnStability } from \"../stability\";\n",
-        "import type { FileInput, Operation, RequestOptions, Transport } from \"../transport\";\n\n",
+        "import type { FileInput, RequestOptions, Transport } from \"../transport\";\n\n",
     ]
-    for op in sdk_ops(ops):
-        spec = {"id": op.id, "method": op.method, "path": op.path, "unwrap": op.unwrap, "pagination": op.pagination}
-        if op.multipart:
-            spec["multipart"] = True
-        out.append(f"export const {op_constant(op)}: Operation = {json.dumps(spec)};\n")
-    out.append("\n")
     for ns in sorted(tree):
         for op in sorted(tree[ns], key=lambda o: o.method_name):
             out.append(_params_interface(op)[0])
@@ -249,6 +262,7 @@ def emit_resource_index(ops: list[Op]) -> str:
     ]
     for ns in roots:
         out.append(f"import {{ {ts_public_class(ns)} }} from \"./{ns[0]}\";\n")
+    out.append("\n// The generated base classes (nested resources are these) and every method's `params` type.\nexport * from \"./base\";\n")
     out.append("\nexport interface Resources {\n")
     for ns in roots:
         out.append(f"  {ts_attr(ns[0])}: {ts_public_class(ns)};\n")
@@ -283,7 +297,7 @@ def scaffold_resource(ns: tuple[str, ...]) -> str:
         f"// Hand-written additions to `client.{ts_attr(ns[0])}`.\n"
         "//\n"
         "// Scaffolded once by sdkgen/generate.py and never overwritten: methods added here survive\n"
-        "// regeneration. The generated methods live in `../_generated/resources`.\n"
+        "// regeneration. The generated methods live in `./base`.\n"
         "//\n"
         "//   export class Datasets extends DatasetsResource {\n"
         "//     async getByName(name: string) {\n"
@@ -291,7 +305,7 @@ def scaffold_resource(ns: tuple[str, ...]) -> str:
         '//       return this._t.raw("GET", "/some/path/", {});    // call an endpoint the catalog lacks\n'
         "//     }\n"
         "//   }\n\n"
-        f"import {{ {ts_class(ns)} }} from \"../_generated/resources\";\n\n"
+        f"import {{ {ts_class(ns)} }} from \"./base\";\n\n"
         f"/** {scaffold_doc(ns)} */\n"
         f"export class {ts_public_class(ns)} extends {ts_class(ns)} {{}}\n"
     )

@@ -1,7 +1,7 @@
 // Hand-written additions to `client.simulation`.
 //
 // Scaffolded once by sdkgen/generate.py and never overwritten: methods added here survive
-// regeneration. The generated methods live in `../_generated/resources`.
+// regeneration. The generated methods live in `./base`.
 //
 //   export class Datasets extends DatasetsResource {
 //     async getByName(name: string) {
@@ -10,7 +10,7 @@
 //     }
 //   }
 
-import { SimulationResource } from "../_generated/resources";
+import { SimulationResource } from "./base";
 
 /** `client.simulation`: every generated `simulation.*` method, plus the hand-written additions in this file. */
 export class Simulation extends SimulationResource {}

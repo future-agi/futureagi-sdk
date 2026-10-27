@@ -6,7 +6,7 @@ import { join } from "node:path";
 
 import { Client } from "../client";
 import { APIConnectionError, APIError, BadRequestError, InternalServerError, NotFoundError } from "../errors";
-import { OP_DATASETS_CREATE } from "../_generated/resources";
+import { OP_DATASETS_CREATE } from "../_operations";
 import type { FetchLike } from "../transport";
 
 const BASE = "http://backend.test";
