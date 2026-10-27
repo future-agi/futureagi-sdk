@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 - `client.spans.ingest()` (both SDKs): send spans straight to the tracer.
 - `fi.gateway`: the Agent Command Center data-plane client (vendored from `agent-command-center-sdk`), `Gateway` / `AsyncGateway`.
 - CI: `ci.yml` (generated code current, Python 3.9/3.11/3.13 unit suite, TypeScript type check, tests and build) and `e2e.yml` (the live suites against the Standalone backend, booted from the monorepo's compose files and the released image, with a fresh account from `sdkgen/local_api_key.py --signup`). `FI_E2E_REQUIRED=1` turns a skipped live suite into a failure.
+- Release cycle: a backend release is synced in by the monorepo's `sdk-sync` workflow (contract slice, regenerated clients, `sdkgen/contracts/BACKEND_VERSION`), promoted from `dev` to `main` (`promote.yml`), versioned by release-please (`python-vX.Y.Z`, `typescript-vX.Y.Z`, per-package changelogs) and published to PyPI and npm (`publish.yml`).
 
 ### Fixed
 - TypeScript package: `form-data` and `@jest/globals` are now declared, so a fresh `pnpm install` builds and tests.

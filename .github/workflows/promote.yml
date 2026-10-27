@@ -1,0 +1,74 @@
+name: Promote dev to main
+
+# Keeps one open pull request from dev to main, the release PR of this
+# repository: everything that reaches dev shows up there, CI and E2E run on
+# it, and merging it (as a merge commit, like the monorepo's release PR) hands
+# the commits to release-please on main.
+#
+# When the push to dev came from the monorepo's sdk-sync workflow (a backend
+# release synced into the contract), the PR is set to merge itself once the
+# checks pass, so a backend release reaches PyPI and npm without a human in
+# the loop. Any other push leaves the PR open for someone to merge.
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: promote-dev-to-main
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # A PR opened with GITHUB_TOKEN gets no CI runs; the release bot app
+      # (the one release-please uses) makes the PR like a person would.
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+          owner: future-agi
+          repositories: futureagi-sdk
+
+      - name: Open or update the dev -> main pull request
+        id: pr
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          number=$(gh pr list --base main --head dev --state open --json number --jq '.[0].number // empty')
+          if [ -z "$number" ]; then
+            if [ "$(gh api "repos/$GH_REPO/compare/main...dev" --jq .ahead_by)" = "0" ]; then
+              echo "dev has nothing main lacks"
+              exit 0
+            fi
+            gh pr create --base main --head dev \
+              --title "chore: release dev to main" \
+              --body "$(printf '%s\n\n%s' \
+                "Everything on \`dev\` since the last release. Merge with a **merge commit**; release-please then opens the version PR(s) on main." \
+                "Opened by .github/workflows/promote.yml.")"
+            number=$(gh pr list --base main --head dev --state open --json number --jq '.[0].number')
+          fi
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          echo "dev -> main: #$number"
+
+      - name: Merge automatically when the push was a backend sync
+        if: >-
+          ${{ steps.pr.outputs.number != ''
+              && (startsWith(github.event.head_commit.message, 'feat(contract): sync with backend')
+                  || startsWith(github.event.head_commit.message, 'chore(contract): sync with backend')) }}
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          # Needs "Allow auto-merge" in the repository settings and required
+          # checks on main (CI Pass, E2E Tests Pass); without them this is a no-op.
+          gh pr merge --auto --merge "${{ steps.pr.outputs.number }}" \
+            || echo "::warning::auto-merge not enabled on this repository; merge #${{ steps.pr.outputs.number }} by hand"

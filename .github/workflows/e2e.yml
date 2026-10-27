@@ -7,10 +7,13 @@ name: E2E
 # suites: python/tests/platform calls every catalog operation,
 # src/platform/__tests__/live.test.ts covers the TypeScript transport.
 #
-# The backend is the released image (futureagi/standalone:latest) unless the
-# run is dispatched with another tag. The monorepo runs the same suites against
-# every pull request's own build in its E2E CI, so a backend change that breaks
-# the SDK fails there before it is released.
+# The backend is the release the contract slice came from
+# (sdkgen/contracts/BACKEND_VERSION, written by sync_contract.py and bumped by
+# the monorepo's sdk-sync workflow on every release) unless the run is
+# dispatched with another tag; the nightly run uses :latest to catch drift.
+# The monorepo runs the same suites against every pull request's own build in
+# its E2E CI, so a backend change that breaks the SDK fails there before it is
+# released.
 
 on:
   pull_request:
@@ -24,8 +27,8 @@ on:
   workflow_dispatch:
     inputs:
       backend-version:
-        description: futureagi/standalone image tag to test against
-        default: latest
+        description: "futureagi/standalone image tag to test against (default: sdkgen/contracts/BACKEND_VERSION)"
+        required: false
         type: string
       backend-ref:
         description: future-agi ref that provides the compose files
@@ -40,7 +43,6 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  BACKEND_VERSION: ${{ inputs.backend-version || 'latest' }}
   BACKEND_REF: ${{ inputs.backend-ref || 'main' }}
   # e2e/stack/standalone-e2e.env maps the app's API onto this port.
   FI_BASE_URL: http://localhost:8100
@@ -63,6 +65,20 @@ jobs:
             typescript: true
     steps:
       - uses: actions/checkout@v4
+
+      - name: Pick the backend image tag
+        env:
+          DISPATCHED: ${{ inputs.backend-version }}
+        run: |
+          if [ -n "$DISPATCHED" ]; then
+            version="$DISPATCHED"
+          elif [ "${{ github.event_name }}" = schedule ]; then
+            version=latest
+          else
+            version=$(tr -d '[:space:]' < sdkgen/contracts/BACKEND_VERSION)
+          fi
+          echo "BACKEND_VERSION=${version:?no backend version}" >> "$GITHUB_ENV"
+          echo "backend: futureagi/standalone:$version"
 
       - name: Check out the monorepo's stack definition
         # Only the files docker-compose.yml and the E2E overlay mount; the

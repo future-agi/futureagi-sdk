@@ -188,6 +188,17 @@ Two workflows in this repository, both on every pull request and on pushes to `d
 
 The monorepo's E2E CI (`future-agi/.github/workflows/e2e-ci.yml`, PRs and pushes on `dev` and `main`) runs the same two live suites against every backend build, so a backend change that breaks the SDK fails there before it is released. It checks out this repository at the branch named like the monorepo PR's branch if one exists, else the base branch (`dev` or `main`).
 
+## Release cycle
+
+A backend release becomes an SDK release on its own:
+
+1. **Backend release** (`vX.Y.Z` tag in the monorepo, images published by `release-images`) triggers the monorepo's `sdk-sync` workflow. It runs `sync_contract.py --backend-version vX.Y.Z` and `generate.py` against that tag's `swagger.json` and opens a pull request here on `dev` (`feat(contract): sync with backend vX.Y.Z`, or `chore(contract): ...` when nothing generated changed). The PR's E2E run tests against `futureagi/standalone:vX.Y.Z`, the pin in `sdkgen/contracts/BACKEND_VERSION`, and the PR merges itself when `CI Pass` and `E2E Tests Pass` are green.
+2. **`promote.yml`** keeps one `dev → main` pull request open (the SDK's release PR, merged with a merge commit as in the monorepo). A push to `dev` that came from the sync merges it automatically; anything else waits for a person.
+3. **`release-please.yml`** on `main` opens the version PR from the conventional commits: `python/pyproject.toml` + `python/fi/__init__.py` and `typescript/futureagi/package.json`, with a changelog per package (`release-please-config.json`, `.release-please-manifest.json`). `feat` bumps the minor version, `fix` the patch. It merges itself once CI passes and creates the tags `python-vX.Y.Z` / `typescript-vX.Y.Z` and their GitHub releases.
+4. **`publish.yml`** on a published release builds the package at that tag, checks the version matches the tag, and uploads: PyPI through trusted publishing (environment `pypi`), npm with `NPM_TOKEN` and provenance. Skips a version that is already there.
+
+One-time setup, repository admin: install the org's release bot app on this repository and expose `RELEASE_BOT_APP_ID` / `RELEASE_BOT_PRIVATE_KEY` (the monorepo's release-please secrets; pull requests opened with the default token get no CI runs); enable "Allow auto-merge"; require `CI Pass` and `E2E Tests Pass` on `dev` and `main`; register the trusted publisher on PyPI (`futureagi`, workflow `publish.yml`, environment `pypi`); add `NPM_TOKEN`. Without the app secrets the sync still opens its PR with a warning instead of auto-merging; without auto-merge every step above is the same, with a human clicking merge.
+
 - Run `generate.py --check`, `pytest python/tests/platform` and `pnpm test` in CI against a backend started from the monorepo.
 - Move `operations.yaml` into the monorepo next to the MCP catalog, so `tool_generation.py` reads the MCP entries from it.
 - Deprecate the hand-written modules (`fi.datasets`, `fi.prompt`, `fi.kb`, `fi.queues`, `fi.annotations`, and their TypeScript counterparts) in favour of the generated client, then remove them in a major release.

@@ -1,0 +1,105 @@
+name: Publish
+
+# Ships a release that release-please cut: the python-vX.Y.Z tag goes to PyPI,
+# the typescript-vX.Y.Z tag to npm. Also runnable by hand for a tag that was
+# published but failed to upload.
+#
+# PyPI uses trusted publishing (no secret): register this repository and
+# workflow with the `pypi` environment on https://pypi.org/manage/project/futureagi/settings/publishing/.
+# npm needs NPM_TOKEN (an automation token with publish rights on @future-agi).
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish (python-vX.Y.Z or typescript-vX.Y.Z)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  TAG: ${{ inputs.tag || github.event.release.tag_name }}
+
+jobs:
+  python:
+    name: PyPI
+    if: startsWith(inputs.tag || github.event.release.tag_name, 'python-v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install --quiet --upgrade pip build
+          python -m build python
+          version=$(python - <<'EOF'
+          import pathlib, re
+          print(re.search(r'^version = "(.+)"$', pathlib.Path("python/pyproject.toml").read_text(), re.M).group(1))
+          EOF
+          )
+          [ "python-v$version" = "$TAG" ] || { echo "::error::pyproject.toml is $version, tag is $TAG"; exit 1; }
+          ls -l python/dist
+      - name: Install the wheel and import it
+        run: |
+          python -m pip install --quiet python/dist/*.whl
+          python -c "import fi, fi.platform, fi.gateway; print('futureagi', fi.__version__)"
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python/dist
+          skip-existing: true
+
+  typescript:
+    name: npm
+    if: startsWith(inputs.tag || github.event.release.tag_name, 'typescript-v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    defaults:
+      run:
+        working-directory: typescript/futureagi
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+          cache-dependency-path: typescript/futureagi/pnpm-lock.yaml
+      - name: Install and build
+        run: |
+          pnpm install --ignore-workspace --frozen-lockfile --ignore-scripts
+          pnpm run build
+          version=$(node -p "require('./package.json').version")
+          [ "typescript-v$version" = "$TAG" ] || { echo "::error::package.json is $version, tag is $TAG"; exit 1; }
+      - name: Publish unless this version is already on npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "$name@$version is already on npm"
+            exit 0
+          fi
+          [ -n "$NODE_AUTH_TOKEN" ] || { echo "::error::NPM_TOKEN is not set"; exit 1; }
+          pnpm publish --access public --provenance --no-git-checks

@@ -1,16 +1,21 @@
 """Copy the slice of the monorepo contract that the catalog uses into contracts/.
 
-In production the SDK repo would pull the whole (converted) contract from the
-monorepo. The POC keeps a small slice so it is easy to read and diff.
-
     python sdkgen/sync_contract.py /path/to/future-agi/api_contracts/openapi/swagger.json
+    python sdkgen/sync_contract.py swagger.json --backend-version v1.54.0   # also pin the release
+
+Only the operations the catalog names, plus every definition they reach, are
+kept, so the slice is small enough to read and its diff shows the API change.
+`--backend-version` records the backend release the slice came from in
+contracts/BACKEND_VERSION; .github/workflows/e2e.yml tests against that image.
+The monorepo's sdk-sync workflow runs both on every backend release.
 """
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
-import sys
+import re
 from pathlib import Path
 
 import yaml
@@ -18,6 +23,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "sdkgen" / "catalog" / "operations.yaml"
 OUT = ROOT / "sdkgen" / "contracts" / "swagger.json"
+VERSION_FILE = ROOT / "sdkgen" / "contracts" / "BACKEND_VERSION"
 
 
 def _refs(node, found: set[str]) -> None:
@@ -32,8 +38,8 @@ def _refs(node, found: set[str]) -> None:
             _refs(value, found)
 
 
-def main(source: str) -> None:
-    spec = json.loads(Path(source).read_text())
+def sync(source: Path) -> str:
+    spec = json.loads(source.read_text())
     catalog = yaml.safe_load(CATALOG.read_text())
 
     paths: dict = {}
@@ -60,16 +66,28 @@ def main(source: str) -> None:
         "info": spec["info"],
         "securityDefinitions": spec.get("securityDefinitions", {}),
         "security": spec.get("security", []),
-        "x-source-sha256": hashlib.sha256(Path(source).read_bytes()).hexdigest(),
+        "x-source-sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
         "paths": dict(sorted(paths.items())),
         "definitions": {name: spec["definitions"][name] for name in sorted(done)},
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, indent=2) + "\n")
-    print(f"wrote {OUT.relative_to(ROOT)}: {len(paths)} paths, {len(done)} definitions")
+    return f"wrote {OUT.relative_to(ROOT)}: {len(paths)} paths, {len(done)} definitions"
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Copy the catalog's slice of the monorepo contract into contracts/.")
+    parser.add_argument("source", help="path to future-agi/api_contracts/openapi/swagger.json")
+    parser.add_argument("--backend-version", help="backend release tag (vX.Y.Z) to record in contracts/BACKEND_VERSION")
+    args = parser.parse_args()
+    if args.backend_version and not re.fullmatch(r"v\d+\.\d+\.\d+", args.backend_version):
+        parser.error("--backend-version must look like v1.54.0")
+
+    print(sync(Path(args.source)))
+    if args.backend_version:
+        VERSION_FILE.write_text(args.backend_version + "\n")
+        print(f"wrote {VERSION_FILE.relative_to(ROOT)}: {args.backend_version}")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        sys.exit(__doc__)
-    main(sys.argv[1])
+    main()

@@ -1,4 +1,4 @@
-__version__ = "0.6.14"
+__version__ = "0.6.14"  # x-release-please-version
 
 # Allow sibling `fi.*` packages (notably `fi.evals` shipped from the
 # ai-evaluation repo) to extend this namespace when both are installed.
