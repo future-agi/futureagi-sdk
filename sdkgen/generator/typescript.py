@@ -1,7 +1,7 @@
 """TypeScript emitter: the same catalog as `client.<resource>.<method>()` for `@future-agi/sdk`.
 
 Generated (overwritten on every run)
-    typescript/futureagi/src/platform/_generated/models.ts       response interfaces
+    typescript/futureagi/src/platform/models.ts                  response interfaces (public, `@future-agi/sdk/platform/models`)
     typescript/futureagi/src/platform/_generated/resources.ts    <Name>Resource classes + params types
     typescript/futureagi/src/platform/resources/index.ts         what `Client` exposes
 
@@ -209,7 +209,7 @@ def emit_resources(ops: list[Op]) -> str:
         "// Resource classes. Names come from catalog ids, so they match the Python SDK and the MCP tools.\n",
         "// The hand-written subclasses in `../resources` are what `Client` exposes; add custom methods there.\n\n",
         "/* eslint-disable @typescript-eslint/no-unused-vars */\n",
-        "import type * as models from \"./models\";\n",
+        "import type * as models from \"../models\";\n",
         "import { Pager } from \"../pagination\";\n",
         "import { Resource } from \"../resource\";\n",
         "import { warnStability } from \"../stability\";\n",
@@ -272,6 +272,12 @@ def emit_resource_index(ops: list[Op]) -> str:
     return "".join(out)
 
 
+def scaffold_doc(ns: tuple[str, ...]) -> str:
+    """The scaffold class's JSDoc: the reference pages show it as the summary."""
+    attr = ts_attr(ns[0])
+    return f"`client.{attr}`: every generated `{attr}.*` method, plus the hand-written additions in this file."
+
+
 def scaffold_resource(ns: tuple[str, ...]) -> str:
     return (
         f"// Hand-written additions to `client.{ts_attr(ns[0])}`.\n"
@@ -286,5 +292,6 @@ def scaffold_resource(ns: tuple[str, ...]) -> str:
         "//     }\n"
         "//   }\n\n"
         f"import {{ {ts_class(ns)} }} from \"../_generated/resources\";\n\n"
+        f"/** {scaffold_doc(ns)} */\n"
         f"export class {ts_public_class(ns)} extends {ts_class(ns)} {{}}\n"
     )

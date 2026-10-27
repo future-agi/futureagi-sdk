@@ -15,8 +15,8 @@ from .._generated.resources import AgentsResource, AsyncAgentsResource
 
 
 class Agents(AgentsResource):
-    pass
+    """`client.agents`: every generated `agents.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncAgents(AsyncAgentsResource):
-    pass
+    """`client.agents` for `AsyncClient`: the same methods as `Agents`, awaited."""

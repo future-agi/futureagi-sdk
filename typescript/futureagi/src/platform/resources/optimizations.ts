@@ -12,4 +12,5 @@
 
 import { OptimizationsResource } from "../_generated/resources";
 
+/** `client.optimizations`: every generated `optimizations.*` method, plus the hand-written additions in this file. */
 export class Optimizations extends OptimizationsResource {}

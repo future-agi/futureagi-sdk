@@ -11,6 +11,16 @@
       "import": "./dist/esm/index.js",
       "require": "./dist/src/index.js",
       "types": "./dist/esm/index.d.ts"
+    },
+    "./platform": {
+      "import": "./dist/esm/platform/index.js",
+      "require": "./dist/src/platform/index.js",
+      "types": "./dist/esm/platform/index.d.ts"
+    },
+    "./platform/models": {
+      "import": "./dist/esm/platform/models.js",
+      "require": "./dist/src/platform/models.js",
+      "types": "./dist/esm/platform/models.d.ts"
     }
   },
   "files": [

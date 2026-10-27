@@ -12,4 +12,5 @@
 
 import { AlertsResource } from "../_generated/resources";
 
+/** `client.alerts`: every generated `alerts.*` method, plus the hand-written additions in this file. */
 export class Alerts extends AlertsResource {}

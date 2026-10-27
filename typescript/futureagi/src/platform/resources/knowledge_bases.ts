@@ -12,4 +12,5 @@
 
 import { KnowledgeBasesResource } from "../_generated/resources";
 
+/** `client.knowledgeBases`: every generated `knowledgeBases.*` method, plus the hand-written additions in this file. */
 export class KnowledgeBases extends KnowledgeBasesResource {}

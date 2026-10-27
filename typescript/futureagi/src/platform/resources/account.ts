@@ -12,4 +12,5 @@
 
 import { AccountResource } from "../_generated/resources";
 
+/** `client.account`: every generated `account.*` method, plus the hand-written additions in this file. */
 export class Account extends AccountResource {}

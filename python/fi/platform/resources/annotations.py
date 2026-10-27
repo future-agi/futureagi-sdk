@@ -15,8 +15,8 @@ from .._generated.resources import AnnotationsResource, AsyncAnnotationsResource
 
 
 class Annotations(AnnotationsResource):
-    pass
+    """`client.annotations`: every generated `annotations.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncAnnotations(AsyncAnnotationsResource):
-    pass
+    """`client.annotations` for `AsyncClient`: the same methods as `Annotations`, awaited."""

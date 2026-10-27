@@ -15,8 +15,8 @@ from .._generated.resources import AsyncErrorClustersResource, ErrorClustersReso
 
 
 class ErrorClusters(ErrorClustersResource):
-    pass
+    """`client.error_clusters`: every generated `error_clusters.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncErrorClusters(AsyncErrorClustersResource):
-    pass
+    """`client.error_clusters` for `AsyncClient`: the same methods as `ErrorClusters`, awaited."""

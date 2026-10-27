@@ -12,4 +12,5 @@
 
 import { EvalsResource } from "../_generated/resources";
 
+/** `client.evals`: every generated `evals.*` method, plus the hand-written additions in this file. */
 export class Evals extends EvalsResource {}

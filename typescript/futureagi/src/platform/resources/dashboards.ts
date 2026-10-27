@@ -12,4 +12,5 @@
 
 import { DashboardsResource } from "../_generated/resources";
 
+/** `client.dashboards`: every generated `dashboards.*` method, plus the hand-written additions in this file. */
 export class Dashboards extends DashboardsResource {}

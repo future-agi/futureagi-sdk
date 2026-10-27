@@ -12,4 +12,5 @@
 
 import { TracesResource } from "../_generated/resources";
 
+/** `client.traces`: every generated `traces.*` method, plus the hand-written additions in this file. */
 export class Traces extends TracesResource {}

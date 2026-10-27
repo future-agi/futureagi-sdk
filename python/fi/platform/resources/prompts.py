@@ -15,8 +15,8 @@ from .._generated.resources import AsyncPromptsResource, PromptsResource
 
 
 class Prompts(PromptsResource):
-    pass
+    """`client.prompts`: every generated `prompts.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncPrompts(AsyncPromptsResource):
-    pass
+    """`client.prompts` for `AsyncClient`: the same methods as `Prompts`, awaited."""

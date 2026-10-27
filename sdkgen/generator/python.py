@@ -1,7 +1,7 @@
 """Python emitter: pydantic models, resource classes, and the hand-written extension points.
 
 Generated (overwritten on every run)
-    python/fi/platform/_generated/models.py       response models
+    python/fi/platform/models.py                  response models (public, `fi.platform.models`)
     python/fi/platform/_generated/resources.py    <Name>Resource / Async<Name>Resource classes
     python/fi/platform/resources/__init__.py      the Resources mixins the clients inherit
 
@@ -226,11 +226,11 @@ def emit_resources(ops: list[Op]) -> str:
         'custom methods there, not here.\n"""\n\n',
         "from __future__ import annotations\n\n",
         "{typing}",
+        "from .. import models\n",
         "from .._pagination import AsyncPager, SyncPager\n",
         "from .._resource import Resource\n",
         "from .._stability import _stability\n",
-        "from .._transport import (\n    AsyncTransport,\n    FileInput,\n    Operation,\n    RequestOptions,\n    SyncTransport,\n)\n",
-        "from . import models\n\n",
+        "from .._transport import (\n    AsyncTransport,\n    FileInput,\n    Operation,\n    RequestOptions,\n    SyncTransport,\n)\n\n",
     ]
     for op in sdk_ops(ops):
         spec = {"id": op.id, "method": op.method, "path": op.path, "unwrap": op.unwrap, "pagination": op.pagination}
@@ -293,8 +293,18 @@ def emit_resource_index(ops: list[Op]) -> str:
     return "".join(out)
 
 
+def scaffold_docstrings(ns: tuple[str, ...]) -> tuple[str, str]:
+    """Class docstrings of the (sync, async) scaffold: the reference pages show them as the summary."""
+    attr = ns[0]
+    return (
+        f"`client.{attr}`: every generated `{attr}.*` method, plus the hand-written additions in this module.",
+        f"`client.{attr}` for `AsyncClient`: the same methods as `{public_class(ns, is_async=False)}`, awaited.",
+    )
+
+
 def scaffold_resource(ns: tuple[str, ...]) -> str:
     sync_cls, async_cls = generated_class(ns, is_async=False), generated_class(ns, is_async=True)
+    sync_doc, async_doc = scaffold_docstrings(ns)
     return (
         f'"""Hand-written additions to `client.{ns[0]}`.\n\n'
         "Scaffolded once by sdkgen/generate.py and never overwritten: methods added here survive\n"
@@ -306,6 +316,6 @@ def scaffold_resource(ns: tuple[str, ...]) -> str:
         '"""\n\n'
         "from __future__ import annotations\n\n"
         f"from .._generated.resources import {', '.join(sorted([async_cls, sync_cls]))}\n\n\n"
-        f"class {public_class(ns, is_async=False)}({sync_cls}):\n    pass\n\n\n"
-        f"class {public_class(ns, is_async=True)}({async_cls}):\n    pass\n"
+        f'class {public_class(ns, is_async=False)}({sync_cls}):\n    """{sync_doc}"""\n\n\n'
+        f'class {public_class(ns, is_async=True)}({async_cls}):\n    """{async_doc}"""\n'
     )

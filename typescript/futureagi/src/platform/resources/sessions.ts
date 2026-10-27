@@ -12,4 +12,5 @@
 
 import { SessionsResource } from "../_generated/resources";
 
+/** `client.sessions`: every generated `sessions.*` method, plus the hand-written additions in this file. */
 export class Sessions extends SessionsResource {}

@@ -12,4 +12,5 @@
 
 import { ErrorClustersResource } from "../_generated/resources";
 
+/** `client.errorClusters`: every generated `errorClusters.*` method, plus the hand-written additions in this file. */
 export class ErrorClusters extends ErrorClustersResource {}

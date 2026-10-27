@@ -15,6 +15,8 @@ INGEST_PATH = "/tracer/observation-span/create_otel_span/"
 
 
 class Spans(SpansResource):
+    """`client.spans`: every generated `spans.*` method, plus `ingest()`."""
+
     def ingest(self, spans: List[Dict[str, Any]], *, options: RequestOptions | None = None) -> Dict[str, Any]:
         """Send spans straight to the tracer (`{"ids": [...]}`), without the traceAI exporter.
 
@@ -28,6 +30,8 @@ class Spans(SpansResource):
 
 
 class AsyncSpans(AsyncSpansResource):
+    """`client.spans` for `AsyncClient`: the same methods as `Spans`, awaited."""
+
     async def ingest(self, spans: List[Dict[str, Any]], *, options: RequestOptions | None = None) -> Dict[str, Any]:
         """See `Spans.ingest`."""
         return await self._t.raw("POST", INGEST_PATH, body=list(spans), options=options)

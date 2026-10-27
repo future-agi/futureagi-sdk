@@ -12,4 +12,5 @@
 
 import { DatasetsResource } from "../_generated/resources";
 
+/** `client.datasets`: every generated `datasets.*` method, plus the hand-written additions in this file. */
 export class Datasets extends DatasetsResource {}

@@ -12,4 +12,5 @@
 
 import { PromptsResource } from "../_generated/resources";
 
+/** `client.prompts`: every generated `prompts.*` method, plus the hand-written additions in this file. */
 export class Prompts extends PromptsResource {}

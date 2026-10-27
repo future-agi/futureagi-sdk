@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 - Release cycle: a backend release is synced in by the monorepo's `sdk-sync` workflow (contract slice, regenerated clients, `sdkgen/contracts/BACKEND_VERSION`), promoted from `dev` to `main` (`promote.yml`), versioned by release-please (`python-vX.Y.Z`, `typescript-vX.Y.Z`, per-package changelogs) and published to PyPI and npm (`publish.yml`).
 
 - `pr-title-lint.yml`: pull request titles must follow Conventional Commits, since squash-merged titles are what release-please versions from. `publish.yml` installs the just-published package from PyPI and npm into a clean environment and runs a quickstart (CommonJS and ESM for npm) before the release counts as done.
+- The generated response models are public modules: `fi.platform.models` is a real module (`python/fi/platform/models.py`) and `@future-agi/sdk/platform/models` is a package subpath. `@future-agi/sdk/platform` exports the resource classes behind `client.<name>` (`Datasets`, `KnowledgeBases`, ...) and every method's `params` type, so they can be subclassed and typed from outside the package. The scaffolded resource classes carry a docstring. This is what the docs site's API reference reads, so the reference lists every generated method and model instead of empty classes.
 
 ### Fixed
 - TypeScript package: `form-data` and `@jest/globals` are now declared, so a fresh `pnpm install` builds and tests.

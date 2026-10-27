@@ -8,6 +8,7 @@ import type { RequestOptions } from "../transport";
 
 const INGEST_PATH = "/tracer/observation-span/create_otel_span/";
 
+/** `client.spans`: every generated `spans.*` method, plus `ingest()`. */
 export class Spans extends SpansResource {
   /**
    * Send spans straight to the tracer (`{ ids: [...] }`), without the traceAI exporter.

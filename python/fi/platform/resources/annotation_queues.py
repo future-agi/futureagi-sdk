@@ -18,8 +18,8 @@ from .._generated.resources import (
 
 
 class AnnotationQueues(AnnotationQueuesResource):
-    pass
+    """`client.annotation_queues`: every generated `annotation_queues.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncAnnotationQueues(AsyncAnnotationQueuesResource):
-    pass
+    """`client.annotation_queues` for `AsyncClient`: the same methods as `AnnotationQueues`, awaited."""

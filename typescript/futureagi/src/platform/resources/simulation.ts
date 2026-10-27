@@ -12,4 +12,5 @@
 
 import { SimulationResource } from "../_generated/resources";
 
+/** `client.simulation`: every generated `simulation.*` method, plus the hand-written additions in this file. */
 export class Simulation extends SimulationResource {}

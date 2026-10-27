@@ -15,8 +15,8 @@ from .._generated.resources import AsyncDatasetsResource, DatasetsResource
 
 
 class Datasets(DatasetsResource):
-    pass
+    """`client.datasets`: every generated `datasets.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncDatasets(AsyncDatasetsResource):
-    pass
+    """`client.datasets` for `AsyncClient`: the same methods as `Datasets`, awaited."""

@@ -3,7 +3,7 @@
 // The hand-written subclasses in `../resources` are what `Client` exposes; add custom methods there.
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type * as models from "./models";
+import type * as models from "../models";
 import { Pager } from "../pagination";
 import { Resource } from "../resource";
 import { warnStability } from "../stability";

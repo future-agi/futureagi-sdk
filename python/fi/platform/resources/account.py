@@ -15,8 +15,8 @@ from .._generated.resources import AccountResource, AsyncAccountResource
 
 
 class Account(AccountResource):
-    pass
+    """`client.account`: every generated `account.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncAccount(AsyncAccountResource):
-    pass
+    """`client.account` for `AsyncClient`: the same methods as `Account`, awaited."""

@@ -12,4 +12,5 @@
 
 import { UsageResource } from "../_generated/resources";
 
+/** `client.usage`: every generated `usage.*` method, plus the hand-written additions in this file. */
 export class Usage extends UsageResource {}

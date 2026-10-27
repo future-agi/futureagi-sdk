@@ -15,8 +15,8 @@ from .._generated.resources import AsyncProviderKeysResource, ProviderKeysResour
 
 
 class ProviderKeys(ProviderKeysResource):
-    pass
+    """`client.provider_keys`: every generated `provider_keys.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncProviderKeys(AsyncProviderKeysResource):
-    pass
+    """`client.provider_keys` for `AsyncClient`: the same methods as `ProviderKeys`, awaited."""

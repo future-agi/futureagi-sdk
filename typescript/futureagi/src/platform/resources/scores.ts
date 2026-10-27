@@ -12,4 +12,5 @@
 
 import { ScoresResource } from "../_generated/resources";
 
+/** `client.scores`: every generated `scores.*` method, plus the hand-written additions in this file. */
 export class Scores extends ScoresResource {}

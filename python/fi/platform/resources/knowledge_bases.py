@@ -15,8 +15,8 @@ from .._generated.resources import AsyncKnowledgeBasesResource, KnowledgeBasesRe
 
 
 class KnowledgeBases(KnowledgeBasesResource):
-    pass
+    """`client.knowledge_bases`: every generated `knowledge_bases.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncKnowledgeBases(AsyncKnowledgeBasesResource):
-    pass
+    """`client.knowledge_bases` for `AsyncClient`: the same methods as `KnowledgeBases`, awaited."""

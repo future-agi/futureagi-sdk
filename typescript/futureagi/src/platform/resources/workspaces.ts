@@ -12,4 +12,5 @@
 
 import { WorkspacesResource } from "../_generated/resources";
 
+/** `client.workspaces`: every generated `workspaces.*` method, plus the hand-written additions in this file. */
 export class Workspaces extends WorkspacesResource {}

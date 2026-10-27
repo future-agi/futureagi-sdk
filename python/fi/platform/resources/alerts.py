@@ -15,8 +15,8 @@ from .._generated.resources import AlertsResource, AsyncAlertsResource
 
 
 class Alerts(AlertsResource):
-    pass
+    """`client.alerts`: every generated `alerts.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncAlerts(AsyncAlertsResource):
-    pass
+    """`client.alerts` for `AsyncClient`: the same methods as `Alerts`, awaited."""

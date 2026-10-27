@@ -15,8 +15,8 @@ from .._generated.resources import AsyncOptimizationsResource, OptimizationsReso
 
 
 class Optimizations(OptimizationsResource):
-    pass
+    """`client.optimizations`: every generated `optimizations.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncOptimizations(AsyncOptimizationsResource):
-    pass
+    """`client.optimizations` for `AsyncClient`: the same methods as `Optimizations`, awaited."""

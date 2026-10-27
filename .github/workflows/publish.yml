@@ -151,8 +151,10 @@ jobs:
           done
           node - <<'EOF'
           const { Client, platform } = require("@future-agi/sdk");
+          const { Datasets } = require("@future-agi/sdk/platform");
           const client = new Client({ apiKey: "smoke", secretKey: "smoke", baseUrl: "http://127.0.0.1:9", maxRetries: 0, timeout: 1000 });
           if (typeof client.datasets.create !== "function" || typeof client.spans.ingest !== "function") throw new Error("resources missing");
+          if (!(client.datasets instanceof Datasets)) throw new Error("@future-agi/sdk/platform does not export the resource classes");
           client.account.whoami().then(
             () => { throw new Error("unexpected success"); },
             (error) => {
@@ -163,8 +165,11 @@ jobs:
           EOF
           cat > smoke.mjs <<'EOF'
           import { Client } from "@future-agi/sdk";
+          import { KnowledgeBases } from "@future-agi/sdk/platform";
+          import "@future-agi/sdk/platform/models";
           const client = new Client({ apiKey: "smoke", secretKey: "smoke", baseUrl: "http://127.0.0.1:9" });
           if (typeof client.datasets.createFromFile !== "function" || typeof client.knowledgeBases.create !== "function") throw new Error("ESM resources missing");
+          if (!(client.knowledgeBases instanceof KnowledgeBases)) throw new Error("ESM @future-agi/sdk/platform does not export the resource classes");
           console.log("ESM import ok");
           EOF
           node smoke.mjs

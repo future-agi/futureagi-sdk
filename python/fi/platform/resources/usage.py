@@ -15,8 +15,8 @@ from .._generated.resources import AsyncUsageResource, UsageResource
 
 
 class Usage(UsageResource):
-    pass
+    """`client.usage`: every generated `usage.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncUsage(AsyncUsageResource):
-    pass
+    """`client.usage` for `AsyncClient`: the same methods as `Usage`, awaited."""

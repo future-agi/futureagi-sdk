@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Literal, Optional
 
+from .. import models
 from .._pagination import AsyncPager, SyncPager
 from .._resource import Resource
 from .._stability import _stability
@@ -19,7 +20,6 @@ from .._transport import (
     RequestOptions,
     SyncTransport,
 )
-from . import models
 
 OP_ACCOUNT_WHOAMI = Operation(**{'id': 'account.whoami', 'method': 'GET', 'path': '/accounts/user-info/', 'unwrap': None, 'pagination': None})
 OP_WORKSPACES_LIST = Operation(**{'id': 'workspaces.list', 'method': 'GET', 'path': '/accounts/workspaces/', 'unwrap': 'result', 'pagination': None})

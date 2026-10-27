@@ -15,8 +15,8 @@ from .._generated.resources import AsyncSessionsResource, SessionsResource
 
 
 class Sessions(SessionsResource):
-    pass
+    """`client.sessions`: every generated `sessions.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncSessions(AsyncSessionsResource):
-    pass
+    """`client.sessions` for `AsyncClient`: the same methods as `Sessions`, awaited."""

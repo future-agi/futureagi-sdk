@@ -15,8 +15,8 @@ from .._generated.resources import AsyncWorkspacesResource, WorkspacesResource
 
 
 class Workspaces(WorkspacesResource):
-    pass
+    """`client.workspaces`: every generated `workspaces.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncWorkspaces(AsyncWorkspacesResource):
-    pass
+    """`client.workspaces` for `AsyncClient`: the same methods as `Workspaces`, awaited."""

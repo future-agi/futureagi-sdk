@@ -12,4 +12,5 @@
 
 import { ModelsResource } from "../_generated/resources";
 
+/** `client.models`: every generated `models.*` method, plus the hand-written additions in this file. */
 export class Models extends ModelsResource {}

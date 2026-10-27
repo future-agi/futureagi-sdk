@@ -15,8 +15,8 @@ from .._generated.resources import AsyncEvalsResource, EvalsResource
 
 
 class Evals(EvalsResource):
-    pass
+    """`client.evals`: every generated `evals.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncEvals(AsyncEvalsResource):
-    pass
+    """`client.evals` for `AsyncClient`: the same methods as `Evals`, awaited."""

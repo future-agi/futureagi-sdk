@@ -12,4 +12,5 @@
 
 import { AgentsResource } from "../_generated/resources";
 
+/** `client.agents`: every generated `agents.*` method, plus the hand-written additions in this file. */
 export class Agents extends AgentsResource {}

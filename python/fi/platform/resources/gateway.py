@@ -15,8 +15,8 @@ from .._generated.resources import AsyncGatewayResource, GatewayResource
 
 
 class Gateway(GatewayResource):
-    pass
+    """`client.gateway`: every generated `gateway.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncGateway(AsyncGatewayResource):
-    pass
+    """`client.gateway` for `AsyncClient`: the same methods as `Gateway`, awaited."""

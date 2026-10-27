@@ -15,8 +15,8 @@ from .._generated.resources import AsyncDashboardsResource, DashboardsResource
 
 
 class Dashboards(DashboardsResource):
-    pass
+    """`client.dashboards`: every generated `dashboards.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncDashboards(AsyncDashboardsResource):
-    pass
+    """`client.dashboards` for `AsyncClient`: the same methods as `Dashboards`, awaited."""

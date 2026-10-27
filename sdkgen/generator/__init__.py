@@ -7,9 +7,11 @@ Inputs
                                      the MCP server itself is generated in the monorepo)
 
 Outputs (never edited by hand)
-    python/fi/platform/_generated/{models,resources}.py           pydantic models, resource classes
+    python/fi/platform/models.py                                  pydantic response models (public: fi.platform.models)
+    python/fi/platform/_generated/resources.py                    resource base classes
     python/fi/platform/resources/__init__.py                      what fi.Client exposes
-    typescript/futureagi/src/platform/_generated/{models,resources}.ts
+    typescript/futureagi/src/platform/models.ts                   response interfaces (public: @future-agi/sdk/platform/models)
+    typescript/futureagi/src/platform/_generated/resources.ts     resource base classes + params types
     typescript/futureagi/src/platform/resources/index.ts
 
 Scaffolds (written once when a resource first appears, then owned by hand)
@@ -53,11 +55,11 @@ def build(targets: tuple[str, ...] = TARGETS) -> dict[Path, str]:
     spec, ops, _ = load_ops()
     out: dict[Path, str] = {}
     if "python" in targets:
-        out[PY_PLATFORM / "_generated" / "models.py"] = python.emit_models(spec, ops)
+        out[PY_PLATFORM / "models.py"] = python.emit_models(spec, ops)
         out[PY_PLATFORM / "_generated" / "resources.py"] = python.emit_resources(ops)
         out[PY_PLATFORM / "resources" / "__init__.py"] = python.emit_resource_index(ops)
     if "typescript" in targets:
-        out[TS_PLATFORM / "_generated" / "models.ts"] = typescript.emit_models(spec, ops)
+        out[TS_PLATFORM / "models.ts"] = typescript.emit_models(spec, ops)
         out[TS_PLATFORM / "_generated" / "resources.ts"] = typescript.emit_resources(ops)
         out[TS_PLATFORM / "resources" / "index.ts"] = typescript.emit_resource_index(ops)
     return out

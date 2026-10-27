@@ -15,8 +15,8 @@ from .._generated.resources import AsyncSimulationResource, SimulationResource
 
 
 class Simulation(SimulationResource):
-    pass
+    """`client.simulation`: every generated `simulation.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncSimulation(AsyncSimulationResource):
-    pass
+    """`client.simulation` for `AsyncClient`: the same methods as `Simulation`, awaited."""

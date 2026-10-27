@@ -12,4 +12,5 @@
 
 import { GatewayResource } from "../_generated/resources";
 
+/** `client.gateway`: every generated `gateway.*` method, plus the hand-written additions in this file. */
 export class Gateway extends GatewayResource {}

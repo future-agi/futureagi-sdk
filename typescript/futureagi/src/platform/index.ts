@@ -25,5 +25,10 @@ export {
 export { Page, Pager } from "./pagination";
 export { Resource } from "./resource";
 export { FileInput, Operation, RequestArgs, RequestOptions, Transport } from "./transport";
-export { ResourceClasses, Resources } from "./resources";
-export * as models from "./_generated/models";
+// The resource classes behind `client.<name>` (subclass them to add methods), and the `Resources`
+// map that lists them.
+export * from "./resources";
+// The `params` object type of every generated method (`DatasetsCreateParams`, ...).
+export type * from "./_generated/resources";
+// Response models, also importable on their own from "@future-agi/sdk/platform/models".
+export * as models from "./models";

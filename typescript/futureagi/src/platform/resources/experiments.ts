@@ -12,4 +12,5 @@
 
 import { ExperimentsResource } from "../_generated/resources";
 
+/** `client.experiments`: every generated `experiments.*` method, plus the hand-written additions in this file. */
 export class Experiments extends ExperimentsResource {}

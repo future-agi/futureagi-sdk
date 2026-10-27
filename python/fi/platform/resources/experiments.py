@@ -15,8 +15,8 @@ from .._generated.resources import AsyncExperimentsResource, ExperimentsResource
 
 
 class Experiments(ExperimentsResource):
-    pass
+    """`client.experiments`: every generated `experiments.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncExperiments(AsyncExperimentsResource):
-    pass
+    """`client.experiments` for `AsyncClient`: the same methods as `Experiments`, awaited."""

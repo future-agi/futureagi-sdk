@@ -15,8 +15,8 @@ from .._generated.resources import AsyncScoresResource, ScoresResource
 
 
 class Scores(ScoresResource):
-    pass
+    """`client.scores`: every generated `scores.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncScores(AsyncScoresResource):
-    pass
+    """`client.scores` for `AsyncClient`: the same methods as `Scores`, awaited."""

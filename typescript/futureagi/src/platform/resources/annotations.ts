@@ -12,4 +12,5 @@
 
 import { AnnotationsResource } from "../_generated/resources";
 
+/** `client.annotations`: every generated `annotations.*` method, plus the hand-written additions in this file. */
 export class Annotations extends AnnotationsResource {}

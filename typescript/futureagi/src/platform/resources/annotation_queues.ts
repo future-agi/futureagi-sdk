@@ -12,4 +12,5 @@
 
 import { AnnotationQueuesResource } from "../_generated/resources";
 
+/** `client.annotationQueues`: every generated `annotationQueues.*` method, plus the hand-written additions in this file. */
 export class AnnotationQueues extends AnnotationQueuesResource {}

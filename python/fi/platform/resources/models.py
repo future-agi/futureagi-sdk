@@ -15,8 +15,8 @@ from .._generated.resources import AsyncModelsResource, ModelsResource
 
 
 class Models(ModelsResource):
-    pass
+    """`client.models`: every generated `models.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncModels(AsyncModelsResource):
-    pass
+    """`client.models` for `AsyncClient`: the same methods as `Models`, awaited."""

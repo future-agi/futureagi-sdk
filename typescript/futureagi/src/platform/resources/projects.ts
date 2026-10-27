@@ -12,4 +12,5 @@
 
 import { ProjectsResource } from "../_generated/resources";
 
+/** `client.projects`: every generated `projects.*` method, plus the hand-written additions in this file. */
 export class Projects extends ProjectsResource {}

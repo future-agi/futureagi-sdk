@@ -12,4 +12,5 @@
 
 import { ProviderKeysResource } from "../_generated/resources";
 
+/** `client.providerKeys`: every generated `providerKeys.*` method, plus the hand-written additions in this file. */
 export class ProviderKeys extends ProviderKeysResource {}

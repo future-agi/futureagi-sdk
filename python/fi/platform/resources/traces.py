@@ -15,8 +15,8 @@ from .._generated.resources import AsyncTracesResource, TracesResource
 
 
 class Traces(TracesResource):
-    pass
+    """`client.traces`: every generated `traces.*` method, plus the hand-written additions in this module."""
 
 
 class AsyncTraces(AsyncTracesResource):
-    pass
+    """`client.traces` for `AsyncClient`: the same methods as `Traces`, awaited."""
