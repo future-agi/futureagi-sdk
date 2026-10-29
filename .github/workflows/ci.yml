@@ -36,6 +36,12 @@ jobs:
         # differs from what the contract and catalog produce, or when a
         # resource scaffold is missing.
         run: python sdkgen/generate.py --check
+      - name: Catalog MCP names match the monorepo's tool list at the pinned backend release
+        # The catalog records, per operation, the MCP tool it corresponds to; the
+        # tool list is generated in the monorepo. Compared at the release in
+        # sdkgen/contracts/BACKEND_VERSION, so a backend sync that brings new tools
+        # fails here until the catalog gets their entries.
+        run: python sdkgen/check_mcp_parity.py
       - name: Lint the generator, the platform client and its tests
         run: ruff check --isolated --select E,F,W,I --ignore E501 sdkgen python/fi/platform python/tests/platform
 

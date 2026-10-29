@@ -5,10 +5,11 @@ name: Promote dev to main
 # it, and merging it (as a merge commit, like the monorepo's release PR) hands
 # the commits to release-please on main.
 #
-# When the push to dev came from the monorepo's sdk-sync workflow (a backend
-# release synced into the contract), the PR is set to merge itself once the
-# checks pass, so a backend release reaches PyPI and npm without a human in
-# the loop. Any other push leaves the PR open for someone to merge.
+# While everything on dev that main lacks came from the monorepo's sdk-sync
+# workflow (backend releases synced into the contract), the PR is set to merge
+# itself once the checks pass, so a backend release reaches PyPI and npm
+# without a human in the loop. As soon as dev holds anything else, auto-merge
+# is switched off and the PR waits for someone to merge it.
 
 on:
   push:
@@ -59,16 +60,29 @@ jobs:
           echo "number=$number" >> "$GITHUB_OUTPUT"
           echo "dev -> main: #$number"
 
-      - name: Merge automatically when the push was a backend sync
-        if: >-
-          ${{ steps.pr.outputs.number != ''
-              && (startsWith(github.event.head_commit.message, 'feat(contract): sync with backend')
-                  || startsWith(github.event.head_commit.message, 'chore(contract): sync with backend')) }}
+      - name: Merge automatically only while everything on dev is a backend sync
+        if: steps.pr.outputs.number != ''
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ steps.pr.outputs.number }}
         run: |
-          # Needs "Allow auto-merge" in the repository settings and required
-          # checks on main (CI Pass, E2E Tests Pass); without them this is a no-op.
-          gh pr merge --auto --merge "${{ steps.pr.outputs.number }}" \
-            || echo "::warning::auto-merge not enabled on this repository; merge #${{ steps.pr.outputs.number }} by hand"
+          # The PR carries all of dev, not just this push. So auto-merge is on only
+          # while every commit main lacks is a sync commit from the monorepo's
+          # sdk-sync workflow, and goes off again the moment anything else lands
+          # on dev (a feature waiting for review must not ride the next backend
+          # release to PyPI and npm). The compare API lists at most 250 commits;
+          # more than that is treated as "not only syncs".
+          compare=$(gh api "repos/$GH_REPO/compare/main...dev")
+          ahead=$(jq -r .ahead_by <<< "$compare")
+          all_sync=$(jq -r '[.commits[].commit.message | test("^(feat|chore)\\(contract\\): sync with backend")] | all' <<< "$compare")
+          if [ "$ahead" -le 250 ] && [ "$all_sync" = true ]; then
+            # Needs "Allow auto-merge" in the repository settings and required
+            # checks on main (CI Pass, E2E Tests Pass); without them this is a no-op.
+            gh pr merge --auto --merge "$NUMBER" \
+              || echo "::warning::auto-merge not enabled on this repository; merge #$NUMBER by hand"
+            echo "every commit on dev is a backend sync: #$NUMBER merges itself once the checks pass"
+          else
+            gh pr merge --disable-auto "$NUMBER" > /dev/null 2>&1 || true
+            echo "dev has commits that are not backend syncs ($ahead ahead of main): #$NUMBER waits for a person"
+          fi
