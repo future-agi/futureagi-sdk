@@ -1,0 +1,82 @@
+"""Generate the Python SDK and the TypeScript SDK from one contract + one catalog.
+
+Inputs
+    sdkgen/contracts/swagger.json    API contract (sliced from the monorepo by sync_contract.py)
+    sdkgen/catalog/operations.yaml   shared names + which surface ships what (the `mcp` surface
+                                     records the monorepo's MCP tool each operation corresponds to;
+                                     the MCP server itself is generated in the monorepo)
+
+Outputs (never edited by hand)
+    python/fi/platform/models.py                                  pydantic response models (public: fi.platform.models)
+    python/fi/platform/_operations.py                             one Operation constant per call (private)
+    python/fi/platform/resources/base.py                          resource base classes (public: fi.platform.resources.base)
+    python/fi/platform/resources/__init__.py                      what fi.Client exposes
+    typescript/futureagi/src/platform/models.ts                   response interfaces (public: @future-agi/sdk/platform/models)
+    typescript/futureagi/src/platform/_operations.ts              one Operation constant per call (private)
+    typescript/futureagi/src/platform/resources/base.ts           resource base classes + params types (public: @future-agi/sdk/platform)
+    typescript/futureagi/src/platform/resources/index.ts
+
+Scaffolds (written once when a resource first appears, then owned by hand)
+    python/fi/platform/resources/<resource>.py
+    typescript/futureagi/src/platform/resources/<resource>.ts
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+
+import yaml
+
+from . import python, typescript
+from .catalog import CatalogError, Op, Param, load
+
+ROOT = Path(__file__).resolve().parents[2]
+SDKGEN = ROOT / "sdkgen"
+CONTRACT = SDKGEN / "contracts" / "swagger.json"
+CATALOG = SDKGEN / "catalog" / "operations.yaml"
+PY_PLATFORM = ROOT / "python" / "fi" / "platform"
+TS_PLATFORM = ROOT / "typescript" / "futureagi" / "src" / "platform"
+
+TARGETS = ("python", "typescript")
+
+__all__ = ["CatalogError", "Op", "Param", "TARGETS", "build", "load", "load_ops", "scaffolds"]
+
+
+def load_ops() -> tuple[dict, list[Op], str]:
+    """(contract, validated operations, sha256 of the contract file)."""
+    raw = CONTRACT.read_bytes()
+    spec = json.loads(raw)
+    ops = load(spec, yaml.safe_load(CATALOG.read_text()))
+    return spec, ops, hashlib.sha256(raw).hexdigest()
+
+
+def build(targets: tuple[str, ...] = TARGETS) -> dict[Path, str]:
+    """Generated files: {path: text}. Each one is overwritten on every run."""
+    spec, ops, _ = load_ops()
+    out: dict[Path, str] = {}
+    if "python" in targets:
+        out[PY_PLATFORM / "models.py"] = python.emit_models(spec, ops)
+        out[PY_PLATFORM / "_operations.py"] = python.emit_operations(ops)
+        out[PY_PLATFORM / "resources" / "base.py"] = python.emit_resources(ops)
+        out[PY_PLATFORM / "resources" / "__init__.py"] = python.emit_resource_index(ops)
+    if "typescript" in targets:
+        out[TS_PLATFORM / "models.ts"] = typescript.emit_models(spec, ops)
+        out[TS_PLATFORM / "_operations.ts"] = typescript.emit_operations(ops)
+        out[TS_PLATFORM / "resources" / "base.ts"] = typescript.emit_resources(ops)
+        out[TS_PLATFORM / "resources" / "index.ts"] = typescript.emit_resource_index(ops)
+    return out
+
+
+def scaffolds(targets: tuple[str, ...] = TARGETS) -> dict[Path, str]:
+    """Hand-owned files the generator creates only when missing: one per top-level resource."""
+    _, ops, _ = load_ops()
+    out: dict[Path, str] = {}
+    if "python" in targets:
+        for ns in python.top_level(ops):
+            out[PY_PLATFORM / "resources" / f"{ns[0]}.py"] = python.scaffold_resource(ns)
+    if "typescript" in targets:
+        for ns in typescript.top_level(ops):
+            out[TS_PLATFORM / "resources" / f"{ns[0]}.ts"] = typescript.scaffold_resource(ns)
+    return out

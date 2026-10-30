@@ -1,0 +1,88 @@
+name: Promote dev to main
+
+# Keeps one open pull request from dev to main, the release PR of this
+# repository: everything that reaches dev shows up there, CI and E2E run on
+# it, and merging it (as a merge commit, like the monorepo's release PR) hands
+# the commits to release-please on main.
+#
+# While everything on dev that main lacks came from the monorepo's sdk-sync
+# workflow (backend releases synced into the contract), the PR is set to merge
+# itself once the checks pass, so a backend release reaches PyPI and npm
+# without a human in the loop. As soon as dev holds anything else, auto-merge
+# is switched off and the PR waits for someone to merge it.
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: promote-dev-to-main
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # A PR opened with GITHUB_TOKEN gets no CI runs; the release bot app
+      # (the one release-please uses) makes the PR like a person would.
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+          owner: future-agi
+          repositories: futureagi-sdk
+
+      - name: Open or update the dev -> main pull request
+        id: pr
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          number=$(gh pr list --base main --head dev --state open --json number --jq '.[0].number // empty')
+          if [ -z "$number" ]; then
+            if [ "$(gh api "repos/$GH_REPO/compare/main...dev" --jq .ahead_by)" = "0" ]; then
+              echo "dev has nothing main lacks"
+              exit 0
+            fi
+            gh pr create --base main --head dev \
+              --title "chore: release dev to main" \
+              --body "$(printf '%s\n\n%s' \
+                "Everything on \`dev\` since the last release. Merge with a **merge commit**; release-please then opens the version PR(s) on main." \
+                "Opened by .github/workflows/promote.yml.")"
+            number=$(gh pr list --base main --head dev --state open --json number --jq '.[0].number')
+          fi
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          echo "dev -> main: #$number"
+
+      - name: Merge automatically only while everything on dev is a backend sync
+        if: steps.pr.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          # The PR carries all of dev, not just this push. So auto-merge is on only
+          # while every commit main lacks is a sync commit from the monorepo's
+          # sdk-sync workflow, and goes off again the moment anything else lands
+          # on dev (a feature waiting for review must not ride the next backend
+          # release to PyPI and npm). The compare API lists at most 250 commits;
+          # more than that is treated as "not only syncs".
+          compare=$(gh api "repos/$GH_REPO/compare/main...dev")
+          ahead=$(jq -r .ahead_by <<< "$compare")
+          all_sync=$(jq -r '[.commits[].commit.message | test("^(feat|chore)\\(contract\\): sync with backend")] | all' <<< "$compare")
+          if [ "$ahead" -le 250 ] && [ "$all_sync" = true ]; then
+            # Needs "Allow auto-merge" in the repository settings and required
+            # checks on main (CI Pass, E2E Tests Pass); without them this is a no-op.
+            gh pr merge --auto --merge "$NUMBER" \
+              || echo "::warning::auto-merge not enabled on this repository; merge #$NUMBER by hand"
+            echo "every commit on dev is a backend sync: #$NUMBER merges itself once the checks pass"
+          else
+            gh pr merge --disable-auto "$NUMBER" > /dev/null 2>&1 || true
+            echo "dev has commits that are not backend syncs ($ahead ahead of main): #$NUMBER waits for a person"
+          fi

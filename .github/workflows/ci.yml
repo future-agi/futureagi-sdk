@@ -1,0 +1,118 @@
+name: CI
+
+# Fast checks on every pull request and on dev/main: the generated code is
+# current, the Python SDK's unit suite passes on the oldest and newest
+# supported interpreters, and the TypeScript package type-checks, tests and
+# builds. Nothing here talks to a backend; that is e2e.yml.
+
+on:
+  pull_request:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  generated:
+    name: Generated code is current
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the generator's dependencies
+        run: python -m pip install --quiet pyyaml ruff
+      - name: Regenerate and compare
+        # Fails when a generated file (fi/platform/{models,_operations}.py,
+        # fi/platform/resources/{base,__init__}.py, their TypeScript twins)
+        # differs from what the contract and catalog produce, or when a
+        # resource scaffold is missing.
+        run: python sdkgen/generate.py --check
+      - name: Catalog MCP names match the monorepo's tool list at the pinned backend release
+        # The catalog records, per operation, the MCP tool it corresponds to; the
+        # tool list is generated in the monorepo. Compared at the release in
+        # sdkgen/contracts/BACKEND_VERSION, so a backend sync that brings new tools
+        # fails here until the catalog gets their entries.
+        run: python sdkgen/check_mcp_parity.py
+      - name: Lint the generator, the platform client and its tests
+        run: ruff check --isolated --select E,F,W,I --ignore E501 sdkgen python/fi/platform python/tests/platform
+
+  python:
+    name: Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        # pyproject.toml: python > 3.9. The floor is where typing and
+        # pydantic differences show up.
+        python: ["3.9", "3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: python/pyproject.toml
+      - name: Install the SDK and the test dependencies
+        # The dev group in pyproject.toml, without poetry.
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ./python pytest pytest-asyncio respx pyyaml
+      - name: Unit tests
+        # python/tests/platform's live tests skip without a backend; e2e.yml
+        # runs them for real.
+        run: PYTHONPATH=python pytest -q python/tests
+
+  typescript:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: typescript/futureagi
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: typescript/futureagi/pnpm-lock.yaml
+      - name: Install
+        run: pnpm install --ignore-workspace --frozen-lockfile --ignore-scripts
+      - name: Type check
+        run: pnpm run typecheck
+      - name: Unit tests (platform client)
+        # src/kb and src/annotations carry jest suites that fail on dev as
+        # well (pre-existing); they are not part of the gate until fixed.
+        run: pnpm test -- src/platform
+      - name: Build (CJS, ESM, ESNext)
+        run: pnpm run build
+
+  ci-pass:
+    name: CI Pass
+    needs: [generated, python, typescript]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fail closed unless every job succeeded
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS" | jq 'with_entries(.value |= .result)
+            | to_entries
+            | map(select(.value != "success"))
+            | if length > 0 then ("failing: " + (map(.key) | join(", ")) | halt_error)
+              else "all jobs green" end'

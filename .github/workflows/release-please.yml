@@ -1,0 +1,56 @@
+name: release-please
+
+# Versioning and releases of the two packages, from conventional commits on
+# main (the same setup as the monorepo). release-please keeps one PR open on
+# main that bumps python/pyproject.toml + python/fi/__init__.py and
+# typescript/futureagi/package.json and writes the changelogs; merging it
+# creates the tags python-vX.Y.Z and typescript-vX.Y.Z and their GitHub
+# releases, which publish.yml ships to PyPI and npm.
+#
+# The release PR is set to merge itself once CI passes, so a backend sync
+# that reached main through promote.yml ends up published without a click.
+# Turn that off by deleting the last step.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-please-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+          owner: future-agi
+          repositories: futureagi-sdk
+
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      - name: Let the release PR merge itself once checks pass
+        if: steps.release.outputs.prs_created == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+          PRS: ${{ steps.release.outputs.prs }}
+        run: |
+          for number in $(echo "$PRS" | jq -r '.[].number'); do
+            gh pr merge --auto --squash "$number" \
+              || echo "::warning::auto-merge not enabled on this repository; merge #$number by hand"
+          done

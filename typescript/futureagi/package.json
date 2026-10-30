@@ -11,6 +11,16 @@
       "import": "./dist/esm/index.js",
       "require": "./dist/src/index.js",
       "types": "./dist/esm/index.d.ts"
+    },
+    "./platform": {
+      "import": "./dist/esm/platform/index.js",
+      "require": "./dist/src/platform/index.js",
+      "types": "./dist/esm/platform/index.d.ts"
+    },
+    "./platform/models": {
+      "import": "./dist/esm/platform/models.js",
+      "require": "./dist/src/platform/models.js",
+      "types": "./dist/esm/platform/models.d.ts"
     }
   },
   "files": [
@@ -19,7 +29,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc --build tsconfig.json tsconfig.esm.json tsconfig.esnext.json && tsc-alias -p tsconfig.esm.json && pnpm run postbuild",
-    "postbuild": "echo '{\"type\": \"module\"}' > ./dist/esm/package.json",
+    "postbuild": "echo '{\"type\": \"module\"}' > ./dist/esm/package.json && echo '{\"type\": \"commonjs\"}' > ./dist/src/package.json",
     "build:watch": "tsc --build --watch tsconfig.json",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -31,7 +41,8 @@
     "clean": "rimraf dist",
     "dev": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
-    "prepare": "pnpm run build"
+    "prepare": "pnpm run build",
+    "test:live": "jest --testPathPattern platform/__tests__/live"
   },
   "keywords": [
     "ai",
@@ -59,6 +70,7 @@
   },
   "packageManager": "pnpm@8.15.0",
   "devDependencies": {
+    "@jest/globals": "^29.5.0",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
@@ -77,6 +89,7 @@
   "dependencies": {
     "@types/uuid": "^10.0.0",
     "axios": "^1.6.0",
+    "form-data": "^4.0.6",
     "uuid": "^11.1.0",
     "winston": "^3.11.0"
   },
