@@ -30,6 +30,33 @@ from ._pagination import AsyncPager, SyncPager, _get
 RETRY_ANY_METHOD = {429}
 RETRY_IDEMPOTENT = {408, 500, 502, 503, 504}
 IDEMPOTENT_METHODS = {"GET", "HEAD", "OPTIONS", "PUT", "DELETE"}
+REDIRECT_STATUSES = {301, 302, 303, 307, 308}
+MAX_REDIRECTS = 5
+
+
+class NotGiven:
+    """The type of `NOT_GIVEN`: an argument the caller did not pass.
+
+    Generated methods default every optional argument to `NOT_GIVEN`, so that an explicit
+    `None` can be told apart from an omitted one: `None` is sent as JSON `null` (which is how
+    a nullable field is cleared), `NOT_GIVEN` is left out of the request.
+    """
+
+    _instance: "NotGiven | None" = None
+
+    def __new__(cls) -> "NotGiven":
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __bool__(self) -> bool:
+        return False
+
+    def __repr__(self) -> str:
+        return "NOT_GIVEN"
+
+
+NOT_GIVEN = NotGiven()
 
 
 def _can_retry(op: "Operation", status: int | None, attempt: int, max_retries: int) -> bool:
@@ -50,6 +77,7 @@ class Operation:
     unwrap: str | None
     pagination: dict | None
     multipart: bool = False  # body fields go as form data, file params as uploads
+    decode: str = "json"  # json | text | auto (json when the response says so, else text)
 
 
 @dataclass(frozen=True)
@@ -86,7 +114,7 @@ def _files(files: Dict[str, Any] | None) -> List[Tuple[str, Tuple[str, bytes]]] 
         return None
     out: List[Tuple[str, Tuple[str, bytes]]] = []
     for field, value in files.items():
-        if value is None:
+        if value is None or value is NOT_GIVEN:
             continue
         for item in value if isinstance(value, list) else [value]:
             out.append((field, _file_tuple(item)))
@@ -97,7 +125,37 @@ def _form(body: Any) -> Any:
     """Form fields are strings; booleans and numbers are rendered the way DRF parses them."""
     if not isinstance(body, dict):
         return body
-    return {k: (str(v).lower() if isinstance(v, bool) else v) for k, v in body.items() if v is not None}
+    return {k: (str(v).lower() if isinstance(v, bool) else v) for k, v in body.items() if v is not None and v is not NOT_GIVEN}
+
+
+def _merge_headers(*layers: Mapping[str, str] | None) -> dict[str, str]:
+    """Later layers replace earlier ones whatever the letter case: `x-workspace-id` set per call
+    replaces the client's `X-Workspace-Id` instead of being sent next to it (header names are
+    case-insensitive, and a server given both may combine or reject them)."""
+    by_name: dict[str, tuple[str, str]] = {}
+    for layer in layers:
+        for key, value in (layer or {}).items():
+            by_name[key.lower()] = (key, value)
+    return {key: value for key, value in by_name.values()}
+
+
+def _origin(url: str) -> str:
+    u = httpx.URL(url)
+    return f"{u.scheme}://{u.host}:{u.port or (443 if u.scheme == 'https' else 80)}".lower()
+
+
+def _follow_redirect(base_url: str, response: httpx.Response, method: str) -> tuple[str, str]:
+    """(url, method) to follow a redirect with. Only a target on the client's own origin is
+    followed: the credentials travel in custom headers (`X-Api-Key`, `X-Secret-Key`) that
+    neither httpx nor browsers strip on a cross-origin redirect, so one is refused instead."""
+    target = str(response.request.url.join(response.headers["location"]))
+    if _origin(target) != _origin(base_url):
+        raise APIConnectionError(
+            f"{response.status_code} redirect to {target} was not followed: it leaves {base_url} and the API keys would go with it"
+        )
+    if response.status_code == 303 or (response.status_code in (301, 302) and method == "POST"):
+        method = "GET"  # the way browsers and httpx re-issue these
+    return target, method
 
 
 @dataclass
@@ -119,10 +177,7 @@ class Config:
         }
         if self.workspace_id:
             headers["X-Workspace-Id"] = self.workspace_id
-        headers.update(self.default_headers or {})
-        if options and options.headers:
-            headers.update(options.headers)
-        return headers
+        return _merge_headers(headers, self.default_headers, options.headers if options else None)
 
     def timeout_for(self, options: RequestOptions | None) -> float:
         return options.timeout if options and options.timeout is not None else self.timeout
@@ -131,11 +186,13 @@ class Config:
         return options.max_retries if options and options.max_retries is not None else self.max_retries
 
 
-def raw_operation(method: str, path: str, *, unwrap: str | None = "result", multipart: bool = False) -> Operation:
+def raw_operation(method: str, path: str, *, unwrap: str | None = "result", multipart: bool = False, decode: str = "json") -> Operation:
     """An ad-hoc operation for an endpoint the catalog does not describe (`client.request`)."""
     if not path.startswith("/"):
         raise ValueError(f"path must start with '/', got {path!r}")
-    return Operation(id=f"raw:{method.upper()} {path}", method=method.upper(), path=path, unwrap=unwrap, pagination=None, multipart=multipart)
+    if decode not in ("json", "text", "auto"):
+        raise ValueError(f"decode must be 'json', 'text' or 'auto', got {decode!r}")
+    return Operation(id=f"raw:{method.upper()} {path}", method=method.upper(), path=path, unwrap=unwrap, pagination=None, multipart=multipart, decode=decode)
 
 
 def _url(op: Operation, path: dict | None) -> str:
@@ -145,11 +202,13 @@ def _url(op: Operation, path: dict | None) -> str:
     return url
 
 
-def _clean(params: Any) -> Any:
-    """Drop unset (None) fields; a non-dict body (e.g. a list) is sent as is."""
+def _clean(params: Any, *, keep_none: bool = False) -> Any:
+    """Drop the fields the caller did not pass (`NOT_GIVEN`). A JSON body keeps an explicit
+    `None` as `null` (that is how a nullable field is cleared); a query string has no null, so
+    there `None` is dropped too. A non-dict body (e.g. a list) is sent as is."""
     if not isinstance(params, dict):
         return params
-    return {k: v for k, v in params.items() if v is not None}
+    return {k: v for k, v in params.items() if v is not NOT_GIVEN and (keep_none or v is not None)}
 
 
 def _payload(op: Operation, body: Any, files: Dict[str, Any] | None) -> Dict[str, Any]:
@@ -158,12 +217,15 @@ def _payload(op: Operation, body: Any, files: Dict[str, Any] | None) -> Dict[str
         return {"data": _form(body), "files": _files(files)}
     if files:
         raise TypeError(f"{op.id}: files are only accepted by multipart operations")
-    return {"json": _clean(body)}
+    return {"json": _clean(body, keep_none=True)}
 
 
 def _decode(op: Operation, response: httpx.Response) -> Any:
     if response.status_code == 204 or not response.content:
         return None
+    content_type = response.headers.get("content-type", "")
+    if op.decode == "text" or (op.decode == "auto" and "json" not in content_type):
+        return response.text  # e.g. a CSV export: the body is the result
     try:
         data = response.json()
     except ValueError:
@@ -230,32 +292,44 @@ class SyncTransport:
         # A caller's client is used as given (absolute URLs, per-request timeout) and never
         # closed here; only a client we created is ours to configure and close.
         self._owns_http = http_client is None
-        self._http = http_client or httpx.Client(follow_redirects=True)
+        # Redirects are followed here, not by httpx: only to the client's own origin (see _follow_redirect).
+        self._http = http_client or httpx.Client(follow_redirects=False)
 
     def request(self, op: Operation, *, path=None, query=None, body=None, files=None, options: RequestOptions | None = None) -> Any:
         """One HTTP call for `op`: auth, retries, envelope unwrap, typed errors. Returns decoded JSON."""
-        url = self.config.base_url + _url(op, path)
+        url, method = self.config.base_url + _url(op, path), op.method
         payload = _payload(op, body, files)
         headers, timeout, retries = self.config.headers(options), self.config.timeout_for(options), self.config.retries_for(options)
-        for attempt in range(retries + 1):
+        attempt = redirects = 0
+        while True:
             try:
-                response = self._http.request(op.method, url, params=_clean(query), headers=headers, timeout=timeout, **payload)
+                response = self._http.request(method, url, params=_clean(query), headers=headers, timeout=timeout, **payload)
             except httpx.TransportError as exc:
                 if _can_retry(op, None, attempt, retries):
                     time.sleep(_backoff(attempt, None))
+                    attempt += 1
                     continue
                 raise APIConnectionError(str(exc)) from exc
+            if response.status_code in REDIRECT_STATUSES and response.headers.get("location"):
+                redirects += 1
+                if redirects > MAX_REDIRECTS:
+                    raise APIConnectionError(f"{op.id}: more than {MAX_REDIRECTS} redirects")
+                url, method = _follow_redirect(self.config.base_url, response, method)
+                query = None  # the target URL carries whatever query it needs
+                if method != op.method:
+                    payload = {}  # re-issued as a GET: no body
+                continue
             if _can_retry(op, response.status_code, attempt, retries):
                 time.sleep(_backoff(attempt, response))
+                attempt += 1
                 continue
-            if response.status_code >= 300:  # a redirect we did not follow is not a result
+            if response.status_code >= 300:  # a redirect without a target is not a result
                 raise error_from_response(response)
             return _decode(op, response)
-        raise AssertionError("unreachable")
 
-    def raw(self, method: str, path: str, *, query=None, body=None, files=None, unwrap: str | None = "result", multipart: bool = False, options: RequestOptions | None = None) -> Any:
+    def raw(self, method: str, path: str, *, query=None, body=None, files=None, unwrap: str | None = "result", multipart: bool = False, decode: str = "json", options: RequestOptions | None = None) -> Any:
         """Call an endpoint the catalog does not describe; the usual auth, retries and errors apply."""
-        return self.request(raw_operation(method, path, unwrap=unwrap, multipart=multipart), query=query, body=body, files=files, options=options)
+        return self.request(raw_operation(method, path, unwrap=unwrap, multipart=multipart, decode=decode), query=query, body=body, files=files, options=options)
 
     def call(self, op: Operation, *, path=None, query=None, body=None, files=None, model=None, options: RequestOptions | None = None) -> Any:
         data = self.request(op, path=path, query=query, body=body, files=files, options=options)
@@ -279,30 +353,41 @@ class AsyncTransport:
     def __init__(self, config: Config, http_client: httpx.AsyncClient | None = None) -> None:
         self.config = config
         self._owns_http = http_client is None
-        self._http = http_client or httpx.AsyncClient(follow_redirects=True)
+        self._http = http_client or httpx.AsyncClient(follow_redirects=False)
 
     async def request(self, op: Operation, *, path=None, query=None, body=None, files=None, options: RequestOptions | None = None) -> Any:
-        url = self.config.base_url + _url(op, path)
+        url, method = self.config.base_url + _url(op, path), op.method
         payload = _payload(op, body, files)
         headers, timeout, retries = self.config.headers(options), self.config.timeout_for(options), self.config.retries_for(options)
-        for attempt in range(retries + 1):
+        attempt = redirects = 0
+        while True:
             try:
-                response = await self._http.request(op.method, url, params=_clean(query), headers=headers, timeout=timeout, **payload)
+                response = await self._http.request(method, url, params=_clean(query), headers=headers, timeout=timeout, **payload)
             except httpx.TransportError as exc:
                 if _can_retry(op, None, attempt, retries):
                     await asyncio.sleep(_backoff(attempt, None))
+                    attempt += 1
                     continue
                 raise APIConnectionError(str(exc)) from exc
+            if response.status_code in REDIRECT_STATUSES and response.headers.get("location"):
+                redirects += 1
+                if redirects > MAX_REDIRECTS:
+                    raise APIConnectionError(f"{op.id}: more than {MAX_REDIRECTS} redirects")
+                url, method = _follow_redirect(self.config.base_url, response, method)
+                query = None  # the target URL carries whatever query it needs
+                if method != op.method:
+                    payload = {}
+                continue
             if _can_retry(op, response.status_code, attempt, retries):
                 await asyncio.sleep(_backoff(attempt, response))
+                attempt += 1
                 continue
             if response.status_code >= 300:
                 raise error_from_response(response)
             return _decode(op, response)
-        raise AssertionError("unreachable")
 
-    async def raw(self, method: str, path: str, *, query=None, body=None, files=None, unwrap: str | None = "result", multipart: bool = False, options: RequestOptions | None = None) -> Any:
-        return await self.request(raw_operation(method, path, unwrap=unwrap, multipart=multipart), query=query, body=body, files=files, options=options)
+    async def raw(self, method: str, path: str, *, query=None, body=None, files=None, unwrap: str | None = "result", multipart: bool = False, decode: str = "json", options: RequestOptions | None = None) -> Any:
+        return await self.request(raw_operation(method, path, unwrap=unwrap, multipart=multipart, decode=decode), query=query, body=body, files=files, options=options)
 
     async def acall(self, op: Operation, *, path=None, query=None, body=None, files=None, model=None, options: RequestOptions | None = None) -> Any:
         data = await self.request(op, path=path, query=query, body=body, files=files, options=options)

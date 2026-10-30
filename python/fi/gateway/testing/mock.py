@@ -115,8 +115,10 @@ def create_mock_client(
         base_url: Base URL for the mock client.
 
     Returns:
-        A AgentCC client instance configured for testing. The ``_mock_responses``
-        attribute holds the response mapping that users can extend.
+        An AgentCC client whose HTTP transport answers from the mapping and never reaches
+        the network: a path without a response gets a 404 (``NotFoundError``). The
+        ``_mock_responses`` attribute is the live mapping, so a test can add or change
+        responses after the client exists. A value may be a callable returning the body.
 
     Usage::
 
@@ -126,8 +128,27 @@ def create_mock_client(
             "/v1/chat/completions": {"id": "chatcmpl-test", ...}
         })
     """
+    import httpx
+
     from fi.gateway._client import AgentCC
 
-    client = AgentCC(api_key=api_key, base_url=base_url)
-    client._mock_responses = responses or {}  # type: ignore[attr-defined]
+    mapping: dict[str, Any] = dict(responses or {})
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        path = request.url.path
+        if path in mapping:
+            body = mapping[path]
+            return httpx.Response(200, json=body() if callable(body) else body)
+        return httpx.Response(
+            404,
+            json={"error": {"message": f"create_mock_client has no response for {request.method} {path}", "type": "mock_not_found"}},
+        )
+
+    client = AgentCC(
+        api_key=api_key,
+        base_url=base_url,
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        max_retries=0,
+    )
+    client._mock_responses = mapping  # type: ignore[attr-defined]
     return client

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextvars
 import threading
 from collections.abc import Callable
 from typing import Any
@@ -97,7 +98,17 @@ class AgentCC:
         self._user_copied = False
         self._current_cost: float = 0.0
         self._cost_lock = threading.Lock()
-        self._active_session: Any = None
+        # The active session lives in a ContextVar: each thread and each asyncio task sees its own.
+        self._session_var: contextvars.ContextVar[Any] = contextvars.ContextVar(f"agentcc_session_{id(self)}", default=None)
+
+    @property
+    def _active_session(self) -> Any:
+        """The session entered in the current thread or task, or None."""
+        return self._session_var.get()
+
+    @_active_session.setter
+    def _active_session(self, session: Any) -> None:
+        self._session_var.set(session)
 
     @property
     def redact_messages(self) -> bool:
@@ -322,8 +333,10 @@ class AgentCC:
         return new
 
     def close(self) -> None:
-        """Close the underlying HTTP connection pool."""
-        if self._base_client is not None and not self._user_copied:
+        """Close the HTTP connection pool, when this client owns one. A client made by
+        `with_options()` shares its parent's pool (the base client knows, and leaves a shared or
+        injected pool alone); a copy made before the parent's first request has a pool of its own."""
+        if self._base_client is not None:
             self._base_client.close()
 
     def __enter__(self) -> AgentCC:
@@ -421,7 +434,17 @@ class AsyncAgentCC:
         self._user_copied = False
         self._current_cost: float = 0.0
         self._cost_lock = threading.Lock()
-        self._active_session: Any = None
+        # The active session lives in a ContextVar: each thread and each asyncio task sees its own.
+        self._session_var: contextvars.ContextVar[Any] = contextvars.ContextVar(f"agentcc_session_{id(self)}", default=None)
+
+    @property
+    def _active_session(self) -> Any:
+        """The session entered in the current thread or task, or None."""
+        return self._session_var.get()
+
+    @_active_session.setter
+    def _active_session(self, session: Any) -> None:
+        self._session_var.set(session)
 
     @property
     def redact_messages(self) -> bool:
@@ -643,7 +666,8 @@ class AsyncAgentCC:
         return new
 
     async def aclose(self) -> None:
-        if self._base_client is not None and not self._user_copied:
+        """See `AgentCC.close`."""
+        if self._base_client is not None:
             await self._base_client.aclose()
 
     async def __aenter__(self) -> AsyncAgentCC:

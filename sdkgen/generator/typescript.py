@@ -134,6 +134,8 @@ def emit_operations(ops: list[Op]) -> str:
         spec = {"id": op.id, "method": op.method, "path": op.path, "unwrap": op.unwrap, "pagination": op.pagination}
         if op.multipart:
             spec["multipart"] = True
+        if op.decode != "json":
+            spec["decode"] = op.decode
         out.append(f"export const {op_constant(op)}: Operation = {json.dumps(spec)};\n")
     return "".join(out)
 
@@ -148,6 +150,10 @@ def _return_type(op: Op) -> str:
         item = ts_type(op.returns, for_input=False)
     if op.pagination:
         return f"Pager<{item}>"
+    if op.decode == "text":
+        return "Promise<string>"
+    if op.decode == "auto":
+        return "Promise<unknown>"  # JSON when the response is JSON, else the body text
     return f"Promise<{item}>"
 
 
@@ -161,7 +167,11 @@ def _params_interface(op: Op) -> tuple[str, list[Param]]:
     out = [f"export interface {ts_params_type(op)} {{\n"]
     for p in fields:
         desc = f"  /** {p.description} */\n" if p.description else ""
-        out.append(f"{desc}  {prop_key(p.name)}{'' if p.required else '?'}: {ts_type(p.schema, for_input=True)};\n")
+        ts = ts_type(p.schema, for_input=True)
+        # Optional: left out when undefined, sent as null when null (clears a nullable field). A file
+        # field has no null form: it is either uploaded or left out.
+        nullable = not p.required and not is_file(p.schema)
+        out.append(f"{desc}  {prop_key(p.name)}{'' if p.required else '?'}: {ts + ' | null' if nullable else ts};\n")
     out.append("}\n\n")
     return "".join(out), fields
 

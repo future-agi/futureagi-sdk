@@ -9,7 +9,7 @@ not here.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal
 
 from .. import _operations as _ops
 from .. import models
@@ -17,8 +17,10 @@ from .._pagination import AsyncPager, SyncPager
 from .._resource import Resource
 from .._stability import _stability
 from .._transport import (
+    NOT_GIVEN,
     AsyncTransport,
     FileInput,
+    NotGiven,
     RequestOptions,
     SyncTransport,
 )
@@ -29,7 +31,7 @@ class AgentsVersionsResource(Resource):
 
     _t: SyncTransport
 
-    def create(self, agent_id: str, *, agent_name: str | None = None, agent_type: Literal['voice', 'text'] | None = None, description: str | None = None, provider: str | None = None, api_key: str | None = None, assistant_id: str | None = None, authentication_method: Literal['api_key'] | None = None, language: str | None = None, languages: List[str] | None = None, contact_number: str | None = None, inbound: bool | None = None, target_speaks_first: bool | None = None, knowledge_base: str | None = None, model: str | None = None, model_details: Dict[str, Any] | None = None, livekit_url: str | None = None, livekit_api_key: str | None = None, livekit_api_secret: str | None = None, livekit_agent_name: str | None = None, livekit_config_json: Dict[str, Any] | None = None, livekit_max_concurrency: int | None = None, commit_message: str | None = None, observability_enabled: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentVersionCreateResponse:
+    def create(self, agent_id: str, *, agent_name: str | None | NotGiven = NOT_GIVEN, agent_type: Literal['voice', 'text'] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, provider: str | None | NotGiven = NOT_GIVEN, api_key: str | None | NotGiven = NOT_GIVEN, assistant_id: str | None | NotGiven = NOT_GIVEN, authentication_method: Literal['api_key'] | None | NotGiven = NOT_GIVEN, language: str | None | NotGiven = NOT_GIVEN, languages: List[str] | None | NotGiven = NOT_GIVEN, contact_number: str | None | NotGiven = NOT_GIVEN, inbound: bool | None | NotGiven = NOT_GIVEN, target_speaks_first: bool | None | NotGiven = NOT_GIVEN, knowledge_base: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, model_details: Dict[str, Any] | None | NotGiven = NOT_GIVEN, livekit_url: str | None | NotGiven = NOT_GIVEN, livekit_api_key: str | None | NotGiven = NOT_GIVEN, livekit_api_secret: str | None | NotGiven = NOT_GIVEN, livekit_agent_name: str | None | NotGiven = NOT_GIVEN, livekit_config_json: Dict[str, Any] | None | NotGiven = NOT_GIVEN, livekit_max_concurrency: int | None | NotGiven = NOT_GIVEN, commit_message: str | None | NotGiven = NOT_GIVEN, observability_enabled: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentVersionCreateResponse:
         """Snapshot agent configuration into a new version and activate it. Can also update agent configuration. Use the returned version when creating a simulation test; existing tests may remain pinned to an older version.
 
         POST /simulate/agent-definitions/{agent_id}/versions/create/
@@ -45,7 +47,7 @@ class AlertsLogsResource(Resource):
 
     _t: SyncTransport
 
-    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.UserAlertMonitorLog]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.UserAlertMonitorLog]:
         """List alerts that have fired in numbered pages. Use this to find out what the platform has already flagged before digging into traces or error clusters.
 
         GET /tracer/user-alert-logs/
@@ -60,7 +62,7 @@ class AlertsRulesResource(Resource):
 
     _t: SyncTransport
 
-    def list(self, *, page_number: int | None = None, page_size: int | None = None, search_text: str | None = None, project_id: List[str] | None = None, status: List[Literal['triggered', 'healthy']] | None = None, metric_type: List[str] | None = None, sort_by: str | None = None, sort_direction: Literal['asc', 'desc'] | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.UserAlertMonitorListResult:
+    def list(self, *, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, search_text: str | None | NotGiven = NOT_GIVEN, project_id: List[str] | None | NotGiven = NOT_GIVEN, status: List[Literal['triggered', 'healthy']] | None | NotGiven = NOT_GIVEN, metric_type: List[str] | None | NotGiven = NOT_GIVEN, sort_by: str | None | NotGiven = NOT_GIVEN, sort_direction: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.UserAlertMonitorListResult:
         """List the configured alert monitors - what each one watches, its threshold and its project. Pair with list_fired_alerts to explain why an alert fired, or to see that no monitor covers a condition the user expected to be caught.
 
         GET /tracer/user-alerts/list_monitors/
@@ -76,7 +78,7 @@ class AnnotationQueuesItemsResource(Resource):
 
     _t: SyncTransport
 
-    def add(self, queue_id: str, *, items: List[Dict[str, Any]] | None = None, selection: Dict[str, Any] | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAddItemsResult:
+    def add(self, queue_id: str, *, items: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, selection: Dict[str, Any] | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAddItemsResult:
         """Add items (spans, traces, dataset rows) to a queue, by id or by a selection filter.
 
         POST /model-hub/annotation-queues/{queue_id}/items/add-items/
@@ -86,7 +88,7 @@ class AnnotationQueuesItemsResource(Resource):
         body = {'items': items, 'selection': selection, 'project_id': project_id, **(extra_body or {})}
         return self._t.call(_ops.OP_ANNOTATION_QUEUES_ITEMS_ADD, path=path, query=query, body=body, model=models.QueueAddItemsResult, options=options)
 
-    def annotate_detail(self, queue_id: str, id: str, *, annotator_id: str | None = None, include_completed: bool | None = None, view_mode: str | None = None, review_status: str | None = None, exclude_review_status: str | None = None, include_all_annotations: bool | None = None, reserve: bool | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAnnotateDetailResult:
+    def annotate_detail(self, queue_id: str, id: str, *, annotator_id: str | None | NotGiven = NOT_GIVEN, include_completed: bool | None | NotGiven = NOT_GIVEN, view_mode: str | None | NotGiven = NOT_GIVEN, review_status: str | None | NotGiven = NOT_GIVEN, exclude_review_status: str | None | NotGiven = NOT_GIVEN, include_all_annotations: bool | None | NotGiven = NOT_GIVEN, reserve: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAnnotateDetailResult:
         """Return everything needed to annotate one queue item; reserve=true acquires an editing reservation for the caller. Includes its source content, the queue instructions, every label with its settings (the allowed values a submitted value must match), any annotations already recorded, and the next/previous item ids. Call this before submit_annotation; the label settings are not available anywhere else.
 
         GET /model-hub/annotation-queues/{queue_id}/items/{id}/annotate-detail/
@@ -96,7 +98,7 @@ class AnnotationQueuesItemsResource(Resource):
         body = None
         return self._t.call(_ops.OP_ANNOTATION_QUEUES_ITEMS_ANNOTATE_DETAIL, path=path, query=query, body=body, model=models.QueueAnnotateDetailResult, options=options)
 
-    def assign(self, queue_id: str, *, item_ids: List[str], user_ids: List[str] | None = None, action: Literal['add', 'set', 'remove'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAssignItemsResult:
+    def assign(self, queue_id: str, *, item_ids: List[str], user_ids: List[str] | None | NotGiven = NOT_GIVEN, action: Literal['add', 'set', 'remove'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAssignItemsResult:
         """Assign or unassign queue items to annotators.
 
         POST /model-hub/annotation-queues/{queue_id}/items/assign/
@@ -106,7 +108,7 @@ class AnnotationQueuesItemsResource(Resource):
         body = {'item_ids': item_ids, 'user_ids': user_ids, 'action': action, **(extra_body or {})}
         return self._t.call(_ops.OP_ANNOTATION_QUEUES_ITEMS_ASSIGN, path=path, query=query, body=body, model=models.QueueAssignItemsResult, options=options)
 
-    def complete(self, queue_id: str, id: str, *, exclude: List[str] | None = None, exclude_review_status: str | None = None, include_completed: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueNavigationResult:
+    def complete(self, queue_id: str, id: str, *, exclude: List[str] | None | NotGiven = NOT_GIVEN, exclude_review_status: str | None | NotGiven = NOT_GIVEN, include_completed: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueNavigationResult:
         """Mark an annotated queue item complete and return the next item to work on. Required to finish an item - submit_annotation alone leaves it in_progress and the queue never closes.
 
         POST /model-hub/annotation-queues/{queue_id}/items/{id}/complete/
@@ -116,7 +118,7 @@ class AnnotationQueuesItemsResource(Resource):
         body = {'exclude': exclude, 'exclude_review_status': exclude_review_status, 'include_completed': include_completed, **(extra_body or {})}
         return self._t.call(_ops.OP_ANNOTATION_QUEUES_ITEMS_COMPLETE, path=path, query=query, body=body, model=models.QueueNavigationResult, options=options)
 
-    def import_annotations(self, queue_id: str, id: str, *, annotations: List[Dict[str, Any]], annotator_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueImportAnnotationsResult:
+    def import_annotations(self, queue_id: str, id: str, *, annotations: List[Dict[str, Any]], annotator_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueImportAnnotationsResult:
         """Import existing annotations onto a queue item, optionally on behalf of an annotator.
 
         POST /model-hub/annotation-queues/{queue_id}/items/{id}/annotations/import/
@@ -126,7 +128,7 @@ class AnnotationQueuesItemsResource(Resource):
         body = {'annotations': annotations, 'annotator_id': annotator_id, **(extra_body or {})}
         return self._t.call(_ops.OP_ANNOTATION_QUEUES_ITEMS_IMPORT_ANNOTATIONS, path=path, query=query, body=body, model=models.QueueImportAnnotationsResult, options=options)
 
-    def list(self, queue_id: str, *, limit: int | None = None, status: List[str] | None = None, source_type: List[str] | None = None, assigned_to: str | None = None, review_status: str | None = None, ordering: Literal['created_at', '-created_at'] | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.QueueItem]:
+    def list(self, queue_id: str, *, limit: int | None | NotGiven = NOT_GIVEN, status: List[str] | None | NotGiven = NOT_GIVEN, source_type: List[str] | None | NotGiven = NOT_GIVEN, assigned_to: str | None | NotGiven = NOT_GIVEN, review_status: str | None | NotGiven = NOT_GIVEN, ordering: Literal['created_at', '-created_at'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.QueueItem]:
         """List items belonging to an annotation queue.
 
         GET /model-hub/annotation-queues/{queue_id}/items/
@@ -155,7 +157,7 @@ class AnnotationQueuesItemsResource(Resource):
         body = {'item_ids': item_ids, **(extra_body or {})}
         return self._t.call(_ops.OP_ANNOTATION_QUEUES_ITEMS_REMOVE, path=path, query=query, body=body, model=models.QueueBulkRemoveItemsResult, options=options)
 
-    def skip(self, queue_id: str, id: str, *, exclude: List[str] | None = None, exclude_review_status: str | None = None, include_completed: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueNavigationResult:
+    def skip(self, queue_id: str, id: str, *, exclude: List[str] | None | NotGiven = NOT_GIVEN, exclude_review_status: str | None | NotGiven = NOT_GIVEN, include_completed: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueNavigationResult:
         """Skip a queue item and return the next one to work on.
 
         POST /model-hub/annotation-queues/{queue_id}/items/{id}/skip/
@@ -165,7 +167,7 @@ class AnnotationQueuesItemsResource(Resource):
         body = {'exclude': exclude, 'exclude_review_status': exclude_review_status, 'include_completed': include_completed, **(extra_body or {})}
         return self._t.call(_ops.OP_ANNOTATION_QUEUES_ITEMS_SKIP, path=path, query=query, body=body, model=models.QueueNavigationResult, options=options)
 
-    def submit(self, queue_id: str, id: str, *, annotations: List[Dict[str, Any]], notes: str | None = None, item_notes: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueSubmitAnnotationsResult:
+    def submit(self, queue_id: str, id: str, *, annotations: List[Dict[str, Any]], notes: str | None | NotGiven = NOT_GIVEN, item_notes: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueSubmitAnnotationsResult:
         """Submit annotation values for an item in an annotation queue. The value shape must match the label's settings from get_annotation_item_detail. Submitting moves the item to in_progress only; call complete_annotation_item to finish it.
 
         POST /model-hub/annotation-queues/{queue_id}/items/{id}/annotations/submit/
@@ -181,7 +183,7 @@ class AnnotationsLabelsResource(Resource):
 
     _t: SyncTransport
 
-    def create(self, *, name: str, type: Literal['text', 'numeric', 'categorical', 'star', 'thumbs_up_down'], settings: Dict[str, Any] | None = None, project: str | None = None, description: str | None = None, allow_notes: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AnnotationsLabels:
+    def create(self, *, name: str, type: Literal['text', 'numeric', 'categorical', 'star', 'thumbs_up_down'], settings: Dict[str, Any] | None | NotGiven = NOT_GIVEN, project: str | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, allow_notes: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AnnotationsLabels:
         """Create an annotation label (text, label, score, ...) with its settings.
 
         POST /model-hub/annotations-labels/
@@ -211,7 +213,7 @@ class AnnotationsLabelsResource(Resource):
         body = None
         return self._t.call(_ops.OP_ANNOTATIONS_LABELS_GET, path=path, query=query, body=body, model=models.AnnotationsLabels, options=options)
 
-    def list(self, *, limit: int | None = None, dataset: str | None = None, project_id: str | None = None, type: Literal['text', 'numeric', 'categorical', 'star', 'thumbs_up_down'] | None = None, search: str | None = None, include_usage_count: bool | None = None, include_archived: bool | None = None, archived: bool | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.AnnotationsLabels]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, dataset: str | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, type: Literal['text', 'numeric', 'categorical', 'star', 'thumbs_up_down'] | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, include_usage_count: bool | None | NotGiven = NOT_GIVEN, include_archived: bool | None | NotGiven = NOT_GIVEN, archived: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.AnnotationsLabels]:
         """List annotation labels, optionally filtered by project, type or search text.
 
         GET /model-hub/annotations-labels/
@@ -226,7 +228,7 @@ class DashboardsMetricsResource(Resource):
 
     _t: SyncTransport
 
-    def list(self, *, workflow: Literal['observability', 'dataset', 'simulation'] | None = None, project_ids: str | None = None, agent_definition_id: str | None = None, per_eval_config: bool | None = None, exclude_custom_attributes: bool | None = None, search: str | None = None, category: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None = None, role: Literal['metric', 'dimension'] | None = None, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'simulation', 'both', 'all'] | None = None, page: int | None = None, page_size: int | None = None, cursor_mode: bool | None = None, cursor: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardMetricsCatalogResult:
+    def list(self, *, workflow: Literal['observability', 'dataset', 'simulation'] | None | NotGiven = NOT_GIVEN, project_ids: str | None | NotGiven = NOT_GIVEN, agent_definition_id: str | None | NotGiven = NOT_GIVEN, per_eval_config: bool | None | NotGiven = NOT_GIVEN, exclude_custom_attributes: bool | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, category: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None | NotGiven = NOT_GIVEN, role: Literal['metric', 'dimension'] | None | NotGiven = NOT_GIVEN, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'simulation', 'both', 'all'] | None | NotGiven = NOT_GIVEN, page: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor_mode: bool | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardMetricsCatalogResult:
         """List the metrics available to dashboard queries across traces, datasets, and simulations.
 
         GET /tracer/dashboard/metrics/
@@ -242,7 +244,7 @@ class DashboardsWidgetsResource(Resource):
 
     _t: SyncTransport
 
-    def create(self, dashboard_pk: str, *, name: str | None = None, description: str | None = None, position: int | None = None, width: int | None = None, height: int | None = None, query_config: Dict[str, Any] | None = None, chart_config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardWidget:
+    def create(self, dashboard_pk: str, *, name: str | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, position: int | None | NotGiven = NOT_GIVEN, width: int | None | NotGiven = NOT_GIVEN, height: int | None | NotGiven = NOT_GIVEN, query_config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, chart_config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardWidget:
         """Add a widget to a dashboard. query_config uses the query_dashboard_metrics request shape (time_range plus metrics); discover metric names with list_dashboard_metrics.
 
         POST /tracer/dashboard/{dashboard_pk}/widgets/
@@ -262,7 +264,7 @@ class DashboardsWidgetsResource(Resource):
         body = None
         return self._t.call(_ops.OP_DASHBOARDS_WIDGETS_GET, path=path, query=query, body=body, model=models.DashboardWidget, options=options)
 
-    def list(self, dashboard_pk: str, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.DashboardWidget]:
+    def list(self, dashboard_pk: str, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.DashboardWidget]:
         """List the widgets on a dashboard.
 
         GET /tracer/dashboard/{dashboard_pk}/widgets/
@@ -271,7 +273,7 @@ class DashboardsWidgetsResource(Resource):
         query = {'limit': limit, **(extra_query or {})}
         return self._t.paginate(_ops.OP_DASHBOARDS_WIDGETS_LIST, path=path, query=query, model=models.DashboardWidget, options=options)
 
-    def query(self, dashboard_pk: str, id: str, *, allow_sampled: bool | None = None, refresh: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardQueryResult:
+    def query(self, dashboard_pk: str, id: str, *, allow_sampled: bool | None | NotGiven = NOT_GIVEN, refresh: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardQueryResult:
         """Execute a saved widget's query and return its chart data.
 
         POST /tracer/dashboard/{dashboard_pk}/widgets/{id}/query/
@@ -281,7 +283,7 @@ class DashboardsWidgetsResource(Resource):
         body = {'allow_sampled': allow_sampled, **(extra_body or {})}
         return self._t.call(_ops.OP_DASHBOARDS_WIDGETS_QUERY, path=path, query=query, body=body, model=models.DashboardQueryResult, options=options)
 
-    def update(self, dashboard_pk: str, id: str, *, name: str | None = None, description: str | None = None, position: int | None = None, width: int | None = None, height: int | None = None, query_config: Dict[str, Any] | None = None, chart_config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardWidget:
+    def update(self, dashboard_pk: str, id: str, *, name: str | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, position: int | None | NotGiven = NOT_GIVEN, width: int | None | NotGiven = NOT_GIVEN, height: int | None | NotGiven = NOT_GIVEN, query_config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, chart_config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardWidget:
         """Update selected fields on a dashboard widget, such as its query_config, chart_config, or layout.
 
         PATCH /tracer/dashboard/{dashboard_pk}/widgets/{id}/
@@ -297,7 +299,7 @@ class DatasetsCellsResource(Resource):
 
     _t: SyncTransport
 
-    def update(self, dataset_id: str, *, row_id: str, column_id: str, new_value: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    def update(self, dataset_id: str, *, row_id: str, column_id: str, new_value: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Set the value of a single dataset cell. Use this to correct one value; add_dataset_rows only appends and cannot edit an existing row.
 
         POST /model-hub/develops/{dataset_id}/update_cell_value/
@@ -323,7 +325,7 @@ class DatasetsColumnsResource(Resource):
         body = {'new_columns_data': new_columns_data, **(extra_body or {})}
         return self._t.call(_ops.OP_DATASETS_COLUMNS_ADD, path=path, query=query, body=body, model=models.DatasetColumnsMutationResult, options=options)
 
-    def add_static(self, dataset_id: str, *, new_column_name: str, column_type: str, source: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    def add_static(self, dataset_id: str, *, new_column_name: str, column_type: str, source: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Create a named static input column before adding dataset rows. Supply column_type using the API schema.
 
         POST /model-hub/develops/{dataset_id}/add_static_column/
@@ -349,7 +351,7 @@ class DatasetsEvalsResource(Resource):
 
     _t: SyncTransport
 
-    def add(self, dataset_id: str, *, name: str, template_id: str, config: Dict[str, Any], kb_id: str | None = None, error_localizer: bool | None = None, model: str | None = None, eval_type: str | None = None, run: bool | None = None, save_as_template: bool | None = None, experiment_id: str | None = None, composite_weight_overrides: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    def add(self, dataset_id: str, *, name: str, template_id: str, config: Dict[str, Any], kb_id: str | None | NotGiven = NOT_GIVEN, error_localizer: bool | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, eval_type: str | None | NotGiven = NOT_GIVEN, run: bool | None | NotGiven = NOT_GIVEN, save_as_template: bool | None | NotGiven = NOT_GIVEN, experiment_id: str | None | NotGiven = NOT_GIVEN, composite_weight_overrides: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Attach an evaluation template to a dataset with a lowercase name (letters, digits, hyphens or underscores; no spaces) and config.mapping column mappings. Set run=false for setup only; run=true marks it for processing. Use list_dataset_evaluations to discover the attached evaluation ID.
 
         POST /model-hub/develops/{dataset_id}/add_user_eval/
@@ -359,7 +361,7 @@ class DatasetsEvalsResource(Resource):
         body = {'name': name, 'template_id': template_id, 'config': config, 'kb_id': kb_id, 'error_localizer': error_localizer, 'model': model, 'eval_type': eval_type, 'run': run, 'save_as_template': save_as_template, 'experiment_id': experiment_id, 'composite_weight_overrides': composite_weight_overrides, **(extra_body or {})}
         return self._t.call(_ops.OP_DATASETS_EVALS_ADD, path=path, query=query, body=body, model=None, options=options)
 
-    def list(self, dataset_id: str, *, eval_type: str | None = None, search_text: str | None = None, eval_categories: str | None = None, eval_tags: List[str] | None = None, use_cases: List[str] | None = None, experiment_id: str | None = None, order: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalListResult:
+    def list(self, dataset_id: str, *, eval_type: str | None | NotGiven = NOT_GIVEN, search_text: str | None | NotGiven = NOT_GIVEN, eval_categories: str | None | NotGiven = NOT_GIVEN, eval_tags: List[str] | None | NotGiven = NOT_GIVEN, use_cases: List[str] | None | NotGiven = NOT_GIVEN, experiment_id: str | None | NotGiven = NOT_GIVEN, order: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalListResult:
         """List evaluations attached to a dataset by supplying eval_type=user, including their IDs, configuration and status. These IDs, not template IDs, are used by run_dataset_evals. Without eval_type=user, the API lists available evaluation templates.
 
         GET /model-hub/develops/{dataset_id}/get_evals_list/
@@ -369,7 +371,7 @@ class DatasetsEvalsResource(Resource):
         body = None
         return self._t.call(_ops.OP_DATASETS_EVALS_LIST, path=path, query=query, body=body, model=models.EvalListResult, options=options)
 
-    def run(self, dataset_id: str, *, user_eval_ids: List[str], experiment_id: str | None = None, failed_only: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    def run(self, dataset_id: str, *, user_eval_ids: List[str], experiment_id: str | None | NotGiven = NOT_GIVEN, failed_only: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Start the configured evaluations for a dataset.
 
         POST /model-hub/develops/{dataset_id}/start_evals_process/
@@ -395,7 +397,7 @@ class DatasetsPromptsResource(Resource):
 
     _t: SyncTransport
 
-    def add(self, *, dataset_id: str, name: str, config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    def add(self, *, dataset_id: str, name: str, config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Create a dataset prompt output column and immediately schedule processing of dataset rows. This can incur model usage charges. Supply dataset_id, name and config; this is separate from workbench run_prompt.
 
         POST /model-hub/develops/add_run_prompt_column/
@@ -405,7 +407,7 @@ class DatasetsPromptsResource(Resource):
         body = {'dataset_id': dataset_id, 'name': name, 'config': config, **(extra_body or {})}
         return self._t.call(_ops.OP_DATASETS_PROMPTS_ADD, path=path, query=query, body=body, model=None, options=options)
 
-    def run(self, *, run_prompt_ids: List[str], row_ids: List[str] | None = None, selected_all_rows: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.ModelHubSuccessMessageResult:
+    def run(self, *, run_prompt_ids: List[str], row_ids: List[str] | None | NotGiven = NOT_GIVEN, selected_all_rows: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.ModelHubSuccessMessageResult:
         """Queue configured dataset prompts by run_prompt_ids. Supply row_ids for selected rows, or selected_all_rows=true for all rows; with selected_all_rows=true, row_ids are EXCLUDED. Poll get_dataset for cell results and status.
 
         POST /model-hub/run-prompt-for-rows/
@@ -425,7 +427,7 @@ class DatasetsPromptsResource(Resource):
         body = None
         return self._t.call(_ops.OP_DATASETS_PROMPTS_STATS, path=path, query=query, body=body, model=models.DatasetRunPromptStatsResult, options=options)
 
-    def update(self, *, dataset_id: str, column_id: str, name: str | None = None, config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    def update(self, *, dataset_id: str, column_id: str, name: str | None | NotGiven = NOT_GIVEN, config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Update a dataset prompt column using dataset_id, column_id and config. This can schedule processing and incur model usage charges.
 
         POST /model-hub/develops/edit_run_prompt_column/
@@ -460,7 +462,7 @@ class EvalsConfigsResource(Resource):
 
     _t: SyncTransport
 
-    def create(self, *, eval_template: str, project: str, name: str | None = None, config: Dict[str, Any] | None = None, mapping: Dict[str, Any] | None = None, filters: Dict[str, Any] | None = None, error_localizer: bool | None = None, kb_id: str | None = None, model: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.CustomEvalConfig:
+    def create(self, *, eval_template: str, project: str, name: str | None | NotGiven = NOT_GIVEN, config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, filters: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer: bool | None | NotGiven = NOT_GIVEN, kb_id: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.CustomEvalConfig:
         """Create a custom evaluation configuration from an eval template so it can be attached to an online evaluation task. Use when list_eval_configs has no entry for the template you want to run over spans.
 
         POST /tracer/custom-eval-config/
@@ -470,7 +472,7 @@ class EvalsConfigsResource(Resource):
         body = {'eval_template': eval_template, 'project': project, 'name': name, 'config': config, 'mapping': mapping, 'filters': filters, 'error_localizer': error_localizer, 'kb_id': kb_id, 'model': model, **(extra_body or {})}
         return self._t.call(_ops.OP_EVALS_CONFIGS_CREATE, path=path, query=query, body=body, model=models.CustomEvalConfig, options=options)
 
-    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.CustomEvalConfig]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.CustomEvalConfig]:
         """List the custom evaluation configurations available for online evaluation tasks. The ids returned here are what create_eval_task takes in its `evals` argument - eval templates are a different object and their ids are not accepted there.
 
         GET /tracer/custom-eval-config/
@@ -485,7 +487,7 @@ class EvalsGroupsResource(Resource):
 
     _t: SyncTransport
 
-    def get(self, id: str, *, name: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalGroup:
+    def get(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalGroup:
         """Return an evaluation group by its identifier.
 
         GET /model-hub/eval-groups/{id}/
@@ -495,7 +497,7 @@ class EvalsGroupsResource(Resource):
         body = None
         return self._t.call(_ops.OP_EVALS_GROUPS_GET, path=path, query=query, body=body, model=models.EvalGroup, options=options)
 
-    def list(self, *, name: str | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def list(self, *, name: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """List evaluation groups in the current workspace.
 
         GET /model-hub/eval-groups/
@@ -511,7 +513,7 @@ class EvalsTasksResource(Resource):
 
     _t: SyncTransport
 
-    def create(self, *, project: str, name: str, sampling_rate: float, run_type: Literal['continuous', 'historical'], evals: List[str], filters: Dict[str, Any] | None = None, last_run: str | None = None, spans_limit: int | None = None, row_type: Literal['spans', 'traces', 'sessions', 'voiceCalls'] | None = None, status: Literal['pending', 'running', 'completed', 'failed', 'paused', 'deleted'] | None = None, start_time: str | None = None, end_time: str | None = None, evals_details: Dict[str, Any] | None = None, failed_spans: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTaskCreateResult:
+    def create(self, *, project: str, name: str, sampling_rate: float, run_type: Literal['continuous', 'historical'], evals: List[str], filters: Dict[str, Any] | None | NotGiven = NOT_GIVEN, last_run: str | None | NotGiven = NOT_GIVEN, spans_limit: int | None | NotGiven = NOT_GIVEN, row_type: Literal['spans', 'traces', 'sessions', 'voiceCalls'] | None | NotGiven = NOT_GIVEN, status: Literal['pending', 'running', 'completed', 'failed', 'paused', 'deleted'] | None | NotGiven = NOT_GIVEN, start_time: str | None | NotGiven = NOT_GIVEN, end_time: str | None | NotGiven = NOT_GIVEN, evals_details: Dict[str, Any] | None | NotGiven = NOT_GIVEN, failed_spans: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTaskCreateResult:
         """Create an online evaluation task.
 
         POST /tracer/eval-task/
@@ -531,7 +533,7 @@ class EvalsTasksResource(Resource):
         body = None
         return self._t.call(_ops.OP_EVALS_TASKS_GET, path=path, query=query, body=body, model=models.EvalTask, options=options)
 
-    def list(self, *, project_id: str | None = None, name: str | None = None, filters: str | None = None, sort_params: str | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models._EvalTaskListResultResponse:
+    def list(self, *, project_id: str | None | NotGiven = NOT_GIVEN, name: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, sort_params: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models._EvalTaskListResultResponse:
         """List online evaluation tasks in the current workspace.
 
         GET /tracer/eval-task/list_eval_tasks/
@@ -561,7 +563,7 @@ class EvalsTasksResource(Resource):
         body = {**(extra_body or {})}
         return self._t.call(_ops.OP_EVALS_TASKS_RESUME, path=path, query=query, body=body, model=models.EvalTaskMessageResult, options=options)
 
-    def update(self, *, edit_type: Literal['edit_rerun', 'fresh_run'], eval_task_id: str, name: str | None = None, filters: Dict[str, Any] | None = None, sampling_rate: float | None = None, spans_limit: int | None = None, run_type: Literal['continuous', 'historical'] | None = None, row_type: Literal['spans', 'traces', 'sessions', 'voiceCalls'] | None = None, status: Literal['pending', 'running', 'completed', 'failed', 'paused', 'deleted'] | None = None, evals: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTaskUpdateResult:
+    def update(self, *, edit_type: Literal['edit_rerun', 'fresh_run'], eval_task_id: str, name: str | None | NotGiven = NOT_GIVEN, filters: Dict[str, Any] | None | NotGiven = NOT_GIVEN, sampling_rate: float | None | NotGiven = NOT_GIVEN, spans_limit: int | None | NotGiven = NOT_GIVEN, run_type: Literal['continuous', 'historical'] | None | NotGiven = NOT_GIVEN, row_type: Literal['spans', 'traces', 'sessions', 'voiceCalls'] | None | NotGiven = NOT_GIVEN, status: Literal['pending', 'running', 'completed', 'failed', 'paused', 'deleted'] | None | NotGiven = NOT_GIVEN, evals: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTaskUpdateResult:
         """Update and rerun an online evaluation task using eval_task_id and edit_type. Pause a running task first. edit_rerun preserves existing results; fresh_run DELETES previous results and starts again. May incur evaluation charges.
 
         PATCH /tracer/eval-task/update_eval_task/
@@ -577,7 +579,7 @@ class EvalsTemplatesResource(Resource):
 
     _t: SyncTransport
 
-    def create(self, *, name: str | None = None, is_draft: bool | None = None, eval_type: Literal['llm', 'code', 'agent'] | None = None, instructions: str | None = None, model: str | None = None, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None = None, pass_threshold: float | None = None, choice_scores: Dict[str, Any] | None = None, description: str | None = None, tags: List[str] | None = None, check_internet: bool | None = None, code: str | None = None, code_language: Literal['python', 'javascript'] | None = None, messages: List[Dict[str, Any]] | None = None, few_shot_examples: List[Dict[str, Any]] | None = None, mode: Literal['auto', 'agent', 'quick'] | None = None, tools: Dict[str, Any] | None = None, knowledge_bases: List[str] | None = None, data_injection: Dict[str, Any] | None = None, summary: Dict[str, Any] | None = None, error_localizer_enabled: bool | None = None, template_format: Literal['mustache', 'jinja'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateCreateResponseResult:
+    def create(self, *, name: str | None | NotGiven = NOT_GIVEN, is_draft: bool | None | NotGiven = NOT_GIVEN, eval_type: Literal['llm', 'code', 'agent'] | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None | NotGiven = NOT_GIVEN, pass_threshold: float | None | NotGiven = NOT_GIVEN, choice_scores: Dict[str, Any] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, code: str | None | NotGiven = NOT_GIVEN, code_language: Literal['python', 'javascript'] | None | NotGiven = NOT_GIVEN, messages: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, few_shot_examples: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, mode: Literal['auto', 'agent', 'quick'] | None | NotGiven = NOT_GIVEN, tools: Dict[str, Any] | None | NotGiven = NOT_GIVEN, knowledge_bases: List[str] | None | NotGiven = NOT_GIVEN, data_injection: Dict[str, Any] | None | NotGiven = NOT_GIVEN, summary: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer_enabled: bool | None | NotGiven = NOT_GIVEN, template_format: Literal['mustache', 'jinja'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateCreateResponseResult:
         """Create an evaluation template.
 
         POST /model-hub/eval-templates/create-v2/
@@ -597,7 +599,7 @@ class EvalsTemplatesResource(Resource):
         body = None
         return self._t.call(_ops.OP_EVALS_TEMPLATES_GET, path=path, query=query, body=body, model=models.EvalTemplateDetailResponseResult, options=options)
 
-    def list(self, *, page: int | None = None, page_size: int | None = None, search: str | None = None, owner_filter: Literal['all', 'user', 'system'] | None = None, filters: Dict[str, Any] | None = None, sort_by: Literal['name', 'updated_at', 'created_at'] | None = None, sort_order: Literal['asc', 'desc'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateListResponseResult:
+    def list(self, *, page: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, owner_filter: Literal['all', 'user', 'system'] | None | NotGiven = NOT_GIVEN, filters: Dict[str, Any] | None | NotGiven = NOT_GIVEN, sort_by: Literal['name', 'updated_at', 'created_at'] | None | NotGiven = NOT_GIVEN, sort_order: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateListResponseResult:
         """List evaluation templates using the supplied filters.
 
         POST /model-hub/eval-templates/list/
@@ -607,7 +609,7 @@ class EvalsTemplatesResource(Resource):
         body = {'page': page, 'page_size': page_size, 'search': search, 'owner_filter': owner_filter, 'filters': filters, 'sort_by': sort_by, 'sort_order': sort_order, **(extra_body or {})}
         return self._t.call(_ops.OP_EVALS_TEMPLATES_LIST, path=path, query=query, body=body, model=models.EvalTemplateListResponseResult, options=options)
 
-    def update(self, template_id: str, *, name: str | None = None, eval_type: Literal['llm', 'code', 'agent'] | None = None, instructions: str | None = None, model: str | None = None, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None = None, pass_threshold: float | None = None, choice_scores: Dict[str, Any] | None = None, multi_choice: bool | None = None, description: str | None = None, tags: List[str] | None = None, check_internet: bool | None = None, code: str | None = None, code_language: Literal['python', 'javascript'] | None = None, messages: List[Dict[str, Any]] | None = None, few_shot_examples: List[Dict[str, Any]] | None = None, mode: Literal['auto', 'agent', 'quick'] | None = None, tools: Dict[str, Any] | None = None, knowledge_bases: List[str] | None = None, data_injection: Dict[str, Any] | None = None, summary: Dict[str, Any] | None = None, error_localizer_enabled: bool | None = None, publish: bool | None = None, template_format: Literal['mustache', 'jinja'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateUpdateResponseResult:
+    def update(self, template_id: str, *, name: str | None | NotGiven = NOT_GIVEN, eval_type: Literal['llm', 'code', 'agent'] | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None | NotGiven = NOT_GIVEN, pass_threshold: float | None | NotGiven = NOT_GIVEN, choice_scores: Dict[str, Any] | None | NotGiven = NOT_GIVEN, multi_choice: bool | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, code: str | None | NotGiven = NOT_GIVEN, code_language: Literal['python', 'javascript'] | None | NotGiven = NOT_GIVEN, messages: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, few_shot_examples: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, mode: Literal['auto', 'agent', 'quick'] | None | NotGiven = NOT_GIVEN, tools: Dict[str, Any] | None | NotGiven = NOT_GIVEN, knowledge_bases: List[str] | None | NotGiven = NOT_GIVEN, data_injection: Dict[str, Any] | None | NotGiven = NOT_GIVEN, summary: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer_enabled: bool | None | NotGiven = NOT_GIVEN, publish: bool | None | NotGiven = NOT_GIVEN, template_format: Literal['mustache', 'jinja'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateUpdateResponseResult:
         """Update an existing evaluation template.
 
         PUT /model-hub/eval-templates/{template_id}/update/
@@ -623,7 +625,7 @@ class GatewayGuardrailRulesResource(Resource):
 
     _t: SyncTransport
 
-    def list(self, *, page: int | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def list(self, *, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """Per-rule guardrail trigger breakdown - which guardrail rules exist and how often each has fired. Request logs report guardrail_triggered but not which rule caused it; this is what turns "the request was blocked" into "the PII rule blocked it".
 
         GET /agentcc/analytics/guardrail-rules/
@@ -639,7 +641,7 @@ class GatewayRequestLogsResource(Resource):
 
     _t: SyncTransport
 
-    def list(self, *, limit: int | None = None, user_id: str | None = None, session_id: str | None = None, api_key_id: str | None = None, request_id: str | None = None, model: str | None = None, provider: str | None = None, status_code: str | None = None, min_status_code: int | None = None, max_status_code: int | None = None, is_error: bool | None = None, cache_hit: bool | None = None, fallback_used: bool | None = None, guardrail_triggered: bool | None = None, is_stream: bool | None = None, started_after: str | None = None, started_before: str | None = None, min_latency: int | None = None, max_latency: int | None = None, min_cost: float | None = None, max_cost: float | None = None, min_tokens: int | None = None, max_tokens: int | None = None, q: str | None = None, search: str | None = None, ordering: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.AgentccRequestLog]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, user_id: str | None | NotGiven = NOT_GIVEN, session_id: str | None | NotGiven = NOT_GIVEN, api_key_id: str | None | NotGiven = NOT_GIVEN, request_id: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, provider: str | None | NotGiven = NOT_GIVEN, status_code: str | None | NotGiven = NOT_GIVEN, min_status_code: int | None | NotGiven = NOT_GIVEN, max_status_code: int | None | NotGiven = NOT_GIVEN, is_error: bool | None | NotGiven = NOT_GIVEN, cache_hit: bool | None | NotGiven = NOT_GIVEN, fallback_used: bool | None | NotGiven = NOT_GIVEN, guardrail_triggered: bool | None | NotGiven = NOT_GIVEN, is_stream: bool | None | NotGiven = NOT_GIVEN, started_after: str | None | NotGiven = NOT_GIVEN, started_before: str | None | NotGiven = NOT_GIVEN, min_latency: int | None | NotGiven = NOT_GIVEN, max_latency: int | None | NotGiven = NOT_GIVEN, min_cost: float | None | NotGiven = NOT_GIVEN, max_cost: float | None | NotGiven = NOT_GIVEN, min_tokens: int | None | NotGiven = NOT_GIVEN, max_tokens: int | None | NotGiven = NOT_GIVEN, q: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, ordering: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.AgentccRequestLog]:
         """List request logs recorded by the AI gateway.
 
         GET /agentcc/request-logs/
@@ -654,7 +656,7 @@ class GatewaySessionsResource(Resource):
 
     _t: SyncTransport
 
-    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.AgentccSession]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.AgentccSession]:
         """List AI gateway sessions with their stats. These are gateway sessions, distinct from the tracing sessions returned by list_sessions. Use this to obtain a session id for list_gateway_session_requests.
 
         GET /agentcc/sessions/
@@ -679,7 +681,7 @@ class KnowledgeBasesFilesResource(Resource):
 
     _t: SyncTransport
 
-    def delete(self, *, kb_id: str | None = None, delete_all: bool | None = None, file_ids: List[str] | None = None, excluded_file_ids: List[str] | None = None, file_names: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    def delete(self, *, kb_id: str | None | NotGiven = NOT_GIVEN, delete_all: bool | None | NotGiven = NOT_GIVEN, file_ids: List[str] | None | NotGiven = NOT_GIVEN, excluded_file_ids: List[str] | None | NotGiven = NOT_GIVEN, file_names: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Delete files from a knowledge base, by id or name, or all of them.
 
         DELETE /model-hub/knowledge-base/files/
@@ -689,7 +691,7 @@ class KnowledgeBasesFilesResource(Resource):
         body = {'kb_id': kb_id, 'delete_all': delete_all, 'file_ids': file_ids, 'excluded_file_ids': excluded_file_ids, 'file_names': file_names, **(extra_body or {})}
         return self._t.call(_ops.OP_KNOWLEDGE_BASES_FILES_DELETE, path=path, query=query, body=body, model=None, options=options)
 
-    def list(self, *, kb_id: str, search: str | None = None, sort: List[Dict[str, Any]] | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseFilesResult:
+    def list(self, *, kb_id: str, search: str | None | NotGiven = NOT_GIVEN, sort: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseFilesResult:
         """List the files in a knowledge base, with their processing status.
 
         POST /model-hub/knowledge-base/files/
@@ -715,7 +717,7 @@ class PromptsLabelsResource(Resource):
         body = {'version': version, **(extra_body or {})}
         return self._t.call(_ops.OP_PROMPTS_LABELS_ASSIGN, path=path, query=query, body=body, model=None, options=options)
 
-    def create(self, *, name: str, type: Literal['system', 'custom'], metadata: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptLabel:
+    def create(self, *, name: str, type: Literal['system', 'custom'], metadata: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptLabel:
         """Create a prompt label.
 
         POST /model-hub/prompt-labels/
@@ -725,7 +727,7 @@ class PromptsLabelsResource(Resource):
         body = {'name': name, 'type': type, 'metadata': metadata, **(extra_body or {})}
         return self._t.call(_ops.OP_PROMPTS_LABELS_CREATE, path=path, query=query, body=body, model=models.PromptLabel, options=options)
 
-    def for_template(self, *, page: int | None = None, limit: int | None = None, template_id: str | None = None, template_name: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def for_template(self, *, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, template_id: str | None | NotGiven = NOT_GIVEN, template_name: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """List the labels assigned to a prompt template's versions.
 
         GET /model-hub/prompt-labels/template-labels/
@@ -735,7 +737,7 @@ class PromptsLabelsResource(Resource):
         body = None
         return self._t.call(_ops.OP_PROMPTS_LABELS_FOR_TEMPLATE, path=path, query=query, body=body, model=None, options=options)
 
-    def get_template(self, *, page: int | None = None, limit: int | None = None, name: str | None = None, label: str | None = None, version: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def get_template(self, *, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, name: str | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, version: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """Fetch the prompt template version a label points to, by template name and label (or version).
 
         GET /model-hub/prompt-labels/get-by-name/
@@ -745,7 +747,7 @@ class PromptsLabelsResource(Resource):
         body = None
         return self._t.call(_ops.OP_PROMPTS_LABELS_GET_TEMPLATE, path=path, query=query, body=body, model=None, options=options)
 
-    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.PromptLabel]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.PromptLabel]:
         """List prompt labels (e.g. production, staging) in the organization.
 
         GET /model-hub/prompt-labels/
@@ -780,7 +782,7 @@ class PromptsVersionsResource(Resource):
 
     _t: SyncTransport
 
-    def list(self, id: str, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[Any]:
+    def list(self, id: str, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[Any]:
         """List versions of a prompt template.
 
         GET /model-hub/prompt-templates/{id}/versions/
@@ -805,7 +807,7 @@ class SimulationExecutionsResource(Resource):
         body = None
         return self._t.call(_ops.OP_SIMULATION_EXECUTIONS_ANALYTICS, path=path, query=query, body=body, model=models.TestExecutionAnalytics, options=options)
 
-    def get(self, test_execution_id: str, *, search: str | None = None, filters: str | None = None, row_groups: str | None = None, group_keys: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[Any]:
+    def get(self, test_execution_id: str, *, search: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, row_groups: str | None | NotGiven = NOT_GIVEN, group_keys: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[Any]:
         """Return a simulation test execution by its identifier.
 
         GET /simulate/test-executions/{test_execution_id}/
@@ -814,7 +816,7 @@ class SimulationExecutionsResource(Resource):
         query = {'search': search, 'filters': filters, 'row_groups': row_groups, 'group_keys': group_keys, 'limit': limit, **(extra_query or {})}
         return self._t.paginate(_ops.OP_SIMULATION_EXECUTIONS_GET, path=path, query=query, model=None, options=options)
 
-    def list(self, *, search: str | None = None, status: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.TestExecution]:
+    def list(self, *, search: str | None | NotGiven = NOT_GIVEN, status: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.TestExecution]:
         """List simulation test executions.
 
         GET /simulate/api/test-executions/
@@ -829,7 +831,7 @@ class SimulationScenariosResource(Resource):
 
     _t: SyncTransport
 
-    def create(self, *, name: str, description: str | None = None, dataset_id: str | None = None, kind: Literal['graph', 'script', 'dataset'] | None = None, script_url: str | None = None, agent_definition_id: str | None = None, agent_definition_version_id: str | None = None, custom_instruction: str | None = None, no_of_rows: int | None = None, generate_graph: bool | None = None, graph: Dict[str, Any] | None = None, source_type: Literal['agent_definition', 'prompt'] | None = None, prompt_template_id: str | None = None, prompt_version_id: str | None = None, add_persona_automatically: bool | None = None, personas: List[str] | None = None, custom_columns: List[Dict[str, Any]] | None = None, agent_name: str | None = None, agent_prompt: str | None = None, voice_provider: str | None = None, voice_name: str | None = None, model: str | None = None, llm_temperature: float | None = None, initial_message: str | None = None, max_call_duration_in_minutes: int | None = None, interrupt_sensitivity: float | None = None, conversation_speed: float | None = None, finished_speaking_sensitivity: float | None = None, initial_message_delay: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def create(self, *, name: str, description: str | None | NotGiven = NOT_GIVEN, dataset_id: str | None | NotGiven = NOT_GIVEN, kind: Literal['graph', 'script', 'dataset'] | None | NotGiven = NOT_GIVEN, script_url: str | None | NotGiven = NOT_GIVEN, agent_definition_id: str | None | NotGiven = NOT_GIVEN, agent_definition_version_id: str | None | NotGiven = NOT_GIVEN, custom_instruction: str | None | NotGiven = NOT_GIVEN, no_of_rows: int | None | NotGiven = NOT_GIVEN, generate_graph: bool | None | NotGiven = NOT_GIVEN, graph: Dict[str, Any] | None | NotGiven = NOT_GIVEN, source_type: Literal['agent_definition', 'prompt'] | None | NotGiven = NOT_GIVEN, prompt_template_id: str | None | NotGiven = NOT_GIVEN, prompt_version_id: str | None | NotGiven = NOT_GIVEN, add_persona_automatically: bool | None | NotGiven = NOT_GIVEN, personas: List[str] | None | NotGiven = NOT_GIVEN, custom_columns: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, agent_name: str | None | NotGiven = NOT_GIVEN, agent_prompt: str | None | NotGiven = NOT_GIVEN, voice_provider: str | None | NotGiven = NOT_GIVEN, voice_name: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, llm_temperature: float | None | NotGiven = NOT_GIVEN, initial_message: str | None | NotGiven = NOT_GIVEN, max_call_duration_in_minutes: int | None | NotGiven = NOT_GIVEN, interrupt_sensitivity: float | None | NotGiven = NOT_GIVEN, conversation_speed: float | None | NotGiven = NOT_GIVEN, finished_speaking_sensitivity: float | None | NotGiven = NOT_GIVEN, initial_message_delay: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """Create an agent or prompt simulation scenario of kind dataset, script or graph. Generation is asynchronous and may incur usage charges; poll get_scenario until ready before running tests. Requires the applicable plan entitlement.
 
         POST /simulate/scenarios/create/
@@ -849,7 +851,7 @@ class SimulationScenariosResource(Resource):
         body = None
         return self._t.call(_ops.OP_SIMULATION_SCENARIOS_GET, path=path, query=query, body=body, model=models.ScenarioDetailResponse, options=options)
 
-    def list(self, *, search: str | None = None, agent_definition_id: str | None = None, agent_type: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.ScenarioResponse]:
+    def list(self, *, search: str | None | NotGiven = NOT_GIVEN, agent_definition_id: str | None | NotGiven = NOT_GIVEN, agent_type: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.ScenarioResponse]:
         """List simulation scenarios in the current workspace.
 
         GET /simulate/scenarios/
@@ -858,7 +860,7 @@ class SimulationScenariosResource(Resource):
         query = {'search': search, 'agent_definition_id': agent_definition_id, 'agent_type': agent_type, 'limit': limit, **(extra_query or {})}
         return self._t.paginate(_ops.OP_SIMULATION_SCENARIOS_LIST, path=path, query=query, model=models.ScenarioResponse, options=options)
 
-    def update(self, scenario_id: str, *, name: str | None = None, description: str | None = None, graph: Dict[str, Any] | None = None, prompt: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.ScenarioEditResponse:
+    def update(self, scenario_id: str, *, name: str | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, graph: Dict[str, Any] | None | NotGiven = NOT_GIVEN, prompt: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.ScenarioEditResponse:
         """Edit supported scenario fields such as name, description, graph or prompt. This is not a dataset-row editor or a simulation execution.
 
         PUT /simulate/scenarios/{scenario_id}/edit/
@@ -874,7 +876,7 @@ class SimulationTestsResource(Resource):
 
     _t: SyncTransport
 
-    def create(self, *, name: str, agent_definition_id: str, scenario_ids: List[str], description: str | None = None, dataset_row_ids: List[str] | None = None, eval_config_ids: List[str] | None = None, evaluations_config: List[Dict[str, Any]] | None = None, enable_tool_evaluation: bool | None = None, replay_session_id: str | None = None, agent_version: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.RunTestResponse:
+    def create(self, *, name: str, agent_definition_id: str, scenario_ids: List[str], description: str | None | NotGiven = NOT_GIVEN, dataset_row_ids: List[str] | None | NotGiven = NOT_GIVEN, eval_config_ids: List[str] | None | NotGiven = NOT_GIVEN, evaluations_config: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, enable_tool_evaluation: bool | None | NotGiven = NOT_GIVEN, replay_session_id: str | None | NotGiven = NOT_GIVEN, agent_version: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.RunTestResponse:
         """Save a simulation test using name, agent_definition_id and scenario_ids, optionally agent_version and evaluations_config. Does not execute it; pass the returned test ID to run_simulation.
 
         POST /simulate/run-tests/create/
@@ -894,7 +896,7 @@ class SimulationTestsResource(Resource):
         body = None
         return self._t.call(_ops.OP_SIMULATION_TESTS_GET, path=path, query=query, body=body, model=models.RunTestResponse, options=options)
 
-    def list(self, *, search: str | None = None, simulation_type: Literal['agent_definition', 'prompt'] | None = None, prompt_template_id: str | None = None, limit: int | None = None, summary: bool | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.RunTestResponse]:
+    def list(self, *, search: str | None | NotGiven = NOT_GIVEN, simulation_type: Literal['agent_definition', 'prompt'] | None | NotGiven = NOT_GIVEN, prompt_template_id: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, summary: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.RunTestResponse]:
         """List saved simulation test configurations. A test configuration is distinct from its executions; use list_test_executions to inspect runs.
 
         GET /simulate/run-tests/
@@ -903,7 +905,7 @@ class SimulationTestsResource(Resource):
         query = {'search': search, 'simulation_type': simulation_type, 'prompt_template_id': prompt_template_id, 'limit': limit, 'summary': summary, **(extra_query or {})}
         return self._t.paginate(_ops.OP_SIMULATION_TESTS_LIST, path=path, query=query, model=models.RunTestResponse, options=options)
 
-    def run(self, run_test_id: str, *, scenario_ids: List[str] | None = None, simulator_id: str | None = None, select_all: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.RunTestExecutionResponse:
+    def run(self, run_test_id: str, *, scenario_ids: List[str] | None | NotGiven = NOT_GIVEN, simulator_id: str | None | NotGiven = NOT_GIVEN, select_all: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.RunTestExecutionResponse:
         """Start a saved simulation test asynchronously. Omit scenario_ids to run all configured scenarios. Uses existing provider/worker infrastructure and can incur usage charges. Poll get_test_execution with the returned execution_id, then read get_test_execution_analytics.
 
         POST /simulate/run-tests/{run_test_id}/execute/
@@ -919,7 +921,7 @@ class TracesPropertiesResource(Resource):
 
     _t: SyncTransport
 
-    def list(self, *, workflow: Literal['observability', 'dataset', 'simulation'] | None = None, project_ids: str | None = None, agent_definition_id: str | None = None, per_eval_config: bool | None = None, exclude_custom_attributes: bool | None = None, search: str | None = None, category: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None = None, role: Literal['metric', 'dimension'] | None = None, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'simulation', 'both', 'all'] | None = None, page: int | None = None, page_size: int | None = None, cursor_mode: bool | None = None, cursor: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardMetricsCatalogResult:
+    def list(self, *, workflow: Literal['observability', 'dataset', 'simulation'] | None | NotGiven = NOT_GIVEN, project_ids: str | None | NotGiven = NOT_GIVEN, agent_definition_id: str | None | NotGiven = NOT_GIVEN, per_eval_config: bool | None | NotGiven = NOT_GIVEN, exclude_custom_attributes: bool | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, category: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None | NotGiven = NOT_GIVEN, role: Literal['metric', 'dimension'] | None | NotGiven = NOT_GIVEN, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'simulation', 'both', 'all'] | None | NotGiven = NOT_GIVEN, page: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor_mode: bool | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardMetricsCatalogResult:
         """Discover filter properties from the shared metrics catalog. Pass cursor_mode=true, page_size (at most 50), source=traces (search_traces) or source=spans (list_spans), per_eval_config=true and project_ids when known. Use role=dimension to narrow to dimensions. Use name as column_id; set filter_config.col_type by mapping category system_metric to SYSTEM_METRIC, custom_attribute to SPAN_ATTRIBUTE, eval_metric to EVAL_METRIC, and annotation_metric to ANNOTATION. Preserve property_id and source for typed attribute bindings. Follow has_more/next_cursor by passing cursor; omit page and exclude_custom_attributes in cursor mode.
 
         GET /tracer/dashboard/metrics/
@@ -953,7 +955,7 @@ class AgentsResource(Resource):
     versions: AgentsVersionsResource
     _children: Dict[str, type] = {'versions': AgentsVersionsResource}
 
-    def create(self, *, agent_name: str, agent_type: Literal['voice', 'text'], commit_message: str, inbound: bool | None = None, target_speaks_first: bool | None = None, description: str | None = None, provider: str | None = None, api_key: str | None = None, assistant_id: str | None = None, authentication_method: Literal['api_key'] | None = None, language: str | None = None, languages: List[str] | None = None, contact_number: str | None = None, knowledge_base: str | None = None, observability_enabled: bool | None = None, model: str | None = None, model_details: Dict[str, Any] | None = None, websocket_url: str | None = None, websocket_headers: Dict[str, Any] | None = None, replay_session_id: str | None = None, livekit_url: str | None = None, livekit_api_key: str | None = None, livekit_api_secret: str | None = None, livekit_agent_name: str | None = None, livekit_config_json: Dict[str, Any] | None = None, livekit_max_concurrency: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentDefinitionCreateResponse:
+    def create(self, *, agent_name: str, agent_type: Literal['voice', 'text'], commit_message: str, inbound: bool | None | NotGiven = NOT_GIVEN, target_speaks_first: bool | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, provider: str | None | NotGiven = NOT_GIVEN, api_key: str | None | NotGiven = NOT_GIVEN, assistant_id: str | None | NotGiven = NOT_GIVEN, authentication_method: Literal['api_key'] | None | NotGiven = NOT_GIVEN, language: str | None | NotGiven = NOT_GIVEN, languages: List[str] | None | NotGiven = NOT_GIVEN, contact_number: str | None | NotGiven = NOT_GIVEN, knowledge_base: str | None | NotGiven = NOT_GIVEN, observability_enabled: bool | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, model_details: Dict[str, Any] | None | NotGiven = NOT_GIVEN, websocket_url: str | None | NotGiven = NOT_GIVEN, websocket_headers: Dict[str, Any] | None | NotGiven = NOT_GIVEN, replay_session_id: str | None | NotGiven = NOT_GIVEN, livekit_url: str | None | NotGiven = NOT_GIVEN, livekit_api_key: str | None | NotGiven = NOT_GIVEN, livekit_api_secret: str | None | NotGiven = NOT_GIVEN, livekit_agent_name: str | None | NotGiven = NOT_GIVEN, livekit_config_json: Dict[str, Any] | None | NotGiven = NOT_GIVEN, livekit_max_concurrency: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentDefinitionCreateResponse:
         """Create a text or voice agent definition and its first active version. Supply agent_name, agent_type and commit_message plus the configuration required for the chosen provider.
 
         POST /simulate/agent-definitions/create/
@@ -973,7 +975,7 @@ class AgentsResource(Resource):
         body = None
         return self._t.call(_ops.OP_AGENTS_GET, path=path, query=query, body=body, model=models.AgentDefinitionDetailResponse, options=options)
 
-    def list(self, *, search: str | None = None, agent_type: Literal['voice', 'text'] | None = None, agent_definition_id: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.AgentDefinitionListResponse]:
+    def list(self, *, search: str | None | NotGiven = NOT_GIVEN, agent_type: Literal['voice', 'text'] | None | NotGiven = NOT_GIVEN, agent_definition_id: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.AgentDefinitionListResponse]:
         """List agent definitions in the current workspace.
 
         GET /simulate/agent-definitions/
@@ -982,7 +984,7 @@ class AgentsResource(Resource):
         query = {'search': search, 'agent_type': agent_type, 'agent_definition_id': agent_definition_id, 'limit': limit, **(extra_query or {})}
         return self._t.paginate(_ops.OP_AGENTS_LIST, path=path, query=query, model=models.AgentDefinitionListResponse, options=options)
 
-    def update(self, agent_id: str, *, observability_enabled: bool | None = None, agent_name: str | None = None, agent_type: Literal['voice', 'text'] | None = None, description: str | None = None, provider: str | None = None, api_key: str | None = None, assistant_id: str | None = None, authentication_method: Literal['api_key'] | None = None, language: str | None = None, languages: List[str] | None = None, contact_number: str | None = None, inbound: bool | None = None, target_speaks_first: bool | None = None, knowledge_base: str | None = None, model: str | None = None, model_details: Dict[str, Any] | None = None, websocket_url: str | None = None, websocket_headers: Dict[str, Any] | None = None, livekit_url: str | None = None, livekit_api_key: str | None = None, livekit_api_secret: str | None = None, livekit_agent_name: str | None = None, livekit_config_json: Dict[str, Any] | None = None, livekit_max_concurrency: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentDefinitionEditResponse:
+    def update(self, agent_id: str, *, observability_enabled: bool | None | NotGiven = NOT_GIVEN, agent_name: str | None | NotGiven = NOT_GIVEN, agent_type: Literal['voice', 'text'] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, provider: str | None | NotGiven = NOT_GIVEN, api_key: str | None | NotGiven = NOT_GIVEN, assistant_id: str | None | NotGiven = NOT_GIVEN, authentication_method: Literal['api_key'] | None | NotGiven = NOT_GIVEN, language: str | None | NotGiven = NOT_GIVEN, languages: List[str] | None | NotGiven = NOT_GIVEN, contact_number: str | None | NotGiven = NOT_GIVEN, inbound: bool | None | NotGiven = NOT_GIVEN, target_speaks_first: bool | None | NotGiven = NOT_GIVEN, knowledge_base: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, model_details: Dict[str, Any] | None | NotGiven = NOT_GIVEN, websocket_url: str | None | NotGiven = NOT_GIVEN, websocket_headers: Dict[str, Any] | None | NotGiven = NOT_GIVEN, livekit_url: str | None | NotGiven = NOT_GIVEN, livekit_api_key: str | None | NotGiven = NOT_GIVEN, livekit_api_secret: str | None | NotGiven = NOT_GIVEN, livekit_agent_name: str | None | NotGiven = NOT_GIVEN, livekit_config_json: Dict[str, Any] | None | NotGiven = NOT_GIVEN, livekit_max_concurrency: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentDefinitionEditResponse:
         """Edit an agent definition. Leave observability_enabled out to keep observability as it is; send true or false to turn it on or off. To use changed configuration in a versioned simulation, subsequently call create_agent_version, or supply the changes directly to create_agent_version.
 
         PUT /simulate/agent-definitions/{agent_id}/edit/
@@ -1009,7 +1011,7 @@ class AnnotationQueuesResource(Resource):
     items: AnnotationQueuesItemsResource
     _children: Dict[str, type] = {'items': AnnotationQueuesItemsResource}
 
-    def add_label(self, id: str, *, label_id: str, required: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAddLabelResult:
+    def add_label(self, id: str, *, label_id: str, required: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAddLabelResult:
         """Add an annotation label to a queue.
 
         POST /model-hub/annotation-queues/{id}/add-label/
@@ -1039,7 +1041,7 @@ class AnnotationQueuesResource(Resource):
         body = None
         return self._t.call(_ops.OP_ANNOTATION_QUEUES_ANALYTICS, path=path, query=query, body=body, model=models.QueueAnalyticsResult, options=options)
 
-    def create(self, *, name: str, label_ids: List[str], description: str | None = None, instructions: str | None = None, assignment_strategy: Literal['manual', 'round_robin', 'load_balanced'] | None = None, annotations_required: int | None = None, reservation_timeout_minutes: int | None = None, requires_review: bool | None = None, auto_assign: bool | None = None, annotator_ids: List[str] | None = None, annotator_roles: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AnnotationQueue:
+    def create(self, *, name: str, label_ids: List[str], description: str | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, assignment_strategy: Literal['manual', 'round_robin', 'load_balanced'] | None | NotGiven = NOT_GIVEN, annotations_required: int | None | NotGiven = NOT_GIVEN, reservation_timeout_minutes: int | None | NotGiven = NOT_GIVEN, requires_review: bool | None | NotGiven = NOT_GIVEN, auto_assign: bool | None | NotGiven = NOT_GIVEN, annotator_ids: List[str] | None | NotGiven = NOT_GIVEN, annotator_roles: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AnnotationQueue:
         """Create an annotation queue with its labels and annotators.
 
         POST /model-hub/annotation-queues/
@@ -1059,8 +1061,8 @@ class AnnotationQueuesResource(Resource):
         body = {**(extra_body or {})}
         return self._t.call(_ops.OP_ANNOTATION_QUEUES_DELETE, path=path, query=query, body=body, model=None, options=options)
 
-    def export(self, id: str, *, export_format: Literal['json', 'csv'] | None = None, status: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> List[Optional[Any]]:
-        """Export a queue's annotations.
+    def export(self, id: str, *, export_format: Literal['json', 'csv'] | None | NotGiven = NOT_GIVEN, status: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+        """Export a queue's annotations, as JSON or, with `export_format=csv`, as CSV text.
 
         GET /model-hub/annotation-queues/{id}/export/
         """
@@ -1069,7 +1071,7 @@ class AnnotationQueuesResource(Resource):
         body = None
         return self._t.call(_ops.OP_ANNOTATION_QUEUES_EXPORT, path=path, query=query, body=body, model=None, options=options)
 
-    def export_to_dataset(self, id: str, *, dataset_id: str | None = None, dataset_name: str | None = None, status_filter: str | None = None, column_mapping: List[Dict[str, Any]] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueExportToDatasetResult:
+    def export_to_dataset(self, id: str, *, dataset_id: str | None | NotGiven = NOT_GIVEN, dataset_name: str | None | NotGiven = NOT_GIVEN, status_filter: str | None | NotGiven = NOT_GIVEN, column_mapping: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueExportToDatasetResult:
         """Write a queue's annotations into a new or existing dataset.
 
         POST /model-hub/annotation-queues/{id}/export-to-dataset/
@@ -1089,7 +1091,7 @@ class AnnotationQueuesResource(Resource):
         body = None
         return self._t.call(_ops.OP_ANNOTATION_QUEUES_GET, path=path, query=query, body=body, model=models.AnnotationQueue, options=options)
 
-    def list(self, *, limit: int | None = None, status: str | None = None, search: str | None = None, include_counts: bool | None = None, archived: bool | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.AnnotationQueue]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, status: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, include_counts: bool | None | NotGiven = NOT_GIVEN, archived: bool | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.AnnotationQueue]:
         """List annotation queues in the current workspace.
 
         GET /model-hub/annotation-queues/
@@ -1108,7 +1110,7 @@ class AnnotationQueuesResource(Resource):
         body = None
         return self._t.call(_ops.OP_ANNOTATION_QUEUES_PROGRESS, path=path, query=query, body=body, model=models.QueueProgressResult, options=options)
 
-    def remove_label(self, id: str, *, label_id: str, required: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueRemoveLabelResult:
+    def remove_label(self, id: str, *, label_id: str, required: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueRemoveLabelResult:
         """Remove an annotation label from a queue.
 
         POST /model-hub/annotation-queues/{id}/remove-label/
@@ -1118,7 +1120,7 @@ class AnnotationQueuesResource(Resource):
         body = {'label_id': label_id, 'required': required, **(extra_body or {})}
         return self._t.call(_ops.OP_ANNOTATION_QUEUES_REMOVE_LABEL, path=path, query=query, body=body, model=models.QueueRemoveLabelResult, options=options)
 
-    def update(self, id: str, *, name: str | None = None, description: str | None = None, instructions: str | None = None, assignment_strategy: Literal['manual', 'round_robin', 'load_balanced'] | None = None, annotations_required: int | None = None, reservation_timeout_minutes: int | None = None, requires_review: bool | None = None, auto_assign: bool | None = None, label_ids: List[str] | None = None, annotator_ids: List[str] | None = None, annotator_roles: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AnnotationQueue:
+    def update(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, assignment_strategy: Literal['manual', 'round_robin', 'load_balanced'] | None | NotGiven = NOT_GIVEN, annotations_required: int | None | NotGiven = NOT_GIVEN, reservation_timeout_minutes: int | None | NotGiven = NOT_GIVEN, requires_review: bool | None | NotGiven = NOT_GIVEN, auto_assign: bool | None | NotGiven = NOT_GIVEN, label_ids: List[str] | None | NotGiven = NOT_GIVEN, annotator_ids: List[str] | None | NotGiven = NOT_GIVEN, annotator_roles: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AnnotationQueue:
         """Update selected fields of an annotation queue.
 
         PATCH /model-hub/annotation-queues/{id}/
@@ -1165,7 +1167,7 @@ class DashboardsResource(Resource):
     widgets: DashboardsWidgetsResource
     _children: Dict[str, type] = {'metrics': DashboardsMetricsResource, 'widgets': DashboardsWidgetsResource}
 
-    def create(self, *, name: str, description: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardCreateUpdate:
+    def create(self, *, name: str, description: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardCreateUpdate:
         """Create an empty dashboard in the current workspace; add widgets with create_dashboard_widget.
 
         POST /tracer/dashboard/
@@ -1185,7 +1187,7 @@ class DashboardsResource(Resource):
         body = {**(extra_body or {})}
         return self._t.call(_ops.OP_DASHBOARDS_DELETE, path=path, query=query, body=body, model=None, options=options)
 
-    def filter_values(self, *, property_id: str | None = None, metric_name: str | None = None, metric_type: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None = None, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'dataset_column', 'simulation', 'both', 'all'] | None = None, project_ids: str | None = None, dataset_id: str | None = None, search: str | None = None, page_size: int | None = None, cursor: str | None = None, attribute_type: Literal['string', 'number', 'boolean', 'array', 'map', 'json'] | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardFilterValuesResult:
+    def filter_values(self, *, property_id: str | None | NotGiven = NOT_GIVEN, metric_name: str | None | NotGiven = NOT_GIVEN, metric_type: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None | NotGiven = NOT_GIVEN, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'dataset_column', 'simulation', 'both', 'all'] | None | NotGiven = NOT_GIVEN, project_ids: str | None | NotGiven = NOT_GIVEN, dataset_id: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, attribute_type: Literal['string', 'number', 'boolean', 'array', 'map', 'json'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardFilterValuesResult:
         """List the distinct values of a metric or attribute for use in dashboard filters.
 
         GET /tracer/dashboard/filter_values/
@@ -1215,7 +1217,7 @@ class DashboardsResource(Resource):
         body = None
         return self._t.call(_ops.OP_DASHBOARDS_LIST, path=path, query=query, body=body, model=List[models.Dashboard], options=options)
 
-    def query(self, *, time_range: Dict[str, Any], metrics: List[Dict[str, Any]], workflow: Literal['observability', 'dataset', 'simulation'] | None = None, project_ids: List[str] | None = None, granularity: Literal['minute', 'hour', 'day', 'week', 'month'] | None = None, filters: List[Dict[str, Any]] | None = None, breakdowns: List[Dict[str, Any]] | None = None, allow_sampled: bool | None = None, refresh: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardQueryResult:
+    def query(self, *, time_range: Dict[str, Any], metrics: List[Dict[str, Any]], workflow: Literal['observability', 'dataset', 'simulation'] | None | NotGiven = NOT_GIVEN, project_ids: List[str] | None | NotGiven = NOT_GIVEN, granularity: Literal['minute', 'hour', 'day', 'week', 'month'] | None | NotGiven = NOT_GIVEN, filters: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, breakdowns: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, allow_sampled: bool | None | NotGiven = NOT_GIVEN, refresh: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardQueryResult:
         """Run an ad-hoc dashboard query (time_range and metrics, with optional filters and breakdowns) and return chart data without saving a widget.
 
         POST /tracer/dashboard/query/
@@ -1225,7 +1227,7 @@ class DashboardsResource(Resource):
         body = {'time_range': time_range, 'metrics': metrics, 'workflow': workflow, 'project_ids': project_ids, 'granularity': granularity, 'filters': filters, 'breakdowns': breakdowns, 'allow_sampled': allow_sampled, **(extra_body or {})}
         return self._t.call(_ops.OP_DASHBOARDS_QUERY, path=path, query=query, body=body, model=models.DashboardQueryResult, options=options)
 
-    def update(self, id: str, *, name: str, description: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardCreateUpdate:
+    def update(self, id: str, *, name: str, description: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardCreateUpdate:
         """Update the name or description of an existing dashboard.
 
         PATCH /tracer/dashboard/{id}/
@@ -1247,7 +1249,7 @@ class DatasetsResource(Resource):
     rows: DatasetsRowsResource
     _children: Dict[str, type] = {'cells': DatasetsCellsResource, 'columns': DatasetsColumnsResource, 'evals': DatasetsEvalsResource, 'prompts': DatasetsPromptsResource, 'rows': DatasetsRowsResource}
 
-    def create(self, *, new_dataset_name: str, model_type: str | None = None, is_sdk: bool | None = None, row: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetCreateStartedResult:
+    def create(self, *, new_dataset_name: str, model_type: str | None | NotGiven = NOT_GIVEN, is_sdk: bool | None | NotGiven = NOT_GIVEN, row: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetCreateStartedResult:
         """Create an empty dataset in the current workspace. Use create_dataset_column before add_dataset_rows.
 
         POST /model-hub/develops/create-empty-dataset/
@@ -1257,7 +1259,7 @@ class DatasetsResource(Resource):
         body = {'new_dataset_name': new_dataset_name, 'model_type': model_type, 'is_sdk': is_sdk, 'row': row, **(extra_body or {})}
         return self._t.call(_ops.OP_DATASETS_CREATE, path=path, query=query, body=body, model=models.DatasetCreateStartedResult, options=options)
 
-    def create_from_file(self, *, file: FileInput, new_dataset_name: str, model_type: str, source: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LocalFileDatasetCreateStartedResult:
+    def create_from_file(self, *, file: FileInput, new_dataset_name: str, model_type: str, source: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LocalFileDatasetCreateStartedResult:
         """Create a dataset by uploading a local CSV, JSON, JSONL or Excel file. Processing is asynchronous; read datasets.get for the result.
 
         POST /model-hub/develops/create-dataset-from-local-file/
@@ -1268,7 +1270,7 @@ class DatasetsResource(Resource):
         files = {'file': file}
         return self._t.call(_ops.OP_DATASETS_CREATE_FROM_FILE, path=path, query=query, body=body, files=files, model=models.LocalFileDatasetCreateStartedResult, options=options)
 
-    def create_from_huggingface(self, *, huggingface_dataset_name: str, huggingface_dataset_split: str, name: str | None = None, model_type: str | None = None, num_rows: int | None = None, huggingface_dataset_config: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetCreateStartedResult:
+    def create_from_huggingface(self, *, huggingface_dataset_name: str, huggingface_dataset_split: str, name: str | None | NotGiven = NOT_GIVEN, model_type: str | None | NotGiven = NOT_GIVEN, num_rows: int | None | NotGiven = NOT_GIVEN, huggingface_dataset_config: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetCreateStartedResult:
         """Create a dataset from a Hugging Face dataset split.
 
         POST /model-hub/develops/create-dataset-from-huggingface/
@@ -1288,7 +1290,7 @@ class DatasetsResource(Resource):
         body = {'dataset_ids': dataset_ids, **(extra_body or {})}
         return self._t.call(_ops.OP_DATASETS_DELETE, path=path, query=query, body=body, model=None, options=options)
 
-    def get(self, dataset_id: str, *, filters: str | None = None, sort: str | None = None, search: str | None = None, page_size: int | None = None, current_page_index: int | None = None, column_config_only: bool | None = None, exact_snapshot: bool | None = None, cursor: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetTableResult:
+    def get(self, dataset_id: str, *, filters: str | None | NotGiven = NOT_GIVEN, sort: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, current_page_index: int | None | NotGiven = NOT_GIVEN, column_config_only: bool | None | NotGiven = NOT_GIVEN, exact_snapshot: bool | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetTableResult:
         """Return the rows, columns, and metadata for a dataset.
 
         GET /model-hub/develops/{dataset_id}/get-dataset-table/
@@ -1298,7 +1300,7 @@ class DatasetsResource(Resource):
         body = None
         return self._t.call(_ops.OP_DATASETS_GET, path=path, query=query, body=body, model=models.DatasetTableResult, options=options)
 
-    def list(self, *, search_text: str | None = None, page_size: int | None = None, sort: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.DatasetListItem]:
+    def list(self, *, search_text: str | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, sort: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.DatasetListItem]:
         """List datasets available in the current workspace.
 
         GET /model-hub/develops/get-datasets/
@@ -1323,7 +1325,7 @@ class ErrorClustersResource(Resource):
 
     _t: SyncTransport
 
-    def get(self, cluster_id: str, *, project_id: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.FeedDetailCore:
+    def get(self, cluster_id: str, *, project_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.FeedDetailCore:
         """Return an error issue and its grouped trace information.
 
         GET /tracer/feed/issues/{cluster_id}/
@@ -1333,7 +1335,7 @@ class ErrorClustersResource(Resource):
         body = None
         return self._t.call(_ops.OP_ERROR_CLUSTERS_GET, path=path, query=query, body=body, model=models.FeedDetailCore, options=options)
 
-    def list(self, *, project_id: str | None = None, search: str | None = None, status: Literal['escalating', 'for_review', 'acknowledged', 'resolved'] | None = None, severity: Literal['critical', 'high', 'medium', 'low'] | None = None, fix_layer: str | None = None, source: Literal['scanner', 'eval'] | None = None, issue_group: str | None = None, time_range_days: int | None = None, sort_by: Literal['last_seen', 'first_seen', 'error_count', 'unique_traces', 'severity'] | None = None, sort_dir: Literal['asc', 'desc'] | None = None, limit: int | None = None, offset: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.FeedListResponse:
+    def list(self, *, project_id: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, status: Literal['escalating', 'for_review', 'acknowledged', 'resolved'] | None | NotGiven = NOT_GIVEN, severity: Literal['critical', 'high', 'medium', 'low'] | None | NotGiven = NOT_GIVEN, fix_layer: str | None | NotGiven = NOT_GIVEN, source: Literal['scanner', 'eval'] | None | NotGiven = NOT_GIVEN, issue_group: str | None | NotGiven = NOT_GIVEN, time_range_days: int | None | NotGiven = NOT_GIVEN, sort_by: Literal['last_seen', 'first_seen', 'error_count', 'unique_traces', 'severity'] | None | NotGiven = NOT_GIVEN, sort_dir: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, offset: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.FeedListResponse:
         """List grouped error issues detected in project traces.
 
         GET /tracer/feed/issues/
@@ -1354,7 +1356,7 @@ class EvalsResource(Resource):
     templates: EvalsTemplatesResource
     _children: Dict[str, type] = {'configs': EvalsConfigsResource, 'groups': EvalsGroupsResource, 'tasks': EvalsTasksResource, 'templates': EvalsTemplatesResource}
 
-    def test(self, *, config: Dict[str, Any], name: str, output_type: str, model: str | None = None, eval_tags: List[str] | None = None, criteria: str | None = None, multi_choice: bool | None = None, choices: Dict[str, Any] | None = None, input_data_types: Dict[str, Any] | None = None, description: str | None = None, check_internet: bool | None = None, required_keys: List[str] | None = None, template_type: str | None = None, eval_type_id: str | None = None, template_id: str | None = None, eval_type: str | None = None, error_localizer: bool | None = None, reason_column: bool | None = None, optional_keys: List[str] | None = None, variable_keys: Dict[str, Any] | None = None, run_prompt_column: bool | None = None, template_name: str | None = None, mapping: Dict[str, Any] | None = None, output: str | None = None, config_params_desc: Dict[str, Any] | None = None, config_params_option: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalExecutionResponseResult:
+    def test(self, *, config: Dict[str, Any], name: str, output_type: str, model: str | None | NotGiven = NOT_GIVEN, eval_tags: List[str] | None | NotGiven = NOT_GIVEN, criteria: str | None | NotGiven = NOT_GIVEN, multi_choice: bool | None | NotGiven = NOT_GIVEN, choices: Dict[str, Any] | None | NotGiven = NOT_GIVEN, input_data_types: Dict[str, Any] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, required_keys: List[str] | None | NotGiven = NOT_GIVEN, template_type: str | None | NotGiven = NOT_GIVEN, eval_type_id: str | None | NotGiven = NOT_GIVEN, template_id: str | None | NotGiven = NOT_GIVEN, eval_type: str | None | NotGiven = NOT_GIVEN, error_localizer: bool | None | NotGiven = NOT_GIVEN, reason_column: bool | None | NotGiven = NOT_GIVEN, optional_keys: List[str] | None | NotGiven = NOT_GIVEN, variable_keys: Dict[str, Any] | None | NotGiven = NOT_GIVEN, run_prompt_column: bool | None | NotGiven = NOT_GIVEN, template_name: str | None | NotGiven = NOT_GIVEN, mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, output: str | None | NotGiven = NOT_GIVEN, config_params_desc: Dict[str, Any] | None | NotGiven = NOT_GIVEN, config_params_option: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalExecutionResponseResult:
         """Execute an evaluation template against supplied test inputs.
 
         POST /model-hub/test-evaluation/
@@ -1370,7 +1372,7 @@ class ExperimentsResource(Resource):
 
     _t: SyncTransport
 
-    def create(self, *, name: str, dataset_id: str, prompt_config: List[Dict[str, Any]], user_eval_metrics: List[Dict[str, Any]], column_id: str | None = None, experiment_type: Literal['llm', 'tts', 'stt', 'image'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    def create(self, *, name: str, dataset_id: str, prompt_config: List[Dict[str, Any]], user_eval_metrics: List[Dict[str, Any]], column_id: str | None | NotGiven = NOT_GIVEN, experiment_type: Literal['llm', 'tts', 'stt', 'image'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Create and start an experiment. The new experiment's id is returned inside the `result` message as `experiment_id=<uuid>`; pass it to get_experiment to follow the run.
 
         POST /model-hub/experiments/v2/
@@ -1390,7 +1392,7 @@ class ExperimentsResource(Resource):
         body = None
         return self._t.call(_ops.OP_EXPERIMENTS_GET, path=path, query=query, body=body, model=models.ExperimentDetailV2, options=options)
 
-    def list(self, *, created_at: str | None = None, status: str | None = None, dataset_id: str | None = None, search: str | None = None, ordering: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.ExperimentListV2]:
+    def list(self, *, created_at: str | None | NotGiven = NOT_GIVEN, status: str | None | NotGiven = NOT_GIVEN, dataset_id: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, ordering: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.ExperimentListV2]:
         """List experiments in the current workspace.
 
         GET /model-hub/experiments/v2/list/
@@ -1409,7 +1411,7 @@ class GatewayResource(Resource):
     sessions: GatewaySessionsResource
     _children: Dict[str, type] = {'guardrail_rules': GatewayGuardrailRulesResource, 'request_logs': GatewayRequestLogsResource, 'sessions': GatewaySessionsResource}
 
-    def analytics(self, *, start: str | None = None, end: str | None = None, granularity: str | None = None, api_key_id: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def analytics(self, *, start: str | None | NotGiven = NOT_GIVEN, end: str | None | NotGiven = NOT_GIVEN, granularity: str | None | NotGiven = NOT_GIVEN, api_key_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """Return overview usage, latency, error, and cost analytics for the AI gateway.
 
         GET /agentcc/analytics/overview/
@@ -1447,7 +1449,7 @@ class KnowledgeBasesResource(Resource):
     files: KnowledgeBasesFilesResource
     _children: Dict[str, type] = {'files': KnowledgeBasesFilesResource}
 
-    def create(self, *, name: str, files: List[FileInput] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseCreateResult:
+    def create(self, *, name: str, files: List[FileInput] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseCreateResult:
         """Create a knowledge base, optionally uploading its first files (pdf, docx, txt, rtf).
 
         POST /model-hub/knowledge-base/
@@ -1458,7 +1460,7 @@ class KnowledgeBasesResource(Resource):
         files = {'file': files}
         return self._t.call(_ops.OP_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseCreateResult, options=options)
 
-    def delete(self, *, kb_ids: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    def delete(self, *, kb_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Delete knowledge bases by id.
 
         DELETE /model-hub/knowledge-base/
@@ -1478,7 +1480,7 @@ class KnowledgeBasesResource(Resource):
         body = None
         return self._t.call(_ops.OP_KNOWLEDGE_BASES_GET, path=path, query=query, body=body, model=models.KnowledgeBaseItem, options=options)
 
-    def list(self, *, search: str | None = None, page: int | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.KnowledgeBasePaginatedResult:
+    def list(self, *, search: str | None | NotGiven = NOT_GIVEN, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.KnowledgeBasePaginatedResult:
         """List knowledge bases in the current workspace.
 
         GET /model-hub/kb/
@@ -1498,7 +1500,7 @@ class KnowledgeBasesResource(Resource):
         body = None
         return self._t.call(_ops.OP_KNOWLEDGE_BASES_LIST_NAMES, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseListResult, options=options)
 
-    def update(self, *, kb_id: str, name: str | None = None, files: List[FileInput] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseMutationResult:
+    def update(self, *, kb_id: str, name: str | None | NotGiven = NOT_GIVEN, files: List[FileInput] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseMutationResult:
         """Rename a knowledge base and/or upload more files to it.
 
         PATCH /model-hub/knowledge-base/
@@ -1531,7 +1533,7 @@ class OptimizationsResource(Resource):
 
     _t: SyncTransport
 
-    def create(self, *, name: str, column_id: str, optimizer_algorithm: Literal['random_search', 'bayesian', 'metaprompt', 'protegi', 'promptwizard', 'gepa'], optimizer_model_id: str | None = None, optimizer_config: Dict[str, Any] | None = None, user_eval_template_ids: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetOptimizationCreate:
+    def create(self, *, name: str, column_id: str, optimizer_algorithm: Literal['random_search', 'bayesian', 'metaprompt', 'protegi', 'promptwizard', 'gepa'], optimizer_model_id: str | None | NotGiven = NOT_GIVEN, optimizer_config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, user_eval_template_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetOptimizationCreate:
         """Create a dataset optimization run.
 
         POST /model-hub/dataset-optimization/
@@ -1551,7 +1553,7 @@ class OptimizationsResource(Resource):
         body = None
         return self._t.call(_ops.OP_OPTIMIZATIONS_GET, path=path, query=query, body=body, model=models.DatasetOptimizationDetail, options=options)
 
-    def list(self, *, dataset_id: str | None = None, column_id: str | None = None, develop_id: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[Any]:
+    def list(self, *, dataset_id: str | None | NotGiven = NOT_GIVEN, column_id: str | None | NotGiven = NOT_GIVEN, develop_id: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[Any]:
         """List dataset optimization runs.
 
         GET /model-hub/dataset-optimization/
@@ -1576,7 +1578,7 @@ class ProjectsResource(Resource):
         body = None
         return self._t.call(_ops.OP_PROJECTS_GET, path=path, query=query, body=body, model=models.ProjectDetailResult, options=options)
 
-    def list(self, *, name: str | None = None, project_type: str | None = None, tags: str | None = None, filters: str | None = None, sort_by: str | None = None, sort_direction: Literal['asc', 'desc'] | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def list(self, *, name: str | None | NotGiven = NOT_GIVEN, project_type: str | None | NotGiven = NOT_GIVEN, tags: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, sort_by: str | None | NotGiven = NOT_GIVEN, sort_direction: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """List tracing projects available in the current workspace.
 
         GET /tracer/project/
@@ -1605,7 +1607,7 @@ class PromptsResource(Resource):
         body = {'new_prompts': new_prompts, **(extra_body or {})}
         return self._t.call(_ops.OP_PROMPTS_ADD_DRAFT, path=path, query=query, body=body, model=None, options=options)
 
-    def commit(self, id: str, *, version_name: str, message: str | None = None, set_default: bool | None = None, is_draft: bool | None = None, metadata: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def commit(self, id: str, *, version_name: str, message: str | None | NotGiven = NOT_GIVEN, set_default: bool | None | NotGiven = NOT_GIVEN, is_draft: bool | None | NotGiven = NOT_GIVEN, metadata: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """Commit the current draft of a prompt template as a named version, optionally making it the default.
 
         POST /model-hub/prompt-templates/{id}/commit/
@@ -1615,7 +1617,7 @@ class PromptsResource(Resource):
         body = {'version_name': version_name, 'message': message, 'set_default': set_default, 'is_draft': is_draft, 'metadata': metadata, **(extra_body or {})}
         return self._t.call(_ops.OP_PROMPTS_COMMIT, path=path, query=query, body=body, model=None, options=options)
 
-    def create(self, *, name: str, description: str | None = None, variable_names: Dict[str, Any] | None = None, prompt_folder: str | None = None, placeholders: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptTemplate:
+    def create(self, *, name: str, description: str | None | NotGiven = NOT_GIVEN, variable_names: Dict[str, Any] | None | NotGiven = NOT_GIVEN, prompt_folder: str | None | NotGiven = NOT_GIVEN, placeholders: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptTemplate:
         """Create a prompt template in the current workspace.
 
         POST /model-hub/prompt-templates/
@@ -1625,7 +1627,7 @@ class PromptsResource(Resource):
         body = {'name': name, 'description': description, 'variable_names': variable_names, 'prompt_folder': prompt_folder, 'placeholders': placeholders, **(extra_body or {})}
         return self._t.call(_ops.OP_PROMPTS_CREATE, path=path, query=query, body=body, model=models.PromptTemplate, options=options)
 
-    def create_draft(self, *, name: str, prompt_config: List[Dict[str, Any]], variable_names: Dict[str, Any] | None = None, evaluation_configs: List[Dict[str, Any]] | None = None, metadata: Dict[str, Any] | None = None, placeholders: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptTemplate:
+    def create_draft(self, *, name: str, prompt_config: List[Dict[str, Any]], variable_names: Dict[str, Any] | None | NotGiven = NOT_GIVEN, evaluation_configs: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, metadata: Dict[str, Any] | None | NotGiven = NOT_GIVEN, placeholders: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptTemplate:
         """Create a prompt template together with its first draft version (messages, model configuration, variables).
 
         POST /model-hub/prompt-templates/create-draft/
@@ -1665,7 +1667,7 @@ class PromptsResource(Resource):
         body = None
         return self._t.call(_ops.OP_PROMPTS_GET, path=path, query=query, body=body, model=models.PromptTemplate, options=options)
 
-    def get_by_name(self, *, name: str | None = None, version: str | None = None, created_at: str | None = None, search: str | None = None, ordering: str | None = None, page: int | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def get_by_name(self, *, name: str | None | NotGiven = NOT_GIVEN, version: str | None | NotGiven = NOT_GIVEN, created_at: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, ordering: str | None | NotGiven = NOT_GIVEN, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """Fetch a prompt template by name; the default version unless `version` is given.
 
         GET /model-hub/prompt-templates/get-template-by-name/
@@ -1675,7 +1677,7 @@ class PromptsResource(Resource):
         body = None
         return self._t.call(_ops.OP_PROMPTS_GET_BY_NAME, path=path, query=query, body=body, model=None, options=options)
 
-    def history(self, *, template_name: str | None = None, template_version: str | None = None, created_at: str | None = None, search: str | None = None, ordering: str | None = None, limit: int | None = None, template_id: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.PromptHistoryExecution]:
+    def history(self, *, template_name: str | None | NotGiven = NOT_GIVEN, template_version: str | None | NotGiven = NOT_GIVEN, created_at: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, ordering: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, template_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.PromptHistoryExecution]:
         """List past prompt executions, optionally for one template.
 
         GET /model-hub/prompt-history-executions/
@@ -1694,7 +1696,7 @@ class PromptsResource(Resource):
         body = {'existing_prompt': existing_prompt, 'improvement_requirements': improvement_requirements, **(extra_body or {})}
         return self._t.call(_ops.OP_PROMPTS_IMPROVE, path=path, query=query, body=body, model=None, options=options)
 
-    def list(self, *, name: str | None = None, version: str | None = None, created_at: str | None = None, search: str | None = None, ordering: str | None = None, limit: int | None = None, modality: List[str] | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.PromptTemplate]:
+    def list(self, *, name: str | None | NotGiven = NOT_GIVEN, version: str | None | NotGiven = NOT_GIVEN, created_at: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, ordering: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, modality: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.PromptTemplate]:
         """List prompt templates available in the current workspace.
 
         GET /model-hub/prompt-templates/
@@ -1703,7 +1705,7 @@ class PromptsResource(Resource):
         query = {'name': name, 'version': version, 'created_at': created_at, 'search': search, 'ordering': ordering, 'limit': limit, 'modality': modality, **(extra_query or {})}
         return self._t.paginate(_ops.OP_PROMPTS_LIST, path=path, query=query, model=models.PromptTemplate, options=options)
 
-    def run(self, id: str, *, name: str | None = None, version: str | None = None, prompt_config: List[Dict[str, Any]] | None = None, variable_names: Dict[str, Any] | None = None, placeholders: Dict[str, Any] | None = None, evaluation_configs: List[Dict[str, Any]] | None = None, source: str | None = None, is_run: Dict[str, Any] | None = None, is_sdk: bool | None = None, run_index: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptRunRequest:
+    def run(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, version: str | None | NotGiven = NOT_GIVEN, prompt_config: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, variable_names: Dict[str, Any] | None | NotGiven = NOT_GIVEN, placeholders: Dict[str, Any] | None | NotGiven = NOT_GIVEN, evaluation_configs: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, source: str | None | NotGiven = NOT_GIVEN, is_run: Dict[str, Any] | None | NotGiven = NOT_GIVEN, is_sdk: bool | None | NotGiven = NOT_GIVEN, run_index: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptRunRequest:
         """Run a configured prompt version by supplying version and is_run="prompt". Optionally replace prompt_config or variable_names. Returns an asynchronous receipt; read get_prompt_run with template_version for status and output.
 
         POST /model-hub/prompt-templates/{id}/run_template/
@@ -1713,7 +1715,7 @@ class PromptsResource(Resource):
         body = {'name': name, 'version': version, 'prompt_config': prompt_config, 'variable_names': variable_names, 'placeholders': placeholders, 'evaluation_configs': evaluation_configs, 'source': source, 'is_run': is_run, 'is_sdk': is_sdk, 'run_index': run_index, **(extra_body or {})}
         return self._t.call(_ops.OP_PROMPTS_RUN, path=path, query=query, body=body, model=models.PromptRunRequest, options=options)
 
-    def run_status(self, id: str, *, template_version: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptRunStatusResult:
+    def run_status(self, id: str, *, template_version: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptRunStatusResult:
         """Read workbench prompt execution status and outputs. Supply template_version matching the version returned by run_prompt to read that version, otherwise the API chooses the default/latest version.
 
         GET /model-hub/prompt-templates/{id}/get-run-status/
@@ -1723,7 +1725,7 @@ class PromptsResource(Resource):
         body = None
         return self._t.call(_ops.OP_PROMPTS_RUN_STATUS, path=path, query=query, body=body, model=models.PromptRunStatusResult, options=options)
 
-    def update(self, id: str, *, name: str | None = None, description: str | None = None, variable_names: Dict[str, Any] | None = None, prompt_folder: str | None = None, placeholders: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptTemplatePatch:
+    def update(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, variable_names: Dict[str, Any] | None | NotGiven = NOT_GIVEN, prompt_folder: str | None | NotGiven = NOT_GIVEN, placeholders: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptTemplatePatch:
         """Update selected fields on an existing prompt template.
 
         PATCH /model-hub/prompt-templates/{id}/
@@ -1739,7 +1741,7 @@ class ProviderKeysResource(Resource):
 
     _t: SyncTransport
 
-    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.ApiKeyResponse]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.ApiKeyResponse]:
         """List the model-provider API keys configured for the organization (values are masked).
 
         GET /model-hub/api-keys/
@@ -1754,7 +1756,7 @@ class ScoresResource(Resource):
 
     _t: SyncTransport
 
-    def create(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, label_id: str, value: Dict[str, Any], notes: str | None = None, score_source: Literal['human', 'api', 'auto', 'imported'] | None = None, queue_item_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.Score:
+    def create(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, label_id: str, value: Dict[str, Any], notes: str | None | NotGiven = NOT_GIVEN, score_source: Literal['human', 'api', 'auto', 'imported'] | None | NotGiven = NOT_GIVEN, queue_item_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.Score:
         """Record one score (annotation value) against a source such as a span or dataset row.
 
         POST /model-hub/scores/
@@ -1764,7 +1766,7 @@ class ScoresResource(Resource):
         body = {'source_type': source_type, 'source_id': source_id, 'label_id': label_id, 'value': value, 'notes': notes, 'score_source': score_source, 'queue_item_id': queue_item_id, **(extra_body or {})}
         return self._t.call(_ops.OP_SCORES_CREATE, path=path, query=query, body=body, model=models.Score, options=options)
 
-    def create_bulk(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, scores: List[Dict[str, Any]], notes: str | None = None, span_notes: str | None = None, span_notes_source_id: str | None = None, queue_item_id: str | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.BulkCreateScoresResult:
+    def create_bulk(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, scores: List[Dict[str, Any]], notes: str | None | NotGiven = NOT_GIVEN, span_notes: str | None | NotGiven = NOT_GIVEN, span_notes_source_id: str | None | NotGiven = NOT_GIVEN, queue_item_id: str | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.BulkCreateScoresResult:
         """Record several scores against one source in a single call.
 
         POST /model-hub/scores/bulk/
@@ -1774,7 +1776,7 @@ class ScoresResource(Resource):
         body = {'source_type': source_type, 'source_id': source_id, 'scores': scores, 'notes': notes, 'span_notes': span_notes, 'span_notes_source_id': span_notes_source_id, 'queue_item_id': queue_item_id, 'project_id': project_id, **(extra_body or {})}
         return self._t.call(_ops.OP_SCORES_CREATE_BULK, path=path, query=query, body=body, model=models.BulkCreateScoresResult, options=options)
 
-    def list_for_source(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, page: int | None = None, limit: int | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> List[models.Score]:
+    def list_for_source(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> List[models.Score]:
         """List the scores recorded against one source.
 
         GET /model-hub/scores/for-source/
@@ -1790,7 +1792,7 @@ class SessionsResource(Resource):
 
     _t: SyncTransport
 
-    def get(self, id: str, *, navigation_context: str | None = None, user_id: str | None = None, filters: str | None = None, sort_params: str | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceSessionDetailResult:
+    def get(self, id: str, *, navigation_context: str | None | NotGiven = NOT_GIVEN, user_id: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, sort_params: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceSessionDetailResult:
         """Return a trace session by its identifier.
 
         GET /tracer/trace-session/{id}/query/
@@ -1800,7 +1802,7 @@ class SessionsResource(Resource):
         body = None
         return self._t.call(_ops.OP_SESSIONS_GET, path=path, query=query, body=body, model=models.TraceSessionDetailResult, options=options)
 
-    def list(self, *, project_id: str | None = None, user_id: str | None = None, bookmarked: bool | None = None, filters: str | None = None, sort_params: str | None = None, page_number: int | None = None, page_size: int | None = None, cursor: str | None = None, cursor_mode: bool | None = None, interval: str | None = None, allow_sampled: bool | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceSessionListResult:
+    def list(self, *, project_id: str | None | NotGiven = NOT_GIVEN, user_id: str | None | NotGiven = NOT_GIVEN, bookmarked: bool | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, sort_params: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, cursor_mode: bool | None | NotGiven = NOT_GIVEN, interval: str | None | NotGiven = NOT_GIVEN, allow_sampled: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceSessionListResult:
         """List trace sessions using the supplied filters.
 
         GET /tracer/trace-session/list_sessions/
@@ -1826,7 +1828,7 @@ class SpansResource(Resource):
 
     _t: SyncTransport
 
-    def get(self, id: str, *, test_execution_id: str | None = None, call_execution_id: str | None = None, project_id: str | None = None, trace_id: str | None = None, start_hour: str | None = None, observation_type: str | None = None, service_name: str | None = None, expected_start_time: str | None = None, expected_version: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.ObservationSpanDetailResult:
+    def get(self, id: str, *, test_execution_id: str | None | NotGiven = NOT_GIVEN, call_execution_id: str | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, trace_id: str | None | NotGiven = NOT_GIVEN, start_hour: str | None | NotGiven = NOT_GIVEN, observation_type: str | None | NotGiven = NOT_GIVEN, service_name: str | None | NotGiven = NOT_GIVEN, expected_start_time: str | None | NotGiven = NOT_GIVEN, expected_version: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.ObservationSpanDetailResult:
         """Return an observation span by its identifier.
 
         GET /tracer/observation-span/{id}/
@@ -1836,7 +1838,7 @@ class SpansResource(Resource):
         body = None
         return self._t.call(_ops.OP_SPANS_GET, path=path, query=query, body=body, model=models.ObservationSpanDetailResult, options=options)
 
-    def list(self, *, project_id: str | None = None, user_id: str | None = None, filters: str | None = None, page_number: int | None = None, page_size: int | None = None, cursor: str | None = None, cursor_mode: bool | None = None, allow_sampled: bool | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SpanObserveListResult:
+    def list(self, *, project_id: str | None | NotGiven = NOT_GIVEN, user_id: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, cursor_mode: bool | None | NotGiven = NOT_GIVEN, allow_sampled: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SpanObserveListResult:
         """List observation spans using the supplied filters.
 
         GET /tracer/observation-span/list_spans_observe/
@@ -1864,7 +1866,7 @@ class TracesResource(Resource):
         body = None
         return self._t.call(_ops.OP_TRACES_ERROR_ANALYSIS, path=path, query=query, body=body, model=models.TraceErrorAnalysisResult, options=options)
 
-    def get(self, id: str, *, test_execution_id: str | None = None, call_execution_id: str | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceDetailResult:
+    def get(self, id: str, *, test_execution_id: str | None | NotGiven = NOT_GIVEN, call_execution_id: str | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceDetailResult:
         """Return a trace by its identifier.
 
         GET /tracer/trace/{id}/
@@ -1874,7 +1876,7 @@ class TracesResource(Resource):
         body = None
         return self._t.call(_ops.OP_TRACES_GET, path=path, query=query, body=body, model=models.TraceDetailResult, options=options)
 
-    def list(self, *, project_id: str | None = None, project_version_id: str | None = None, session_id: str | None = None, filters: str | None = None, page_number: int | None = None, page_size: int | None = None, cursor: str | None = None, cursor_mode: bool | None = None, attribute_keys: str | None = None, allow_sampled: bool | None = None, interval: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceObserveListResult:
+    def list(self, *, project_id: str | None | NotGiven = NOT_GIVEN, project_version_id: str | None | NotGiven = NOT_GIVEN, session_id: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, cursor_mode: bool | None | NotGiven = NOT_GIVEN, attribute_keys: str | None | NotGiven = NOT_GIVEN, allow_sampled: bool | None | NotGiven = NOT_GIVEN, interval: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceObserveListResult:
         """Search traces using project, time range, status, and attribute filters.
 
         GET /tracer/trace/list_traces_of_session/
@@ -1890,7 +1892,7 @@ class UsageResource(Resource):
 
     _t: SyncTransport
 
-    def overview(self, *, period: str | None = None, period_end: str | None = None, workspace_id: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.UsageOverviewResult:
+    def overview(self, *, period: str | None | NotGiven = NOT_GIVEN, period_end: str | None | NotGiven = NOT_GIVEN, workspace_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.UsageOverviewResult:
         """Return the current organization's usage and cost overview.
 
         GET /usage/v2/usage-overview/
@@ -1932,7 +1934,7 @@ class AsyncAgentsVersionsResource(Resource):
 
     _t: AsyncTransport
 
-    async def create(self, agent_id: str, *, agent_name: str | None = None, agent_type: Literal['voice', 'text'] | None = None, description: str | None = None, provider: str | None = None, api_key: str | None = None, assistant_id: str | None = None, authentication_method: Literal['api_key'] | None = None, language: str | None = None, languages: List[str] | None = None, contact_number: str | None = None, inbound: bool | None = None, target_speaks_first: bool | None = None, knowledge_base: str | None = None, model: str | None = None, model_details: Dict[str, Any] | None = None, livekit_url: str | None = None, livekit_api_key: str | None = None, livekit_api_secret: str | None = None, livekit_agent_name: str | None = None, livekit_config_json: Dict[str, Any] | None = None, livekit_max_concurrency: int | None = None, commit_message: str | None = None, observability_enabled: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentVersionCreateResponse:
+    async def create(self, agent_id: str, *, agent_name: str | None | NotGiven = NOT_GIVEN, agent_type: Literal['voice', 'text'] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, provider: str | None | NotGiven = NOT_GIVEN, api_key: str | None | NotGiven = NOT_GIVEN, assistant_id: str | None | NotGiven = NOT_GIVEN, authentication_method: Literal['api_key'] | None | NotGiven = NOT_GIVEN, language: str | None | NotGiven = NOT_GIVEN, languages: List[str] | None | NotGiven = NOT_GIVEN, contact_number: str | None | NotGiven = NOT_GIVEN, inbound: bool | None | NotGiven = NOT_GIVEN, target_speaks_first: bool | None | NotGiven = NOT_GIVEN, knowledge_base: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, model_details: Dict[str, Any] | None | NotGiven = NOT_GIVEN, livekit_url: str | None | NotGiven = NOT_GIVEN, livekit_api_key: str | None | NotGiven = NOT_GIVEN, livekit_api_secret: str | None | NotGiven = NOT_GIVEN, livekit_agent_name: str | None | NotGiven = NOT_GIVEN, livekit_config_json: Dict[str, Any] | None | NotGiven = NOT_GIVEN, livekit_max_concurrency: int | None | NotGiven = NOT_GIVEN, commit_message: str | None | NotGiven = NOT_GIVEN, observability_enabled: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentVersionCreateResponse:
         """Snapshot agent configuration into a new version and activate it. Can also update agent configuration. Use the returned version when creating a simulation test; existing tests may remain pinned to an older version.
 
         POST /simulate/agent-definitions/{agent_id}/versions/create/
@@ -1948,7 +1950,7 @@ class AsyncAlertsLogsResource(Resource):
 
     _t: AsyncTransport
 
-    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.UserAlertMonitorLog]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.UserAlertMonitorLog]:
         """List alerts that have fired in numbered pages. Use this to find out what the platform has already flagged before digging into traces or error clusters.
 
         GET /tracer/user-alert-logs/
@@ -1963,7 +1965,7 @@ class AsyncAlertsRulesResource(Resource):
 
     _t: AsyncTransport
 
-    async def list(self, *, page_number: int | None = None, page_size: int | None = None, search_text: str | None = None, project_id: List[str] | None = None, status: List[Literal['triggered', 'healthy']] | None = None, metric_type: List[str] | None = None, sort_by: str | None = None, sort_direction: Literal['asc', 'desc'] | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.UserAlertMonitorListResult:
+    async def list(self, *, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, search_text: str | None | NotGiven = NOT_GIVEN, project_id: List[str] | None | NotGiven = NOT_GIVEN, status: List[Literal['triggered', 'healthy']] | None | NotGiven = NOT_GIVEN, metric_type: List[str] | None | NotGiven = NOT_GIVEN, sort_by: str | None | NotGiven = NOT_GIVEN, sort_direction: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.UserAlertMonitorListResult:
         """List the configured alert monitors - what each one watches, its threshold and its project. Pair with list_fired_alerts to explain why an alert fired, or to see that no monitor covers a condition the user expected to be caught.
 
         GET /tracer/user-alerts/list_monitors/
@@ -1979,7 +1981,7 @@ class AsyncAnnotationQueuesItemsResource(Resource):
 
     _t: AsyncTransport
 
-    async def add(self, queue_id: str, *, items: List[Dict[str, Any]] | None = None, selection: Dict[str, Any] | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAddItemsResult:
+    async def add(self, queue_id: str, *, items: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, selection: Dict[str, Any] | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAddItemsResult:
         """Add items (spans, traces, dataset rows) to a queue, by id or by a selection filter.
 
         POST /model-hub/annotation-queues/{queue_id}/items/add-items/
@@ -1989,7 +1991,7 @@ class AsyncAnnotationQueuesItemsResource(Resource):
         body = {'items': items, 'selection': selection, 'project_id': project_id, **(extra_body or {})}
         return await self._t.acall(_ops.OP_ANNOTATION_QUEUES_ITEMS_ADD, path=path, query=query, body=body, model=models.QueueAddItemsResult, options=options)
 
-    async def annotate_detail(self, queue_id: str, id: str, *, annotator_id: str | None = None, include_completed: bool | None = None, view_mode: str | None = None, review_status: str | None = None, exclude_review_status: str | None = None, include_all_annotations: bool | None = None, reserve: bool | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAnnotateDetailResult:
+    async def annotate_detail(self, queue_id: str, id: str, *, annotator_id: str | None | NotGiven = NOT_GIVEN, include_completed: bool | None | NotGiven = NOT_GIVEN, view_mode: str | None | NotGiven = NOT_GIVEN, review_status: str | None | NotGiven = NOT_GIVEN, exclude_review_status: str | None | NotGiven = NOT_GIVEN, include_all_annotations: bool | None | NotGiven = NOT_GIVEN, reserve: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAnnotateDetailResult:
         """Return everything needed to annotate one queue item; reserve=true acquires an editing reservation for the caller. Includes its source content, the queue instructions, every label with its settings (the allowed values a submitted value must match), any annotations already recorded, and the next/previous item ids. Call this before submit_annotation; the label settings are not available anywhere else.
 
         GET /model-hub/annotation-queues/{queue_id}/items/{id}/annotate-detail/
@@ -1999,7 +2001,7 @@ class AsyncAnnotationQueuesItemsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_ANNOTATION_QUEUES_ITEMS_ANNOTATE_DETAIL, path=path, query=query, body=body, model=models.QueueAnnotateDetailResult, options=options)
 
-    async def assign(self, queue_id: str, *, item_ids: List[str], user_ids: List[str] | None = None, action: Literal['add', 'set', 'remove'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAssignItemsResult:
+    async def assign(self, queue_id: str, *, item_ids: List[str], user_ids: List[str] | None | NotGiven = NOT_GIVEN, action: Literal['add', 'set', 'remove'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAssignItemsResult:
         """Assign or unassign queue items to annotators.
 
         POST /model-hub/annotation-queues/{queue_id}/items/assign/
@@ -2009,7 +2011,7 @@ class AsyncAnnotationQueuesItemsResource(Resource):
         body = {'item_ids': item_ids, 'user_ids': user_ids, 'action': action, **(extra_body or {})}
         return await self._t.acall(_ops.OP_ANNOTATION_QUEUES_ITEMS_ASSIGN, path=path, query=query, body=body, model=models.QueueAssignItemsResult, options=options)
 
-    async def complete(self, queue_id: str, id: str, *, exclude: List[str] | None = None, exclude_review_status: str | None = None, include_completed: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueNavigationResult:
+    async def complete(self, queue_id: str, id: str, *, exclude: List[str] | None | NotGiven = NOT_GIVEN, exclude_review_status: str | None | NotGiven = NOT_GIVEN, include_completed: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueNavigationResult:
         """Mark an annotated queue item complete and return the next item to work on. Required to finish an item - submit_annotation alone leaves it in_progress and the queue never closes.
 
         POST /model-hub/annotation-queues/{queue_id}/items/{id}/complete/
@@ -2019,7 +2021,7 @@ class AsyncAnnotationQueuesItemsResource(Resource):
         body = {'exclude': exclude, 'exclude_review_status': exclude_review_status, 'include_completed': include_completed, **(extra_body or {})}
         return await self._t.acall(_ops.OP_ANNOTATION_QUEUES_ITEMS_COMPLETE, path=path, query=query, body=body, model=models.QueueNavigationResult, options=options)
 
-    async def import_annotations(self, queue_id: str, id: str, *, annotations: List[Dict[str, Any]], annotator_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueImportAnnotationsResult:
+    async def import_annotations(self, queue_id: str, id: str, *, annotations: List[Dict[str, Any]], annotator_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueImportAnnotationsResult:
         """Import existing annotations onto a queue item, optionally on behalf of an annotator.
 
         POST /model-hub/annotation-queues/{queue_id}/items/{id}/annotations/import/
@@ -2029,7 +2031,7 @@ class AsyncAnnotationQueuesItemsResource(Resource):
         body = {'annotations': annotations, 'annotator_id': annotator_id, **(extra_body or {})}
         return await self._t.acall(_ops.OP_ANNOTATION_QUEUES_ITEMS_IMPORT_ANNOTATIONS, path=path, query=query, body=body, model=models.QueueImportAnnotationsResult, options=options)
 
-    def list(self, queue_id: str, *, limit: int | None = None, status: List[str] | None = None, source_type: List[str] | None = None, assigned_to: str | None = None, review_status: str | None = None, ordering: Literal['created_at', '-created_at'] | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.QueueItem]:
+    def list(self, queue_id: str, *, limit: int | None | NotGiven = NOT_GIVEN, status: List[str] | None | NotGiven = NOT_GIVEN, source_type: List[str] | None | NotGiven = NOT_GIVEN, assigned_to: str | None | NotGiven = NOT_GIVEN, review_status: str | None | NotGiven = NOT_GIVEN, ordering: Literal['created_at', '-created_at'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.QueueItem]:
         """List items belonging to an annotation queue.
 
         GET /model-hub/annotation-queues/{queue_id}/items/
@@ -2058,7 +2060,7 @@ class AsyncAnnotationQueuesItemsResource(Resource):
         body = {'item_ids': item_ids, **(extra_body or {})}
         return await self._t.acall(_ops.OP_ANNOTATION_QUEUES_ITEMS_REMOVE, path=path, query=query, body=body, model=models.QueueBulkRemoveItemsResult, options=options)
 
-    async def skip(self, queue_id: str, id: str, *, exclude: List[str] | None = None, exclude_review_status: str | None = None, include_completed: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueNavigationResult:
+    async def skip(self, queue_id: str, id: str, *, exclude: List[str] | None | NotGiven = NOT_GIVEN, exclude_review_status: str | None | NotGiven = NOT_GIVEN, include_completed: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueNavigationResult:
         """Skip a queue item and return the next one to work on.
 
         POST /model-hub/annotation-queues/{queue_id}/items/{id}/skip/
@@ -2068,7 +2070,7 @@ class AsyncAnnotationQueuesItemsResource(Resource):
         body = {'exclude': exclude, 'exclude_review_status': exclude_review_status, 'include_completed': include_completed, **(extra_body or {})}
         return await self._t.acall(_ops.OP_ANNOTATION_QUEUES_ITEMS_SKIP, path=path, query=query, body=body, model=models.QueueNavigationResult, options=options)
 
-    async def submit(self, queue_id: str, id: str, *, annotations: List[Dict[str, Any]], notes: str | None = None, item_notes: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueSubmitAnnotationsResult:
+    async def submit(self, queue_id: str, id: str, *, annotations: List[Dict[str, Any]], notes: str | None | NotGiven = NOT_GIVEN, item_notes: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueSubmitAnnotationsResult:
         """Submit annotation values for an item in an annotation queue. The value shape must match the label's settings from get_annotation_item_detail. Submitting moves the item to in_progress only; call complete_annotation_item to finish it.
 
         POST /model-hub/annotation-queues/{queue_id}/items/{id}/annotations/submit/
@@ -2084,7 +2086,7 @@ class AsyncAnnotationsLabelsResource(Resource):
 
     _t: AsyncTransport
 
-    async def create(self, *, name: str, type: Literal['text', 'numeric', 'categorical', 'star', 'thumbs_up_down'], settings: Dict[str, Any] | None = None, project: str | None = None, description: str | None = None, allow_notes: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AnnotationsLabels:
+    async def create(self, *, name: str, type: Literal['text', 'numeric', 'categorical', 'star', 'thumbs_up_down'], settings: Dict[str, Any] | None | NotGiven = NOT_GIVEN, project: str | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, allow_notes: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AnnotationsLabels:
         """Create an annotation label (text, label, score, ...) with its settings.
 
         POST /model-hub/annotations-labels/
@@ -2114,7 +2116,7 @@ class AsyncAnnotationsLabelsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_ANNOTATIONS_LABELS_GET, path=path, query=query, body=body, model=models.AnnotationsLabels, options=options)
 
-    def list(self, *, limit: int | None = None, dataset: str | None = None, project_id: str | None = None, type: Literal['text', 'numeric', 'categorical', 'star', 'thumbs_up_down'] | None = None, search: str | None = None, include_usage_count: bool | None = None, include_archived: bool | None = None, archived: bool | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.AnnotationsLabels]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, dataset: str | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, type: Literal['text', 'numeric', 'categorical', 'star', 'thumbs_up_down'] | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, include_usage_count: bool | None | NotGiven = NOT_GIVEN, include_archived: bool | None | NotGiven = NOT_GIVEN, archived: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.AnnotationsLabels]:
         """List annotation labels, optionally filtered by project, type or search text.
 
         GET /model-hub/annotations-labels/
@@ -2129,7 +2131,7 @@ class AsyncDashboardsMetricsResource(Resource):
 
     _t: AsyncTransport
 
-    async def list(self, *, workflow: Literal['observability', 'dataset', 'simulation'] | None = None, project_ids: str | None = None, agent_definition_id: str | None = None, per_eval_config: bool | None = None, exclude_custom_attributes: bool | None = None, search: str | None = None, category: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None = None, role: Literal['metric', 'dimension'] | None = None, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'simulation', 'both', 'all'] | None = None, page: int | None = None, page_size: int | None = None, cursor_mode: bool | None = None, cursor: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardMetricsCatalogResult:
+    async def list(self, *, workflow: Literal['observability', 'dataset', 'simulation'] | None | NotGiven = NOT_GIVEN, project_ids: str | None | NotGiven = NOT_GIVEN, agent_definition_id: str | None | NotGiven = NOT_GIVEN, per_eval_config: bool | None | NotGiven = NOT_GIVEN, exclude_custom_attributes: bool | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, category: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None | NotGiven = NOT_GIVEN, role: Literal['metric', 'dimension'] | None | NotGiven = NOT_GIVEN, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'simulation', 'both', 'all'] | None | NotGiven = NOT_GIVEN, page: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor_mode: bool | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardMetricsCatalogResult:
         """List the metrics available to dashboard queries across traces, datasets, and simulations.
 
         GET /tracer/dashboard/metrics/
@@ -2145,7 +2147,7 @@ class AsyncDashboardsWidgetsResource(Resource):
 
     _t: AsyncTransport
 
-    async def create(self, dashboard_pk: str, *, name: str | None = None, description: str | None = None, position: int | None = None, width: int | None = None, height: int | None = None, query_config: Dict[str, Any] | None = None, chart_config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardWidget:
+    async def create(self, dashboard_pk: str, *, name: str | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, position: int | None | NotGiven = NOT_GIVEN, width: int | None | NotGiven = NOT_GIVEN, height: int | None | NotGiven = NOT_GIVEN, query_config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, chart_config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardWidget:
         """Add a widget to a dashboard. query_config uses the query_dashboard_metrics request shape (time_range plus metrics); discover metric names with list_dashboard_metrics.
 
         POST /tracer/dashboard/{dashboard_pk}/widgets/
@@ -2165,7 +2167,7 @@ class AsyncDashboardsWidgetsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_DASHBOARDS_WIDGETS_GET, path=path, query=query, body=body, model=models.DashboardWidget, options=options)
 
-    def list(self, dashboard_pk: str, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.DashboardWidget]:
+    def list(self, dashboard_pk: str, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.DashboardWidget]:
         """List the widgets on a dashboard.
 
         GET /tracer/dashboard/{dashboard_pk}/widgets/
@@ -2174,7 +2176,7 @@ class AsyncDashboardsWidgetsResource(Resource):
         query = {'limit': limit, **(extra_query or {})}
         return self._t.apaginate(_ops.OP_DASHBOARDS_WIDGETS_LIST, path=path, query=query, model=models.DashboardWidget, options=options)
 
-    async def query(self, dashboard_pk: str, id: str, *, allow_sampled: bool | None = None, refresh: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardQueryResult:
+    async def query(self, dashboard_pk: str, id: str, *, allow_sampled: bool | None | NotGiven = NOT_GIVEN, refresh: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardQueryResult:
         """Execute a saved widget's query and return its chart data.
 
         POST /tracer/dashboard/{dashboard_pk}/widgets/{id}/query/
@@ -2184,7 +2186,7 @@ class AsyncDashboardsWidgetsResource(Resource):
         body = {'allow_sampled': allow_sampled, **(extra_body or {})}
         return await self._t.acall(_ops.OP_DASHBOARDS_WIDGETS_QUERY, path=path, query=query, body=body, model=models.DashboardQueryResult, options=options)
 
-    async def update(self, dashboard_pk: str, id: str, *, name: str | None = None, description: str | None = None, position: int | None = None, width: int | None = None, height: int | None = None, query_config: Dict[str, Any] | None = None, chart_config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardWidget:
+    async def update(self, dashboard_pk: str, id: str, *, name: str | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, position: int | None | NotGiven = NOT_GIVEN, width: int | None | NotGiven = NOT_GIVEN, height: int | None | NotGiven = NOT_GIVEN, query_config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, chart_config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardWidget:
         """Update selected fields on a dashboard widget, such as its query_config, chart_config, or layout.
 
         PATCH /tracer/dashboard/{dashboard_pk}/widgets/{id}/
@@ -2200,7 +2202,7 @@ class AsyncDatasetsCellsResource(Resource):
 
     _t: AsyncTransport
 
-    async def update(self, dataset_id: str, *, row_id: str, column_id: str, new_value: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    async def update(self, dataset_id: str, *, row_id: str, column_id: str, new_value: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Set the value of a single dataset cell. Use this to correct one value; add_dataset_rows only appends and cannot edit an existing row.
 
         POST /model-hub/develops/{dataset_id}/update_cell_value/
@@ -2226,7 +2228,7 @@ class AsyncDatasetsColumnsResource(Resource):
         body = {'new_columns_data': new_columns_data, **(extra_body or {})}
         return await self._t.acall(_ops.OP_DATASETS_COLUMNS_ADD, path=path, query=query, body=body, model=models.DatasetColumnsMutationResult, options=options)
 
-    async def add_static(self, dataset_id: str, *, new_column_name: str, column_type: str, source: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    async def add_static(self, dataset_id: str, *, new_column_name: str, column_type: str, source: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Create a named static input column before adding dataset rows. Supply column_type using the API schema.
 
         POST /model-hub/develops/{dataset_id}/add_static_column/
@@ -2252,7 +2254,7 @@ class AsyncDatasetsEvalsResource(Resource):
 
     _t: AsyncTransport
 
-    async def add(self, dataset_id: str, *, name: str, template_id: str, config: Dict[str, Any], kb_id: str | None = None, error_localizer: bool | None = None, model: str | None = None, eval_type: str | None = None, run: bool | None = None, save_as_template: bool | None = None, experiment_id: str | None = None, composite_weight_overrides: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    async def add(self, dataset_id: str, *, name: str, template_id: str, config: Dict[str, Any], kb_id: str | None | NotGiven = NOT_GIVEN, error_localizer: bool | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, eval_type: str | None | NotGiven = NOT_GIVEN, run: bool | None | NotGiven = NOT_GIVEN, save_as_template: bool | None | NotGiven = NOT_GIVEN, experiment_id: str | None | NotGiven = NOT_GIVEN, composite_weight_overrides: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Attach an evaluation template to a dataset with a lowercase name (letters, digits, hyphens or underscores; no spaces) and config.mapping column mappings. Set run=false for setup only; run=true marks it for processing. Use list_dataset_evaluations to discover the attached evaluation ID.
 
         POST /model-hub/develops/{dataset_id}/add_user_eval/
@@ -2262,7 +2264,7 @@ class AsyncDatasetsEvalsResource(Resource):
         body = {'name': name, 'template_id': template_id, 'config': config, 'kb_id': kb_id, 'error_localizer': error_localizer, 'model': model, 'eval_type': eval_type, 'run': run, 'save_as_template': save_as_template, 'experiment_id': experiment_id, 'composite_weight_overrides': composite_weight_overrides, **(extra_body or {})}
         return await self._t.acall(_ops.OP_DATASETS_EVALS_ADD, path=path, query=query, body=body, model=None, options=options)
 
-    async def list(self, dataset_id: str, *, eval_type: str | None = None, search_text: str | None = None, eval_categories: str | None = None, eval_tags: List[str] | None = None, use_cases: List[str] | None = None, experiment_id: str | None = None, order: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalListResult:
+    async def list(self, dataset_id: str, *, eval_type: str | None | NotGiven = NOT_GIVEN, search_text: str | None | NotGiven = NOT_GIVEN, eval_categories: str | None | NotGiven = NOT_GIVEN, eval_tags: List[str] | None | NotGiven = NOT_GIVEN, use_cases: List[str] | None | NotGiven = NOT_GIVEN, experiment_id: str | None | NotGiven = NOT_GIVEN, order: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalListResult:
         """List evaluations attached to a dataset by supplying eval_type=user, including their IDs, configuration and status. These IDs, not template IDs, are used by run_dataset_evals. Without eval_type=user, the API lists available evaluation templates.
 
         GET /model-hub/develops/{dataset_id}/get_evals_list/
@@ -2272,7 +2274,7 @@ class AsyncDatasetsEvalsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_DATASETS_EVALS_LIST, path=path, query=query, body=body, model=models.EvalListResult, options=options)
 
-    async def run(self, dataset_id: str, *, user_eval_ids: List[str], experiment_id: str | None = None, failed_only: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    async def run(self, dataset_id: str, *, user_eval_ids: List[str], experiment_id: str | None | NotGiven = NOT_GIVEN, failed_only: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Start the configured evaluations for a dataset.
 
         POST /model-hub/develops/{dataset_id}/start_evals_process/
@@ -2298,7 +2300,7 @@ class AsyncDatasetsPromptsResource(Resource):
 
     _t: AsyncTransport
 
-    async def add(self, *, dataset_id: str, name: str, config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    async def add(self, *, dataset_id: str, name: str, config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Create a dataset prompt output column and immediately schedule processing of dataset rows. This can incur model usage charges. Supply dataset_id, name and config; this is separate from workbench run_prompt.
 
         POST /model-hub/develops/add_run_prompt_column/
@@ -2308,7 +2310,7 @@ class AsyncDatasetsPromptsResource(Resource):
         body = {'dataset_id': dataset_id, 'name': name, 'config': config, **(extra_body or {})}
         return await self._t.acall(_ops.OP_DATASETS_PROMPTS_ADD, path=path, query=query, body=body, model=None, options=options)
 
-    async def run(self, *, run_prompt_ids: List[str], row_ids: List[str] | None = None, selected_all_rows: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.ModelHubSuccessMessageResult:
+    async def run(self, *, run_prompt_ids: List[str], row_ids: List[str] | None | NotGiven = NOT_GIVEN, selected_all_rows: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.ModelHubSuccessMessageResult:
         """Queue configured dataset prompts by run_prompt_ids. Supply row_ids for selected rows, or selected_all_rows=true for all rows; with selected_all_rows=true, row_ids are EXCLUDED. Poll get_dataset for cell results and status.
 
         POST /model-hub/run-prompt-for-rows/
@@ -2328,7 +2330,7 @@ class AsyncDatasetsPromptsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_DATASETS_PROMPTS_STATS, path=path, query=query, body=body, model=models.DatasetRunPromptStatsResult, options=options)
 
-    async def update(self, *, dataset_id: str, column_id: str, name: str | None = None, config: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    async def update(self, *, dataset_id: str, column_id: str, name: str | None | NotGiven = NOT_GIVEN, config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Update a dataset prompt column using dataset_id, column_id and config. This can schedule processing and incur model usage charges.
 
         POST /model-hub/develops/edit_run_prompt_column/
@@ -2363,7 +2365,7 @@ class AsyncEvalsConfigsResource(Resource):
 
     _t: AsyncTransport
 
-    async def create(self, *, eval_template: str, project: str, name: str | None = None, config: Dict[str, Any] | None = None, mapping: Dict[str, Any] | None = None, filters: Dict[str, Any] | None = None, error_localizer: bool | None = None, kb_id: str | None = None, model: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.CustomEvalConfig:
+    async def create(self, *, eval_template: str, project: str, name: str | None | NotGiven = NOT_GIVEN, config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, filters: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer: bool | None | NotGiven = NOT_GIVEN, kb_id: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.CustomEvalConfig:
         """Create a custom evaluation configuration from an eval template so it can be attached to an online evaluation task. Use when list_eval_configs has no entry for the template you want to run over spans.
 
         POST /tracer/custom-eval-config/
@@ -2373,7 +2375,7 @@ class AsyncEvalsConfigsResource(Resource):
         body = {'eval_template': eval_template, 'project': project, 'name': name, 'config': config, 'mapping': mapping, 'filters': filters, 'error_localizer': error_localizer, 'kb_id': kb_id, 'model': model, **(extra_body or {})}
         return await self._t.acall(_ops.OP_EVALS_CONFIGS_CREATE, path=path, query=query, body=body, model=models.CustomEvalConfig, options=options)
 
-    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.CustomEvalConfig]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.CustomEvalConfig]:
         """List the custom evaluation configurations available for online evaluation tasks. The ids returned here are what create_eval_task takes in its `evals` argument - eval templates are a different object and their ids are not accepted there.
 
         GET /tracer/custom-eval-config/
@@ -2388,7 +2390,7 @@ class AsyncEvalsGroupsResource(Resource):
 
     _t: AsyncTransport
 
-    async def get(self, id: str, *, name: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalGroup:
+    async def get(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalGroup:
         """Return an evaluation group by its identifier.
 
         GET /model-hub/eval-groups/{id}/
@@ -2398,7 +2400,7 @@ class AsyncEvalsGroupsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_EVALS_GROUPS_GET, path=path, query=query, body=body, model=models.EvalGroup, options=options)
 
-    async def list(self, *, name: str | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def list(self, *, name: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """List evaluation groups in the current workspace.
 
         GET /model-hub/eval-groups/
@@ -2414,7 +2416,7 @@ class AsyncEvalsTasksResource(Resource):
 
     _t: AsyncTransport
 
-    async def create(self, *, project: str, name: str, sampling_rate: float, run_type: Literal['continuous', 'historical'], evals: List[str], filters: Dict[str, Any] | None = None, last_run: str | None = None, spans_limit: int | None = None, row_type: Literal['spans', 'traces', 'sessions', 'voiceCalls'] | None = None, status: Literal['pending', 'running', 'completed', 'failed', 'paused', 'deleted'] | None = None, start_time: str | None = None, end_time: str | None = None, evals_details: Dict[str, Any] | None = None, failed_spans: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTaskCreateResult:
+    async def create(self, *, project: str, name: str, sampling_rate: float, run_type: Literal['continuous', 'historical'], evals: List[str], filters: Dict[str, Any] | None | NotGiven = NOT_GIVEN, last_run: str | None | NotGiven = NOT_GIVEN, spans_limit: int | None | NotGiven = NOT_GIVEN, row_type: Literal['spans', 'traces', 'sessions', 'voiceCalls'] | None | NotGiven = NOT_GIVEN, status: Literal['pending', 'running', 'completed', 'failed', 'paused', 'deleted'] | None | NotGiven = NOT_GIVEN, start_time: str | None | NotGiven = NOT_GIVEN, end_time: str | None | NotGiven = NOT_GIVEN, evals_details: Dict[str, Any] | None | NotGiven = NOT_GIVEN, failed_spans: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTaskCreateResult:
         """Create an online evaluation task.
 
         POST /tracer/eval-task/
@@ -2434,7 +2436,7 @@ class AsyncEvalsTasksResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_EVALS_TASKS_GET, path=path, query=query, body=body, model=models.EvalTask, options=options)
 
-    async def list(self, *, project_id: str | None = None, name: str | None = None, filters: str | None = None, sort_params: str | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models._EvalTaskListResultResponse:
+    async def list(self, *, project_id: str | None | NotGiven = NOT_GIVEN, name: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, sort_params: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models._EvalTaskListResultResponse:
         """List online evaluation tasks in the current workspace.
 
         GET /tracer/eval-task/list_eval_tasks/
@@ -2464,7 +2466,7 @@ class AsyncEvalsTasksResource(Resource):
         body = {**(extra_body or {})}
         return await self._t.acall(_ops.OP_EVALS_TASKS_RESUME, path=path, query=query, body=body, model=models.EvalTaskMessageResult, options=options)
 
-    async def update(self, *, edit_type: Literal['edit_rerun', 'fresh_run'], eval_task_id: str, name: str | None = None, filters: Dict[str, Any] | None = None, sampling_rate: float | None = None, spans_limit: int | None = None, run_type: Literal['continuous', 'historical'] | None = None, row_type: Literal['spans', 'traces', 'sessions', 'voiceCalls'] | None = None, status: Literal['pending', 'running', 'completed', 'failed', 'paused', 'deleted'] | None = None, evals: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTaskUpdateResult:
+    async def update(self, *, edit_type: Literal['edit_rerun', 'fresh_run'], eval_task_id: str, name: str | None | NotGiven = NOT_GIVEN, filters: Dict[str, Any] | None | NotGiven = NOT_GIVEN, sampling_rate: float | None | NotGiven = NOT_GIVEN, spans_limit: int | None | NotGiven = NOT_GIVEN, run_type: Literal['continuous', 'historical'] | None | NotGiven = NOT_GIVEN, row_type: Literal['spans', 'traces', 'sessions', 'voiceCalls'] | None | NotGiven = NOT_GIVEN, status: Literal['pending', 'running', 'completed', 'failed', 'paused', 'deleted'] | None | NotGiven = NOT_GIVEN, evals: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTaskUpdateResult:
         """Update and rerun an online evaluation task using eval_task_id and edit_type. Pause a running task first. edit_rerun preserves existing results; fresh_run DELETES previous results and starts again. May incur evaluation charges.
 
         PATCH /tracer/eval-task/update_eval_task/
@@ -2480,7 +2482,7 @@ class AsyncEvalsTemplatesResource(Resource):
 
     _t: AsyncTransport
 
-    async def create(self, *, name: str | None = None, is_draft: bool | None = None, eval_type: Literal['llm', 'code', 'agent'] | None = None, instructions: str | None = None, model: str | None = None, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None = None, pass_threshold: float | None = None, choice_scores: Dict[str, Any] | None = None, description: str | None = None, tags: List[str] | None = None, check_internet: bool | None = None, code: str | None = None, code_language: Literal['python', 'javascript'] | None = None, messages: List[Dict[str, Any]] | None = None, few_shot_examples: List[Dict[str, Any]] | None = None, mode: Literal['auto', 'agent', 'quick'] | None = None, tools: Dict[str, Any] | None = None, knowledge_bases: List[str] | None = None, data_injection: Dict[str, Any] | None = None, summary: Dict[str, Any] | None = None, error_localizer_enabled: bool | None = None, template_format: Literal['mustache', 'jinja'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateCreateResponseResult:
+    async def create(self, *, name: str | None | NotGiven = NOT_GIVEN, is_draft: bool | None | NotGiven = NOT_GIVEN, eval_type: Literal['llm', 'code', 'agent'] | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None | NotGiven = NOT_GIVEN, pass_threshold: float | None | NotGiven = NOT_GIVEN, choice_scores: Dict[str, Any] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, code: str | None | NotGiven = NOT_GIVEN, code_language: Literal['python', 'javascript'] | None | NotGiven = NOT_GIVEN, messages: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, few_shot_examples: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, mode: Literal['auto', 'agent', 'quick'] | None | NotGiven = NOT_GIVEN, tools: Dict[str, Any] | None | NotGiven = NOT_GIVEN, knowledge_bases: List[str] | None | NotGiven = NOT_GIVEN, data_injection: Dict[str, Any] | None | NotGiven = NOT_GIVEN, summary: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer_enabled: bool | None | NotGiven = NOT_GIVEN, template_format: Literal['mustache', 'jinja'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateCreateResponseResult:
         """Create an evaluation template.
 
         POST /model-hub/eval-templates/create-v2/
@@ -2500,7 +2502,7 @@ class AsyncEvalsTemplatesResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_EVALS_TEMPLATES_GET, path=path, query=query, body=body, model=models.EvalTemplateDetailResponseResult, options=options)
 
-    async def list(self, *, page: int | None = None, page_size: int | None = None, search: str | None = None, owner_filter: Literal['all', 'user', 'system'] | None = None, filters: Dict[str, Any] | None = None, sort_by: Literal['name', 'updated_at', 'created_at'] | None = None, sort_order: Literal['asc', 'desc'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateListResponseResult:
+    async def list(self, *, page: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, owner_filter: Literal['all', 'user', 'system'] | None | NotGiven = NOT_GIVEN, filters: Dict[str, Any] | None | NotGiven = NOT_GIVEN, sort_by: Literal['name', 'updated_at', 'created_at'] | None | NotGiven = NOT_GIVEN, sort_order: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateListResponseResult:
         """List evaluation templates using the supplied filters.
 
         POST /model-hub/eval-templates/list/
@@ -2510,7 +2512,7 @@ class AsyncEvalsTemplatesResource(Resource):
         body = {'page': page, 'page_size': page_size, 'search': search, 'owner_filter': owner_filter, 'filters': filters, 'sort_by': sort_by, 'sort_order': sort_order, **(extra_body or {})}
         return await self._t.acall(_ops.OP_EVALS_TEMPLATES_LIST, path=path, query=query, body=body, model=models.EvalTemplateListResponseResult, options=options)
 
-    async def update(self, template_id: str, *, name: str | None = None, eval_type: Literal['llm', 'code', 'agent'] | None = None, instructions: str | None = None, model: str | None = None, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None = None, pass_threshold: float | None = None, choice_scores: Dict[str, Any] | None = None, multi_choice: bool | None = None, description: str | None = None, tags: List[str] | None = None, check_internet: bool | None = None, code: str | None = None, code_language: Literal['python', 'javascript'] | None = None, messages: List[Dict[str, Any]] | None = None, few_shot_examples: List[Dict[str, Any]] | None = None, mode: Literal['auto', 'agent', 'quick'] | None = None, tools: Dict[str, Any] | None = None, knowledge_bases: List[str] | None = None, data_injection: Dict[str, Any] | None = None, summary: Dict[str, Any] | None = None, error_localizer_enabled: bool | None = None, publish: bool | None = None, template_format: Literal['mustache', 'jinja'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateUpdateResponseResult:
+    async def update(self, template_id: str, *, name: str | None | NotGiven = NOT_GIVEN, eval_type: Literal['llm', 'code', 'agent'] | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None | NotGiven = NOT_GIVEN, pass_threshold: float | None | NotGiven = NOT_GIVEN, choice_scores: Dict[str, Any] | None | NotGiven = NOT_GIVEN, multi_choice: bool | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, code: str | None | NotGiven = NOT_GIVEN, code_language: Literal['python', 'javascript'] | None | NotGiven = NOT_GIVEN, messages: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, few_shot_examples: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, mode: Literal['auto', 'agent', 'quick'] | None | NotGiven = NOT_GIVEN, tools: Dict[str, Any] | None | NotGiven = NOT_GIVEN, knowledge_bases: List[str] | None | NotGiven = NOT_GIVEN, data_injection: Dict[str, Any] | None | NotGiven = NOT_GIVEN, summary: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer_enabled: bool | None | NotGiven = NOT_GIVEN, publish: bool | None | NotGiven = NOT_GIVEN, template_format: Literal['mustache', 'jinja'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateUpdateResponseResult:
         """Update an existing evaluation template.
 
         PUT /model-hub/eval-templates/{template_id}/update/
@@ -2526,7 +2528,7 @@ class AsyncGatewayGuardrailRulesResource(Resource):
 
     _t: AsyncTransport
 
-    async def list(self, *, page: int | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def list(self, *, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """Per-rule guardrail trigger breakdown - which guardrail rules exist and how often each has fired. Request logs report guardrail_triggered but not which rule caused it; this is what turns "the request was blocked" into "the PII rule blocked it".
 
         GET /agentcc/analytics/guardrail-rules/
@@ -2542,7 +2544,7 @@ class AsyncGatewayRequestLogsResource(Resource):
 
     _t: AsyncTransport
 
-    def list(self, *, limit: int | None = None, user_id: str | None = None, session_id: str | None = None, api_key_id: str | None = None, request_id: str | None = None, model: str | None = None, provider: str | None = None, status_code: str | None = None, min_status_code: int | None = None, max_status_code: int | None = None, is_error: bool | None = None, cache_hit: bool | None = None, fallback_used: bool | None = None, guardrail_triggered: bool | None = None, is_stream: bool | None = None, started_after: str | None = None, started_before: str | None = None, min_latency: int | None = None, max_latency: int | None = None, min_cost: float | None = None, max_cost: float | None = None, min_tokens: int | None = None, max_tokens: int | None = None, q: str | None = None, search: str | None = None, ordering: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.AgentccRequestLog]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, user_id: str | None | NotGiven = NOT_GIVEN, session_id: str | None | NotGiven = NOT_GIVEN, api_key_id: str | None | NotGiven = NOT_GIVEN, request_id: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, provider: str | None | NotGiven = NOT_GIVEN, status_code: str | None | NotGiven = NOT_GIVEN, min_status_code: int | None | NotGiven = NOT_GIVEN, max_status_code: int | None | NotGiven = NOT_GIVEN, is_error: bool | None | NotGiven = NOT_GIVEN, cache_hit: bool | None | NotGiven = NOT_GIVEN, fallback_used: bool | None | NotGiven = NOT_GIVEN, guardrail_triggered: bool | None | NotGiven = NOT_GIVEN, is_stream: bool | None | NotGiven = NOT_GIVEN, started_after: str | None | NotGiven = NOT_GIVEN, started_before: str | None | NotGiven = NOT_GIVEN, min_latency: int | None | NotGiven = NOT_GIVEN, max_latency: int | None | NotGiven = NOT_GIVEN, min_cost: float | None | NotGiven = NOT_GIVEN, max_cost: float | None | NotGiven = NOT_GIVEN, min_tokens: int | None | NotGiven = NOT_GIVEN, max_tokens: int | None | NotGiven = NOT_GIVEN, q: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, ordering: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.AgentccRequestLog]:
         """List request logs recorded by the AI gateway.
 
         GET /agentcc/request-logs/
@@ -2557,7 +2559,7 @@ class AsyncGatewaySessionsResource(Resource):
 
     _t: AsyncTransport
 
-    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.AgentccSession]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.AgentccSession]:
         """List AI gateway sessions with their stats. These are gateway sessions, distinct from the tracing sessions returned by list_sessions. Use this to obtain a session id for list_gateway_session_requests.
 
         GET /agentcc/sessions/
@@ -2582,7 +2584,7 @@ class AsyncKnowledgeBasesFilesResource(Resource):
 
     _t: AsyncTransport
 
-    async def delete(self, *, kb_id: str | None = None, delete_all: bool | None = None, file_ids: List[str] | None = None, excluded_file_ids: List[str] | None = None, file_names: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    async def delete(self, *, kb_id: str | None | NotGiven = NOT_GIVEN, delete_all: bool | None | NotGiven = NOT_GIVEN, file_ids: List[str] | None | NotGiven = NOT_GIVEN, excluded_file_ids: List[str] | None | NotGiven = NOT_GIVEN, file_names: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Delete files from a knowledge base, by id or name, or all of them.
 
         DELETE /model-hub/knowledge-base/files/
@@ -2592,7 +2594,7 @@ class AsyncKnowledgeBasesFilesResource(Resource):
         body = {'kb_id': kb_id, 'delete_all': delete_all, 'file_ids': file_ids, 'excluded_file_ids': excluded_file_ids, 'file_names': file_names, **(extra_body or {})}
         return await self._t.acall(_ops.OP_KNOWLEDGE_BASES_FILES_DELETE, path=path, query=query, body=body, model=None, options=options)
 
-    async def list(self, *, kb_id: str, search: str | None = None, sort: List[Dict[str, Any]] | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseFilesResult:
+    async def list(self, *, kb_id: str, search: str | None | NotGiven = NOT_GIVEN, sort: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseFilesResult:
         """List the files in a knowledge base, with their processing status.
 
         POST /model-hub/knowledge-base/files/
@@ -2618,7 +2620,7 @@ class AsyncPromptsLabelsResource(Resource):
         body = {'version': version, **(extra_body or {})}
         return await self._t.acall(_ops.OP_PROMPTS_LABELS_ASSIGN, path=path, query=query, body=body, model=None, options=options)
 
-    async def create(self, *, name: str, type: Literal['system', 'custom'], metadata: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptLabel:
+    async def create(self, *, name: str, type: Literal['system', 'custom'], metadata: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptLabel:
         """Create a prompt label.
 
         POST /model-hub/prompt-labels/
@@ -2628,7 +2630,7 @@ class AsyncPromptsLabelsResource(Resource):
         body = {'name': name, 'type': type, 'metadata': metadata, **(extra_body or {})}
         return await self._t.acall(_ops.OP_PROMPTS_LABELS_CREATE, path=path, query=query, body=body, model=models.PromptLabel, options=options)
 
-    async def for_template(self, *, page: int | None = None, limit: int | None = None, template_id: str | None = None, template_name: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def for_template(self, *, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, template_id: str | None | NotGiven = NOT_GIVEN, template_name: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """List the labels assigned to a prompt template's versions.
 
         GET /model-hub/prompt-labels/template-labels/
@@ -2638,7 +2640,7 @@ class AsyncPromptsLabelsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_PROMPTS_LABELS_FOR_TEMPLATE, path=path, query=query, body=body, model=None, options=options)
 
-    async def get_template(self, *, page: int | None = None, limit: int | None = None, name: str | None = None, label: str | None = None, version: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def get_template(self, *, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, name: str | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, version: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """Fetch the prompt template version a label points to, by template name and label (or version).
 
         GET /model-hub/prompt-labels/get-by-name/
@@ -2648,7 +2650,7 @@ class AsyncPromptsLabelsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_PROMPTS_LABELS_GET_TEMPLATE, path=path, query=query, body=body, model=None, options=options)
 
-    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.PromptLabel]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.PromptLabel]:
         """List prompt labels (e.g. production, staging) in the organization.
 
         GET /model-hub/prompt-labels/
@@ -2683,7 +2685,7 @@ class AsyncPromptsVersionsResource(Resource):
 
     _t: AsyncTransport
 
-    def list(self, id: str, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[Any]:
+    def list(self, id: str, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[Any]:
         """List versions of a prompt template.
 
         GET /model-hub/prompt-templates/{id}/versions/
@@ -2708,7 +2710,7 @@ class AsyncSimulationExecutionsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_SIMULATION_EXECUTIONS_ANALYTICS, path=path, query=query, body=body, model=models.TestExecutionAnalytics, options=options)
 
-    def get(self, test_execution_id: str, *, search: str | None = None, filters: str | None = None, row_groups: str | None = None, group_keys: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[Any]:
+    def get(self, test_execution_id: str, *, search: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, row_groups: str | None | NotGiven = NOT_GIVEN, group_keys: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[Any]:
         """Return a simulation test execution by its identifier.
 
         GET /simulate/test-executions/{test_execution_id}/
@@ -2717,7 +2719,7 @@ class AsyncSimulationExecutionsResource(Resource):
         query = {'search': search, 'filters': filters, 'row_groups': row_groups, 'group_keys': group_keys, 'limit': limit, **(extra_query or {})}
         return self._t.apaginate(_ops.OP_SIMULATION_EXECUTIONS_GET, path=path, query=query, model=None, options=options)
 
-    def list(self, *, search: str | None = None, status: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.TestExecution]:
+    def list(self, *, search: str | None | NotGiven = NOT_GIVEN, status: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.TestExecution]:
         """List simulation test executions.
 
         GET /simulate/api/test-executions/
@@ -2732,7 +2734,7 @@ class AsyncSimulationScenariosResource(Resource):
 
     _t: AsyncTransport
 
-    async def create(self, *, name: str, description: str | None = None, dataset_id: str | None = None, kind: Literal['graph', 'script', 'dataset'] | None = None, script_url: str | None = None, agent_definition_id: str | None = None, agent_definition_version_id: str | None = None, custom_instruction: str | None = None, no_of_rows: int | None = None, generate_graph: bool | None = None, graph: Dict[str, Any] | None = None, source_type: Literal['agent_definition', 'prompt'] | None = None, prompt_template_id: str | None = None, prompt_version_id: str | None = None, add_persona_automatically: bool | None = None, personas: List[str] | None = None, custom_columns: List[Dict[str, Any]] | None = None, agent_name: str | None = None, agent_prompt: str | None = None, voice_provider: str | None = None, voice_name: str | None = None, model: str | None = None, llm_temperature: float | None = None, initial_message: str | None = None, max_call_duration_in_minutes: int | None = None, interrupt_sensitivity: float | None = None, conversation_speed: float | None = None, finished_speaking_sensitivity: float | None = None, initial_message_delay: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def create(self, *, name: str, description: str | None | NotGiven = NOT_GIVEN, dataset_id: str | None | NotGiven = NOT_GIVEN, kind: Literal['graph', 'script', 'dataset'] | None | NotGiven = NOT_GIVEN, script_url: str | None | NotGiven = NOT_GIVEN, agent_definition_id: str | None | NotGiven = NOT_GIVEN, agent_definition_version_id: str | None | NotGiven = NOT_GIVEN, custom_instruction: str | None | NotGiven = NOT_GIVEN, no_of_rows: int | None | NotGiven = NOT_GIVEN, generate_graph: bool | None | NotGiven = NOT_GIVEN, graph: Dict[str, Any] | None | NotGiven = NOT_GIVEN, source_type: Literal['agent_definition', 'prompt'] | None | NotGiven = NOT_GIVEN, prompt_template_id: str | None | NotGiven = NOT_GIVEN, prompt_version_id: str | None | NotGiven = NOT_GIVEN, add_persona_automatically: bool | None | NotGiven = NOT_GIVEN, personas: List[str] | None | NotGiven = NOT_GIVEN, custom_columns: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, agent_name: str | None | NotGiven = NOT_GIVEN, agent_prompt: str | None | NotGiven = NOT_GIVEN, voice_provider: str | None | NotGiven = NOT_GIVEN, voice_name: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, llm_temperature: float | None | NotGiven = NOT_GIVEN, initial_message: str | None | NotGiven = NOT_GIVEN, max_call_duration_in_minutes: int | None | NotGiven = NOT_GIVEN, interrupt_sensitivity: float | None | NotGiven = NOT_GIVEN, conversation_speed: float | None | NotGiven = NOT_GIVEN, finished_speaking_sensitivity: float | None | NotGiven = NOT_GIVEN, initial_message_delay: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """Create an agent or prompt simulation scenario of kind dataset, script or graph. Generation is asynchronous and may incur usage charges; poll get_scenario until ready before running tests. Requires the applicable plan entitlement.
 
         POST /simulate/scenarios/create/
@@ -2752,7 +2754,7 @@ class AsyncSimulationScenariosResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_SIMULATION_SCENARIOS_GET, path=path, query=query, body=body, model=models.ScenarioDetailResponse, options=options)
 
-    def list(self, *, search: str | None = None, agent_definition_id: str | None = None, agent_type: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.ScenarioResponse]:
+    def list(self, *, search: str | None | NotGiven = NOT_GIVEN, agent_definition_id: str | None | NotGiven = NOT_GIVEN, agent_type: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.ScenarioResponse]:
         """List simulation scenarios in the current workspace.
 
         GET /simulate/scenarios/
@@ -2761,7 +2763,7 @@ class AsyncSimulationScenariosResource(Resource):
         query = {'search': search, 'agent_definition_id': agent_definition_id, 'agent_type': agent_type, 'limit': limit, **(extra_query or {})}
         return self._t.apaginate(_ops.OP_SIMULATION_SCENARIOS_LIST, path=path, query=query, model=models.ScenarioResponse, options=options)
 
-    async def update(self, scenario_id: str, *, name: str | None = None, description: str | None = None, graph: Dict[str, Any] | None = None, prompt: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.ScenarioEditResponse:
+    async def update(self, scenario_id: str, *, name: str | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, graph: Dict[str, Any] | None | NotGiven = NOT_GIVEN, prompt: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.ScenarioEditResponse:
         """Edit supported scenario fields such as name, description, graph or prompt. This is not a dataset-row editor or a simulation execution.
 
         PUT /simulate/scenarios/{scenario_id}/edit/
@@ -2777,7 +2779,7 @@ class AsyncSimulationTestsResource(Resource):
 
     _t: AsyncTransport
 
-    async def create(self, *, name: str, agent_definition_id: str, scenario_ids: List[str], description: str | None = None, dataset_row_ids: List[str] | None = None, eval_config_ids: List[str] | None = None, evaluations_config: List[Dict[str, Any]] | None = None, enable_tool_evaluation: bool | None = None, replay_session_id: str | None = None, agent_version: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.RunTestResponse:
+    async def create(self, *, name: str, agent_definition_id: str, scenario_ids: List[str], description: str | None | NotGiven = NOT_GIVEN, dataset_row_ids: List[str] | None | NotGiven = NOT_GIVEN, eval_config_ids: List[str] | None | NotGiven = NOT_GIVEN, evaluations_config: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, enable_tool_evaluation: bool | None | NotGiven = NOT_GIVEN, replay_session_id: str | None | NotGiven = NOT_GIVEN, agent_version: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.RunTestResponse:
         """Save a simulation test using name, agent_definition_id and scenario_ids, optionally agent_version and evaluations_config. Does not execute it; pass the returned test ID to run_simulation.
 
         POST /simulate/run-tests/create/
@@ -2797,7 +2799,7 @@ class AsyncSimulationTestsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_SIMULATION_TESTS_GET, path=path, query=query, body=body, model=models.RunTestResponse, options=options)
 
-    def list(self, *, search: str | None = None, simulation_type: Literal['agent_definition', 'prompt'] | None = None, prompt_template_id: str | None = None, limit: int | None = None, summary: bool | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.RunTestResponse]:
+    def list(self, *, search: str | None | NotGiven = NOT_GIVEN, simulation_type: Literal['agent_definition', 'prompt'] | None | NotGiven = NOT_GIVEN, prompt_template_id: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, summary: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.RunTestResponse]:
         """List saved simulation test configurations. A test configuration is distinct from its executions; use list_test_executions to inspect runs.
 
         GET /simulate/run-tests/
@@ -2806,7 +2808,7 @@ class AsyncSimulationTestsResource(Resource):
         query = {'search': search, 'simulation_type': simulation_type, 'prompt_template_id': prompt_template_id, 'limit': limit, 'summary': summary, **(extra_query or {})}
         return self._t.apaginate(_ops.OP_SIMULATION_TESTS_LIST, path=path, query=query, model=models.RunTestResponse, options=options)
 
-    async def run(self, run_test_id: str, *, scenario_ids: List[str] | None = None, simulator_id: str | None = None, select_all: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.RunTestExecutionResponse:
+    async def run(self, run_test_id: str, *, scenario_ids: List[str] | None | NotGiven = NOT_GIVEN, simulator_id: str | None | NotGiven = NOT_GIVEN, select_all: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.RunTestExecutionResponse:
         """Start a saved simulation test asynchronously. Omit scenario_ids to run all configured scenarios. Uses existing provider/worker infrastructure and can incur usage charges. Poll get_test_execution with the returned execution_id, then read get_test_execution_analytics.
 
         POST /simulate/run-tests/{run_test_id}/execute/
@@ -2822,7 +2824,7 @@ class AsyncTracesPropertiesResource(Resource):
 
     _t: AsyncTransport
 
-    async def list(self, *, workflow: Literal['observability', 'dataset', 'simulation'] | None = None, project_ids: str | None = None, agent_definition_id: str | None = None, per_eval_config: bool | None = None, exclude_custom_attributes: bool | None = None, search: str | None = None, category: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None = None, role: Literal['metric', 'dimension'] | None = None, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'simulation', 'both', 'all'] | None = None, page: int | None = None, page_size: int | None = None, cursor_mode: bool | None = None, cursor: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardMetricsCatalogResult:
+    async def list(self, *, workflow: Literal['observability', 'dataset', 'simulation'] | None | NotGiven = NOT_GIVEN, project_ids: str | None | NotGiven = NOT_GIVEN, agent_definition_id: str | None | NotGiven = NOT_GIVEN, per_eval_config: bool | None | NotGiven = NOT_GIVEN, exclude_custom_attributes: bool | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, category: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None | NotGiven = NOT_GIVEN, role: Literal['metric', 'dimension'] | None | NotGiven = NOT_GIVEN, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'simulation', 'both', 'all'] | None | NotGiven = NOT_GIVEN, page: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor_mode: bool | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardMetricsCatalogResult:
         """Discover filter properties from the shared metrics catalog. Pass cursor_mode=true, page_size (at most 50), source=traces (search_traces) or source=spans (list_spans), per_eval_config=true and project_ids when known. Use role=dimension to narrow to dimensions. Use name as column_id; set filter_config.col_type by mapping category system_metric to SYSTEM_METRIC, custom_attribute to SPAN_ATTRIBUTE, eval_metric to EVAL_METRIC, and annotation_metric to ANNOTATION. Preserve property_id and source for typed attribute bindings. Follow has_more/next_cursor by passing cursor; omit page and exclude_custom_attributes in cursor mode.
 
         GET /tracer/dashboard/metrics/
@@ -2856,7 +2858,7 @@ class AsyncAgentsResource(Resource):
     versions: AsyncAgentsVersionsResource
     _children: Dict[str, type] = {'versions': AsyncAgentsVersionsResource}
 
-    async def create(self, *, agent_name: str, agent_type: Literal['voice', 'text'], commit_message: str, inbound: bool | None = None, target_speaks_first: bool | None = None, description: str | None = None, provider: str | None = None, api_key: str | None = None, assistant_id: str | None = None, authentication_method: Literal['api_key'] | None = None, language: str | None = None, languages: List[str] | None = None, contact_number: str | None = None, knowledge_base: str | None = None, observability_enabled: bool | None = None, model: str | None = None, model_details: Dict[str, Any] | None = None, websocket_url: str | None = None, websocket_headers: Dict[str, Any] | None = None, replay_session_id: str | None = None, livekit_url: str | None = None, livekit_api_key: str | None = None, livekit_api_secret: str | None = None, livekit_agent_name: str | None = None, livekit_config_json: Dict[str, Any] | None = None, livekit_max_concurrency: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentDefinitionCreateResponse:
+    async def create(self, *, agent_name: str, agent_type: Literal['voice', 'text'], commit_message: str, inbound: bool | None | NotGiven = NOT_GIVEN, target_speaks_first: bool | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, provider: str | None | NotGiven = NOT_GIVEN, api_key: str | None | NotGiven = NOT_GIVEN, assistant_id: str | None | NotGiven = NOT_GIVEN, authentication_method: Literal['api_key'] | None | NotGiven = NOT_GIVEN, language: str | None | NotGiven = NOT_GIVEN, languages: List[str] | None | NotGiven = NOT_GIVEN, contact_number: str | None | NotGiven = NOT_GIVEN, knowledge_base: str | None | NotGiven = NOT_GIVEN, observability_enabled: bool | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, model_details: Dict[str, Any] | None | NotGiven = NOT_GIVEN, websocket_url: str | None | NotGiven = NOT_GIVEN, websocket_headers: Dict[str, Any] | None | NotGiven = NOT_GIVEN, replay_session_id: str | None | NotGiven = NOT_GIVEN, livekit_url: str | None | NotGiven = NOT_GIVEN, livekit_api_key: str | None | NotGiven = NOT_GIVEN, livekit_api_secret: str | None | NotGiven = NOT_GIVEN, livekit_agent_name: str | None | NotGiven = NOT_GIVEN, livekit_config_json: Dict[str, Any] | None | NotGiven = NOT_GIVEN, livekit_max_concurrency: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentDefinitionCreateResponse:
         """Create a text or voice agent definition and its first active version. Supply agent_name, agent_type and commit_message plus the configuration required for the chosen provider.
 
         POST /simulate/agent-definitions/create/
@@ -2876,7 +2878,7 @@ class AsyncAgentsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_AGENTS_GET, path=path, query=query, body=body, model=models.AgentDefinitionDetailResponse, options=options)
 
-    def list(self, *, search: str | None = None, agent_type: Literal['voice', 'text'] | None = None, agent_definition_id: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.AgentDefinitionListResponse]:
+    def list(self, *, search: str | None | NotGiven = NOT_GIVEN, agent_type: Literal['voice', 'text'] | None | NotGiven = NOT_GIVEN, agent_definition_id: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.AgentDefinitionListResponse]:
         """List agent definitions in the current workspace.
 
         GET /simulate/agent-definitions/
@@ -2885,7 +2887,7 @@ class AsyncAgentsResource(Resource):
         query = {'search': search, 'agent_type': agent_type, 'agent_definition_id': agent_definition_id, 'limit': limit, **(extra_query or {})}
         return self._t.apaginate(_ops.OP_AGENTS_LIST, path=path, query=query, model=models.AgentDefinitionListResponse, options=options)
 
-    async def update(self, agent_id: str, *, observability_enabled: bool | None = None, agent_name: str | None = None, agent_type: Literal['voice', 'text'] | None = None, description: str | None = None, provider: str | None = None, api_key: str | None = None, assistant_id: str | None = None, authentication_method: Literal['api_key'] | None = None, language: str | None = None, languages: List[str] | None = None, contact_number: str | None = None, inbound: bool | None = None, target_speaks_first: bool | None = None, knowledge_base: str | None = None, model: str | None = None, model_details: Dict[str, Any] | None = None, websocket_url: str | None = None, websocket_headers: Dict[str, Any] | None = None, livekit_url: str | None = None, livekit_api_key: str | None = None, livekit_api_secret: str | None = None, livekit_agent_name: str | None = None, livekit_config_json: Dict[str, Any] | None = None, livekit_max_concurrency: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentDefinitionEditResponse:
+    async def update(self, agent_id: str, *, observability_enabled: bool | None | NotGiven = NOT_GIVEN, agent_name: str | None | NotGiven = NOT_GIVEN, agent_type: Literal['voice', 'text'] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, provider: str | None | NotGiven = NOT_GIVEN, api_key: str | None | NotGiven = NOT_GIVEN, assistant_id: str | None | NotGiven = NOT_GIVEN, authentication_method: Literal['api_key'] | None | NotGiven = NOT_GIVEN, language: str | None | NotGiven = NOT_GIVEN, languages: List[str] | None | NotGiven = NOT_GIVEN, contact_number: str | None | NotGiven = NOT_GIVEN, inbound: bool | None | NotGiven = NOT_GIVEN, target_speaks_first: bool | None | NotGiven = NOT_GIVEN, knowledge_base: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, model_details: Dict[str, Any] | None | NotGiven = NOT_GIVEN, websocket_url: str | None | NotGiven = NOT_GIVEN, websocket_headers: Dict[str, Any] | None | NotGiven = NOT_GIVEN, livekit_url: str | None | NotGiven = NOT_GIVEN, livekit_api_key: str | None | NotGiven = NOT_GIVEN, livekit_api_secret: str | None | NotGiven = NOT_GIVEN, livekit_agent_name: str | None | NotGiven = NOT_GIVEN, livekit_config_json: Dict[str, Any] | None | NotGiven = NOT_GIVEN, livekit_max_concurrency: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentDefinitionEditResponse:
         """Edit an agent definition. Leave observability_enabled out to keep observability as it is; send true or false to turn it on or off. To use changed configuration in a versioned simulation, subsequently call create_agent_version, or supply the changes directly to create_agent_version.
 
         PUT /simulate/agent-definitions/{agent_id}/edit/
@@ -2912,7 +2914,7 @@ class AsyncAnnotationQueuesResource(Resource):
     items: AsyncAnnotationQueuesItemsResource
     _children: Dict[str, type] = {'items': AsyncAnnotationQueuesItemsResource}
 
-    async def add_label(self, id: str, *, label_id: str, required: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAddLabelResult:
+    async def add_label(self, id: str, *, label_id: str, required: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueAddLabelResult:
         """Add an annotation label to a queue.
 
         POST /model-hub/annotation-queues/{id}/add-label/
@@ -2942,7 +2944,7 @@ class AsyncAnnotationQueuesResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_ANNOTATION_QUEUES_ANALYTICS, path=path, query=query, body=body, model=models.QueueAnalyticsResult, options=options)
 
-    async def create(self, *, name: str, label_ids: List[str], description: str | None = None, instructions: str | None = None, assignment_strategy: Literal['manual', 'round_robin', 'load_balanced'] | None = None, annotations_required: int | None = None, reservation_timeout_minutes: int | None = None, requires_review: bool | None = None, auto_assign: bool | None = None, annotator_ids: List[str] | None = None, annotator_roles: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AnnotationQueue:
+    async def create(self, *, name: str, label_ids: List[str], description: str | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, assignment_strategy: Literal['manual', 'round_robin', 'load_balanced'] | None | NotGiven = NOT_GIVEN, annotations_required: int | None | NotGiven = NOT_GIVEN, reservation_timeout_minutes: int | None | NotGiven = NOT_GIVEN, requires_review: bool | None | NotGiven = NOT_GIVEN, auto_assign: bool | None | NotGiven = NOT_GIVEN, annotator_ids: List[str] | None | NotGiven = NOT_GIVEN, annotator_roles: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AnnotationQueue:
         """Create an annotation queue with its labels and annotators.
 
         POST /model-hub/annotation-queues/
@@ -2962,8 +2964,8 @@ class AsyncAnnotationQueuesResource(Resource):
         body = {**(extra_body or {})}
         return await self._t.acall(_ops.OP_ANNOTATION_QUEUES_DELETE, path=path, query=query, body=body, model=None, options=options)
 
-    async def export(self, id: str, *, export_format: Literal['json', 'csv'] | None = None, status: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> List[Optional[Any]]:
-        """Export a queue's annotations.
+    async def export(self, id: str, *, export_format: Literal['json', 'csv'] | None | NotGiven = NOT_GIVEN, status: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+        """Export a queue's annotations, as JSON or, with `export_format=csv`, as CSV text.
 
         GET /model-hub/annotation-queues/{id}/export/
         """
@@ -2972,7 +2974,7 @@ class AsyncAnnotationQueuesResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_ANNOTATION_QUEUES_EXPORT, path=path, query=query, body=body, model=None, options=options)
 
-    async def export_to_dataset(self, id: str, *, dataset_id: str | None = None, dataset_name: str | None = None, status_filter: str | None = None, column_mapping: List[Dict[str, Any]] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueExportToDatasetResult:
+    async def export_to_dataset(self, id: str, *, dataset_id: str | None | NotGiven = NOT_GIVEN, dataset_name: str | None | NotGiven = NOT_GIVEN, status_filter: str | None | NotGiven = NOT_GIVEN, column_mapping: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueExportToDatasetResult:
         """Write a queue's annotations into a new or existing dataset.
 
         POST /model-hub/annotation-queues/{id}/export-to-dataset/
@@ -2992,7 +2994,7 @@ class AsyncAnnotationQueuesResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_ANNOTATION_QUEUES_GET, path=path, query=query, body=body, model=models.AnnotationQueue, options=options)
 
-    def list(self, *, limit: int | None = None, status: str | None = None, search: str | None = None, include_counts: bool | None = None, archived: bool | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.AnnotationQueue]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, status: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, include_counts: bool | None | NotGiven = NOT_GIVEN, archived: bool | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.AnnotationQueue]:
         """List annotation queues in the current workspace.
 
         GET /model-hub/annotation-queues/
@@ -3011,7 +3013,7 @@ class AsyncAnnotationQueuesResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_ANNOTATION_QUEUES_PROGRESS, path=path, query=query, body=body, model=models.QueueProgressResult, options=options)
 
-    async def remove_label(self, id: str, *, label_id: str, required: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueRemoveLabelResult:
+    async def remove_label(self, id: str, *, label_id: str, required: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.QueueRemoveLabelResult:
         """Remove an annotation label from a queue.
 
         POST /model-hub/annotation-queues/{id}/remove-label/
@@ -3021,7 +3023,7 @@ class AsyncAnnotationQueuesResource(Resource):
         body = {'label_id': label_id, 'required': required, **(extra_body or {})}
         return await self._t.acall(_ops.OP_ANNOTATION_QUEUES_REMOVE_LABEL, path=path, query=query, body=body, model=models.QueueRemoveLabelResult, options=options)
 
-    async def update(self, id: str, *, name: str | None = None, description: str | None = None, instructions: str | None = None, assignment_strategy: Literal['manual', 'round_robin', 'load_balanced'] | None = None, annotations_required: int | None = None, reservation_timeout_minutes: int | None = None, requires_review: bool | None = None, auto_assign: bool | None = None, label_ids: List[str] | None = None, annotator_ids: List[str] | None = None, annotator_roles: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AnnotationQueue:
+    async def update(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, assignment_strategy: Literal['manual', 'round_robin', 'load_balanced'] | None | NotGiven = NOT_GIVEN, annotations_required: int | None | NotGiven = NOT_GIVEN, reservation_timeout_minutes: int | None | NotGiven = NOT_GIVEN, requires_review: bool | None | NotGiven = NOT_GIVEN, auto_assign: bool | None | NotGiven = NOT_GIVEN, label_ids: List[str] | None | NotGiven = NOT_GIVEN, annotator_ids: List[str] | None | NotGiven = NOT_GIVEN, annotator_roles: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AnnotationQueue:
         """Update selected fields of an annotation queue.
 
         PATCH /model-hub/annotation-queues/{id}/
@@ -3068,7 +3070,7 @@ class AsyncDashboardsResource(Resource):
     widgets: AsyncDashboardsWidgetsResource
     _children: Dict[str, type] = {'metrics': AsyncDashboardsMetricsResource, 'widgets': AsyncDashboardsWidgetsResource}
 
-    async def create(self, *, name: str, description: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardCreateUpdate:
+    async def create(self, *, name: str, description: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardCreateUpdate:
         """Create an empty dashboard in the current workspace; add widgets with create_dashboard_widget.
 
         POST /tracer/dashboard/
@@ -3088,7 +3090,7 @@ class AsyncDashboardsResource(Resource):
         body = {**(extra_body or {})}
         return await self._t.acall(_ops.OP_DASHBOARDS_DELETE, path=path, query=query, body=body, model=None, options=options)
 
-    async def filter_values(self, *, property_id: str | None = None, metric_name: str | None = None, metric_type: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None = None, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'dataset_column', 'simulation', 'both', 'all'] | None = None, project_ids: str | None = None, dataset_id: str | None = None, search: str | None = None, page_size: int | None = None, cursor: str | None = None, attribute_type: Literal['string', 'number', 'boolean', 'array', 'map', 'json'] | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardFilterValuesResult:
+    async def filter_values(self, *, property_id: str | None | NotGiven = NOT_GIVEN, metric_name: str | None | NotGiven = NOT_GIVEN, metric_type: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None | NotGiven = NOT_GIVEN, source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'dataset_column', 'simulation', 'both', 'all'] | None | NotGiven = NOT_GIVEN, project_ids: str | None | NotGiven = NOT_GIVEN, dataset_id: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, attribute_type: Literal['string', 'number', 'boolean', 'array', 'map', 'json'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardFilterValuesResult:
         """List the distinct values of a metric or attribute for use in dashboard filters.
 
         GET /tracer/dashboard/filter_values/
@@ -3118,7 +3120,7 @@ class AsyncDashboardsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_DASHBOARDS_LIST, path=path, query=query, body=body, model=List[models.Dashboard], options=options)
 
-    async def query(self, *, time_range: Dict[str, Any], metrics: List[Dict[str, Any]], workflow: Literal['observability', 'dataset', 'simulation'] | None = None, project_ids: List[str] | None = None, granularity: Literal['minute', 'hour', 'day', 'week', 'month'] | None = None, filters: List[Dict[str, Any]] | None = None, breakdowns: List[Dict[str, Any]] | None = None, allow_sampled: bool | None = None, refresh: bool | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardQueryResult:
+    async def query(self, *, time_range: Dict[str, Any], metrics: List[Dict[str, Any]], workflow: Literal['observability', 'dataset', 'simulation'] | None | NotGiven = NOT_GIVEN, project_ids: List[str] | None | NotGiven = NOT_GIVEN, granularity: Literal['minute', 'hour', 'day', 'week', 'month'] | None | NotGiven = NOT_GIVEN, filters: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, breakdowns: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, allow_sampled: bool | None | NotGiven = NOT_GIVEN, refresh: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardQueryResult:
         """Run an ad-hoc dashboard query (time_range and metrics, with optional filters and breakdowns) and return chart data without saving a widget.
 
         POST /tracer/dashboard/query/
@@ -3128,7 +3130,7 @@ class AsyncDashboardsResource(Resource):
         body = {'time_range': time_range, 'metrics': metrics, 'workflow': workflow, 'project_ids': project_ids, 'granularity': granularity, 'filters': filters, 'breakdowns': breakdowns, 'allow_sampled': allow_sampled, **(extra_body or {})}
         return await self._t.acall(_ops.OP_DASHBOARDS_QUERY, path=path, query=query, body=body, model=models.DashboardQueryResult, options=options)
 
-    async def update(self, id: str, *, name: str, description: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardCreateUpdate:
+    async def update(self, id: str, *, name: str, description: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardCreateUpdate:
         """Update the name or description of an existing dashboard.
 
         PATCH /tracer/dashboard/{id}/
@@ -3150,7 +3152,7 @@ class AsyncDatasetsResource(Resource):
     rows: AsyncDatasetsRowsResource
     _children: Dict[str, type] = {'cells': AsyncDatasetsCellsResource, 'columns': AsyncDatasetsColumnsResource, 'evals': AsyncDatasetsEvalsResource, 'prompts': AsyncDatasetsPromptsResource, 'rows': AsyncDatasetsRowsResource}
 
-    async def create(self, *, new_dataset_name: str, model_type: str | None = None, is_sdk: bool | None = None, row: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetCreateStartedResult:
+    async def create(self, *, new_dataset_name: str, model_type: str | None | NotGiven = NOT_GIVEN, is_sdk: bool | None | NotGiven = NOT_GIVEN, row: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetCreateStartedResult:
         """Create an empty dataset in the current workspace. Use create_dataset_column before add_dataset_rows.
 
         POST /model-hub/develops/create-empty-dataset/
@@ -3160,7 +3162,7 @@ class AsyncDatasetsResource(Resource):
         body = {'new_dataset_name': new_dataset_name, 'model_type': model_type, 'is_sdk': is_sdk, 'row': row, **(extra_body or {})}
         return await self._t.acall(_ops.OP_DATASETS_CREATE, path=path, query=query, body=body, model=models.DatasetCreateStartedResult, options=options)
 
-    async def create_from_file(self, *, file: FileInput, new_dataset_name: str, model_type: str, source: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LocalFileDatasetCreateStartedResult:
+    async def create_from_file(self, *, file: FileInput, new_dataset_name: str, model_type: str, source: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LocalFileDatasetCreateStartedResult:
         """Create a dataset by uploading a local CSV, JSON, JSONL or Excel file. Processing is asynchronous; read datasets.get for the result.
 
         POST /model-hub/develops/create-dataset-from-local-file/
@@ -3171,7 +3173,7 @@ class AsyncDatasetsResource(Resource):
         files = {'file': file}
         return await self._t.acall(_ops.OP_DATASETS_CREATE_FROM_FILE, path=path, query=query, body=body, files=files, model=models.LocalFileDatasetCreateStartedResult, options=options)
 
-    async def create_from_huggingface(self, *, huggingface_dataset_name: str, huggingface_dataset_split: str, name: str | None = None, model_type: str | None = None, num_rows: int | None = None, huggingface_dataset_config: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetCreateStartedResult:
+    async def create_from_huggingface(self, *, huggingface_dataset_name: str, huggingface_dataset_split: str, name: str | None | NotGiven = NOT_GIVEN, model_type: str | None | NotGiven = NOT_GIVEN, num_rows: int | None | NotGiven = NOT_GIVEN, huggingface_dataset_config: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetCreateStartedResult:
         """Create a dataset from a Hugging Face dataset split.
 
         POST /model-hub/develops/create-dataset-from-huggingface/
@@ -3191,7 +3193,7 @@ class AsyncDatasetsResource(Resource):
         body = {'dataset_ids': dataset_ids, **(extra_body or {})}
         return await self._t.acall(_ops.OP_DATASETS_DELETE, path=path, query=query, body=body, model=None, options=options)
 
-    async def get(self, dataset_id: str, *, filters: str | None = None, sort: str | None = None, search: str | None = None, page_size: int | None = None, current_page_index: int | None = None, column_config_only: bool | None = None, exact_snapshot: bool | None = None, cursor: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetTableResult:
+    async def get(self, dataset_id: str, *, filters: str | None | NotGiven = NOT_GIVEN, sort: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, current_page_index: int | None | NotGiven = NOT_GIVEN, column_config_only: bool | None | NotGiven = NOT_GIVEN, exact_snapshot: bool | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetTableResult:
         """Return the rows, columns, and metadata for a dataset.
 
         GET /model-hub/develops/{dataset_id}/get-dataset-table/
@@ -3201,7 +3203,7 @@ class AsyncDatasetsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_DATASETS_GET, path=path, query=query, body=body, model=models.DatasetTableResult, options=options)
 
-    def list(self, *, search_text: str | None = None, page_size: int | None = None, sort: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.DatasetListItem]:
+    def list(self, *, search_text: str | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, sort: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.DatasetListItem]:
         """List datasets available in the current workspace.
 
         GET /model-hub/develops/get-datasets/
@@ -3226,7 +3228,7 @@ class AsyncErrorClustersResource(Resource):
 
     _t: AsyncTransport
 
-    async def get(self, cluster_id: str, *, project_id: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.FeedDetailCore:
+    async def get(self, cluster_id: str, *, project_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.FeedDetailCore:
         """Return an error issue and its grouped trace information.
 
         GET /tracer/feed/issues/{cluster_id}/
@@ -3236,7 +3238,7 @@ class AsyncErrorClustersResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_ERROR_CLUSTERS_GET, path=path, query=query, body=body, model=models.FeedDetailCore, options=options)
 
-    async def list(self, *, project_id: str | None = None, search: str | None = None, status: Literal['escalating', 'for_review', 'acknowledged', 'resolved'] | None = None, severity: Literal['critical', 'high', 'medium', 'low'] | None = None, fix_layer: str | None = None, source: Literal['scanner', 'eval'] | None = None, issue_group: str | None = None, time_range_days: int | None = None, sort_by: Literal['last_seen', 'first_seen', 'error_count', 'unique_traces', 'severity'] | None = None, sort_dir: Literal['asc', 'desc'] | None = None, limit: int | None = None, offset: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.FeedListResponse:
+    async def list(self, *, project_id: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, status: Literal['escalating', 'for_review', 'acknowledged', 'resolved'] | None | NotGiven = NOT_GIVEN, severity: Literal['critical', 'high', 'medium', 'low'] | None | NotGiven = NOT_GIVEN, fix_layer: str | None | NotGiven = NOT_GIVEN, source: Literal['scanner', 'eval'] | None | NotGiven = NOT_GIVEN, issue_group: str | None | NotGiven = NOT_GIVEN, time_range_days: int | None | NotGiven = NOT_GIVEN, sort_by: Literal['last_seen', 'first_seen', 'error_count', 'unique_traces', 'severity'] | None | NotGiven = NOT_GIVEN, sort_dir: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, offset: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.FeedListResponse:
         """List grouped error issues detected in project traces.
 
         GET /tracer/feed/issues/
@@ -3257,7 +3259,7 @@ class AsyncEvalsResource(Resource):
     templates: AsyncEvalsTemplatesResource
     _children: Dict[str, type] = {'configs': AsyncEvalsConfigsResource, 'groups': AsyncEvalsGroupsResource, 'tasks': AsyncEvalsTasksResource, 'templates': AsyncEvalsTemplatesResource}
 
-    async def test(self, *, config: Dict[str, Any], name: str, output_type: str, model: str | None = None, eval_tags: List[str] | None = None, criteria: str | None = None, multi_choice: bool | None = None, choices: Dict[str, Any] | None = None, input_data_types: Dict[str, Any] | None = None, description: str | None = None, check_internet: bool | None = None, required_keys: List[str] | None = None, template_type: str | None = None, eval_type_id: str | None = None, template_id: str | None = None, eval_type: str | None = None, error_localizer: bool | None = None, reason_column: bool | None = None, optional_keys: List[str] | None = None, variable_keys: Dict[str, Any] | None = None, run_prompt_column: bool | None = None, template_name: str | None = None, mapping: Dict[str, Any] | None = None, output: str | None = None, config_params_desc: Dict[str, Any] | None = None, config_params_option: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalExecutionResponseResult:
+    async def test(self, *, config: Dict[str, Any], name: str, output_type: str, model: str | None | NotGiven = NOT_GIVEN, eval_tags: List[str] | None | NotGiven = NOT_GIVEN, criteria: str | None | NotGiven = NOT_GIVEN, multi_choice: bool | None | NotGiven = NOT_GIVEN, choices: Dict[str, Any] | None | NotGiven = NOT_GIVEN, input_data_types: Dict[str, Any] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, required_keys: List[str] | None | NotGiven = NOT_GIVEN, template_type: str | None | NotGiven = NOT_GIVEN, eval_type_id: str | None | NotGiven = NOT_GIVEN, template_id: str | None | NotGiven = NOT_GIVEN, eval_type: str | None | NotGiven = NOT_GIVEN, error_localizer: bool | None | NotGiven = NOT_GIVEN, reason_column: bool | None | NotGiven = NOT_GIVEN, optional_keys: List[str] | None | NotGiven = NOT_GIVEN, variable_keys: Dict[str, Any] | None | NotGiven = NOT_GIVEN, run_prompt_column: bool | None | NotGiven = NOT_GIVEN, template_name: str | None | NotGiven = NOT_GIVEN, mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, output: str | None | NotGiven = NOT_GIVEN, config_params_desc: Dict[str, Any] | None | NotGiven = NOT_GIVEN, config_params_option: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalExecutionResponseResult:
         """Execute an evaluation template against supplied test inputs.
 
         POST /model-hub/test-evaluation/
@@ -3273,7 +3275,7 @@ class AsyncExperimentsResource(Resource):
 
     _t: AsyncTransport
 
-    async def create(self, *, name: str, dataset_id: str, prompt_config: List[Dict[str, Any]], user_eval_metrics: List[Dict[str, Any]], column_id: str | None = None, experiment_type: Literal['llm', 'tts', 'stt', 'image'] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    async def create(self, *, name: str, dataset_id: str, prompt_config: List[Dict[str, Any]], user_eval_metrics: List[Dict[str, Any]], column_id: str | None | NotGiven = NOT_GIVEN, experiment_type: Literal['llm', 'tts', 'stt', 'image'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Create and start an experiment. The new experiment's id is returned inside the `result` message as `experiment_id=<uuid>`; pass it to get_experiment to follow the run.
 
         POST /model-hub/experiments/v2/
@@ -3293,7 +3295,7 @@ class AsyncExperimentsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_EXPERIMENTS_GET, path=path, query=query, body=body, model=models.ExperimentDetailV2, options=options)
 
-    def list(self, *, created_at: str | None = None, status: str | None = None, dataset_id: str | None = None, search: str | None = None, ordering: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.ExperimentListV2]:
+    def list(self, *, created_at: str | None | NotGiven = NOT_GIVEN, status: str | None | NotGiven = NOT_GIVEN, dataset_id: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, ordering: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.ExperimentListV2]:
         """List experiments in the current workspace.
 
         GET /model-hub/experiments/v2/list/
@@ -3312,7 +3314,7 @@ class AsyncGatewayResource(Resource):
     sessions: AsyncGatewaySessionsResource
     _children: Dict[str, type] = {'guardrail_rules': AsyncGatewayGuardrailRulesResource, 'request_logs': AsyncGatewayRequestLogsResource, 'sessions': AsyncGatewaySessionsResource}
 
-    async def analytics(self, *, start: str | None = None, end: str | None = None, granularity: str | None = None, api_key_id: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def analytics(self, *, start: str | None | NotGiven = NOT_GIVEN, end: str | None | NotGiven = NOT_GIVEN, granularity: str | None | NotGiven = NOT_GIVEN, api_key_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """Return overview usage, latency, error, and cost analytics for the AI gateway.
 
         GET /agentcc/analytics/overview/
@@ -3350,7 +3352,7 @@ class AsyncKnowledgeBasesResource(Resource):
     files: AsyncKnowledgeBasesFilesResource
     _children: Dict[str, type] = {'files': AsyncKnowledgeBasesFilesResource}
 
-    async def create(self, *, name: str, files: List[FileInput] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseCreateResult:
+    async def create(self, *, name: str, files: List[FileInput] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseCreateResult:
         """Create a knowledge base, optionally uploading its first files (pdf, docx, txt, rtf).
 
         POST /model-hub/knowledge-base/
@@ -3361,7 +3363,7 @@ class AsyncKnowledgeBasesResource(Resource):
         files = {'file': files}
         return await self._t.acall(_ops.OP_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseCreateResult, options=options)
 
-    async def delete(self, *, kb_ids: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+    async def delete(self, *, kb_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Delete knowledge bases by id.
 
         DELETE /model-hub/knowledge-base/
@@ -3381,7 +3383,7 @@ class AsyncKnowledgeBasesResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_KNOWLEDGE_BASES_GET, path=path, query=query, body=body, model=models.KnowledgeBaseItem, options=options)
 
-    async def list(self, *, search: str | None = None, page: int | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.KnowledgeBasePaginatedResult:
+    async def list(self, *, search: str | None | NotGiven = NOT_GIVEN, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.KnowledgeBasePaginatedResult:
         """List knowledge bases in the current workspace.
 
         GET /model-hub/kb/
@@ -3401,7 +3403,7 @@ class AsyncKnowledgeBasesResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_KNOWLEDGE_BASES_LIST_NAMES, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseListResult, options=options)
 
-    async def update(self, *, kb_id: str, name: str | None = None, files: List[FileInput] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseMutationResult:
+    async def update(self, *, kb_id: str, name: str | None | NotGiven = NOT_GIVEN, files: List[FileInput] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseMutationResult:
         """Rename a knowledge base and/or upload more files to it.
 
         PATCH /model-hub/knowledge-base/
@@ -3434,7 +3436,7 @@ class AsyncOptimizationsResource(Resource):
 
     _t: AsyncTransport
 
-    async def create(self, *, name: str, column_id: str, optimizer_algorithm: Literal['random_search', 'bayesian', 'metaprompt', 'protegi', 'promptwizard', 'gepa'], optimizer_model_id: str | None = None, optimizer_config: Dict[str, Any] | None = None, user_eval_template_ids: List[str] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetOptimizationCreate:
+    async def create(self, *, name: str, column_id: str, optimizer_algorithm: Literal['random_search', 'bayesian', 'metaprompt', 'protegi', 'promptwizard', 'gepa'], optimizer_model_id: str | None | NotGiven = NOT_GIVEN, optimizer_config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, user_eval_template_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetOptimizationCreate:
         """Create a dataset optimization run.
 
         POST /model-hub/dataset-optimization/
@@ -3454,7 +3456,7 @@ class AsyncOptimizationsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_OPTIMIZATIONS_GET, path=path, query=query, body=body, model=models.DatasetOptimizationDetail, options=options)
 
-    def list(self, *, dataset_id: str | None = None, column_id: str | None = None, develop_id: str | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[Any]:
+    def list(self, *, dataset_id: str | None | NotGiven = NOT_GIVEN, column_id: str | None | NotGiven = NOT_GIVEN, develop_id: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[Any]:
         """List dataset optimization runs.
 
         GET /model-hub/dataset-optimization/
@@ -3479,7 +3481,7 @@ class AsyncProjectsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_PROJECTS_GET, path=path, query=query, body=body, model=models.ProjectDetailResult, options=options)
 
-    async def list(self, *, name: str | None = None, project_type: str | None = None, tags: str | None = None, filters: str | None = None, sort_by: str | None = None, sort_direction: Literal['asc', 'desc'] | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def list(self, *, name: str | None | NotGiven = NOT_GIVEN, project_type: str | None | NotGiven = NOT_GIVEN, tags: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, sort_by: str | None | NotGiven = NOT_GIVEN, sort_direction: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """List tracing projects available in the current workspace.
 
         GET /tracer/project/
@@ -3508,7 +3510,7 @@ class AsyncPromptsResource(Resource):
         body = {'new_prompts': new_prompts, **(extra_body or {})}
         return await self._t.acall(_ops.OP_PROMPTS_ADD_DRAFT, path=path, query=query, body=body, model=None, options=options)
 
-    async def commit(self, id: str, *, version_name: str, message: str | None = None, set_default: bool | None = None, is_draft: bool | None = None, metadata: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def commit(self, id: str, *, version_name: str, message: str | None | NotGiven = NOT_GIVEN, set_default: bool | None | NotGiven = NOT_GIVEN, is_draft: bool | None | NotGiven = NOT_GIVEN, metadata: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """Commit the current draft of a prompt template as a named version, optionally making it the default.
 
         POST /model-hub/prompt-templates/{id}/commit/
@@ -3518,7 +3520,7 @@ class AsyncPromptsResource(Resource):
         body = {'version_name': version_name, 'message': message, 'set_default': set_default, 'is_draft': is_draft, 'metadata': metadata, **(extra_body or {})}
         return await self._t.acall(_ops.OP_PROMPTS_COMMIT, path=path, query=query, body=body, model=None, options=options)
 
-    async def create(self, *, name: str, description: str | None = None, variable_names: Dict[str, Any] | None = None, prompt_folder: str | None = None, placeholders: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptTemplate:
+    async def create(self, *, name: str, description: str | None | NotGiven = NOT_GIVEN, variable_names: Dict[str, Any] | None | NotGiven = NOT_GIVEN, prompt_folder: str | None | NotGiven = NOT_GIVEN, placeholders: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptTemplate:
         """Create a prompt template in the current workspace.
 
         POST /model-hub/prompt-templates/
@@ -3528,7 +3530,7 @@ class AsyncPromptsResource(Resource):
         body = {'name': name, 'description': description, 'variable_names': variable_names, 'prompt_folder': prompt_folder, 'placeholders': placeholders, **(extra_body or {})}
         return await self._t.acall(_ops.OP_PROMPTS_CREATE, path=path, query=query, body=body, model=models.PromptTemplate, options=options)
 
-    async def create_draft(self, *, name: str, prompt_config: List[Dict[str, Any]], variable_names: Dict[str, Any] | None = None, evaluation_configs: List[Dict[str, Any]] | None = None, metadata: Dict[str, Any] | None = None, placeholders: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptTemplate:
+    async def create_draft(self, *, name: str, prompt_config: List[Dict[str, Any]], variable_names: Dict[str, Any] | None | NotGiven = NOT_GIVEN, evaluation_configs: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, metadata: Dict[str, Any] | None | NotGiven = NOT_GIVEN, placeholders: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptTemplate:
         """Create a prompt template together with its first draft version (messages, model configuration, variables).
 
         POST /model-hub/prompt-templates/create-draft/
@@ -3568,7 +3570,7 @@ class AsyncPromptsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_PROMPTS_GET, path=path, query=query, body=body, model=models.PromptTemplate, options=options)
 
-    async def get_by_name(self, *, name: str | None = None, version: str | None = None, created_at: str | None = None, search: str | None = None, ordering: str | None = None, page: int | None = None, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def get_by_name(self, *, name: str | None | NotGiven = NOT_GIVEN, version: str | None | NotGiven = NOT_GIVEN, created_at: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, ordering: str | None | NotGiven = NOT_GIVEN, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """Fetch a prompt template by name; the default version unless `version` is given.
 
         GET /model-hub/prompt-templates/get-template-by-name/
@@ -3578,7 +3580,7 @@ class AsyncPromptsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_PROMPTS_GET_BY_NAME, path=path, query=query, body=body, model=None, options=options)
 
-    def history(self, *, template_name: str | None = None, template_version: str | None = None, created_at: str | None = None, search: str | None = None, ordering: str | None = None, limit: int | None = None, template_id: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.PromptHistoryExecution]:
+    def history(self, *, template_name: str | None | NotGiven = NOT_GIVEN, template_version: str | None | NotGiven = NOT_GIVEN, created_at: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, ordering: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, template_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.PromptHistoryExecution]:
         """List past prompt executions, optionally for one template.
 
         GET /model-hub/prompt-history-executions/
@@ -3597,7 +3599,7 @@ class AsyncPromptsResource(Resource):
         body = {'existing_prompt': existing_prompt, 'improvement_requirements': improvement_requirements, **(extra_body or {})}
         return await self._t.acall(_ops.OP_PROMPTS_IMPROVE, path=path, query=query, body=body, model=None, options=options)
 
-    def list(self, *, name: str | None = None, version: str | None = None, created_at: str | None = None, search: str | None = None, ordering: str | None = None, limit: int | None = None, modality: List[str] | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.PromptTemplate]:
+    def list(self, *, name: str | None | NotGiven = NOT_GIVEN, version: str | None | NotGiven = NOT_GIVEN, created_at: str | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, ordering: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, modality: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.PromptTemplate]:
         """List prompt templates available in the current workspace.
 
         GET /model-hub/prompt-templates/
@@ -3606,7 +3608,7 @@ class AsyncPromptsResource(Resource):
         query = {'name': name, 'version': version, 'created_at': created_at, 'search': search, 'ordering': ordering, 'limit': limit, 'modality': modality, **(extra_query or {})}
         return self._t.apaginate(_ops.OP_PROMPTS_LIST, path=path, query=query, model=models.PromptTemplate, options=options)
 
-    async def run(self, id: str, *, name: str | None = None, version: str | None = None, prompt_config: List[Dict[str, Any]] | None = None, variable_names: Dict[str, Any] | None = None, placeholders: Dict[str, Any] | None = None, evaluation_configs: List[Dict[str, Any]] | None = None, source: str | None = None, is_run: Dict[str, Any] | None = None, is_sdk: bool | None = None, run_index: int | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptRunRequest:
+    async def run(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, version: str | None | NotGiven = NOT_GIVEN, prompt_config: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, variable_names: Dict[str, Any] | None | NotGiven = NOT_GIVEN, placeholders: Dict[str, Any] | None | NotGiven = NOT_GIVEN, evaluation_configs: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, source: str | None | NotGiven = NOT_GIVEN, is_run: Dict[str, Any] | None | NotGiven = NOT_GIVEN, is_sdk: bool | None | NotGiven = NOT_GIVEN, run_index: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptRunRequest:
         """Run a configured prompt version by supplying version and is_run="prompt". Optionally replace prompt_config or variable_names. Returns an asynchronous receipt; read get_prompt_run with template_version for status and output.
 
         POST /model-hub/prompt-templates/{id}/run_template/
@@ -3616,7 +3618,7 @@ class AsyncPromptsResource(Resource):
         body = {'name': name, 'version': version, 'prompt_config': prompt_config, 'variable_names': variable_names, 'placeholders': placeholders, 'evaluation_configs': evaluation_configs, 'source': source, 'is_run': is_run, 'is_sdk': is_sdk, 'run_index': run_index, **(extra_body or {})}
         return await self._t.acall(_ops.OP_PROMPTS_RUN, path=path, query=query, body=body, model=models.PromptRunRequest, options=options)
 
-    async def run_status(self, id: str, *, template_version: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptRunStatusResult:
+    async def run_status(self, id: str, *, template_version: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptRunStatusResult:
         """Read workbench prompt execution status and outputs. Supply template_version matching the version returned by run_prompt to read that version, otherwise the API chooses the default/latest version.
 
         GET /model-hub/prompt-templates/{id}/get-run-status/
@@ -3626,7 +3628,7 @@ class AsyncPromptsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_PROMPTS_RUN_STATUS, path=path, query=query, body=body, model=models.PromptRunStatusResult, options=options)
 
-    async def update(self, id: str, *, name: str | None = None, description: str | None = None, variable_names: Dict[str, Any] | None = None, prompt_folder: str | None = None, placeholders: Dict[str, Any] | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptTemplatePatch:
+    async def update(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, variable_names: Dict[str, Any] | None | NotGiven = NOT_GIVEN, prompt_folder: str | None | NotGiven = NOT_GIVEN, placeholders: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptTemplatePatch:
         """Update selected fields on an existing prompt template.
 
         PATCH /model-hub/prompt-templates/{id}/
@@ -3642,7 +3644,7 @@ class AsyncProviderKeysResource(Resource):
 
     _t: AsyncTransport
 
-    def list(self, *, limit: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.ApiKeyResponse]:
+    def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.ApiKeyResponse]:
         """List the model-provider API keys configured for the organization (values are masked).
 
         GET /model-hub/api-keys/
@@ -3657,7 +3659,7 @@ class AsyncScoresResource(Resource):
 
     _t: AsyncTransport
 
-    async def create(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, label_id: str, value: Dict[str, Any], notes: str | None = None, score_source: Literal['human', 'api', 'auto', 'imported'] | None = None, queue_item_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.Score:
+    async def create(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, label_id: str, value: Dict[str, Any], notes: str | None | NotGiven = NOT_GIVEN, score_source: Literal['human', 'api', 'auto', 'imported'] | None | NotGiven = NOT_GIVEN, queue_item_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.Score:
         """Record one score (annotation value) against a source such as a span or dataset row.
 
         POST /model-hub/scores/
@@ -3667,7 +3669,7 @@ class AsyncScoresResource(Resource):
         body = {'source_type': source_type, 'source_id': source_id, 'label_id': label_id, 'value': value, 'notes': notes, 'score_source': score_source, 'queue_item_id': queue_item_id, **(extra_body or {})}
         return await self._t.acall(_ops.OP_SCORES_CREATE, path=path, query=query, body=body, model=models.Score, options=options)
 
-    async def create_bulk(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, scores: List[Dict[str, Any]], notes: str | None = None, span_notes: str | None = None, span_notes_source_id: str | None = None, queue_item_id: str | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.BulkCreateScoresResult:
+    async def create_bulk(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, scores: List[Dict[str, Any]], notes: str | None | NotGiven = NOT_GIVEN, span_notes: str | None | NotGiven = NOT_GIVEN, span_notes_source_id: str | None | NotGiven = NOT_GIVEN, queue_item_id: str | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.BulkCreateScoresResult:
         """Record several scores against one source in a single call.
 
         POST /model-hub/scores/bulk/
@@ -3677,7 +3679,7 @@ class AsyncScoresResource(Resource):
         body = {'source_type': source_type, 'source_id': source_id, 'scores': scores, 'notes': notes, 'span_notes': span_notes, 'span_notes_source_id': span_notes_source_id, 'queue_item_id': queue_item_id, 'project_id': project_id, **(extra_body or {})}
         return await self._t.acall(_ops.OP_SCORES_CREATE_BULK, path=path, query=query, body=body, model=models.BulkCreateScoresResult, options=options)
 
-    async def list_for_source(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, page: int | None = None, limit: int | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> List[models.Score]:
+    async def list_for_source(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> List[models.Score]:
         """List the scores recorded against one source.
 
         GET /model-hub/scores/for-source/
@@ -3693,7 +3695,7 @@ class AsyncSessionsResource(Resource):
 
     _t: AsyncTransport
 
-    async def get(self, id: str, *, navigation_context: str | None = None, user_id: str | None = None, filters: str | None = None, sort_params: str | None = None, page_number: int | None = None, page_size: int | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceSessionDetailResult:
+    async def get(self, id: str, *, navigation_context: str | None | NotGiven = NOT_GIVEN, user_id: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, sort_params: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceSessionDetailResult:
         """Return a trace session by its identifier.
 
         GET /tracer/trace-session/{id}/query/
@@ -3703,7 +3705,7 @@ class AsyncSessionsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_SESSIONS_GET, path=path, query=query, body=body, model=models.TraceSessionDetailResult, options=options)
 
-    async def list(self, *, project_id: str | None = None, user_id: str | None = None, bookmarked: bool | None = None, filters: str | None = None, sort_params: str | None = None, page_number: int | None = None, page_size: int | None = None, cursor: str | None = None, cursor_mode: bool | None = None, interval: str | None = None, allow_sampled: bool | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceSessionListResult:
+    async def list(self, *, project_id: str | None | NotGiven = NOT_GIVEN, user_id: str | None | NotGiven = NOT_GIVEN, bookmarked: bool | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, sort_params: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, cursor_mode: bool | None | NotGiven = NOT_GIVEN, interval: str | None | NotGiven = NOT_GIVEN, allow_sampled: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceSessionListResult:
         """List trace sessions using the supplied filters.
 
         GET /tracer/trace-session/list_sessions/
@@ -3729,7 +3731,7 @@ class AsyncSpansResource(Resource):
 
     _t: AsyncTransport
 
-    async def get(self, id: str, *, test_execution_id: str | None = None, call_execution_id: str | None = None, project_id: str | None = None, trace_id: str | None = None, start_hour: str | None = None, observation_type: str | None = None, service_name: str | None = None, expected_start_time: str | None = None, expected_version: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.ObservationSpanDetailResult:
+    async def get(self, id: str, *, test_execution_id: str | None | NotGiven = NOT_GIVEN, call_execution_id: str | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, trace_id: str | None | NotGiven = NOT_GIVEN, start_hour: str | None | NotGiven = NOT_GIVEN, observation_type: str | None | NotGiven = NOT_GIVEN, service_name: str | None | NotGiven = NOT_GIVEN, expected_start_time: str | None | NotGiven = NOT_GIVEN, expected_version: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.ObservationSpanDetailResult:
         """Return an observation span by its identifier.
 
         GET /tracer/observation-span/{id}/
@@ -3739,7 +3741,7 @@ class AsyncSpansResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_SPANS_GET, path=path, query=query, body=body, model=models.ObservationSpanDetailResult, options=options)
 
-    async def list(self, *, project_id: str | None = None, user_id: str | None = None, filters: str | None = None, page_number: int | None = None, page_size: int | None = None, cursor: str | None = None, cursor_mode: bool | None = None, allow_sampled: bool | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SpanObserveListResult:
+    async def list(self, *, project_id: str | None | NotGiven = NOT_GIVEN, user_id: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, cursor_mode: bool | None | NotGiven = NOT_GIVEN, allow_sampled: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SpanObserveListResult:
         """List observation spans using the supplied filters.
 
         GET /tracer/observation-span/list_spans_observe/
@@ -3767,7 +3769,7 @@ class AsyncTracesResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_TRACES_ERROR_ANALYSIS, path=path, query=query, body=body, model=models.TraceErrorAnalysisResult, options=options)
 
-    async def get(self, id: str, *, test_execution_id: str | None = None, call_execution_id: str | None = None, project_id: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceDetailResult:
+    async def get(self, id: str, *, test_execution_id: str | None | NotGiven = NOT_GIVEN, call_execution_id: str | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceDetailResult:
         """Return a trace by its identifier.
 
         GET /tracer/trace/{id}/
@@ -3777,7 +3779,7 @@ class AsyncTracesResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_TRACES_GET, path=path, query=query, body=body, model=models.TraceDetailResult, options=options)
 
-    async def list(self, *, project_id: str | None = None, project_version_id: str | None = None, session_id: str | None = None, filters: str | None = None, page_number: int | None = None, page_size: int | None = None, cursor: str | None = None, cursor_mode: bool | None = None, attribute_keys: str | None = None, allow_sampled: bool | None = None, interval: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceObserveListResult:
+    async def list(self, *, project_id: str | None | NotGiven = NOT_GIVEN, project_version_id: str | None | NotGiven = NOT_GIVEN, session_id: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, cursor_mode: bool | None | NotGiven = NOT_GIVEN, attribute_keys: str | None | NotGiven = NOT_GIVEN, allow_sampled: bool | None | NotGiven = NOT_GIVEN, interval: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceObserveListResult:
         """Search traces using project, time range, status, and attribute filters.
 
         GET /tracer/trace/list_traces_of_session/
@@ -3793,7 +3795,7 @@ class AsyncUsageResource(Resource):
 
     _t: AsyncTransport
 
-    async def overview(self, *, period: str | None = None, period_end: str | None = None, workspace_id: str | None = None, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.UsageOverviewResult:
+    async def overview(self, *, period: str | None | NotGiven = NOT_GIVEN, period_end: str | None | NotGiven = NOT_GIVEN, workspace_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.UsageOverviewResult:
         """Return the current organization's usage and cost overview.
 
         GET /usage/v2/usage-overview/

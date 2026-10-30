@@ -13,6 +13,8 @@ export interface Operation {
   pagination: Pagination | null;
   /** Body fields go as form data, file params as uploads. */
   multipart?: boolean;
+  /** How the response body is read: JSON (default), text, or auto (JSON when the response says so, else text). */
+  decode?: "json" | "text" | "auto";
 }
 
 /** A file parameter: a path (Node only), raw bytes, a Blob, or an explicit name + content. */
@@ -58,6 +60,41 @@ export interface ResolvedConfig {
 const RETRY_ANY_METHOD = new Set([429]);
 const RETRY_IDEMPOTENT = new Set([408, 500, 502, 503, 504]);
 const IDEMPOTENT_METHODS = new Set(["GET", "HEAD", "OPTIONS", "PUT", "DELETE"]);
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
+const MAX_REDIRECTS = 5;
+
+/** Later layers replace earlier ones whatever the letter case: `x-workspace-id` set per call replaces the
+ * client's `X-Workspace-Id` instead of being sent next to it (header names are case-insensitive, and a
+ * server given both may combine or reject them). */
+function mergeHeaders(...layers: Array<Record<string, string> | undefined>): Record<string, string> {
+  const byName = new Map<string, [string, string]>();
+  for (const layer of layers) {
+    for (const [key, value] of Object.entries(layer ?? {})) {
+      byName.set(key.toLowerCase(), [key, value]);
+    }
+  }
+  return Object.fromEntries(byName.values());
+}
+
+const originOf = (url: string) => new URL(url).origin.toLowerCase();
+
+/** Where to follow a redirect, when its target is on the client's own origin. The credentials travel in
+ * custom headers (`X-Api-Key`, `X-Secret-Key`) that fetch does not strip on a cross-origin redirect the way
+ * it strips `Authorization`, so a redirect that leaves the origin is refused instead of followed. */
+function followRedirect(baseUrl: string, from: string, status: number, location: string, method: string): { url: string; method: string } {
+  const target = new URL(location, from).toString();
+  if (originOf(target) !== originOf(baseUrl)) {
+    throw new APIConnectionError(`${status} redirect to ${target} was not followed: it leaves ${baseUrl} and the API keys would go with it`);
+  }
+  const asGet = status === 303 || ((status === 301 || status === 302) && method === "POST"); // the way browsers re-issue these
+  return { url: target, method: asGet ? "GET" : method };
+}
+
+/** Release a response we will not read, so its connection is free for the next attempt. Not awaited:
+ * cancelling one branch of a cloned body settles only when the other is done too, which would hang. */
+function discard(response: Response): void {
+  response.body?.cancel().catch(() => undefined);
+}
 
 function canRetry(op: Operation, status: number | null, attempt: number, maxRetries: number): boolean {
   if (attempt >= maxRetries) {
@@ -82,11 +119,11 @@ function backoffMs(attempt: number, retryAfter: string | null): number {
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 /** An ad-hoc operation for an endpoint the catalog does not describe (`client.request`). */
-export function rawOperation(method: string, path: string, unwrap: string | null = "result", multipart = false): Operation {
+export function rawOperation(method: string, path: string, unwrap: string | null = "result", multipart = false, decode: Operation["decode"] = "json"): Operation {
   if (!path.startsWith("/")) {
     throw new Error(`path must start with '/', got ${JSON.stringify(path)}`);
   }
-  return { id: `raw:${method.toUpperCase()} ${path}`, method: method.toUpperCase(), path, unwrap, pagination: null, multipart };
+  return { id: `raw:${method.toUpperCase()} ${path}`, method: method.toUpperCase(), path, unwrap, pagination: null, multipart, decode };
 }
 
 function buildUrl(config: ResolvedConfig, op: Operation, args: RequestArgs, options?: RequestOptions): string {
@@ -119,8 +156,8 @@ function cleanBody(body: unknown, extra?: Record<string, unknown>): unknown {
   }
   const merged: Record<string, unknown> = { ...body, ...(extra ?? {}) };
   for (const key of Object.keys(merged)) {
-    if (merged[key] === undefined || merged[key] === null) {
-      delete merged[key];
+    if (merged[key] === undefined) {
+      delete merged[key]; // not passed; an explicit null is sent, that is how a nullable field is cleared
     }
   }
   return merged;
@@ -156,7 +193,9 @@ async function buildBody(op: Operation, args: RequestArgs, options?: RequestOpti
   const fields = cleanBody(args.body ?? {}, options?.extraBody);
   if (isRecord(fields)) {
     for (const [key, value] of Object.entries(fields)) {
-      form.append(key, formValue(value));
+      if (value !== null) {
+        form.append(key, formValue(value)); // a form field cannot carry null
+      }
     }
   }
   for (const [field, value] of Object.entries(args.files ?? {})) {
@@ -171,17 +210,19 @@ async function buildBody(op: Operation, args: RequestArgs, options?: RequestOpti
   return { body: form, headers: {} }; // fetch sets the multipart boundary itself
 }
 
-async function decode(op: Operation, response: Response): Promise<unknown> {
-  const text = await response.text();
-  if (response.status === 204 || text.length === 0) {
+function decode(op: Operation, status: number, headers: Headers, text: string): unknown {
+  if (status === 204 || text.length === 0) {
     return null;
+  }
+  const contentType = headers.get("content-type") ?? "";
+  if (op.decode === "text" || (op.decode === "auto" && !contentType.includes("json"))) {
+    return text; // e.g. a CSV export: the body is the result
   }
   let data: unknown;
   try {
     data = JSON.parse(text);
   } catch {
-    const contentType = response.headers.get("content-type") ?? "unknown";
-    throw new APIError(`${response.status} non-JSON response (${contentType})`, response.status, text, response.headers.get("x-request-id"));
+    throw new APIError(`${status} non-JSON response (${contentType || "unknown"})`, status, text, headers.get("x-request-id"));
   }
   if (op.unwrap && isRecord(data) && op.unwrap in data) {
     return data[op.unwrap];
@@ -206,48 +247,69 @@ export class Transport {
     if (this.config.workspaceId) {
       headers["X-Workspace-Id"] = this.config.workspaceId;
     }
-    return { ...headers, ...(this.config.defaultHeaders ?? {}), ...(options?.headers ?? {}) };
+    return mergeHeaders(headers, this.config.defaultHeaders, options?.headers);
   }
 
   /** One HTTP call for `op`: auth, retries, envelope unwrap, typed errors. Resolves to decoded JSON. */
   async request(op: Operation, args: RequestArgs = {}, options?: RequestOptions): Promise<unknown> {
-    const url = buildUrl(this.config, op, args, options);
+    let url = buildUrl(this.config, op, args, options);
+    let method = op.method;
     const timeout = options?.timeout ?? this.config.timeout;
     const maxRetries = options?.maxRetries ?? this.config.maxRetries;
-    for (let attempt = 0; ; attempt++) {
-      const { body, headers } = await buildBody(op, args, options); // rebuilt per attempt: a FormData stream is single-use
+    let attempt = 0;
+    let redirects = 0;
+    for (;;) {
+      // Rebuilt per attempt (a FormData stream is single-use); a request re-issued as a GET after a redirect has no body.
+      const { body, headers } = method === op.method ? await buildBody(op, args, options) : { body: undefined, headers: {} };
       let response: Response;
+      let text: string;
       try {
         response = await this.config.fetch(url, {
-          method: op.method,
-          headers: { ...this.headers(options), ...headers },
+          method,
+          headers: mergeHeaders(this.headers(options), headers),
           body,
           signal: AbortSignal.timeout(timeout),
-          redirect: "follow",
+          redirect: "manual", // followed below, and only within the client's own origin
         });
+        const location = response.headers.get("location");
+        if (REDIRECT_STATUSES.has(response.status) && location) {
+          discard(response);
+          if (++redirects > MAX_REDIRECTS) {
+            throw new APIConnectionError(`${op.id}: more than ${MAX_REDIRECTS} redirects`);
+          }
+          ({ url, method } = followRedirect(this.config.baseUrl, url, response.status, location, method));
+          continue;
+        }
+        if (canRetry(op, response.status, attempt, maxRetries)) {
+          discard(response); // release the connection before waiting, not after
+          await sleep(backoffMs(attempt, response.headers.get("retry-after")));
+          attempt++;
+          continue;
+        }
+        text = await response.text(); // the connection can still drop or time out mid-body: a transport error like any other
       } catch (error) {
+        if (error instanceof APIConnectionError) {
+          throw error; // a refused redirect: a decision, not a transport failure
+        }
         if (canRetry(op, null, attempt, maxRetries)) {
           await sleep(backoffMs(attempt, null));
+          attempt++;
           continue;
         }
         throw new APIConnectionError(error instanceof Error ? error.message : String(error));
       }
-      if (canRetry(op, response.status, attempt, maxRetries)) {
-        await sleep(backoffMs(attempt, response.headers.get("retry-after")));
-        continue;
-      }
       if (response.status >= 300) {
-        // a redirect we did not follow is not a result
-        throw errorFromResponse(response.status, await response.text(), response.headers.get("x-request-id"));
+        // a redirect without a target is not a result
+        throw errorFromResponse(response.status, text, response.headers.get("x-request-id"));
       }
-      return decode(op, response);
+      return decode(op, response.status, response.headers, text);
     }
   }
 
   /** Call an endpoint the catalog does not describe; the usual auth, retries and errors apply. */
-  raw(method: string, path: string, args: RequestArgs & { unwrap?: string | null; multipart?: boolean } = {}, options?: RequestOptions): Promise<unknown> {
-    const { unwrap, multipart, ...rest } = args;
-    return this.request(rawOperation(method, path, unwrap === undefined ? "result" : unwrap, multipart ?? false), rest, options);
+  raw(method: string, path: string, args: RequestArgs & { unwrap?: string | null; multipart?: boolean; decode?: Operation["decode"] } = {}, options?: RequestOptions): Promise<unknown> {
+    const { unwrap, multipart, decode: mode, ...rest } = args;
+    return this.request(rawOperation(method, path, unwrap === undefined ? "result" : unwrap, multipart ?? false, mode ?? "json"), rest, options);
   }
 
   /** The typed form of `request`: the result is the contract's response type (no runtime validation). */

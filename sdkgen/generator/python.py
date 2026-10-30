@@ -138,6 +138,8 @@ def emit_operations(ops: list[Op]) -> str:
         spec = {"id": op.id, "method": op.method, "path": op.path, "unwrap": op.unwrap, "pagination": op.pagination}
         if op.multipart:
             spec["multipart"] = True
+        if op.decode != "json":
+            spec["decode"] = op.decode
         out.append(f"{op_constant(op)} = Operation(**{spec!r})\n")
     return "".join(out)
 
@@ -154,6 +156,10 @@ def _return_annotation(op: Op, *, is_async: bool) -> tuple[str, str | None]:
         item, model = py_type(op.returns, for_input=False), None
     if op.pagination:
         return (f"AsyncPager[{item}]" if is_async else f"SyncPager[{item}]"), model
+    if op.decode == "text":
+        return "str", None
+    if op.decode == "auto":
+        return "Any", None  # JSON when the response is JSON, else the body text
     if op.returns is None:
         return "Any", None  # the contract does not describe the response
     return item, model
@@ -172,7 +178,8 @@ def _signature(op: Op) -> tuple[list[str], list[tuple[Param, str]]]:
     args.append("*")
     for p in rest:
         py = py_type(p.schema, for_input=True)
-        args.append(f"{arg_name(p)}: {py}" if p.required else f"{arg_name(p)}: {py} | None = None")
+        # Optional: NOT_GIVEN is left out of the request, an explicit None is sent as null.
+        args.append(f"{arg_name(p)}: {py}" if p.required else f"{arg_name(p)}: {py} | None | NotGiven = NOT_GIVEN")
         named.append((p, arg_name(p)))
     # Escape hatches: fields the contract does not (yet) describe, and per-call request options.
     args.append("extra_query: dict[str, Any] | None = None")
@@ -248,7 +255,7 @@ def emit_resources(ops: list[Op]) -> str:
         "from .._pagination import AsyncPager, SyncPager\n",
         "from .._resource import Resource\n",
         "from .._stability import _stability\n",
-        "from .._transport import (\n    AsyncTransport,\n    FileInput,\n    RequestOptions,\n    SyncTransport,\n)\n",
+        "from .._transport import (\n    NOT_GIVEN,\n    AsyncTransport,\n    FileInput,\n    NotGiven,\n    RequestOptions,\n    SyncTransport,\n)\n",
     ]
     for is_async in (False, True):
         for ns in sorted(tree, key=lambda ns: (-len(ns), ns)):  # children before parents

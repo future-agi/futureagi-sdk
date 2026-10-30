@@ -78,7 +78,7 @@ export class Client {
    * endpoints the catalog does not describe yet. Resolves to the decoded JSON with the
    * `unwrap` key (the backend's `{status, result}` envelope) removed when present.
    */
-  request(method: string, path: string, args: RequestArgs & { unwrap?: string | null; multipart?: boolean } = {}, options?: RequestOptions): Promise<unknown> {
+  request(method: string, path: string, args: RequestArgs & { unwrap?: string | null; multipart?: boolean; decode?: "json" | "text" | "auto" } = {}, options?: RequestOptions): Promise<unknown> {
     return this.transport.raw(method, path, args, options);
   }
 }

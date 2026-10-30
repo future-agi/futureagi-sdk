@@ -33,6 +33,35 @@ Changes from upstream:
     and dropped;
   - `FI_GATEWAY_API_KEY` / `FI_GATEWAY_URL` (and the `/v1` fix) now apply to every entry point
     (`AgentCC`, `health_check`, `validate_environment`, `patch_openai`), through `_env.py`.
+- bugs found in the security / correctness review of futureagi-sdk#35 (regression tests in
+  `tests/gateway/test_security_review_fixes.py`):
+  - `redact_messages=True` was stored and never applied: callbacks (and so `RequestRecorder`)
+    received the full message body. Callbacks now get a redacted copy (`messages[].content`,
+    `prompt`, `input`, `instructions` replaced by `[REDACTED]`); the request to the provider is
+    untouched;
+  - the active session was one attribute on the client, so two threads or asyncio tasks sharing a
+    client overwrote each other's session, a request could be credited to another task's session,
+    and leaving a nested session dropped the outer one. It is a `ContextVar` now, restored on exit,
+    and a request is credited to the session it started in;
+  - `to_response_format()` sent Pydantic's schema with `strict: true`, which OpenAI rejects
+    (`additionalProperties`, `required`, `default`). The schema is converted (`strict_schema`):
+    every object closed, every property required, defaulted fields made nullable, `$defs` too;
+  - `responses.create(stream=True)` and `completions.create(stream=True)` decoded every event as
+    a chat chunk and failed on the first one; each endpoint now has its own event model
+    (`ResponseStreamEvent` with a string `delta`, `Completion`);
+  - a stream that ended normally (or with an error) never closed its HTTP response, holding a
+    pooled connection until the caller remembered `close()`; both streams close themselves when
+    they end (closing is idempotent);
+  - `AsyncStream` built a new parser on every `async for`, so breaking out of a loop and then
+    calling `get_final_completion()` hit httpx's `StreamConsumed`; one iterator is shared;
+  - `create_mock_client()` returned an ordinary network client that ignored its fixture mapping
+    (a reachable gateway would have made billable calls); it now installs an httpx mock transport
+    that serves the mapping and answers 404 for anything else;
+  - `Embedding.embedding` only accepted `list[float]`, so `encoding_format="base64"` responses
+    failed validation; the base64 string is accepted and `decode_base64_embedding()` unpacks it;
+  - `close()` / `aclose()` skipped every client made by `with_options()`, so a copy made before
+    the parent's first request could never close the pool it owns; closing is delegated to the
+    base client, which already knows whether its pool is owned, shared or injected.
 
 Tests are in `tests/gateway/` (upstream `sdk/python/tests`, same rewrite). `test_gateway_live.py` runs
 against a real gateway when `FI_GATEWAY_URL` / `FI_GATEWAY_API_KEY` are set (see its docstring).

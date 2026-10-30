@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextvars
 import uuid
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -107,9 +108,9 @@ class Session:
 class SessionContext:
     """Context manager that binds a :class:`Session` to a client.
 
-    When entering, stores the session on the client as ``_active_session``.
-    When exiting, clears it. Supports both sync (``with``) and async
-    (``async with``) usage.
+    While entered, the session is the client's ``_active_session`` for the current thread or
+    asyncio task only; exiting restores whatever was active before (an outer session, or none).
+    Supports both sync (``with``) and async (``async with``) usage.
 
     Usage::
 
@@ -132,21 +133,32 @@ class SessionContext:
             name=name,
             metadata=metadata or {},
         )
+        self._token: contextvars.Token[Any] | None = None
+
+    # The client's active session is a ContextVar, so two threads or asyncio tasks sharing one
+    # client each see the session they entered, and leaving a nested session restores the outer one.
+
+    def _enter(self) -> Session:
+        self._token = self._client._session_var.set(self._session)  # type: ignore[attr-defined]
+        return self._session
+
+    def _exit(self) -> None:
+        if self._token is not None:
+            self._client._session_var.reset(self._token)  # type: ignore[attr-defined]
+            self._token = None
 
     # --- Sync context manager ---
 
     def __enter__(self) -> Session:
-        self._client._active_session = self._session  # type: ignore[attr-defined]
-        return self._session
+        return self._enter()
 
     def __exit__(self, *args: Any) -> None:
-        self._client._active_session = None  # type: ignore[attr-defined]
+        self._exit()
 
     # --- Async context manager ---
 
     async def __aenter__(self) -> Session:
-        self._client._active_session = self._session  # type: ignore[attr-defined]
-        return self._session
+        return self._enter()
 
     async def __aexit__(self, *args: Any) -> None:
-        self._client._active_session = None  # type: ignore[attr-defined]
+        self._exit()

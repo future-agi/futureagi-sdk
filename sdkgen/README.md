@@ -55,6 +55,9 @@ await client.knowledgeBases.create({ name: "docs", file: ["./notes.txt", { name:
 - **Typed errors:** `BadRequestError`, `NotFoundError`, `AuthenticationError`, ..., carrying the backend's `type`, `code` and `detail`.
 - **Retries:** 429 is retried for every call. Timeouts, 5xx and dropped connections are retried only for calls that are safe to repeat (GET, PUT, DELETE), so a POST the server already applied is never sent twice.
 - **Your own HTTP client:** `Client(http_client=...)` (httpx) in Python, `new Client({ fetch })` in TypeScript; used as given.
+- **Redirects stay home:** a redirect is followed only within the client's own origin (up to 5 hops; 303 and a redirected POST become GET). One that leaves the origin raises `APIConnectionError`, because the API keys travel in custom headers that neither httpx nor browsers strip on a cross-origin redirect.
+- **Omitted vs. null:** every optional argument defaults to `NOT_GIVEN` (`fi.platform.NOT_GIVEN`) and is left out of the request; an explicit `None` is sent as JSON `null`, which is how a nullable field is cleared (`client.prompts.update(id, prompt_folder=None)`). TypeScript: `undefined` is left out, `null` is sent. Query strings and form fields have no null, so there `None` is dropped too.
+- **Headers merge case-insensitively:** defaults < client `default_headers` < per-call `options.headers`, and `x-workspace-id` replaces `X-Workspace-Id` instead of being sent next to it.
 - **Same names on every surface:** `client.datasets.rows.add` / `client.datasets.rows.add()` / MCP `add_dataset_rows` come from one catalog id. TypeScript uses camelCase for resources and methods (`client.knowledgeBases.createFromFile`) and keeps the wire names for fields, so a request looks the same in both languages and in the API docs.
 - **Old code still works:** the existing modules (`fi.datasets.Dataset`, `fi.queues`, the TypeScript `Dataset` class, ...) are untouched.
 
@@ -87,7 +90,7 @@ The generator never owns the whole client. Four places are yours:
 
    TypeScript: `new Client({ resources: { datasets: MyDatasets } })`; nested ones are reassigned in the subclass constructor.
 
-3. **Any endpoint, with the same plumbing.** `client.request("DELETE", "/model-hub/prompt-labels/{id}/")` (auth, retries, envelope unwrap, typed errors; `multipart=True` and `files=` for uploads).
+3. **Any endpoint, with the same plumbing.** `client.request("DELETE", "/model-hub/prompt-labels/{id}/")` (auth, retries, envelope unwrap, typed errors; `multipart=True` and `files=` for uploads; `decode="text"` or `"auto"` for a body that is not JSON).
 
 4. **Per call.** Every generated method takes `extra_query=` / `extra_body=` for fields the contract does not describe yet, and `options=RequestOptions(headers=..., timeout=..., max_retries=...)`. TypeScript: the last `options` argument carries `headers`, `timeout`, `maxRetries`, `extraQuery`, `extraBody`.
 
@@ -144,6 +147,7 @@ Live testing showed the contract is often wrong about responses. The SDK handles
 - **The generator** loosens patterns drf-yasg always gets wrong. Every `SerializerMethodField` comes out as a read-only `string`, and untyped `ListField`s come out as lists of strings; both are typed `Any` / `unknown`. Free-form `object` fields are `Any`. Output list items may be null. Numbers are accepted where the contract says string.
 - **`contract_fix`** in the catalog corrects one operation, with a `note` naming the backend bug. Response-side options: `page_items` (an "array" that is really a page object) and `untyped` (the schema is simply wrong). Request-side options, for the many endpoints where drf-yasg documents the *response* serializer as the request body: `body: {field: type}` replaces the body fields, `body_required: [...]` overrides which are required (a PATCH is partial), and `query: {field: type}` adds filters the contract leaves out. Types are `string | integer | number | boolean | object | array | file`, or `X[]` for a list; a body value may be `{type: T, as: argument_name}` when the wire name makes a poor argument.
 - **`operation.multipart: true`** sends body fields as form data and `file`-typed params as uploads (`client.knowledge_bases.create(name=..., files=[path, ("a.txt", b"...")])`). A file argument is a path, bytes, an open binary file, or a `(filename, bytes)` pair; in TypeScript a path, `Uint8Array`, `Blob`, or `{ name, data }`.
+- **`operation.decode: text | auto`** for a response that is not JSON: `text` returns the body as a string, `auto` does so unless the response says it is JSON (`annotation_queues.export`, which returns CSV for `export_format=csv`). The method's return type becomes `str` / `Any` (`string` / `unknown`).
 
 By default, a Python response that still doesn't match gives you the raw JSON and a `ResponseShapeWarning`, so a backend change never breaks a user's call. `Client(strict_responses=True)` raises `ResponseValidationError` instead; the tests run strict. The TypeScript client types responses at compile time only and returns the JSON as is.
 

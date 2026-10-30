@@ -11,7 +11,7 @@ from fi.gateway._agentcc_params import (
 )
 from fi.gateway._base_client import RequestOptions
 from fi.gateway._constants import NOT_GIVEN
-from fi.gateway.types.responses import ResponseObject
+from fi.gateway.types.responses import ResponseObject, ResponseStreamEvent
 
 
 def _build_response_body(
@@ -129,7 +129,7 @@ class Responses:
             from fi.gateway._streaming import Stream
 
             response = self._client._get_base_client()._stream_request(opts, agentcc_params)
-            return Stream(response)
+            return Stream(response, ResponseStreamEvent)  # Responses events, not chat chunks
 
         return self._client._get_base_client()._request_with_retry(opts, ResponseObject, agentcc_params)
 
@@ -243,7 +243,7 @@ class AsyncResponses:
             from fi.gateway._streaming import AsyncStream
 
             response = await self._client._get_base_client()._stream_request(opts, agentcc_params)
-            return AsyncStream(response)
+            return AsyncStream(response, ResponseStreamEvent)
 
         return await self._client._get_base_client()._request_with_retry(opts, ResponseObject, agentcc_params)
 

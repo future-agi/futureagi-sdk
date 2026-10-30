@@ -21,179 +21,179 @@ export interface AgentsCreateParams {
   /** Commit message */
   commit_message: string;
   /** Inbound */
-  inbound?: boolean;
+  inbound?: boolean | null;
   /** Target speaks first */
-  target_speaks_first?: boolean;
+  target_speaks_first?: boolean | null;
   /** Description */
-  description?: string;
+  description?: string | null;
   /** Provider */
-  provider?: string;
+  provider?: string | null;
   /** Api key */
-  api_key?: string;
+  api_key?: string | null;
   /** Assistant id */
-  assistant_id?: string;
+  assistant_id?: string | null;
   /** Authentication method */
-  authentication_method?: "api_key";
+  authentication_method?: "api_key" | null;
   /** Language */
-  language?: string;
-  languages?: Array<string>;
+  language?: string | null;
+  languages?: Array<string> | null;
   /** Contact number */
-  contact_number?: string;
+  contact_number?: string | null;
   /** Knowledge base */
-  knowledge_base?: string;
+  knowledge_base?: string | null;
   /** Observability enabled */
-  observability_enabled?: boolean;
+  observability_enabled?: boolean | null;
   /** Model */
-  model?: string;
+  model?: string | null;
   /** Model details */
-  model_details?: Record<string, unknown>;
+  model_details?: Record<string, unknown> | null;
   /** Websocket url */
-  websocket_url?: string;
+  websocket_url?: string | null;
   /** Websocket headers */
-  websocket_headers?: Record<string, unknown>;
+  websocket_headers?: Record<string, unknown> | null;
   /** Replay session id */
-  replay_session_id?: string;
+  replay_session_id?: string | null;
   /** Livekit url */
-  livekit_url?: string;
+  livekit_url?: string | null;
   /** Livekit api key */
-  livekit_api_key?: string;
+  livekit_api_key?: string | null;
   /** Livekit api secret */
-  livekit_api_secret?: string;
+  livekit_api_secret?: string | null;
   /** Livekit agent name */
-  livekit_agent_name?: string;
+  livekit_agent_name?: string | null;
   /** Livekit config json */
-  livekit_config_json?: Record<string, unknown>;
+  livekit_config_json?: Record<string, unknown> | null;
   /** Livekit max concurrency */
-  livekit_max_concurrency?: number;
+  livekit_max_concurrency?: number | null;
 }
 
 export interface AgentsListParams {
-  search?: string;
-  agent_type?: "voice" | "text";
-  agent_definition_id?: string;
-  limit?: number;
+  search?: string | null;
+  agent_type?: "voice" | "text" | null;
+  agent_definition_id?: string | null;
+  limit?: number | null;
 }
 
 export interface AgentsUpdateParams {
   /** Observability enabled */
-  observability_enabled?: boolean;
+  observability_enabled?: boolean | null;
   /** Agent name */
-  agent_name?: string;
+  agent_name?: string | null;
   /** Agent type */
-  agent_type?: "voice" | "text";
+  agent_type?: "voice" | "text" | null;
   /** Description */
-  description?: string;
+  description?: string | null;
   /** Provider */
-  provider?: string;
+  provider?: string | null;
   /** Api key */
-  api_key?: string;
+  api_key?: string | null;
   /** Assistant id */
-  assistant_id?: string;
+  assistant_id?: string | null;
   /** Authentication method */
-  authentication_method?: "api_key";
+  authentication_method?: "api_key" | null;
   /** Language */
-  language?: string;
-  languages?: Array<string>;
+  language?: string | null;
+  languages?: Array<string> | null;
   /** Contact number */
-  contact_number?: string;
+  contact_number?: string | null;
   /** Inbound */
-  inbound?: boolean;
+  inbound?: boolean | null;
   /** Target speaks first */
-  target_speaks_first?: boolean;
+  target_speaks_first?: boolean | null;
   /** Knowledge base */
-  knowledge_base?: string;
+  knowledge_base?: string | null;
   /** Model */
-  model?: string;
+  model?: string | null;
   /** Model details */
-  model_details?: Record<string, unknown>;
+  model_details?: Record<string, unknown> | null;
   /** Websocket url */
-  websocket_url?: string;
+  websocket_url?: string | null;
   /** Websocket headers */
-  websocket_headers?: Record<string, unknown>;
+  websocket_headers?: Record<string, unknown> | null;
   /** Livekit url */
-  livekit_url?: string;
+  livekit_url?: string | null;
   /** Livekit api key */
-  livekit_api_key?: string;
+  livekit_api_key?: string | null;
   /** Livekit api secret */
-  livekit_api_secret?: string;
+  livekit_api_secret?: string | null;
   /** Livekit agent name */
-  livekit_agent_name?: string;
+  livekit_agent_name?: string | null;
   /** Livekit config json */
-  livekit_config_json?: Record<string, unknown>;
+  livekit_config_json?: Record<string, unknown> | null;
   /** Livekit max concurrency */
-  livekit_max_concurrency?: number;
+  livekit_max_concurrency?: number | null;
 }
 
 export interface AgentsVersionsCreateParams {
   /** Agent name */
-  agent_name?: string;
+  agent_name?: string | null;
   /** Agent type */
-  agent_type?: "voice" | "text";
+  agent_type?: "voice" | "text" | null;
   /** Description */
-  description?: string;
+  description?: string | null;
   /** Provider */
-  provider?: string;
+  provider?: string | null;
   /** Api key */
-  api_key?: string;
+  api_key?: string | null;
   /** Assistant id */
-  assistant_id?: string;
+  assistant_id?: string | null;
   /** Authentication method */
-  authentication_method?: "api_key";
+  authentication_method?: "api_key" | null;
   /** Language */
-  language?: string;
-  languages?: Array<string>;
+  language?: string | null;
+  languages?: Array<string> | null;
   /** Contact number */
-  contact_number?: string;
+  contact_number?: string | null;
   /** Inbound */
-  inbound?: boolean;
+  inbound?: boolean | null;
   /** Target speaks first */
-  target_speaks_first?: boolean;
+  target_speaks_first?: boolean | null;
   /** Knowledge base */
-  knowledge_base?: string;
+  knowledge_base?: string | null;
   /** Model */
-  model?: string;
+  model?: string | null;
   /** Model details */
-  model_details?: Record<string, unknown>;
+  model_details?: Record<string, unknown> | null;
   /** Livekit url */
-  livekit_url?: string;
+  livekit_url?: string | null;
   /** Livekit api key */
-  livekit_api_key?: string;
+  livekit_api_key?: string | null;
   /** Livekit api secret */
-  livekit_api_secret?: string;
+  livekit_api_secret?: string | null;
   /** Livekit agent name */
-  livekit_agent_name?: string;
+  livekit_agent_name?: string | null;
   /** Livekit config json */
-  livekit_config_json?: Record<string, unknown>;
+  livekit_config_json?: Record<string, unknown> | null;
   /** Livekit max concurrency */
-  livekit_max_concurrency?: number;
+  livekit_max_concurrency?: number | null;
   /** Commit message */
-  commit_message?: string;
+  commit_message?: string | null;
   /** Observability enabled */
-  observability_enabled?: boolean;
+  observability_enabled?: boolean | null;
 }
 
 export interface AlertsLogsListParams {
   /** Number of results to return per page. */
-  limit?: number;
+  limit?: number | null;
 }
 
 export interface AlertsRulesListParams {
   /** Zero-based page number. */
-  page_number?: number;
-  page_size?: number;
-  search_text?: string;
-  project_id?: Array<string>;
-  status?: Array<"triggered" | "healthy">;
-  metric_type?: Array<string>;
-  sort_by?: string;
-  sort_direction?: "asc" | "desc";
+  page_number?: number | null;
+  page_size?: number | null;
+  search_text?: string | null;
+  project_id?: Array<string> | null;
+  status?: Array<"triggered" | "healthy"> | null;
+  metric_type?: Array<string> | null;
+  sort_by?: string | null;
+  sort_direction?: "asc" | "desc" | null;
 }
 
 export interface AnnotationQueuesAddLabelParams {
   /** Label id */
   label_id: string;
   /** Required */
-  required?: boolean;
+  required?: boolean | null;
 }
 
 export interface AnnotationQueuesCreateParams {
@@ -201,77 +201,77 @@ export interface AnnotationQueuesCreateParams {
   name: string;
   label_ids: Array<string>;
   /** Description */
-  description?: string;
+  description?: string | null;
   /** Instructions */
-  instructions?: string;
+  instructions?: string | null;
   /** Assignment strategy */
-  assignment_strategy?: "manual" | "round_robin" | "load_balanced";
+  assignment_strategy?: "manual" | "round_robin" | "load_balanced" | null;
   /** Annotations required */
-  annotations_required?: number;
+  annotations_required?: number | null;
   /** Reservation timeout minutes */
-  reservation_timeout_minutes?: number;
+  reservation_timeout_minutes?: number | null;
   /** Requires review */
-  requires_review?: boolean;
+  requires_review?: boolean | null;
   /** Auto assign */
-  auto_assign?: boolean;
-  annotator_ids?: Array<string>;
+  auto_assign?: boolean | null;
+  annotator_ids?: Array<string> | null;
   /** Annotator roles */
-  annotator_roles?: Record<string, unknown>;
+  annotator_roles?: Record<string, unknown> | null;
 }
 
 export interface AnnotationQueuesExportParams {
-  export_format?: "json" | "csv";
-  status?: string;
+  export_format?: "json" | "csv" | null;
+  status?: string | null;
 }
 
 export interface AnnotationQueuesExportToDatasetParams {
   /** Dataset id */
-  dataset_id?: string;
+  dataset_id?: string | null;
   /** Dataset name */
-  dataset_name?: string;
+  dataset_name?: string | null;
   /** Status filter */
-  status_filter?: string;
-  column_mapping?: Array<Record<string, unknown>>;
+  status_filter?: string | null;
+  column_mapping?: Array<Record<string, unknown>> | null;
 }
 
 export interface AnnotationQueuesListParams {
   /** Number of results to return per page. */
-  limit?: number;
-  status?: string;
-  search?: string;
-  include_counts?: boolean;
-  archived?: boolean;
-  page_size?: number;
+  limit?: number | null;
+  status?: string | null;
+  search?: string | null;
+  include_counts?: boolean | null;
+  archived?: boolean | null;
+  page_size?: number | null;
 }
 
 export interface AnnotationQueuesRemoveLabelParams {
   /** Label id */
   label_id: string;
   /** Required */
-  required?: boolean;
+  required?: boolean | null;
 }
 
 export interface AnnotationQueuesUpdateParams {
   /** Name */
-  name?: string;
+  name?: string | null;
   /** Description */
-  description?: string;
+  description?: string | null;
   /** Instructions */
-  instructions?: string;
+  instructions?: string | null;
   /** Assignment strategy */
-  assignment_strategy?: "manual" | "round_robin" | "load_balanced";
+  assignment_strategy?: "manual" | "round_robin" | "load_balanced" | null;
   /** Annotations required */
-  annotations_required?: number;
+  annotations_required?: number | null;
   /** Reservation timeout minutes */
-  reservation_timeout_minutes?: number;
+  reservation_timeout_minutes?: number | null;
   /** Requires review */
-  requires_review?: boolean;
+  requires_review?: boolean | null;
   /** Auto assign */
-  auto_assign?: boolean;
-  label_ids?: Array<string>;
-  annotator_ids?: Array<string>;
+  auto_assign?: boolean | null;
+  label_ids?: Array<string> | null;
+  annotator_ids?: Array<string> | null;
   /** Annotator roles */
-  annotator_roles?: Record<string, unknown>;
+  annotator_roles?: Record<string, unknown> | null;
 }
 
 export interface AnnotationQueuesUpdateStatusParams {
@@ -280,51 +280,51 @@ export interface AnnotationQueuesUpdateStatusParams {
 }
 
 export interface AnnotationQueuesItemsAddParams {
-  items?: Array<Record<string, unknown>>;
-  selection?: Record<string, unknown>;
+  items?: Array<Record<string, unknown>> | null;
+  selection?: Record<string, unknown> | null;
   /** Project id */
-  project_id?: string;
+  project_id?: string | null;
 }
 
 export interface AnnotationQueuesItemsAnnotateDetailParams {
-  annotator_id?: string;
-  include_completed?: boolean;
-  view_mode?: string;
-  review_status?: string;
-  exclude_review_status?: string;
-  include_all_annotations?: boolean;
-  reserve?: boolean;
+  annotator_id?: string | null;
+  include_completed?: boolean | null;
+  view_mode?: string | null;
+  review_status?: string | null;
+  exclude_review_status?: string | null;
+  include_all_annotations?: boolean | null;
+  reserve?: boolean | null;
 }
 
 export interface AnnotationQueuesItemsAssignParams {
   item_ids: Array<string>;
-  user_ids?: Array<string>;
+  user_ids?: Array<string> | null;
   /** Action */
-  action?: "add" | "set" | "remove";
+  action?: "add" | "set" | "remove" | null;
 }
 
 export interface AnnotationQueuesItemsCompleteParams {
-  exclude?: Array<string>;
+  exclude?: Array<string> | null;
   /** Exclude review status */
-  exclude_review_status?: string;
+  exclude_review_status?: string | null;
   /** Include completed */
-  include_completed?: boolean;
+  include_completed?: boolean | null;
 }
 
 export interface AnnotationQueuesItemsImportAnnotationsParams {
   annotations: Array<Record<string, unknown>>;
   /** Annotator id */
-  annotator_id?: string;
+  annotator_id?: string | null;
 }
 
 export interface AnnotationQueuesItemsListParams {
   /** Number of results to return per page. */
-  limit?: number;
-  status?: Array<string>;
-  source_type?: Array<string>;
-  assigned_to?: string;
-  review_status?: string;
-  ordering?: "created_at" | "-created_at";
+  limit?: number | null;
+  status?: Array<string> | null;
+  source_type?: Array<string> | null;
+  assigned_to?: string | null;
+  review_status?: string | null;
+  ordering?: "created_at" | "-created_at" | null;
 }
 
 export interface AnnotationQueuesItemsRemoveParams {
@@ -332,19 +332,19 @@ export interface AnnotationQueuesItemsRemoveParams {
 }
 
 export interface AnnotationQueuesItemsSkipParams {
-  exclude?: Array<string>;
+  exclude?: Array<string> | null;
   /** Exclude review status */
-  exclude_review_status?: string;
+  exclude_review_status?: string | null;
   /** Include completed */
-  include_completed?: boolean;
+  include_completed?: boolean | null;
 }
 
 export interface AnnotationQueuesItemsSubmitParams {
   annotations: Array<Record<string, unknown>>;
   /** Notes */
-  notes?: string;
+  notes?: string | null;
   /** Item notes */
-  item_notes?: string;
+  item_notes?: string | null;
 }
 
 export interface AnnotationsBulkCreateParams {
@@ -357,147 +357,147 @@ export interface AnnotationsLabelsCreateParams {
   /** Type */
   type: "text" | "numeric" | "categorical" | "star" | "thumbs_up_down";
   /** Settings */
-  settings?: Record<string, unknown>;
+  settings?: Record<string, unknown> | null;
   /** Project */
-  project?: string;
+  project?: string | null;
   /** Description */
-  description?: string;
+  description?: string | null;
   /** Allow notes */
-  allow_notes?: boolean;
+  allow_notes?: boolean | null;
 }
 
 export interface AnnotationsLabelsListParams {
   /** Number of results to return per page. */
-  limit?: number;
-  dataset?: string;
-  project_id?: string;
-  type?: "text" | "numeric" | "categorical" | "star" | "thumbs_up_down";
-  search?: string;
-  include_usage_count?: boolean;
-  include_archived?: boolean;
-  archived?: boolean;
+  limit?: number | null;
+  dataset?: string | null;
+  project_id?: string | null;
+  type?: "text" | "numeric" | "categorical" | "star" | "thumbs_up_down" | null;
+  search?: string | null;
+  include_usage_count?: boolean | null;
+  include_archived?: boolean | null;
+  archived?: boolean | null;
 }
 
 export interface DashboardsCreateParams {
   /** Name */
   name: string;
   /** Description */
-  description?: string;
+  description?: string | null;
 }
 
 export interface DashboardsFilterValuesParams {
   /** Stable namespaced property identity returned by the metrics catalog. Legacy metric_name/metric_type remain accepted during migration. */
-  property_id?: string;
-  metric_name?: string;
-  metric_type?: "system_metric" | "eval_metric" | "annotation_metric" | "custom_attribute" | "custom_column";
-  source?: "traces" | "spans" | "sessions" | "users" | "voice_calls" | "prompts" | "datasets" | "dataset_column" | "simulation" | "both" | "all";
-  project_ids?: string;
-  dataset_id?: string;
-  search?: string;
-  page_size?: number;
-  cursor?: string;
-  attribute_type?: "string" | "number" | "boolean" | "array" | "map" | "json";
+  property_id?: string | null;
+  metric_name?: string | null;
+  metric_type?: "system_metric" | "eval_metric" | "annotation_metric" | "custom_attribute" | "custom_column" | null;
+  source?: "traces" | "spans" | "sessions" | "users" | "voice_calls" | "prompts" | "datasets" | "dataset_column" | "simulation" | "both" | "all" | null;
+  project_ids?: string | null;
+  dataset_id?: string | null;
+  search?: string | null;
+  page_size?: number | null;
+  cursor?: string | null;
+  attribute_type?: "string" | "number" | "boolean" | "array" | "map" | "json" | null;
 }
 
 export interface DashboardsQueryParams {
   time_range: Record<string, unknown>;
   metrics: Array<Record<string, unknown>>;
   /** Workflow */
-  workflow?: "observability" | "dataset" | "simulation";
-  project_ids?: Array<string>;
+  workflow?: "observability" | "dataset" | "simulation" | null;
+  project_ids?: Array<string> | null;
   /** Granularity */
-  granularity?: "minute" | "hour" | "day" | "week" | "month";
-  filters?: Array<Record<string, unknown>>;
-  breakdowns?: Array<Record<string, unknown>>;
+  granularity?: "minute" | "hour" | "day" | "week" | "month" | null;
+  filters?: Array<Record<string, unknown>> | null;
+  breakdowns?: Array<Record<string, unknown>> | null;
   /** Allow sampled */
-  allow_sampled?: boolean;
-  refresh?: boolean;
+  allow_sampled?: boolean | null;
+  refresh?: boolean | null;
 }
 
 export interface DashboardsUpdateParams {
   /** Name */
   name: string;
   /** Description */
-  description?: string;
+  description?: string | null;
 }
 
 export interface DashboardsMetricsListParams {
-  workflow?: "observability" | "dataset" | "simulation";
-  project_ids?: string;
-  agent_definition_id?: string;
-  per_eval_config?: boolean;
-  exclude_custom_attributes?: boolean;
-  search?: string;
-  category?: "system_metric" | "eval_metric" | "annotation_metric" | "custom_attribute" | "custom_column";
-  role?: "metric" | "dimension";
-  source?: "traces" | "spans" | "sessions" | "users" | "voice_calls" | "prompts" | "datasets" | "simulation" | "both" | "all";
-  page?: number;
-  page_size?: number;
-  cursor_mode?: boolean;
-  cursor?: string;
+  workflow?: "observability" | "dataset" | "simulation" | null;
+  project_ids?: string | null;
+  agent_definition_id?: string | null;
+  per_eval_config?: boolean | null;
+  exclude_custom_attributes?: boolean | null;
+  search?: string | null;
+  category?: "system_metric" | "eval_metric" | "annotation_metric" | "custom_attribute" | "custom_column" | null;
+  role?: "metric" | "dimension" | null;
+  source?: "traces" | "spans" | "sessions" | "users" | "voice_calls" | "prompts" | "datasets" | "simulation" | "both" | "all" | null;
+  page?: number | null;
+  page_size?: number | null;
+  cursor_mode?: boolean | null;
+  cursor?: string | null;
 }
 
 export interface DashboardsWidgetsCreateParams {
   /** Name */
-  name?: string;
+  name?: string | null;
   /** Description */
-  description?: string;
+  description?: string | null;
   /** Position */
-  position?: number;
+  position?: number | null;
   /** Width */
-  width?: number;
+  width?: number | null;
   /** Height */
-  height?: number;
+  height?: number | null;
   /** Query config */
-  query_config?: Record<string, unknown>;
+  query_config?: Record<string, unknown> | null;
   /** Chart config */
-  chart_config?: Record<string, unknown>;
+  chart_config?: Record<string, unknown> | null;
 }
 
 export interface DashboardsWidgetsListParams {
   /** Number of results to return per page. */
-  limit?: number;
+  limit?: number | null;
 }
 
 export interface DashboardsWidgetsQueryParams {
   /** Allow sampled */
-  allow_sampled?: boolean;
-  refresh?: boolean;
+  allow_sampled?: boolean | null;
+  refresh?: boolean | null;
 }
 
 export interface DashboardsWidgetsUpdateParams {
   /** Name */
-  name?: string;
+  name?: string | null;
   /** Description */
-  description?: string;
+  description?: string | null;
   /** Position */
-  position?: number;
+  position?: number | null;
   /** Width */
-  width?: number;
+  width?: number | null;
   /** Height */
-  height?: number;
+  height?: number | null;
   /** Query config */
-  query_config?: Record<string, unknown>;
+  query_config?: Record<string, unknown> | null;
   /** Chart config */
-  chart_config?: Record<string, unknown>;
+  chart_config?: Record<string, unknown> | null;
 }
 
 export interface DatasetsCreateParams {
   /** New dataset name */
   new_dataset_name: string;
   /** Model type */
-  model_type?: string;
+  model_type?: string | null;
   /** Is sdk */
-  is_sdk?: boolean;
+  is_sdk?: boolean | null;
   /** Row */
-  row?: number;
+  row?: number | null;
 }
 
 export interface DatasetsCreateFromFileParams {
   file: FileInput;
   new_dataset_name: string;
   model_type: string;
-  source?: string;
+  source?: string | null;
 }
 
 export interface DatasetsCreateFromHuggingfaceParams {
@@ -506,13 +506,13 @@ export interface DatasetsCreateFromHuggingfaceParams {
   /** Huggingface dataset split */
   huggingface_dataset_split: string;
   /** Name */
-  name?: string;
+  name?: string | null;
   /** Model type */
-  model_type?: string;
+  model_type?: string | null;
   /** Num rows */
-  num_rows?: number;
+  num_rows?: number | null;
   /** Huggingface dataset config */
-  huggingface_dataset_config?: string;
+  huggingface_dataset_config?: string | null;
 }
 
 export interface DatasetsDeleteParams {
@@ -520,22 +520,22 @@ export interface DatasetsDeleteParams {
 }
 
 export interface DatasetsGetParams {
-  filters?: string;
-  sort?: string;
-  search?: string;
-  page_size?: number;
-  current_page_index?: number;
-  column_config_only?: boolean;
+  filters?: string | null;
+  sort?: string | null;
+  search?: string | null;
+  page_size?: number | null;
+  current_page_index?: number | null;
+  column_config_only?: boolean | null;
   /** Start an exact MVCC-bound dataset read. Exact reads start at page 0 and return a signed next_cursor when more rows remain. */
-  exact_snapshot?: boolean;
+  exact_snapshot?: boolean | null;
   /** Signed next_cursor from the preceding exact dataset page. Keep the same page_size and current_page_index sequence. */
-  cursor?: string;
+  cursor?: string | null;
 }
 
 export interface DatasetsListParams {
-  search_text?: string;
-  page_size?: number;
-  sort?: string;
+  search_text?: string | null;
+  page_size?: number | null;
+  sort?: string | null;
 }
 
 export interface DatasetsCellsUpdateParams {
@@ -544,7 +544,7 @@ export interface DatasetsCellsUpdateParams {
   /** Column id */
   column_id: string;
   /** New value */
-  new_value?: string;
+  new_value?: string | null;
 }
 
 export interface DatasetsColumnsAddParams {
@@ -557,7 +557,7 @@ export interface DatasetsColumnsAddStaticParams {
   /** Column type */
   column_type: string;
   /** Source */
-  source?: string;
+  source?: string | null;
 }
 
 export interface DatasetsColumnsRenameParams {
@@ -573,40 +573,40 @@ export interface DatasetsEvalsAddParams {
   /** Config */
   config: Record<string, unknown>;
   /** Kb id */
-  kb_id?: string;
+  kb_id?: string | null;
   /** Error localizer */
-  error_localizer?: boolean;
+  error_localizer?: boolean | null;
   /** Model */
-  model?: string;
+  model?: string | null;
   /** Eval type */
-  eval_type?: string;
+  eval_type?: string | null;
   /** Run */
-  run?: boolean;
+  run?: boolean | null;
   /** Save as template */
-  save_as_template?: boolean;
+  save_as_template?: boolean | null;
   /** Experiment id */
-  experiment_id?: string;
+  experiment_id?: string | null;
   /** Composite weight overrides */
-  composite_weight_overrides?: Record<string, unknown>;
+  composite_weight_overrides?: Record<string, unknown> | null;
 }
 
 export interface DatasetsEvalsListParams {
   /** Use user to list evaluations attached to this dataset, including their runnable IDs. */
-  eval_type?: string;
-  search_text?: string;
-  eval_categories?: string;
-  eval_tags?: Array<string>;
-  use_cases?: Array<string>;
-  experiment_id?: string;
-  order?: string;
+  eval_type?: string | null;
+  search_text?: string | null;
+  eval_categories?: string | null;
+  eval_tags?: Array<string> | null;
+  use_cases?: Array<string> | null;
+  experiment_id?: string | null;
+  order?: string | null;
 }
 
 export interface DatasetsEvalsRunParams {
   user_eval_ids: Array<string>;
   /** Experiment id */
-  experiment_id?: string;
+  experiment_id?: string | null;
   /** Failed only */
-  failed_only?: boolean;
+  failed_only?: boolean | null;
 }
 
 export interface DatasetsPromptsAddParams {
@@ -614,14 +614,14 @@ export interface DatasetsPromptsAddParams {
   dataset_id: string;
   /** Name */
   name: string;
-  config?: Record<string, unknown>;
+  config?: Record<string, unknown> | null;
 }
 
 export interface DatasetsPromptsRunParams {
   run_prompt_ids: Array<string>;
-  row_ids?: Array<string>;
+  row_ids?: Array<string> | null;
   /** Selected all rows */
-  selected_all_rows?: boolean;
+  selected_all_rows?: boolean | null;
 }
 
 export interface DatasetsPromptsUpdateParams {
@@ -630,8 +630,8 @@ export interface DatasetsPromptsUpdateParams {
   /** Column id */
   column_id: string;
   /** Name */
-  name?: string;
-  config?: Record<string, unknown>;
+  name?: string | null;
+  config?: Record<string, unknown> | null;
 }
 
 export interface DatasetsRowsAddParams {
@@ -639,22 +639,22 @@ export interface DatasetsRowsAddParams {
 }
 
 export interface ErrorClustersGetParams {
-  project_id?: string;
+  project_id?: string | null;
 }
 
 export interface ErrorClustersListParams {
-  project_id?: string;
-  search?: string;
-  status?: "escalating" | "for_review" | "acknowledged" | "resolved";
-  severity?: "critical" | "high" | "medium" | "low";
-  fix_layer?: string;
-  source?: "scanner" | "eval";
-  issue_group?: string;
-  time_range_days?: number;
-  sort_by?: "last_seen" | "first_seen" | "error_count" | "unique_traces" | "severity";
-  sort_dir?: "asc" | "desc";
-  limit?: number;
-  offset?: number;
+  project_id?: string | null;
+  search?: string | null;
+  status?: "escalating" | "for_review" | "acknowledged" | "resolved" | null;
+  severity?: "critical" | "high" | "medium" | "low" | null;
+  fix_layer?: string | null;
+  source?: "scanner" | "eval" | null;
+  issue_group?: string | null;
+  time_range_days?: number | null;
+  sort_by?: "last_seen" | "first_seen" | "error_count" | "unique_traces" | "severity" | null;
+  sort_dir?: "asc" | "desc" | null;
+  limit?: number | null;
+  offset?: number | null;
 }
 
 export interface EvalsTestParams {
@@ -665,48 +665,48 @@ export interface EvalsTestParams {
   /** Output type */
   output_type: string;
   /** Model */
-  model?: string;
-  eval_tags?: Array<string>;
+  model?: string | null;
+  eval_tags?: Array<string> | null;
   /** Criteria */
-  criteria?: string;
+  criteria?: string | null;
   /** Multi choice */
-  multi_choice?: boolean;
+  multi_choice?: boolean | null;
   /** Choices */
-  choices?: Record<string, unknown>;
+  choices?: Record<string, unknown> | null;
   /** Input data types */
-  input_data_types?: Record<string, unknown>;
+  input_data_types?: Record<string, unknown> | null;
   /** Description */
-  description?: string;
+  description?: string | null;
   /** Check internet */
-  check_internet?: boolean;
-  required_keys?: Array<string>;
+  check_internet?: boolean | null;
+  required_keys?: Array<string> | null;
   /** Template type */
-  template_type?: string;
+  template_type?: string | null;
   /** Eval type id */
-  eval_type_id?: string;
+  eval_type_id?: string | null;
   /** Template id */
-  template_id?: string;
+  template_id?: string | null;
   /** Eval type */
-  eval_type?: string;
+  eval_type?: string | null;
   /** Error localizer */
-  error_localizer?: boolean;
+  error_localizer?: boolean | null;
   /** Reason column */
-  reason_column?: boolean;
-  optional_keys?: Array<string>;
+  reason_column?: boolean | null;
+  optional_keys?: Array<string> | null;
   /** Variable keys */
-  variable_keys?: Record<string, unknown>;
+  variable_keys?: Record<string, unknown> | null;
   /** Run prompt column */
-  run_prompt_column?: boolean;
+  run_prompt_column?: boolean | null;
   /** Template name */
-  template_name?: string;
+  template_name?: string | null;
   /** Mapping */
-  mapping?: Record<string, unknown>;
+  mapping?: Record<string, unknown> | null;
   /** Output */
-  output?: string;
+  output?: string | null;
   /** Config params desc */
-  config_params_desc?: Record<string, unknown>;
+  config_params_desc?: Record<string, unknown> | null;
   /** Config params option */
-  config_params_option?: Record<string, unknown>;
+  config_params_option?: Record<string, unknown> | null;
 }
 
 export interface EvalsConfigsCreateParams {
@@ -715,34 +715,34 @@ export interface EvalsConfigsCreateParams {
   /** Project */
   project: string;
   /** Name */
-  name?: string;
+  name?: string | null;
   /** Config */
-  config?: Record<string, unknown>;
+  config?: Record<string, unknown> | null;
   /** Mapping */
-  mapping?: Record<string, unknown>;
+  mapping?: Record<string, unknown> | null;
   /** Filters */
-  filters?: Record<string, unknown>;
+  filters?: Record<string, unknown> | null;
   /** Error localizer */
-  error_localizer?: boolean;
+  error_localizer?: boolean | null;
   /** Kb id */
-  kb_id?: string;
+  kb_id?: string | null;
   /** Model */
-  model?: string;
+  model?: string | null;
 }
 
 export interface EvalsConfigsListParams {
   /** Number of results to return per page. */
-  limit?: number;
+  limit?: number | null;
 }
 
 export interface EvalsGroupsGetParams {
-  name?: string;
+  name?: string | null;
 }
 
 export interface EvalsGroupsListParams {
-  name?: string;
-  page_number?: number;
-  page_size?: number;
+  name?: string | null;
+  page_number?: number | null;
+  page_size?: number | null;
 }
 
 export interface EvalsTasksCreateParams {
@@ -756,32 +756,32 @@ export interface EvalsTasksCreateParams {
   run_type: "continuous" | "historical";
   evals: Array<string>;
   /** Filters */
-  filters?: Record<string, unknown>;
+  filters?: Record<string, unknown> | null;
   /** Last run */
-  last_run?: string;
+  last_run?: string | null;
   /** Spans limit */
-  spans_limit?: number;
+  spans_limit?: number | null;
   /** Row type */
-  row_type?: "spans" | "traces" | "sessions" | "voiceCalls";
+  row_type?: "spans" | "traces" | "sessions" | "voiceCalls" | null;
   /** Status */
-  status?: "pending" | "running" | "completed" | "failed" | "paused" | "deleted";
+  status?: "pending" | "running" | "completed" | "failed" | "paused" | "deleted" | null;
   /** Start time */
-  start_time?: string;
+  start_time?: string | null;
   /** End time */
-  end_time?: string;
+  end_time?: string | null;
   /** Evals details */
-  evals_details?: Record<string, unknown>;
+  evals_details?: Record<string, unknown> | null;
   /** Failed spans */
-  failed_spans?: Record<string, unknown>;
+  failed_spans?: Record<string, unknown> | null;
 }
 
 export interface EvalsTasksListParams {
-  project_id?: string;
-  name?: string;
-  filters?: string;
-  sort_params?: string;
-  page_number?: number;
-  page_size?: number;
+  project_id?: string | null;
+  name?: string | null;
+  filters?: string | null;
+  sort_params?: string | null;
+  page_number?: number | null;
+  page_size?: number | null;
 }
 
 export interface EvalsTasksPauseParams {
@@ -798,124 +798,124 @@ export interface EvalsTasksUpdateParams {
   /** Eval task id */
   eval_task_id: string;
   /** Name */
-  name?: string;
+  name?: string | null;
   /** Filters */
-  filters?: Record<string, unknown>;
+  filters?: Record<string, unknown> | null;
   /** Sampling rate */
-  sampling_rate?: number;
+  sampling_rate?: number | null;
   /** Spans limit */
-  spans_limit?: number;
+  spans_limit?: number | null;
   /** Run type */
-  run_type?: "continuous" | "historical";
+  run_type?: "continuous" | "historical" | null;
   /** Row type */
-  row_type?: "spans" | "traces" | "sessions" | "voiceCalls";
+  row_type?: "spans" | "traces" | "sessions" | "voiceCalls" | null;
   /** Status */
-  status?: "pending" | "running" | "completed" | "failed" | "paused" | "deleted";
-  evals?: Array<string>;
+  status?: "pending" | "running" | "completed" | "failed" | "paused" | "deleted" | null;
+  evals?: Array<string> | null;
 }
 
 export interface EvalsTemplatesCreateParams {
   /** Name */
-  name?: string;
+  name?: string | null;
   /** Is draft */
-  is_draft?: boolean;
+  is_draft?: boolean | null;
   /** Eval type */
-  eval_type?: "llm" | "code" | "agent";
+  eval_type?: "llm" | "code" | "agent" | null;
   /** Instructions */
-  instructions?: string;
+  instructions?: string | null;
   /** Model */
-  model?: string;
+  model?: string | null;
   /** Output type */
-  output_type?: "pass_fail" | "percentage" | "deterministic";
+  output_type?: "pass_fail" | "percentage" | "deterministic" | null;
   /** Pass threshold */
-  pass_threshold?: number;
+  pass_threshold?: number | null;
   /** Choice scores */
-  choice_scores?: Record<string, unknown>;
+  choice_scores?: Record<string, unknown> | null;
   /** Description */
-  description?: string;
-  tags?: Array<string>;
+  description?: string | null;
+  tags?: Array<string> | null;
   /** Check internet */
-  check_internet?: boolean;
+  check_internet?: boolean | null;
   /** Code */
-  code?: string;
+  code?: string | null;
   /** Code language */
-  code_language?: "python" | "javascript";
-  messages?: Array<Record<string, unknown>>;
-  few_shot_examples?: Array<Record<string, unknown>>;
+  code_language?: "python" | "javascript" | null;
+  messages?: Array<Record<string, unknown>> | null;
+  few_shot_examples?: Array<Record<string, unknown>> | null;
   /** Mode */
-  mode?: "auto" | "agent" | "quick";
+  mode?: "auto" | "agent" | "quick" | null;
   /** Tools */
-  tools?: Record<string, unknown>;
-  knowledge_bases?: Array<string>;
+  tools?: Record<string, unknown> | null;
+  knowledge_bases?: Array<string> | null;
   /** Data injection */
-  data_injection?: Record<string, unknown>;
+  data_injection?: Record<string, unknown> | null;
   /** Summary */
-  summary?: Record<string, unknown>;
+  summary?: Record<string, unknown> | null;
   /** Error localizer enabled */
-  error_localizer_enabled?: boolean;
+  error_localizer_enabled?: boolean | null;
   /** Template format */
-  template_format?: "mustache" | "jinja";
+  template_format?: "mustache" | "jinja" | null;
 }
 
 export interface EvalsTemplatesListParams {
   /** Page */
-  page?: number;
+  page?: number | null;
   /** Page size */
-  page_size?: number;
+  page_size?: number | null;
   /** Search */
-  search?: string;
+  search?: string | null;
   /** Owner filter */
-  owner_filter?: "all" | "user" | "system";
-  filters?: Record<string, unknown>;
+  owner_filter?: "all" | "user" | "system" | null;
+  filters?: Record<string, unknown> | null;
   /** Sort by */
-  sort_by?: "name" | "updated_at" | "created_at";
+  sort_by?: "name" | "updated_at" | "created_at" | null;
   /** Sort order */
-  sort_order?: "asc" | "desc";
+  sort_order?: "asc" | "desc" | null;
 }
 
 export interface EvalsTemplatesUpdateParams {
   /** Name */
-  name?: string;
+  name?: string | null;
   /** Eval type */
-  eval_type?: "llm" | "code" | "agent";
+  eval_type?: "llm" | "code" | "agent" | null;
   /** Instructions */
-  instructions?: string;
+  instructions?: string | null;
   /** Model */
-  model?: string;
+  model?: string | null;
   /** Output type */
-  output_type?: "pass_fail" | "percentage" | "deterministic";
+  output_type?: "pass_fail" | "percentage" | "deterministic" | null;
   /** Pass threshold */
-  pass_threshold?: number;
+  pass_threshold?: number | null;
   /** Choice scores */
-  choice_scores?: Record<string, unknown>;
+  choice_scores?: Record<string, unknown> | null;
   /** Multi choice */
-  multi_choice?: boolean;
+  multi_choice?: boolean | null;
   /** Description */
-  description?: string;
-  tags?: Array<string>;
+  description?: string | null;
+  tags?: Array<string> | null;
   /** Check internet */
-  check_internet?: boolean;
+  check_internet?: boolean | null;
   /** Code */
-  code?: string;
+  code?: string | null;
   /** Code language */
-  code_language?: "python" | "javascript";
-  messages?: Array<Record<string, unknown>>;
-  few_shot_examples?: Array<Record<string, unknown>>;
+  code_language?: "python" | "javascript" | null;
+  messages?: Array<Record<string, unknown>> | null;
+  few_shot_examples?: Array<Record<string, unknown>> | null;
   /** Mode */
-  mode?: "auto" | "agent" | "quick";
+  mode?: "auto" | "agent" | "quick" | null;
   /** Tools */
-  tools?: Record<string, unknown>;
-  knowledge_bases?: Array<string>;
+  tools?: Record<string, unknown> | null;
+  knowledge_bases?: Array<string> | null;
   /** Data injection */
-  data_injection?: Record<string, unknown>;
+  data_injection?: Record<string, unknown> | null;
   /** Summary */
-  summary?: Record<string, unknown>;
+  summary?: Record<string, unknown> | null;
   /** Error localizer enabled */
-  error_localizer_enabled?: boolean;
+  error_localizer_enabled?: boolean | null;
   /** Publish */
-  publish?: boolean;
+  publish?: boolean | null;
   /** Template format */
-  template_format?: "mustache" | "jinja";
+  template_format?: "mustache" | "jinja" | null;
 }
 
 export interface ExperimentsCreateParams {
@@ -926,74 +926,74 @@ export interface ExperimentsCreateParams {
   prompt_config: Array<Record<string, unknown>>;
   user_eval_metrics: Array<Record<string, unknown>>;
   /** Column id */
-  column_id?: string;
+  column_id?: string | null;
   /** Experiment type */
-  experiment_type?: "llm" | "tts" | "stt" | "image";
+  experiment_type?: "llm" | "tts" | "stt" | "image" | null;
 }
 
 export interface ExperimentsListParams {
-  created_at?: string;
-  status?: string;
-  dataset_id?: string;
+  created_at?: string | null;
+  status?: string | null;
+  dataset_id?: string | null;
   /** A search term. */
-  search?: string;
+  search?: string | null;
   /** Which field to use when ordering the results. */
-  ordering?: string;
+  ordering?: string | null;
   /** Number of results to return per page. */
-  limit?: number;
+  limit?: number | null;
 }
 
 export interface GatewayAnalyticsParams {
-  start?: string;
-  end?: string;
-  granularity?: string;
+  start?: string | null;
+  end?: string | null;
+  granularity?: string | null;
   /** Gateway key id (not the API key's UUID primary key). */
-  api_key_id?: string;
+  api_key_id?: string | null;
 }
 
 export interface GatewayGuardrailRulesListParams {
   /** A page number within the paginated result set. */
-  page?: number;
+  page?: number | null;
   /** Number of results to return per page. */
-  limit?: number;
+  limit?: number | null;
 }
 
 export interface GatewayRequestLogsListParams {
-  limit?: number;
-  user_id?: string;
-  session_id?: string;
+  limit?: number | null;
+  user_id?: string | null;
+  session_id?: string | null;
   /** Gateway key id (not the API key's UUID primary key). */
-  api_key_id?: string;
-  request_id?: string;
+  api_key_id?: string | null;
+  request_id?: string | null;
   /** Comma-separated model names. */
-  model?: string;
+  model?: string | null;
   /** Comma-separated provider names. */
-  provider?: string;
+  provider?: string | null;
   /** Comma-separated HTTP status codes. */
-  status_code?: string;
-  min_status_code?: number;
-  max_status_code?: number;
-  is_error?: boolean;
-  cache_hit?: boolean;
-  fallback_used?: boolean;
-  guardrail_triggered?: boolean;
-  is_stream?: boolean;
-  started_after?: string;
-  started_before?: string;
-  min_latency?: number;
-  max_latency?: number;
-  min_cost?: number;
-  max_cost?: number;
-  min_tokens?: number;
-  max_tokens?: number;
-  q?: string;
-  search?: string;
-  ordering?: string;
+  status_code?: string | null;
+  min_status_code?: number | null;
+  max_status_code?: number | null;
+  is_error?: boolean | null;
+  cache_hit?: boolean | null;
+  fallback_used?: boolean | null;
+  guardrail_triggered?: boolean | null;
+  is_stream?: boolean | null;
+  started_after?: string | null;
+  started_before?: string | null;
+  min_latency?: number | null;
+  max_latency?: number | null;
+  min_cost?: number | null;
+  max_cost?: number | null;
+  min_tokens?: number | null;
+  max_tokens?: number | null;
+  q?: string | null;
+  search?: string | null;
+  ordering?: string | null;
 }
 
 export interface GatewaySessionsListParams {
   /** Number of results to return per page. */
-  limit?: number;
+  limit?: number | null;
 }
 
 export interface KnowledgeBasesCreateParams {
@@ -1002,44 +1002,44 @@ export interface KnowledgeBasesCreateParams {
 }
 
 export interface KnowledgeBasesDeleteParams {
-  kb_ids?: Array<string>;
+  kb_ids?: Array<string> | null;
 }
 
 export interface KnowledgeBasesListParams {
   /** A search term. */
-  search?: string;
+  search?: string | null;
   /** A page number within the paginated result set. */
-  page?: number;
+  page?: number | null;
   /** Number of results to return per page. */
-  limit?: number;
+  limit?: number | null;
 }
 
 export interface KnowledgeBasesUpdateParams {
   kb_id: string;
-  name?: string;
+  name?: string | null;
   file?: Array<FileInput>;
 }
 
 export interface KnowledgeBasesFilesDeleteParams {
   /** Kb id */
-  kb_id?: string;
+  kb_id?: string | null;
   /** Delete all */
-  delete_all?: boolean;
-  file_ids?: Array<string>;
-  excluded_file_ids?: Array<string>;
-  file_names?: Array<string>;
+  delete_all?: boolean | null;
+  file_ids?: Array<string> | null;
+  excluded_file_ids?: Array<string> | null;
+  file_names?: Array<string> | null;
 }
 
 export interface KnowledgeBasesFilesListParams {
   /** Kb id */
   kb_id: string;
   /** Search */
-  search?: string;
-  sort?: Array<Record<string, unknown>>;
+  search?: string | null;
+  sort?: Array<Record<string, unknown>> | null;
   /** Page number */
-  page_number?: number;
+  page_number?: number | null;
   /** Page size */
-  page_size?: number;
+  page_size?: number | null;
 }
 
 export interface OptimizationsCreateParams {
@@ -1050,28 +1050,28 @@ export interface OptimizationsCreateParams {
   /** Optimizer algorithm */
   optimizer_algorithm: "random_search" | "bayesian" | "metaprompt" | "protegi" | "promptwizard" | "gepa";
   /** Optimizer model id */
-  optimizer_model_id?: string;
+  optimizer_model_id?: string | null;
   /** Optimizer config */
-  optimizer_config?: Record<string, unknown>;
-  user_eval_template_ids?: Array<string>;
+  optimizer_config?: Record<string, unknown> | null;
+  user_eval_template_ids?: Array<string> | null;
 }
 
 export interface OptimizationsListParams {
-  dataset_id?: string;
-  column_id?: string;
-  develop_id?: string;
-  limit?: number;
+  dataset_id?: string | null;
+  column_id?: string | null;
+  develop_id?: string | null;
+  limit?: number | null;
 }
 
 export interface ProjectsListParams {
-  name?: string;
-  project_type?: string;
-  tags?: string;
-  filters?: string;
-  sort_by?: string;
-  sort_direction?: "asc" | "desc";
-  page_number?: number;
-  page_size?: number;
+  name?: string | null;
+  project_type?: string | null;
+  tags?: string | null;
+  filters?: string | null;
+  sort_by?: string | null;
+  sort_direction?: "asc" | "desc" | null;
+  page_number?: number | null;
+  page_size?: number | null;
 }
 
 export interface PromptsAddDraftParams {
@@ -1080,32 +1080,32 @@ export interface PromptsAddDraftParams {
 
 export interface PromptsCommitParams {
   version_name: string;
-  message?: string;
-  set_default?: boolean;
-  is_draft?: boolean;
-  metadata?: Record<string, unknown>;
+  message?: string | null;
+  set_default?: boolean | null;
+  is_draft?: boolean | null;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface PromptsCreateParams {
   /** Name */
   name: string;
   /** Description */
-  description?: string;
+  description?: string | null;
   /** Variable names */
-  variable_names?: Record<string, unknown>;
+  variable_names?: Record<string, unknown> | null;
   /** Prompt folder */
-  prompt_folder?: string;
+  prompt_folder?: string | null;
   /** Placeholders */
-  placeholders?: Record<string, unknown>;
+  placeholders?: Record<string, unknown> | null;
 }
 
 export interface PromptsCreateDraftParams {
   name: string;
   prompt_config: Array<Record<string, unknown>>;
-  variable_names?: Record<string, unknown>;
-  evaluation_configs?: Array<Record<string, unknown>>;
-  metadata?: Record<string, unknown>;
-  placeholders?: Record<string, unknown>;
+  variable_names?: Record<string, unknown> | null;
+  evaluation_configs?: Array<Record<string, unknown>> | null;
+  metadata?: Record<string, unknown> | null;
+  placeholders?: Record<string, unknown> | null;
 }
 
 export interface PromptsGenerateParams {
@@ -1113,30 +1113,30 @@ export interface PromptsGenerateParams {
 }
 
 export interface PromptsGetByNameParams {
-  name?: string;
-  version?: string;
-  created_at?: string;
+  name?: string | null;
+  version?: string | null;
+  created_at?: string | null;
   /** A search term. */
-  search?: string;
+  search?: string | null;
   /** Which field to use when ordering the results. */
-  ordering?: string;
+  ordering?: string | null;
   /** A page number within the paginated result set. */
-  page?: number;
+  page?: number | null;
   /** Number of results to return per page. */
-  limit?: number;
+  limit?: number | null;
 }
 
 export interface PromptsHistoryParams {
-  template_name?: string;
-  template_version?: string;
-  created_at?: string;
+  template_name?: string | null;
+  template_version?: string | null;
+  created_at?: string | null;
   /** A search term. */
-  search?: string;
+  search?: string | null;
   /** Which field to use when ordering the results. */
-  ordering?: string;
+  ordering?: string | null;
   /** Number of results to return per page. */
-  limit?: number;
-  template_id?: string;
+  limit?: number | null;
+  template_id?: string | null;
 }
 
 export interface PromptsImproveParams {
@@ -1145,54 +1145,54 @@ export interface PromptsImproveParams {
 }
 
 export interface PromptsListParams {
-  name?: string;
-  version?: string;
-  created_at?: string;
+  name?: string | null;
+  version?: string | null;
+  created_at?: string | null;
   /** A search term. */
-  search?: string;
+  search?: string | null;
   /** Which field to use when ordering the results. */
-  ordering?: string;
+  ordering?: string | null;
   /** Number of results to return per page. */
-  limit?: number;
-  modality?: Array<string>;
+  limit?: number | null;
+  modality?: Array<string> | null;
 }
 
 export interface PromptsRunParams {
   /** Name */
-  name?: string;
+  name?: string | null;
   /** Version */
-  version?: string;
-  prompt_config?: Array<Record<string, unknown>>;
+  version?: string | null;
+  prompt_config?: Array<Record<string, unknown>> | null;
   /** Variable names */
-  variable_names?: Record<string, unknown>;
+  variable_names?: Record<string, unknown> | null;
   /** Placeholders */
-  placeholders?: Record<string, unknown>;
-  evaluation_configs?: Array<Record<string, unknown>>;
+  placeholders?: Record<string, unknown> | null;
+  evaluation_configs?: Array<Record<string, unknown>> | null;
   /** Source */
-  source?: string;
+  source?: string | null;
   /** Is run */
-  is_run?: Record<string, unknown>;
+  is_run?: Record<string, unknown> | null;
   /** Is sdk */
-  is_sdk?: boolean;
+  is_sdk?: boolean | null;
   /** Run index */
-  run_index?: number;
+  run_index?: number | null;
 }
 
 export interface PromptsRunStatusParams {
-  template_version?: string;
+  template_version?: string | null;
 }
 
 export interface PromptsUpdateParams {
   /** Name */
-  name?: string;
+  name?: string | null;
   /** Description */
-  description?: string;
+  description?: string | null;
   /** Variable names */
-  variable_names?: Record<string, unknown>;
+  variable_names?: Record<string, unknown> | null;
   /** Prompt folder */
-  prompt_folder?: string;
+  prompt_folder?: string | null;
   /** Placeholders */
-  placeholders?: Record<string, unknown>;
+  placeholders?: Record<string, unknown> | null;
 }
 
 export interface PromptsLabelsAssignParams {
@@ -1205,31 +1205,31 @@ export interface PromptsLabelsCreateParams {
   /** Type */
   type: "system" | "custom";
   /** Metadata */
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface PromptsLabelsForTemplateParams {
   /** A page number within the paginated result set. */
-  page?: number;
+  page?: number | null;
   /** Number of results to return per page. */
-  limit?: number;
-  template_id?: string;
-  template_name?: string;
+  limit?: number | null;
+  template_id?: string | null;
+  template_name?: string | null;
 }
 
 export interface PromptsLabelsGetTemplateParams {
   /** A page number within the paginated result set. */
-  page?: number;
+  page?: number | null;
   /** Number of results to return per page. */
-  limit?: number;
-  name?: string;
-  label?: string;
-  version?: string;
+  limit?: number | null;
+  name?: string | null;
+  label?: string | null;
+  version?: string | null;
 }
 
 export interface PromptsLabelsListParams {
   /** Number of results to return per page. */
-  limit?: number;
+  limit?: number | null;
 }
 
 export interface PromptsLabelsRemoveParams {
@@ -1243,12 +1243,12 @@ export interface PromptsLabelsSetDefaultParams {
 }
 
 export interface PromptsVersionsListParams {
-  limit?: number;
+  limit?: number | null;
 }
 
 export interface ProviderKeysListParams {
   /** Number of results to return per page. */
-  limit?: number;
+  limit?: number | null;
 }
 
 export interface ScoresCreateParams {
@@ -1261,11 +1261,11 @@ export interface ScoresCreateParams {
   /** Value */
   value: Record<string, unknown>;
   /** Notes */
-  notes?: string;
+  notes?: string | null;
   /** Score source */
-  score_source?: "human" | "api" | "auto" | "imported";
+  score_source?: "human" | "api" | "auto" | "imported" | null;
   /** Queue item id */
-  queue_item_id?: string;
+  queue_item_id?: string | null;
 }
 
 export interface ScoresCreateBulkParams {
@@ -1275,143 +1275,143 @@ export interface ScoresCreateBulkParams {
   source_id: string;
   scores: Array<Record<string, unknown>>;
   /** Notes */
-  notes?: string;
+  notes?: string | null;
   /** Span notes */
-  span_notes?: string;
+  span_notes?: string | null;
   /** Span notes source id */
-  span_notes_source_id?: string;
+  span_notes_source_id?: string | null;
   /** Queue item id */
-  queue_item_id?: string;
+  queue_item_id?: string | null;
   /** Project id */
-  project_id?: string;
+  project_id?: string | null;
 }
 
 export interface ScoresListForSourceParams {
   source_type: "dataset_row" | "trace" | "observation_span" | "prototype_run" | "call_execution" | "trace_session";
   source_id: string;
   /** A page number within the paginated result set. */
-  page?: number;
+  page?: number | null;
   /** Number of results to return per page. */
-  limit?: number;
+  limit?: number | null;
   /** Tracer project the trace / span was opened from. The same id can exist in several projects; when supplied, only that project's scores are listed. */
-  project_id?: string;
+  project_id?: string | null;
 }
 
 export interface SessionsGetParams {
-  navigation_context?: string;
-  user_id?: string;
-  filters?: string;
-  sort_params?: string;
-  page_number?: number;
-  page_size?: number;
+  navigation_context?: string | null;
+  user_id?: string | null;
+  filters?: string | null;
+  sort_params?: string | null;
+  page_number?: number | null;
+  page_size?: number | null;
 }
 
 export interface SessionsListParams {
-  project_id?: string;
-  user_id?: string;
-  bookmarked?: boolean;
-  filters?: string;
-  sort_params?: string;
+  project_id?: string | null;
+  user_id?: string | null;
+  bookmarked?: boolean | null;
+  filters?: string | null;
+  sort_params?: string | null;
   /** Zero-based numbered page. Pages whose required ordered work exceeds the finite read contract return HTTP 422 with code page_depth_exceeded; request an earlier page or narrow the time range. */
-  page_number?: number;
-  page_size?: number;
+  page_number?: number | null;
+  page_size?: number | null;
   /** Opaque continuation token returned by the previous page. When supplied, do not also send the numbered-page parameter. */
-  cursor?: string;
-  cursor_mode?: boolean;
-  interval?: string;
+  cursor?: string | null;
+  cursor_mode?: boolean | null;
+  interval?: string | null;
   /** Omit for backward-compatible complete bounded pages, which may label total_rows as a lower bound. Send false to require an exact total, or true to opt in explicitly to lower-bound totals. */
-  allow_sampled?: boolean;
+  allow_sampled?: boolean | null;
 }
 
 export interface SimulationExecutionsGetParams {
-  search?: string;
-  filters?: string;
-  row_groups?: string;
-  group_keys?: string;
-  limit?: number;
+  search?: string | null;
+  filters?: string | null;
+  row_groups?: string | null;
+  group_keys?: string | null;
+  limit?: number | null;
 }
 
 export interface SimulationExecutionsListParams {
-  search?: string;
-  status?: string;
-  limit?: number;
+  search?: string | null;
+  status?: string | null;
+  limit?: number | null;
 }
 
 export interface SimulationScenariosCreateParams {
   /** Name */
   name: string;
   /** Description */
-  description?: string;
+  description?: string | null;
   /** Dataset id */
-  dataset_id?: string;
+  dataset_id?: string | null;
   /** Kind */
-  kind?: "graph" | "script" | "dataset";
+  kind?: "graph" | "script" | "dataset" | null;
   /** Script url */
-  script_url?: string;
+  script_url?: string | null;
   /** Agent definition id */
-  agent_definition_id?: string;
+  agent_definition_id?: string | null;
   /** Agent definition version id */
-  agent_definition_version_id?: string;
+  agent_definition_version_id?: string | null;
   /** Custom instruction */
-  custom_instruction?: string;
+  custom_instruction?: string | null;
   /** No of rows */
-  no_of_rows?: number;
+  no_of_rows?: number | null;
   /** Generate graph */
-  generate_graph?: boolean;
+  generate_graph?: boolean | null;
   /** Graph */
-  graph?: Record<string, unknown>;
+  graph?: Record<string, unknown> | null;
   /** Source type */
-  source_type?: "agent_definition" | "prompt";
+  source_type?: "agent_definition" | "prompt" | null;
   /** Prompt template id */
-  prompt_template_id?: string;
+  prompt_template_id?: string | null;
   /** Prompt version id */
-  prompt_version_id?: string;
+  prompt_version_id?: string | null;
   /** Add persona automatically */
-  add_persona_automatically?: boolean;
-  personas?: Array<string>;
-  custom_columns?: Array<Record<string, unknown>>;
+  add_persona_automatically?: boolean | null;
+  personas?: Array<string> | null;
+  custom_columns?: Array<Record<string, unknown>> | null;
   /** Agent name */
-  agent_name?: string;
+  agent_name?: string | null;
   /** Agent prompt */
-  agent_prompt?: string;
+  agent_prompt?: string | null;
   /** Voice provider */
-  voice_provider?: string;
+  voice_provider?: string | null;
   /** Voice name */
-  voice_name?: string;
+  voice_name?: string | null;
   /** Model */
-  model?: string;
+  model?: string | null;
   /** Llm temperature */
-  llm_temperature?: number;
+  llm_temperature?: number | null;
   /** Initial message */
-  initial_message?: string;
+  initial_message?: string | null;
   /** Max call duration in minutes */
-  max_call_duration_in_minutes?: number;
+  max_call_duration_in_minutes?: number | null;
   /** Interrupt sensitivity */
-  interrupt_sensitivity?: number;
+  interrupt_sensitivity?: number | null;
   /** Conversation speed */
-  conversation_speed?: number;
+  conversation_speed?: number | null;
   /** Finished speaking sensitivity */
-  finished_speaking_sensitivity?: number;
+  finished_speaking_sensitivity?: number | null;
   /** Initial message delay */
-  initial_message_delay?: number;
+  initial_message_delay?: number | null;
 }
 
 export interface SimulationScenariosListParams {
-  search?: string;
-  agent_definition_id?: string;
-  agent_type?: string;
-  limit?: number;
+  search?: string | null;
+  agent_definition_id?: string | null;
+  agent_type?: string | null;
+  limit?: number | null;
 }
 
 export interface SimulationScenariosUpdateParams {
   /** Name */
-  name?: string;
+  name?: string | null;
   /** Description */
-  description?: string;
+  description?: string | null;
   /** Graph */
-  graph?: Record<string, unknown>;
+  graph?: Record<string, unknown> | null;
   /** Prompt */
-  prompt?: string;
+  prompt?: string | null;
 }
 
 export interface SimulationTestsCreateParams {
@@ -1421,110 +1421,110 @@ export interface SimulationTestsCreateParams {
   agent_definition_id: string;
   scenario_ids: Array<string>;
   /** Description */
-  description?: string;
-  dataset_row_ids?: Array<string>;
-  eval_config_ids?: Array<string>;
-  evaluations_config?: Array<Record<string, unknown>>;
+  description?: string | null;
+  dataset_row_ids?: Array<string> | null;
+  eval_config_ids?: Array<string> | null;
+  evaluations_config?: Array<Record<string, unknown>> | null;
   /** Enable tool evaluation */
-  enable_tool_evaluation?: boolean;
+  enable_tool_evaluation?: boolean | null;
   /** Replay session id */
-  replay_session_id?: string;
+  replay_session_id?: string | null;
   /** Agent version */
-  agent_version?: string;
+  agent_version?: string | null;
 }
 
 export interface SimulationTestsListParams {
-  search?: string;
-  simulation_type?: "agent_definition" | "prompt";
-  prompt_template_id?: string;
-  limit?: number;
+  search?: string | null;
+  simulation_type?: "agent_definition" | "prompt" | null;
+  prompt_template_id?: string | null;
+  limit?: number | null;
   /** Return the bounded list-card representation instead of the full nested run-test detail payload. */
-  summary?: boolean;
+  summary?: boolean | null;
 }
 
 export interface SimulationTestsRunParams {
-  scenario_ids?: Array<string>;
+  scenario_ids?: Array<string> | null;
   /** Simulator id */
-  simulator_id?: string;
+  simulator_id?: string | null;
   /** Select all */
-  select_all?: boolean;
+  select_all?: boolean | null;
 }
 
 export interface SpansGetParams {
   /** A run the caller can read; opens the hidden simulation project of that run's agent. */
-  test_execution_id?: string;
+  test_execution_id?: string | null;
   /** A run the caller can read; opens the hidden simulation project of that run's agent. */
-  call_execution_id?: string;
-  project_id?: string;
-  trace_id?: string;
-  start_hour?: string;
-  observation_type?: string;
-  service_name?: string;
-  expected_start_time?: string;
-  expected_version?: string;
+  call_execution_id?: string | null;
+  project_id?: string | null;
+  trace_id?: string | null;
+  start_hour?: string | null;
+  observation_type?: string | null;
+  service_name?: string | null;
+  expected_start_time?: string | null;
+  expected_version?: string | null;
 }
 
 export interface SpansListParams {
-  project_id?: string;
-  user_id?: string;
-  filters?: string;
+  project_id?: string | null;
+  user_id?: string | null;
+  filters?: string | null;
   /** Zero-based numbered page. Pages whose required ordered work exceeds the finite read contract return HTTP 422 with code page_depth_exceeded; request an earlier page or narrow the time range. */
-  page_number?: number;
-  page_size?: number;
+  page_number?: number | null;
+  page_size?: number | null;
   /** Opaque continuation token returned by the previous page. When supplied, do not also send the numbered-page parameter. */
-  cursor?: string;
-  cursor_mode?: boolean;
+  cursor?: string | null;
+  cursor_mode?: boolean | null;
   /** Omit for backward-compatible complete bounded pages, which may label total_rows as a lower bound. Send false to require an exact total, or true to opt in explicitly to lower-bound totals. */
-  allow_sampled?: boolean;
+  allow_sampled?: boolean | null;
 }
 
 export interface TracesGetParams {
   /** A run the caller can read; opens the hidden simulation project of that run's agent. */
-  test_execution_id?: string;
+  test_execution_id?: string | null;
   /** A run the caller can read; opens the hidden simulation project of that run's agent. */
-  call_execution_id?: string;
+  call_execution_id?: string | null;
   /** Project the detail was opened from. The same id can exist in several projects; when supplied, only that project's copy is read. */
-  project_id?: string;
+  project_id?: string | null;
 }
 
 export interface TracesListParams {
-  project_id?: string;
-  project_version_id?: string;
-  session_id?: string;
-  filters?: string;
+  project_id?: string | null;
+  project_version_id?: string | null;
+  session_id?: string | null;
+  filters?: string | null;
   /** Zero-based numbered page. Pages whose required ordered work exceeds the finite read contract return HTTP 422 with code page_depth_exceeded; request an earlier page or narrow the time range. */
-  page_number?: number;
-  page_size?: number;
+  page_number?: number | null;
+  page_size?: number | null;
   /** Opaque continuation token returned by the previous page. When supplied, do not also send the numbered-page parameter. */
-  cursor?: string;
-  cursor_mode?: boolean;
+  cursor?: string | null;
+  cursor_mode?: boolean | null;
   /** JSON-encoded list of custom attribute keys to hydrate; only requested keys are returned. Each key resolves to its latest live span value by (start_time, span_id). Comma-separated simple keys remain supported. */
-  attribute_keys?: string;
+  attribute_keys?: string | null;
   /** Omit for backward-compatible complete bounded pages, which may label total_rows as a lower bound. Send false to require an exact total. Send true to opt in explicitly to lower-bound totals and, on the first page, a clearly labelled bounded partial result when the full ordered prefix cannot be proven inside the read budget. */
-  allow_sampled?: boolean;
-  interval?: string;
+  allow_sampled?: boolean | null;
+  interval?: string | null;
 }
 
 export interface TracesPropertiesListParams {
-  workflow?: "observability" | "dataset" | "simulation";
-  project_ids?: string;
-  agent_definition_id?: string;
-  per_eval_config?: boolean;
-  exclude_custom_attributes?: boolean;
-  search?: string;
-  category?: "system_metric" | "eval_metric" | "annotation_metric" | "custom_attribute" | "custom_column";
-  role?: "metric" | "dimension";
-  source?: "traces" | "spans" | "sessions" | "users" | "voice_calls" | "prompts" | "datasets" | "simulation" | "both" | "all";
-  page?: number;
-  page_size?: number;
-  cursor_mode?: boolean;
-  cursor?: string;
+  workflow?: "observability" | "dataset" | "simulation" | null;
+  project_ids?: string | null;
+  agent_definition_id?: string | null;
+  per_eval_config?: boolean | null;
+  exclude_custom_attributes?: boolean | null;
+  search?: string | null;
+  category?: "system_metric" | "eval_metric" | "annotation_metric" | "custom_attribute" | "custom_column" | null;
+  role?: "metric" | "dimension" | null;
+  source?: "traces" | "spans" | "sessions" | "users" | "voice_calls" | "prompts" | "datasets" | "simulation" | "both" | "all" | null;
+  page?: number | null;
+  page_size?: number | null;
+  cursor_mode?: boolean | null;
+  cursor?: string | null;
 }
 
 export interface UsageOverviewParams {
-  period?: string;
-  period_end?: string;
-  workspace_id?: string;
+  period?: string | null;
+  period_end?: string | null;
+  workspace_id?: string | null;
 }
 
 /**
@@ -2503,12 +2503,12 @@ export class AnnotationQueuesResource extends Resource {
   }
 
   /**
-   * Export a queue's annotations.
+   * Export a queue's annotations, as JSON or, with `export_format=csv`, as CSV text.
    *
    * GET /model-hub/annotation-queues/{id}/export/
    */
-  export(id: string, params: AnnotationQueuesExportParams = {}, options?: RequestOptions): Promise<Array<unknown | null>> {
-    return this._t.call<Array<unknown | null>>(ops.OP_ANNOTATION_QUEUES_EXPORT, { path: { id: id }, query: { export_format: params.export_format, status: params.status } }, options);
+  export(id: string, params: AnnotationQueuesExportParams = {}, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_ANNOTATION_QUEUES_EXPORT, { path: { id: id }, query: { export_format: params.export_format, status: params.status } }, options);
   }
 
   /**

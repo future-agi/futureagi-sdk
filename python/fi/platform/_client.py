@@ -76,14 +76,16 @@ class Client(Resources):
         files: Dict[str, FileInput | list] | None = None,
         unwrap: str | None = "result",
         multipart: bool = False,
+        decode: str = "json",
         options: RequestOptions | None = None,
     ) -> Any:
         """Call any endpoint under the base URL with the client's auth, retries and errors.
 
         For endpoints the catalog does not describe yet. Returns the decoded JSON with the
-        `unwrap` key (the backend's `{status, result}` envelope) removed when present.
+        `unwrap` key (the backend's `{status, result}` envelope) removed when present;
+        `decode="text"` returns the body as text, `"auto"` does so unless the response is JSON.
         """
-        return self._transport.raw(method, path, query=query, body=body, files=files, unwrap=unwrap, multipart=multipart, options=options)
+        return self._transport.raw(method, path, query=query, body=body, files=files, unwrap=unwrap, multipart=multipart, decode=decode, options=options)
 
     def close(self) -> None:
         self._transport.close()
@@ -126,10 +128,11 @@ class AsyncClient(AsyncResources):
         files: Dict[str, FileInput | list] | None = None,
         unwrap: str | None = "result",
         multipart: bool = False,
+        decode: str = "json",
         options: RequestOptions | None = None,
     ) -> Any:
         """See `Client.request`."""
-        return await self._transport.raw(method, path, query=query, body=body, files=files, unwrap=unwrap, multipart=multipart, options=options)
+        return await self._transport.raw(method, path, query=query, body=body, files=files, unwrap=unwrap, multipart=multipart, decode=decode, options=options)
 
     async def aclose(self) -> None:
         await self._transport.aclose()

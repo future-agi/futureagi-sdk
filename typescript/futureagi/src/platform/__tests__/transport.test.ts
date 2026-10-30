@@ -36,7 +36,7 @@ function fake(...responses: Array<Response | Error | ((seen: Seen) => Response |
     if (answer instanceof Error) {
       throw answer;
     }
-    return answer.clone(); // the same Response may answer several calls
+    return typeof next === "function" ? answer : answer.clone(); // a fixed Response may answer several calls; a factory makes a fresh one
   };
   return { fetch, calls };
 }
@@ -100,11 +100,81 @@ describe("errors", () => {
     expect(error.detail).toEqual({ new_dataset_name: ["This field may not be blank."] });
   });
 
-  test("an unfollowed redirect is an error, not an empty result", async () => {
-    const { fetch } = fake(new Response(null, { status: 301, headers: { location: "https://api.futureagi.com/" } }));
+  test("a redirect without a target is an error, not an empty result", async () => {
+    const { fetch } = fake(new Response(null, { status: 301 }));
     const error = await client(fetch).datasets.list().firstPage().catch((e) => e);
     expect(error).toBeInstanceOf(APIError);
     expect(error.status).toBe(301);
+  });
+});
+
+describe("redirects", () => {
+  const page = () => json(200, { status: true, result: { datasets: [], total_pages: 1 } });
+
+  test("one within the client's origin is followed, credentials included", async () => {
+    const { fetch, calls } = fake(new Response(null, { status: 307, headers: { location: "/model-hub/develops/get-datasets/" } }), page());
+    await client(fetch, { workspaceId: "w1" }).datasets.list().firstPage();
+    expect(calls.map((c) => c.url)).toEqual([`${BASE}/model-hub/develops/get-datasets/?page=0`, `${BASE}/model-hub/develops/get-datasets/`]);
+    expect(calls[1].headers).toMatchObject({ "X-Api-Key": "k", "X-Secret-Key": "s", "X-Workspace-Id": "w1" });
+    expect(calls[0].signal).toBeInstanceOf(AbortSignal);
+  });
+
+  test("a 303 re-issues the request as a GET without its body", async () => {
+    const { fetch, calls } = fake(new Response(null, { status: 303, headers: { location: `${BASE}/done/` } }), json(200, { status: true, result: { message: "ok", dataset_id: "d1", dataset_name: "x" } }));
+    await client(fetch).datasets.create({ new_dataset_name: "x" });
+    expect(calls.map((c) => [c.method, c.url])).toEqual([["POST", `${BASE}/model-hub/develops/create-empty-dataset/`], ["GET", `${BASE}/done/`]]);
+    expect(calls[1].body).toBeUndefined();
+  });
+
+  test("one that leaves the origin is refused, so the API keys never travel", async () => {
+    const { fetch, calls } = fake(new Response(null, { status: 302, headers: { location: "https://evil.example/collect" } }));
+    const error = await client(fetch).datasets.list().firstPage().catch((e) => e);
+    expect(error).toBeInstanceOf(APIConnectionError);
+    expect(error.message).toMatch(/not followed/);
+    expect(calls).toHaveLength(1); // nothing was sent to the other host
+  });
+
+  test("a loop stops after five hops", async () => {
+    const { fetch, calls } = fake(new Response(null, { status: 302, headers: { location: `${BASE}/again/` } }));
+    await expect(client(fetch).datasets.list().firstPage()).rejects.toThrow(/more than 5 redirects/);
+    expect(calls).toHaveLength(6);
+  });
+});
+
+describe("bodies", () => {
+  test("an explicit null is sent (it clears a nullable field); undefined is left out", async () => {
+    const { fetch, calls } = fake(json(200, { status: true, result: { id: "p1" } }));
+    await client(fetch).request("PATCH", "/x/", { body: { prompt_folder: null, name: undefined, keep: 1 } }, { extraBody: { other: null } });
+    expect(JSON.parse(calls[0].body as string)).toEqual({ prompt_folder: null, keep: 1, other: null });
+  });
+
+  test("a form field cannot carry null, so one is left out", async () => {
+    const { fetch, calls } = fake(json(200, { status: true, result: { dataset_id: "d1", dataset_name: "x" } }));
+    await client(fetch).datasets.createFromFile({ file: new Uint8Array([97]), new_dataset_name: "x", model_type: "t", source: null });
+    const form = calls[0].body as FormData;
+    expect(form.get("new_dataset_name")).toBe("x");
+    expect(form.has("source")).toBe(false);
+  });
+
+  test("text and auto decoding return the body as text", async () => {
+    const csv = fake(new Response("id,score\n1,0.5\n", { status: 200, headers: { "content-type": "text/csv" } }));
+    expect(await client(csv.fetch).annotationQueues.export("q1", { export_format: "csv" })).toBe("id,score\n1,0.5\n");
+    const asJson = fake(json(200, { status: true, result: { rows: [] } }));
+    expect(await client(asJson.fetch).annotationQueues.export("q1")).toEqual({ rows: [] }); // auto: JSON when the response is JSON
+    const text = fake(new Response("plain", { status: 200, headers: { "content-type": "application/json" } }));
+    expect(await client(text.fetch).request("GET", "/x/", { decode: "text" })).toBe("plain"); // text: never parsed
+  });
+});
+
+describe("headers", () => {
+  test("a per-call override replaces the client's header whatever its letter case", async () => {
+    const { fetch, calls } = fake(json(200, { status: true, result: { table: [] } }));
+    await client(fetch, { workspaceId: "a", defaultHeaders: { "x-api-key": "from-defaults" } }).datasets.get("d1", {}, { headers: { "x-workspace-id": "b" } });
+    const sent = calls[0].headers;
+    expect(Object.keys(sent).filter((k) => k.toLowerCase() === "x-workspace-id")).toHaveLength(1);
+    expect(sent["x-workspace-id"]).toBe("b");
+    expect(Object.keys(sent).filter((k) => k.toLowerCase() === "x-api-key")).toHaveLength(1);
+    expect(sent["x-api-key"]).toBe("from-defaults");
   });
 });
 
@@ -122,6 +192,25 @@ describe("retries", () => {
     const { fetch, calls } = fake(json(429, {}, { "retry-after": "0" }), dataset());
     expect((await client(fetch, { maxRetries: 1 }).datasets.create({ new_dataset_name: "x" })).dataset_id).toBe("d1");
     expect(calls).toHaveLength(2);
+  });
+
+  test("a retried response is released before the wait, and a body that fails mid-read is a transport error", async () => {
+    let cancelled = 0;
+    const busy = () => {
+      const stream = new ReadableStream<Uint8Array>({ start(c) { c.enqueue(new TextEncoder().encode('{"detail": "busy"}')); }, cancel() { cancelled++; } });
+      return new Response(stream, { status: 503, headers: { "content-type": "application/json", "retry-after": "0" } });
+    };
+    const first = fake(busy, json(200, { status: true, result: { datasets: [], total_pages: 1 } }));
+    await client(first.fetch, { maxRetries: 1 }).datasets.list().firstPage();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(cancelled).toBe(1);
+
+    const torn = () => new Response(new ReadableStream({ start(c) { c.error(new Error("socket hang up")); } }), { status: 200, headers: { "content-type": "application/json" } });
+    const once = fake(torn);
+    await expect(client(once.fetch).datasets.list().firstPage()).rejects.toBeInstanceOf(APIConnectionError);
+    const retried = fake(torn, json(200, { status: true, result: { datasets: [], total_pages: 1 } }));
+    await client(retried.fetch, { maxRetries: 1 }).datasets.list().firstPage(); // a GET may be retried after a torn body
+    expect(retried.calls).toHaveLength(2);
   });
 
   test("a connection error is not retried for a write and becomes APIConnectionError", async () => {

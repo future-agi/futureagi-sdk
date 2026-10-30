@@ -140,7 +140,7 @@ class Completions:
             from fi.gateway._streaming import Stream
 
             response = self._client._get_base_client()._stream_request(opts, agentcc_params)
-            return Stream(response)
+            return Stream(response, Completion)  # text completions, not chat chunks
 
         return self._client._get_base_client()._request_with_retry(opts, Completion, agentcc_params)
 
@@ -226,6 +226,6 @@ class AsyncCompletions:
             from fi.gateway._streaming import AsyncStream
 
             response = await self._client._get_base_client()._stream_request(opts, agentcc_params)
-            return AsyncStream(response)
+            return AsyncStream(response, Completion)
 
         return await self._client._get_base_client()._request_with_retry(opts, Completion, agentcc_params)

@@ -7,7 +7,7 @@ import logging
 import random
 import time
 from abc import ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, TypeVar
 
 import anyio
@@ -88,14 +88,38 @@ def _callback_response(result: Any) -> Any:
     )
 
 
-def _track_session(base: Any, result: Any) -> None:
-    """Add a finished request's cost and tokens to the owning client's active session."""
-    session = getattr(getattr(base, "_owner", None), "_active_session", None)
+def _session_of(base: Any) -> Any:
+    """The owning client's session in the current thread or task, taken when a request starts."""
+    return getattr(getattr(base, "_owner", None), "_active_session", None)
+
+
+def _track_session(session: Any, result: Any) -> None:
+    """Add a finished request's cost and tokens to the session the request was made in (not to
+    whichever session is active when it completes: another task's could be)."""
     if session is None:
         return
     meta = getattr(result, "agentcc", None)
     usage = getattr(result, "usage", None)
     session.track_request(cost=getattr(meta, "cost", None) or 0.0, tokens=getattr(usage, "total_tokens", None) or 0)
+
+
+_REDACTED = "[REDACTED]"
+
+
+def redact_callback_request(options: RequestOptions) -> RequestOptions:
+    """A copy of the request for callbacks only, with the message content removed. The body the
+    provider receives is untouched."""
+    body = options.body
+    if isinstance(body, dict):
+        body = dict(body)
+        if isinstance(body.get("messages"), list):
+            body["messages"] = [
+                {**m, "content": _REDACTED} if isinstance(m, dict) and m.get("content") is not None else m for m in body["messages"]
+            ]
+        for key in ("prompt", "input", "instructions"):
+            if body.get(key) is not None:
+                body[key] = _REDACTED
+    return replace(options, body=body)
 
 
 def _payload(options: RequestOptions) -> dict[str, Any]:
@@ -233,6 +257,13 @@ class BaseClient(ABC):
         delay += random.uniform(-jitter, jitter)
         return min(delay, rc.backoff_max)
 
+    def _for_callbacks(self, options: RequestOptions) -> RequestOptions:
+        """What callbacks see: the request as sent, or with message content redacted when the
+        owning client was created with `redact_messages=True`."""
+        if getattr(getattr(self, "_owner", None), "redact_messages", False):
+            return redact_callback_request(options)
+        return options
+
     def _dispatch_callback(self, method_name: str, *args: Any) -> None:
         """Call a method on all registered callbacks, swallowing exceptions."""
         for callback in self._callbacks:
@@ -360,14 +391,16 @@ class SyncBaseClient(BaseClient):
 
         last_exc: Exception | None = None
 
-        self._dispatch_callback("on_request_start", options)
+        cb = self._for_callbacks(options)
+        session = _session_of(self)
+        self._dispatch_callback("on_request_start", cb)
 
         for attempt in range(loop_max + 1):
             try:
                 result = self._request(options, response_cls, agentcc_params)
                 if self._callbacks:
-                    self._dispatch_callback("on_request_end", options, _callback_response(result))
-                _track_session(self, result)
+                    self._dispatch_callback("on_request_end", cb, _callback_response(result))
+                _track_session(session, result)
                 return result
             except APIStatusError as exc:
                 last_exc = exc
@@ -376,10 +409,10 @@ class SyncBaseClient(BaseClient):
                         dict(exc.response.headers) if exc.response and hasattr(exc.response, "headers") else None
                     )
                     delay = self._calculate_delay(attempt, resp_headers)
-                    self._dispatch_callback("on_retry", options, exc, attempt + 1, delay)
+                    self._dispatch_callback("on_retry", cb, exc, attempt + 1, delay)
                     time.sleep(delay)
                     continue
-                self._dispatch_callback("on_error", options, exc)
+                self._dispatch_callback("on_error", cb, exc)
                 raise
             except APITimeoutError as exc:
                 last_exc = exc
@@ -388,10 +421,10 @@ class SyncBaseClient(BaseClient):
                 )
                 if attempt < effective_max:
                     delay = self._calculate_delay(attempt)
-                    self._dispatch_callback("on_retry", options, exc, attempt + 1, delay)
+                    self._dispatch_callback("on_retry", cb, exc, attempt + 1, delay)
                     time.sleep(delay)
                     continue
-                self._dispatch_callback("on_error", options, exc)
+                self._dispatch_callback("on_error", cb, exc)
                 raise
             except APIConnectionError as exc:
                 last_exc = exc
@@ -402,15 +435,15 @@ class SyncBaseClient(BaseClient):
                 )
                 if attempt < effective_max:
                     delay = self._calculate_delay(attempt)
-                    self._dispatch_callback("on_retry", options, exc, attempt + 1, delay)
+                    self._dispatch_callback("on_retry", cb, exc, attempt + 1, delay)
                     time.sleep(delay)
                     continue
-                self._dispatch_callback("on_error", options, exc)
+                self._dispatch_callback("on_error", cb, exc)
                 raise
 
         # Should not reach here, but just in case
         if last_exc is not None:
-            self._dispatch_callback("on_error", options, last_exc)
+            self._dispatch_callback("on_error", cb, last_exc)
             raise last_exc
         raise RuntimeError("Retry loop exited unexpectedly")  # pragma: no cover
 
@@ -469,13 +502,15 @@ class SyncBaseClient(BaseClient):
 
         last_exc: Exception | None = None
 
-        self._dispatch_callback("on_request_start", options)
+        cb = self._for_callbacks(options)
+        session = _session_of(self)
+        self._dispatch_callback("on_request_start", cb)
 
         for attempt in range(loop_max + 1):
             try:
                 result = self._request_raw(options, agentcc_params)
                 if self._callbacks:
-                    self._dispatch_callback("on_request_end", options, _callback_response(result))
+                    self._dispatch_callback("on_request_end", cb, _callback_response(result))
                 return result
             except APIStatusError as exc:
                 last_exc = exc
@@ -484,10 +519,10 @@ class SyncBaseClient(BaseClient):
                         dict(exc.response.headers) if exc.response and hasattr(exc.response, "headers") else None
                     )
                     delay = self._calculate_delay(attempt, resp_headers)
-                    self._dispatch_callback("on_retry", options, exc, attempt + 1, delay)
+                    self._dispatch_callback("on_retry", cb, exc, attempt + 1, delay)
                     time.sleep(delay)
                     continue
-                self._dispatch_callback("on_error", options, exc)
+                self._dispatch_callback("on_error", cb, exc)
                 raise
             except APITimeoutError as exc:
                 last_exc = exc
@@ -496,10 +531,10 @@ class SyncBaseClient(BaseClient):
                 )
                 if attempt < effective_max:
                     delay = self._calculate_delay(attempt)
-                    self._dispatch_callback("on_retry", options, exc, attempt + 1, delay)
+                    self._dispatch_callback("on_retry", cb, exc, attempt + 1, delay)
                     time.sleep(delay)
                     continue
-                self._dispatch_callback("on_error", options, exc)
+                self._dispatch_callback("on_error", cb, exc)
                 raise
             except APIConnectionError as exc:
                 last_exc = exc
@@ -510,14 +545,14 @@ class SyncBaseClient(BaseClient):
                 )
                 if attempt < effective_max:
                     delay = self._calculate_delay(attempt)
-                    self._dispatch_callback("on_retry", options, exc, attempt + 1, delay)
+                    self._dispatch_callback("on_retry", cb, exc, attempt + 1, delay)
                     time.sleep(delay)
                     continue
-                self._dispatch_callback("on_error", options, exc)
+                self._dispatch_callback("on_error", cb, exc)
                 raise
 
         if last_exc is not None:
-            self._dispatch_callback("on_error", options, last_exc)
+            self._dispatch_callback("on_error", cb, last_exc)
             raise last_exc
         raise RuntimeError("Retry loop exited unexpectedly")  # pragma: no cover
 
@@ -649,14 +684,16 @@ class AsyncBaseClient(BaseClient):
 
         last_exc: Exception | None = None
 
-        self._dispatch_callback("on_request_start", options)
+        cb = self._for_callbacks(options)
+        session = _session_of(self)
+        self._dispatch_callback("on_request_start", cb)
 
         for attempt in range(loop_max + 1):
             try:
                 result = await self._request(options, response_cls, agentcc_params)
                 if self._callbacks:
-                    self._dispatch_callback("on_request_end", options, _callback_response(result))
-                _track_session(self, result)
+                    self._dispatch_callback("on_request_end", cb, _callback_response(result))
+                _track_session(session, result)
                 return result
             except APIStatusError as exc:
                 last_exc = exc
@@ -665,10 +702,10 @@ class AsyncBaseClient(BaseClient):
                         dict(exc.response.headers) if exc.response and hasattr(exc.response, "headers") else None
                     )
                     delay = self._calculate_delay(attempt, resp_headers)
-                    self._dispatch_callback("on_retry", options, exc, attempt + 1, delay)
+                    self._dispatch_callback("on_retry", cb, exc, attempt + 1, delay)
                     await anyio.sleep(delay)
                     continue
-                self._dispatch_callback("on_error", options, exc)
+                self._dispatch_callback("on_error", cb, exc)
                 raise
             except APITimeoutError as exc:
                 last_exc = exc
@@ -677,10 +714,10 @@ class AsyncBaseClient(BaseClient):
                 )
                 if attempt < effective_max:
                     delay = self._calculate_delay(attempt)
-                    self._dispatch_callback("on_retry", options, exc, attempt + 1, delay)
+                    self._dispatch_callback("on_retry", cb, exc, attempt + 1, delay)
                     await anyio.sleep(delay)
                     continue
-                self._dispatch_callback("on_error", options, exc)
+                self._dispatch_callback("on_error", cb, exc)
                 raise
             except APIConnectionError as exc:
                 last_exc = exc
@@ -691,14 +728,14 @@ class AsyncBaseClient(BaseClient):
                 )
                 if attempt < effective_max:
                     delay = self._calculate_delay(attempt)
-                    self._dispatch_callback("on_retry", options, exc, attempt + 1, delay)
+                    self._dispatch_callback("on_retry", cb, exc, attempt + 1, delay)
                     await anyio.sleep(delay)
                     continue
-                self._dispatch_callback("on_error", options, exc)
+                self._dispatch_callback("on_error", cb, exc)
                 raise
 
         if last_exc is not None:
-            self._dispatch_callback("on_error", options, last_exc)
+            self._dispatch_callback("on_error", cb, last_exc)
             raise last_exc
         raise RuntimeError("Retry loop exited unexpectedly")  # pragma: no cover
 
@@ -757,13 +794,15 @@ class AsyncBaseClient(BaseClient):
 
         last_exc: Exception | None = None
 
-        self._dispatch_callback("on_request_start", options)
+        cb = self._for_callbacks(options)
+        session = _session_of(self)
+        self._dispatch_callback("on_request_start", cb)
 
         for attempt in range(loop_max + 1):
             try:
                 result = await self._request_raw(options, agentcc_params)
                 if self._callbacks:
-                    self._dispatch_callback("on_request_end", options, _callback_response(result))
+                    self._dispatch_callback("on_request_end", cb, _callback_response(result))
                 return result
             except APIStatusError as exc:
                 last_exc = exc
@@ -772,10 +811,10 @@ class AsyncBaseClient(BaseClient):
                         dict(exc.response.headers) if exc.response and hasattr(exc.response, "headers") else None
                     )
                     delay = self._calculate_delay(attempt, resp_headers)
-                    self._dispatch_callback("on_retry", options, exc, attempt + 1, delay)
+                    self._dispatch_callback("on_retry", cb, exc, attempt + 1, delay)
                     await anyio.sleep(delay)
                     continue
-                self._dispatch_callback("on_error", options, exc)
+                self._dispatch_callback("on_error", cb, exc)
                 raise
             except APITimeoutError as exc:
                 last_exc = exc
@@ -784,10 +823,10 @@ class AsyncBaseClient(BaseClient):
                 )
                 if attempt < effective_max:
                     delay = self._calculate_delay(attempt)
-                    self._dispatch_callback("on_retry", options, exc, attempt + 1, delay)
+                    self._dispatch_callback("on_retry", cb, exc, attempt + 1, delay)
                     await anyio.sleep(delay)
                     continue
-                self._dispatch_callback("on_error", options, exc)
+                self._dispatch_callback("on_error", cb, exc)
                 raise
             except APIConnectionError as exc:
                 last_exc = exc
@@ -798,14 +837,14 @@ class AsyncBaseClient(BaseClient):
                 )
                 if attempt < effective_max:
                     delay = self._calculate_delay(attempt)
-                    self._dispatch_callback("on_retry", options, exc, attempt + 1, delay)
+                    self._dispatch_callback("on_retry", cb, exc, attempt + 1, delay)
                     await anyio.sleep(delay)
                     continue
-                self._dispatch_callback("on_error", options, exc)
+                self._dispatch_callback("on_error", cb, exc)
                 raise
 
         if last_exc is not None:
-            self._dispatch_callback("on_error", options, last_exc)
+            self._dispatch_callback("on_error", cb, last_exc)
             raise last_exc
         raise RuntimeError("Retry loop exited unexpectedly")  # pragma: no cover
 

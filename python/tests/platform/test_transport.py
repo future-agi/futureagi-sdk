@@ -98,11 +98,116 @@ def test_non_json_success_body_is_an_api_error():
         client.datasets.create(new_dataset_name="x")
 
 
-def test_unfollowed_redirect_is_an_error_not_an_empty_result():
-    client = _client(lambda r: httpx.Response(301, headers={"location": "https://api.futureagi.com/"}))
+def test_redirect_without_a_target_is_an_error_not_an_empty_result():
+    client = _client(lambda r: httpx.Response(301))
     with pytest.raises(fp.APIError) as exc:
         client.datasets.list().first_page()
     assert exc.value.status_code == 301
+
+
+def test_redirect_within_the_origin_is_followed_with_credentials():
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        if len(seen) == 1:
+            return httpx.Response(307, headers={"location": "/model-hub/develops/get-datasets/"})
+        return httpx.Response(200, json={"status": True, "result": {"datasets": [], "total_pages": 1}})
+
+    _client(handler, workspace_id="w1").datasets.list().first_page()
+    assert [str(r.url) for r in seen] == [f"{BASE}/model-hub/develops/get-datasets/?page=0", f"{BASE}/model-hub/develops/get-datasets/"]
+    assert seen[1].headers["x-api-key"] == "k" and seen[1].headers["x-workspace-id"] == "w1"
+
+
+def test_303_is_followed_as_a_get_without_the_body():
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        request.read()
+        return httpx.Response(303, headers={"location": f"{BASE}/done/"}) if len(seen) == 1 else _dataset_response()
+
+    _client(handler).datasets.create(new_dataset_name="x")
+    assert [(r.method, str(r.url)) for r in seen] == [("POST", f"{BASE}/model-hub/develops/create-empty-dataset/"), ("GET", f"{BASE}/done/")]
+    assert seen[1].content == b""
+
+
+def test_redirect_off_the_origin_is_refused_so_the_keys_never_travel():
+    seen: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request.url.host)
+        return httpx.Response(302, headers={"location": "https://evil.example/collect"})
+
+    with pytest.raises(fp.APIConnectionError, match="not followed"):
+        _client(handler).datasets.list().first_page()
+    assert seen == ["backend.test"]
+
+
+def test_redirect_loop_stops_after_five_hops():
+    client = _client(lambda r: httpx.Response(302, headers={"location": f"{BASE}/again/"}))
+    with pytest.raises(fp.APIConnectionError, match="more than 5 redirects"):
+        client.datasets.list().first_page()
+
+
+def test_explicit_none_is_sent_as_null_and_an_omitted_argument_is_left_out():
+    seen: list[bytes] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request.read())
+        return httpx.Response(200, json={"status": True, "result": {"id": "p1"}})
+
+    client = _client(handler)
+    client.prompts.update("p1", prompt_folder=None)  # clears the folder: the field goes as null
+    assert json.loads(seen[-1]) == {"prompt_folder": None}
+    client.prompts.update("p1", name="n")  # prompt_folder not passed: left out
+    assert json.loads(seen[-1]) == {"name": "n"}
+    client.request("PATCH", "/x/", body={"prompt_folder": None, "skip": fp.NOT_GIVEN}, options=None)  # the escape hatches keep an explicit None too
+    assert json.loads(seen[-1]) == {"prompt_folder": None}
+    client.prompts.update("p1", name="n", extra_body={"other": None})
+    assert json.loads(seen[-1]) == {"name": "n", "other": None}
+    assert repr(fp.NOT_GIVEN) == "NOT_GIVEN" and not fp.NOT_GIVEN
+
+
+def test_query_and_form_fields_drop_none_since_they_cannot_carry_null():
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        request.read()
+        if request.method == "GET":
+            return httpx.Response(200, json={"status": True, "result": {"datasets": [], "total_pages": 1}})
+        return httpx.Response(200, json={"status": True, "result": {"dataset_id": "d1", "dataset_name": "x"}})
+
+    client = _client(handler)
+    client.datasets.list(search_text=None, page_size=5).first_page()
+    assert str(seen[-1].url) == f"{BASE}/model-hub/develops/get-datasets/?page_size=5&page=0"
+    client.datasets.create_from_file(file=b"a,b", new_dataset_name="x", model_type="t", source=None)
+    assert b'name="source"' not in seen[-1].content and b'name="new_dataset_name"\r\n\r\nx' in seen[-1].content
+
+
+def test_text_and_auto_decoding_return_the_body_as_text():
+    csv = _client(lambda r: httpx.Response(200, text="id,score\n1,0.5\n", headers={"content-type": "text/csv"}))
+    assert csv.annotation_queues.export("q1", export_format="csv") == "id,score\n1,0.5\n"
+    as_json = _client(lambda r: httpx.Response(200, json={"status": True, "result": {"rows": []}}))
+    assert as_json.annotation_queues.export("q1") == {"rows": []}  # auto: JSON when the response is JSON
+    text = _client(lambda r: httpx.Response(200, text="plain", headers={"content-type": "application/json"}))
+    assert text.request("GET", "/x/", decode="text") == "plain"  # text: never parsed
+    with pytest.raises(ValueError, match="decode"):
+        text.request("GET", "/x/", decode="xml")
+
+
+def test_per_call_header_override_replaces_the_clients_header_whatever_the_case():
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        return httpx.Response(200, json={"status": True, "result": {"table": []}})
+
+    client = _client(handler, workspace_id="a", default_headers={"x-api-key": "from-defaults"})
+    client.datasets.get("d1", options=fp.RequestOptions(headers={"x-workspace-id": "b"}))
+    assert seen[0].headers.get_list("x-workspace-id") == ["b"]
+    assert seen[0].headers.get_list("x-api-key") == ["from-defaults"]
 
 
 def test_field_errors_appear_in_the_message():

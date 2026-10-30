@@ -31,7 +31,7 @@ from ._errors import (
 from ._pagination import AsyncPager, Page, SyncPager
 from ._resource import Resource, ResourceSet
 from ._stability import BetaWarning
-from ._transport import FileInput, RequestOptions
+from ._transport import NOT_GIVEN, FileInput, NotGiven, RequestOptions
 
 __all__ = [
     "APIConnectionError",
@@ -46,6 +46,8 @@ __all__ = [
     "FileInput",
     "FutureAGIError",
     "InternalServerError",
+    "NOT_GIVEN",
+    "NotGiven",
     "NotFoundError",
     "Page",
     "PaymentRequiredError",

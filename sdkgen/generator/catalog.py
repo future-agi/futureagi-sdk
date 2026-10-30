@@ -17,6 +17,7 @@ MCP_ACCESS = {"read", "write", "destructive"}
 MCP_KEYS = {"name", "group", "access", "open_world", "max_page_size", "stability"}
 CONTRACT_FIXES = {"note", "untyped", "page_items", "body", "body_required", "query"}
 FIX_TYPES = {"string", "integer", "number", "boolean", "object", "array", "file"}
+DECODE_MODES = {"json", "text", "auto"}  # auto: JSON when the response says so, else the body text
 BODY_METHODS = ("post", "put", "patch")
 
 
@@ -47,6 +48,7 @@ class Op:
     unwrap: str | None
     returns: dict | None  # schema of what the caller gets (an item, for paginated ops)
     multipart: bool = False  # form fields + file uploads instead of a JSON body
+    decode: str = "json"  # how the response body is read: json | text | auto
 
     @property
     def namespace(self) -> tuple[str, ...]:
@@ -303,6 +305,9 @@ def _load_one(spec: dict, entry: dict, seen_mcp: set[str]) -> Op:
     params = _apply_request_fix(op_id, fix, _contract_params(op_id, spec, item, contract_op))
 
     multipart = bool(entry["operation"].get("multipart", False))
+    decode = entry["operation"].get("decode", "json")
+    if decode not in DECODE_MODES:
+        raise CatalogError(f"{op_id}: operation.decode must be one of {sorted(DECODE_MODES)}")
     file_params = [p.name for p in params if p.location == "body" and is_file(p.schema)]
     if multipart and method not in BODY_METHODS:
         raise CatalogError(f"{op_id}: multipart is only meaningful on POST/PUT/PATCH")
@@ -355,6 +360,7 @@ def _load_one(spec: dict, entry: dict, seen_mcp: set[str]) -> Op:
         unwrap=unwrap,
         returns=returns,
         multipart=multipart,
+        decode=decode,
     )
 
 

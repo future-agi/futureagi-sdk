@@ -1250,8 +1250,8 @@ operations:
   surfaces: {sdk: {}, mcp: false}
 
 - id: annotation_queues.export
-  description: Export a queue's annotations.
-  operation: {method: GET, path: '/model-hub/annotation-queues/{id}/export/'}
+  description: Export a queue's annotations, as JSON or, with `export_format=csv`, as CSV text.
+  operation: {method: GET, path: '/model-hub/annotation-queues/{id}/export/', decode: auto}
   surfaces: {sdk: {}, mcp: false}
 
 - id: annotation_queues.export_to_dataset

@@ -174,13 +174,19 @@ class AsyncSSEParser:
 
 
 class Stream:
-    """Synchronous iterator over streaming chat completion chunks."""
+    """Synchronous iterator over the events of a streaming response.
 
-    def __init__(self, response: Any, chunk_cls: type[ChatCompletionChunk] = ChatCompletionChunk) -> None:
+    `chunk_cls` is the event model of the endpoint: `ChatCompletionChunk` for chat (the
+    default), `Completion` for legacy completions, `ResponseStreamEvent` for the Responses API.
+    The HTTP response is closed when the stream ends, however it ends.
+    """
+
+    def __init__(self, response: Any, chunk_cls: type[Any] = ChatCompletionChunk) -> None:
         self._response = response
         self._chunk_cls = chunk_cls
         self._agentcc = AgentCCMetadata.from_headers(dict(response.headers), http_response=response)
         self._is_cache_hit = False
+        self._closed = False
 
         content_type = response.headers.get("content-type", "")
         if "application/json" in content_type:
@@ -205,7 +211,7 @@ class Stream:
     def __next__(self) -> ChatCompletionChunk:
         return next(self._iterator)
 
-    def _iterate_chunks(self, parser: SSEParser) -> Iterator[ChatCompletionChunk]:
+    def _iterate_chunks(self, parser: SSEParser) -> Iterator[Any]:
         try:
             for event in parser:
                 if event.data is None:
@@ -226,9 +232,16 @@ class Stream:
             raise
         except Exception as e:
             raise StreamError(f"Stream interrupted: {e}") from e
+        finally:
+            # Normal completion, an error, or the caller stopping early: the connection goes
+            # back to the pool either way.
+            self.close()
 
-    def _cache_hit_iterator(self, body: dict[str, Any]) -> Iterator[ChatCompletionChunk]:
+    def _cache_hit_iterator(self, body: dict[str, Any]) -> Iterator[Any]:
         """Convert a JSON cache-hit response into a single chunk."""
+        if self._chunk_cls is not ChatCompletionChunk:
+            yield self._chunk_cls.model_validate(body)
+            return
         choices: list[StreamChoice] = []
         for choice_data in body.get("choices", []):
             msg = choice_data.get("message", {})
@@ -269,8 +282,10 @@ class Stream:
         yield chunk
 
     def close(self) -> None:
-        """Close the underlying HTTP response."""
-        self._response.close()
+        """Close the underlying HTTP response (once: the stream also closes it when it ends)."""
+        if not self._closed:
+            self._closed = True
+            self._response.close()
 
 
 # ---------------------------------------------------------------------------
@@ -279,18 +294,23 @@ class Stream:
 
 
 class AsyncStream:
-    """Asynchronous iterator over streaming chat completion chunks."""
+    """Asynchronous iterator over the events of a streaming response (see `Stream`).
 
-    def __init__(self, response: Any, chunk_cls: type[ChatCompletionChunk] = ChatCompletionChunk) -> None:
+    One iterator serves every consumer: a loop that stops early and a later
+    `get_final_completion()` resume the same parser instead of reading the response twice.
+    """
+
+    def __init__(self, response: Any, chunk_cls: type[Any] = ChatCompletionChunk) -> None:
         self._response = response
         self._chunk_cls = chunk_cls
         self._agentcc = AgentCCMetadata.from_headers(dict(response.headers), http_response=response)
         self._is_cache_hit = False
 
+        self._closed = False
         content_type = response.headers.get("content-type", "")
         if "application/json" in content_type:
             self._is_cache_hit = True
-        self._started = False
+        self._iterator: AsyncIterator[Any] = self._async_cache_hit_iterator() if self._is_cache_hit else self._async_iterate_chunks()
 
     @property
     def agentcc(self) -> AgentCCMetadata:
@@ -300,12 +320,13 @@ class AsyncStream:
     def response(self) -> Any:
         return self._response
 
-    def __aiter__(self) -> AsyncIterator[ChatCompletionChunk]:
-        if self._is_cache_hit:
-            return self._async_cache_hit_iterator()
-        return self._async_iterate_chunks()
+    def __aiter__(self) -> AsyncIterator[Any]:
+        return self._iterator
 
-    async def _async_iterate_chunks(self) -> AsyncIterator[ChatCompletionChunk]:
+    async def __anext__(self) -> Any:
+        return await self._iterator.__anext__()
+
+    async def _async_iterate_chunks(self) -> AsyncIterator[Any]:
         parser = AsyncSSEParser(self._response.aiter_bytes())
         try:
             async for event in parser:
@@ -326,9 +347,14 @@ class AsyncStream:
             raise
         except Exception as e:
             raise StreamError(f"Stream interrupted: {e}") from e
+        finally:
+            await self.aclose()
 
-    async def _async_cache_hit_iterator(self) -> AsyncIterator[ChatCompletionChunk]:
+    async def _async_cache_hit_iterator(self) -> AsyncIterator[Any]:
         body = _json.loads(await self._response.aread())
+        if self._chunk_cls is not ChatCompletionChunk:
+            yield self._chunk_cls.model_validate(body)
+            return
         choices: list[StreamChoice] = []
         for choice_data in body.get("choices", []):
             msg = choice_data.get("message", {})
@@ -368,7 +394,10 @@ class AsyncStream:
         )
 
     async def aclose(self) -> None:
-        await self._response.aclose()
+        """Close the underlying HTTP response (once: the stream also closes it when it ends)."""
+        if not self._closed:
+            self._closed = True
+            await self._response.aclose()
 
 
 # ---------------------------------------------------------------------------
