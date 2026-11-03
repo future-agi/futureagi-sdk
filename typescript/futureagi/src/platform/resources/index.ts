@@ -14,6 +14,7 @@ import { Datasets } from "./datasets";
 import { ErrorClusters } from "./error_clusters";
 import { Evals } from "./evals";
 import { Experiments } from "./experiments";
+import { FileKnowledgeBases } from "./file_knowledge_bases";
 import { Gateway } from "./gateway";
 import { KnowledgeBases } from "./knowledge_bases";
 import { Models } from "./models";
@@ -43,6 +44,7 @@ export interface Resources {
   errorClusters: ErrorClusters;
   evals: Evals;
   experiments: Experiments;
+  fileKnowledgeBases: FileKnowledgeBases;
   gateway: Gateway;
   knowledgeBases: KnowledgeBases;
   models: Models;
@@ -72,6 +74,7 @@ export const DEFAULT_RESOURCES: ResourceClasses = {
   errorClusters: ErrorClusters,
   evals: Evals,
   experiments: Experiments,
+  fileKnowledgeBases: FileKnowledgeBases,
   gateway: Gateway,
   knowledgeBases: KnowledgeBases,
   models: Models,
@@ -108,6 +111,7 @@ export {
   ErrorClusters,
   Evals,
   Experiments,
+  FileKnowledgeBases,
   Gateway,
   KnowledgeBases,
   Models,

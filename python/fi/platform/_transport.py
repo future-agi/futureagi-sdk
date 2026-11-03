@@ -78,6 +78,10 @@ class Operation:
     pagination: dict | None
     multipart: bool = False  # body fields go as form data, file params as uploads
     decode: str = "json"  # json | text | auto (json when the response says so, else text)
+    # The contract leaves the {status, result} envelope out of many responses, so by default one
+    # is removed whenever present even when `unwrap` names no key. `client.request(unwrap=None)`
+    # turns that off: the caller gets the body exactly as sent.
+    auto_unwrap: bool = True
 
 
 @dataclass(frozen=True)
@@ -192,7 +196,10 @@ def raw_operation(method: str, path: str, *, unwrap: str | None = "result", mult
         raise ValueError(f"path must start with '/', got {path!r}")
     if decode not in ("json", "text", "auto"):
         raise ValueError(f"decode must be 'json', 'text' or 'auto', got {decode!r}")
-    return Operation(id=f"raw:{method.upper()} {path}", method=method.upper(), path=path, unwrap=unwrap, pagination=None, multipart=multipart, decode=decode)
+    return Operation(
+        id=f"raw:{method.upper()} {path}", method=method.upper(), path=path, unwrap=unwrap, pagination=None, multipart=multipart, decode=decode,
+        auto_unwrap=unwrap is not None,  # unwrap=None is an explicit "give me the whole body"
+    )
 
 
 def _url(op: Operation, path: dict | None) -> str:
@@ -237,7 +244,7 @@ def _decode(op: Operation, response: httpx.Response) -> Any:
         return data[op.unwrap]
     # The backend wraps most successes in {status, result}, but the contract often leaves
     # the envelope out, so unwrap it whenever it is exactly that shape.
-    if isinstance(data, dict) and data.keys() == {"status", "result"} and data["status"] is True:
+    if op.auto_unwrap and isinstance(data, dict) and data.keys() == {"status", "result"} and data["status"] is True:
         return data["result"]
     return data
 
@@ -251,12 +258,14 @@ def _parse(op: Operation, model: Any, data: Any, strict: bool) -> Any:
     """Validate into the generated model (or `List[model]`); untyped responses pass through.
 
     A response that does not match the contract never breaks a call by default: the
-    caller gets the raw JSON and a ResponseShapeWarning. Tests run strict to catch drift.
+    caller gets the raw JSON and a ResponseShapeWarning. Tests run strict to catch drift,
+    which then also holds the response to the contract's required fields.
     """
     if model is None or data is None:
         return data
     try:
-        return _adapter(model).validate_python(data)
+        # strict: the generated models also check the contract's required fields (see models._Model)
+        return _adapter(model).validate_python(data, context={"strict": strict})
     except ValidationError as exc:
         if strict:
             raise ResponseValidationError(op.id, exc, data) from exc
@@ -293,6 +302,7 @@ class SyncTransport:
         # closed here; only a client we created is ours to configure and close.
         self._owns_http = http_client is None
         # Redirects are followed here, not by httpx: only to the client's own origin (see _follow_redirect).
+        # Every request also says so itself, because a caller's client may have follow_redirects=True.
         self._http = http_client or httpx.Client(follow_redirects=False)
 
     def request(self, op: Operation, *, path=None, query=None, body=None, files=None, options: RequestOptions | None = None) -> Any:
@@ -303,7 +313,7 @@ class SyncTransport:
         attempt = redirects = 0
         while True:
             try:
-                response = self._http.request(method, url, params=_clean(query), headers=headers, timeout=timeout, **payload)
+                response = self._http.request(method, url, params=_clean(query), headers=headers, timeout=timeout, follow_redirects=False, **payload)
             except httpx.TransportError as exc:
                 if _can_retry(op, None, attempt, retries):
                     time.sleep(_backoff(attempt, None))
@@ -362,7 +372,7 @@ class AsyncTransport:
         attempt = redirects = 0
         while True:
             try:
-                response = await self._http.request(method, url, params=_clean(query), headers=headers, timeout=timeout, **payload)
+                response = await self._http.request(method, url, params=_clean(query), headers=headers, timeout=timeout, follow_redirects=False, **payload)
             except httpx.TransportError as exc:
                 if _can_retry(op, None, attempt, retries):
                     await asyncio.sleep(_backoff(attempt, None))

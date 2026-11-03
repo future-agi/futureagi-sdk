@@ -338,7 +338,7 @@ def test_annotation_queue_workflow(client, dataset, text_label):
 
         # Scores: the unified annotation store behind queues and span annotations.
         score = client.scores.create(source_type="dataset_row", source_id=rows[1], label_id=text_label.id, value="direct")
-        assert score.label_id == text_label.id
+        assert score.label_id == text_label.id and score.value == "direct"  # any JSON value, a string here
         bulk = client.scores.create_bulk(source_type="dataset_row", source_id=rows[1], scores=[{"label_id": text_label.id, "value": "bulk"}])
         assert bulk.scores and not bulk.errors
         assert len(client.scores.list_for_source(source_type="dataset_row", source_id=rows[1])) >= 1
@@ -418,31 +418,44 @@ def test_gateway_management(client):
     assert "total_requests" in overview
 
 
-def test_knowledge_bases_and_usage(client):
-    created = client.knowledge_bases.create(name=_name("kb"), files=[("notes.txt", b"The SDK uploads files as multipart form data.\n")])
+def test_knowledge_bases_lifecycle(client):
+    """One store: the id a create returns is the one get, list, update and delete work with."""
+    kb = client.knowledge_bases.create(name=_name("kb"), chunk_size=256)
+    try:
+        assert kb.id and kb.embedding_model and kb.chunk_size == 256
+        assert client.knowledge_bases.get(kb.id).name == kb.name
+        assert kb.id in [k.id for k in client.knowledge_bases.list(search=kb.name)]
+        assert client.knowledge_bases.update(kb.id, name=kb.name + "-u").name == kb.name + "-u"
+        assert client.knowledge_bases.get(kb.id).name == kb.name + "-u"
+    finally:
+        client.knowledge_bases.delete(kb.id)
+    with pytest.raises(fi.NotFoundError):
+        client.knowledge_bases.get(kb.id)
+
+
+def test_file_knowledge_bases_and_usage(client):
+    """The file store (the app's Knowledge Base page): create with uploads, update, files, delete."""
+    created = client.file_knowledge_bases.create(name=_name("kb"), files=[("notes.txt", b"The SDK uploads files as multipart form data.\n")])
     kb_id = created.kb_id
     try:
         assert kb_id and created.file_ids
-        assert kb_id in [kb.id for kb in client.knowledge_bases.list_names().table_data]
-        # Backend: /model-hub/kb/ (list, get) and /model-hub/knowledge-base/ (create, files) are two
-        # separate stores, so a knowledge base made here is invisible to list() and 404s on get().
-        client.knowledge_bases.list()
-        allow(lambda: client.knowledge_bases.get(kb_id), 404)
+        assert kb_id in [kb.id for kb in client.file_knowledge_bases.list_names().table_data]
+        assert kb_id in [row.id for row in client.file_knowledge_bases.list().table_data]
         # Backend: an update that adds files is refused (400) while an earlier upload is still
         # being processed, and the refused update stores its file anyway. Wait for the worker.
         def processed() -> bool:
-            return all(f.status != "Processing" for f in client.knowledge_bases.files.list(kb_id=kb_id).table_data)
+            return all(f.status != "Processing" for f in client.file_knowledge_bases.files.list(kb_id=kb_id).table_data)
 
         assert wait_until(processed)
-        updated = client.knowledge_bases.update(kb_id=kb_id, name=created.kb_name + "-u", files=[("more.txt", b"A second file.\n")])
+        updated = client.file_knowledge_bases.update(kb_id=kb_id, name=created.kb_name + "-u", files=[("more.txt", b"A second file.\n")])
         assert updated.name.endswith("-u")
-        files = client.knowledge_bases.files.list(kb_id=kb_id)
+        files = client.file_knowledge_bases.files.list(kb_id=kb_id)
         assert files.total_rows == 2
         assert wait_until(processed)  # a file being processed is not deleted
-        assert client.knowledge_bases.files.delete(kb_id=kb_id, file_ids=[files.table_data[0].id])
-        assert wait_until(lambda: client.knowledge_bases.files.list(kb_id=kb_id).total_rows == 1)
+        assert client.file_knowledge_bases.files.delete(kb_id=kb_id, file_ids=[files.table_data[0].id])
+        assert wait_until(lambda: client.file_knowledge_bases.files.list(kb_id=kb_id).total_rows == 1)
     finally:
-        client.knowledge_bases.delete(kb_ids=[kb_id])
+        client.file_knowledge_bases.delete(kb_ids=[kb_id])
     allow(lambda: client.usage.overview(), 404)  # not served by self-hosted installs
 
 
@@ -462,6 +475,8 @@ def test_dashboards_lifecycle(client):
         assert dashboard.id in [d.id for d in client.dashboards.list()]
         assert client.dashboards.get(dashboard.id).name == dashboard.name
         assert client.dashboards.update(dashboard.id, name=dashboard.name + "-u").name.endswith("-u")
+        partial = client.dashboards.update(dashboard.id, description="description only")  # a PATCH is partial
+        assert partial.description == "description only" and partial.name == dashboard.name + "-u"
         widget = client.dashboards.widgets.create(dashboard.id, name="w1", query_config=query)
         assert [w.id for w in client.dashboards.widgets.list(dashboard.id)] == [widget.id]
         assert client.dashboards.widgets.get(dashboard.id, widget.id).name == "w1"

@@ -341,9 +341,9 @@ class ChatCompletions:
         )
 
         if stream is True or (stream is not NOT_GIVEN and stream):
-            from fi.gateway._streaming import Stream
-            response = self._client._get_base_client()._stream_request(opts, agentcc_params)
-            return Stream(response)
+            from fi.gateway.types.chat.chat_completion_chunk import ChatCompletionChunk
+
+            return self._client._get_base_client()._open_stream(opts, agentcc_params, ChatCompletionChunk)
 
         result = self._client._get_base_client()._request_with_retry(opts, ChatCompletion, agentcc_params)
 
@@ -448,8 +448,9 @@ class ChatCompletions:
             headers=extra_hdrs,
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        response = self._client._get_base_client()._stream_request(opts, agentcc_params)
-        return StreamManager(Stream(response))
+        from fi.gateway.types.chat.chat_completion_chunk import ChatCompletionChunk
+
+        return StreamManager(self._client._get_base_client()._open_stream(opts, agentcc_params, ChatCompletionChunk))
 
 
 class AsyncChatCompletions:
@@ -578,9 +579,9 @@ class AsyncChatCompletions:
         )
 
         if stream is True or (stream is not NOT_GIVEN and stream):
-            from fi.gateway._streaming import AsyncStream
-            response = await self._client._get_base_client()._stream_request(opts, agentcc_params)
-            return AsyncStream(response)
+            from fi.gateway.types.chat.chat_completion_chunk import ChatCompletionChunk
+
+            return await self._client._get_base_client()._open_stream(opts, agentcc_params, ChatCompletionChunk)
 
         result = await self._client._get_base_client()._request_with_retry(opts, ChatCompletion, agentcc_params)
 
@@ -685,5 +686,6 @@ class AsyncChatCompletions:
             headers=extra_hdrs,
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        response = await self._client._get_base_client()._stream_request(opts, agentcc_params)
-        return AsyncStreamManager(AsyncStream(response))
+        from fi.gateway.types.chat.chat_completion_chunk import ChatCompletionChunk
+
+        return AsyncStreamManager(await self._client._get_base_client()._open_stream(opts, agentcc_params, ChatCompletionChunk))

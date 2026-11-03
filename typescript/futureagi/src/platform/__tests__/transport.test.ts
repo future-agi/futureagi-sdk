@@ -70,6 +70,14 @@ describe("requests", () => {
     expect(await client(bare.fetch).request("POST", "/x/", { unwrap: null })).toEqual({ status: true, result: { ids: ["s1"] }, message: "created" });
   });
 
+  test("unwrap: null returns the whole body even when it is an envelope", async () => {
+    // [review 2] an explicit null is a choice, not the absence of a key: no automatic unwrapping.
+    const { fetch } = fake(json(200, { status: true, result: { value: 1 } }));
+    expect(await client(fetch).request("GET", "/x/")).toEqual({ value: 1 });
+    expect(await client(fetch).request("GET", "/x/", { unwrap: null })).toEqual({ status: true, result: { value: 1 } });
+    expect(await client(fetch).request("GET", "/x/", { unwrap: "status" })).toBe(true);
+  });
+
   test("empty and non-JSON responses", async () => {
     expect(await client(fake(new Response(null, { status: 204 })).fetch).request("DELETE", "/x/")).toBeNull();
     const html = fake(new Response("<html>maintenance</html>", { status: 200, headers: { "content-type": "text/html" } }));
@@ -269,6 +277,21 @@ describe("pagination", () => {
     expect(once.calls).toHaveLength(1);
   });
 
+  test("the pager owns the page cursor: an extraQuery page value does not pin every fetch to one page", async () => {
+    // [review 2] `{ extraQuery: { page: 1 } }` used to overwrite the advancing page and fetch page one forever.
+    const results = (items: unknown[], next: string | null) => json(200, { results: items, next });
+    const { fetch, calls } = fake(results([{ id: 1 }], "more"), results([{ id: 2 }], "more"), results([{ id: 3 }], null));
+    expect(await client(fetch).prompts.list({}, { extraQuery: { page: 1, team: "x" } }).toArray(3)).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }]);
+    expect(calls.map((c) => new URL(c.url).searchParams.get("page"))).toEqual(["1", "2", "3"]);
+    expect(calls.every((c) => new URL(c.url).searchParams.get("team") === "x")).toBe(true); // the other extra fields still apply
+  });
+
+  test("toArray(0) fetches nothing", async () => {
+    const { fetch, calls } = fake(json(200, { results: [{ id: 1 }], next: null }));
+    expect(await client(fetch).prompts.list().toArray(0)).toEqual([]);
+    expect(calls).toHaveLength(0);
+  });
+
   test("a page without its items list is an error, never an empty result", async () => {
     const { fetch } = fake(json(200, { status: true, result: { nope: [] } }));
     await expect(client(fetch).datasets.list().firstPage()).rejects.toThrow(/page has no 'datasets' list/);
@@ -281,7 +304,7 @@ describe("multipart", () => {
     const path = join(dir, "notes.txt");
     await writeFile(path, "from a path");
     const { fetch, calls } = fake(json(200, { status: true, result: { kb_id: "kb1", kb_name: "x", file_ids: ["f1", "f2", "f3"] } }));
-    const result = await client(fetch).knowledgeBases.create({ name: "x", file: [path, { name: "inline.txt", data: "from a string" }, new Uint8Array([104, 105])] }, { extraBody: { public: false } });
+    const result = await client(fetch).fileKnowledgeBases.create({ name: "x", file: [path, { name: "inline.txt", data: "from a string" }, new Uint8Array([104, 105])] }, { extraBody: { public: false } });
     expect(result.kb_id).toBe("kb1");
     const form = calls[0].body as FormData;
     expect(form).toBeInstanceOf(FormData);

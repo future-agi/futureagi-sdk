@@ -5,7 +5,7 @@ from __future__ import annotations
 import codecs
 import contextlib
 import json as _json
-from collections.abc import AsyncIterator, Iterator
+from collections.abc import AsyncIterator, Callable, Iterator
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -168,6 +168,21 @@ class AsyncSSEParser:
             yield SSEEvent(data="\n".join(buf_data), event=buf_event, id=buf_id, retry=buf_retry)
 
 
+def _usage_of(chunk: Any) -> Usage | None:
+    """The usage an event carries: `usage` on chat chunks and completions (sent with the last
+    chunk when `stream_options.include_usage` is on), `response.usage` on the Responses API's
+    `response.completed` event."""
+    usage = getattr(chunk, "usage", None)
+    if usage is None:
+        usage = getattr(getattr(chunk, "response", None), "usage", None)
+    if usage is None or isinstance(usage, Usage):
+        return usage
+    try:
+        return Usage.model_validate(usage.model_dump() if hasattr(usage, "model_dump") else usage)
+    except Exception:  # a usage shape this SDK does not know: count nothing rather than fail the stream
+        return None
+
+
 # ---------------------------------------------------------------------------
 # Stream (sync)
 # ---------------------------------------------------------------------------
@@ -179,14 +194,32 @@ class Stream:
     `chunk_cls` is the event model of the endpoint: `ChatCompletionChunk` for chat (the
     default), `Completion` for legacy completions, `ResponseStreamEvent` for the Responses API.
     The HTTP response is closed when the stream ends, however it ends.
+
+    `on_chunk` is called with every event; `on_finish` once, when the stream closes (consumed,
+    closed early, or failed: then with the error). The client uses them for callbacks and
+    session accounting; `usage` and `chunk_count` are what was seen by then.
     """
 
-    def __init__(self, response: Any, chunk_cls: type[Any] = ChatCompletionChunk) -> None:
+    def __init__(
+        self,
+        response: Any,
+        chunk_cls: type[Any] = ChatCompletionChunk,
+        *,
+        on_chunk: Callable[[Any], None] | None = None,
+        on_finish: Callable[[Stream, Exception | None], None] | None = None,
+    ) -> None:
         self._response = response
         self._chunk_cls = chunk_cls
         self._agentcc = AgentCCMetadata.from_headers(dict(response.headers), http_response=response)
         self._is_cache_hit = False
         self._closed = False
+        self._on_chunk = on_chunk
+        self._on_finish = on_finish
+        self._error: Exception | None = None
+        self.usage: Usage | None = None  # the last usage the stream reported, if any
+        self.chunk_count = 0
+        # Chat chunks are reassembled so `on_stream_end` gets the completion they add up to.
+        self._accumulator = ChunkAccumulator() if chunk_cls is ChatCompletionChunk else None
 
         content_type = response.headers.get("content-type", "")
         if "application/json" in content_type:
@@ -211,6 +244,23 @@ class Stream:
     def __next__(self) -> ChatCompletionChunk:
         return next(self._iterator)
 
+    @property
+    def completion(self) -> ChatCompletion | None:
+        """The chat completion the chunks seen so far add up to (chat streams only)."""
+        return self._accumulator.build() if self._accumulator is not None else None
+
+    def _note(self, chunk: Any) -> Any:
+        """Record a chunk (usage, count, accumulation) and hand it to the chunk callback."""
+        self.chunk_count += 1
+        usage = _usage_of(chunk)
+        if usage is not None:
+            self.usage = usage
+        if self._accumulator is not None:
+            self._accumulator.add(chunk)
+        if self._on_chunk is not None:
+            self._on_chunk(chunk)
+        return chunk
+
     def _iterate_chunks(self, parser: SSEParser) -> Iterator[Any]:
         try:
             for event in parser:
@@ -227,11 +277,13 @@ class Stream:
 
                     raise StreamError(f"Stream error: {data['error']}")
 
-                yield self._chunk_cls.model_validate(data)
-        except StreamError:
+                yield self._note(self._chunk_cls.model_validate(data))
+        except StreamError as e:
+            self._error = e
             raise
         except Exception as e:
-            raise StreamError(f"Stream interrupted: {e}") from e
+            self._error = StreamError(f"Stream interrupted: {e}")
+            raise self._error from e
         finally:
             # Normal completion, an error, or the caller stopping early: the connection goes
             # back to the pool either way.
@@ -239,9 +291,14 @@ class Stream:
 
     def _cache_hit_iterator(self, body: dict[str, Any]) -> Iterator[Any]:
         """Convert a JSON cache-hit response into a single chunk."""
+        try:
+            yield self._note(self._cache_hit_chunk(body))
+        finally:
+            self.close()
+
+    def _cache_hit_chunk(self, body: dict[str, Any]) -> Any:
         if self._chunk_cls is not ChatCompletionChunk:
-            yield self._chunk_cls.model_validate(body)
-            return
+            return self._chunk_cls.model_validate(body)
         choices: list[StreamChoice] = []
         for choice_data in body.get("choices", []):
             msg = choice_data.get("message", {})
@@ -270,7 +327,7 @@ class Stream:
         usage_data = body.get("usage")
         usage = Usage.model_validate(usage_data) if usage_data else None
 
-        chunk = ChatCompletionChunk(
+        return ChatCompletionChunk(
             id=body.get("id", ""),
             object="chat.completion.chunk",
             created=body.get("created", 0),
@@ -279,13 +336,17 @@ class Stream:
             usage=usage,
             system_fingerprint=body.get("system_fingerprint"),
         )
-        yield chunk
 
     def close(self) -> None:
-        """Close the underlying HTTP response (once: the stream also closes it when it ends)."""
+        """Close the underlying HTTP response (once: the stream also closes it when it ends),
+        then report the finished stream to the client."""
         if not self._closed:
             self._closed = True
-            self._response.close()
+            try:
+                self._response.close()
+            finally:
+                if self._on_finish is not None:
+                    self._on_finish(self, self._error)
 
 
 # ---------------------------------------------------------------------------
@@ -300,11 +361,24 @@ class AsyncStream:
     `get_final_completion()` resume the same parser instead of reading the response twice.
     """
 
-    def __init__(self, response: Any, chunk_cls: type[Any] = ChatCompletionChunk) -> None:
+    def __init__(
+        self,
+        response: Any,
+        chunk_cls: type[Any] = ChatCompletionChunk,
+        *,
+        on_chunk: Callable[[Any], None] | None = None,
+        on_finish: Callable[[AsyncStream, Exception | None], None] | None = None,
+    ) -> None:
         self._response = response
         self._chunk_cls = chunk_cls
         self._agentcc = AgentCCMetadata.from_headers(dict(response.headers), http_response=response)
         self._is_cache_hit = False
+        self._on_chunk = on_chunk
+        self._on_finish = on_finish
+        self._error: Exception | None = None
+        self.usage: Usage | None = None
+        self.chunk_count = 0
+        self._accumulator = ChunkAccumulator() if chunk_cls is ChatCompletionChunk else None
 
         self._closed = False
         content_type = response.headers.get("content-type", "")
@@ -326,6 +400,22 @@ class AsyncStream:
     async def __anext__(self) -> Any:
         return await self._iterator.__anext__()
 
+    @property
+    def completion(self) -> ChatCompletion | None:
+        """The chat completion the chunks seen so far add up to (chat streams only)."""
+        return self._accumulator.build() if self._accumulator is not None else None
+
+    def _note(self, chunk: Any) -> Any:
+        self.chunk_count += 1
+        usage = _usage_of(chunk)
+        if usage is not None:
+            self.usage = usage
+        if self._accumulator is not None:
+            self._accumulator.add(chunk)
+        if self._on_chunk is not None:
+            self._on_chunk(chunk)
+        return chunk
+
     async def _async_iterate_chunks(self) -> AsyncIterator[Any]:
         parser = AsyncSSEParser(self._response.aiter_bytes())
         try:
@@ -342,19 +432,26 @@ class AsyncStream:
                 if isinstance(data, dict) and "error" in data:
                     raise StreamError(f"Stream error: {data['error']}")
 
-                yield self._chunk_cls.model_validate(data)
-        except StreamError:
+                yield self._note(self._chunk_cls.model_validate(data))
+        except StreamError as e:
+            self._error = e
             raise
         except Exception as e:
-            raise StreamError(f"Stream interrupted: {e}") from e
+            self._error = StreamError(f"Stream interrupted: {e}")
+            raise self._error from e
         finally:
             await self.aclose()
 
     async def _async_cache_hit_iterator(self) -> AsyncIterator[Any]:
-        body = _json.loads(await self._response.aread())
+        try:
+            body = _json.loads(await self._response.aread())
+            yield self._note(self._cache_hit_chunk(body))
+        finally:
+            await self.aclose()
+
+    def _cache_hit_chunk(self, body: dict[str, Any]) -> Any:
         if self._chunk_cls is not ChatCompletionChunk:
-            yield self._chunk_cls.model_validate(body)
-            return
+            return self._chunk_cls.model_validate(body)
         choices: list[StreamChoice] = []
         for choice_data in body.get("choices", []):
             msg = choice_data.get("message", {})
@@ -383,7 +480,7 @@ class AsyncStream:
         usage_data = body.get("usage")
         usage = Usage.model_validate(usage_data) if usage_data else None
 
-        yield ChatCompletionChunk(
+        return ChatCompletionChunk(
             id=body.get("id", ""),
             object="chat.completion.chunk",
             created=body.get("created", 0),
@@ -394,10 +491,15 @@ class AsyncStream:
         )
 
     async def aclose(self) -> None:
-        """Close the underlying HTTP response (once: the stream also closes it when it ends)."""
+        """Close the underlying HTTP response (once: the stream also closes it when it ends),
+        then report the finished stream to the client."""
         if not self._closed:
             self._closed = True
-            await self._response.aclose()
+            try:
+                await self._response.aclose()
+            finally:
+                if self._on_finish is not None:
+                    self._on_finish(self, self._error)
 
 
 # ---------------------------------------------------------------------------

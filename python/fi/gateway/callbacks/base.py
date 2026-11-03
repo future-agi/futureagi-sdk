@@ -83,22 +83,53 @@ class CallbackHandler:
         """Called when a session context manager exits."""
 
 
-def redact_callback_request(request: CallbackRequest) -> CallbackRequest:
-    """Return a copy of *request* with message content replaced by ``[REDACTED]``.
+REDACTED = "[REDACTED]"
 
-    If the request body does not contain a ``messages`` key the original
-    request is returned unchanged.
-    """
-    if request.body and isinstance(request.body, dict) and "messages" in request.body:
-        redacted_body = dict(request.body)
-        redacted_body["messages"] = [
-            {**m, "content": "[REDACTED]"} if "content" in m else m
-            for m in request.body["messages"]
+# Body keys other than `messages` that carry user or model text.
+_TEXT_KEYS = ("prompt", "input", "instructions")
+
+
+def _redact_message(message: Any) -> Any:
+    """One chat message with its text removed: the content, and the arguments of any tool
+    call (the model writes user data into those too)."""
+    if not isinstance(message, dict):
+        return message
+    out = dict(message)
+    if out.get("content") is not None:
+        out["content"] = REDACTED
+    if isinstance(out.get("tool_calls"), list):
+        out["tool_calls"] = [
+            {**call, "function": {**call["function"], "arguments": REDACTED}}
+            if isinstance(call, dict) and isinstance(call.get("function"), dict) and call["function"].get("arguments") is not None
+            else call
+            for call in out["tool_calls"]
         ]
-        return CallbackRequest(
-            method=request.method,
-            url=request.url,
-            headers=request.headers,
-            body=redacted_body,
-        )
-    return request
+    if isinstance(out.get("function_call"), dict) and out["function_call"].get("arguments") is not None:
+        out["function_call"] = {**out["function_call"], "arguments": REDACTED}
+    return out
+
+
+def redact_body(body: Any) -> Any:
+    """A copy of a request body with every message text replaced by ``[REDACTED]``: chat
+    message content and tool-call arguments, and the `prompt` / `input` / `instructions`
+    of the other endpoints. Anything else (model, parameters, tool schemas) is kept."""
+    if not isinstance(body, dict):
+        return body
+    out = dict(body)
+    if isinstance(out.get("messages"), list):
+        out["messages"] = [_redact_message(m) for m in out["messages"]]
+    for key in _TEXT_KEYS:
+        if out.get(key) is not None:
+            out[key] = REDACTED
+    return out
+
+
+def redact_callback_request(request: CallbackRequest) -> CallbackRequest:
+    """Return a copy of *request* with message content replaced by ``[REDACTED]``
+    (see `redact_body`). A request without a dict body is returned unchanged."""
+    if not isinstance(request.body, dict):
+        return request
+    body = redact_body(request.body)
+    if body == request.body:
+        return request  # nothing to redact: the same object, as before
+    return CallbackRequest(method=request.method, url=request.url, headers=request.headers, body=body)

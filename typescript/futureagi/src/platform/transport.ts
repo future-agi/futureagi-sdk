@@ -15,10 +15,17 @@ export interface Operation {
   multipart?: boolean;
   /** How the response body is read: JSON (default), text, or auto (JSON when the response says so, else text). */
   decode?: "json" | "text" | "auto";
+  /** The contract leaves the `{status, result}` envelope out of many responses, so by default one is removed
+   * whenever present even when `unwrap` names no key. `client.request(..., { unwrap: null })` turns that off. */
+  autoUnwrap?: boolean;
 }
 
 /** A file parameter: a path (Node only), raw bytes, a Blob, or an explicit name + content. */
 export type FileInput = string | Uint8Array | Blob | { name: string; data: Uint8Array | Blob | string };
+
+/** Any JSON value, for the request fields the backend accepts as such (`x-json-value` in the contract):
+ * a string or number is as valid there as an object. */
+export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
 /** Per-call overrides, accepted by every generated method as its last argument. */
 export interface RequestOptions {
@@ -123,7 +130,8 @@ export function rawOperation(method: string, path: string, unwrap: string | null
   if (!path.startsWith("/")) {
     throw new Error(`path must start with '/', got ${JSON.stringify(path)}`);
   }
-  return { id: `raw:${method.toUpperCase()} ${path}`, method: method.toUpperCase(), path, unwrap, pagination: null, multipart, decode };
+  // unwrap: null is an explicit "give me the whole body"
+  return { id: `raw:${method.toUpperCase()} ${path}`, method: method.toUpperCase(), path, unwrap, pagination: null, multipart, decode, autoUnwrap: unwrap !== null };
 }
 
 function buildUrl(config: ResolvedConfig, op: Operation, args: RequestArgs, options?: RequestOptions): string {
@@ -229,7 +237,7 @@ function decode(op: Operation, status: number, headers: Headers, text: string): 
   }
   // The backend wraps most successes in {status, result}, but the contract often leaves
   // the envelope out, so unwrap it whenever it is exactly that shape.
-  if (isRecord(data) && Object.keys(data).length === 2 && data.status === true && "result" in data) {
+  if (op.autoUnwrap !== false && isRecord(data) && Object.keys(data).length === 2 && data.status === true && "result" in data) {
     return data.result;
   }
   return data;
@@ -322,8 +330,11 @@ export class Transport {
     if (!spec) {
       throw new Error(`${op.id} is not paginated`);
     }
+    // The pager owns the page cursor: it is set after `extraQuery`, so a caller's page value cannot pin every fetch to one page.
+    const { extraQuery, ...rest } = options ?? {};
+    const perCall: RequestOptions | undefined = options ? rest : undefined;
     return new Pager<T>(async (page: number) => {
-      const data = await this.request(op, { ...args, query: { ...(args.query ?? {}), [spec.page_param]: page } }, options);
+      const data = await this.request(op, { ...args, query: { ...(extraQuery ?? {}), ...(args.query ?? {}), [spec.page_param]: page } }, perCall);
       if (!Array.isArray(getPath(data, spec.items))) {
         // A page without its items list means the contract's page shape is wrong; never let that look like an empty result.
         throw new APIError(`${op.id}: page has no '${spec.items}' list`, 200, data);

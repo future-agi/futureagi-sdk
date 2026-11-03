@@ -144,6 +144,37 @@ def test_redirect_off_the_origin_is_refused_so_the_keys_never_travel():
     assert seen == ["backend.test"]
 
 
+def test_a_callers_client_that_follows_redirects_itself_is_still_held_to_the_origin():
+    """[P1, review 2] The redirect policy is per request, not per client: an injected
+    `httpx.Client(follow_redirects=True)` must not forward the keys to another host either."""
+    seen: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(f"{request.url.host} {request.headers.get('x-api-key')}")
+        if request.url.host == "origin.test":
+            return httpx.Response(302, headers={"location": "https://other.test/collect"})
+        return httpx.Response(200, json={"status": True, "result": {}})
+
+    http = httpx.Client(transport=httpx.MockTransport(handler), follow_redirects=True)
+    client = fp.Client(api_key="synthetic-key", secret_key="s", base_url="https://origin.test", http_client=http)
+    with pytest.raises(fp.APIConnectionError, match="not followed"):
+        client.request("GET", "/probe/")
+    assert seen == ["origin.test synthetic-key"]  # other.test never saw a request, let alone the key
+
+    async def handler_async(request: httpx.Request) -> httpx.Response:
+        return handler(request)
+
+    async def scenario() -> None:
+        seen.clear()
+        http = httpx.AsyncClient(transport=httpx.MockTransport(handler_async), follow_redirects=True)
+        async with fp.AsyncClient(api_key="synthetic-key", secret_key="s", base_url="https://origin.test", http_client=http) as client:
+            with pytest.raises(fp.APIConnectionError, match="not followed"):
+                await client.request("POST", "/probe/", body={"x": 1})
+
+    asyncio.run(scenario())
+    assert seen == ["origin.test synthetic-key"]
+
+
 def test_redirect_loop_stops_after_five_hops():
     client = _client(lambda r: httpx.Response(302, headers={"location": f"{BASE}/again/"}))
     with pytest.raises(fp.APIConnectionError, match="more than 5 redirects"):
@@ -236,7 +267,7 @@ def test_multipart_operation_sends_form_fields_and_files(tmp_path):
     path = tmp_path / "notes.txt"
     path.write_bytes(b"from a path")
     client = _client(handler)
-    result = client.knowledge_bases.create(name="x", files=[path, ("inline.txt", b"from bytes")])
+    result = client.file_knowledge_bases.create(name="x", files=[path, ("inline.txt", b"from bytes")])
     assert result.kb_id == "kb1"
     assert seen["content_type"].startswith("multipart/form-data")
     body = seen["body"]
@@ -297,6 +328,51 @@ def test_client_request_reaches_any_endpoint_with_the_same_plumbing():
     with pytest.raises(ValueError, match="start with"):
         client.request("GET", "relative/")
     assert client.spans.ingest([{"name": "s"}]) == {"ids": ["s1"]}  # the hand-written resource method uses the same path
+
+
+def test_unwrap_none_returns_the_whole_body_even_when_it_is_an_envelope():
+    """[review 2] `unwrap=None` is an explicit choice, not the absence of a key: the automatic
+    {status, result} removal does not apply to it."""
+    client = _client(lambda r: httpx.Response(200, json={"status": True, "result": {"value": 1}}))
+    assert client.request("GET", "/x/") == {"value": 1}  # default: the envelope is removed
+    assert client.request("GET", "/x/", unwrap=None) == {"status": True, "result": {"value": 1}}
+    assert client.request("GET", "/x/", unwrap="status") is True
+
+
+def test_to_list_with_a_zero_limit_fetches_nothing():
+    calls: list[int] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(1)
+        return httpx.Response(200, json={"status": True, "result": {"datasets": [{"name": "a"}], "total_pages": 1}})
+
+    client = _client(handler)
+    assert client.datasets.list().to_list(limit=0) == []
+    assert calls == []
+    assert len(client.datasets.list().to_list(limit=1)) == 1 and len(calls) == 1
+
+    async def scenario() -> None:
+        http = httpx.AsyncClient(transport=httpx.MockTransport(lambda r: handler(r)))
+        async with fp.AsyncClient(api_key="k", secret_key="s", base_url=BASE, http_client=http) as aclient:
+            assert await aclient.datasets.list().to_list(limit=0) == []
+
+    asyncio.run(scenario())
+    assert len(calls) == 1
+
+
+def test_strict_mode_rejects_a_response_missing_the_contracts_required_fields():
+    """[P2, review 2] Every model field is optional for tolerance, but strict mode holds a
+    response to the contract: an empty dataset-create result is an error, not dataset_id=None."""
+    from fi.platform import models
+
+    assert models.DatasetCreateStartedResult.__required__ == frozenset({"dataset_id", "dataset_name", "message"})
+    empty = lambda r: httpx.Response(200, json={"status": True, "result": {}})  # noqa: E731
+    with pytest.raises(fp.ResponseValidationError, match="missing required field"):
+        _client(empty, strict_responses=True).datasets.create(new_dataset_name="x")
+    assert _client(empty).datasets.create(new_dataset_name="x").dataset_id is None  # tolerant: every field optional, no error
+    # A nullable required field may be null; an additive unknown field is always fine.
+    ok = lambda r: httpx.Response(200, json={"status": True, "result": {"message": "ok", "dataset_id": "d1", "dataset_name": "x", "dataset_model_type": None, "new_field": 1}})  # noqa: E731
+    assert _client(ok, strict_responses=True).datasets.create(new_dataset_name="x").dataset_id == "d1"
 
 
 def test_async_client_request_and_options():

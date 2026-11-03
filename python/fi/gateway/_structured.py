@@ -70,6 +70,12 @@ def _nullable(prop: dict[str, Any]) -> dict[str, Any]:
     return prop
 
 
+# Where a JSON Schema node holds other nodes: by name, in a list, or directly.
+_NAMED_SCHEMAS = ("properties", "$defs", "definitions", "patternProperties", "dependentSchemas")
+_SCHEMA_LISTS = ("anyOf", "oneOf", "allOf", "prefixItems")
+_SCHEMA_NODES = ("items", "additionalProperties", "not", "if", "then", "else", "contains", "propertyNames", "unevaluatedProperties", "unevaluatedItems")
+
+
 def strict_schema(schema: Any) -> Any:
     """A JSON Schema in the form OpenAI's strict structured output accepts.
 
@@ -83,7 +89,21 @@ def strict_schema(schema: Any) -> Any:
         return [strict_schema(item) for item in schema]
     if not isinstance(schema, dict):
         return schema
-    out = {key: strict_schema(value) for key, value in schema.items() if key != "default"}
+    # Walk schema nodes only. The maps under `properties` / `$defs` are keyed by the user's
+    # names, so a property that happens to be called `default` is kept; the `default` removed
+    # here is the JSON Schema annotation on a schema node.
+    out: dict[str, Any] = {}
+    for key, value in schema.items():
+        if key == "default":
+            continue
+        if key in _NAMED_SCHEMAS and isinstance(value, dict):
+            out[key] = {name: strict_schema(sub) for name, sub in value.items()}
+        elif key in _SCHEMA_LISTS and isinstance(value, list):
+            out[key] = [strict_schema(sub) for sub in value]
+        elif key in _SCHEMA_NODES and isinstance(value, (dict, list)):
+            out[key] = strict_schema(value)
+        else:
+            out[key] = value
     props = out.get("properties")
     if isinstance(props, dict):
         required = set(out.get("required") or [])

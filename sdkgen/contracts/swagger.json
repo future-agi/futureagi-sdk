@@ -5005,6 +5005,70 @@
         "tags": [
           "model-hub"
         ]
+      },
+      "post": {
+        "operationId": "model-hub_kb_create",
+        "summary": "Create a new knowledge base.",
+        "description": "Create a new knowledge base.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/KnowledgeBaseCreate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/KnowledgeBaseResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
       }
     },
     "/model-hub/kb/{id}/": {
@@ -5029,6 +5093,120 @@
             "schema": {
               "$ref": "#/definitions/KnowledgeBaseResponse"
             }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      },
+      "patch": {
+        "operationId": "model-hub_kb_partial_update",
+        "summary": "Partially update a knowledge base.",
+        "description": "Partially update a knowledge base.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/KnowledgeBase"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/KnowledgeBaseResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "delete": {
+        "operationId": "model-hub_kb_delete",
+        "summary": "Soft delete a knowledge base.",
+        "description": "Soft delete a knowledge base.",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "No content"
           },
           "400": {
             "description": "",
@@ -5391,6 +5569,61 @@
         ],
         "x-runtime-request-validation": true,
         "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/knowledge-base/get/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_knowledge-base_get_list",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/LegacyKnowledgeBaseTableResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ModelHubErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
       }
     },
     "/model-hub/knowledge-base/list/": {
@@ -20351,6 +20584,110 @@
         }
       }
     },
+    "KnowledgeBase": {
+      "required": [
+        "name",
+        "chunk_size"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 2000,
+          "minLength": 1
+        },
+        "embedding_model": {
+          "title": "Embedding model",
+          "type": "string",
+          "enum": [
+            "BAAI/bge-small-en-v1.5"
+          ]
+        },
+        "chunk_size": {
+          "title": "Chunk size",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "organization": {
+          "title": "Organization",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    },
+    "KnowledgeBaseCreate": {
+      "required": [
+        "name",
+        "chunk_size"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 2000,
+          "minLength": 1
+        },
+        "embedding_model": {
+          "title": "Embedding model",
+          "type": "string",
+          "enum": [
+            "BAAI/bge-small-en-v1.5"
+          ]
+        },
+        "chunk_size": {
+          "title": "Chunk size",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "organization": {
+          "title": "Organization",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    },
     "KnowledgeBaseItem": {
       "required": [
         "id",
@@ -20851,6 +21188,109 @@
           "title": "Name",
           "type": "string",
           "minLength": 1
+        }
+      }
+    },
+    "LegacyKnowledgeBaseTableColumn": {
+      "required": [
+        "id",
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "LegacyKnowledgeBaseTableResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/LegacyKnowledgeBaseTableResult"
+        }
+      }
+    },
+    "LegacyKnowledgeBaseTableResult": {
+      "type": "object",
+      "properties": {
+        "column_config": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LegacyKnowledgeBaseTableColumn"
+          }
+        },
+        "table_data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LegacyKnowledgeBaseTableRow"
+          }
+        },
+        "total_rows": {
+          "title": "Total rows",
+          "type": "integer"
+        }
+      }
+    },
+    "LegacyKnowledgeBaseTableRow": {
+      "required": [
+        "id",
+        "name",
+        "files_uploaded",
+        "status",
+        "updated_at",
+        "created_by"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "files_uploaded": {
+          "title": "Files uploaded",
+          "type": "integer"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "minLength": 1
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_by": {
+          "title": "Created by",
+          "type": "string",
+          "x-nullable": true
         }
       }
     },

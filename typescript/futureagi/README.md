@@ -98,7 +98,7 @@ const client = new Client();   // FI_API_KEY, FI_SECRET_KEY, FI_BASE_URL (or pas
 const ds = await client.datasets.create({ new_dataset_name: 'qa-set' });
 await client.datasets.columns.add(ds.dataset_id!, { new_columns_data: [{ name: 'question', data_type: 'text' }] });
 for await (const d of client.datasets.list({ search_text: 'qa' })) console.log(d.name);   // walks every page
-await client.knowledgeBases.create({ name: 'docs', file: ['./notes.txt'] });               // multipart upload
+await client.fileKnowledgeBases.create({ name: 'docs', file: ['./notes.txt'] });           // multipart upload
 await client.datasets.get(ds.dataset_id!, {}, { timeout: 5_000, headers: { 'X-Trace': 't1' } });  // per-call options
 await client.request('GET', '/some/new/endpoint/', { query: { page: 1 } });              // anything else, same auth/retries
 ```

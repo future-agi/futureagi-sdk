@@ -42,7 +42,8 @@
     "dev": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
     "prepare": "pnpm run build",
-    "test:live": "jest --testPathPattern platform/__tests__/live"
+    "test:live": "jest --testPathPattern platform/__tests__/live",
+    "check:consumer": "bash scripts/check-consumer.sh"
   },
   "keywords": [
     "ai",

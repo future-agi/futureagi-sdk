@@ -284,3 +284,167 @@ def test_a_copy_made_before_first_use_closes_its_own_pool():
     assert not parent._base_client._client.is_closed  # a shared pool is left to its owner
     parent.close()
     assert parent._base_client._client is None
+
+
+# ============================================================================ review 2 (nik13, 2026-11-03)
+# ---------------------------------------------------------------- [P2] a property named `default` survives strict_schema
+
+
+class Config(BaseModel):
+    default: str
+    name: str
+
+
+class Outer(BaseModel):
+    config: Config
+    fallback: int = 3
+
+
+def test_strict_schema_keeps_a_property_named_default():
+    schema = to_response_format(Config)["json_schema"]["schema"]
+    assert set(schema["properties"]) == {"default", "name"} and schema["required"] == ["default", "name"]
+    nested = to_response_format(Outer)["json_schema"]["schema"]
+    inner = nested["$defs"]["Config"]
+    assert set(inner["properties"]) == {"default", "name"}
+    assert "default" not in nested["properties"]["fallback"]  # the JSON Schema annotation is still removed
+    assert nested["properties"]["fallback"]["type"] == ["integer", "null"]
+
+
+# ---------------------------------------------------------------- [P2] redaction covers tool-call arguments
+
+
+@respx.mock
+def test_redact_messages_covers_tool_call_arguments(tmp_path):
+    respx.post(f"{BASE}/v1/chat/completions").mock(return_value=httpx.Response(200, json=COMPLETION))
+    messages = [
+        {"role": "user", "content": "find Jane Doe"},
+        {"role": "assistant", "content": None, "tool_calls": [{"id": "c1", "type": "function", "function": {"name": "lookup", "arguments": "{\"name\": \"Jane Doe\"}"}}]},
+        {"role": "tool", "tool_call_id": "c1", "content": "Jane Doe, 42"},
+    ]
+    seen, recorder = _Seen(), RequestRecorder(str(tmp_path / "rec.json"))
+    Gateway(api_key="k", base_url=BASE, redact_messages=True, callbacks=[seen, recorder]).chat.completions.create(model="m", messages=messages, tools=[{"type": "function", "function": {"name": "lookup"}}])
+    for body in seen.started + seen.ended + [r["request"]["body"] for r in recorder.recordings]:
+        assert "Jane" not in json.dumps(body)
+        assert body["messages"][1]["tool_calls"][0]["function"] == {"name": "lookup", "arguments": "[REDACTED]"}
+        assert body["messages"][1]["content"] is None  # a null content stays null
+        assert body["tools"][0]["function"]["name"] == "lookup"  # tool schemas are not private
+
+
+# ---------------------------------------------------------------- [P2] a consumed stream is accounted and reported
+
+
+class _StreamSeen(CallbackHandler):
+    def __init__(self) -> None:
+        self.events: list[str] = []
+        self.ended: list = []
+
+    def on_request_start(self, request) -> None:
+        self.events.append("request_start")
+
+    def on_stream_start(self, request, stream) -> None:
+        self.events.append("stream_start")
+
+    def on_stream_chunk(self, request, chunk) -> None:
+        self.events.append("chunk")
+
+    def on_stream_end(self, request, stream, completion) -> None:
+        self.events.append(f"stream_end:{stream.chunk_count}")
+        self.ended.append(completion)
+
+    def on_request_end(self, request, response) -> None:
+        self.events.append(f"request_end:{response.status_code}:{response.agentcc.cost}")
+
+    def on_error(self, request, error) -> None:
+        self.events.append(f"error:{type(error).__name__}")
+
+
+def _usage_chunk(text: str) -> dict:
+    return {**_chunk(text, "stop"), "usage": {"prompt_tokens": 3, "completion_tokens": 2, "total_tokens": 5}}
+
+
+@respx.mock
+def test_a_consumed_stream_counts_in_the_session_and_reaches_the_callbacks():
+    headers = {"content-type": "text/event-stream", "x-agentcc-cost": "0.5"}
+    respx.post(f"{BASE}/v1/chat/completions").mock(return_value=httpx.Response(200, content=_sse(_chunk("He"), _usage_chunk("llo")), headers=headers))
+    seen = _StreamSeen()
+    gw = Gateway(api_key="k", base_url=BASE, callbacks=[seen])
+    with gw.session(name="s") as sess:
+        stream = gw.chat.completions.create(model="m", messages=MSG, stream=True)
+        assert "".join(c.choices[0].delta.content for c in stream) == "Hello"
+    assert (sess.request_count, sess.total_tokens, sess.total_cost) == (1, 5, 0.5)  # as a plain call would record
+    assert seen.events == ["request_start", "stream_start", "chunk", "chunk", "stream_end:2", "request_end:200:0.5"]
+    assert seen.ended[0].choices[0].message.content == "Hello"  # the completion the chunks add up to
+
+    # The stream() context manager and get_final_completion go through the same path, once.
+    seen.events.clear()
+    with gw.session(name="s2") as sess2:
+        with gw.chat.completions.stream(model="m", messages=MSG) as manager:
+            assert manager.get_final_text() == "Hello"
+    assert (sess2.request_count, sess2.total_tokens) == (1, 5)
+    assert seen.events.count("request_end:200:0.5") == 1
+
+
+@respx.mock
+def test_a_stream_closed_early_or_failing_is_still_reported_once():
+    headers = {"content-type": "text/event-stream", "x-agentcc-cost": "0.5"}
+    respx.post(f"{BASE}/v1/chat/completions").mock(return_value=httpx.Response(200, content=_sse(_chunk("a"), _usage_chunk("b")), headers=headers))
+    seen = _StreamSeen()
+    gw = Gateway(api_key="k", base_url=BASE, callbacks=[seen])
+    with gw.session(name="early") as sess:
+        stream = gw.chat.completions.create(model="m", messages=MSG, stream=True)
+        next(iter(stream))
+        stream.close()
+        stream.close()  # idempotent
+    assert (sess.request_count, sess.total_tokens, sess.total_cost) == (1, 0, 0.5)  # the request happened; no usage arrived
+    assert seen.events == ["request_start", "stream_start", "chunk", "stream_end:1", "request_end:200:0.5"]
+
+    respx.post(f"{BASE}/v1/chat/completions").mock(return_value=httpx.Response(200, content=b"data: not json\n\n", headers=headers))
+    seen.events.clear()
+    with gw.session(name="broken") as sess:
+        stream = gw.chat.completions.create(model="m", messages=MSG, stream=True)
+        with pytest.raises(Exception, match="Invalid JSON"):
+            list(stream)
+    assert sess.request_count == 0 and seen.events == ["request_start", "stream_start", "error:StreamError"]
+
+    respx.post(f"{BASE}/v1/chat/completions").mock(return_value=httpx.Response(500, json={"error": "down"}))
+    seen.events.clear()
+    with pytest.raises(Exception):
+        gw.chat.completions.create(model="m", messages=MSG, stream=True)
+    assert seen.events[0] == "request_start" and seen.events[-1].startswith("error:")
+
+
+@respx.mock
+def test_a_consumed_async_stream_counts_in_the_session_of_its_task():
+    headers = {"content-type": "text/event-stream", "x-agentcc-cost": "0.25"}
+    respx.post(f"{BASE}/v1/chat/completions").mock(return_value=httpx.Response(200, content=_sse(_chunk("a"), _usage_chunk("b")), headers=headers))
+
+    async def scenario():
+        seen = _StreamSeen()
+        gw = AsyncGateway(api_key="k", base_url=BASE, callbacks=[seen])
+        async with gw.session(name="s") as sess:
+            stream = await gw.chat.completions.create(model="m", messages=MSG, stream=True)
+            assert [c.choices[0].delta.content async for c in stream] == ["a", "b"]
+        assert (sess.request_count, sess.total_tokens, sess.total_cost) == (1, 5, 0.25)
+        assert seen.events == ["request_start", "stream_start", "chunk", "chunk", "stream_end:2", "request_end:200:0.25"]
+        async with gw.session(name="manager") as sess2:
+            async with await gw.chat.completions.stream(model="m", messages=MSG) as manager:
+                assert await manager.get_final_text() == "ab"
+        assert (sess2.request_count, sess2.total_tokens) == (1, 5)
+
+    asyncio.run(scenario())
+
+
+@respx.mock
+def test_responses_and_completions_streams_are_accounted_too():
+    respx.post(f"{BASE}/v1/responses").mock(return_value=httpx.Response(200, headers={"content-type": "text/event-stream", "x-agentcc-cost": "0.1"}, content=_sse(
+        {"type": "response.output_text.delta", "delta": "hi"},
+        {"type": "response.completed", "response": {"id": "r1", "object": "response", "created_at": 1, "model": "m", "output": [], "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}}},
+    )))
+    respx.post(f"{BASE}/v1/completions").mock(return_value=httpx.Response(200, headers={"content-type": "text/event-stream", "x-agentcc-cost": "0.2"}, content=_sse(
+        {"id": "c", "object": "text_completion", "created": 1, "model": "m", "choices": [{"text": "x", "index": 0}], "usage": {"prompt_tokens": 1, "completion_tokens": 2, "total_tokens": 3}},
+    )))
+    gw = Gateway(api_key="k", base_url=BASE)
+    with gw.session(name="s") as sess:
+        list(gw.responses.create(model="m", input="q", stream=True))
+        list(gw.completions.create(model="m", prompt="q", stream=True))
+    assert (sess.request_count, sess.total_tokens, round(sess.total_cost, 3)) == (2, 5, 0.3)

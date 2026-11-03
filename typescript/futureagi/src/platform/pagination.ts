@@ -57,8 +57,12 @@ export class Pager<T> implements AsyncIterable<T> {
     }
   }
 
+  /** The first `limit` items (every item when omitted). `toArray(0)` fetches nothing. */
   async toArray(limit?: number): Promise<T[]> {
     const out: T[] = [];
+    if (limit !== undefined && limit <= 0) {
+      return out;
+    }
     for await (const item of this) {
       out.push(item);
       if (limit !== undefined && out.length >= limit) {

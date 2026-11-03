@@ -77,7 +77,10 @@ class SyncPager(_PagerBase[T]):
             page += 1
 
     def to_list(self, limit: int | None = None) -> list[T]:
+        """The first `limit` items (every item when None). `limit=0` fetches nothing."""
         out: list[T] = []
+        if limit is not None and limit <= 0:
+            return out
         for item in self:
             out.append(item)
             if limit is not None and len(out) >= limit:
@@ -111,6 +114,8 @@ class AsyncPager(_PagerBase[T]):
 
     async def to_list(self, limit: int | None = None) -> list[T]:
         out: list[T] = []
+        if limit is not None and limit <= 0:
+            return out
         async for item in self:
             out.append(item)
             if limit is not None and len(out) >= limit:

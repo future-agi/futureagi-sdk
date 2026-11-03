@@ -76,7 +76,8 @@ export class Client {
   /**
    * Call any endpoint under the base URL with the client's auth, retries and errors, for
    * endpoints the catalog does not describe yet. Resolves to the decoded JSON with the
-   * `unwrap` key (the backend's `{status, result}` envelope) removed when present.
+   * `unwrap` key (the backend's `{status, result}` envelope) removed when present, or the whole body
+   * as sent with `unwrap: null`.
    */
   request(method: string, path: string, args: RequestArgs & { unwrap?: string | null; multipart?: boolean; decode?: "json" | "text" | "auto" } = {}, options?: RequestOptions): Promise<unknown> {
     return this.transport.raw(method, path, args, options);

@@ -24,6 +24,7 @@ from .catalog import (
     children_of,
     class_name,
     is_file,
+    is_json_value,
     is_method_field,
     model_refs,
     namespace_tree,
@@ -76,6 +77,8 @@ def ts_type(schema: dict | None, *, for_input: bool) -> str:
         return "unknown"
     if for_input and schema.get("type") == "file":
         return "FileInput"
+    if is_json_value(schema):
+        return "JsonValue" if for_input else "unknown"  # any JSON value: a string or number as much as an object
     if "$ref" in schema:
         return "Record<string, unknown>" if for_input else f"models.{class_name(schema['$ref'])}"
     if "enum" in schema:
@@ -242,7 +245,7 @@ def emit_resources(ops: list[Op]) -> str:
         "import { Pager } from \"../pagination\";\n",
         "import { Resource } from \"../resource\";\n",
         "import { warnStability } from \"../stability\";\n",
-        "import type { FileInput, RequestOptions, Transport } from \"../transport\";\n\n",
+        "import type { FileInput, JsonValue, RequestOptions, Transport } from \"../transport\";\n\n",
     ]
     for ns in sorted(tree):
         for op in sorted(tree[ns], key=lambda o: o.method_name):

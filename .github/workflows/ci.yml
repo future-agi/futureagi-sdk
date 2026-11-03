@@ -100,9 +100,53 @@ jobs:
       - name: Build (CJS, ESM, ESNext)
         run: pnpm run build
 
+  packages:
+    name: Packages as installed
+    # What a user's project sees, not what this repository's sources see: the
+    # wheel installed into an empty virtualenv, the npm tarball installed into
+    # an empty project. python/consumer/consumer.py and
+    # typescript/futureagi/consumer/consumer-types.mts hold the public calls
+    # that must run and type-check from there (mypy --strict, tsc --strict).
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build the wheel
+        working-directory: python
+        run: |
+          python -m pip install --quiet build
+          python -m build --wheel --outdir dist
+      - name: Install the wheel into an empty virtualenv, run and type-check the consumer
+        run: |
+          python -m venv "$RUNNER_TEMP/consumer"
+          "$RUNNER_TEMP/consumer/bin/pip" install --quiet python/dist/*.whl mypy
+          cp python/consumer/consumer.py "$RUNNER_TEMP/consumer/"
+          cd "$RUNNER_TEMP/consumer"
+          ./bin/python consumer.py
+          ./bin/python -m mypy --strict --follow-imports=silent consumer.py
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: typescript/futureagi/pnpm-lock.yaml
+      - name: Build the npm package
+        working-directory: typescript/futureagi
+        run: |
+          pnpm install --ignore-workspace --frozen-lockfile --ignore-scripts
+          pnpm run build
+      - name: Install the packed tarball into an empty project, compile and load the consumer
+        working-directory: typescript/futureagi
+        run: pnpm run check:consumer
+
   ci-pass:
     name: CI Pass
-    needs: [generated, python, typescript]
+    needs: [generated, python, typescript, packages]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5

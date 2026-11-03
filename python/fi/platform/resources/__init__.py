@@ -23,6 +23,7 @@ from .datasets import AsyncDatasets, Datasets
 from .error_clusters import AsyncErrorClusters, ErrorClusters
 from .evals import AsyncEvals, Evals
 from .experiments import AsyncExperiments, Experiments
+from .file_knowledge_bases import AsyncFileKnowledgeBases, FileKnowledgeBases
 from .gateway import AsyncGateway, Gateway
 from .knowledge_bases import AsyncKnowledgeBases, KnowledgeBases
 from .models import AsyncModels, Models
@@ -52,6 +53,7 @@ class Resources(ResourceSet):
     error_clusters: ErrorClusters
     evals: Evals
     experiments: Experiments
+    file_knowledge_bases: FileKnowledgeBases
     gateway: Gateway
     knowledge_bases: KnowledgeBases
     models: Models
@@ -66,7 +68,7 @@ class Resources(ResourceSet):
     traces: Traces
     usage: Usage
     workspaces: Workspaces
-    _resources: Dict[str, type] = {'account': Account, 'agents': Agents, 'alerts': Alerts, 'annotation_queues': AnnotationQueues, 'annotations': Annotations, 'dashboards': Dashboards, 'datasets': Datasets, 'error_clusters': ErrorClusters, 'evals': Evals, 'experiments': Experiments, 'gateway': Gateway, 'knowledge_bases': KnowledgeBases, 'models': Models, 'optimizations': Optimizations, 'projects': Projects, 'prompts': Prompts, 'provider_keys': ProviderKeys, 'scores': Scores, 'sessions': Sessions, 'simulation': Simulation, 'spans': Spans, 'traces': Traces, 'usage': Usage, 'workspaces': Workspaces}
+    _resources: Dict[str, type] = {'account': Account, 'agents': Agents, 'alerts': Alerts, 'annotation_queues': AnnotationQueues, 'annotations': Annotations, 'dashboards': Dashboards, 'datasets': Datasets, 'error_clusters': ErrorClusters, 'evals': Evals, 'experiments': Experiments, 'file_knowledge_bases': FileKnowledgeBases, 'gateway': Gateway, 'knowledge_bases': KnowledgeBases, 'models': Models, 'optimizations': Optimizations, 'projects': Projects, 'prompts': Prompts, 'provider_keys': ProviderKeys, 'scores': Scores, 'sessions': Sessions, 'simulation': Simulation, 'spans': Spans, 'traces': Traces, 'usage': Usage, 'workspaces': Workspaces}
 
 
 class AsyncResources(ResourceSet):
@@ -82,6 +84,7 @@ class AsyncResources(ResourceSet):
     error_clusters: AsyncErrorClusters
     evals: AsyncEvals
     experiments: AsyncExperiments
+    file_knowledge_bases: AsyncFileKnowledgeBases
     gateway: AsyncGateway
     knowledge_bases: AsyncKnowledgeBases
     models: AsyncModels
@@ -96,7 +99,7 @@ class AsyncResources(ResourceSet):
     traces: AsyncTraces
     usage: AsyncUsage
     workspaces: AsyncWorkspaces
-    _resources: Dict[str, type] = {'account': AsyncAccount, 'agents': AsyncAgents, 'alerts': AsyncAlerts, 'annotation_queues': AsyncAnnotationQueues, 'annotations': AsyncAnnotations, 'dashboards': AsyncDashboards, 'datasets': AsyncDatasets, 'error_clusters': AsyncErrorClusters, 'evals': AsyncEvals, 'experiments': AsyncExperiments, 'gateway': AsyncGateway, 'knowledge_bases': AsyncKnowledgeBases, 'models': AsyncModels, 'optimizations': AsyncOptimizations, 'projects': AsyncProjects, 'prompts': AsyncPrompts, 'provider_keys': AsyncProviderKeys, 'scores': AsyncScores, 'sessions': AsyncSessions, 'simulation': AsyncSimulation, 'spans': AsyncSpans, 'traces': AsyncTraces, 'usage': AsyncUsage, 'workspaces': AsyncWorkspaces}
+    _resources: Dict[str, type] = {'account': AsyncAccount, 'agents': AsyncAgents, 'alerts': AsyncAlerts, 'annotation_queues': AsyncAnnotationQueues, 'annotations': AsyncAnnotations, 'dashboards': AsyncDashboards, 'datasets': AsyncDatasets, 'error_clusters': AsyncErrorClusters, 'evals': AsyncEvals, 'experiments': AsyncExperiments, 'file_knowledge_bases': AsyncFileKnowledgeBases, 'gateway': AsyncGateway, 'knowledge_bases': AsyncKnowledgeBases, 'models': AsyncModels, 'optimizations': AsyncOptimizations, 'projects': AsyncProjects, 'prompts': AsyncPrompts, 'provider_keys': AsyncProviderKeys, 'scores': AsyncScores, 'sessions': AsyncSessions, 'simulation': AsyncSimulation, 'spans': AsyncSpans, 'traces': AsyncTraces, 'usage': AsyncUsage, 'workspaces': AsyncWorkspaces}
 
 
 __all__ = [
@@ -112,6 +115,7 @@ __all__ = [
     'ErrorClusters',
     'Evals',
     'Experiments',
+    'FileKnowledgeBases',
     'Gateway',
     'KnowledgeBases',
     'Models',
@@ -136,6 +140,7 @@ __all__ = [
     'AsyncErrorClusters',
     'AsyncEvals',
     'AsyncExperiments',
+    'AsyncFileKnowledgeBases',
     'AsyncGateway',
     'AsyncKnowledgeBases',
     'AsyncModels',

@@ -126,10 +126,7 @@ class Responses:
         )
 
         if stream:
-            from fi.gateway._streaming import Stream
-
-            response = self._client._get_base_client()._stream_request(opts, agentcc_params)
-            return Stream(response, ResponseStreamEvent)  # Responses events, not chat chunks
+            return self._client._get_base_client()._open_stream(opts, agentcc_params, ResponseStreamEvent)  # Responses events, not chat chunks
 
         return self._client._get_base_client()._request_with_retry(opts, ResponseObject, agentcc_params)
 

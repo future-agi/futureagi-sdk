@@ -350,11 +350,6 @@ export interface Dashboard {
   widget_count?: unknown | null;
 }
 
-export interface DashboardCreateUpdate {
-  name?: string | null;
-  description?: string | null;
-}
-
 export interface DashboardDetail {
   id?: string | null;
   name?: string | null;
@@ -571,17 +566,6 @@ export interface DatasetOptimizationColumnConfigItem {
   id?: string | null;
   name?: string | null;
   is_visible?: boolean | null;
-}
-
-export interface DatasetOptimizationCreate {
-  id?: string | null;
-  name?: string | null;
-  column_id?: string | null;
-  optimizer_algorithm?: string | null; // one of: random_search, bayesian, metaprompt, protegi, promptwizard, gepa
-  optimizer_model_id?: string | null;
-  optimizer_config?: unknown | null;
-  user_eval_template_ids?: Array<string | null> | null;
-  created_at?: string | null;
 }
 
 export interface DatasetOptimizationDetail {
@@ -869,6 +853,10 @@ export interface EvalTemplateUpdateResponseResult {
   updated?: boolean | null;
 }
 
+export interface EvalsConfigsCreateResult {
+  id?: string | null;
+}
+
 export interface ExperimentDetailV2 {
   id?: string | null;
   name?: string | null;
@@ -1005,16 +993,6 @@ export interface KnowledgeBaseItem {
   updated_at?: string | null;
 }
 
-export interface KnowledgeBasePaginatedResult {
-  count?: number | null;
-  next?: string | null;
-  previous?: string | null;
-  results?: Array<KnowledgeBaseItem | null> | null;
-  total_pages?: number | null;
-  current_page?: number | null;
-  total_queries?: number | null;
-}
-
 export interface LegacyKnowledgeBaseCreateResult {
   detail?: string | null;
   kb_id?: string | null;
@@ -1060,6 +1038,27 @@ export interface LegacyKnowledgeBaseOption {
   name?: string | null;
 }
 
+export interface LegacyKnowledgeBaseTableColumn {
+  id?: string | null;
+  name?: string | null;
+}
+
+export interface LegacyKnowledgeBaseTableResult {
+  column_config?: Array<LegacyKnowledgeBaseTableColumn | null> | null;
+  table_data?: Array<LegacyKnowledgeBaseTableRow | null> | null;
+  total_rows?: number | null;
+}
+
+export interface LegacyKnowledgeBaseTableRow {
+  id?: string | null;
+  name?: string | null;
+  files_uploaded?: number | null;
+  status?: string | null;
+  error?: string | null;
+  updated_at?: string | null;
+  created_by?: string | null;
+}
+
 export interface LocalFileDatasetCreateStartedResult {
   message?: string | null;
   dataset_id?: string | null;
@@ -1068,15 +1067,6 @@ export interface LocalFileDatasetCreateStartedResult {
   processing_status?: string | null;
   estimated_rows?: number | null;
   estimated_columns?: number | null;
-}
-
-export interface MessageItem {
-  role?: string | null;
-  content?: unknown | null;
-  name?: string | null;
-  tool_calls?: unknown | null;
-  tool_call_id?: string | null;
-  id?: string | null;
 }
 
 export interface ModelHubPaginatedResponse {
@@ -1094,6 +1084,14 @@ export interface ObservationSpanDetailResult {
   observation_span?: unknown | null;
   evals_metrics?: unknown | null;
   enrichment?: unknown | null;
+}
+
+export interface OptimizationsCreateResult {
+  id?: string | null;
+  name?: string | null;
+  optimizer_algorithm?: string | null;
+  optimizer_config?: unknown | null;
+  created_at?: string | null;
 }
 
 export interface Organization {
@@ -1157,41 +1155,6 @@ export interface PromptLabel {
   updated_at?: string | null;
 }
 
-export interface PromptRunConfiguration {
-  messages?: Array<MessageItem | null> | null;
-  configuration?: PromptRunModelConfiguration | null;
-}
-
-export interface PromptRunModelConfiguration {
-  tool_choice?: string | null;
-  template_format?: string | null;
-  tools?: Array<unknown | null> | null;
-  output_format?: string | null;
-  model_type?: string | null;
-  model_detail?: unknown | null;
-  voice_id?: string | null;
-  temperature?: number | null;
-  max_tokens?: number | null;
-  top_p?: number | null;
-  frequency_penalty?: number | null;
-  presence_penalty?: number | null;
-  response_format?: unknown | null;
-  model?: unknown | null;
-}
-
-export interface PromptRunRequest {
-  name?: string | null;
-  version?: string | null;
-  prompt_config?: Array<PromptRunConfiguration | null> | null;
-  variable_names?: unknown | null;
-  placeholders?: unknown | null;
-  evaluation_configs?: Array<unknown | null> | null;
-  source?: string | null;
-  is_run?: unknown | null;
-  is_sdk?: boolean | null;
-  run_index?: number | null;
-}
-
 export interface PromptRunStatusResult {
   status?: string | null;
   error_message?: string | null;
@@ -1218,6 +1181,14 @@ export interface PromptTemplatePatch {
   prompt_folder?: string | null;
   placeholders?: unknown | null;
   created_by?: string | null;
+}
+
+export interface PromptsRunResult {
+  template_id?: string | null;
+  prompt_config?: Array<unknown | null> | null;
+  variable_names?: unknown | null;
+  evaluation_configs?: Array<unknown | null> | null;
+  placeholders?: unknown | null;
 }
 
 export interface QueueAddItemsResult {

@@ -185,22 +185,47 @@ live("platform client against a live backend", () => {
     }
   });
 
-  test("knowledge bases: multipart create, update, files, delete", async () => {
-    const kb = await client.knowledgeBases.create({ name: name("kb"), file: [{ name: "notes.txt", data: "hello from typescript" }] });
+  test("knowledge bases: create, get, list, update, delete on one store", async () => {
+    const kb = await client.knowledgeBases.create({ name: name("kb"), chunk_size: 256 });
+    try {
+      expect((await client.knowledgeBases.get(kb.id!)).name).toBe(kb.name); // the id a create returns is one get finds
+      expect((await client.knowledgeBases.list({ search: kb.name! }).toArray()).map((k) => k.id)).toContain(kb.id);
+      expect((await client.knowledgeBases.update(kb.id!, { name: `${kb.name}-u` })).name).toBe(`${kb.name}-u`);
+    } finally {
+      await client.knowledgeBases.delete(kb.id!);
+    }
+    await expect(client.knowledgeBases.get(kb.id!)).rejects.toThrow(NotFoundError);
+  });
+
+  test("file knowledge bases: multipart create, update, files, delete", async () => {
+    const kb = await client.fileKnowledgeBases.create({ name: name("kb"), file: [{ name: "notes.txt", data: "hello from typescript" }] });
     try {
       expect(kb.file_ids).toHaveLength(1);
+      expect((await client.fileKnowledgeBases.listNames()).table_data!.map((k) => k!.id)).toContain(kb.kb_id);
       // Backend: an update that adds files is refused (400) while an earlier upload is still being
       // processed, and the refused update stores its file anyway. Wait for the worker.
-      const processed = async () => (await client.knowledgeBases.files.list({ kb_id: kb.kb_id! })).table_data!.every((f) => f!.status !== "Processing");
+      const processed = async () => (await client.fileKnowledgeBases.files.list({ kb_id: kb.kb_id! })).table_data!.every((f) => f!.status !== "Processing");
       expect(await waitUntil(processed)).toBe(true);
-      const updated = await client.knowledgeBases.update({ kb_id: kb.kb_id!, name: `${kb.kb_name}-u`, file: [{ name: "more.txt", data: "second file" }] });
+      const updated = await client.fileKnowledgeBases.update({ kb_id: kb.kb_id!, name: `${kb.kb_name}-u`, file: [{ name: "more.txt", data: "second file" }] });
       expect(updated.name).toBe(`${kb.kb_name}-u`);
-      expect((await client.knowledgeBases.files.list({ kb_id: kb.kb_id! })).total_rows).toBe(2);
+      expect((await client.fileKnowledgeBases.files.list({ kb_id: kb.kb_id! })).total_rows).toBe(2);
       expect(await waitUntil(processed)).toBe(true); // a file being processed is not deleted
-      expect(await client.knowledgeBases.files.delete({ kb_id: kb.kb_id!, file_ids: [kb.file_ids![0]!] })).toBeTruthy();
-      expect(await waitUntil(async () => (await client.knowledgeBases.files.list({ kb_id: kb.kb_id! })).total_rows === 1)).toBe(true);
+      expect(await client.fileKnowledgeBases.files.delete({ kb_id: kb.kb_id!, file_ids: [kb.file_ids![0]!] })).toBeTruthy();
+      expect(await waitUntil(async () => (await client.fileKnowledgeBases.files.list({ kb_id: kb.kb_id! })).total_rows === 1)).toBe(true);
     } finally {
-      await client.knowledgeBases.delete({ kb_ids: [kb.kb_id!] });
+      await client.fileKnowledgeBases.delete({ kb_ids: [kb.kb_id!] });
+    }
+  });
+
+  test("dashboards: a description-only update is a partial update, and a create returns the detail", async () => {
+    const dashboard = await client.dashboards.create({ name: name("dash") });
+    try {
+      expect(dashboard.id).toBeTruthy(); // typed: the response is the dashboard detail, not the create input
+      const updated = await client.dashboards.update(dashboard.id!, { description: "description only" });
+      expect(updated.description).toBe("description only");
+      expect(updated.name).toBe(dashboard.name);
+    } finally {
+      await client.dashboards.delete(dashboard.id!);
     }
   });
 

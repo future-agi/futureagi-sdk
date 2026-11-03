@@ -22,6 +22,7 @@ from .catalog import (
     children_of,
     class_name,
     is_file,
+    is_json_value,
     is_method_field,
     model_refs,
     namespace_tree,
@@ -68,6 +69,8 @@ def py_type(schema: dict | None, *, for_input: bool) -> str:
         return "Any"
     if for_input and schema.get("type") == "file":
         return "FileInput"
+    if is_json_value(schema):
+        return "Any"  # any JSON value: a string or number as much as an object
     if "$ref" in schema:
         return "dict[str, Any]" if for_input else class_name(schema["$ref"])
     if "enum" in schema:
@@ -92,13 +95,27 @@ def emit_models(spec: dict, ops: list[Op]) -> str:
     names = model_refs(spec, [op.returns for op in sdk_ops(ops) if op.returns])
     out = [
         HEADER,
-        '"""Response models. Every field is optional so a missing or new field never breaks a call."""\n\n',
+        '"""Response models.\n\n',
+        "Every field is typed optional, so a response that leaves one out or adds one never breaks a\n",
+        "call by default. The fields the contract marks required (and not nullable) are listed in each\n",
+        "model's `__required__`; `Client(strict_responses=True)` rejects a response that misses one.\n",
+        '"""\n\n',
         "from __future__ import annotations\n\n",
         "# typing aliases (not `X | None`): pydantic evaluates these at runtime, and the SDK supports Python 3.9\n",
-        "from typing import Any, Dict, List, Optional\n\n",
-        "from pydantic import BaseModel, ConfigDict, Field\n\n\n",
+        "from typing import Any, ClassVar, Dict, FrozenSet, List, Optional\n\n",
+        "from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, model_validator\n\n\n",
         "class _Model(BaseModel):\n",
-        "    model_config = ConfigDict(extra=\"allow\", populate_by_name=True, protected_namespaces=(), coerce_numbers_to_str=True)\n\n\n",
+        "    model_config = ConfigDict(extra=\"allow\", populate_by_name=True, protected_namespaces=(), coerce_numbers_to_str=True)\n",
+        "    __required__: ClassVar[FrozenSet[str]] = frozenset()\n\n",
+        "    @model_validator(mode=\"after\")\n",
+        "    def _required_fields_are_present(self, info: ValidationInfo) -> \"_Model\":\n",
+        "        # Tolerant by default; strict validation (the transport passes `strict` in the context)\n",
+        "        # holds the response to the contract's required fields.\n",
+        "        if info.context and info.context.get(\"strict\"):\n",
+        "            missing = [name for name in sorted(self.__required__) if getattr(self, name) is None]\n",
+        "            if missing:\n",
+        "                raise ValueError(f\"missing required field(s): {', '.join(missing)}\")\n",
+        "        return self\n\n\n",
     ]
     for name in names:
         definition = spec["definitions"][name]
@@ -107,6 +124,9 @@ def emit_models(spec: dict, ops: list[Op]) -> str:
         if not props:
             out.append("    pass\n\n\n")
             continue
+        required = sorted(field_name(n) for n in definition.get("required", []) if n in props and not props[n].get("x-nullable"))
+        if required:
+            out.append(f"    __required__: ClassVar[FrozenSet[str]] = frozenset({required!r})\n")
         for prop_name, prop in props.items():
             py = ("list[Any]" if prop.get("type") == "array" else "Any") if is_method_field(prop) else py_type(prop, for_input=False)
             fname = field_name(prop_name)

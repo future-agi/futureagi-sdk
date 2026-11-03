@@ -137,10 +137,7 @@ class Completions:
         )
 
         if stream is True or (stream is not NOT_GIVEN and stream):
-            from fi.gateway._streaming import Stream
-
-            response = self._client._get_base_client()._stream_request(opts, agentcc_params)
-            return Stream(response, Completion)  # text completions, not chat chunks
+            return self._client._get_base_client()._open_stream(opts, agentcc_params, Completion)  # text completions, not chat chunks
 
         return self._client._get_base_client()._request_with_retry(opts, Completion, agentcc_params)
 

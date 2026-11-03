@@ -15,8 +15,8 @@ SURFACES = {"sdk", "mcp"}  # a CLI would be a third surface on the same catalog
 STABILITY = {"stable", "beta", "deprecated"}
 MCP_ACCESS = {"read", "write", "destructive"}
 MCP_KEYS = {"name", "group", "access", "open_world", "max_page_size", "stability"}
-CONTRACT_FIXES = {"note", "untyped", "page_items", "body", "body_required", "query"}
-FIX_TYPES = {"string", "integer", "number", "boolean", "object", "array", "file"}
+CONTRACT_FIXES = {"note", "untyped", "page_items", "returns", "optional_in_response", "body", "body_fields", "body_required", "query"}
+FIX_TYPES = {"string", "integer", "number", "boolean", "object", "array", "file", "json"}
 DECODE_MODES = {"json", "text", "auto"}  # auto: JSON when the response says so, else the body text
 BODY_METHODS = ("post", "put", "patch")
 
@@ -97,6 +97,12 @@ def class_name(ref: str) -> str:
 def is_file(schema: dict | None) -> bool:
     schema = schema or {}
     return schema.get("type") == "file" or (schema.get("type") == "array" and is_file(schema.get("items")))
+
+
+def is_json_value(schema: dict | None) -> bool:
+    """`x-json-value`: the backend's JsonValueField, any JSON value (a string, number, list or
+    object) where drf-yasg's `type: object` would suggest only an object."""
+    return bool(schema and schema.get("x-json-value"))
 
 
 def is_method_field(prop: dict) -> bool:
@@ -194,46 +200,97 @@ def _fix_schema(op_id: str, type_name: str) -> dict:
         return {"type": "array", "items": _fix_schema(op_id, type_name[:-2])}
     if type_name not in FIX_TYPES:
         raise CatalogError(f"{op_id}: contract_fix type {type_name!r} is not one of {sorted(FIX_TYPES)} or `X[]`")
-    return {"type": "array", "items": {}} if type_name == "array" else {"type": type_name}
+    if type_name == "array":
+        return {"type": "array", "items": {}}
+    if type_name == "json":
+        return {"type": "object", "x-json-value": True}
+    return {"type": type_name}
+
+
+def _same_shape(a: dict | None, b: dict | None) -> bool:
+    """Whether two schemas say the same thing as far as the emitters care (type, items, JSON-value)."""
+    a, b = a or {}, b or {}
+    if a.get("type") != b.get("type") or is_json_value(a) != is_json_value(b) or is_file(a) != is_file(b):
+        return False
+    return _same_shape(a.get("items"), b.get("items")) if a.get("type") == "array" else True
+
+
+def _fix_field(op_id: str, name: str, kind: Any, location: str) -> Param:
+    """One `{name: type}` or `{name: {type: T, as: argument_name}}` entry of a contract_fix."""
+    arg_name = None
+    if isinstance(kind, dict):
+        kind, arg_name = kind["type"], kind.get("as")
+    return Param(name, location, _fix_schema(op_id, kind), False, arg_name=arg_name)
 
 
 def _apply_request_fix(op_id: str, fix: dict | None, params: list[Param]) -> list[Param]:
     """Catalog corrections for request parameters the contract describes wrongly.
 
-    body: {name: type}       replaces the contract's body fields (drf-yasg often documents the
-                             response serializer as the request body); a value may also be
-                             {type: T, as: argument_name} when the wire name makes a poor argument
-    body_required: [name]    overrides which body fields are required (e.g. none, on a PATCH)
-    query: {name: type}      adds query parameters the contract leaves out
+    body_fields: {name: type}  patches single body fields: a listed field replaces the
+                               contract's one (or is added), every other field stays as the
+                               contract says, so a field the backend adds later reaches the SDK
+    body: {name: type}         replaces every body field; only for a contract that documents the
+                               wrong serializer altogether (drf-yasg often shows the response
+                               serializer as the request body)
+    body_required: [name]      overrides which body fields are required
+    query: {name: type}        adds query parameters the contract leaves out
+    A value may be {type: T, as: argument_name} when the wire name makes a poor argument.
+
+    Each fix is checked against the contract: once the backend has fixed its contract, a fix
+    that no longer changes anything fails the build so it gets removed.
     """
-    if not fix or not ({"body", "body_required", "query"} & set(fix)):
+    if not fix or not ({"body", "body_fields", "body_required", "query"} & set(fix)):
         return params
+    contract_body = [p for p in params if p.location == "body"]
+    if "body" in fix and "body_fields" in fix:
+        raise CatalogError(f"{op_id}: contract_fix.body replaces the body; use body_fields alone to patch fields")
     if "body" in fix:
-        params = [p for p in params if p.location != "body"]
-        for name, kind in fix["body"].items():
-            arg_name = None
-            if isinstance(kind, dict):
-                kind, arg_name = kind["type"], kind.get("as")
-            params.append(Param(name, "body", _fix_schema(op_id, kind), False, arg_name=arg_name))
+        fixed = [_fix_field(op_id, name, kind, "body") for name, kind in fix["body"].items()]
+        if [p.name for p in contract_body] == [p.name for p in fixed] and all(_same_shape(a.schema, b.schema) for a, b in zip(contract_body, fixed)):
+            raise CatalogError(f"{op_id}: contract_fix.body is stale: the contract now describes these body fields; use body_fields or drop the fix")
+        params = [p for p in params if p.location != "body"] + fixed
+    for name, kind in fix.get("body_fields", {}).items():
+        patched = _fix_field(op_id, name, kind, "body")
+        current = next((p for p in params if p.location == "body" and p.name == name), None)
+        if current is not None and _same_shape(current.schema, patched.schema) and (patched.arg_name in (None, current.arg_name)):
+            raise CatalogError(f"{op_id}: contract_fix.body_fields.{name} is stale: the contract already says so")
+        if current is not None:
+            patched.required, patched.description = current.required, current.description
+            params[params.index(current)] = patched
+        else:
+            params.append(patched)
     if "body_required" in fix:
-        body_names = {p.name for p in params if p.location == "body"}
-        unknown = set(fix["body_required"]) - body_names
+        body = [p for p in params if p.location == "body"]
+        unknown = set(fix["body_required"]) - {p.name for p in body}
         if unknown:
             raise CatalogError(f"{op_id}: contract_fix.body_required names unknown body fields {sorted(unknown)}")
-        for p in params:
-            if p.location == "body":
-                p.required = p.name in fix["body_required"]
+        if {p.name for p in body if p.required} == set(fix["body_required"]):
+            raise CatalogError(f"{op_id}: contract_fix.body_required is stale: these are the required fields already")
+        for p in body:
+            p.required = p.name in fix["body_required"]
     for name, kind in fix.get("query", {}).items():
-        params = [p for p in params if not (p.location == "query" and p.name == name)]
-        params.append(Param(name, "query", _fix_schema(op_id, kind), False))
+        if any(p.location == "query" and p.name == name for p in params):
+            raise CatalogError(f"{op_id}: contract_fix.query.{name} is stale: the contract has that query parameter")
+        params.append(_fix_field(op_id, name, kind, "query"))
     return params
 
 
-def _apply_response_fix(op_id: str, fix: dict | None, returns: dict | None, unwrap: str | None):
+def _result_name(op_id: str) -> str:
+    return "".join(part.title() for part in op_id.replace(".", "_").split("_")) + "Result"
+
+
+def _apply_response_fix(op_id: str, spec: dict, fix: dict | None, returns: dict | None, unwrap: str | None):
     """Catalog corrections for responses the contract describes wrongly (found on a live backend).
 
-    page_items: KEY    the contract's array is really a page object whose items are under KEY
-    untyped: true      the contract's schema is wrong; return the raw JSON
+    returns: Name          the response is really this definition of the contract (e.g. a create
+                           that answers with the detail serializer, not the input one)
+    returns: {name: type}  the response is an object the contract has no definition for; one named
+                           `<Resource><Method>Result` is generated from these fields
+    optional_in_response: [field]  the response definition marks a field required that the server
+                           never sends (a write-only input the serializer also documents as output);
+                           it becomes optional on that definition, for every operation returning it
+    page_items: KEY        the contract's array is really a page object whose items are under KEY
+    untyped: true          the contract's schema is wrong; return the raw JSON
     Every fix needs a `note` so the backend bug can be fixed at the source. (A missing
     {status, result} envelope needs no fix: the transport unwraps it whenever present.)
     """
@@ -245,7 +302,45 @@ def _apply_response_fix(op_id: str, fix: dict | None, returns: dict | None, unwr
     if not fix.get("note"):
         raise CatalogError(f"{op_id}: contract_fix needs a `note` describing the contract bug")
     if fix.get("untyped"):
+        if "returns" in fix:
+            raise CatalogError(f"{op_id}: contract_fix.untyped and contract_fix.returns contradict each other")
         return None, unwrap
+    if "returns" in fix:
+        target = fix["returns"]
+        if isinstance(target, str):
+            if target not in spec["definitions"]:
+                raise CatalogError(f"{op_id}: contract_fix.returns names {target!r}, which is not a definition of the contract")
+            if (returns or {}).get("$ref") == f"#/definitions/{target}":
+                raise CatalogError(f"{op_id}: contract_fix.returns is stale: the contract already answers with {target}")
+            returns = {"$ref": f"#/definitions/{target}"}
+        elif isinstance(target, dict) and target:
+            name = _result_name(op_id)
+            definition = {
+                "type": "object",
+                "properties": {field: _fix_schema(op_id, kind) for field, kind in target.items()},
+                "x-contract-fix": op_id,  # synthesized from the catalog, not from the backend
+            }
+            existing = spec["definitions"].get(name)
+            if existing is not None and existing != definition:
+                raise CatalogError(f"{op_id}: contract_fix.returns would generate {name}, which the contract already defines differently")
+            spec["definitions"][name] = definition
+            returns = {"$ref": f"#/definitions/{name}"}
+        else:
+            raise CatalogError(f"{op_id}: contract_fix.returns must be a definition name or {{field: type}}")
+    if "optional_in_response" in fix:
+        ref = (returns or {}).get("$ref")
+        if not ref:
+            raise CatalogError(f"{op_id}: contract_fix.optional_in_response needs a response that is a definition of the contract")
+        name = class_name(ref)
+        definition = spec["definitions"][name]
+        relaxed: dict[str, str] = definition.setdefault("x-contract-fix-optional", {})  # field -> the op that declared it
+        for field in fix["optional_in_response"]:
+            if relaxed.get(field) not in (None, op_id):
+                raise CatalogError(f"{op_id}: {name}.{field} is already made optional by {relaxed[field]}'s contract_fix; declare it once")
+            if field not in definition.get("required", []) and field not in relaxed:
+                raise CatalogError(f"{op_id}: contract_fix.optional_in_response.{field} is stale: {name} does not require it")
+            definition["required"] = [f for f in definition.get("required", []) if f != field]
+            relaxed[field] = op_id
     if "page_items" in fix:
         if not returns or returns.get("type") != "array":
             raise CatalogError(f"{op_id}: contract_fix.page_items needs an array response in the contract")
@@ -253,12 +348,15 @@ def _apply_response_fix(op_id: str, fix: dict | None, returns: dict | None, unwr
     return returns, unwrap
 
 
-def _contract_params(op_id: str, spec: dict, item: dict, contract_op: dict) -> list[Param]:
+def _contract_params(op_id: str, spec: dict, method: str, item: dict, contract_op: dict) -> list[Param]:
     params: list[Param] = []
     for p in item.get("parameters", []) + contract_op.get("parameters", []):
         if p["in"] == "body":
             body = resolve(spec, p["schema"]) or {}
-            required = set(body.get("required", []))
+            # A PATCH is a partial update: the backend accepts any subset of the fields, whatever
+            # the contract says (drf-yasg marks the create serializer's required fields). A view
+            # that does need a field on PATCH says so with contract_fix.body_required.
+            required = set() if method == "patch" else set(body.get("required", []))
             for name, prop in body.get("properties", {}).items():
                 if prop.get("readOnly"):
                     continue  # server-owned fields never appear in inputs
@@ -302,7 +400,7 @@ def _load_one(spec: dict, entry: dict, seen_mcp: set[str]) -> Op:
     contract_op = item[method]
     fix = entry.get("contract_fix")
 
-    params = _apply_request_fix(op_id, fix, _contract_params(op_id, spec, item, contract_op))
+    params = _apply_request_fix(op_id, fix, _contract_params(op_id, spec, method, item, contract_op))
 
     multipart = bool(entry["operation"].get("multipart", False))
     decode = entry["operation"].get("decode", "json")
@@ -327,7 +425,7 @@ def _load_one(spec: dict, entry: dict, seen_mcp: set[str]) -> Op:
     if {"status", "result"} <= set(resolved.get("properties", {})):
         unwrap = "result"
         returns = resolved["properties"]["result"]
-    returns, unwrap = _apply_response_fix(op_id, fix, returns, unwrap)
+    returns, unwrap = _apply_response_fix(op_id, spec, fix, returns, unwrap)
 
     pagination = entry.get("pagination")
     sends_body = method in ("post", "put", "patch", "delete") and not pagination

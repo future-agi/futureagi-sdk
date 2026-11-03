@@ -158,12 +158,12 @@ def test_body_params_on_a_paginated_op_fail_the_build():
 
 def test_sdk_only_parity_ops_do_not_reach_mcp():
     """The hand-written modules' operations ship to the SDK only; the MCP tool list keeps its 105 tools."""
-    for op_id in ("prompts.commit", "knowledge_bases.create", "annotation_queues.create", "scores.create", "datasets.create_from_file"):
+    for op_id in ("prompts.commit", "file_knowledge_bases.create", "knowledge_bases.create", "annotation_queues.create", "scores.create", "datasets.create_from_file"):
         assert op_id not in MCP_IDS
     from fi.platform import Client
 
     client = Client(api_key="k", secret_key="s", base_url="http://unused")
-    assert callable(client.prompts.labels.assign) and callable(client.knowledge_bases.files.delete)
+    assert callable(client.prompts.labels.assign) and callable(client.file_knowledge_bases.files.delete)
 
 
 def test_request_fixes_replace_what_the_contract_gets_wrong():
@@ -172,13 +172,106 @@ def test_request_fixes_replace_what_the_contract_gets_wrong():
     commit = ops["prompts.commit"]
     assert [(p.name, p.required) for p in commit.params if p.location == "body"][:2] == [("version_name", True), ("message", False)]
     assert commit.returns is None  # untyped: the server answers with a message string
-    # body_required: a PATCH is partial even though the contract marks fields required.
-    assert not any(p.required for p in ops["annotation_queues.update"].params if p.location == "body")
+    # body_required: a view that needs fields on a PATCH (the generator makes PATCH bodies partial).
+    assert {p.name for p in ops["evals.tasks.update"].params if p.location == "body" and p.required} == {"eval_task_id", "edit_type"}
     # query: a filter the contract leaves out.
     assert "template_id" in {p.name for p in ops["prompts.history"].params if p.location == "query"}
     # `as`: the wire field is `file`, the Python argument is `files`.
-    upload = next(p for p in ops["knowledge_bases.create"].params if p.name == "file")
-    assert upload.arg_name == "files" and ops["knowledge_bases.create"].multipart
+    upload = next(p for p in ops["file_knowledge_bases.create"].params if p.name == "file")
+    assert upload.arg_name == "files" and ops["file_knowledge_bases.create"].multipart
+    # body_fields: one field patched, the rest of the contract's body kept.
+    score = {p.name: p for p in ops["scores.create"].params if p.location == "body"}
+    assert score["value"].schema.get("x-json-value") and score["value"].required and {"source_type", "label_id", "notes"} <= set(score)
+    # returns: a definition of the contract, or an object synthesized from the catalog's fields.
+    assert ops["dashboards.create"].returns == {"$ref": "#/definitions/DashboardDetail"}
+    assert ops["prompts.run"].returns == {"$ref": "#/definitions/PromptsRunResult"}
+    assert set(CONTRACT["definitions"]["PromptsRunResult"]["properties"]) == {"template_id", "prompt_config", "variable_names", "evaluation_configs", "placeholders"}
+
+
+def test_patch_bodies_are_partial_unless_the_catalog_says_otherwise():
+    """[P2, review 2] The contract marks the create serializer's fields required on PATCH too;
+    the backend accepts any subset. A description-only dashboard update must type-check."""
+    ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
+    assert CONTRACT["definitions"]["DashboardCreateUpdate"]["required"] == ["name"]
+    assert not any(p.required for p in ops["dashboards.update"].params if p.location == "body")
+    assert not any(p.required for p in ops["annotation_queues.update"].params if p.location == "body")
+    assert any(p.required for p in ops["dashboards.create"].params if p.location == "body")  # a POST keeps them
+    import inspect
+
+    from fi.platform.resources.base import DashboardsResource
+
+    assert inspect.signature(DashboardsResource.update).parameters["name"].default is not inspect.Parameter.empty
+
+
+def test_json_value_inputs_accept_any_json_in_both_languages():
+    """[P2, review 2] `x-json-value` fields (and the patched score value) take a string or a
+    number as much as an object: `Any` in Python, the recursive `JsonValue` in TypeScript."""
+    text = pygen.emit_resources(generate.load(CONTRACT, CATALOG))
+    assert "is_run: Any | None | NotGiven = NOT_GIVEN" in text
+    assert "value: Any," in text  # scores.create: required, any JSON
+    ts = tsgen.emit_resources(generate.load(CONTRACT, CATALOG))
+    assert "is_run?: JsonValue | null;" in ts and "  value: JsonValue;" in ts
+    assert "import type { FileInput, JsonValue, RequestOptions, Transport }" in ts
+
+
+def test_a_field_added_to_a_selected_request_schema_reaches_the_generated_signature():
+    """The generation objective: the selected surface follows the contract. A field the backend
+    adds to a selected operation's request appears in the SDK without a catalog change."""
+    contract = copy.deepcopy(CONTRACT)
+    contract["definitions"]["DashboardCreateUpdate"]["properties"]["color"] = {"type": "string"}
+    ops = {o.id: o for o in generate.load(contract, CATALOG)}
+    assert "color" in {p.name for p in ops["dashboards.create"].params} and "color" in {p.name for p in ops["dashboards.update"].params}
+    assert "color: str | None | NotGiven = NOT_GIVEN" in pygen.emit_resources(list(ops.values()))
+    assert "color?: string | null;" in tsgen.emit_resources(list(ops.values()))
+    # The same for a response: a new field appears on the model.
+    contract["definitions"]["DashboardDetail"]["properties"]["color"] = {"type": "string"}
+    assert "    color: Optional[str] = Field(default=None)" in pygen.emit_models(contract, list(generate.load(contract, CATALOG).__iter__()))
+
+
+def test_an_operation_the_catalog_does_not_select_stays_out_of_the_sdk():
+    """The allowlist is deliberate: a backend route without a catalog entry gets no method, and
+    nothing counts that as missing coverage."""
+    assert "/model-hub/kb/supported_embedding_models/" not in CONTRACT["paths"]  # not even in the slice
+    ops = generate.load(CONTRACT, CATALOG)
+    assert not any("supported_embedding_models" in op.path for op in ops)
+    from fi.platform.resources.base import KnowledgeBasesResource
+
+    assert not hasattr(KnowledgeBasesResource, "supported_embedding_models")
+    assert {"create", "get", "list", "update", "delete"} <= {name for name in dir(KnowledgeBasesResource) if not name.startswith("_")}
+
+
+@pytest.mark.parametrize(
+    "op_id, fix, message",
+    [
+        ("annotation_queues.update", {"body_required": [], "note": "n"}, "body_required is stale"),
+        ("prompts.history", {"query": {"template_id": "string", "page": "integer"}, "note": "n"}, "query.page is stale"),
+        ("dashboards.get", {"returns": "DashboardDetail", "note": "n"}, "returns is stale"),
+        ("dashboards.create", {"body": {"name": "string", "description": "string"}, "note": "n"}, "body is stale"),
+        ("dashboards.create", {"body": {"name": "string"}, "body_fields": {"name": "string"}, "note": "n"}, "use body_fields alone"),
+        ("dashboards.create", {"returns": "Nope", "note": "n"}, "not a definition"),
+        ("dashboards.create", {"returns": "DashboardDetail", "untyped": True, "note": "n"}, "contradict"),
+        ("annotation_queues.get", {"optional_in_response": ["label_ids"], "note": "n"}, "already made optional by annotation_queues.create"),
+        ("annotation_queues.get", {"optional_in_response": ["description"], "note": "n"}, "optional_in_response.description is stale"),
+    ],
+)
+def test_a_contract_fix_the_contract_no_longer_needs_fails_the_build(op_id, fix, message):
+    """Each fix is a backend bug with a note; once the backend fixes it, the fix must go."""
+    with pytest.raises(generate.CatalogError, match=message):
+        generate.load(copy.deepcopy(CONTRACT), _with(op_id, contract_fix=fix))
+    # `body_fields` too: the score value patch is stale once the contract marks the field itself.
+    contract = copy.deepcopy(CONTRACT)
+    contract["definitions"]["CreateScore"]["properties"]["value"]["x-json-value"] = True
+    with pytest.raises(generate.CatalogError, match="body_fields.value is stale"):
+        generate.load(contract, CATALOG)
+
+
+def test_models_list_their_required_fields_for_strict_mode():
+    from fi.platform import models
+
+    assert "organization" in models.KnowledgeBaseItem.__required__
+    assert "label_ids" not in models.AnnotationQueue.__required__ and "name" in models.AnnotationQueue.__required__  # optional_in_response
+    assert models.PromptsRunResult.__required__ == frozenset()  # synthesized from the catalog: nothing is promised
+    assert models.DashboardDetail.__required__ == frozenset({"name"})
 
 
 @pytest.mark.parametrize(

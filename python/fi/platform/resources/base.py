@@ -462,7 +462,7 @@ class EvalsConfigsResource(Resource):
 
     _t: SyncTransport
 
-    def create(self, *, eval_template: str, project: str, name: str | None | NotGiven = NOT_GIVEN, config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, filters: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer: bool | None | NotGiven = NOT_GIVEN, kb_id: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.CustomEvalConfig:
+    def create(self, *, eval_template: str, project: str, name: str | None | NotGiven = NOT_GIVEN, config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, filters: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer: bool | None | NotGiven = NOT_GIVEN, kb_id: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalsConfigsCreateResult:
         """Create a custom evaluation configuration from an eval template so it can be attached to an online evaluation task. Use when list_eval_configs has no entry for the template you want to run over spans.
 
         POST /tracer/custom-eval-config/
@@ -470,7 +470,7 @@ class EvalsConfigsResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'eval_template': eval_template, 'project': project, 'name': name, 'config': config, 'mapping': mapping, 'filters': filters, 'error_localizer': error_localizer, 'kb_id': kb_id, 'model': model, **(extra_body or {})}
-        return self._t.call(_ops.OP_EVALS_CONFIGS_CREATE, path=path, query=query, body=body, model=models.CustomEvalConfig, options=options)
+        return self._t.call(_ops.OP_EVALS_CONFIGS_CREATE, path=path, query=query, body=body, model=models.EvalsConfigsCreateResult, options=options)
 
     def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.CustomEvalConfig]:
         """List the custom evaluation configurations available for online evaluation tasks. The ids returned here are what create_eval_task takes in its `evals` argument - eval templates are a different object and their ids are not accepted there.
@@ -620,6 +620,32 @@ class EvalsTemplatesResource(Resource):
         return self._t.call(_ops.OP_EVALS_TEMPLATES_UPDATE, path=path, query=query, body=body, model=models.EvalTemplateUpdateResponseResult, options=options)
 
 
+class FileKnowledgeBasesFilesResource(Resource):
+    """`client.file_knowledge_bases.files`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+
+    def delete(self, *, kb_id: str | None | NotGiven = NOT_GIVEN, delete_all: bool | None | NotGiven = NOT_GIVEN, file_ids: List[str] | None | NotGiven = NOT_GIVEN, excluded_file_ids: List[str] | None | NotGiven = NOT_GIVEN, file_names: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+        """Delete files from a file knowledge base, by id or name, or all of them.
+
+        DELETE /model-hub/knowledge-base/files/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_id': kb_id, 'delete_all': delete_all, 'file_ids': file_ids, 'excluded_file_ids': excluded_file_ids, 'file_names': file_names, **(extra_body or {})}
+        return self._t.call(_ops.OP_FILE_KNOWLEDGE_BASES_FILES_DELETE, path=path, query=query, body=body, model=None, options=options)
+
+    def list(self, *, kb_id: str, search: str | None | NotGiven = NOT_GIVEN, sort: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseFilesResult:
+        """List the files in a file knowledge base, with their processing status.
+
+        POST /model-hub/knowledge-base/files/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_id': kb_id, 'search': search, 'sort': sort, 'page_number': page_number, 'page_size': page_size, **(extra_body or {})}
+        return self._t.call(_ops.OP_FILE_KNOWLEDGE_BASES_FILES_LIST, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseFilesResult, options=options)
+
+
 class GatewayGuardrailRulesResource(Resource):
     """`client.gateway.guardrail_rules`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -674,32 +700,6 @@ class GatewaySessionsResource(Resource):
         query = {**(extra_query or {})}
         body = None
         return self._t.call(_ops.OP_GATEWAY_SESSIONS_REQUESTS, path=path, query=query, body=body, model=None, options=options)
-
-
-class KnowledgeBasesFilesResource(Resource):
-    """`client.knowledge_bases.files`. Subclass to add methods; override `_children` to swap a nested resource."""
-
-    _t: SyncTransport
-
-    def delete(self, *, kb_id: str | None | NotGiven = NOT_GIVEN, delete_all: bool | None | NotGiven = NOT_GIVEN, file_ids: List[str] | None | NotGiven = NOT_GIVEN, excluded_file_ids: List[str] | None | NotGiven = NOT_GIVEN, file_names: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
-        """Delete files from a knowledge base, by id or name, or all of them.
-
-        DELETE /model-hub/knowledge-base/files/
-        """
-        path = None
-        query = {**(extra_query or {})}
-        body = {'kb_id': kb_id, 'delete_all': delete_all, 'file_ids': file_ids, 'excluded_file_ids': excluded_file_ids, 'file_names': file_names, **(extra_body or {})}
-        return self._t.call(_ops.OP_KNOWLEDGE_BASES_FILES_DELETE, path=path, query=query, body=body, model=None, options=options)
-
-    def list(self, *, kb_id: str, search: str | None | NotGiven = NOT_GIVEN, sort: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseFilesResult:
-        """List the files in a knowledge base, with their processing status.
-
-        POST /model-hub/knowledge-base/files/
-        """
-        path = None
-        query = {**(extra_query or {})}
-        body = {'kb_id': kb_id, 'search': search, 'sort': sort, 'page_number': page_number, 'page_size': page_size, **(extra_body or {})}
-        return self._t.call(_ops.OP_KNOWLEDGE_BASES_FILES_LIST, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseFilesResult, options=options)
 
 
 class PromptsLabelsResource(Resource):
@@ -1167,7 +1167,7 @@ class DashboardsResource(Resource):
     widgets: DashboardsWidgetsResource
     _children: Dict[str, type] = {'metrics': DashboardsMetricsResource, 'widgets': DashboardsWidgetsResource}
 
-    def create(self, *, name: str, description: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardCreateUpdate:
+    def create(self, *, name: str, description: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardDetail:
         """Create an empty dashboard in the current workspace; add widgets with create_dashboard_widget.
 
         POST /tracer/dashboard/
@@ -1175,7 +1175,7 @@ class DashboardsResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'name': name, 'description': description, **(extra_body or {})}
-        return self._t.call(_ops.OP_DASHBOARDS_CREATE, path=path, query=query, body=body, model=models.DashboardCreateUpdate, options=options)
+        return self._t.call(_ops.OP_DASHBOARDS_CREATE, path=path, query=query, body=body, model=models.DashboardDetail, options=options)
 
     def delete(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """Delete a dashboard and the widgets on it. This is the only way to remove a dashboard created earlier.
@@ -1227,15 +1227,15 @@ class DashboardsResource(Resource):
         body = {'time_range': time_range, 'metrics': metrics, 'workflow': workflow, 'project_ids': project_ids, 'granularity': granularity, 'filters': filters, 'breakdowns': breakdowns, 'allow_sampled': allow_sampled, **(extra_body or {})}
         return self._t.call(_ops.OP_DASHBOARDS_QUERY, path=path, query=query, body=body, model=models.DashboardQueryResult, options=options)
 
-    def update(self, id: str, *, name: str, description: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardCreateUpdate:
-        """Update the name or description of an existing dashboard.
+    def update(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardDetail:
+        """Update the name and/or description of an existing dashboard (a partial update).
 
         PATCH /tracer/dashboard/{id}/
         """
         path = {'id': id}
         query = {**(extra_query or {})}
         body = {'name': name, 'description': description, **(extra_body or {})}
-        return self._t.call(_ops.OP_DASHBOARDS_UPDATE, path=path, query=query, body=body, model=models.DashboardCreateUpdate, options=options)
+        return self._t.call(_ops.OP_DASHBOARDS_UPDATE, path=path, query=query, body=body, model=models.DashboardDetail, options=options)
 
 
 class DatasetsResource(Resource):
@@ -1356,7 +1356,7 @@ class EvalsResource(Resource):
     templates: EvalsTemplatesResource
     _children: Dict[str, type] = {'configs': EvalsConfigsResource, 'groups': EvalsGroupsResource, 'tasks': EvalsTasksResource, 'templates': EvalsTemplatesResource}
 
-    def test(self, *, config: Dict[str, Any], name: str, output_type: str, model: str | None | NotGiven = NOT_GIVEN, eval_tags: List[str] | None | NotGiven = NOT_GIVEN, criteria: str | None | NotGiven = NOT_GIVEN, multi_choice: bool | None | NotGiven = NOT_GIVEN, choices: Dict[str, Any] | None | NotGiven = NOT_GIVEN, input_data_types: Dict[str, Any] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, required_keys: List[str] | None | NotGiven = NOT_GIVEN, template_type: str | None | NotGiven = NOT_GIVEN, eval_type_id: str | None | NotGiven = NOT_GIVEN, template_id: str | None | NotGiven = NOT_GIVEN, eval_type: str | None | NotGiven = NOT_GIVEN, error_localizer: bool | None | NotGiven = NOT_GIVEN, reason_column: bool | None | NotGiven = NOT_GIVEN, optional_keys: List[str] | None | NotGiven = NOT_GIVEN, variable_keys: Dict[str, Any] | None | NotGiven = NOT_GIVEN, run_prompt_column: bool | None | NotGiven = NOT_GIVEN, template_name: str | None | NotGiven = NOT_GIVEN, mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, output: str | None | NotGiven = NOT_GIVEN, config_params_desc: Dict[str, Any] | None | NotGiven = NOT_GIVEN, config_params_option: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalExecutionResponseResult:
+    def test(self, *, config: Dict[str, Any], name: str, output_type: str, model: str | None | NotGiven = NOT_GIVEN, eval_tags: List[str] | None | NotGiven = NOT_GIVEN, criteria: str | None | NotGiven = NOT_GIVEN, multi_choice: bool | None | NotGiven = NOT_GIVEN, choices: Dict[str, Any] | None | NotGiven = NOT_GIVEN, input_data_types: Dict[str, Any] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, required_keys: List[str] | None | NotGiven = NOT_GIVEN, template_type: str | None | NotGiven = NOT_GIVEN, eval_type_id: str | None | NotGiven = NOT_GIVEN, template_id: str | None | NotGiven = NOT_GIVEN, eval_type: str | None | NotGiven = NOT_GIVEN, error_localizer: bool | None | NotGiven = NOT_GIVEN, reason_column: bool | None | NotGiven = NOT_GIVEN, optional_keys: List[str] | None | NotGiven = NOT_GIVEN, variable_keys: Any | None | NotGiven = NOT_GIVEN, run_prompt_column: bool | None | NotGiven = NOT_GIVEN, template_name: str | None | NotGiven = NOT_GIVEN, mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, output: str | None | NotGiven = NOT_GIVEN, config_params_desc: Dict[str, Any] | None | NotGiven = NOT_GIVEN, config_params_option: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalExecutionResponseResult:
         """Execute an evaluation template against supplied test inputs.
 
         POST /model-hub/test-evaluation/
@@ -1400,6 +1400,66 @@ class ExperimentsResource(Resource):
         path = None
         query = {'created_at': created_at, 'status': status, 'dataset_id': dataset_id, 'search': search, 'ordering': ordering, 'limit': limit, **(extra_query or {})}
         return self._t.paginate(_ops.OP_EXPERIMENTS_LIST, path=path, query=query, model=models.ExperimentListV2, options=options)
+
+
+class FileKnowledgeBasesResource(Resource):
+    """`client.file_knowledge_bases`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+    files: FileKnowledgeBasesFilesResource
+    _children: Dict[str, type] = {'files': FileKnowledgeBasesFilesResource}
+
+    def create(self, *, name: str, files: List[FileInput] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseCreateResult:
+        """Create a file knowledge base (the Knowledge Base page of the app), optionally uploading its first files (pdf, docx, txt, rtf).
+
+        POST /model-hub/knowledge-base/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, **(extra_body or {})}
+        files = {'file': files}
+        return self._t.call(_ops.OP_FILE_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseCreateResult, options=options)
+
+    def delete(self, *, kb_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+        """Delete file knowledge bases by id.
+
+        DELETE /model-hub/knowledge-base/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_ids': kb_ids, **(extra_body or {})}
+        return self._t.call(_ops.OP_FILE_KNOWLEDGE_BASES_DELETE, path=path, query=query, body=body, model=None, options=options)
+
+    def list(self, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseTableResult:
+        """List the file knowledge bases of the workspace as a table (name, file count, creator), without paging.
+
+        GET /model-hub/knowledge-base/get/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_FILE_KNOWLEDGE_BASES_LIST, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseTableResult, options=options)
+
+    def list_names(self, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseListResult:
+        """Return the id and name of every file knowledge base, without paging.
+
+        GET /model-hub/knowledge-base/list/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_FILE_KNOWLEDGE_BASES_LIST_NAMES, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseListResult, options=options)
+
+    def update(self, *, kb_id: str, name: str | None | NotGiven = NOT_GIVEN, files: List[FileInput] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseMutationResult:
+        """Rename a file knowledge base and/or upload more files to it.
+
+        PATCH /model-hub/knowledge-base/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_id': kb_id, 'name': name, **(extra_body or {})}
+        files = {'file': files}
+        return self._t.call(_ops.OP_FILE_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseMutationResult, options=options)
 
 
 class GatewayResource(Resource):
@@ -1446,28 +1506,25 @@ class KnowledgeBasesResource(Resource):
     """`client.knowledge_bases`. Subclass to add methods; override `_children` to swap a nested resource."""
 
     _t: SyncTransport
-    files: KnowledgeBasesFilesResource
-    _children: Dict[str, type] = {'files': KnowledgeBasesFilesResource}
 
-    def create(self, *, name: str, files: List[FileInput] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseCreateResult:
-        """Create a knowledge base, optionally uploading its first files (pdf, docx, txt, rtf).
+    def create(self, *, name: str, chunk_size: int, embedding_model: Literal['BAAI/bge-small-en-v1.5'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.KnowledgeBaseItem:
+        """Create a knowledge base with a name, an embedding model and a chunk size; it appears in knowledge_bases.list and knowledge_bases.get.
 
-        POST /model-hub/knowledge-base/
+        POST /model-hub/kb/
         """
         path = None
         query = {**(extra_query or {})}
-        body = {'name': name, **(extra_body or {})}
-        files = {'file': files}
-        return self._t.call(_ops.OP_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseCreateResult, options=options)
+        body = {'name': name, 'chunk_size': chunk_size, 'embedding_model': embedding_model, **(extra_body or {})}
+        return self._t.call(_ops.OP_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, model=models.KnowledgeBaseItem, options=options)
 
-    def delete(self, *, kb_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
-        """Delete knowledge bases by id.
+    def delete(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+        """Delete a knowledge base.
 
-        DELETE /model-hub/knowledge-base/
+        DELETE /model-hub/kb/{id}/
         """
-        path = None
+        path = {'id': id}
         query = {**(extra_query or {})}
-        body = {'kb_ids': kb_ids, **(extra_body or {})}
+        body = {**(extra_body or {})}
         return self._t.call(_ops.OP_KNOWLEDGE_BASES_DELETE, path=path, query=query, body=body, model=None, options=options)
 
     def get(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.KnowledgeBaseItem:
@@ -1480,36 +1537,24 @@ class KnowledgeBasesResource(Resource):
         body = None
         return self._t.call(_ops.OP_KNOWLEDGE_BASES_GET, path=path, query=query, body=body, model=models.KnowledgeBaseItem, options=options)
 
-    def list(self, *, search: str | None | NotGiven = NOT_GIVEN, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.KnowledgeBasePaginatedResult:
-        """List knowledge bases in the current workspace.
+    def list(self, *, search: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.KnowledgeBaseItem]:
+        """List knowledge bases (the RAG stores with an embedding model and a chunk size) in the current workspace. Knowledge bases built from uploaded files are a separate store, see file_knowledge_bases.
 
         GET /model-hub/kb/
         """
         path = None
-        query = {'search': search, 'page': page, 'limit': limit, **(extra_query or {})}
-        body = None
-        return self._t.call(_ops.OP_KNOWLEDGE_BASES_LIST, path=path, query=query, body=body, model=models.KnowledgeBasePaginatedResult, options=options)
+        query = {'search': search, 'limit': limit, **(extra_query or {})}
+        return self._t.paginate(_ops.OP_KNOWLEDGE_BASES_LIST, path=path, query=query, model=models.KnowledgeBaseItem, options=options)
 
-    def list_names(self, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseListResult:
-        """Return the id and name of every knowledge base created through knowledge_bases.create, without paging.
+    def update(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, embedding_model: Literal['BAAI/bge-small-en-v1.5'] | None | NotGiven = NOT_GIVEN, chunk_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.KnowledgeBaseItem:
+        """Update the name, embedding model or chunk size of a knowledge base (a partial update).
 
-        GET /model-hub/knowledge-base/list/
+        PATCH /model-hub/kb/{id}/
         """
-        path = None
+        path = {'id': id}
         query = {**(extra_query or {})}
-        body = None
-        return self._t.call(_ops.OP_KNOWLEDGE_BASES_LIST_NAMES, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseListResult, options=options)
-
-    def update(self, *, kb_id: str, name: str | None | NotGiven = NOT_GIVEN, files: List[FileInput] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseMutationResult:
-        """Rename a knowledge base and/or upload more files to it.
-
-        PATCH /model-hub/knowledge-base/
-        """
-        path = None
-        query = {**(extra_query or {})}
-        body = {'kb_id': kb_id, 'name': name, **(extra_body or {})}
-        files = {'file': files}
-        return self._t.call(_ops.OP_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseMutationResult, options=options)
+        body = {'name': name, 'embedding_model': embedding_model, 'chunk_size': chunk_size, **(extra_body or {})}
+        return self._t.call(_ops.OP_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, model=models.KnowledgeBaseItem, options=options)
 
 
 class ModelsResource(Resource):
@@ -1533,7 +1578,7 @@ class OptimizationsResource(Resource):
 
     _t: SyncTransport
 
-    def create(self, *, name: str, column_id: str, optimizer_algorithm: Literal['random_search', 'bayesian', 'metaprompt', 'protegi', 'promptwizard', 'gepa'], optimizer_model_id: str | None | NotGiven = NOT_GIVEN, optimizer_config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, user_eval_template_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetOptimizationCreate:
+    def create(self, *, name: str, column_id: str, optimizer_algorithm: Literal['random_search', 'bayesian', 'metaprompt', 'protegi', 'promptwizard', 'gepa'], optimizer_model_id: str | None | NotGiven = NOT_GIVEN, optimizer_config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, user_eval_template_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.OptimizationsCreateResult:
         """Create a dataset optimization run.
 
         POST /model-hub/dataset-optimization/
@@ -1541,7 +1586,7 @@ class OptimizationsResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'name': name, 'column_id': column_id, 'optimizer_algorithm': optimizer_algorithm, 'optimizer_model_id': optimizer_model_id, 'optimizer_config': optimizer_config, 'user_eval_template_ids': user_eval_template_ids, **(extra_body or {})}
-        return self._t.call(_ops.OP_OPTIMIZATIONS_CREATE, path=path, query=query, body=body, model=models.DatasetOptimizationCreate, options=options)
+        return self._t.call(_ops.OP_OPTIMIZATIONS_CREATE, path=path, query=query, body=body, model=models.OptimizationsCreateResult, options=options)
 
     def get(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetOptimizationDetail:
         """Return a dataset optimization run by its identifier.
@@ -1705,7 +1750,7 @@ class PromptsResource(Resource):
         query = {'name': name, 'version': version, 'created_at': created_at, 'search': search, 'ordering': ordering, 'limit': limit, 'modality': modality, **(extra_query or {})}
         return self._t.paginate(_ops.OP_PROMPTS_LIST, path=path, query=query, model=models.PromptTemplate, options=options)
 
-    def run(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, version: str | None | NotGiven = NOT_GIVEN, prompt_config: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, variable_names: Dict[str, Any] | None | NotGiven = NOT_GIVEN, placeholders: Dict[str, Any] | None | NotGiven = NOT_GIVEN, evaluation_configs: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, source: str | None | NotGiven = NOT_GIVEN, is_run: Dict[str, Any] | None | NotGiven = NOT_GIVEN, is_sdk: bool | None | NotGiven = NOT_GIVEN, run_index: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptRunRequest:
+    def run(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, version: str | None | NotGiven = NOT_GIVEN, prompt_config: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, variable_names: Dict[str, Any] | None | NotGiven = NOT_GIVEN, placeholders: Any | None | NotGiven = NOT_GIVEN, evaluation_configs: List[Any] | None | NotGiven = NOT_GIVEN, source: str | None | NotGiven = NOT_GIVEN, is_run: Any | None | NotGiven = NOT_GIVEN, is_sdk: bool | None | NotGiven = NOT_GIVEN, run_index: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptsRunResult:
         """Run a configured prompt version by supplying version and is_run="prompt". Optionally replace prompt_config or variable_names. Returns an asynchronous receipt; read get_prompt_run with template_version for status and output.
 
         POST /model-hub/prompt-templates/{id}/run_template/
@@ -1713,7 +1758,7 @@ class PromptsResource(Resource):
         path = {'id': id}
         query = {**(extra_query or {})}
         body = {'name': name, 'version': version, 'prompt_config': prompt_config, 'variable_names': variable_names, 'placeholders': placeholders, 'evaluation_configs': evaluation_configs, 'source': source, 'is_run': is_run, 'is_sdk': is_sdk, 'run_index': run_index, **(extra_body or {})}
-        return self._t.call(_ops.OP_PROMPTS_RUN, path=path, query=query, body=body, model=models.PromptRunRequest, options=options)
+        return self._t.call(_ops.OP_PROMPTS_RUN, path=path, query=query, body=body, model=models.PromptsRunResult, options=options)
 
     def run_status(self, id: str, *, template_version: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptRunStatusResult:
         """Read workbench prompt execution status and outputs. Supply template_version matching the version returned by run_prompt to read that version, otherwise the API chooses the default/latest version.
@@ -1756,7 +1801,7 @@ class ScoresResource(Resource):
 
     _t: SyncTransport
 
-    def create(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, label_id: str, value: Dict[str, Any], notes: str | None | NotGiven = NOT_GIVEN, score_source: Literal['human', 'api', 'auto', 'imported'] | None | NotGiven = NOT_GIVEN, queue_item_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.Score:
+    def create(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, label_id: str, value: Any, notes: str | None | NotGiven = NOT_GIVEN, score_source: Literal['human', 'api', 'auto', 'imported'] | None | NotGiven = NOT_GIVEN, queue_item_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.Score:
         """Record one score (annotation value) against a source such as a span or dataset row.
 
         POST /model-hub/scores/
@@ -2365,7 +2410,7 @@ class AsyncEvalsConfigsResource(Resource):
 
     _t: AsyncTransport
 
-    async def create(self, *, eval_template: str, project: str, name: str | None | NotGiven = NOT_GIVEN, config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, filters: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer: bool | None | NotGiven = NOT_GIVEN, kb_id: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.CustomEvalConfig:
+    async def create(self, *, eval_template: str, project: str, name: str | None | NotGiven = NOT_GIVEN, config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, filters: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer: bool | None | NotGiven = NOT_GIVEN, kb_id: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalsConfigsCreateResult:
         """Create a custom evaluation configuration from an eval template so it can be attached to an online evaluation task. Use when list_eval_configs has no entry for the template you want to run over spans.
 
         POST /tracer/custom-eval-config/
@@ -2373,7 +2418,7 @@ class AsyncEvalsConfigsResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'eval_template': eval_template, 'project': project, 'name': name, 'config': config, 'mapping': mapping, 'filters': filters, 'error_localizer': error_localizer, 'kb_id': kb_id, 'model': model, **(extra_body or {})}
-        return await self._t.acall(_ops.OP_EVALS_CONFIGS_CREATE, path=path, query=query, body=body, model=models.CustomEvalConfig, options=options)
+        return await self._t.acall(_ops.OP_EVALS_CONFIGS_CREATE, path=path, query=query, body=body, model=models.EvalsConfigsCreateResult, options=options)
 
     def list(self, *, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.CustomEvalConfig]:
         """List the custom evaluation configurations available for online evaluation tasks. The ids returned here are what create_eval_task takes in its `evals` argument - eval templates are a different object and their ids are not accepted there.
@@ -2523,6 +2568,32 @@ class AsyncEvalsTemplatesResource(Resource):
         return await self._t.acall(_ops.OP_EVALS_TEMPLATES_UPDATE, path=path, query=query, body=body, model=models.EvalTemplateUpdateResponseResult, options=options)
 
 
+class AsyncFileKnowledgeBasesFilesResource(Resource):
+    """`client.file_knowledge_bases.files`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+
+    async def delete(self, *, kb_id: str | None | NotGiven = NOT_GIVEN, delete_all: bool | None | NotGiven = NOT_GIVEN, file_ids: List[str] | None | NotGiven = NOT_GIVEN, excluded_file_ids: List[str] | None | NotGiven = NOT_GIVEN, file_names: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+        """Delete files from a file knowledge base, by id or name, or all of them.
+
+        DELETE /model-hub/knowledge-base/files/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_id': kb_id, 'delete_all': delete_all, 'file_ids': file_ids, 'excluded_file_ids': excluded_file_ids, 'file_names': file_names, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_FILE_KNOWLEDGE_BASES_FILES_DELETE, path=path, query=query, body=body, model=None, options=options)
+
+    async def list(self, *, kb_id: str, search: str | None | NotGiven = NOT_GIVEN, sort: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseFilesResult:
+        """List the files in a file knowledge base, with their processing status.
+
+        POST /model-hub/knowledge-base/files/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_id': kb_id, 'search': search, 'sort': sort, 'page_number': page_number, 'page_size': page_size, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_FILE_KNOWLEDGE_BASES_FILES_LIST, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseFilesResult, options=options)
+
+
 class AsyncGatewayGuardrailRulesResource(Resource):
     """`client.gateway.guardrail_rules`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -2577,32 +2648,6 @@ class AsyncGatewaySessionsResource(Resource):
         query = {**(extra_query or {})}
         body = None
         return await self._t.acall(_ops.OP_GATEWAY_SESSIONS_REQUESTS, path=path, query=query, body=body, model=None, options=options)
-
-
-class AsyncKnowledgeBasesFilesResource(Resource):
-    """`client.knowledge_bases.files`. Subclass to add methods; override `_children` to swap a nested resource."""
-
-    _t: AsyncTransport
-
-    async def delete(self, *, kb_id: str | None | NotGiven = NOT_GIVEN, delete_all: bool | None | NotGiven = NOT_GIVEN, file_ids: List[str] | None | NotGiven = NOT_GIVEN, excluded_file_ids: List[str] | None | NotGiven = NOT_GIVEN, file_names: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
-        """Delete files from a knowledge base, by id or name, or all of them.
-
-        DELETE /model-hub/knowledge-base/files/
-        """
-        path = None
-        query = {**(extra_query or {})}
-        body = {'kb_id': kb_id, 'delete_all': delete_all, 'file_ids': file_ids, 'excluded_file_ids': excluded_file_ids, 'file_names': file_names, **(extra_body or {})}
-        return await self._t.acall(_ops.OP_KNOWLEDGE_BASES_FILES_DELETE, path=path, query=query, body=body, model=None, options=options)
-
-    async def list(self, *, kb_id: str, search: str | None | NotGiven = NOT_GIVEN, sort: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseFilesResult:
-        """List the files in a knowledge base, with their processing status.
-
-        POST /model-hub/knowledge-base/files/
-        """
-        path = None
-        query = {**(extra_query or {})}
-        body = {'kb_id': kb_id, 'search': search, 'sort': sort, 'page_number': page_number, 'page_size': page_size, **(extra_body or {})}
-        return await self._t.acall(_ops.OP_KNOWLEDGE_BASES_FILES_LIST, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseFilesResult, options=options)
 
 
 class AsyncPromptsLabelsResource(Resource):
@@ -3070,7 +3115,7 @@ class AsyncDashboardsResource(Resource):
     widgets: AsyncDashboardsWidgetsResource
     _children: Dict[str, type] = {'metrics': AsyncDashboardsMetricsResource, 'widgets': AsyncDashboardsWidgetsResource}
 
-    async def create(self, *, name: str, description: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardCreateUpdate:
+    async def create(self, *, name: str, description: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardDetail:
         """Create an empty dashboard in the current workspace; add widgets with create_dashboard_widget.
 
         POST /tracer/dashboard/
@@ -3078,7 +3123,7 @@ class AsyncDashboardsResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'name': name, 'description': description, **(extra_body or {})}
-        return await self._t.acall(_ops.OP_DASHBOARDS_CREATE, path=path, query=query, body=body, model=models.DashboardCreateUpdate, options=options)
+        return await self._t.acall(_ops.OP_DASHBOARDS_CREATE, path=path, query=query, body=body, model=models.DashboardDetail, options=options)
 
     async def delete(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
         """Delete a dashboard and the widgets on it. This is the only way to remove a dashboard created earlier.
@@ -3130,15 +3175,15 @@ class AsyncDashboardsResource(Resource):
         body = {'time_range': time_range, 'metrics': metrics, 'workflow': workflow, 'project_ids': project_ids, 'granularity': granularity, 'filters': filters, 'breakdowns': breakdowns, 'allow_sampled': allow_sampled, **(extra_body or {})}
         return await self._t.acall(_ops.OP_DASHBOARDS_QUERY, path=path, query=query, body=body, model=models.DashboardQueryResult, options=options)
 
-    async def update(self, id: str, *, name: str, description: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardCreateUpdate:
-        """Update the name or description of an existing dashboard.
+    async def update(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DashboardDetail:
+        """Update the name and/or description of an existing dashboard (a partial update).
 
         PATCH /tracer/dashboard/{id}/
         """
         path = {'id': id}
         query = {**(extra_query or {})}
         body = {'name': name, 'description': description, **(extra_body or {})}
-        return await self._t.acall(_ops.OP_DASHBOARDS_UPDATE, path=path, query=query, body=body, model=models.DashboardCreateUpdate, options=options)
+        return await self._t.acall(_ops.OP_DASHBOARDS_UPDATE, path=path, query=query, body=body, model=models.DashboardDetail, options=options)
 
 
 class AsyncDatasetsResource(Resource):
@@ -3259,7 +3304,7 @@ class AsyncEvalsResource(Resource):
     templates: AsyncEvalsTemplatesResource
     _children: Dict[str, type] = {'configs': AsyncEvalsConfigsResource, 'groups': AsyncEvalsGroupsResource, 'tasks': AsyncEvalsTasksResource, 'templates': AsyncEvalsTemplatesResource}
 
-    async def test(self, *, config: Dict[str, Any], name: str, output_type: str, model: str | None | NotGiven = NOT_GIVEN, eval_tags: List[str] | None | NotGiven = NOT_GIVEN, criteria: str | None | NotGiven = NOT_GIVEN, multi_choice: bool | None | NotGiven = NOT_GIVEN, choices: Dict[str, Any] | None | NotGiven = NOT_GIVEN, input_data_types: Dict[str, Any] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, required_keys: List[str] | None | NotGiven = NOT_GIVEN, template_type: str | None | NotGiven = NOT_GIVEN, eval_type_id: str | None | NotGiven = NOT_GIVEN, template_id: str | None | NotGiven = NOT_GIVEN, eval_type: str | None | NotGiven = NOT_GIVEN, error_localizer: bool | None | NotGiven = NOT_GIVEN, reason_column: bool | None | NotGiven = NOT_GIVEN, optional_keys: List[str] | None | NotGiven = NOT_GIVEN, variable_keys: Dict[str, Any] | None | NotGiven = NOT_GIVEN, run_prompt_column: bool | None | NotGiven = NOT_GIVEN, template_name: str | None | NotGiven = NOT_GIVEN, mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, output: str | None | NotGiven = NOT_GIVEN, config_params_desc: Dict[str, Any] | None | NotGiven = NOT_GIVEN, config_params_option: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalExecutionResponseResult:
+    async def test(self, *, config: Dict[str, Any], name: str, output_type: str, model: str | None | NotGiven = NOT_GIVEN, eval_tags: List[str] | None | NotGiven = NOT_GIVEN, criteria: str | None | NotGiven = NOT_GIVEN, multi_choice: bool | None | NotGiven = NOT_GIVEN, choices: Dict[str, Any] | None | NotGiven = NOT_GIVEN, input_data_types: Dict[str, Any] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, required_keys: List[str] | None | NotGiven = NOT_GIVEN, template_type: str | None | NotGiven = NOT_GIVEN, eval_type_id: str | None | NotGiven = NOT_GIVEN, template_id: str | None | NotGiven = NOT_GIVEN, eval_type: str | None | NotGiven = NOT_GIVEN, error_localizer: bool | None | NotGiven = NOT_GIVEN, reason_column: bool | None | NotGiven = NOT_GIVEN, optional_keys: List[str] | None | NotGiven = NOT_GIVEN, variable_keys: Any | None | NotGiven = NOT_GIVEN, run_prompt_column: bool | None | NotGiven = NOT_GIVEN, template_name: str | None | NotGiven = NOT_GIVEN, mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, output: str | None | NotGiven = NOT_GIVEN, config_params_desc: Dict[str, Any] | None | NotGiven = NOT_GIVEN, config_params_option: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalExecutionResponseResult:
         """Execute an evaluation template against supplied test inputs.
 
         POST /model-hub/test-evaluation/
@@ -3303,6 +3348,66 @@ class AsyncExperimentsResource(Resource):
         path = None
         query = {'created_at': created_at, 'status': status, 'dataset_id': dataset_id, 'search': search, 'ordering': ordering, 'limit': limit, **(extra_query or {})}
         return self._t.apaginate(_ops.OP_EXPERIMENTS_LIST, path=path, query=query, model=models.ExperimentListV2, options=options)
+
+
+class AsyncFileKnowledgeBasesResource(Resource):
+    """`client.file_knowledge_bases`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+    files: AsyncFileKnowledgeBasesFilesResource
+    _children: Dict[str, type] = {'files': AsyncFileKnowledgeBasesFilesResource}
+
+    async def create(self, *, name: str, files: List[FileInput] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseCreateResult:
+        """Create a file knowledge base (the Knowledge Base page of the app), optionally uploading its first files (pdf, docx, txt, rtf).
+
+        POST /model-hub/knowledge-base/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'name': name, **(extra_body or {})}
+        files = {'file': files}
+        return await self._t.acall(_ops.OP_FILE_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseCreateResult, options=options)
+
+    async def delete(self, *, kb_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+        """Delete file knowledge bases by id.
+
+        DELETE /model-hub/knowledge-base/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_ids': kb_ids, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_FILE_KNOWLEDGE_BASES_DELETE, path=path, query=query, body=body, model=None, options=options)
+
+    async def list(self, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseTableResult:
+        """List the file knowledge bases of the workspace as a table (name, file count, creator), without paging.
+
+        GET /model-hub/knowledge-base/get/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_FILE_KNOWLEDGE_BASES_LIST, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseTableResult, options=options)
+
+    async def list_names(self, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseListResult:
+        """Return the id and name of every file knowledge base, without paging.
+
+        GET /model-hub/knowledge-base/list/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_FILE_KNOWLEDGE_BASES_LIST_NAMES, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseListResult, options=options)
+
+    async def update(self, *, kb_id: str, name: str | None | NotGiven = NOT_GIVEN, files: List[FileInput] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseMutationResult:
+        """Rename a file knowledge base and/or upload more files to it.
+
+        PATCH /model-hub/knowledge-base/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'kb_id': kb_id, 'name': name, **(extra_body or {})}
+        files = {'file': files}
+        return await self._t.acall(_ops.OP_FILE_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseMutationResult, options=options)
 
 
 class AsyncGatewayResource(Resource):
@@ -3349,28 +3454,25 @@ class AsyncKnowledgeBasesResource(Resource):
     """`client.knowledge_bases`. Subclass to add methods; override `_children` to swap a nested resource."""
 
     _t: AsyncTransport
-    files: AsyncKnowledgeBasesFilesResource
-    _children: Dict[str, type] = {'files': AsyncKnowledgeBasesFilesResource}
 
-    async def create(self, *, name: str, files: List[FileInput] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseCreateResult:
-        """Create a knowledge base, optionally uploading its first files (pdf, docx, txt, rtf).
+    async def create(self, *, name: str, chunk_size: int, embedding_model: Literal['BAAI/bge-small-en-v1.5'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.KnowledgeBaseItem:
+        """Create a knowledge base with a name, an embedding model and a chunk size; it appears in knowledge_bases.list and knowledge_bases.get.
 
-        POST /model-hub/knowledge-base/
+        POST /model-hub/kb/
         """
         path = None
         query = {**(extra_query or {})}
-        body = {'name': name, **(extra_body or {})}
-        files = {'file': files}
-        return await self._t.acall(_ops.OP_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseCreateResult, options=options)
+        body = {'name': name, 'chunk_size': chunk_size, 'embedding_model': embedding_model, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, model=models.KnowledgeBaseItem, options=options)
 
-    async def delete(self, *, kb_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
-        """Delete knowledge bases by id.
+    async def delete(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+        """Delete a knowledge base.
 
-        DELETE /model-hub/knowledge-base/
+        DELETE /model-hub/kb/{id}/
         """
-        path = None
+        path = {'id': id}
         query = {**(extra_query or {})}
-        body = {'kb_ids': kb_ids, **(extra_body or {})}
+        body = {**(extra_body or {})}
         return await self._t.acall(_ops.OP_KNOWLEDGE_BASES_DELETE, path=path, query=query, body=body, model=None, options=options)
 
     async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.KnowledgeBaseItem:
@@ -3383,36 +3485,24 @@ class AsyncKnowledgeBasesResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_KNOWLEDGE_BASES_GET, path=path, query=query, body=body, model=models.KnowledgeBaseItem, options=options)
 
-    async def list(self, *, search: str | None | NotGiven = NOT_GIVEN, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.KnowledgeBasePaginatedResult:
-        """List knowledge bases in the current workspace.
+    def list(self, *, search: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.KnowledgeBaseItem]:
+        """List knowledge bases (the RAG stores with an embedding model and a chunk size) in the current workspace. Knowledge bases built from uploaded files are a separate store, see file_knowledge_bases.
 
         GET /model-hub/kb/
         """
         path = None
-        query = {'search': search, 'page': page, 'limit': limit, **(extra_query or {})}
-        body = None
-        return await self._t.acall(_ops.OP_KNOWLEDGE_BASES_LIST, path=path, query=query, body=body, model=models.KnowledgeBasePaginatedResult, options=options)
+        query = {'search': search, 'limit': limit, **(extra_query or {})}
+        return self._t.apaginate(_ops.OP_KNOWLEDGE_BASES_LIST, path=path, query=query, model=models.KnowledgeBaseItem, options=options)
 
-    async def list_names(self, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseListResult:
-        """Return the id and name of every knowledge base created through knowledge_bases.create, without paging.
+    async def update(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, embedding_model: Literal['BAAI/bge-small-en-v1.5'] | None | NotGiven = NOT_GIVEN, chunk_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.KnowledgeBaseItem:
+        """Update the name, embedding model or chunk size of a knowledge base (a partial update).
 
-        GET /model-hub/knowledge-base/list/
+        PATCH /model-hub/kb/{id}/
         """
-        path = None
+        path = {'id': id}
         query = {**(extra_query or {})}
-        body = None
-        return await self._t.acall(_ops.OP_KNOWLEDGE_BASES_LIST_NAMES, path=path, query=query, body=body, model=models.LegacyKnowledgeBaseListResult, options=options)
-
-    async def update(self, *, kb_id: str, name: str | None | NotGiven = NOT_GIVEN, files: List[FileInput] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LegacyKnowledgeBaseMutationResult:
-        """Rename a knowledge base and/or upload more files to it.
-
-        PATCH /model-hub/knowledge-base/
-        """
-        path = None
-        query = {**(extra_query or {})}
-        body = {'kb_id': kb_id, 'name': name, **(extra_body or {})}
-        files = {'file': files}
-        return await self._t.acall(_ops.OP_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseMutationResult, options=options)
+        body = {'name': name, 'embedding_model': embedding_model, 'chunk_size': chunk_size, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, model=models.KnowledgeBaseItem, options=options)
 
 
 class AsyncModelsResource(Resource):
@@ -3436,7 +3526,7 @@ class AsyncOptimizationsResource(Resource):
 
     _t: AsyncTransport
 
-    async def create(self, *, name: str, column_id: str, optimizer_algorithm: Literal['random_search', 'bayesian', 'metaprompt', 'protegi', 'promptwizard', 'gepa'], optimizer_model_id: str | None | NotGiven = NOT_GIVEN, optimizer_config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, user_eval_template_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetOptimizationCreate:
+    async def create(self, *, name: str, column_id: str, optimizer_algorithm: Literal['random_search', 'bayesian', 'metaprompt', 'protegi', 'promptwizard', 'gepa'], optimizer_model_id: str | None | NotGiven = NOT_GIVEN, optimizer_config: Dict[str, Any] | None | NotGiven = NOT_GIVEN, user_eval_template_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.OptimizationsCreateResult:
         """Create a dataset optimization run.
 
         POST /model-hub/dataset-optimization/
@@ -3444,7 +3534,7 @@ class AsyncOptimizationsResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'name': name, 'column_id': column_id, 'optimizer_algorithm': optimizer_algorithm, 'optimizer_model_id': optimizer_model_id, 'optimizer_config': optimizer_config, 'user_eval_template_ids': user_eval_template_ids, **(extra_body or {})}
-        return await self._t.acall(_ops.OP_OPTIMIZATIONS_CREATE, path=path, query=query, body=body, model=models.DatasetOptimizationCreate, options=options)
+        return await self._t.acall(_ops.OP_OPTIMIZATIONS_CREATE, path=path, query=query, body=body, model=models.OptimizationsCreateResult, options=options)
 
     async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.DatasetOptimizationDetail:
         """Return a dataset optimization run by its identifier.
@@ -3608,7 +3698,7 @@ class AsyncPromptsResource(Resource):
         query = {'name': name, 'version': version, 'created_at': created_at, 'search': search, 'ordering': ordering, 'limit': limit, 'modality': modality, **(extra_query or {})}
         return self._t.apaginate(_ops.OP_PROMPTS_LIST, path=path, query=query, model=models.PromptTemplate, options=options)
 
-    async def run(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, version: str | None | NotGiven = NOT_GIVEN, prompt_config: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, variable_names: Dict[str, Any] | None | NotGiven = NOT_GIVEN, placeholders: Dict[str, Any] | None | NotGiven = NOT_GIVEN, evaluation_configs: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, source: str | None | NotGiven = NOT_GIVEN, is_run: Dict[str, Any] | None | NotGiven = NOT_GIVEN, is_sdk: bool | None | NotGiven = NOT_GIVEN, run_index: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptRunRequest:
+    async def run(self, id: str, *, name: str | None | NotGiven = NOT_GIVEN, version: str | None | NotGiven = NOT_GIVEN, prompt_config: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, variable_names: Dict[str, Any] | None | NotGiven = NOT_GIVEN, placeholders: Any | None | NotGiven = NOT_GIVEN, evaluation_configs: List[Any] | None | NotGiven = NOT_GIVEN, source: str | None | NotGiven = NOT_GIVEN, is_run: Any | None | NotGiven = NOT_GIVEN, is_sdk: bool | None | NotGiven = NOT_GIVEN, run_index: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptsRunResult:
         """Run a configured prompt version by supplying version and is_run="prompt". Optionally replace prompt_config or variable_names. Returns an asynchronous receipt; read get_prompt_run with template_version for status and output.
 
         POST /model-hub/prompt-templates/{id}/run_template/
@@ -3616,7 +3706,7 @@ class AsyncPromptsResource(Resource):
         path = {'id': id}
         query = {**(extra_query or {})}
         body = {'name': name, 'version': version, 'prompt_config': prompt_config, 'variable_names': variable_names, 'placeholders': placeholders, 'evaluation_configs': evaluation_configs, 'source': source, 'is_run': is_run, 'is_sdk': is_sdk, 'run_index': run_index, **(extra_body or {})}
-        return await self._t.acall(_ops.OP_PROMPTS_RUN, path=path, query=query, body=body, model=models.PromptRunRequest, options=options)
+        return await self._t.acall(_ops.OP_PROMPTS_RUN, path=path, query=query, body=body, model=models.PromptsRunResult, options=options)
 
     async def run_status(self, id: str, *, template_version: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.PromptRunStatusResult:
         """Read workbench prompt execution status and outputs. Supply template_version matching the version returned by run_prompt to read that version, otherwise the API chooses the default/latest version.
@@ -3659,7 +3749,7 @@ class AsyncScoresResource(Resource):
 
     _t: AsyncTransport
 
-    async def create(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, label_id: str, value: Dict[str, Any], notes: str | None | NotGiven = NOT_GIVEN, score_source: Literal['human', 'api', 'auto', 'imported'] | None | NotGiven = NOT_GIVEN, queue_item_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.Score:
+    async def create(self, *, source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'], source_id: str, label_id: str, value: Any, notes: str | None | NotGiven = NOT_GIVEN, score_source: Literal['human', 'api', 'auto', 'imported'] | None | NotGiven = NOT_GIVEN, queue_item_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.Score:
         """Record one score (annotation value) against a source such as a span or dataset row.
 
         POST /model-hub/scores/
@@ -3859,12 +3949,13 @@ __all__ = [
     'EvalsTasksResource',
     'EvalsTemplatesResource',
     'ExperimentsResource',
+    'FileKnowledgeBasesResource',
+    'FileKnowledgeBasesFilesResource',
     'GatewayResource',
     'GatewayGuardrailRulesResource',
     'GatewayRequestLogsResource',
     'GatewaySessionsResource',
     'KnowledgeBasesResource',
-    'KnowledgeBasesFilesResource',
     'ModelsResource',
     'OptimizationsResource',
     'ProjectsResource',
@@ -3909,12 +4000,13 @@ __all__ = [
     'AsyncEvalsTasksResource',
     'AsyncEvalsTemplatesResource',
     'AsyncExperimentsResource',
+    'AsyncFileKnowledgeBasesResource',
+    'AsyncFileKnowledgeBasesFilesResource',
     'AsyncGatewayResource',
     'AsyncGatewayGuardrailRulesResource',
     'AsyncGatewayRequestLogsResource',
     'AsyncGatewaySessionsResource',
     'AsyncKnowledgeBasesResource',
-    'AsyncKnowledgeBasesFilesResource',
     'AsyncModelsResource',
     'AsyncOptimizationsResource',
     'AsyncProjectsResource',

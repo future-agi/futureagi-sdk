@@ -31,6 +31,11 @@ def _make_mock_client_with_stream_response(chunks):
 
     mock_base = MagicMock()
     mock_base._stream_request.return_value = resp
+    # The resource asks the base client for a stream; a real one wraps `_stream_request` (see
+    # SyncBaseClient._open_stream), so the mock does the same, minus callbacks and sessions.
+    from fi.gateway._streaming import Stream
+
+    mock_base._open_stream.side_effect = lambda opts, params, chunk_cls: Stream(mock_base._stream_request(opts, params), chunk_cls)
 
     mock_client = MagicMock()
     mock_client._get_base_client.return_value = mock_base

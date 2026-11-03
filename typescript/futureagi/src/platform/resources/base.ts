@@ -11,7 +11,7 @@ import type * as models from "../models";
 import { Pager } from "../pagination";
 import { Resource } from "../resource";
 import { warnStability } from "../stability";
-import type { FileInput, RequestOptions, Transport } from "../transport";
+import type { FileInput, JsonValue, RequestOptions, Transport } from "../transport";
 
 export interface AgentsCreateParams {
   /** Agent name */
@@ -416,7 +416,7 @@ export interface DashboardsQueryParams {
 
 export interface DashboardsUpdateParams {
   /** Name */
-  name: string;
+  name?: string | null;
   /** Description */
   description?: string | null;
 }
@@ -694,7 +694,7 @@ export interface EvalsTestParams {
   reason_column?: boolean | null;
   optional_keys?: Array<string> | null;
   /** Variable keys */
-  variable_keys?: Record<string, unknown> | null;
+  variable_keys?: JsonValue | null;
   /** Run prompt column */
   run_prompt_column?: boolean | null;
   /** Template name */
@@ -943,6 +943,43 @@ export interface ExperimentsListParams {
   limit?: number | null;
 }
 
+export interface FileKnowledgeBasesCreateParams {
+  name: string;
+  file?: Array<FileInput>;
+}
+
+export interface FileKnowledgeBasesDeleteParams {
+  kb_ids?: Array<string> | null;
+}
+
+export interface FileKnowledgeBasesUpdateParams {
+  kb_id: string;
+  name?: string | null;
+  file?: Array<FileInput>;
+}
+
+export interface FileKnowledgeBasesFilesDeleteParams {
+  /** Kb id */
+  kb_id?: string | null;
+  /** Delete all */
+  delete_all?: boolean | null;
+  file_ids?: Array<string> | null;
+  excluded_file_ids?: Array<string> | null;
+  file_names?: Array<string> | null;
+}
+
+export interface FileKnowledgeBasesFilesListParams {
+  /** Kb id */
+  kb_id: string;
+  /** Search */
+  search?: string | null;
+  sort?: Array<Record<string, unknown>> | null;
+  /** Page number */
+  page_number?: number | null;
+  /** Page size */
+  page_size?: number | null;
+}
+
 export interface GatewayAnalyticsParams {
   start?: string | null;
   end?: string | null;
@@ -997,49 +1034,28 @@ export interface GatewaySessionsListParams {
 }
 
 export interface KnowledgeBasesCreateParams {
+  /** Name */
   name: string;
-  file?: Array<FileInput>;
-}
-
-export interface KnowledgeBasesDeleteParams {
-  kb_ids?: Array<string> | null;
+  /** Chunk size */
+  chunk_size: number;
+  /** Embedding model */
+  embedding_model?: "BAAI/bge-small-en-v1.5" | null;
 }
 
 export interface KnowledgeBasesListParams {
   /** A search term. */
   search?: string | null;
-  /** A page number within the paginated result set. */
-  page?: number | null;
   /** Number of results to return per page. */
   limit?: number | null;
 }
 
 export interface KnowledgeBasesUpdateParams {
-  kb_id: string;
+  /** Name */
   name?: string | null;
-  file?: Array<FileInput>;
-}
-
-export interface KnowledgeBasesFilesDeleteParams {
-  /** Kb id */
-  kb_id?: string | null;
-  /** Delete all */
-  delete_all?: boolean | null;
-  file_ids?: Array<string> | null;
-  excluded_file_ids?: Array<string> | null;
-  file_names?: Array<string> | null;
-}
-
-export interface KnowledgeBasesFilesListParams {
-  /** Kb id */
-  kb_id: string;
-  /** Search */
-  search?: string | null;
-  sort?: Array<Record<string, unknown>> | null;
-  /** Page number */
-  page_number?: number | null;
-  /** Page size */
-  page_size?: number | null;
+  /** Embedding model */
+  embedding_model?: "BAAI/bge-small-en-v1.5" | null;
+  /** Chunk size */
+  chunk_size?: number | null;
 }
 
 export interface OptimizationsCreateParams {
@@ -1166,12 +1182,12 @@ export interface PromptsRunParams {
   /** Variable names */
   variable_names?: Record<string, unknown> | null;
   /** Placeholders */
-  placeholders?: Record<string, unknown> | null;
-  evaluation_configs?: Array<Record<string, unknown>> | null;
+  placeholders?: JsonValue | null;
+  evaluation_configs?: Array<JsonValue> | null;
   /** Source */
   source?: string | null;
   /** Is run */
-  is_run?: Record<string, unknown> | null;
+  is_run?: JsonValue | null;
   /** Is sdk */
   is_sdk?: boolean | null;
   /** Run index */
@@ -1259,7 +1275,7 @@ export interface ScoresCreateParams {
   /** Label id */
   label_id: string;
   /** Value */
-  value: Record<string, unknown>;
+  value: JsonValue;
   /** Notes */
   notes?: string | null;
   /** Score source */
@@ -1935,8 +1951,8 @@ export class EvalsConfigsResource extends Resource {
    *
    * POST /tracer/custom-eval-config/
    */
-  create(params: EvalsConfigsCreateParams, options?: RequestOptions): Promise<models.CustomEvalConfig> {
-    return this._t.call<models.CustomEvalConfig>(ops.OP_EVALS_CONFIGS_CREATE, { path: {}, query: {}, body: { eval_template: params.eval_template, project: params.project, name: params.name, config: params.config, mapping: params.mapping, filters: params.filters, error_localizer: params.error_localizer, kb_id: params.kb_id, model: params.model } }, options);
+  create(params: EvalsConfigsCreateParams, options?: RequestOptions): Promise<models.EvalsConfigsCreateResult> {
+    return this._t.call<models.EvalsConfigsCreateResult>(ops.OP_EVALS_CONFIGS_CREATE, { path: {}, query: {}, body: { eval_template: params.eval_template, project: params.project, name: params.name, config: params.config, mapping: params.mapping, filters: params.filters, error_localizer: params.error_localizer, kb_id: params.kb_id, model: params.model } }, options);
   }
 
   /**
@@ -2076,6 +2092,30 @@ export class EvalsTemplatesResource extends Resource {
 }
 
 /**
+ * `client.fileKnowledgeBases.files`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class FileKnowledgeBasesFilesResource extends Resource {
+
+  /**
+   * Delete files from a file knowledge base, by id or name, or all of them.
+   *
+   * DELETE /model-hub/knowledge-base/files/
+   */
+  delete(params: FileKnowledgeBasesFilesDeleteParams = {}, options?: RequestOptions): Promise<string> {
+    return this._t.call<string>(ops.OP_FILE_KNOWLEDGE_BASES_FILES_DELETE, { path: {}, query: {}, body: { kb_id: params.kb_id, delete_all: params.delete_all, file_ids: params.file_ids, excluded_file_ids: params.excluded_file_ids, file_names: params.file_names } }, options);
+  }
+
+  /**
+   * List the files in a file knowledge base, with their processing status.
+   *
+   * POST /model-hub/knowledge-base/files/
+   */
+  list(params: FileKnowledgeBasesFilesListParams, options?: RequestOptions): Promise<models.LegacyKnowledgeBaseFilesResult> {
+    return this._t.call<models.LegacyKnowledgeBaseFilesResult>(ops.OP_FILE_KNOWLEDGE_BASES_FILES_LIST, { path: {}, query: {}, body: { kb_id: params.kb_id, search: params.search, sort: params.sort, page_number: params.page_number, page_size: params.page_size } }, options);
+  }
+}
+
+/**
  * `client.gateway.guardrailRules`. Subclass to add methods; reassign a child in the constructor to swap it.
  */
 export class GatewayGuardrailRulesResource extends Resource {
@@ -2126,30 +2166,6 @@ export class GatewaySessionsResource extends Resource {
    */
   requests(id: string, options?: RequestOptions): Promise<unknown> {
     return this._t.call<unknown>(ops.OP_GATEWAY_SESSIONS_REQUESTS, { path: { id: id }, query: {} }, options);
-  }
-}
-
-/**
- * `client.knowledgeBases.files`. Subclass to add methods; reassign a child in the constructor to swap it.
- */
-export class KnowledgeBasesFilesResource extends Resource {
-
-  /**
-   * Delete files from a knowledge base, by id or name, or all of them.
-   *
-   * DELETE /model-hub/knowledge-base/files/
-   */
-  delete(params: KnowledgeBasesFilesDeleteParams = {}, options?: RequestOptions): Promise<string> {
-    return this._t.call<string>(ops.OP_KNOWLEDGE_BASES_FILES_DELETE, { path: {}, query: {}, body: { kb_id: params.kb_id, delete_all: params.delete_all, file_ids: params.file_ids, excluded_file_ids: params.excluded_file_ids, file_names: params.file_names } }, options);
-  }
-
-  /**
-   * List the files in a knowledge base, with their processing status.
-   *
-   * POST /model-hub/knowledge-base/files/
-   */
-  list(params: KnowledgeBasesFilesListParams, options?: RequestOptions): Promise<models.LegacyKnowledgeBaseFilesResult> {
-    return this._t.call<models.LegacyKnowledgeBaseFilesResult>(ops.OP_KNOWLEDGE_BASES_FILES_LIST, { path: {}, query: {}, body: { kb_id: params.kb_id, search: params.search, sort: params.sort, page_number: params.page_number, page_size: params.page_size } }, options);
   }
 }
 
@@ -2614,8 +2630,8 @@ export class DashboardsResource extends Resource {
    *
    * POST /tracer/dashboard/
    */
-  create(params: DashboardsCreateParams, options?: RequestOptions): Promise<models.DashboardCreateUpdate> {
-    return this._t.call<models.DashboardCreateUpdate>(ops.OP_DASHBOARDS_CREATE, { path: {}, query: {}, body: { name: params.name, description: params.description } }, options);
+  create(params: DashboardsCreateParams, options?: RequestOptions): Promise<models.DashboardDetail> {
+    return this._t.call<models.DashboardDetail>(ops.OP_DASHBOARDS_CREATE, { path: {}, query: {}, body: { name: params.name, description: params.description } }, options);
   }
 
   /**
@@ -2664,12 +2680,12 @@ export class DashboardsResource extends Resource {
   }
 
   /**
-   * Update the name or description of an existing dashboard.
+   * Update the name and/or description of an existing dashboard (a partial update).
    *
    * PATCH /tracer/dashboard/{id}/
    */
-  update(id: string, params: DashboardsUpdateParams, options?: RequestOptions): Promise<models.DashboardCreateUpdate> {
-    return this._t.call<models.DashboardCreateUpdate>(ops.OP_DASHBOARDS_UPDATE, { path: { id: id }, query: {}, body: { name: params.name, description: params.description } }, options);
+  update(id: string, params: DashboardsUpdateParams = {}, options?: RequestOptions): Promise<models.DashboardDetail> {
+    return this._t.call<models.DashboardDetail>(ops.OP_DASHBOARDS_UPDATE, { path: { id: id }, query: {}, body: { name: params.name, description: params.description } }, options);
   }
 }
 
@@ -2841,6 +2857,63 @@ export class ExperimentsResource extends Resource {
 }
 
 /**
+ * `client.fileKnowledgeBases`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class FileKnowledgeBasesResource extends Resource {
+  files: FileKnowledgeBasesFilesResource;
+
+  constructor(transport: Transport) {
+    super(transport);
+    this.files = new FileKnowledgeBasesFilesResource(transport);
+  }
+
+  /**
+   * Create a file knowledge base (the Knowledge Base page of the app), optionally uploading its first files (pdf, docx, txt, rtf).
+   *
+   * POST /model-hub/knowledge-base/
+   */
+  create(params: FileKnowledgeBasesCreateParams, options?: RequestOptions): Promise<models.LegacyKnowledgeBaseCreateResult> {
+    return this._t.call<models.LegacyKnowledgeBaseCreateResult>(ops.OP_FILE_KNOWLEDGE_BASES_CREATE, { path: {}, query: {}, body: { name: params.name }, files: { file: params.file } }, options);
+  }
+
+  /**
+   * Delete file knowledge bases by id.
+   *
+   * DELETE /model-hub/knowledge-base/
+   */
+  delete(params: FileKnowledgeBasesDeleteParams = {}, options?: RequestOptions): Promise<string> {
+    return this._t.call<string>(ops.OP_FILE_KNOWLEDGE_BASES_DELETE, { path: {}, query: {}, body: { kb_ids: params.kb_ids } }, options);
+  }
+
+  /**
+   * List the file knowledge bases of the workspace as a table (name, file count, creator), without paging.
+   *
+   * GET /model-hub/knowledge-base/get/
+   */
+  list(options?: RequestOptions): Promise<models.LegacyKnowledgeBaseTableResult> {
+    return this._t.call<models.LegacyKnowledgeBaseTableResult>(ops.OP_FILE_KNOWLEDGE_BASES_LIST, { path: {}, query: {} }, options);
+  }
+
+  /**
+   * Return the id and name of every file knowledge base, without paging.
+   *
+   * GET /model-hub/knowledge-base/list/
+   */
+  listNames(options?: RequestOptions): Promise<models.LegacyKnowledgeBaseListResult> {
+    return this._t.call<models.LegacyKnowledgeBaseListResult>(ops.OP_FILE_KNOWLEDGE_BASES_LIST_NAMES, { path: {}, query: {} }, options);
+  }
+
+  /**
+   * Rename a file knowledge base and/or upload more files to it.
+   *
+   * PATCH /model-hub/knowledge-base/
+   */
+  update(params: FileKnowledgeBasesUpdateParams, options?: RequestOptions): Promise<models.LegacyKnowledgeBaseMutationResult> {
+    return this._t.call<models.LegacyKnowledgeBaseMutationResult>(ops.OP_FILE_KNOWLEDGE_BASES_UPDATE, { path: {}, query: {}, body: { kb_id: params.kb_id, name: params.name }, files: { file: params.file } }, options);
+  }
+}
+
+/**
  * `client.gateway`. Subclass to add methods; reassign a child in the constructor to swap it.
  */
 export class GatewayResource extends Resource {
@@ -2887,29 +2960,23 @@ export class GatewayResource extends Resource {
  * `client.knowledgeBases`. Subclass to add methods; reassign a child in the constructor to swap it.
  */
 export class KnowledgeBasesResource extends Resource {
-  files: KnowledgeBasesFilesResource;
 
-  constructor(transport: Transport) {
-    super(transport);
-    this.files = new KnowledgeBasesFilesResource(transport);
+  /**
+   * Create a knowledge base with a name, an embedding model and a chunk size; it appears in knowledge_bases.list and knowledge_bases.get.
+   *
+   * POST /model-hub/kb/
+   */
+  create(params: KnowledgeBasesCreateParams, options?: RequestOptions): Promise<models.KnowledgeBaseItem> {
+    return this._t.call<models.KnowledgeBaseItem>(ops.OP_KNOWLEDGE_BASES_CREATE, { path: {}, query: {}, body: { name: params.name, chunk_size: params.chunk_size, embedding_model: params.embedding_model } }, options);
   }
 
   /**
-   * Create a knowledge base, optionally uploading its first files (pdf, docx, txt, rtf).
+   * Delete a knowledge base.
    *
-   * POST /model-hub/knowledge-base/
+   * DELETE /model-hub/kb/{id}/
    */
-  create(params: KnowledgeBasesCreateParams, options?: RequestOptions): Promise<models.LegacyKnowledgeBaseCreateResult> {
-    return this._t.call<models.LegacyKnowledgeBaseCreateResult>(ops.OP_KNOWLEDGE_BASES_CREATE, { path: {}, query: {}, body: { name: params.name }, files: { file: params.file } }, options);
-  }
-
-  /**
-   * Delete knowledge bases by id.
-   *
-   * DELETE /model-hub/knowledge-base/
-   */
-  delete(params: KnowledgeBasesDeleteParams = {}, options?: RequestOptions): Promise<string> {
-    return this._t.call<string>(ops.OP_KNOWLEDGE_BASES_DELETE, { path: {}, query: {}, body: { kb_ids: params.kb_ids } }, options);
+  delete(id: string, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_KNOWLEDGE_BASES_DELETE, { path: { id: id }, query: {}, body: {} }, options);
   }
 
   /**
@@ -2922,30 +2989,21 @@ export class KnowledgeBasesResource extends Resource {
   }
 
   /**
-   * List knowledge bases in the current workspace.
+   * List knowledge bases (the RAG stores with an embedding model and a chunk size) in the current workspace. Knowledge bases built from uploaded files are a separate store, see file_knowledge_bases.
    *
    * GET /model-hub/kb/
    */
-  list(params: KnowledgeBasesListParams = {}, options?: RequestOptions): Promise<models.KnowledgeBasePaginatedResult> {
-    return this._t.call<models.KnowledgeBasePaginatedResult>(ops.OP_KNOWLEDGE_BASES_LIST, { path: {}, query: { search: params.search, page: params.page, limit: params.limit } }, options);
+  list(params: KnowledgeBasesListParams = {}, options?: RequestOptions): Pager<models.KnowledgeBaseItem> {
+    return this._t.paginate<models.KnowledgeBaseItem>(ops.OP_KNOWLEDGE_BASES_LIST, { path: {}, query: { search: params.search, limit: params.limit } }, options);
   }
 
   /**
-   * Return the id and name of every knowledge base created through knowledge_bases.create, without paging.
+   * Update the name, embedding model or chunk size of a knowledge base (a partial update).
    *
-   * GET /model-hub/knowledge-base/list/
+   * PATCH /model-hub/kb/{id}/
    */
-  listNames(options?: RequestOptions): Promise<models.LegacyKnowledgeBaseListResult> {
-    return this._t.call<models.LegacyKnowledgeBaseListResult>(ops.OP_KNOWLEDGE_BASES_LIST_NAMES, { path: {}, query: {} }, options);
-  }
-
-  /**
-   * Rename a knowledge base and/or upload more files to it.
-   *
-   * PATCH /model-hub/knowledge-base/
-   */
-  update(params: KnowledgeBasesUpdateParams, options?: RequestOptions): Promise<models.LegacyKnowledgeBaseMutationResult> {
-    return this._t.call<models.LegacyKnowledgeBaseMutationResult>(ops.OP_KNOWLEDGE_BASES_UPDATE, { path: {}, query: {}, body: { kb_id: params.kb_id, name: params.name }, files: { file: params.file } }, options);
+  update(id: string, params: KnowledgeBasesUpdateParams = {}, options?: RequestOptions): Promise<models.KnowledgeBaseItem> {
+    return this._t.call<models.KnowledgeBaseItem>(ops.OP_KNOWLEDGE_BASES_UPDATE, { path: { id: id }, query: {}, body: { name: params.name, embedding_model: params.embedding_model, chunk_size: params.chunk_size } }, options);
   }
 }
 
@@ -2974,8 +3032,8 @@ export class OptimizationsResource extends Resource {
    *
    * POST /model-hub/dataset-optimization/
    */
-  create(params: OptimizationsCreateParams, options?: RequestOptions): Promise<models.DatasetOptimizationCreate> {
-    return this._t.call<models.DatasetOptimizationCreate>(ops.OP_OPTIMIZATIONS_CREATE, { path: {}, query: {}, body: { name: params.name, column_id: params.column_id, optimizer_algorithm: params.optimizer_algorithm, optimizer_model_id: params.optimizer_model_id, optimizer_config: params.optimizer_config, user_eval_template_ids: params.user_eval_template_ids } }, options);
+  create(params: OptimizationsCreateParams, options?: RequestOptions): Promise<models.OptimizationsCreateResult> {
+    return this._t.call<models.OptimizationsCreateResult>(ops.OP_OPTIMIZATIONS_CREATE, { path: {}, query: {}, body: { name: params.name, column_id: params.column_id, optimizer_algorithm: params.optimizer_algorithm, optimizer_model_id: params.optimizer_model_id, optimizer_config: params.optimizer_config, user_eval_template_ids: params.user_eval_template_ids } }, options);
   }
 
   /**
@@ -3138,8 +3196,8 @@ export class PromptsResource extends Resource {
    *
    * POST /model-hub/prompt-templates/{id}/run_template/
    */
-  run(id: string, params: PromptsRunParams = {}, options?: RequestOptions): Promise<models.PromptRunRequest> {
-    return this._t.call<models.PromptRunRequest>(ops.OP_PROMPTS_RUN, { path: { id: id }, query: {}, body: { name: params.name, version: params.version, prompt_config: params.prompt_config, variable_names: params.variable_names, placeholders: params.placeholders, evaluation_configs: params.evaluation_configs, source: params.source, is_run: params.is_run, is_sdk: params.is_sdk, run_index: params.run_index } }, options);
+  run(id: string, params: PromptsRunParams = {}, options?: RequestOptions): Promise<models.PromptsRunResult> {
+    return this._t.call<models.PromptsRunResult>(ops.OP_PROMPTS_RUN, { path: { id: id }, query: {}, body: { name: params.name, version: params.version, prompt_config: params.prompt_config, variable_names: params.variable_names, placeholders: params.placeholders, evaluation_configs: params.evaluation_configs, source: params.source, is_run: params.is_run, is_sdk: params.is_sdk, run_index: params.run_index } }, options);
   }
 
   /**

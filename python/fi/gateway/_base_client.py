@@ -8,6 +8,7 @@ import random
 import time
 from abc import ABC
 from dataclasses import dataclass, field, replace
+from types import SimpleNamespace
 from typing import Any, TypeVar
 
 import anyio
@@ -109,17 +110,15 @@ _REDACTED = "[REDACTED]"
 def redact_callback_request(options: RequestOptions) -> RequestOptions:
     """A copy of the request for callbacks only, with the message content removed. The body the
     provider receives is untouched."""
-    body = options.body
-    if isinstance(body, dict):
-        body = dict(body)
-        if isinstance(body.get("messages"), list):
-            body["messages"] = [
-                {**m, "content": _REDACTED} if isinstance(m, dict) and m.get("content") is not None else m for m in body["messages"]
-            ]
-        for key in ("prompt", "input", "instructions"):
-            if body.get(key) is not None:
-                body[key] = _REDACTED
-    return replace(options, body=body)
+    from fi.gateway.callbacks.base import redact_body
+
+    return replace(options, body=redact_body(options.body))
+
+
+def _stream_result(stream: Any) -> Any:
+    """What a finished stream adds up to for session accounting: its cost header and the usage
+    its last event carried (none when the caller closed it early)."""
+    return SimpleNamespace(agentcc=stream.agentcc, usage=stream.usage)
 
 
 def _payload(options: RequestOptions) -> dict[str, Any]:
@@ -594,6 +593,40 @@ class SyncBaseClient(BaseClient):
 
         return response
 
+    def _open_stream(self, options: RequestOptions, agentcc_params: dict[str, Any] | None, chunk_cls: type[Any]) -> Any:
+        """A `Stream` over a streaming request, with the same callbacks and session accounting as
+        a plain request: `on_request_start` now, `on_stream_start` once the response is in,
+        `on_stream_chunk` per event, and when the stream closes `on_stream_end`, `on_request_end`
+        and the session's counters (`on_error` instead if it failed). The session is the one
+        active when the request starts, as for a plain request."""
+        from fi.gateway._streaming import Stream
+        from fi.gateway.callbacks.base import CallbackResponse, StreamInfo
+
+        cb = self._for_callbacks(options)
+        session = _session_of(self)
+        self._dispatch_callback("on_request_start", cb)
+        try:
+            response = self._stream_request(options, agentcc_params)
+        except Exception as exc:
+            self._dispatch_callback("on_error", cb, exc)
+            raise
+
+        def on_finish(stream: Any, error: Exception | None) -> None:
+            if error is not None:
+                self._dispatch_callback("on_error", cb, error)
+                return
+            info = StreamInfo(agentcc=stream.agentcc, chunk_count=stream.chunk_count)
+            self._dispatch_callback("on_stream_end", cb, info, stream.completion)
+            if self._callbacks:
+                self._dispatch_callback(
+                    "on_request_end", cb, CallbackResponse(status_code=response.status_code, headers=dict(response.headers), agentcc=stream.agentcc, body=None)
+                )
+            _track_session(session, _stream_result(stream))
+
+        stream = Stream(response, chunk_cls, on_chunk=lambda chunk: self._dispatch_callback("on_stream_chunk", cb, chunk), on_finish=on_finish)
+        self._dispatch_callback("on_stream_start", cb, StreamInfo(agentcc=stream.agentcc))
+        return stream
+
     def close(self) -> None:
         """Close the underlying HTTP client."""
         if self._client is not None and self._owns_client:
@@ -884,6 +917,36 @@ class AsyncBaseClient(BaseClient):
                 await response.aclose()
 
         return response
+
+    async def _open_stream(self, options: RequestOptions, agentcc_params: dict[str, Any] | None, chunk_cls: type[Any]) -> Any:
+        """See `SyncBaseClient._open_stream`; returns an `AsyncStream`."""
+        from fi.gateway._streaming import AsyncStream
+        from fi.gateway.callbacks.base import CallbackResponse, StreamInfo
+
+        cb = self._for_callbacks(options)
+        session = _session_of(self)
+        self._dispatch_callback("on_request_start", cb)
+        try:
+            response = await self._stream_request(options, agentcc_params)
+        except Exception as exc:
+            self._dispatch_callback("on_error", cb, exc)
+            raise
+
+        def on_finish(stream: Any, error: Exception | None) -> None:
+            if error is not None:
+                self._dispatch_callback("on_error", cb, error)
+                return
+            info = StreamInfo(agentcc=stream.agentcc, chunk_count=stream.chunk_count)
+            self._dispatch_callback("on_stream_end", cb, info, stream.completion)
+            if self._callbacks:
+                self._dispatch_callback(
+                    "on_request_end", cb, CallbackResponse(status_code=response.status_code, headers=dict(response.headers), agentcc=stream.agentcc, body=None)
+                )
+            _track_session(session, _stream_result(stream))
+
+        stream = AsyncStream(response, chunk_cls, on_chunk=lambda chunk: self._dispatch_callback("on_stream_chunk", cb, chunk), on_finish=on_finish)
+        self._dispatch_callback("on_stream_start", cb, StreamInfo(agentcc=stream.agentcc))
+        return stream
 
     async def aclose(self) -> None:
         """Close the underlying async HTTP client."""

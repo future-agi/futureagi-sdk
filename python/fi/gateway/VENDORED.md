@@ -61,7 +61,18 @@ Changes from upstream:
     failed validation; the base64 string is accepted and `decode_base64_embedding()` unpacks it;
   - `close()` / `aclose()` skipped every client made by `with_options()`, so a copy made before
     the parent's first request could never close the pool it owns; closing is delegated to the
-    base client, which already knows whether its pool is owned, shared or injected.
+    base client, which already knows whether its pool is owned, shared or injected;
+  - (review 2, 2026-11-03) a streaming call went straight to `_stream_request` and so was never
+    counted in the session nor reported to the callbacks; `_open_stream` wraps it with the same
+    `on_request_start` / `on_request_end` / `on_error` as a plain call plus the stream callbacks,
+    and credits the session captured when the request started once the stream closes (tokens
+    from the last usage event, cost from the response headers; a stream closed early counts the
+    request with no tokens; a failed one is an error, not a request);
+  - `strict_schema()` removed every dictionary key named `default`, so a user model with a field
+    called `default` lost that property; it now walks schema nodes only and leaves the name maps
+    (`properties`, `$defs`, ...) alone;
+  - redaction left `messages[].tool_calls[].function.arguments` (and `function_call.arguments`)
+    in the copy callbacks get; they are `[REDACTED]` too (`callbacks.base.redact_body`).
 
 Tests are in `tests/gateway/` (upstream `sdk/python/tests`, same rewrite). `test_gateway_live.py` runs
 against a real gateway when `FI_GATEWAY_URL` / `FI_GATEWAY_API_KEY` are set (see its docstring).

@@ -218,6 +218,9 @@ operations:
   description: Run a configured prompt version by supplying version and is_run="prompt". Optionally replace prompt_config or variable_names. Returns
     an asynchronous receipt; read get_prompt_run with template_version for status and output.
   operation: {method: POST, path: '/model-hub/prompt-templates/{id}/run_template/'}
+  contract_fix:
+    returns: {template_id: string, prompt_config: 'object[]', variable_names: object, evaluation_configs: 'object[]', placeholders: object}
+    note: "contract documents the request serializer as the response; the server answers with the execution receipt (run_template in prompt_template.py)"
   surfaces:
     sdk: {}
     mcp: {name: run_prompt, group: prompts, access: write, open_world: true}
@@ -401,6 +404,9 @@ operations:
   description: Update and rerun an online evaluation task using eval_task_id and edit_type. Pause a running task first. edit_rerun preserves existing
     results; fresh_run DELETES previous results and starts again. May incur evaluation charges.
   operation: {method: PATCH, path: /tracer/eval-task/update_eval_task/}
+  contract_fix:
+    body_required: [eval_task_id, edit_type]
+    note: "not a partial update despite the PATCH: the view needs the task id and the edit mode in the body"
   surfaces:
     sdk: {}
     mcp: {name: update_eval_task, group: observability, access: destructive, open_world: true}
@@ -422,6 +428,9 @@ operations:
   description: Create a custom evaluation configuration from an eval template so it can be attached to an online evaluation task. Use when list_eval_configs
     has no entry for the template you want to run over spans.
   operation: {method: POST, path: /tracer/custom-eval-config/}
+  contract_fix:
+    returns: {id: string}
+    note: "contract documents the CustomEvalConfig serializer as the response; the server answers with the new config's id only"
   surfaces:
     sdk: {}
     mcp: {name: create_eval_config, group: observability, access: write}
@@ -604,6 +613,9 @@ operations:
 - id: optimizations.create
   description: Create a dataset optimization run.
   operation: {method: POST, path: /model-hub/dataset-optimization/}
+  contract_fix:
+    returns: {id: string, name: string, optimizer_algorithm: string, optimizer_config: object, created_at: string}
+    note: "contract documents the input serializer (with a required column_id) as the response; the server answers with the run's id, name, algorithm, config and creation time"
   surfaces:
     sdk: {}
     mcp: {name: create_optimization_run, group: optimization, access: write, open_world: true}
@@ -824,8 +836,10 @@ operations:
     mcp: {name: get_gateway_analytics, group: gateway, access: read}
 
 - id: knowledge_bases.list
-  description: List knowledge bases in the current workspace.
+  description: List knowledge bases (the RAG stores with an embedding model and a chunk size) in the current workspace.
+    Knowledge bases built from uploaded files are a separate store, see file_knowledge_bases.
   operation: {method: GET, path: /model-hub/kb/}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
   surfaces:
     sdk: {}
     mcp:
@@ -840,6 +854,21 @@ operations:
   surfaces:
     sdk: {}
     mcp: {name: get_knowledge_base, group: datasets, access: read}
+
+- id: knowledge_bases.create
+  description: Create a knowledge base with a name, an embedding model and a chunk size; it appears in knowledge_bases.list and knowledge_bases.get.
+  operation: {method: POST, path: /model-hub/kb/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: knowledge_bases.update
+  description: Update the name, embedding model or chunk size of a knowledge base (a partial update).
+  operation: {method: PATCH, path: '/model-hub/kb/{id}/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: knowledge_bases.delete
+  description: Delete a knowledge base.
+  operation: {method: DELETE, path: '/model-hub/kb/{id}/'}
+  surfaces: {sdk: {}, mcp: false}
 
 - id: dashboards.list
   description: List dashboards in the current workspace with their widget counts.
@@ -858,13 +887,19 @@ operations:
 - id: dashboards.create
   description: Create an empty dashboard in the current workspace; add widgets with create_dashboard_widget.
   operation: {method: POST, path: /tracer/dashboard/}
+  contract_fix:
+    returns: DashboardDetail
+    note: "contract documents the create serializer (name, description) as the response; the server answers with the dashboard detail (id, widgets, ...)"
   surfaces:
     sdk: {}
     mcp: {name: create_dashboard, group: dashboards, access: write}
 
 - id: dashboards.update
-  description: Update the name or description of an existing dashboard.
+  description: Update the name and/or description of an existing dashboard (a partial update).
   operation: {method: PATCH, path: '/tracer/dashboard/{id}/'}
+  contract_fix:
+    returns: DashboardDetail
+    note: "contract documents the update serializer (name, description) as the response; the server answers with the dashboard detail"
   surfaces:
     sdk: {}
     mcp: {name: update_dashboard, group: dashboards, access: write}
@@ -1129,8 +1164,12 @@ operations:
 
 # knowledge bases
 
-- id: knowledge_bases.create
-  description: Create a knowledge base, optionally uploading its first files (pdf, docx, txt, rtf).
+# File knowledge bases: the Knowledge Base page of the app, a store of uploaded documents
+# (/model-hub/knowledge-base/). Separate from knowledge_bases (/model-hub/kb/) above: a file
+# knowledge base is not visible there, and the other way round.
+
+- id: file_knowledge_bases.create
+  description: Create a file knowledge base (the Knowledge Base page of the app), optionally uploading its first files (pdf, docx, txt, rtf).
   operation: {method: POST, path: /model-hub/knowledge-base/, multipart: true}
   contract_fix:
     body: {name: string, file: {type: 'file[]', as: files}}
@@ -1138,8 +1177,8 @@ operations:
     note: "multipart upload; files go in the repeated `file` form field, which the contract calls `files` inside a JSON body"
   surfaces: {sdk: {}, mcp: false}
 
-- id: knowledge_bases.update
-  description: Rename a knowledge base and/or upload more files to it.
+- id: file_knowledge_bases.update
+  description: Rename a file knowledge base and/or upload more files to it.
   operation: {method: PATCH, path: /model-hub/knowledge-base/, multipart: true}
   contract_fix:
     body: {kb_id: string, name: string, file: {type: 'file[]', as: files}}
@@ -1147,23 +1186,28 @@ operations:
     note: "multipart upload; files go in the repeated `file` form field, which the contract calls `files` inside a JSON body"
   surfaces: {sdk: {}, mcp: false}
 
-- id: knowledge_bases.list_names
-  description: Return the id and name of every knowledge base created through knowledge_bases.create, without paging.
+- id: file_knowledge_bases.list
+  description: List the file knowledge bases of the workspace as a table (name, file count, creator), without paging.
+  operation: {method: GET, path: /model-hub/knowledge-base/get/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: file_knowledge_bases.list_names
+  description: Return the id and name of every file knowledge base, without paging.
   operation: {method: GET, path: /model-hub/knowledge-base/list/}
   surfaces: {sdk: {}, mcp: false}
 
-- id: knowledge_bases.delete
-  description: Delete knowledge bases by id.
+- id: file_knowledge_bases.delete
+  description: Delete file knowledge bases by id.
   operation: {method: DELETE, path: /model-hub/knowledge-base/}
   surfaces: {sdk: {}, mcp: false}
 
-- id: knowledge_bases.files.list
-  description: List the files in a knowledge base, with their processing status.
+- id: file_knowledge_bases.files.list
+  description: List the files in a file knowledge base, with their processing status.
   operation: {method: POST, path: /model-hub/knowledge-base/files/}
   surfaces: {sdk: {}, mcp: false}
 
-- id: knowledge_bases.files.delete
-  description: Delete files from a knowledge base, by id or name, or all of them.
+- id: file_knowledge_bases.files.delete
+  description: Delete files from a file knowledge base, by id or name, or all of them.
   operation: {method: DELETE, path: /model-hub/knowledge-base/files/}
   surfaces: {sdk: {}, mcp: false}
 
@@ -1199,6 +1243,9 @@ operations:
 - id: scores.create
   description: Record one score (annotation value) against a source such as a span or dataset row.
   operation: {method: POST, path: /model-hub/scores/}
+  contract_fix:
+    body_fields: {value: json}
+    note: "CreateScoreSerializer.value is a plain JSONField, which drf-yasg documents as an object; the server accepts any JSON value (a number or string for most labels)"
   surfaces: {sdk: {}, mcp: false}
 
 - id: scores.create_bulk
@@ -1216,12 +1263,14 @@ operations:
 - id: annotation_queues.create
   description: Create an annotation queue with its labels and annotators.
   operation: {method: POST, path: /model-hub/annotation-queues/}
+  contract_fix:
+    optional_in_response: [label_ids]
+    note: "AnnotationQueueSerializer documents the write-only label_ids input as a required output field; responses carry `labels` instead"
   surfaces: {sdk: {}, mcp: false}
 
 - id: annotation_queues.update
   description: Update selected fields of an annotation queue.
   operation: {method: PATCH, path: '/model-hub/annotation-queues/{id}/'}
-  contract_fix: {body_required: [], note: "PATCH is partial, but the contract marks name and label_ids required"}
   surfaces: {sdk: {}, mcp: false}
 
 - id: annotation_queues.delete
