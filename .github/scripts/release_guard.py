@@ -37,7 +37,7 @@ def require(condition, message):
 
 
 def version(value):
-    require(isinstance(value, str) and re.fullmatch(r"\d+\.\d+\.\d+", value), "Only stable semantic versions may release automatically")
+    require(isinstance(value, str) and re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", value), "Only stable semantic versions may release automatically")
     return tuple(map(int, value.split(".")))
 
 
@@ -213,7 +213,7 @@ class GitHub:
         return head
 
     def validate_tag(self, tag, wait_seconds=0):
-        require(re.fullmatch(r'(python|typescript)-v\d+\.\d+\.\d+', tag), 'Invalid release tag')
+        require(re.fullmatch(r'(python|typescript)-v[0-9]+\.[0-9]+\.[0-9]+', tag), 'Invalid release tag')
         obj = self.api('git/ref/tags/' + tag)['object']
         # A branch with a tag-shaped name is not a release. Support annotated
         # tags, but bound peeling to avoid malformed/cyclic remote references.
