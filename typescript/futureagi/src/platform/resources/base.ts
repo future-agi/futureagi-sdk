@@ -657,6 +657,15 @@ export interface ErrorClustersListParams {
   offset?: number | null;
 }
 
+export interface ErrorClustersListTracesParams {
+  limit?: number | null;
+  offset?: number | null;
+}
+
+export interface ErrorClustersOverviewParams {
+  rep_limit?: number | null;
+}
+
 export interface EvalsTestParams {
   /** Config */
   config: Record<string, unknown>;
@@ -2794,6 +2803,24 @@ export class ErrorClustersResource extends Resource {
    */
   list(params: ErrorClustersListParams = {}, options?: RequestOptions): Promise<models.FeedListResponse> {
     return this._t.call<models.FeedListResponse>(ops.OP_ERROR_CLUSTERS_LIST, { path: {}, query: { project_id: params.project_id, search: params.search, status: params.status, severity: params.severity, fix_layer: params.fix_layer, source: params.source, issue_group: params.issue_group, time_range_days: params.time_range_days, sort_by: params.sort_by, sort_dir: params.sort_dir, limit: params.limit, offset: params.offset } }, options);
+  }
+
+  /**
+   * List the traces grouped into a cluster with each one's score, latency, tokens and cost, alongside cluster-wide aggregates.
+   *
+   * GET /tracer/feed/issues/{cluster_id}/traces/
+   */
+  listTraces(clusterId: string, params: ErrorClustersListTracesParams = {}, options?: RequestOptions): Promise<models.TracesTabResponse> {
+    return this._t.call<models.TracesTabResponse>(ops.OP_ERROR_CLUSTERS_LIST_TRACES, { path: { cluster_id: clusterId }, query: { limit: params.limit, offset: params.offset } }, options);
+  }
+
+  /**
+   * Return a cluster's pattern summary (the statistical insights that separate its failing traces from the passing baseline), its daily error counts, and representative traces with their evidence and agent flow. Representative traces carry inputs, outputs and conversation reels, so start with a small `rep_limit`.
+   *
+   * GET /tracer/feed/issues/{cluster_id}/overview/
+   */
+  overview(clusterId: string, params: ErrorClustersOverviewParams = {}, options?: RequestOptions): Promise<models.OverviewResponse> {
+    return this._t.call<models.OverviewResponse>(ops.OP_ERROR_CLUSTERS_OVERVIEW, { path: { cluster_id: clusterId }, query: { rep_limit: params.rep_limit } }, options);
   }
 }
 

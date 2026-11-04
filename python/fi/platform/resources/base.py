@@ -1345,6 +1345,26 @@ class ErrorClustersResource(Resource):
         body = None
         return self._t.call(_ops.OP_ERROR_CLUSTERS_LIST, path=path, query=query, body=body, model=models.FeedListResponse, options=options)
 
+    def list_traces(self, cluster_id: str, *, limit: int | None | NotGiven = NOT_GIVEN, offset: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TracesTabResponse:
+        """List the traces grouped into a cluster with each one's score, latency, tokens and cost, alongside cluster-wide aggregates.
+
+        GET /tracer/feed/issues/{cluster_id}/traces/
+        """
+        path = {'cluster_id': cluster_id}
+        query = {'limit': limit, 'offset': offset, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_ERROR_CLUSTERS_LIST_TRACES, path=path, query=query, body=body, model=models.TracesTabResponse, options=options)
+
+    def overview(self, cluster_id: str, *, rep_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.OverviewResponse:
+        """Return a cluster's pattern summary (the statistical insights that separate its failing traces from the passing baseline), its daily error counts, and representative traces with their evidence and agent flow. Representative traces carry inputs, outputs and conversation reels, so start with a small `rep_limit`.
+
+        GET /tracer/feed/issues/{cluster_id}/overview/
+        """
+        path = {'cluster_id': cluster_id}
+        query = {'rep_limit': rep_limit, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_ERROR_CLUSTERS_OVERVIEW, path=path, query=query, body=body, model=models.OverviewResponse, options=options)
+
 
 class EvalsResource(Resource):
     """`client.evals`. Subclass to add methods; override `_children` to swap a nested resource."""
@@ -3292,6 +3312,26 @@ class AsyncErrorClustersResource(Resource):
         query = {'project_id': project_id, 'search': search, 'status': status, 'severity': severity, 'fix_layer': fix_layer, 'source': source, 'issue_group': issue_group, 'time_range_days': time_range_days, 'sort_by': sort_by, 'sort_dir': sort_dir, 'limit': limit, 'offset': offset, **(extra_query or {})}
         body = None
         return await self._t.acall(_ops.OP_ERROR_CLUSTERS_LIST, path=path, query=query, body=body, model=models.FeedListResponse, options=options)
+
+    async def list_traces(self, cluster_id: str, *, limit: int | None | NotGiven = NOT_GIVEN, offset: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TracesTabResponse:
+        """List the traces grouped into a cluster with each one's score, latency, tokens and cost, alongside cluster-wide aggregates.
+
+        GET /tracer/feed/issues/{cluster_id}/traces/
+        """
+        path = {'cluster_id': cluster_id}
+        query = {'limit': limit, 'offset': offset, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_ERROR_CLUSTERS_LIST_TRACES, path=path, query=query, body=body, model=models.TracesTabResponse, options=options)
+
+    async def overview(self, cluster_id: str, *, rep_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.OverviewResponse:
+        """Return a cluster's pattern summary (the statistical insights that separate its failing traces from the passing baseline), its daily error counts, and representative traces with their evidence and agent flow. Representative traces carry inputs, outputs and conversation reels, so start with a small `rep_limit`.
+
+        GET /tracer/feed/issues/{cluster_id}/overview/
+        """
+        path = {'cluster_id': cluster_id}
+        query = {'rep_limit': rep_limit, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_ERROR_CLUSTERS_OVERVIEW, path=path, query=query, body=body, model=models.OverviewResponse, options=options)
 
 
 class AsyncEvalsResource(Resource):

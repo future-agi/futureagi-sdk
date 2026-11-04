@@ -138,6 +138,12 @@ class AgentDefinitionResponse(_Model):
     livekit_max_concurrency: Optional[Any] = Field(default=None)
 
 
+class AgentFlowGraph(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['edges', 'nodes'])
+    nodes: Optional[List[Optional[Any]]] = Field(default=None)
+    edges: Optional[List[Optional[Any]]] = Field(default=None)
+
+
 class AgentVersionCreateResponse(_Model):
     message: Optional[str] = Field(default=None)
     version: Optional[AgentVersionResponse] = Field(default=None)
@@ -938,6 +944,14 @@ class EvalsConfigsCreateResult(_Model):
     id: Optional[str] = Field(default=None)
 
 
+class EventsOverTimePoint(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['date', 'errors', 'passing', 'users'])
+    date: Optional[str] = Field(default=None)
+    errors: Optional[int] = Field(default=None)
+    passing: Optional[int] = Field(default=None)
+    users: Optional[int] = Field(default=None)
+
+
 class ExperimentDetailV2(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['name'])
     id: Optional[str] = Field(default=None)
@@ -1071,6 +1085,12 @@ class GatewaySummaryResult(_Model):
     status: Optional[str] = Field(default=None)
     provider_count: Optional[int] = Field(default=None)
     model_count: Optional[int] = Field(default=None)
+
+
+class KeyMoment(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['kevinified', 'verbatim'])
+    kevinified: Optional[str] = Field(default=None)
+    verbatim: Optional[str] = Field(default=None)
 
 
 class KnowledgeBaseItem(_Model):
@@ -1209,6 +1229,45 @@ class Organization(_Model):
     require_2fa: Optional[bool] = Field(default=None)
     require_2fa_grace_period_days: Optional[int] = Field(default=None)
     require_2fa_enforced_at: Optional[str] = Field(default=None)
+
+
+class OverviewResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['events_over_time', 'pattern_summary', 'representative_traces'])
+    events_over_time: Optional[List[Optional[EventsOverTimePoint]]] = Field(default=None)
+    pattern_summary: Optional[PatternSummary] = Field(default=None)
+    representative_traces: Optional[List[Optional[RepresentativeTrace]]] = Field(default=None)
+    representative_total: Optional[int] = Field(default=None)
+
+
+class PatternInsight(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['caption', 'value'])
+    title: Optional[str] = Field(default=None)
+    value: Optional[str] = Field(default=None)
+    caption: Optional[str] = Field(default=None)
+    evidence: Optional[PatternInsightEvidence] = Field(default=None)
+
+
+class PatternInsightEvidence(_Model):
+    test: Optional[str] = Field(default=None)
+    baseline: Optional[str] = Field(default=None)
+    tool: Optional[str] = Field(default=None)
+    z: Optional[float] = Field(default=None)
+    p_value: Optional[float] = Field(default=None)
+    ks_stat: Optional[float] = Field(default=None)
+    fail_median: Optional[float] = Field(default=None)
+    baseline_median: Optional[float] = Field(default=None)
+    fail_pct: Optional[int] = Field(default=None)
+    baseline_pct: Optional[int] = Field(default=None)
+    hits: Optional[int] = Field(default=None)
+    total: Optional[int] = Field(default=None)
+    missing_in: Optional[int] = Field(default=None)
+    traces_with_tools: Optional[int] = Field(default=None)
+
+
+class PatternSummary(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['insights', 'key_moments'])
+    insights: Optional[List[Optional[PatternInsight]]] = Field(default=None)
+    key_moments: Optional[List[Optional[KeyMoment]]] = Field(default=None)
 
 
 class ProjectDetailResult(_Model):
@@ -1557,6 +1616,19 @@ class RcaTrailStep(_Model):
     confidence: Optional[str] = Field(default=None)
 
 
+class RepresentativeTrace(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent_flow', 'evidence', 'id', 'recommendations', 'root_causes', 'status', 'summary'])
+    id: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)
+    timestamp: Optional[str] = Field(default=None)
+    summary: Optional[TraceSummary] = Field(default=None)
+    evidence: Optional[TraceEvidence] = Field(default=None)
+    agent_flow: Optional[AgentFlowGraph] = Field(default=None)
+    root_causes: Optional[List[Optional[Any]]] = Field(default=None)
+    recommendations: Optional[List[Optional[Any]]] = Field(default=None)
+    what_changed: Optional[Any] = Field(default=None)
+
+
 class RunEnvironmentRef(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'name'])
     id: Optional[str] = Field(default=None)
@@ -1820,6 +1892,16 @@ class TraceErrorAnalysisResult(_Model):
     memory_context: Optional[Any] = Field(default=None)
 
 
+class TraceEvidence(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['fail_reel', 'pass_reel'])
+    input: Optional[str] = Field(default=None)
+    output: Optional[str] = Field(default=None)
+    fail_reel: Optional[List[Optional[Any]]] = Field(default=None)
+    pass_reel: Optional[List[Optional[Any]]] = Field(default=None)
+    judge_reason: Optional[str] = Field(default=None)
+    score: Optional[float] = Field(default=None)
+
+
 class TraceObserveColumnConfig(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'is_visible', 'name'])
     id: Optional[str] = Field(default=None)
@@ -1931,6 +2013,45 @@ class TraceSessionTableRow(_Model):
     user_id: Optional[str] = Field(default=None)
     user_id_type: Optional[str] = Field(default=None)
     user_id_hash: Optional[str] = Field(default=None)
+
+
+class TraceSummary(_Model):
+    eval_score: Optional[float] = Field(default=None)
+    latency_ms: Optional[int] = Field(default=None)
+    turns: Optional[int] = Field(default=None)
+    model: Optional[str] = Field(default=None)
+    input_tokens: Optional[int] = Field(default=None)
+    output_tokens: Optional[int] = Field(default=None)
+
+
+class TracesAggregates(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['failing_traces', 'p50_latency', 'p95_latency', 'passing_traces', 'total_traces'])
+    total_traces: Optional[int] = Field(default=None)
+    failing_traces: Optional[int] = Field(default=None)
+    passing_traces: Optional[int] = Field(default=None)
+    avg_score: Optional[float] = Field(default=None)
+    p50_latency: Optional[int] = Field(default=None)
+    p95_latency: Optional[int] = Field(default=None)
+    avg_turns: Optional[float] = Field(default=None)
+
+
+class TracesListRow(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id'])
+    id: Optional[str] = Field(default=None)
+    input: Optional[str] = Field(default=None)
+    timestamp: Optional[str] = Field(default=None)
+    latency_ms: Optional[int] = Field(default=None)
+    tokens: Optional[int] = Field(default=None)
+    cost: Optional[float] = Field(default=None)
+    score: Optional[float] = Field(default=None)
+    turns: Optional[int] = Field(default=None)
+
+
+class TracesTabResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['aggregates', 'total', 'traces'])
+    aggregates: Optional[TracesAggregates] = Field(default=None)
+    traces: Optional[List[Optional[TracesListRow]]] = Field(default=None)
+    total: Optional[int] = Field(default=None)
 
 
 class TrendPoint(_Model):
@@ -2134,6 +2255,7 @@ AgentDefinitionDetailResponse.model_rebuild()
 AgentDefinitionEditResponse.model_rebuild()
 AgentDefinitionListResponse.model_rebuild()
 AgentDefinitionResponse.model_rebuild()
+AgentFlowGraph.model_rebuild()
 AgentVersionCreateResponse.model_rebuild()
 AgentVersionResponse.model_rebuild()
 AgentccRequestLog.model_rebuild()
@@ -2197,6 +2319,7 @@ EvalTemplateListItem.model_rebuild()
 EvalTemplateListResponseResult.model_rebuild()
 EvalTemplateUpdateResponseResult.model_rebuild()
 EvalsConfigsCreateResult.model_rebuild()
+EventsOverTimePoint.model_rebuild()
 ExperimentDetailV2.model_rebuild()
 ExperimentListV2.model_rebuild()
 FeedDetailCore.model_rebuild()
@@ -2206,6 +2329,7 @@ GatewayConfigProvider.model_rebuild()
 GatewayConfigResult.model_rebuild()
 GatewayStatus.model_rebuild()
 GatewaySummaryResult.model_rebuild()
+KeyMoment.model_rebuild()
 KnowledgeBaseItem.model_rebuild()
 LegacyKnowledgeBaseCreateResult.model_rebuild()
 LegacyKnowledgeBaseFileRow.model_rebuild()
@@ -2222,6 +2346,10 @@ ModelHubSuccessMessageResult.model_rebuild()
 ObservationSpanDetailResult.model_rebuild()
 OptimizationsCreateResult.model_rebuild()
 Organization.model_rebuild()
+OverviewResponse.model_rebuild()
+PatternInsight.model_rebuild()
+PatternInsightEvidence.model_rebuild()
+PatternSummary.model_rebuild()
 ProjectDetailResult.model_rebuild()
 PromptHistoryExecution.model_rebuild()
 PromptLabel.model_rebuild()
@@ -2256,6 +2384,7 @@ QueueRemoveLabelResult.model_rebuild()
 QueueSubmitAnnotationsResult.model_rebuild()
 RcaSummary.model_rebuild()
 RcaTrailStep.model_rebuild()
+RepresentativeTrace.model_rebuild()
 RunEnvironmentRef.model_rebuild()
 RunTestExecutionResponse.model_rebuild()
 RunTestResponse.model_rebuild()
@@ -2273,6 +2402,7 @@ TestExecutionAnalytics.model_rebuild()
 TraceDetailResult.model_rebuild()
 TraceDetailSpan.model_rebuild()
 TraceErrorAnalysisResult.model_rebuild()
+TraceEvidence.model_rebuild()
 TraceObserveColumnConfig.model_rebuild()
 TraceObserveListMetadata.model_rebuild()
 TraceObserveListResult.model_rebuild()
@@ -2281,6 +2411,10 @@ TraceSessionDetailResult.model_rebuild()
 TraceSessionListMetadata.model_rebuild()
 TraceSessionListResult.model_rebuild()
 TraceSessionTableRow.model_rebuild()
+TraceSummary.model_rebuild()
+TracesAggregates.model_rebuild()
+TracesListRow.model_rebuild()
+TracesTabResponse.model_rebuild()
 TrendPoint.model_rebuild()
 UsageOverviewDimension.model_rebuild()
 UsageOverviewResult.model_rebuild()
@@ -2306,6 +2440,7 @@ __all__ = [
     'AgentDefinitionEditResponse',
     'AgentDefinitionListResponse',
     'AgentDefinitionResponse',
+    'AgentFlowGraph',
     'AgentVersionCreateResponse',
     'AgentVersionResponse',
     'AgentccRequestLog',
@@ -2369,6 +2504,7 @@ __all__ = [
     'EvalTemplateListResponseResult',
     'EvalTemplateUpdateResponseResult',
     'EvalsConfigsCreateResult',
+    'EventsOverTimePoint',
     'ExperimentDetailV2',
     'ExperimentListV2',
     'FeedDetailCore',
@@ -2378,6 +2514,7 @@ __all__ = [
     'GatewayConfigResult',
     'GatewayStatus',
     'GatewaySummaryResult',
+    'KeyMoment',
     'KnowledgeBaseItem',
     'LegacyKnowledgeBaseCreateResult',
     'LegacyKnowledgeBaseFileRow',
@@ -2394,6 +2531,10 @@ __all__ = [
     'ObservationSpanDetailResult',
     'OptimizationsCreateResult',
     'Organization',
+    'OverviewResponse',
+    'PatternInsight',
+    'PatternInsightEvidence',
+    'PatternSummary',
     'ProjectDetailResult',
     'PromptHistoryExecution',
     'PromptLabel',
@@ -2428,6 +2569,7 @@ __all__ = [
     'QueueSubmitAnnotationsResult',
     'RcaSummary',
     'RcaTrailStep',
+    'RepresentativeTrace',
     'RunEnvironmentRef',
     'RunTestExecutionResponse',
     'RunTestResponse',
@@ -2445,6 +2587,7 @@ __all__ = [
     'TraceDetailResult',
     'TraceDetailSpan',
     'TraceErrorAnalysisResult',
+    'TraceEvidence',
     'TraceObserveColumnConfig',
     'TraceObserveListMetadata',
     'TraceObserveListResult',
@@ -2453,6 +2596,10 @@ __all__ = [
     'TraceSessionListMetadata',
     'TraceSessionListResult',
     'TraceSessionTableRow',
+    'TraceSummary',
+    'TracesAggregates',
+    'TracesListRow',
+    'TracesTabResponse',
     'TrendPoint',
     'UsageOverviewDimension',
     'UsageOverviewResult',

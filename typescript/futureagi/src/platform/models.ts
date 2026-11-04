@@ -110,6 +110,11 @@ export interface AgentDefinitionResponse {
   livekit_max_concurrency?: unknown | null;
 }
 
+export interface AgentFlowGraph {
+  nodes?: Array<unknown | null> | null;
+  edges?: Array<unknown | null> | null;
+}
+
 export interface AgentVersionCreateResponse {
   message?: string | null;
   version?: AgentVersionResponse | null;
@@ -857,6 +862,13 @@ export interface EvalsConfigsCreateResult {
   id?: string | null;
 }
 
+export interface EventsOverTimePoint {
+  date?: string | null;
+  errors?: number | null;
+  passing?: number | null;
+  users?: number | null;
+}
+
 export interface ExperimentDetailV2 {
   id?: string | null;
   name?: string | null;
@@ -983,6 +995,11 @@ export interface GatewaySummaryResult {
   model_count?: number | null;
 }
 
+export interface KeyMoment {
+  kevinified?: string | null;
+  verbatim?: string | null;
+}
+
 export interface KnowledgeBaseItem {
   id?: string | null;
   name?: string | null;
@@ -1105,6 +1122,42 @@ export interface Organization {
   require_2fa?: boolean | null;
   require_2fa_grace_period_days?: number | null;
   require_2fa_enforced_at?: string | null;
+}
+
+export interface OverviewResponse {
+  events_over_time?: Array<EventsOverTimePoint | null> | null;
+  pattern_summary?: PatternSummary | null;
+  representative_traces?: Array<RepresentativeTrace | null> | null;
+  representative_total?: number | null;
+}
+
+export interface PatternInsight {
+  title?: string | null;
+  value?: string | null;
+  caption?: string | null;
+  evidence?: PatternInsightEvidence | null;
+}
+
+export interface PatternInsightEvidence {
+  test?: string | null;
+  baseline?: string | null;
+  tool?: string | null;
+  z?: number | null;
+  p_value?: number | null;
+  ks_stat?: number | null;
+  fail_median?: number | null;
+  baseline_median?: number | null;
+  fail_pct?: number | null;
+  baseline_pct?: number | null;
+  hits?: number | null;
+  total?: number | null;
+  missing_in?: number | null;
+  traces_with_tools?: number | null;
+}
+
+export interface PatternSummary {
+  insights?: Array<PatternInsight | null> | null;
+  key_moments?: Array<KeyMoment | null> | null;
 }
 
 export interface ProjectDetailResult {
@@ -1423,6 +1476,18 @@ export interface RcaTrailStep {
   confidence?: string | null;
 }
 
+export interface RepresentativeTrace {
+  id?: string | null;
+  status?: string | null;
+  timestamp?: string | null;
+  summary?: TraceSummary | null;
+  evidence?: TraceEvidence | null;
+  agent_flow?: AgentFlowGraph | null;
+  root_causes?: Array<unknown | null> | null;
+  recommendations?: Array<unknown | null> | null;
+  what_changed?: unknown | null;
+}
+
 export interface RunEnvironmentRef {
   id?: string | null;
   name?: string | null;
@@ -1675,6 +1740,15 @@ export interface TraceErrorAnalysisResult {
   memory_context?: unknown | null;
 }
 
+export interface TraceEvidence {
+  input?: string | null;
+  output?: string | null;
+  fail_reel?: Array<unknown | null> | null;
+  pass_reel?: Array<unknown | null> | null;
+  judge_reason?: string | null;
+  score?: number | null;
+}
+
 export interface TraceObserveColumnConfig {
   id?: string | null;
   name?: string | null;
@@ -1779,6 +1853,42 @@ export interface TraceSessionTableRow {
   user_id?: string | null;
   user_id_type?: string | null;
   user_id_hash?: string | null;
+}
+
+export interface TraceSummary {
+  eval_score?: number | null;
+  latency_ms?: number | null;
+  turns?: number | null;
+  model?: string | null;
+  input_tokens?: number | null;
+  output_tokens?: number | null;
+}
+
+export interface TracesAggregates {
+  total_traces?: number | null;
+  failing_traces?: number | null;
+  passing_traces?: number | null;
+  avg_score?: number | null;
+  p50_latency?: number | null;
+  p95_latency?: number | null;
+  avg_turns?: number | null;
+}
+
+export interface TracesListRow {
+  id?: string | null;
+  input?: string | null;
+  timestamp?: string | null;
+  latency_ms?: number | null;
+  tokens?: number | null;
+  cost?: number | null;
+  score?: number | null;
+  turns?: number | null;
+}
+
+export interface TracesTabResponse {
+  aggregates?: TracesAggregates | null;
+  traces?: Array<TracesListRow | null> | null;
+  total?: number | null;
 }
 
 export interface TrendPoint {
