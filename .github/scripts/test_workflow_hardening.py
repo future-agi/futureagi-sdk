@@ -91,6 +91,37 @@ class WorkflowHardeningTests(unittest.TestCase):
             {'release-please.yml': 1},
         )
 
+    def test_every_action_is_pinned_to_a_full_commit_sha(self):
+        pinned = re.compile(r'^uses: [A-Za-z0-9_.-]+/[A-Za-z0-9_./-]+@[0-9a-f]{40}(?:\s+#\s*\S.*)?$')
+        for name in WORKFLOW_NAMES:
+            uses = self.uses(self.workflow(name))
+            self.assertTrue(uses, f'Expected action references in {name}')
+            for line in uses:
+                with self.subTest(workflow=name, line=line):
+                    self.assertRegex(line, pinned)
+
+    def test_common_action_sha_pins(self):
+        self.assert_action_pin(
+            'actions/checkout',
+            '11d5960a326750d5838078e36cf38b85af677262', 'v4.4.0',
+            {'publish.yml': 3, 'release-please.yml': 1},
+        )
+        self.assert_action_pin(
+            'actions/setup-python',
+            'a26af69be951a213d495a4c3e4e4022e16d87065', 'v5.6.0',
+            {'publish.yml': 2, 'release-please.yml': 1},
+        )
+        self.assert_action_pin(
+            'pnpm/action-setup',
+            'b906affcce14559ad1aafd4ab0e942779e9f58b1', 'v4.3.0',
+            {'publish.yml': 1},
+        )
+        self.assert_action_pin(
+            'actions/setup-node',
+            '49933ea5288caeca8642d1e84afbd3f7d6820020', 'v4.4.0',
+            {'publish.yml': 1},
+        )
+
     def test_publish_accepts_only_workflow_dispatch_on_main(self):
         lines = self.workflow('publish.yml')
         text = '\n'.join(lines)
