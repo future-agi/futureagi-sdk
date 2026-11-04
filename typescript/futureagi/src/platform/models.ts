@@ -1916,6 +1916,7 @@ export interface UserInfoResponse {
   two_factor_methods?: UserInfoTwoFactorMethods | null;
   org_2fa_required?: boolean | null;
   org_2fa_grace_ends_at?: string | null;
+  restrict_simulate_to_environments?: boolean | null;
 }
 
 export interface UserInfoTwoFactorMethods {

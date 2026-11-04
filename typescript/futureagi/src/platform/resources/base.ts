@@ -1504,6 +1504,7 @@ export interface TracesGetParams {
 }
 
 export interface TracesListParams {
+  sort_params?: string | null;
   project_id?: string | null;
   project_version_id?: string | null;
   session_id?: string | null;
@@ -3366,7 +3367,7 @@ export class TracesResource extends Resource {
    * GET /tracer/trace/list_traces_of_session/
    */
   list(params: TracesListParams = {}, options?: RequestOptions): Promise<models.TraceObserveListResult> {
-    return this._t.call<models.TraceObserveListResult>(ops.OP_TRACES_LIST, { path: {}, query: { project_id: params.project_id, project_version_id: params.project_version_id, session_id: params.session_id, filters: params.filters, page_number: params.page_number, page_size: params.page_size, cursor: params.cursor, cursor_mode: params.cursor_mode, attribute_keys: params.attribute_keys, allow_sampled: params.allow_sampled, interval: params.interval } }, options);
+    return this._t.call<models.TraceObserveListResult>(ops.OP_TRACES_LIST, { path: {}, query: { sort_params: params.sort_params, project_id: params.project_id, project_version_id: params.project_version_id, session_id: params.session_id, filters: params.filters, page_number: params.page_number, page_size: params.page_size, cursor: params.cursor, cursor_mode: params.cursor_mode, attribute_keys: params.attribute_keys, allow_sampled: params.allow_sampled, interval: params.interval } }, options);
   }
 }
 
