@@ -59,36 +59,35 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
 
         # Handle GET template by ID endpoint
         if response.request.method == HttpMethod.GET.value:
-            # Support both camelCase and snake_case keys from backend
             # Unwrap common {"result": {...}} envelope if present
             if isinstance(data, dict) and "result" in data and isinstance(data["result"], dict):
                 data = data["result"]
-            pc = data.get("promptConfig") or data.get("prompt_config") or [{}]
+            pc = data.get("prompt_config") or [{}]
             if isinstance(pc, list):
                 prompt_config_raw = pc[0] if pc else {}
             else:
                 prompt_config_raw = pc
             cfg_src = (prompt_config_raw or {}).get("configuration", {})
             cfg = {
-                "modelName": cfg_src.get("modelName") or cfg_src.get("model"),
+                "model_name": cfg_src.get("model_name") or cfg_src.get("model"),
                 "temperature": cfg_src.get("temperature"),
-                "frequencyPenalty": cfg_src.get("frequencyPenalty") or cfg_src.get("frequency_penalty"),
-                "presencePenalty": cfg_src.get("presencePenalty") or cfg_src.get("presence_penalty"),
-                "maxTokens": cfg_src.get("maxTokens") or cfg_src.get("max_tokens"),
-                "topP": cfg_src.get("topP") or cfg_src.get("top_p"),
-                "responseFormat": cfg_src.get("responseFormat") or cfg_src.get("response_format"),
-                "toolChoice": cfg_src.get("toolChoice") or cfg_src.get("tool_choice"),
+                "frequency_penalty": cfg_src.get("frequency_penalty"),
+                "presence_penalty": cfg_src.get("presence_penalty"),
+                "max_tokens": cfg_src.get("max_tokens"),
+                "top_p": cfg_src.get("top_p"),
+                "response_format": cfg_src.get("response_format"),
+                "tool_choice": cfg_src.get("tool_choice"),
                 "tools": cfg_src.get("tools"),
             }
             model_config = ModelConfig(
-                model_name=cfg["modelName"] or "unavailable",
+                model_name=cfg["model_name"] or "unavailable",
                 temperature=cfg["temperature"] if cfg["temperature"] is not None else 0,
-                frequency_penalty=cfg["frequencyPenalty"] if cfg["frequencyPenalty"] is not None else 0,
-                presence_penalty=cfg["presencePenalty"] if cfg["presencePenalty"] is not None else 0,
-                max_tokens=cfg["maxTokens"],
-                top_p=cfg["topP"] if cfg["topP"] is not None else 0,
-                response_format=cfg["responseFormat"],
-                tool_choice=cfg["toolChoice"],
+                frequency_penalty=cfg["frequency_penalty"] if cfg["frequency_penalty"] is not None else 0,
+                presence_penalty=cfg["presence_penalty"] if cfg["presence_penalty"] is not None else 0,
+                max_tokens=cfg["max_tokens"],
+                top_p=cfg["top_p"] if cfg["top_p"] is not None else 0,
+                response_format=cfg["response_format"],
+                tool_choice=cfg["tool_choice"],
                 tools=cfg["tools"],
             )
             template_data = {
@@ -97,12 +96,12 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
                 "description": data.get("description", ""),
                 "messages": (prompt_config_raw or {}).get("messages", []),
                 "model_configuration": model_config,
-                "variable_names": data.get("variableNames") or data.get("variable_names", {}),
+                "variable_names": data.get("variable_names", {}),
                 "version": data.get("version"),
-                "is_default": data.get("isDefault", True) if data.get("isDefault") is not None else data.get("is_default", True),
-                "evaluation_configs": data.get("evaluationConfigs") or data.get("evaluation_configs", []),
+                "is_default": data.get("is_default", True),
+                "evaluation_configs": data.get("evaluation_configs", []),
                 "status": data.get("status"),
-                "error_message": data.get("errorMessage"),
+                "error_message": data.get("error_message"),
                 "metadata": data.get("metadata"),
                 "placeholders": (prompt_config_raw or {}).get("placeholders", {}),
             }
@@ -131,7 +130,7 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
         if response.status_code == 400:
             try:
                 detail = response.json()
-                error_code = detail.get("errorCode") if isinstance(detail, dict) else None
+                error_code = detail.get("error_code") if isinstance(detail, dict) else None
             except Exception:
                 error_code = None
 
@@ -157,32 +156,31 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
     def _dict_to_prompt_template(item: Dict) -> PromptTemplate:
         """Safely convert backend JSON to PromptTemplate."""
 
-        prompt_config_raw = item.get("promptConfig") or item.get("prompt_config")
+        prompt_config_raw = item.get("prompt_config")
 
         if prompt_config_raw:
             pc = prompt_config_raw[0] if isinstance(prompt_config_raw, list) else prompt_config_raw
             cfg_raw = pc.get("configuration", {})
-            # Normalize key casing / naming
             cfg = {
-                "modelName": cfg_raw.get("modelName") or cfg_raw.get("model"),
+                "model_name": cfg_raw.get("model_name") or cfg_raw.get("model"),
                 "temperature": cfg_raw.get("temperature"),
-                "frequencyPenalty": cfg_raw.get("frequencyPenalty") or cfg_raw.get("frequency_penalty"),
-                "presencePenalty": cfg_raw.get("presencePenalty") or cfg_raw.get("presence_penalty"),
-                "maxTokens": cfg_raw.get("maxTokens") or cfg_raw.get("max_tokens"),
-                "topP": cfg_raw.get("topP") or cfg_raw.get("top_p"),
-                "responseFormat": cfg_raw.get("responseFormat") or cfg_raw.get("response_format"),
-                "toolChoice": cfg_raw.get("toolChoice") or cfg_raw.get("tool_choice"),
+                "frequency_penalty": cfg_raw.get("frequency_penalty"),
+                "presence_penalty": cfg_raw.get("presence_penalty"),
+                "max_tokens": cfg_raw.get("max_tokens"),
+                "top_p": cfg_raw.get("top_p"),
+                "response_format": cfg_raw.get("response_format"),
+                "tool_choice": cfg_raw.get("tool_choice"),
                 "tools": cfg_raw.get("tools"),
             }
             model_config = ModelConfig(
-                model_name=cfg["modelName"] or "unavailable",
+                model_name=cfg["model_name"] or "unavailable",
                 temperature=cfg["temperature"] if cfg["temperature"] is not None else 0,
-                frequency_penalty=cfg["frequencyPenalty"] if cfg["frequencyPenalty"] is not None else 0,
-                presence_penalty=cfg["presencePenalty"] if cfg["presencePenalty"] is not None else 0,
-                max_tokens=cfg["maxTokens"],
-                top_p=cfg["topP"] if cfg["topP"] is not None else 0,
-                response_format=cfg["responseFormat"] if cfg["responseFormat"] is not None else None,
-                tool_choice=cfg["toolChoice"] if cfg["toolChoice"] is not None else None,
+                frequency_penalty=cfg["frequency_penalty"] if cfg["frequency_penalty"] is not None else 0,
+                presence_penalty=cfg["presence_penalty"] if cfg["presence_penalty"] is not None else 0,
+                max_tokens=cfg["max_tokens"],
+                top_p=cfg["top_p"] if cfg["top_p"] is not None else 0,
+                response_format=cfg["response_format"] if cfg["response_format"] is not None else None,
+                tool_choice=cfg["tool_choice"] if cfg["tool_choice"] is not None else None,
                 tools=cfg["tools"] if cfg["tools"] is not None else None,
             )
             messages = pc.get("messages", [])
@@ -198,12 +196,12 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             description=item.get("description", ""),
             messages=messages or [],
             model_configuration=model_config or ModelConfig(),
-            variable_names=item.get("variableNames") or item.get("variable_names", {}),
+            variable_names=item.get("variable_names", {}),
             version=item.get("version"),
-            is_default=item.get("isDefault", True),
-            evaluation_configs=item.get("evaluationConfigs", []),
+            is_default=item.get("is_default", True),
+            evaluation_configs=item.get("evaluation_configs", []),
             status=item.get("status"),
-            error_message=item.get("errorMessage"),
+            error_message=item.get("error_message"),
             metadata=item.get("metadata"),
             placeholders=item.get("placeholders", {}),
         )
@@ -355,7 +353,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
 
         self.template.id = response["id"]
         self.template.name = response["name"]
-        self.template.version = response.get("templateVersion") or response.get("createdVersion") or "v1"
+        self.template.version = response.get("template_version") or response.get("created_version") or "v1"
         self.template.metadata = response.get("metadata", {})
 
         # Remember label for assignment on commit (cannot assign on drafts)
@@ -413,7 +411,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             result = response.get("result")
             if isinstance(result, list) and result:
                 new_version_data = result[0]
-                self.template.version = new_version_data.get("templateVersion")
+                self.template.version = new_version_data.get("template_version")
         else:
             logger.error(
                 "Failed to create new version, unexpected response format from server."
@@ -521,8 +519,8 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         """Return full version history as provided by the backend.
 
         Each element in the returned list is the raw JSON entry that includes
-        at least these keys: ``templateVersion``, ``isDraft`` and
-        ``createdAt``.
+        at least these keys: ``template_version``, ``is_draft`` and
+        ``created_at``.
         """
         return self._fetch_template_version_history()
 
@@ -534,8 +532,8 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         """Check backend state to know if the current version is still draft."""
         history = self._fetch_template_version_history()
         for entry in history:
-            if entry.get("templateVersion") == self.template.version:
-                return bool(entry.get("isDraft"))
+            if entry.get("template_version") == self.template.version:
+                return bool(entry.get("is_draft"))
         # If not found assume draft (conservative)
         return True
 

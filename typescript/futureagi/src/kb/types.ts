@@ -19,7 +19,7 @@ export interface KnowledgeBaseConfig {
     /** Current status of the knowledge base */
     status?: string;
     /** Last error message if any */
-    lastError?: string;
+    last_error?: string;
     /** List of file IDs or names in the knowledge base */
     files?: string[];
 }
@@ -28,10 +28,10 @@ export interface KnowledgeBaseConfig {
  * Response interface for knowledge base creation
  */
 export interface KnowledgeBaseCreateResponse {
-    kbId: string;
-    kbName: string;
-    fileIds?: string[];
-    notUploaded?: string[];
+    kb_id: string;
+    kb_name: string;
+    file_ids?: string[];
+    not_uploaded?: string[];
 }
 
 /**
@@ -41,7 +41,7 @@ export interface KnowledgeBaseUpdateResponse {
     id: string;
     name: string;
     files?: string[];
-    notUploaded?: string[];
+    not_uploaded?: string[];
 }
 
 /**
@@ -49,7 +49,7 @@ export interface KnowledgeBaseUpdateResponse {
  */
 export interface KnowledgeBaseListResponse {
     result: {
-        tableData: Array<{
+        table_data: Array<{
             id: string;
             name: string;
             status?: string;

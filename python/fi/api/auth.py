@@ -15,7 +15,7 @@ from fi.utils.constants import (
     DEFAULT_TIMEOUT,
     SECRET_KEY_ENVVAR_NAME,
 )
-from fi.utils.errors import MissingAuthError, DatasetNotFoundError
+from fi.utils.errors import MissingAuthError
 from fi.utils.executor import BoundedExecutor
 from fi.utils.utils import ApiKeyName
 
@@ -71,7 +71,13 @@ class HttpClient:
         config: RequestConfig,
         response_handler: Optional[ResponseHandler[T, U]] = None,
     ) -> Union[Response, T]:
-        """Make an HTTP request with retries and response handling"""
+        """Make an HTTP request, retrying only transport-level failures.
+
+        The network round-trip is the only thing retried. Response parsing runs
+        once, after the loop, so a parse/deserialization error (or an HTTP error
+        status) never re-sends the request — retrying a non-idempotent POST on a
+        parse failure silently duplicates server-side writes.
+        """
 
         url = config.url
         headers = {**self._default_headers, **(config.headers or {})}
@@ -80,6 +86,7 @@ class HttpClient:
         timeout = config.timeout or self._default_timeout
         files = config.files or {}
         data = config.data or {}
+        response: Optional[Response] = None
         for attempt in range(config.retry_attempts):
             try:
                 response = self._session.request(
@@ -92,17 +99,15 @@ class HttpClient:
                     files=files,
                     timeout=timeout,
                 ).result()
-
-                if response_handler:
-                    return response_handler.parse(response=response)
-                return response
-
-            except Exception as e:
-                if isinstance(e, DatasetNotFoundError):
-                    raise e
+                break
+            except Exception:
                 if attempt == config.retry_attempts - 1:
-                    raise e
+                    raise
                 time.sleep(config.retry_delay)
+
+        if response_handler:
+            return response_handler.parse(response=response)
+        return response
 
     def close(self):
         """Close the client session"""

@@ -31,14 +31,14 @@ export interface QueueDetail {
     description?: string;
     instructions?: string;
     status?: QueueStatus;
-    assignmentStrategy?: string;
-    annotationsRequired?: number;
-    reservationTimeoutMinutes?: number;
-    requiresReview?: boolean;
-    createdAt?: string;
-    updatedAt?: string;
-    itemCount?: number;
-    completedCount?: number;
+    assignment_strategy?: string;
+    annotations_required?: number;
+    reservation_timeout_minutes?: number;
+    requires_review?: boolean;
+    created_at?: string;
+    updated_at?: string;
+    item_count?: number;
+    completed_count?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -58,12 +58,12 @@ export interface QueueItemSource {
 
 export interface QueueItem {
     id: string;
-    sourceType?: string;
-    sourceId?: string;
+    source_type?: string;
+    source_id?: string;
     status?: QueueItemStatus;
     order?: number;
-    assignedTo?: string;
-    createdAt?: string;
+    assigned_to?: string;
+    created_at?: string;
 }
 
 export interface AddItemsResponse {
@@ -80,16 +80,16 @@ export type ScoreValue = string | number | boolean | string[];
 
 export interface Score {
     id?: string;
-    labelId?: string;
-    labelName?: string;
+    label_id?: string;
+    label_name?: string;
     value?: ScoreValue;
-    scoreSource?: string;
+    score_source?: string;
     notes?: string;
-    annotatorId?: string;
-    annotatorName?: string;
-    sourceType?: string;
-    sourceId?: string;
-    createdAt?: string;
+    annotator_id?: string;
+    annotator_name?: string;
+    source_type?: string;
+    source_id?: string;
+    created_at?: string;
 }
 
 export interface ScoreInput {
@@ -115,25 +115,25 @@ export interface ImportAnnotationsResponse {
 export interface QueueProgress {
     total: number;
     pending: number;
-    inProgress: number;
+    in_progress: number;
     completed: number;
     skipped: number;
-    progressPct?: number;
-    annotatorStats?: Array<Record<string, any>>;
+    progress_pct?: number;
+    annotator_stats?: Array<Record<string, any>>;
 }
 
 export interface QueueAnalytics {
     throughput?: Record<string, any>;
-    annotatorPerformance?: Array<Record<string, any>>;
-    labelDistribution?: Record<string, any>;
-    statusBreakdown?: Record<string, number>;
+    annotator_performance?: Array<Record<string, any>>;
+    label_distribution?: Record<string, any>;
+    status_breakdown?: Record<string, number>;
     total?: number;
 }
 
 export interface QueueAgreement {
-    overallAgreement?: number;
-    perLabel?: Array<Record<string, any>>;
-    annotatorPairs?: Array<Record<string, any>>;
+    overall_agreement?: number;
+    per_label?: Array<Record<string, any>>;
+    annotator_pairs?: Array<Record<string, any>>;
 }
 
 // ---------------------------------------------------------------------------
@@ -141,7 +141,7 @@ export interface QueueAgreement {
 // ---------------------------------------------------------------------------
 
 export interface ExportToDatasetResponse {
-    datasetId?: string;
-    datasetName?: string;
-    rowsCreated?: number;
+    dataset_id?: string;
+    dataset_name?: string;
+    rows_created?: number;
 }

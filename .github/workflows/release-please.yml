@@ -1,0 +1,105 @@
+name: release-please
+
+# Main is the publication boundary. Wait for BOTH main-push suites before
+# preparing a version PR or cutting its release. Never release from dev.
+on:
+  workflow_run:
+    workflows: [CI, E2E]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sdk-release-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: write # GITHUB_TOKEN approves only the guarded bot version PR
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require successful CI and E2E for the current main commit
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TRIGGER_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: python .github/scripts/release_guard.py check-main --sha "$TRIGGER_SHA"
+      - name: Require the release app configuration
+        if: steps.gate.outputs.ready == 'true'
+        env:
+          APP_ID: ${{ vars.RELEASE_BOT_APP_ID || secrets.RELEASE_BOT_APP_ID }}
+          APP_KEY: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+        run: |
+          test -n "$APP_ID" && test -n "$APP_KEY" || {
+            echo '::error::Configure RELEASE_BOT_APP_ID and RELEASE_BOT_PRIVATE_KEY; see sdkgen/RELEASING.md.'
+            exit 1
+          }
+      - uses: actions/create-github-app-token@v2
+        if: steps.gate.outputs.ready == 'true'
+        id: app-token
+        with:
+          app-id: ${{ vars.RELEASE_BOT_APP_ID || secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+          owner: future-agi
+          repositories: futureagi-sdk
+      - uses: googleapis/release-please-action@v4
+        if: steps.gate.outputs.ready == 'true'
+        id: release
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          target-branch: main
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+      - name: Validate and approve only generated version changes
+        if: steps.release.outputs.prs_created == 'true'
+        id: approval
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRS: ${{ steps.release.outputs.prs }}
+          BOT: ${{ steps.app-token.outputs.app-slug }}[bot]
+        run: |
+          # separate-pull-requests=false: a single manifest release PR only.
+          number=$(jq -er 'if length == 1 then .[0].number else error("expected one release PR") end' <<< "$PRS")
+          python .github/scripts/release_guard.py approve --number "$number" --bot "$BOT"
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+      - name: Queue the validated release PR behind required checks
+        if: steps.approval.outputs.head != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ steps.approval.outputs.number }}
+          HEAD: ${{ steps.approval.outputs.head }}
+        run: |
+          # Compare-and-swap against the exact diff the guard approved.
+          # No --admin or bypass: normal protected-branch checks still apply.
+          gh pr merge --auto --squash --match-head-commit "$HEAD" "$NUMBER"
+      - name: Request publication of new tags from the main workflow
+        if: steps.release.outputs.releases_created == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+          PYTHON_TAG: ${{ steps.release.outputs['python--tag_name'] }}
+          TYPESCRIPT_TAG: ${{ steps.release.outputs['typescript/futureagi--tag_name'] }}
+        run: |
+          # repository_dispatch runs publish.yml on the default branch (main),
+          # giving both OIDC providers one stable workflow identity, including retries.
+          for tag in "$PYTHON_TAG" "$TYPESCRIPT_TAG"; do
+            [ -n "$tag" ] || continue
+            jq -n --arg tag "$tag" '{event_type:"sdk-release-publish",client_payload:{tag:$tag}}' \
+              | gh api --method POST "repos/$GH_REPO/dispatches" --input -
+          done
