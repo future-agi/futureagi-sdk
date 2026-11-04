@@ -16,6 +16,13 @@ def fixture():
         'python/fi/__init__.py': '__version__ = "0.6.14"  # x-release-please-version\nfrom pkgutil import extend_path\n',
         'python/CHANGELOG.md': None,
         'typescript/futureagi/package.json': json.dumps({'name': '@future-agi/sdk', 'version': '0.1.2', 'scripts': {'build': 'tsc'}}),
+        'typescript/futureagi/package-lock.json': json.dumps({
+            'name': '@future-agi/sdk', 'version': '0.1.2', 'lockfileVersion': 3,
+            'packages': {
+                '': {'name': '@future-agi/sdk', 'version': '0.1.2', 'dependencies': {'fixture': '^9.9.9'}},
+                'node_modules/fixture': {'version': '9.9.9', 'resolved': 'https://registry.npmjs.org/fixture/-/fixture-9.9.9.tgz', 'integrity': 'sha512-synthetic'},
+            },
+        }),
         'typescript/futureagi/CHANGELOG.md': None,
     }
     after = {key: (value.replace('0.6.14', '0.7.0').replace('0.1.2', '0.2.0') if value else '# Changelog\n\nNew version.') for key, value in before.items()}
@@ -47,6 +54,54 @@ class VersionDiffTests(unittest.TestCase):
         after['typescript/futureagi/package.json'] = json.dumps(package)
         with self.assertRaises(GuardError):
             validate_version_changes(before, after)
+
+    def test_lockfile_matches_real_release_please_diff(self):
+        before, after = fixture()
+        self.assertEqual(len(after), 7)
+        path = 'typescript/futureagi/package-lock.json'
+        old, new = json.loads(before[path]), json.loads(after[path])
+        self.assertEqual(old['packages']['node_modules/fixture'], new['packages']['node_modules/fixture'])
+        self.assertEqual(new['version'], '0.2.0')
+        self.assertEqual(new['packages']['']['version'], '0.2.0')
+        validate_version_changes(before, after)
+
+    def test_rejects_lockfile_dependency_or_metadata_changes(self):
+        for change in ['dependency_version', 'integrity', 'resolved', 'constraint', 'removed_package', 'added_package', 'lock_format', 'root_name']:
+            with self.subTest(change=change):
+                before, after = fixture()
+                path = 'typescript/futureagi/package-lock.json'
+                lock = json.loads(after[path])
+                dependency = lock['packages']['node_modules/fixture']
+                if change == 'dependency_version': dependency['version'] = '10.0.0'
+                if change == 'integrity': dependency['integrity'] = 'sha512-different'
+                if change == 'resolved': dependency['resolved'] = 'https://different.test/package.tgz'
+                if change == 'constraint': lock['packages']['']['dependencies']['fixture'] = '^10.0.0'
+                if change == 'removed_package': del lock['packages']['node_modules/fixture']
+                if change == 'added_package': lock['packages']['node_modules/extra'] = {'version': '1.0.0'}
+                if change == 'lock_format': lock['lockfileVersion'] = 2
+                if change == 'root_name': lock['packages']['']['name'] = 'different-package'
+                after[path] = json.dumps(lock)
+                with self.assertRaises(GuardError): validate_version_changes(before, after)
+
+    def test_rejects_missing_or_mismatched_lockfile_version(self):
+        for change in ['no_file', 'no_root', 'root_null', 'no_root_version', 'wrong_root_version', 'wrong_top_version']:
+            with self.subTest(change=change):
+                before, after = fixture()
+                path = 'typescript/futureagi/package-lock.json'
+                lock = json.loads(after[path])
+                if change == 'no_file': del after[path]
+                if change == 'no_root': del lock['packages']['']
+                if change == 'root_null': lock['packages'][''] = None
+                if change == 'no_root_version': del lock['packages']['']['version']
+                if change == 'wrong_root_version': lock['packages']['']['version'] = '0.1.2'
+                if change == 'wrong_top_version': lock['version'] = '0.1.2'
+                if change != 'no_file': after[path] = json.dumps(lock)
+                with self.assertRaises(GuardError): validate_version_changes(before, after)
+
+    def test_lockfile_change_requires_typescript_version_bump(self):
+        before, after = fixture()
+        after[MANIFEST] = json.dumps({'python': '0.7.0', 'typescript/futureagi': '0.1.2'})
+        with self.assertRaises(GuardError): validate_version_changes(before, after)
 
     def test_rejects_workflow_changes(self):
         before, after = fixture()
@@ -90,7 +145,7 @@ class FakeGitHub(GitHub):
             'state': 'open', 'draft': False, 'user': {'login': 'futureagi-release-bot[bot]', 'type': 'Bot'},
             'base': {'ref': 'main', 'sha': 'base'},
             'head': {'ref': RELEASE_BRANCH, 'sha': 'head', 'repo': {'full_name': self.repo}},
-            'changed_files': 6,
+            'changed_files': len(self.after),
         }
         self.behind = 0
         self.posts = []

@@ -13,7 +13,7 @@ import urllib.request
 
 PACKAGES = {
     "python": ("python/pyproject.toml", "python/fi/__init__.py", "python/CHANGELOG.md"),
-    "typescript/futureagi": ("typescript/futureagi/package.json", "typescript/futureagi/CHANGELOG.md"),
+    "typescript/futureagi": ("typescript/futureagi/package.json", "typescript/futureagi/package-lock.json", "typescript/futureagi/CHANGELOG.md"),
 }
 MANIFEST = ".release-please-manifest.json"
 RELEASE_BRANCH = "release-please--branches--main"
@@ -60,11 +60,19 @@ def validate_version_changes(before, after):
                 require(after[path].strip(), "Empty changelog")
                 continue
             a, b = before[path], after[path]
-            if path.endswith('package.json'):
+            if path.endswith(('package.json', 'package-lock.json')):
                 a, b = json.loads(a), json.loads(b)
                 require(a.get('version') == old[name] and b.get('version') == new[name], "Package version disagrees with manifest")
                 a.pop('version'); b.pop('version')
-                require(a == b, "package.json changes more than its version")
+                if path.endswith('package-lock.json'):
+                    root_a = a.get('packages', {}).get('')
+                    root_b = b.get('packages', {}).get('')
+                    require(isinstance(root_a, dict) and isinstance(root_b, dict), "Lockfile must contain the root package")
+                    require(root_a.get('version') == old[name] and root_b.get('version') == new[name], "Lockfile root version disagrees with manifest")
+                    root_a.pop('version'); root_b.pop('version')
+                # Every dependency entry, constraint, integrity/resolved value,
+                # script, and metadata field must remain byte-value equivalent.
+                require(a == b, f"{path} changes more than its root package version")
             else:
                 field = '__version__' if path.endswith('__init__.py') else 'version'
                 pattern = rf'(?m)^({field}\s*=\s*")[^"]+("[^\n]*)$'
@@ -138,11 +146,11 @@ class GitHub:
         comparison = self.api(f'compare/{base}...{head}')
         require(comparison['behind_by'] == 0, 'Release PR must be up to date with main')
         files = self.api(f'pulls/{number}/files?per_page=100')
-        require(len(files) == pr['changed_files'] and 0 < len(files) <= 6, 'Unexpected or truncated release diff')
+        allowed = {MANIFEST} | {path for package in PACKAGES.values() for path in package}
+        require(len(files) == pr['changed_files'] and 0 < len(files) <= len(allowed), 'Unexpected or truncated release diff')
         require(all(f['status'] in ('modified', 'added') for f in files), 'Release PR renames or deletes files')
         paths = {f['filename'] for f in files}
         require(MANIFEST in paths, 'Release manifest is missing from the diff')
-        allowed = {MANIFEST} | {path for package in PACKAGES.values() for path in package}
         require(paths <= allowed, 'Release PR includes code or workflow changes')
         before = {path: self.content(path, base, optional=path.endswith('/CHANGELOG.md')) for path in paths}
         after = {path: self.content(path, head) for path in paths}
