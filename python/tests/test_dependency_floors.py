@@ -247,6 +247,11 @@ class DependencyFloorsTest(unittest.TestCase):
                          "The retired ai-evaluation package is not a workspace member")
         self.assertEqual(workspace, {"@future-agi/sdk"})
 
+    def test_workspace_root_is_private(self):
+        root = json.loads(_read("typescript/package.json"))
+        self.assertIs(root.get("private"), True,
+                      "The TypeScript workspace root must never be published")
+
     def test_fallback_reads_legacy_scalar_and_optional_constraints(self):
         result = _parse_manifest_subset(
             '[tool.poetry.dependencies]\n'
