@@ -1,0 +1,385 @@
+---
+title: "File knowledge bases"
+description: "Reference for client.file_knowledge_bases in the Future AGI Python and TypeScript SDKs: file_knowledge_bases.create, file_knowledge_bases.delete, file_knowledge_bases.list, file_knowledge_bases.list_names, file_knowledge_bases.update, file_knowledge_bases.files.delete and 1 more."
+---
+
+`client.file_knowledge_bases` on `fi.Client` (Python) and `client.fileKnowledgeBases` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.file_knowledge_bases.files`. The models these methods return are on [Knowledge bases response models](/docs/sdk/reference/knowledge-bases-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+| Method | Description |
+|---|---|
+| [`file_knowledge_bases.create`](#file_knowledge_basescreate) | Create a file knowledge base (the Knowledge Base page of the app), optionally uploading its first files (pdf, docx, txt, rtf). |
+| [`file_knowledge_bases.delete`](#file_knowledge_basesdelete) | Delete file knowledge bases by id. |
+| [`file_knowledge_bases.list`](#file_knowledge_baseslist) | List the file knowledge bases of the workspace as a table (name, file count, creator), without paging. |
+| [`file_knowledge_bases.list_names`](#file_knowledge_baseslist_names) | Return the id and name of every file knowledge base, without paging. |
+| [`file_knowledge_bases.update`](#file_knowledge_basesupdate) | Rename a file knowledge base and/or upload more files to it. |
+| [`file_knowledge_bases.files.delete`](#file_knowledge_basesfilesdelete) | Delete files from a file knowledge base, by id or name, or all of them. |
+| [`file_knowledge_bases.files.list`](#file_knowledge_basesfileslist) | List the files in a file knowledge base, with their processing status. |
+
+## client.file_knowledge_bases
+
+### file_knowledge_bases.create
+
+Create a file knowledge base (the Knowledge Base page of the app), optionally uploading its first files (pdf, docx, txt, rtf).
+
+<ApiEndpoint method="POST" path="/model-hub/knowledge-base/" />
+
+**Multipart upload**: file parameters take a path, bytes or an open file
+
+<CodeGroup>
+
+```python Python
+result = client.file_knowledge_bases.create(name="your-name")
+```
+
+```typescript TypeScript
+const result = await client.fileKnowledgeBases.create({ name: "your-name" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.file_knowledge_bases.create(
+    *,
+    name: str,
+    files: list[FileInput] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.LegacyKnowledgeBaseCreateResult
+```
+
+```typescript TypeScript
+client.fileKnowledgeBases.create(params: FileKnowledgeBasesCreateParams, options?: RequestOptions): Promise<models.LegacyKnowledgeBaseCreateResult>
+
+export interface FileKnowledgeBasesCreateParams {
+  name: string;
+  file?: Array<FileInput>;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="name" type="string" required />
+<ParamField body="file" type="file[]" optional />
+
+#### Returns
+
+[`LegacyKnowledgeBaseCreateResult`](/docs/sdk/reference/knowledge-bases-models#legacyknowledgebasecreateresult).
+
+### file_knowledge_bases.delete
+
+Delete file knowledge bases by id.
+
+<ApiEndpoint method="DELETE" path="/model-hub/knowledge-base/" />
+
+<CodeGroup>
+
+```python Python
+result = client.file_knowledge_bases.delete()
+```
+
+```typescript TypeScript
+const result = await client.fileKnowledgeBases.delete();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.file_knowledge_bases.delete(
+    *,
+    kb_ids: list[str] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> str
+```
+
+```typescript TypeScript
+client.fileKnowledgeBases.delete(params: FileKnowledgeBasesDeleteParams = {}, options?: RequestOptions): Promise<string>
+
+export interface FileKnowledgeBasesDeleteParams {
+  kb_ids?: Array<string> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="kb_ids" type="string[]" optional />
+
+#### Returns
+
+`string`.
+
+### file_knowledge_bases.list
+
+List the file knowledge bases of the workspace as a table (name, file count, creator), without paging.
+
+<ApiEndpoint method="GET" path="/model-hub/knowledge-base/get/" />
+
+<CodeGroup>
+
+```python Python
+result = client.file_knowledge_bases.list()
+```
+
+```typescript TypeScript
+const result = await client.fileKnowledgeBases.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.file_knowledge_bases.list(
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.LegacyKnowledgeBaseTableResult
+```
+
+```typescript TypeScript
+client.fileKnowledgeBases.list(options?: RequestOptions): Promise<models.LegacyKnowledgeBaseTableResult>
+```
+
+</Expandable>
+
+#### Parameters
+
+This method takes no parameters beyond the per-call `options`.
+
+#### Returns
+
+[`LegacyKnowledgeBaseTableResult`](/docs/sdk/reference/knowledge-bases-models#legacyknowledgebasetableresult).
+
+### file_knowledge_bases.list_names
+
+Return the id and name of every file knowledge base, without paging.
+
+<ApiEndpoint method="GET" path="/model-hub/knowledge-base/list/" />
+
+<CodeGroup>
+
+```python Python
+result = client.file_knowledge_bases.list_names()
+```
+
+```typescript TypeScript
+const result = await client.fileKnowledgeBases.listNames();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.file_knowledge_bases.list_names(
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.LegacyKnowledgeBaseListResult
+```
+
+```typescript TypeScript
+client.fileKnowledgeBases.listNames(options?: RequestOptions): Promise<models.LegacyKnowledgeBaseListResult>
+```
+
+</Expandable>
+
+#### Parameters
+
+This method takes no parameters beyond the per-call `options`.
+
+#### Returns
+
+[`LegacyKnowledgeBaseListResult`](/docs/sdk/reference/knowledge-bases-models#legacyknowledgebaselistresult).
+
+### file_knowledge_bases.update
+
+Rename a file knowledge base and/or upload more files to it.
+
+<ApiEndpoint method="PATCH" path="/model-hub/knowledge-base/" />
+
+**Multipart upload**: file parameters take a path, bytes or an open file
+
+<CodeGroup>
+
+```python Python
+result = client.file_knowledge_bases.update(kb_id="your-kb-id")
+```
+
+```typescript TypeScript
+const result = await client.fileKnowledgeBases.update({ kb_id: "your-kb-id" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.file_knowledge_bases.update(
+    *,
+    kb_id: str,
+    name: str | None | NotGiven = NOT_GIVEN,
+    files: list[FileInput] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.LegacyKnowledgeBaseMutationResult
+```
+
+```typescript TypeScript
+client.fileKnowledgeBases.update(params: FileKnowledgeBasesUpdateParams, options?: RequestOptions): Promise<models.LegacyKnowledgeBaseMutationResult>
+
+export interface FileKnowledgeBasesUpdateParams {
+  kb_id: string;
+  name?: string | null;
+  file?: Array<FileInput>;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="kb_id" type="string" required />
+<ParamField body="name" type="string" optional />
+<ParamField body="file" type="file[]" optional />
+
+#### Returns
+
+[`LegacyKnowledgeBaseMutationResult`](/docs/sdk/reference/knowledge-bases-models#legacyknowledgebasemutationresult).
+
+## client.file_knowledge_bases.files
+
+TypeScript: `client.fileKnowledgeBases.files`.
+
+### file_knowledge_bases.files.delete
+
+Delete files from a file knowledge base, by id or name, or all of them.
+
+<ApiEndpoint method="DELETE" path="/model-hub/knowledge-base/files/" />
+
+<CodeGroup>
+
+```python Python
+result = client.file_knowledge_bases.files.delete()
+```
+
+```typescript TypeScript
+const result = await client.fileKnowledgeBases.files.delete();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.file_knowledge_bases.files.delete(
+    *,
+    kb_id: str | None | NotGiven = NOT_GIVEN,
+    delete_all: bool | None | NotGiven = NOT_GIVEN,
+    file_ids: list[str] | None | NotGiven = NOT_GIVEN,
+    excluded_file_ids: list[str] | None | NotGiven = NOT_GIVEN,
+    file_names: list[str] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> str
+```
+
+```typescript TypeScript
+client.fileKnowledgeBases.files.delete(params: FileKnowledgeBasesFilesDeleteParams = {}, options?: RequestOptions): Promise<string>
+
+export interface FileKnowledgeBasesFilesDeleteParams {
+  kb_id?: string | null;
+  delete_all?: boolean | null;
+  file_ids?: Array<string> | null;
+  excluded_file_ids?: Array<string> | null;
+  file_names?: Array<string> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="kb_id" type="string" optional />
+<ParamField body="delete_all" type="boolean" optional />
+<ParamField body="file_ids" type="string[]" optional />
+<ParamField body="excluded_file_ids" type="string[]" optional />
+<ParamField body="file_names" type="string[]" optional />
+
+#### Returns
+
+`string`.
+
+### file_knowledge_bases.files.list
+
+List the files in a file knowledge base, with their processing status.
+
+<ApiEndpoint method="POST" path="/model-hub/knowledge-base/files/" />
+
+<CodeGroup>
+
+```python Python
+result = client.file_knowledge_bases.files.list(kb_id="your-kb-id")
+```
+
+```typescript TypeScript
+const result = await client.fileKnowledgeBases.files.list({ kb_id: "your-kb-id" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.file_knowledge_bases.files.list(
+    *,
+    kb_id: str,
+    search: str | None | NotGiven = NOT_GIVEN,
+    sort: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    page_number: int | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.LegacyKnowledgeBaseFilesResult
+```
+
+```typescript TypeScript
+client.fileKnowledgeBases.files.list(params: FileKnowledgeBasesFilesListParams, options?: RequestOptions): Promise<models.LegacyKnowledgeBaseFilesResult>
+
+export interface FileKnowledgeBasesFilesListParams {
+  kb_id: string;
+  search?: string | null;
+  sort?: Array<Record<string, unknown>> | null;
+  page_number?: number | null;
+  page_size?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="kb_id" type="string" required />
+<ParamField body="search" type="string" optional />
+<ParamField body="sort" type="object[]" optional />
+<ParamField body="page_number" type="integer" optional />
+<ParamField body="page_size" type="integer" optional />
+
+#### Returns
+
+[`LegacyKnowledgeBaseFilesResult`](/docs/sdk/reference/knowledge-bases-models#legacyknowledgebasefilesresult).

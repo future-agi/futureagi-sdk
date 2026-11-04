@@ -1,0 +1,53 @@
+---
+title: "Datasets & evals response models"
+description: "The 42 response models returned by the datasets & evals resources of the Future AGI Python and TypeScript SDKs, with every field and its type."
+---
+
+The models returned by `client.datasets`, `client.evals`, `client.experiments`, `client.optimizations`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call, and `strict_responses=True` (Python) or `strictResponses: true` (TypeScript) rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)).
+
+## Models
+
+| Model | Fields |
+|---|---|
+| <span id="column">`Column`</span> | `id: string`, `name: string`, `data_type: string`, `dataset: string`, `source: string`, `source_id: string` |
+| <span id="customevalconfig">`CustomEvalConfig`</span> | `id: string`, `eval_template: string`, `name: string`, `config: any`, `mapping: any`, `project: string`, `filters: any`, `error_localizer: boolean`, `kb_id: string`, `model: string`, `eval_group: any` |
+| <span id="datasetcolumnsmutationresult">`DatasetColumnsMutationResult`</span> | `message: string`, `data:` [`Column`](#column)[] |
+| <span id="datasetcreatestartedresult">`DatasetCreateStartedResult`</span> | `message: string`, `dataset_id: string`, `dataset_name: string`, `dataset_model_type: string` |
+| <span id="datasetevalstatsitem">`DatasetEvalStatsItem`</span> | `id: string`, `name: string`, `output_type: string`, `result:` [`DatasetEvalStatsMetric`](#datasetevalstatsmetric)[], `total_pass_rate: number`, `total_avg: any`, `total_choices_avg: any`, `is_numeric_eval: boolean`, `is_numeric_eval_percentage: boolean` |
+| <span id="datasetevalstatsmetric">`DatasetEvalStatsMetric`</span> | `id: string`, `name: string`, `total_cells: integer`, `output: any` |
+| <span id="datasetlistitem">`DatasetListItem`</span> | `id: string`, `name: string`, `number_of_datapoints: integer`, `number_of_experiments: integer`, `number_of_optimisations: integer`, `derived_datasets: integer`, `created_at: string`, `dataset_type: string` |
+| <span id="datasetnameitem">`DatasetNameItem`</span> | `dataset_id: string`, `name: string`, `model_type: string` |
+| <span id="datasetnamesresult">`DatasetNamesResult`</span> | `datasets:` [`DatasetNameItem`](#datasetnameitem)[] |
+| <span id="datasetoptimizationcolumnconfigitem">`DatasetOptimizationColumnConfigItem`</span> | `id: string`, `name: string`, `is_visible: boolean` |
+| <span id="datasetoptimizationdetail">`DatasetOptimizationDetail`</span> | `optimiser_name: string`, `optimiser_type: string`, `model: string`, `model_deprecated: boolean`, `provider_logo: string`, `configuration: any`, `status: string`, `error_message: string`, `start_time: string`, `parameters:` [`DatasetOptimizationParameterItem`](#datasetoptimizationparameteritem)[], `column_id: string`, `column_name: string`, `best_score: number`, `baseline_score: number`, `table:` [`DatasetOptimizationTrialTableRow`](#datasetoptimizationtrialtablerow)[], `column_config:` [`DatasetOptimizationColumnConfigItem`](#datasetoptimizationcolumnconfigitem)[], `optimizer_model_id: string`, `user_eval_templates:` [`DatasetOptimizationEvalTemplateItem`](#datasetoptimizationevaltemplateitem)[] |
+| <span id="datasetoptimizationevaltemplateitem">`DatasetOptimizationEvalTemplateItem`</span> | `id: string`, `eval_id: string`, `name: string`, `template_id: string` |
+| <span id="datasetoptimizationparameteritem">`DatasetOptimizationParameterItem`</span> | `key: string`, `label: string`, `description: string`, `value: any` |
+| <span id="datasetoptimizationtrialevalscore">`DatasetOptimizationTrialEvalScore`</span> | `score: number`, `percentage_change: number` |
+| <span id="datasetoptimizationtrialtablerow">`DatasetOptimizationTrialTableRow`</span> | `id: string`, `trial: string`, `prompt: string`, `is_best: boolean`, `score_percentage_change: number`, `eval_scores: any` |
+| <span id="datasetrunpromptstatsprompt">`DatasetRunPromptStatsPrompt`</span> | `id: string`, `name: string`, `input_token: number`, `output_token: number`, `total_token: number` |
+| <span id="datasetrunpromptstatsresult">`DatasetRunPromptStatsResult`</span> | `avg_tokens: number`, `avg_cost: number`, `avg_time: number`, `prompts:` [`DatasetRunPromptStatsPrompt`](#datasetrunpromptstatsprompt)[] |
+| <span id="datasettablecolumn">`DatasetTableColumn`</span> | `id: string`, `name: string`, `data_type: string`, `is_visible: boolean`, `is_frozen: boolean`, `source_type: string`, `origin_type: string`, `source_id: string`, `order_index: integer`, `status: string`, `average_score: number`, `reason_column: boolean`, `is_numeric_eval: boolean`, `is_numeric_eval_percentage: boolean`, `eval_tag: string[]`, `metadata: any`, `choices_map: any` |
+| <span id="datasettablemetadata">`DatasetTableMetadata`</span> | `dataset_name: string`, `experiment_id: string`, `experiment_name: string`, `total_rows: integer`, `total_pages: integer`, `page_size: integer`, `current_page_index: integer`, `has_more: boolean`, `next_page_index: integer`, `next_cursor: string`, `is_exact: boolean`, `snapshot_bound: boolean`, `error_messages: string[]`, `status: any` |
+| <span id="datasettableresult">`DatasetTableResult`</span> | `metadata:` [`DatasetTableMetadata`](#datasettablemetadata), `column_config:` [`DatasetTableColumn`](#datasettablecolumn)[], `table:` [`DatasetTableRow`](#datasettablerow)[], `dataset_config: any`, `synthetic_dataset: boolean`, `synthetic_dataset_percentage: number`, `synthetic_regenerate: boolean`, `is_processing_data: boolean` |
+| <span id="datasettablerow">`DatasetTableRow`</span> | `row_id: string` |
+| <span id="evalexecutionresponseresult">`EvalExecutionResponseResult`</span> | `output: any`, `result: any`, `reason: string`, `score: any`, `metadata: any`, `log_id: string`, `error_localizer: any`, `error_details: any` |
+| <span id="evalgroup">`EvalGroup`</span> | `id: string`, `name: string`, `organization: string`, `workspace: string`, `created_at: string`, `updated_at: string`, `description: string`, `created_by: any`, `is_sample: boolean` |
+| <span id="evallistresult">`EvalListResult`</span> | `evals: any[]`, `eval_recommendations: string[]` |
+| <span id="evaltask">`EvalTask`</span> | `id: string`, `project: string`, `name: string`, `filters: object`, `sampling_rate: number`, `last_run: string`, `spans_limit: integer`, `run_type: string`, `row_type: string`, `status: string`, `start_time: string`, `end_time: string`, `created_at: string`, `updated_at: string`, `evals_details: any`, `evals: string[]`, `failed_spans: any`, `progress: any` |
+| <span id="evaltaskcreateresult">`EvalTaskCreateResult`</span> | `id: string` |
+| <span id="evaltaskmessageresult">`EvalTaskMessageResult`</span> | `message: string` |
+| <span id="evaltaskupdateresult">`EvalTaskUpdateResult`</span> | `message: string`, `edit_type: string`, `task_id: string` |
+| <span id="evaltemplatechartpoint">`EvalTemplateChartPoint`</span> | `timestamp: string`, `value: number` |
+| <span id="evaltemplatecreateresponseresult">`EvalTemplateCreateResponseResult`</span> | `id: string`, `name: string`, `version: string` |
+| <span id="evaltemplatedetailresponseresult">`EvalTemplateDetailResponseResult`</span> | `id: string`, `name: string`, `description: string`, `template_type: string`, `eval_type: string`, `instructions: string`, `model: string`, `output_type: string`, `pass_threshold: number`, `choice_scores: any`, `choices: any`, `multi_choice: boolean`, `code: string`, `code_language: string`, `required_keys: string[]`, `owner: string`, `created_by_name: string`, `version_count: integer`, `current_version: string`, `tags: string[]`, `check_internet: boolean`, `error_localizer_enabled: boolean`, `template_format: string`, `aggregation_enabled: boolean`, `aggregation_function: string`, `composite_child_axis: string`, `config: any`, `created_at: string`, `updated_at: string` |
+| <span id="evaltemplatelistitem">`EvalTemplateListItem`</span> | `id: string`, `name: string`, `template_type: string`, `eval_type: string`, `output_type: string`, `owner: string`, `created_by_name: string`, `version_count: integer`, `current_version: string`, `last_updated: string`, `thirty_day_chart:` [`EvalTemplateChartPoint`](#evaltemplatechartpoint)[], `thirty_day_error_rate:` [`EvalTemplateChartPoint`](#evaltemplatechartpoint)[], `thirty_day_run_count: integer`, `tags: string[]` |
+| <span id="evaltemplatelistresponseresult">`EvalTemplateListResponseResult`</span> | `items:` [`EvalTemplateListItem`](#evaltemplatelistitem)[], `total: integer`, `page: integer`, `page_size: integer` |
+| <span id="evaltemplateupdateresponseresult">`EvalTemplateUpdateResponseResult`</span> | `id: string`, `name: string`, `updated: boolean` |
+| <span id="evalsconfigscreateresult">`EvalsConfigsCreateResult`</span> | `id: string` |
+| <span id="experimentdetailv2">`ExperimentDetailV2`</span> | `id: string`, `name: string`, `dataset_id: string`, `column_id: string`, `experiment_type: string`, `status: string`, `snapshot_dataset_id: string`, `prompt_configs: any`, `agent_configs: any`, `user_eval_metrics: any`, `created_at: string` |
+| <span id="experimentlistv2">`ExperimentListV2`</span> | `id: string`, `name: string`, `status: string`, `experiment_type: string`, `eval_templates_count: any`, `created_at: string`, `models_count: any`, `agents_count: any`, `dataset: string` |
+| <span id="localfiledatasetcreatestartedresult">`LocalFileDatasetCreateStartedResult`</span> | `message: string`, `dataset_id: string`, `dataset_name: string`, `dataset_model_type: string`, `processing_status: string`, `estimated_rows: integer`, `estimated_columns: integer` |
+| <span id="modelhubsuccessmessageresult">`ModelHubSuccessMessageResult`</span> | `success: string` |
+| <span id="optimizationscreateresult">`OptimizationsCreateResult`</span> | `id: string`, `name: string`, `optimizer_algorithm: string`, `optimizer_config: any`, `created_at: string` |
+| <span id="_evaltasklistresultresponse">`_EvalTaskListResultResponse`</span> | `metadata: any`, `table:` [`_EvalTaskListRowResponse`](#_evaltasklistrowresponse)[], `config: any[]` |
+| <span id="_evaltasklistrowresponse">`_EvalTaskListRowResponse`</span> | `id: string`, `name: string`, `project_name: string`, `status: string`, `run_type: string`, `filters_applied: any`, `created_at: string`, `evals_applied: string[]`, `sampling_rate: number`, `last_run: string` |

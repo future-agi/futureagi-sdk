@@ -1,0 +1,56 @@
+---
+title: "Models"
+description: "Reference for client.models in the Future AGI Python and TypeScript SDKs: models.list."
+---
+
+`client.models` on `fi.Client` (Python) and `client.models` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Gateway response models](/docs/sdk/reference/gateway-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+| Method | Description |
+|---|---|
+| [`models.list`](#modelslist) | List the LLM models available to prompts and evaluations, with their providers. |
+
+## client.models
+
+### models.list
+
+List the LLM models available to prompts and evaluations, with their providers.
+
+<ApiEndpoint method="GET" path="/model-hub/api/models_list/" />
+
+<CodeGroup>
+
+```python Python
+result = client.models.list()
+```
+
+```typescript TypeScript
+const result = await client.models.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.models.list(
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.ModelHubPaginatedResponse
+```
+
+```typescript TypeScript
+client.models.list(options?: RequestOptions): Promise<models.ModelHubPaginatedResponse>
+```
+
+</Expandable>
+
+#### Parameters
+
+This method takes no parameters beyond the per-call `options`.
+
+#### Returns
+
+[`ModelHubPaginatedResponse`](/docs/sdk/reference/gateway-models#modelhubpaginatedresponse).

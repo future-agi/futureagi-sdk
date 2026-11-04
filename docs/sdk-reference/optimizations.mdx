@@ -1,0 +1,199 @@
+---
+title: "Optimizations"
+description: "Reference for client.optimizations in the Future AGI Python and TypeScript SDKs: optimizations.create, optimizations.get, optimizations.list."
+---
+
+`client.optimizations` on `fi.Client` (Python) and `client.optimizations` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Datasets & evals response models](/docs/sdk/reference/datasets-evals-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+| Method | Description |
+|---|---|
+| [`optimizations.create`](#optimizationscreate) | Create a dataset optimization run. |
+| [`optimizations.get`](#optimizationsget) | Return a dataset optimization run by its identifier. |
+| [`optimizations.list`](#optimizationslist) | List dataset optimization runs. |
+
+## client.optimizations
+
+### optimizations.create
+
+Create a dataset optimization run.
+
+<ApiEndpoint method="POST" path="/model-hub/dataset-optimization/" />
+
+**MCP tool**: `create_optimization_run`
+
+<CodeGroup>
+
+```python Python
+result = client.optimizations.create(
+    name="your-name",
+    column_id="your-column-id",
+    optimizer_algorithm="random_search",
+)
+```
+
+```typescript TypeScript
+const result = await client.optimizations.create({
+  name: "your-name",
+  column_id: "your-column-id",
+  optimizer_algorithm: "random_search",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.optimizations.create(
+    *,
+    name: str,
+    column_id: str,
+    optimizer_algorithm: Literal['random_search', 'bayesian', 'metaprompt', 'protegi', 'promptwizard', 'gepa'],
+    optimizer_model_id: str | None | NotGiven = NOT_GIVEN,
+    optimizer_config: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    user_eval_template_ids: list[str] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.OptimizationsCreateResult
+```
+
+```typescript TypeScript
+client.optimizations.create(params: OptimizationsCreateParams, options?: RequestOptions): Promise<models.OptimizationsCreateResult>
+
+export interface OptimizationsCreateParams {
+  name: string;
+  column_id: string;
+  optimizer_algorithm: "random_search" | "bayesian" | "metaprompt" | "protegi" | "promptwizard" | "gepa";
+  optimizer_model_id?: string | null;
+  optimizer_config?: Record<string, unknown> | null;
+  user_eval_template_ids?: Array<string> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="name" type="string" required />
+<ParamField body="column_id" type="string" required />
+<ParamField body="optimizer_algorithm" type="string" required enum={["random_search", "bayesian", "metaprompt", "protegi", "promptwizard", "gepa"]} />
+<ParamField body="optimizer_model_id" type="string" optional />
+<ParamField body="optimizer_config" type="object" optional />
+<ParamField body="user_eval_template_ids" type="string[]" optional />
+
+#### Returns
+
+[`OptimizationsCreateResult`](/docs/sdk/reference/datasets-evals-models#optimizationscreateresult).
+
+### optimizations.get
+
+Return a dataset optimization run by its identifier.
+
+<ApiEndpoint method="GET" path="/model-hub/dataset-optimization/{id}/" />
+
+**MCP tool**: `get_optimization_run`
+
+<CodeGroup>
+
+```python Python
+result = client.optimizations.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.optimizations.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.optimizations.get(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DatasetOptimizationDetail
+```
+
+```typescript TypeScript
+client.optimizations.get(id: string, options?: RequestOptions): Promise<models.DatasetOptimizationDetail>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this optimize dataset.
+</ParamField>
+
+#### Returns
+
+[`DatasetOptimizationDetail`](/docs/sdk/reference/datasets-evals-models#datasetoptimizationdetail).
+
+### optimizations.list
+
+List dataset optimization runs.
+
+<ApiEndpoint method="GET" path="/model-hub/dataset-optimization/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_optimization_runs`
+
+<CodeGroup>
+
+```python Python
+for item in client.optimizations.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.optimizations.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.optimizations.list(
+    *,
+    dataset_id: str | None | NotGiven = NOT_GIVEN,
+    column_id: str | None | NotGiven = NOT_GIVEN,
+    develop_id: str | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[Any]
+```
+
+```typescript TypeScript
+client.optimizations.list(params: OptimizationsListParams = {}, options?: RequestOptions): Pager<unknown>
+
+export interface OptimizationsListParams {
+  dataset_id?: string | null;
+  column_id?: string | null;
+  develop_id?: string | null;
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="dataset_id" type="string" optional />
+<ParamField query="column_id" type="string" optional />
+<ParamField query="develop_id" type="string" optional />
+<ParamField query="limit" type="integer" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.

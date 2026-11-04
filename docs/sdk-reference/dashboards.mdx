@@ -1,0 +1,845 @@
+---
+title: "Dashboards"
+description: "Reference for client.dashboards in the Future AGI Python and TypeScript SDKs: dashboards.create, dashboards.delete, dashboards.filter_values, dashboards.get, dashboards.list, dashboards.query and 7 more."
+---
+
+`client.dashboards` on `fi.Client` (Python) and `client.dashboards` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.dashboards.metrics`, `client.dashboards.widgets`. The models these methods return are on [Observability response models](/docs/sdk/reference/observability-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+| Method | Description |
+|---|---|
+| [`dashboards.create`](#dashboardscreate) | Create an empty dashboard in the current workspace; add widgets with create_dashboard_widget. |
+| [`dashboards.delete`](#dashboardsdelete) | Delete a dashboard and the widgets on it. |
+| [`dashboards.filter_values`](#dashboardsfilter_values) | List the distinct values of a metric or attribute for use in dashboard filters. |
+| [`dashboards.get`](#dashboardsget) | Return a dashboard and its widgets by identifier. |
+| [`dashboards.list`](#dashboardslist) | List dashboards in the current workspace with their widget counts. |
+| [`dashboards.query`](#dashboardsquery) | Run an ad-hoc dashboard query (time_range and metrics, with optional filters and breakdowns) and return chart data without saving a widget. |
+| [`dashboards.update`](#dashboardsupdate) | Update the name and/or description of an existing dashboard (a partial update). |
+| [`dashboards.metrics.list`](#dashboardsmetricslist) | List the metrics available to dashboard queries across traces, datasets, and simulations. |
+| [`dashboards.widgets.create`](#dashboardswidgetscreate) | Add a widget to a dashboard. |
+| [`dashboards.widgets.get`](#dashboardswidgetsget) | Return a dashboard widget, including its query_config and chart_config. |
+| [`dashboards.widgets.list`](#dashboardswidgetslist) | List the widgets on a dashboard. |
+| [`dashboards.widgets.query`](#dashboardswidgetsquery) | Execute a saved widget's query and return its chart data. |
+| [`dashboards.widgets.update`](#dashboardswidgetsupdate) | Update selected fields on a dashboard widget, such as its query_config, chart_config, or layout. |
+
+## client.dashboards
+
+### dashboards.create
+
+Create an empty dashboard in the current workspace; add widgets with create_dashboard_widget.
+
+<ApiEndpoint method="POST" path="/tracer/dashboard/" />
+
+**MCP tool**: `create_dashboard`
+
+<CodeGroup>
+
+```python Python
+result = client.dashboards.create(name="your-name")
+```
+
+```typescript TypeScript
+const result = await client.dashboards.create({ name: "your-name" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.dashboards.create(
+    *,
+    name: str,
+    description: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DashboardDetail
+```
+
+```typescript TypeScript
+client.dashboards.create(params: DashboardsCreateParams, options?: RequestOptions): Promise<models.DashboardDetail>
+
+export interface DashboardsCreateParams {
+  name: string;
+  description?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="name" type="string" required />
+<ParamField body="description" type="string" optional />
+
+#### Returns
+
+[`DashboardDetail`](/docs/sdk/reference/observability-models#dashboarddetail).
+
+### dashboards.delete
+
+Delete a dashboard and the widgets on it. This is the only way to remove a dashboard created earlier.
+
+<ApiEndpoint method="DELETE" path="/tracer/dashboard/{id}/" />
+
+**MCP tool**: `delete_dashboard`
+
+<CodeGroup>
+
+```python Python
+result = client.dashboards.delete("your-id")
+```
+
+```typescript TypeScript
+const result = await client.dashboards.delete("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.dashboards.delete(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.dashboards.delete(id: string, options?: RequestOptions): Promise<unknown>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### dashboards.filter_values
+
+List the distinct values of a metric or attribute for use in dashboard filters.
+
+<ApiEndpoint method="GET" path="/tracer/dashboard/filter_values/" />
+
+**MCP tool**: `get_dashboard_filter_values`
+
+<CodeGroup>
+
+```python Python
+result = client.dashboards.filter_values()
+```
+
+```typescript TypeScript
+const result = await client.dashboards.filterValues();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.dashboards.filter_values(
+    *,
+    property_id: str | None | NotGiven = NOT_GIVEN,
+    metric_name: str | None | NotGiven = NOT_GIVEN,
+    metric_type: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None | NotGiven = NOT_GIVEN,
+    source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'dataset_column', 'simulation', 'both', 'all'] | None | NotGiven = NOT_GIVEN,
+    project_ids: str | None | NotGiven = NOT_GIVEN,
+    dataset_id: str | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    cursor: str | None | NotGiven = NOT_GIVEN,
+    attribute_type: Literal['string', 'number', 'boolean', 'array', 'map', 'json'] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DashboardFilterValuesResult
+```
+
+```typescript TypeScript
+client.dashboards.filterValues(params: DashboardsFilterValuesParams = {}, options?: RequestOptions): Promise<models.DashboardFilterValuesResult>
+
+export interface DashboardsFilterValuesParams {
+  /** Stable namespaced property identity returned by the metrics catalog. Legacy metric_name/metric_type remain accepted during migration. */
+  property_id?: string | null;
+  metric_name?: string | null;
+  metric_type?: "system_metric" | "eval_metric" | "annotation_metric" | "custom_attribute" | "custom_column" | null;
+  source?: "traces" | "spans" | "sessions" | "users" | "voice_calls" | "prompts" | "datasets" | "dataset_column" | "simulation" | "both" | "all" | null;
+  project_ids?: string | null;
+  dataset_id?: string | null;
+  search?: string | null;
+  page_size?: number | null;
+  cursor?: string | null;
+  attribute_type?: "string" | "number" | "boolean" | "array" | "map" | "json" | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="property_id" type="string" optional>
+  Stable namespaced property identity returned by the metrics catalog. Legacy metric_name/metric_type remain accepted during migration.
+</ParamField>
+<ParamField query="metric_name" type="string" optional />
+<ParamField query="metric_type" type="string" optional enum={["system_metric", "eval_metric", "annotation_metric", "custom_attribute", "custom_column"]} />
+<ParamField query="source" type="string" optional enum={["traces", "spans", "sessions", "users", "voice_calls", "prompts", "datasets", "dataset_column", "simulation", "both", "all"]} />
+<ParamField query="project_ids" type="string" optional />
+<ParamField query="dataset_id" type="string" optional />
+<ParamField query="search" type="string" optional />
+<ParamField query="page_size" type="integer" optional />
+<ParamField query="cursor" type="string" optional />
+<ParamField query="attribute_type" type="string" optional enum={["string", "number", "boolean", "array", "map", "json"]} />
+
+#### Returns
+
+[`DashboardFilterValuesResult`](/docs/sdk/reference/observability-models#dashboardfiltervaluesresult).
+
+### dashboards.get
+
+Return a dashboard and its widgets by identifier.
+
+<ApiEndpoint method="GET" path="/tracer/dashboard/{id}/" />
+
+**MCP tool**: `get_dashboard`
+
+<CodeGroup>
+
+```python Python
+result = client.dashboards.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.dashboards.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.dashboards.get(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DashboardDetail
+```
+
+```typescript TypeScript
+client.dashboards.get(id: string, options?: RequestOptions): Promise<models.DashboardDetail>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`DashboardDetail`](/docs/sdk/reference/observability-models#dashboarddetail).
+
+### dashboards.list
+
+List dashboards in the current workspace with their widget counts.
+
+<ApiEndpoint method="GET" path="/tracer/dashboard/" />
+
+**MCP tool**: `list_dashboards`
+
+<CodeGroup>
+
+```python Python
+result = client.dashboards.list()
+```
+
+```typescript TypeScript
+const result = await client.dashboards.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.dashboards.list(
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> List[models.Dashboard]
+```
+
+```typescript TypeScript
+client.dashboards.list(options?: RequestOptions): Promise<Array<models.Dashboard>>
+```
+
+</Expandable>
+
+#### Parameters
+
+This method takes no parameters beyond the per-call `options`.
+
+#### Returns
+
+A list of [`Dashboard`](/docs/sdk/reference/observability-models#dashboard).
+
+### dashboards.query
+
+Run an ad-hoc dashboard query (time_range and metrics, with optional filters and breakdowns) and return chart data without saving a widget.
+
+<ApiEndpoint method="POST" path="/tracer/dashboard/query/" />
+
+**MCP tool**: `query_dashboard_metrics`
+
+<CodeGroup>
+
+```python Python
+result = client.dashboards.query(time_range="your-time-range", metrics=[])
+```
+
+```typescript TypeScript
+const result = await client.dashboards.query({
+  time_range: "your-time-range",
+  metrics: [],
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.dashboards.query(
+    *,
+    time_range: dict[str, Any],
+    metrics: list[dict[str, Any]],
+    workflow: Literal['observability', 'dataset', 'simulation'] | None | NotGiven = NOT_GIVEN,
+    project_ids: list[str] | None | NotGiven = NOT_GIVEN,
+    granularity: Literal['minute', 'hour', 'day', 'week', 'month'] | None | NotGiven = NOT_GIVEN,
+    filters: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    breakdowns: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    allow_sampled: bool | None | NotGiven = NOT_GIVEN,
+    refresh: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DashboardQueryResult
+```
+
+```typescript TypeScript
+client.dashboards.query(params: DashboardsQueryParams, options?: RequestOptions): Promise<models.DashboardQueryResult>
+
+export interface DashboardsQueryParams {
+  time_range: Record<string, unknown>;
+  metrics: Array<Record<string, unknown>>;
+  workflow?: "observability" | "dataset" | "simulation" | null;
+  project_ids?: Array<string> | null;
+  granularity?: "minute" | "hour" | "day" | "week" | "month" | null;
+  filters?: Array<Record<string, unknown>> | null;
+  breakdowns?: Array<Record<string, unknown>> | null;
+  allow_sampled?: boolean | null;
+  refresh?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="refresh" type="boolean" optional />
+<ParamField body="time_range" type="object" required />
+<ParamField body="metrics" type="object[]" required />
+<ParamField body="workflow" type="string" optional enum={["observability", "dataset", "simulation"]} />
+<ParamField body="project_ids" type="string[]" optional />
+<ParamField body="granularity" type="string" optional enum={["minute", "hour", "day", "week", "month"]} />
+<ParamField body="filters" type="object[]" optional />
+<ParamField body="breakdowns" type="object[]" optional />
+<ParamField body="allow_sampled" type="boolean" optional />
+
+#### Returns
+
+[`DashboardQueryResult`](/docs/sdk/reference/observability-models#dashboardqueryresult).
+
+### dashboards.update
+
+Update the name and/or description of an existing dashboard (a partial update).
+
+<ApiEndpoint method="PATCH" path="/tracer/dashboard/{id}/" />
+
+**MCP tool**: `update_dashboard`
+
+<CodeGroup>
+
+```python Python
+result = client.dashboards.update("your-id")
+```
+
+```typescript TypeScript
+const result = await client.dashboards.update("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.dashboards.update(
+    id: str,
+    *,
+    name: str | None | NotGiven = NOT_GIVEN,
+    description: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DashboardDetail
+```
+
+```typescript TypeScript
+client.dashboards.update(id: string, params: DashboardsUpdateParams = {}, options?: RequestOptions): Promise<models.DashboardDetail>
+
+export interface DashboardsUpdateParams {
+  name?: string | null;
+  description?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="name" type="string" optional />
+<ParamField body="description" type="string" optional />
+
+#### Returns
+
+[`DashboardDetail`](/docs/sdk/reference/observability-models#dashboarddetail).
+
+## client.dashboards.metrics
+
+TypeScript: `client.dashboards.metrics`.
+
+### dashboards.metrics.list
+
+List the metrics available to dashboard queries across traces, datasets, and simulations.
+
+<ApiEndpoint method="GET" path="/tracer/dashboard/metrics/" />
+
+**MCP tool**: `list_dashboard_metrics`
+
+<CodeGroup>
+
+```python Python
+result = client.dashboards.metrics.list()
+```
+
+```typescript TypeScript
+const result = await client.dashboards.metrics.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.dashboards.metrics.list(
+    *,
+    workflow: Literal['observability', 'dataset', 'simulation'] | None | NotGiven = NOT_GIVEN,
+    project_ids: str | None | NotGiven = NOT_GIVEN,
+    agent_definition_id: str | None | NotGiven = NOT_GIVEN,
+    per_eval_config: bool | None | NotGiven = NOT_GIVEN,
+    exclude_custom_attributes: bool | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    category: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None | NotGiven = NOT_GIVEN,
+    role: Literal['metric', 'dimension'] | None | NotGiven = NOT_GIVEN,
+    source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'simulation', 'both', 'all'] | None | NotGiven = NOT_GIVEN,
+    page: int | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    cursor_mode: bool | None | NotGiven = NOT_GIVEN,
+    cursor: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DashboardMetricsCatalogResult
+```
+
+```typescript TypeScript
+client.dashboards.metrics.list(params: DashboardsMetricsListParams = {}, options?: RequestOptions): Promise<models.DashboardMetricsCatalogResult>
+
+export interface DashboardsMetricsListParams {
+  workflow?: "observability" | "dataset" | "simulation" | null;
+  project_ids?: string | null;
+  agent_definition_id?: string | null;
+  per_eval_config?: boolean | null;
+  exclude_custom_attributes?: boolean | null;
+  search?: string | null;
+  category?: "system_metric" | "eval_metric" | "annotation_metric" | "custom_attribute" | "custom_column" | null;
+  role?: "metric" | "dimension" | null;
+  source?: "traces" | "spans" | "sessions" | "users" | "voice_calls" | "prompts" | "datasets" | "simulation" | "both" | "all" | null;
+  page?: number | null;
+  page_size?: number | null;
+  cursor_mode?: boolean | null;
+  cursor?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="workflow" type="string" optional enum={["observability", "dataset", "simulation"]} />
+<ParamField query="project_ids" type="string" optional />
+<ParamField query="agent_definition_id" type="string" optional />
+<ParamField query="per_eval_config" type="boolean" optional />
+<ParamField query="exclude_custom_attributes" type="boolean" optional />
+<ParamField query="search" type="string" optional />
+<ParamField query="category" type="string" optional enum={["system_metric", "eval_metric", "annotation_metric", "custom_attribute", "custom_column"]} />
+<ParamField query="role" type="string" optional enum={["metric", "dimension"]} />
+<ParamField query="source" type="string" optional enum={["traces", "spans", "sessions", "users", "voice_calls", "prompts", "datasets", "simulation", "both", "all"]} />
+<ParamField query="page" type="integer" optional />
+<ParamField query="page_size" type="integer" optional />
+<ParamField query="cursor_mode" type="boolean" optional />
+<ParamField query="cursor" type="string" optional />
+
+#### Returns
+
+[`DashboardMetricsCatalogResult`](/docs/sdk/reference/observability-models#dashboardmetricscatalogresult).
+
+## client.dashboards.widgets
+
+TypeScript: `client.dashboards.widgets`.
+
+### dashboards.widgets.create
+
+Add a widget to a dashboard. query_config uses the query_dashboard_metrics request shape (time_range plus metrics); discover metric names with list_dashboard_metrics.
+
+<ApiEndpoint method="POST" path="/tracer/dashboard/{dashboard_pk}/widgets/" />
+
+**MCP tool**: `create_dashboard_widget`
+
+<CodeGroup>
+
+```python Python
+result = client.dashboards.widgets.create("your-dashboard-pk")
+```
+
+```typescript TypeScript
+const result = await client.dashboards.widgets.create("your-dashboard-pk");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.dashboards.widgets.create(
+    dashboard_pk: str,
+    *,
+    name: str | None | NotGiven = NOT_GIVEN,
+    description: str | None | NotGiven = NOT_GIVEN,
+    position: int | None | NotGiven = NOT_GIVEN,
+    width: int | None | NotGiven = NOT_GIVEN,
+    height: int | None | NotGiven = NOT_GIVEN,
+    query_config: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    chart_config: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DashboardWidget
+```
+
+```typescript TypeScript
+client.dashboards.widgets.create(dashboardPk: string, params: DashboardsWidgetsCreateParams = {}, options?: RequestOptions): Promise<models.DashboardWidget>
+
+export interface DashboardsWidgetsCreateParams {
+  name?: string | null;
+  description?: string | null;
+  position?: number | null;
+  width?: number | null;
+  height?: number | null;
+  query_config?: Record<string, unknown> | null;
+  chart_config?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dashboard_pk" type="string" required>
+  Positional argument `dashboard_pk`.
+</ParamField>
+<ParamField body="name" type="string" optional />
+<ParamField body="description" type="string" optional />
+<ParamField body="position" type="integer" optional />
+<ParamField body="width" type="integer" optional />
+<ParamField body="height" type="integer" optional />
+<ParamField body="query_config" type="object" optional />
+<ParamField body="chart_config" type="object" optional />
+
+#### Returns
+
+[`DashboardWidget`](/docs/sdk/reference/observability-models#dashboardwidget).
+
+### dashboards.widgets.get
+
+Return a dashboard widget, including its query_config and chart_config.
+
+<ApiEndpoint method="GET" path="/tracer/dashboard/{dashboard_pk}/widgets/{id}/" />
+
+**MCP tool**: `get_dashboard_widget`
+
+<CodeGroup>
+
+```python Python
+result = client.dashboards.widgets.get("your-dashboard-pk", "your-id")
+```
+
+```typescript TypeScript
+const result = await client.dashboards.widgets.get("your-dashboard-pk", "your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.dashboards.widgets.get(
+    dashboard_pk: str,
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DashboardWidget
+```
+
+```typescript TypeScript
+client.dashboards.widgets.get(dashboardPk: string, id: string, options?: RequestOptions): Promise<models.DashboardWidget>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dashboard_pk" type="string" required>
+  Positional argument `dashboard_pk`.
+</ParamField>
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`DashboardWidget`](/docs/sdk/reference/observability-models#dashboardwidget).
+
+### dashboards.widgets.list
+
+List the widgets on a dashboard.
+
+<ApiEndpoint method="GET" path="/tracer/dashboard/{dashboard_pk}/widgets/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_dashboard_widgets`
+
+<CodeGroup>
+
+```python Python
+for item in client.dashboards.widgets.list("your-dashboard-pk"):
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.dashboards.widgets.list("your-dashboard-pk")) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.dashboards.widgets.list(
+    dashboard_pk: str,
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.DashboardWidget]
+```
+
+```typescript TypeScript
+client.dashboards.widgets.list(dashboardPk: string, params: DashboardsWidgetsListParams = {}, options?: RequestOptions): Pager<models.DashboardWidget>
+
+export interface DashboardsWidgetsListParams {
+  /** Number of results to return per page. */
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dashboard_pk" type="string" required>
+  Positional argument `dashboard_pk`.
+</ParamField>
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`DashboardWidget`](/docs/sdk/reference/observability-models#dashboardwidget) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### dashboards.widgets.query
+
+Execute a saved widget's query and return its chart data.
+
+<ApiEndpoint method="POST" path="/tracer/dashboard/{dashboard_pk}/widgets/{id}/query/" />
+
+**MCP tool**: `query_dashboard_widget`
+
+<CodeGroup>
+
+```python Python
+result = client.dashboards.widgets.query("your-dashboard-pk", "your-id")
+```
+
+```typescript TypeScript
+const result = await client.dashboards.widgets.query("your-dashboard-pk", "your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.dashboards.widgets.query(
+    dashboard_pk: str,
+    id: str,
+    *,
+    allow_sampled: bool | None | NotGiven = NOT_GIVEN,
+    refresh: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DashboardQueryResult
+```
+
+```typescript TypeScript
+client.dashboards.widgets.query(dashboardPk: string, id: string, params: DashboardsWidgetsQueryParams = {}, options?: RequestOptions): Promise<models.DashboardQueryResult>
+
+export interface DashboardsWidgetsQueryParams {
+  allow_sampled?: boolean | null;
+  refresh?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dashboard_pk" type="string" required>
+  Positional argument `dashboard_pk`.
+</ParamField>
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField query="refresh" type="boolean" optional />
+<ParamField body="allow_sampled" type="boolean" optional />
+
+#### Returns
+
+[`DashboardQueryResult`](/docs/sdk/reference/observability-models#dashboardqueryresult).
+
+### dashboards.widgets.update
+
+Update selected fields on a dashboard widget, such as its query_config, chart_config, or layout.
+
+<ApiEndpoint method="PATCH" path="/tracer/dashboard/{dashboard_pk}/widgets/{id}/" />
+
+**MCP tool**: `update_dashboard_widget`
+
+<CodeGroup>
+
+```python Python
+result = client.dashboards.widgets.update("your-dashboard-pk", "your-id")
+```
+
+```typescript TypeScript
+const result = await client.dashboards.widgets.update("your-dashboard-pk", "your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.dashboards.widgets.update(
+    dashboard_pk: str,
+    id: str,
+    *,
+    name: str | None | NotGiven = NOT_GIVEN,
+    description: str | None | NotGiven = NOT_GIVEN,
+    position: int | None | NotGiven = NOT_GIVEN,
+    width: int | None | NotGiven = NOT_GIVEN,
+    height: int | None | NotGiven = NOT_GIVEN,
+    query_config: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    chart_config: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DashboardWidget
+```
+
+```typescript TypeScript
+client.dashboards.widgets.update(dashboardPk: string, id: string, params: DashboardsWidgetsUpdateParams = {}, options?: RequestOptions): Promise<models.DashboardWidget>
+
+export interface DashboardsWidgetsUpdateParams {
+  name?: string | null;
+  description?: string | null;
+  position?: number | null;
+  width?: number | null;
+  height?: number | null;
+  query_config?: Record<string, unknown> | null;
+  chart_config?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dashboard_pk" type="string" required>
+  Positional argument `dashboard_pk`.
+</ParamField>
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="name" type="string" optional />
+<ParamField body="description" type="string" optional />
+<ParamField body="position" type="integer" optional />
+<ParamField body="width" type="integer" optional />
+<ParamField body="height" type="integer" optional />
+<ParamField body="query_config" type="object" optional />
+<ParamField body="chart_config" type="object" optional />
+
+#### Returns
+
+[`DashboardWidget`](/docs/sdk/reference/observability-models#dashboardwidget).

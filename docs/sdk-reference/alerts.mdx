@@ -1,0 +1,153 @@
+---
+title: "Alerts"
+description: "Reference for client.alerts in the Future AGI Python and TypeScript SDKs: alerts.logs.list, alerts.rules.list."
+---
+
+`client.alerts` on `fi.Client` (Python) and `client.alerts` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.alerts.logs`, `client.alerts.rules`. The models these methods return are on [Observability response models](/docs/sdk/reference/observability-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+| Method | Description |
+|---|---|
+| [`alerts.logs.list`](#alertslogslist) | List alerts that have fired in numbered pages. |
+| [`alerts.rules.list`](#alertsruleslist) | List the configured alert monitors - what each one watches, its threshold and its project. |
+
+## client.alerts
+
+## client.alerts.logs
+
+TypeScript: `client.alerts.logs`.
+
+### alerts.logs.list
+
+List alerts that have fired in numbered pages. Use this to find out what the platform has already flagged before digging into traces or error clusters.
+
+<ApiEndpoint method="GET" path="/tracer/user-alert-logs/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_fired_alerts`
+
+<CodeGroup>
+
+```python Python
+for item in client.alerts.logs.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.alerts.logs.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.alerts.logs.list(
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.UserAlertMonitorLog]
+```
+
+```typescript TypeScript
+client.alerts.logs.list(params: AlertsLogsListParams = {}, options?: RequestOptions): Pager<models.UserAlertMonitorLog>
+
+export interface AlertsLogsListParams {
+  /** Number of results to return per page. */
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`UserAlertMonitorLog`](/docs/sdk/reference/observability-models#useralertmonitorlog) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+## client.alerts.rules
+
+TypeScript: `client.alerts.rules`.
+
+### alerts.rules.list
+
+List the configured alert monitors - what each one watches, its threshold and its project. Pair with list_fired_alerts to explain why an alert fired, or to see that no monitor covers a condition the user expected to be caught.
+
+<ApiEndpoint method="GET" path="/tracer/user-alerts/list_monitors/" />
+
+**MCP tool**: `list_alert_rules`
+
+<CodeGroup>
+
+```python Python
+result = client.alerts.rules.list()
+```
+
+```typescript TypeScript
+const result = await client.alerts.rules.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.alerts.rules.list(
+    *,
+    page_number: int | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    search_text: str | None | NotGiven = NOT_GIVEN,
+    project_id: list[str] | None | NotGiven = NOT_GIVEN,
+    status: list[Literal['triggered', 'healthy']] | None | NotGiven = NOT_GIVEN,
+    metric_type: list[str] | None | NotGiven = NOT_GIVEN,
+    sort_by: str | None | NotGiven = NOT_GIVEN,
+    sort_direction: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.UserAlertMonitorListResult
+```
+
+```typescript TypeScript
+client.alerts.rules.list(params: AlertsRulesListParams = {}, options?: RequestOptions): Promise<models.UserAlertMonitorListResult>
+
+export interface AlertsRulesListParams {
+  /** Zero-based page number. */
+  page_number?: number | null;
+  page_size?: number | null;
+  search_text?: string | null;
+  project_id?: Array<string> | null;
+  status?: Array<"triggered" | "healthy"> | null;
+  metric_type?: Array<string> | null;
+  sort_by?: string | null;
+  sort_direction?: "asc" | "desc" | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="page_number" type="integer" optional>
+  Zero-based page number.
+</ParamField>
+<ParamField query="page_size" type="integer" optional />
+<ParamField query="search_text" type="string" optional />
+<ParamField query="project_id" type="string[]" optional />
+<ParamField query="status" type="string[]" optional />
+<ParamField query="metric_type" type="string[]" optional />
+<ParamField query="sort_by" type="string" optional />
+<ParamField query="sort_direction" type="string" optional enum={["asc", "desc"]} />
+
+#### Returns
+
+[`UserAlertMonitorListResult`](/docs/sdk/reference/observability-models#useralertmonitorlistresult).

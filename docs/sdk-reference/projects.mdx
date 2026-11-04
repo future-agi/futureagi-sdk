@@ -1,0 +1,132 @@
+---
+title: "Projects"
+description: "Reference for client.projects in the Future AGI Python and TypeScript SDKs: projects.get, projects.list."
+---
+
+`client.projects` on `fi.Client` (Python) and `client.projects` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Observability response models](/docs/sdk/reference/observability-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+| Method | Description |
+|---|---|
+| [`projects.get`](#projectsget) | Return a tracing project by its identifier. |
+| [`projects.list`](#projectslist) | List tracing projects available in the current workspace. |
+
+## client.projects
+
+### projects.get
+
+Return a tracing project by its identifier.
+
+<ApiEndpoint method="GET" path="/tracer/project/{id}/" />
+
+**MCP tool**: `get_project`
+
+<CodeGroup>
+
+```python Python
+result = client.projects.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.projects.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.projects.get(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.ProjectDetailResult
+```
+
+```typescript TypeScript
+client.projects.get(id: string, options?: RequestOptions): Promise<models.ProjectDetailResult>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`ProjectDetailResult`](/docs/sdk/reference/observability-models#projectdetailresult).
+
+### projects.list
+
+List tracing projects available in the current workspace.
+
+<ApiEndpoint method="GET" path="/tracer/project/" />
+
+**MCP tool**: `list_projects`
+
+<CodeGroup>
+
+```python Python
+result = client.projects.list()
+```
+
+```typescript TypeScript
+const result = await client.projects.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.projects.list(
+    *,
+    name: str | None | NotGiven = NOT_GIVEN,
+    project_type: str | None | NotGiven = NOT_GIVEN,
+    tags: str | None | NotGiven = NOT_GIVEN,
+    filters: str | None | NotGiven = NOT_GIVEN,
+    sort_by: str | None | NotGiven = NOT_GIVEN,
+    sort_direction: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN,
+    page_number: int | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.projects.list(params: ProjectsListParams = {}, options?: RequestOptions): Promise<unknown>
+
+export interface ProjectsListParams {
+  name?: string | null;
+  project_type?: string | null;
+  tags?: string | null;
+  filters?: string | null;
+  sort_by?: string | null;
+  sort_direction?: "asc" | "desc" | null;
+  page_number?: number | null;
+  page_size?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="name" type="string" optional />
+<ParamField query="project_type" type="string" optional />
+<ParamField query="tags" type="string" optional />
+<ParamField query="filters" type="string" optional />
+<ParamField query="sort_by" type="string" optional />
+<ParamField query="sort_direction" type="string" optional enum={["asc", "desc"]} />
+<ParamField query="page_number" type="integer" optional />
+<ParamField query="page_size" type="integer" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.

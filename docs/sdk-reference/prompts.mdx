@@ -1,0 +1,1388 @@
+---
+title: "Prompts"
+description: "Reference for client.prompts in the Future AGI Python and TypeScript SDKs: prompts.add_draft, prompts.commit, prompts.create, prompts.create_draft, prompts.delete, prompts.generate and 16 more."
+---
+
+`client.prompts` on `fi.Client` (Python) and `client.prompts` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.prompts.labels`, `client.prompts.versions`. The models these methods return are on [Prompts response models](/docs/sdk/reference/prompts-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+| Method | Description |
+|---|---|
+| [`prompts.add_draft`](#promptsadd_draft) | Add new draft versions to a prompt template. |
+| [`prompts.commit`](#promptscommit) | Commit the current draft of a prompt template as a named version, optionally making it the default. |
+| [`prompts.create`](#promptscreate) | Create a prompt template in the current workspace. |
+| [`prompts.create_draft`](#promptscreate_draft) | Create a prompt template together with its first draft version (messages, model configuration, variables). |
+| [`prompts.delete`](#promptsdelete) | Delete a prompt template and all its versions. |
+| [`prompts.generate`](#promptsgenerate) | Generate a prompt from a plain-language statement of what it should do. |
+| [`prompts.get`](#promptsget) | Open a prompt template by its identifier, creating its workbench draft if needed. |
+| [`prompts.get_by_name`](#promptsget_by_name) | Fetch a prompt template by name; the default version unless `version` is given. |
+| [`prompts.history`](#promptshistory) | List past prompt executions, optionally for one template. |
+| [`prompts.improve`](#promptsimprove) | Rewrite an existing prompt according to the given improvement requirements. |
+| [`prompts.list`](#promptslist) | List prompt templates available in the current workspace. |
+| [`prompts.run`](#promptsrun) | Run a configured prompt version by supplying version and is_run="prompt". |
+| [`prompts.run_status`](#promptsrun_status) | Read workbench prompt execution status and outputs. |
+| [`prompts.update`](#promptsupdate) | Update selected fields on an existing prompt template. |
+| [`prompts.labels.assign`](#promptslabelsassign) | Assign a label to one version of a prompt template. |
+| [`prompts.labels.create`](#promptslabelscreate) | Create a prompt label. |
+| [`prompts.labels.for_template`](#promptslabelsfor_template) | List the labels assigned to a prompt template's versions. |
+| [`prompts.labels.get_template`](#promptslabelsget_template) | Fetch the prompt template version a label points to, by template name and label (or version). |
+| [`prompts.labels.list`](#promptslabelslist) | List prompt labels (e.g. |
+| [`prompts.labels.remove`](#promptslabelsremove) | Remove a label from a prompt template version. |
+| [`prompts.labels.set_default`](#promptslabelsset_default) | Make a version the default for a prompt template, by template name. |
+| [`prompts.versions.list`](#promptsversionslist) | List versions of a prompt template. |
+
+## client.prompts
+
+### prompts.add_draft
+
+Add new draft versions to a prompt template. Each entry carries prompt_config, variable_names, evaluation_configs, metadata and placeholders.
+
+<ApiEndpoint method="POST" path="/model-hub/prompt-templates/{id}/add-new-draft/" />
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.add_draft("your-id", new_prompts=[])
+```
+
+```typescript TypeScript
+const result = await client.prompts.addDraft("your-id", { new_prompts: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.add_draft(
+    id: str,
+    *,
+    new_prompts: list[dict[str, Any]],
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.prompts.addDraft(id: string, params: PromptsAddDraftParams, options?: RequestOptions): Promise<unknown>
+
+export interface PromptsAddDraftParams {
+  new_prompts: Array<Record<string, unknown>>;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this prompt template.
+</ParamField>
+<ParamField body="new_prompts" type="object[]" required />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### prompts.commit
+
+Commit the current draft of a prompt template as a named version, optionally making it the default.
+
+<ApiEndpoint method="POST" path="/model-hub/prompt-templates/{id}/commit/" />
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.commit("your-id", version_name="your-version-name")
+```
+
+```typescript TypeScript
+const result = await client.prompts.commit("your-id", { version_name: "your-version-name" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.commit(
+    id: str,
+    *,
+    version_name: str,
+    message: str | None | NotGiven = NOT_GIVEN,
+    set_default: bool | None | NotGiven = NOT_GIVEN,
+    is_draft: bool | None | NotGiven = NOT_GIVEN,
+    metadata: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.prompts.commit(id: string, params: PromptsCommitParams, options?: RequestOptions): Promise<unknown>
+
+export interface PromptsCommitParams {
+  version_name: string;
+  message?: string | null;
+  set_default?: boolean | null;
+  is_draft?: boolean | null;
+  metadata?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this prompt template.
+</ParamField>
+<ParamField body="version_name" type="string" required />
+<ParamField body="message" type="string" optional />
+<ParamField body="set_default" type="boolean" optional />
+<ParamField body="is_draft" type="boolean" optional />
+<ParamField body="metadata" type="object" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### prompts.create
+
+Create a prompt template in the current workspace.
+
+<ApiEndpoint method="POST" path="/model-hub/prompt-templates/" />
+
+**MCP tool**: `create_prompt_template`
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.create(name="your-name")
+```
+
+```typescript TypeScript
+const result = await client.prompts.create({ name: "your-name" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.create(
+    *,
+    name: str,
+    description: str | None | NotGiven = NOT_GIVEN,
+    variable_names: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    prompt_folder: str | None | NotGiven = NOT_GIVEN,
+    placeholders: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.PromptTemplate
+```
+
+```typescript TypeScript
+client.prompts.create(params: PromptsCreateParams, options?: RequestOptions): Promise<models.PromptTemplate>
+
+export interface PromptsCreateParams {
+  name: string;
+  description?: string | null;
+  variable_names?: Record<string, unknown> | null;
+  prompt_folder?: string | null;
+  placeholders?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="name" type="string" required />
+<ParamField body="description" type="string" optional />
+<ParamField body="variable_names" type="object" optional />
+<ParamField body="prompt_folder" type="string" optional />
+<ParamField body="placeholders" type="object" optional />
+
+#### Returns
+
+[`PromptTemplate`](/docs/sdk/reference/prompts-models#prompttemplate).
+
+### prompts.create_draft
+
+Create a prompt template together with its first draft version (messages, model configuration, variables).
+
+<ApiEndpoint method="POST" path="/model-hub/prompt-templates/create-draft/" />
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.create_draft(name="your-name", prompt_config=[])
+```
+
+```typescript TypeScript
+const result = await client.prompts.createDraft({
+  name: "your-name",
+  prompt_config: [],
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.create_draft(
+    *,
+    name: str,
+    prompt_config: list[dict[str, Any]],
+    variable_names: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    evaluation_configs: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    metadata: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    placeholders: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.PromptTemplate
+```
+
+```typescript TypeScript
+client.prompts.createDraft(params: PromptsCreateDraftParams, options?: RequestOptions): Promise<models.PromptTemplate>
+
+export interface PromptsCreateDraftParams {
+  name: string;
+  prompt_config: Array<Record<string, unknown>>;
+  variable_names?: Record<string, unknown> | null;
+  evaluation_configs?: Array<Record<string, unknown>> | null;
+  metadata?: Record<string, unknown> | null;
+  placeholders?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="name" type="string" required />
+<ParamField body="prompt_config" type="object[]" required />
+<ParamField body="variable_names" type="object" optional />
+<ParamField body="evaluation_configs" type="object[]" optional />
+<ParamField body="metadata" type="object" optional />
+<ParamField body="placeholders" type="object" optional />
+
+#### Returns
+
+[`PromptTemplate`](/docs/sdk/reference/prompts-models#prompttemplate).
+
+### prompts.delete
+
+Delete a prompt template and all its versions.
+
+<ApiEndpoint method="DELETE" path="/model-hub/prompt-templates/{id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.delete("your-id")
+```
+
+```typescript TypeScript
+const result = await client.prompts.delete("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.delete(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.prompts.delete(id: string, options?: RequestOptions): Promise<unknown>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this prompt template.
+</ParamField>
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### prompts.generate
+
+Generate a prompt from a plain-language statement of what it should do.
+
+<ApiEndpoint method="POST" path="/model-hub/prompt-templates/generate-prompt/" />
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.generate(statement="your-statement")
+```
+
+```typescript TypeScript
+const result = await client.prompts.generate({ statement: "your-statement" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.generate(
+    *,
+    statement: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.prompts.generate(params: PromptsGenerateParams, options?: RequestOptions): Promise<unknown>
+
+export interface PromptsGenerateParams {
+  statement: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="statement" type="string" required />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### prompts.get
+
+Open a prompt template by its identifier, creating its workbench draft if needed.
+
+<ApiEndpoint method="GET" path="/model-hub/prompt-templates/{id}/" />
+
+**MCP tool**: `get_prompt_template`
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.prompts.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.get(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.PromptTemplate
+```
+
+```typescript TypeScript
+client.prompts.get(id: string, options?: RequestOptions): Promise<models.PromptTemplate>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this prompt template.
+</ParamField>
+
+#### Returns
+
+[`PromptTemplate`](/docs/sdk/reference/prompts-models#prompttemplate).
+
+### prompts.get_by_name
+
+Fetch a prompt template by name; the default version unless `version` is given.
+
+<ApiEndpoint method="GET" path="/model-hub/prompt-templates/get-template-by-name/" />
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.get_by_name()
+```
+
+```typescript TypeScript
+const result = await client.prompts.getByName();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.get_by_name(
+    *,
+    name: str | None | NotGiven = NOT_GIVEN,
+    version: str | None | NotGiven = NOT_GIVEN,
+    created_at: str | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    ordering: str | None | NotGiven = NOT_GIVEN,
+    page: int | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.prompts.getByName(params: PromptsGetByNameParams = {}, options?: RequestOptions): Promise<unknown>
+
+export interface PromptsGetByNameParams {
+  name?: string | null;
+  version?: string | null;
+  created_at?: string | null;
+  /** A search term. */
+  search?: string | null;
+  /** Which field to use when ordering the results. */
+  ordering?: string | null;
+  /** A page number within the paginated result set. */
+  page?: number | null;
+  /** Number of results to return per page. */
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="name" type="string" optional />
+<ParamField query="version" type="string" optional />
+<ParamField query="created_at" type="string" optional />
+<ParamField query="search" type="string" optional>
+  A search term.
+</ParamField>
+<ParamField query="ordering" type="string" optional>
+  Which field to use when ordering the results.
+</ParamField>
+<ParamField query="page" type="integer" optional>
+  A page number within the paginated result set.
+</ParamField>
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### prompts.history
+
+List past prompt executions, optionally for one template.
+
+<ApiEndpoint method="GET" path="/model-hub/prompt-history-executions/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination))
+
+<CodeGroup>
+
+```python Python
+for item in client.prompts.history():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.prompts.history()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.history(
+    *,
+    template_name: str | None | NotGiven = NOT_GIVEN,
+    template_version: str | None | NotGiven = NOT_GIVEN,
+    created_at: str | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    ordering: str | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    template_id: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.PromptHistoryExecution]
+```
+
+```typescript TypeScript
+client.prompts.history(params: PromptsHistoryParams = {}, options?: RequestOptions): Pager<models.PromptHistoryExecution>
+
+export interface PromptsHistoryParams {
+  template_name?: string | null;
+  template_version?: string | null;
+  created_at?: string | null;
+  /** A search term. */
+  search?: string | null;
+  /** Which field to use when ordering the results. */
+  ordering?: string | null;
+  /** Number of results to return per page. */
+  limit?: number | null;
+  template_id?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="template_name" type="string" optional />
+<ParamField query="template_version" type="string" optional />
+<ParamField query="created_at" type="string" optional />
+<ParamField query="search" type="string" optional>
+  A search term.
+</ParamField>
+<ParamField query="ordering" type="string" optional>
+  Which field to use when ordering the results.
+</ParamField>
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+<ParamField query="template_id" type="string" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`PromptHistoryExecution`](/docs/sdk/reference/prompts-models#prompthistoryexecution) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### prompts.improve
+
+Rewrite an existing prompt according to the given improvement requirements.
+
+<ApiEndpoint method="POST" path="/model-hub/prompt-templates/improve-prompt/" />
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.improve(existing_prompt="your-existing-prompt", improvement_requirements="your-improvement-requirements")
+```
+
+```typescript TypeScript
+const result = await client.prompts.improve({
+  existing_prompt: "your-existing-prompt",
+  improvement_requirements: "your-improvement-requirements",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.improve(
+    *,
+    existing_prompt: str,
+    improvement_requirements: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.prompts.improve(params: PromptsImproveParams, options?: RequestOptions): Promise<unknown>
+
+export interface PromptsImproveParams {
+  existing_prompt: string;
+  improvement_requirements: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="existing_prompt" type="string" required />
+<ParamField body="improvement_requirements" type="string" required />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### prompts.list
+
+List prompt templates available in the current workspace.
+
+<ApiEndpoint method="GET" path="/model-hub/prompt-templates/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_prompt_templates`
+
+<CodeGroup>
+
+```python Python
+for item in client.prompts.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.prompts.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.list(
+    *,
+    name: str | None | NotGiven = NOT_GIVEN,
+    version: str | None | NotGiven = NOT_GIVEN,
+    created_at: str | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    ordering: str | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    modality: list[str] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.PromptTemplate]
+```
+
+```typescript TypeScript
+client.prompts.list(params: PromptsListParams = {}, options?: RequestOptions): Pager<models.PromptTemplate>
+
+export interface PromptsListParams {
+  name?: string | null;
+  version?: string | null;
+  created_at?: string | null;
+  /** A search term. */
+  search?: string | null;
+  /** Which field to use when ordering the results. */
+  ordering?: string | null;
+  /** Number of results to return per page. */
+  limit?: number | null;
+  modality?: Array<string> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="name" type="string" optional />
+<ParamField query="version" type="string" optional />
+<ParamField query="created_at" type="string" optional />
+<ParamField query="search" type="string" optional>
+  A search term.
+</ParamField>
+<ParamField query="ordering" type="string" optional>
+  Which field to use when ordering the results.
+</ParamField>
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+<ParamField query="modality" type="string[]" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`PromptTemplate`](/docs/sdk/reference/prompts-models#prompttemplate) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### prompts.run
+
+Run a configured prompt version by supplying version and is_run="prompt". Optionally replace prompt_config or variable_names. Returns an asynchronous receipt; read get_prompt_run with template_version for status and output.
+
+<ApiEndpoint method="POST" path="/model-hub/prompt-templates/{id}/run_template/" />
+
+**MCP tool**: `run_prompt`
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.run("your-id")
+```
+
+```typescript TypeScript
+const result = await client.prompts.run("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.run(
+    id: str,
+    *,
+    name: str | None | NotGiven = NOT_GIVEN,
+    version: str | None | NotGiven = NOT_GIVEN,
+    prompt_config: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    variable_names: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    placeholders: Any | None | NotGiven = NOT_GIVEN,
+    evaluation_configs: list[Any] | None | NotGiven = NOT_GIVEN,
+    source: str | None | NotGiven = NOT_GIVEN,
+    is_run: Any | None | NotGiven = NOT_GIVEN,
+    is_sdk: bool | None | NotGiven = NOT_GIVEN,
+    run_index: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.PromptsRunResult
+```
+
+```typescript TypeScript
+client.prompts.run(id: string, params: PromptsRunParams = {}, options?: RequestOptions): Promise<models.PromptsRunResult>
+
+export interface PromptsRunParams {
+  name?: string | null;
+  version?: string | null;
+  prompt_config?: Array<Record<string, unknown>> | null;
+  variable_names?: Record<string, unknown> | null;
+  placeholders?: JsonValue | null;
+  evaluation_configs?: Array<JsonValue> | null;
+  source?: string | null;
+  is_run?: JsonValue | null;
+  is_sdk?: boolean | null;
+  run_index?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this prompt template.
+</ParamField>
+<ParamField body="name" type="string" optional />
+<ParamField body="version" type="string" optional />
+<ParamField body="prompt_config" type="object[]" optional />
+<ParamField body="variable_names" type="object" optional />
+<ParamField body="placeholders" type="any JSON value" optional />
+<ParamField body="evaluation_configs" type="any JSON value[]" optional />
+<ParamField body="source" type="string" optional />
+<ParamField body="is_run" type="any JSON value" optional />
+<ParamField body="is_sdk" type="boolean" optional />
+<ParamField body="run_index" type="integer" optional />
+
+#### Returns
+
+[`PromptsRunResult`](/docs/sdk/reference/prompts-models#promptsrunresult).
+
+### prompts.run_status
+
+Read workbench prompt execution status and outputs. Supply template_version matching the version returned by run_prompt to read that version, otherwise the API chooses the default/latest version.
+
+<ApiEndpoint method="GET" path="/model-hub/prompt-templates/{id}/get-run-status/" />
+
+**MCP tool**: `get_prompt_run`
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.run_status("your-id")
+```
+
+```typescript TypeScript
+const result = await client.prompts.runStatus("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.run_status(
+    id: str,
+    *,
+    template_version: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.PromptRunStatusResult
+```
+
+```typescript TypeScript
+client.prompts.runStatus(id: string, params: PromptsRunStatusParams = {}, options?: RequestOptions): Promise<models.PromptRunStatusResult>
+
+export interface PromptsRunStatusParams {
+  template_version?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this prompt template.
+</ParamField>
+<ParamField query="template_version" type="string" optional />
+
+#### Returns
+
+[`PromptRunStatusResult`](/docs/sdk/reference/prompts-models#promptrunstatusresult).
+
+### prompts.update
+
+Update selected fields on an existing prompt template.
+
+<ApiEndpoint method="PATCH" path="/model-hub/prompt-templates/{id}/" />
+
+**MCP tool**: `update_prompt_template`
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.update("your-id")
+```
+
+```typescript TypeScript
+const result = await client.prompts.update("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.update(
+    id: str,
+    *,
+    name: str | None | NotGiven = NOT_GIVEN,
+    description: str | None | NotGiven = NOT_GIVEN,
+    variable_names: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    prompt_folder: str | None | NotGiven = NOT_GIVEN,
+    placeholders: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.PromptTemplatePatch
+```
+
+```typescript TypeScript
+client.prompts.update(id: string, params: PromptsUpdateParams = {}, options?: RequestOptions): Promise<models.PromptTemplatePatch>
+
+export interface PromptsUpdateParams {
+  name?: string | null;
+  description?: string | null;
+  variable_names?: Record<string, unknown> | null;
+  prompt_folder?: string | null;
+  placeholders?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this prompt template.
+</ParamField>
+<ParamField body="name" type="string" optional />
+<ParamField body="description" type="string" optional />
+<ParamField body="variable_names" type="object" optional />
+<ParamField body="prompt_folder" type="string" optional />
+<ParamField body="placeholders" type="object" optional />
+
+#### Returns
+
+[`PromptTemplatePatch`](/docs/sdk/reference/prompts-models#prompttemplatepatch).
+
+## client.prompts.labels
+
+TypeScript: `client.prompts.labels`.
+
+### prompts.labels.assign
+
+Assign a label to one version of a prompt template.
+
+<ApiEndpoint method="POST" path="/model-hub/prompt-labels/{template_id}/{label_id}/assign-label-by-id/" />
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.labels.assign(
+    "your-template-id",
+    "your-label-id",
+    version="your-version",
+)
+```
+
+```typescript TypeScript
+const result = await client.prompts.labels.assign("your-template-id", "your-label-id", { version: "your-version" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.labels.assign(
+    template_id: str,
+    label_id: str,
+    *,
+    version: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.prompts.labels.assign(templateId: string, labelId: string, params: PromptsLabelsAssignParams, options?: RequestOptions): Promise<unknown>
+
+export interface PromptsLabelsAssignParams {
+  version: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="template_id" type="string" required>
+  Positional argument `template_id`.
+</ParamField>
+<ParamField path="label_id" type="string" required>
+  Positional argument `label_id`.
+</ParamField>
+<ParamField body="version" type="string" required />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### prompts.labels.create
+
+Create a prompt label.
+
+<ApiEndpoint method="POST" path="/model-hub/prompt-labels/" />
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.labels.create(name="your-name", type="system")
+```
+
+```typescript TypeScript
+const result = await client.prompts.labels.create({
+  name: "your-name",
+  type: "system",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.labels.create(
+    *,
+    name: str,
+    type: Literal['system', 'custom'],
+    metadata: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.PromptLabel
+```
+
+```typescript TypeScript
+client.prompts.labels.create(params: PromptsLabelsCreateParams, options?: RequestOptions): Promise<models.PromptLabel>
+
+export interface PromptsLabelsCreateParams {
+  name: string;
+  type: "system" | "custom";
+  metadata?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="name" type="string" required />
+<ParamField body="type" type="string" required enum={["system", "custom"]} />
+<ParamField body="metadata" type="object" optional />
+
+#### Returns
+
+[`PromptLabel`](/docs/sdk/reference/prompts-models#promptlabel).
+
+### prompts.labels.for_template
+
+List the labels assigned to a prompt template's versions.
+
+<ApiEndpoint method="GET" path="/model-hub/prompt-labels/template-labels/" />
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.labels.for_template()
+```
+
+```typescript TypeScript
+const result = await client.prompts.labels.forTemplate();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.labels.for_template(
+    *,
+    page: int | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    template_id: str | None | NotGiven = NOT_GIVEN,
+    template_name: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.prompts.labels.forTemplate(params: PromptsLabelsForTemplateParams = {}, options?: RequestOptions): Promise<unknown>
+
+export interface PromptsLabelsForTemplateParams {
+  /** A page number within the paginated result set. */
+  page?: number | null;
+  /** Number of results to return per page. */
+  limit?: number | null;
+  template_id?: string | null;
+  template_name?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="page" type="integer" optional>
+  A page number within the paginated result set.
+</ParamField>
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+<ParamField query="template_id" type="string" optional />
+<ParamField query="template_name" type="string" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### prompts.labels.get_template
+
+Fetch the prompt template version a label points to, by template name and label (or version).
+
+<ApiEndpoint method="GET" path="/model-hub/prompt-labels/get-by-name/" />
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.labels.get_template()
+```
+
+```typescript TypeScript
+const result = await client.prompts.labels.getTemplate();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.labels.get_template(
+    *,
+    page: int | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    name: str | None | NotGiven = NOT_GIVEN,
+    label: str | None | NotGiven = NOT_GIVEN,
+    version: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.prompts.labels.getTemplate(params: PromptsLabelsGetTemplateParams = {}, options?: RequestOptions): Promise<unknown>
+
+export interface PromptsLabelsGetTemplateParams {
+  /** A page number within the paginated result set. */
+  page?: number | null;
+  /** Number of results to return per page. */
+  limit?: number | null;
+  name?: string | null;
+  label?: string | null;
+  version?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="page" type="integer" optional>
+  A page number within the paginated result set.
+</ParamField>
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+<ParamField query="name" type="string" optional />
+<ParamField query="label" type="string" optional />
+<ParamField query="version" type="string" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### prompts.labels.list
+
+List prompt labels (e.g. production, staging) in the organization.
+
+<ApiEndpoint method="GET" path="/model-hub/prompt-labels/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination))
+
+<CodeGroup>
+
+```python Python
+for item in client.prompts.labels.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.prompts.labels.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.labels.list(
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.PromptLabel]
+```
+
+```typescript TypeScript
+client.prompts.labels.list(params: PromptsLabelsListParams = {}, options?: RequestOptions): Pager<models.PromptLabel>
+
+export interface PromptsLabelsListParams {
+  /** Number of results to return per page. */
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`PromptLabel`](/docs/sdk/reference/prompts-models#promptlabel) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### prompts.labels.remove
+
+Remove a label from a prompt template version.
+
+<ApiEndpoint method="POST" path="/model-hub/prompt-labels/remove/" />
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.labels.remove(label_id="your-label-id", version_id="your-version-id")
+```
+
+```typescript TypeScript
+const result = await client.prompts.labels.remove({
+  label_id: "your-label-id",
+  version_id: "your-version-id",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.labels.remove(
+    *,
+    label_id: str,
+    version_id: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.prompts.labels.remove(params: PromptsLabelsRemoveParams, options?: RequestOptions): Promise<unknown>
+
+export interface PromptsLabelsRemoveParams {
+  label_id: string;
+  version_id: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="label_id" type="string" required />
+<ParamField body="version_id" type="string" required />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### prompts.labels.set_default
+
+Make a version the default for a prompt template, by template name.
+
+<ApiEndpoint method="POST" path="/model-hub/prompt-labels/set-default/" />
+
+<CodeGroup>
+
+```python Python
+result = client.prompts.labels.set_default(template_name="your-template-name", version="your-version")
+```
+
+```typescript TypeScript
+const result = await client.prompts.labels.setDefault({
+  template_name: "your-template-name",
+  version: "your-version",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.labels.set_default(
+    *,
+    template_name: str,
+    version: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.prompts.labels.setDefault(params: PromptsLabelsSetDefaultParams, options?: RequestOptions): Promise<unknown>
+
+export interface PromptsLabelsSetDefaultParams {
+  template_name: string;
+  version: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="template_name" type="string" required />
+<ParamField body="version" type="string" required />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+## client.prompts.versions
+
+TypeScript: `client.prompts.versions`.
+
+### prompts.versions.list
+
+List versions of a prompt template.
+
+<ApiEndpoint method="GET" path="/model-hub/prompt-templates/{id}/versions/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_prompt_versions`
+
+<CodeGroup>
+
+```python Python
+for item in client.prompts.versions.list("your-id"):
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.prompts.versions.list("your-id")) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.prompts.versions.list(
+    id: str,
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[Any]
+```
+
+```typescript TypeScript
+client.prompts.versions.list(id: string, params: PromptsVersionsListParams = {}, options?: RequestOptions): Pager<unknown>
+
+export interface PromptsVersionsListParams {
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this prompt template.
+</ParamField>
+<ParamField query="limit" type="integer" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.

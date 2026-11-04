@@ -1,0 +1,781 @@
+---
+title: "Simulation"
+description: "Reference for client.simulation in the Future AGI Python and TypeScript SDKs: simulation.executions.analytics, simulation.executions.get, simulation.executions.list, simulation.scenarios.create, simulation.scenarios.get, simulation.scenarios.list and 5 more."
+---
+
+`client.simulation` on `fi.Client` (Python) and `client.simulation` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.simulation.executions`, `client.simulation.scenarios`, `client.simulation.tests`. The models these methods return are on [Simulation response models](/docs/sdk/reference/simulation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+| Method | Description |
+|---|---|
+| [`simulation.executions.analytics`](#simulationexecutionsanalytics) | Return aggregated analytics for a simulation test execution. |
+| [`simulation.executions.get`](#simulationexecutionsget) | Return a simulation test execution by its identifier. |
+| [`simulation.executions.list`](#simulationexecutionslist) | List simulation test executions. |
+| [`simulation.scenarios.create`](#simulationscenarioscreate) | Create an agent or prompt simulation scenario of kind dataset, script or graph. |
+| [`simulation.scenarios.get`](#simulationscenariosget) | Return a simulation scenario by its identifier. |
+| [`simulation.scenarios.list`](#simulationscenarioslist) | List simulation scenarios in the current workspace. |
+| [`simulation.scenarios.update`](#simulationscenariosupdate) | Edit supported scenario fields such as name, description, graph or prompt. |
+| [`simulation.tests.create`](#simulationtestscreate) | Save a simulation test using name, agent_definition_id and scenario_ids, optionally agent_version and evaluations_config. |
+| [`simulation.tests.get`](#simulationtestsget) | Read a saved simulation test configuration, its agent/version and scenarios. |
+| [`simulation.tests.list`](#simulationtestslist) | List saved simulation test configurations. |
+| [`simulation.tests.run`](#simulationtestsrun) | Start a saved simulation test asynchronously. |
+
+## client.simulation
+
+## client.simulation.executions
+
+TypeScript: `client.simulation.executions`.
+
+### simulation.executions.analytics
+
+Return aggregated analytics for a simulation test execution.
+
+<ApiEndpoint method="GET" path="/simulate/test-executions/{test_execution_id}/analytics/" />
+
+**MCP tool**: `get_test_execution_analytics`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.executions.analytics("your-test-execution-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.executions.analytics("your-test-execution-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.executions.analytics(
+    test_execution_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.TestExecutionAnalytics
+```
+
+```typescript TypeScript
+client.simulation.executions.analytics(testExecutionId: string, options?: RequestOptions): Promise<models.TestExecutionAnalytics>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="test_execution_id" type="string" required>
+  Positional argument `test_execution_id`.
+</ParamField>
+
+#### Returns
+
+[`TestExecutionAnalytics`](/docs/sdk/reference/simulation-models#testexecutionanalytics).
+
+### simulation.executions.get
+
+Return a simulation test execution by its identifier.
+
+<ApiEndpoint method="GET" path="/simulate/test-executions/{test_execution_id}/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `get_test_execution`
+
+<CodeGroup>
+
+```python Python
+for item in client.simulation.executions.get("your-test-execution-id"):
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.simulation.executions.get("your-test-execution-id")) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.executions.get(
+    test_execution_id: str,
+    *,
+    search: str | None | NotGiven = NOT_GIVEN,
+    filters: str | None | NotGiven = NOT_GIVEN,
+    row_groups: str | None | NotGiven = NOT_GIVEN,
+    group_keys: str | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[Any]
+```
+
+```typescript TypeScript
+client.simulation.executions.get(testExecutionId: string, params: SimulationExecutionsGetParams = {}, options?: RequestOptions): Pager<unknown>
+
+export interface SimulationExecutionsGetParams {
+  search?: string | null;
+  filters?: string | null;
+  row_groups?: string | null;
+  group_keys?: string | null;
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="test_execution_id" type="string" required>
+  Positional argument `test_execution_id`.
+</ParamField>
+<ParamField query="search" type="string" optional />
+<ParamField query="filters" type="string" optional />
+<ParamField query="row_groups" type="string" optional />
+<ParamField query="group_keys" type="string" optional />
+<ParamField query="limit" type="integer" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of `any` items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### simulation.executions.list
+
+List simulation test executions.
+
+<ApiEndpoint method="GET" path="/simulate/api/test-executions/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_test_executions`
+
+<CodeGroup>
+
+```python Python
+for item in client.simulation.executions.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.simulation.executions.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.executions.list(
+    *,
+    search: str | None | NotGiven = NOT_GIVEN,
+    status: str | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.TestExecution]
+```
+
+```typescript TypeScript
+client.simulation.executions.list(params: SimulationExecutionsListParams = {}, options?: RequestOptions): Pager<models.TestExecution>
+
+export interface SimulationExecutionsListParams {
+  search?: string | null;
+  status?: string | null;
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="search" type="string" optional />
+<ParamField query="status" type="string" optional />
+<ParamField query="limit" type="integer" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`TestExecution`](/docs/sdk/reference/simulation-models#testexecution) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+## client.simulation.scenarios
+
+TypeScript: `client.simulation.scenarios`.
+
+### simulation.scenarios.create
+
+Create an agent or prompt simulation scenario of kind dataset, script or graph. Generation is asynchronous and may incur usage charges; poll get_scenario until ready before running tests. Requires the applicable plan entitlement.
+
+<ApiEndpoint method="POST" path="/simulate/scenarios/create/" />
+
+**MCP tool**: `create_scenario`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.scenarios.create(name="your-name")
+```
+
+```typescript TypeScript
+const result = await client.simulation.scenarios.create({ name: "your-name" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.scenarios.create(
+    *,
+    name: str,
+    description: str | None | NotGiven = NOT_GIVEN,
+    dataset_id: str | None | NotGiven = NOT_GIVEN,
+    kind: Literal['graph', 'script', 'dataset'] | None | NotGiven = NOT_GIVEN,
+    script_url: str | None | NotGiven = NOT_GIVEN,
+    agent_definition_id: str | None | NotGiven = NOT_GIVEN,
+    agent_definition_version_id: str | None | NotGiven = NOT_GIVEN,
+    custom_instruction: str | None | NotGiven = NOT_GIVEN,
+    no_of_rows: int | None | NotGiven = NOT_GIVEN,
+    generate_graph: bool | None | NotGiven = NOT_GIVEN,
+    graph: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    source_type: Literal['agent_definition', 'prompt'] | None | NotGiven = NOT_GIVEN,
+    prompt_template_id: str | None | NotGiven = NOT_GIVEN,
+    prompt_version_id: str | None | NotGiven = NOT_GIVEN,
+    add_persona_automatically: bool | None | NotGiven = NOT_GIVEN,
+    personas: list[str] | None | NotGiven = NOT_GIVEN,
+    custom_columns: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    agent_name: str | None | NotGiven = NOT_GIVEN,
+    agent_prompt: str | None | NotGiven = NOT_GIVEN,
+    voice_provider: str | None | NotGiven = NOT_GIVEN,
+    voice_name: str | None | NotGiven = NOT_GIVEN,
+    model: str | None | NotGiven = NOT_GIVEN,
+    llm_temperature: float | None | NotGiven = NOT_GIVEN,
+    initial_message: str | None | NotGiven = NOT_GIVEN,
+    max_call_duration_in_minutes: int | None | NotGiven = NOT_GIVEN,
+    interrupt_sensitivity: float | None | NotGiven = NOT_GIVEN,
+    conversation_speed: float | None | NotGiven = NOT_GIVEN,
+    finished_speaking_sensitivity: float | None | NotGiven = NOT_GIVEN,
+    initial_message_delay: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.scenarios.create(params: SimulationScenariosCreateParams, options?: RequestOptions): Promise<unknown>
+
+export interface SimulationScenariosCreateParams {
+  name: string;
+  description?: string | null;
+  dataset_id?: string | null;
+  kind?: "graph" | "script" | "dataset" | null;
+  script_url?: string | null;
+  agent_definition_id?: string | null;
+  agent_definition_version_id?: string | null;
+  custom_instruction?: string | null;
+  no_of_rows?: number | null;
+  generate_graph?: boolean | null;
+  graph?: Record<string, unknown> | null;
+  source_type?: "agent_definition" | "prompt" | null;
+  prompt_template_id?: string | null;
+  prompt_version_id?: string | null;
+  add_persona_automatically?: boolean | null;
+  personas?: Array<string> | null;
+  custom_columns?: Array<Record<string, unknown>> | null;
+  agent_name?: string | null;
+  agent_prompt?: string | null;
+  voice_provider?: string | null;
+  voice_name?: string | null;
+  model?: string | null;
+  llm_temperature?: number | null;
+  initial_message?: string | null;
+  max_call_duration_in_minutes?: number | null;
+  interrupt_sensitivity?: number | null;
+  conversation_speed?: number | null;
+  finished_speaking_sensitivity?: number | null;
+  initial_message_delay?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="name" type="string" required />
+<ParamField body="description" type="string" optional />
+<ParamField body="dataset_id" type="string" optional />
+<ParamField body="kind" type="string" optional enum={["graph", "script", "dataset"]} />
+<ParamField body="script_url" type="string" optional />
+<ParamField body="agent_definition_id" type="string" optional />
+<ParamField body="agent_definition_version_id" type="string" optional />
+<ParamField body="custom_instruction" type="string" optional />
+<ParamField body="no_of_rows" type="integer" optional />
+<ParamField body="generate_graph" type="boolean" optional />
+<ParamField body="graph" type="object" optional />
+<ParamField body="source_type" type="string" optional enum={["agent_definition", "prompt"]} />
+<ParamField body="prompt_template_id" type="string" optional />
+<ParamField body="prompt_version_id" type="string" optional />
+<ParamField body="add_persona_automatically" type="boolean" optional />
+<ParamField body="personas" type="string[]" optional />
+<ParamField body="custom_columns" type="object[]" optional />
+<ParamField body="agent_name" type="string" optional />
+<ParamField body="agent_prompt" type="string" optional />
+<ParamField body="voice_provider" type="string" optional />
+<ParamField body="voice_name" type="string" optional />
+<ParamField body="model" type="string" optional />
+<ParamField body="llm_temperature" type="number" optional />
+<ParamField body="initial_message" type="string" optional />
+<ParamField body="max_call_duration_in_minutes" type="integer" optional />
+<ParamField body="interrupt_sensitivity" type="number" optional />
+<ParamField body="conversation_speed" type="number" optional />
+<ParamField body="finished_speaking_sensitivity" type="number" optional />
+<ParamField body="initial_message_delay" type="integer" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.scenarios.get
+
+Return a simulation scenario by its identifier.
+
+<ApiEndpoint method="GET" path="/simulate/scenarios/{scenario_id}/" />
+
+**MCP tool**: `get_scenario`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.scenarios.get("your-scenario-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.scenarios.get("your-scenario-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.scenarios.get(
+    scenario_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.ScenarioDetailResponse
+```
+
+```typescript TypeScript
+client.simulation.scenarios.get(scenarioId: string, options?: RequestOptions): Promise<models.ScenarioDetailResponse>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="scenario_id" type="string" required>
+  Positional argument `scenario_id`.
+</ParamField>
+
+#### Returns
+
+[`ScenarioDetailResponse`](/docs/sdk/reference/simulation-models#scenariodetailresponse).
+
+### simulation.scenarios.list
+
+List simulation scenarios in the current workspace.
+
+<ApiEndpoint method="GET" path="/simulate/scenarios/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_scenarios`
+
+<CodeGroup>
+
+```python Python
+for item in client.simulation.scenarios.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.simulation.scenarios.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.scenarios.list(
+    *,
+    search: str | None | NotGiven = NOT_GIVEN,
+    agent_definition_id: str | None | NotGiven = NOT_GIVEN,
+    agent_type: str | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.ScenarioResponse]
+```
+
+```typescript TypeScript
+client.simulation.scenarios.list(params: SimulationScenariosListParams = {}, options?: RequestOptions): Pager<models.ScenarioResponse>
+
+export interface SimulationScenariosListParams {
+  search?: string | null;
+  agent_definition_id?: string | null;
+  agent_type?: string | null;
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="search" type="string" optional />
+<ParamField query="agent_definition_id" type="string" optional />
+<ParamField query="agent_type" type="string" optional />
+<ParamField query="limit" type="integer" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`ScenarioResponse`](/docs/sdk/reference/simulation-models#scenarioresponse) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### simulation.scenarios.update
+
+Edit supported scenario fields such as name, description, graph or prompt. This is not a dataset-row editor or a simulation execution.
+
+<ApiEndpoint method="PUT" path="/simulate/scenarios/{scenario_id}/edit/" />
+
+**MCP tool**: `update_scenario`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.scenarios.update("your-scenario-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.scenarios.update("your-scenario-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.scenarios.update(
+    scenario_id: str,
+    *,
+    name: str | None | NotGiven = NOT_GIVEN,
+    description: str | None | NotGiven = NOT_GIVEN,
+    graph: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    prompt: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.ScenarioEditResponse
+```
+
+```typescript TypeScript
+client.simulation.scenarios.update(scenarioId: string, params: SimulationScenariosUpdateParams = {}, options?: RequestOptions): Promise<models.ScenarioEditResponse>
+
+export interface SimulationScenariosUpdateParams {
+  name?: string | null;
+  description?: string | null;
+  graph?: Record<string, unknown> | null;
+  prompt?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="scenario_id" type="string" required>
+  Positional argument `scenario_id`.
+</ParamField>
+<ParamField body="name" type="string" optional />
+<ParamField body="description" type="string" optional />
+<ParamField body="graph" type="object" optional />
+<ParamField body="prompt" type="string" optional />
+
+#### Returns
+
+[`ScenarioEditResponse`](/docs/sdk/reference/simulation-models#scenarioeditresponse).
+
+## client.simulation.tests
+
+TypeScript: `client.simulation.tests`.
+
+### simulation.tests.create
+
+Save a simulation test using name, agent_definition_id and scenario_ids, optionally agent_version and evaluations_config. Does not execute it; pass the returned test ID to run_simulation.
+
+<ApiEndpoint method="POST" path="/simulate/run-tests/create/" />
+
+**MCP tool**: `create_simulation_test`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.tests.create(
+    name="your-name",
+    agent_definition_id="your-agent-definition-id",
+    scenario_ids=[],
+)
+```
+
+```typescript TypeScript
+const result = await client.simulation.tests.create({
+  name: "your-name",
+  agent_definition_id: "your-agent-definition-id",
+  scenario_ids: [],
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.tests.create(
+    *,
+    name: str,
+    agent_definition_id: str,
+    scenario_ids: list[str],
+    description: str | None | NotGiven = NOT_GIVEN,
+    dataset_row_ids: list[str] | None | NotGiven = NOT_GIVEN,
+    eval_config_ids: list[str] | None | NotGiven = NOT_GIVEN,
+    evaluations_config: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    enable_tool_evaluation: bool | None | NotGiven = NOT_GIVEN,
+    replay_session_id: str | None | NotGiven = NOT_GIVEN,
+    agent_version: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.RunTestResponse
+```
+
+```typescript TypeScript
+client.simulation.tests.create(params: SimulationTestsCreateParams, options?: RequestOptions): Promise<models.RunTestResponse>
+
+export interface SimulationTestsCreateParams {
+  name: string;
+  agent_definition_id: string;
+  scenario_ids: Array<string>;
+  description?: string | null;
+  dataset_row_ids?: Array<string> | null;
+  eval_config_ids?: Array<string> | null;
+  evaluations_config?: Array<Record<string, unknown>> | null;
+  enable_tool_evaluation?: boolean | null;
+  replay_session_id?: string | null;
+  agent_version?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="name" type="string" required />
+<ParamField body="agent_definition_id" type="string" required />
+<ParamField body="scenario_ids" type="string[]" required />
+<ParamField body="description" type="string" optional />
+<ParamField body="dataset_row_ids" type="string[]" optional />
+<ParamField body="eval_config_ids" type="string[]" optional />
+<ParamField body="evaluations_config" type="object[]" optional />
+<ParamField body="enable_tool_evaluation" type="boolean" optional />
+<ParamField body="replay_session_id" type="string" optional />
+<ParamField body="agent_version" type="string" optional />
+
+#### Returns
+
+[`RunTestResponse`](/docs/sdk/reference/simulation-models#runtestresponse).
+
+### simulation.tests.get
+
+Read a saved simulation test configuration, its agent/version and scenarios.
+
+<ApiEndpoint method="GET" path="/simulate/run-tests/{run_test_id}/" />
+
+**MCP tool**: `get_simulation_test`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.tests.get("your-run-test-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.tests.get("your-run-test-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.tests.get(
+    run_test_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.RunTestResponse
+```
+
+```typescript TypeScript
+client.simulation.tests.get(runTestId: string, options?: RequestOptions): Promise<models.RunTestResponse>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="run_test_id" type="string" required>
+  Positional argument `run_test_id`.
+</ParamField>
+
+#### Returns
+
+[`RunTestResponse`](/docs/sdk/reference/simulation-models#runtestresponse).
+
+### simulation.tests.list
+
+List saved simulation test configurations. A test configuration is distinct from its executions; use list_test_executions to inspect runs.
+
+<ApiEndpoint method="GET" path="/simulate/run-tests/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_simulation_tests`
+
+<CodeGroup>
+
+```python Python
+for item in client.simulation.tests.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.simulation.tests.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.tests.list(
+    *,
+    search: str | None | NotGiven = NOT_GIVEN,
+    simulation_type: Literal['agent_definition', 'prompt'] | None | NotGiven = NOT_GIVEN,
+    prompt_template_id: str | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    summary: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.RunTestResponse]
+```
+
+```typescript TypeScript
+client.simulation.tests.list(params: SimulationTestsListParams = {}, options?: RequestOptions): Pager<models.RunTestResponse>
+
+export interface SimulationTestsListParams {
+  search?: string | null;
+  simulation_type?: "agent_definition" | "prompt" | null;
+  prompt_template_id?: string | null;
+  limit?: number | null;
+  /** Return the bounded list-card representation instead of the full nested run-test detail payload. */
+  summary?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="search" type="string" optional />
+<ParamField query="simulation_type" type="string" optional enum={["agent_definition", "prompt"]} />
+<ParamField query="prompt_template_id" type="string" optional />
+<ParamField query="limit" type="integer" optional />
+<ParamField query="summary" type="boolean" optional>
+  Return the bounded list-card representation instead of the full nested run-test detail payload.
+</ParamField>
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`RunTestResponse`](/docs/sdk/reference/simulation-models#runtestresponse) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### simulation.tests.run
+
+Start a saved simulation test asynchronously. Omit scenario_ids to run all configured scenarios. Uses existing provider/worker infrastructure and can incur usage charges. Poll get_test_execution with the returned execution_id, then read get_test_execution_analytics.
+
+<ApiEndpoint method="POST" path="/simulate/run-tests/{run_test_id}/execute/" />
+
+**MCP tool**: `run_simulation`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.tests.run("your-run-test-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.tests.run("your-run-test-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.tests.run(
+    run_test_id: str,
+    *,
+    scenario_ids: list[str] | None | NotGiven = NOT_GIVEN,
+    simulator_id: str | None | NotGiven = NOT_GIVEN,
+    select_all: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.RunTestExecutionResponse
+```
+
+```typescript TypeScript
+client.simulation.tests.run(runTestId: string, params: SimulationTestsRunParams = {}, options?: RequestOptions): Promise<models.RunTestExecutionResponse>
+
+export interface SimulationTestsRunParams {
+  scenario_ids?: Array<string> | null;
+  simulator_id?: string | null;
+  select_all?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="run_test_id" type="string" required>
+  Positional argument `run_test_id`.
+</ParamField>
+<ParamField body="scenario_ids" type="string[]" optional />
+<ParamField body="simulator_id" type="string" optional />
+<ParamField body="select_all" type="boolean" optional />
+
+#### Returns
+
+[`RunTestExecutionResponse`](/docs/sdk/reference/simulation-models#runtestexecutionresponse).

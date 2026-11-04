@@ -1,0 +1,41 @@
+---
+title: "Annotation response models"
+description: "The 30 response models returned by the annotation resources of the Future AGI Python and TypeScript SDKs, with every field and its type."
+---
+
+The models returned by `client.annotation_queues`, `client.annotations`, `client.scores`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call, and `strict_responses=True` (Python) or `strictResponses: true` (TypeScript) rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)).
+
+## Models
+
+| Model | Fields |
+|---|---|
+| <span id="annotationqueue">`AnnotationQueue`</span> | `id: string`, `name: string`, `description: string`, `instructions: string`, `status: string`, `assignment_strategy: string`, `annotations_required: integer`, `reservation_timeout_minutes: integer`, `requires_review: boolean`, `auto_assign: boolean`, `organization: string`, `project: string`, `dataset: string`, `agent_definition: string`, `is_default: boolean`, `labels:` [`QueueLabelNested`](#queuelabelnested)[], `annotators:` [`QueueAnnotatorNested`](#queueannotatornested)[], `label_ids: string[]`, `annotator_ids: string[]`, `annotator_roles: any`, `label_count: integer`, `annotator_count: integer`, `item_count: integer`, `completed_count: integer`, `created_by: string`, `created_by_name: string`, `viewer_role: string`, `viewer_roles: string[]`, `deleted: boolean`, `created_at: string` |
+| <span id="annotationslabels">`AnnotationsLabels`</span> | `id: string`, `name: string`, `type: string`, `organization: string`, `settings: any`, `project: string`, `description: string`, `allow_notes: boolean`, `created_at: string`, `trace_annotations_count: integer`, `annotation_count: integer`, `archived: boolean` |
+| <span id="bulkannotationresponseresult">`BulkAnnotationResponseResult`</span> | `message: string`, `annotations_created: integer`, `annotations_updated: integer`, `notes_created: integer`, `succeeded_count: integer`, `errors_count: integer`, `warnings_count: integer`, `warnings: any[]`, `errors: any[]` |
+| <span id="bulkcreatescoresresult">`BulkCreateScoresResult`</span> | `scores:` [`Score`](#score)[], `errors: string[]` |
+| <span id="queueadditemsresult">`QueueAddItemsResult`</span> | `added: integer`, `duplicates: integer`, `errors: string[]`, `queue_status: string`, `total_matching: integer`, `total_matching_is_lower_bound: boolean`, `has_more: boolean`, `next_cursor: string`, `next_cursor_fingerprint: string` |
+| <span id="queueaddlabelresult">`QueueAddLabelResult`</span> | `label:` [`QueueLabelResult`](#queuelabelresult), `created: boolean`, `reopened_items: integer`, `queue_status: string` |
+| <span id="queueagreementannotatorpair">`QueueAgreementAnnotatorPair`</span> | `annotator_1_id: string`, `annotator_2_id: string`, `agreement_pct: number`, `total_comparisons: integer` |
+| <span id="queueagreementlabel">`QueueAgreementLabel`</span> | `label_name: string`, `label_type: string`, `agreement_pct: number`, `cohens_kappa: number`, `disagreement_count: integer`, `disagreement_items: string[]` |
+| <span id="queueagreementresult">`QueueAgreementResult`</span> | `overall_agreement: number`, `labels: any`, `annotator_pairs:` [`QueueAgreementAnnotatorPair`](#queueagreementannotatorpair)[] |
+| <span id="queueanalyticsannotatorperformance">`QueueAnalyticsAnnotatorPerformance`</span> | `user_id: string`, `name: string`, `completed: integer`, `last_active: string` |
+| <span id="queueanalyticsresult">`QueueAnalyticsResult`</span> | `throughput:` [`QueueAnalyticsThroughput`](#queueanalyticsthroughput), `annotator_performance:` [`QueueAnalyticsAnnotatorPerformance`](#queueanalyticsannotatorperformance)[], `label_distribution: any`, `status_breakdown: any`, `total: integer` |
+| <span id="queueanalyticsthroughput">`QueueAnalyticsThroughput`</span> | `daily:` [`QueueAnalyticsThroughputDaily`](#queueanalyticsthroughputdaily)[], `total_completed: integer`, `avg_per_day: number` |
+| <span id="queueanalyticsthroughputdaily">`QueueAnalyticsThroughputDaily`</span> | `date: string`, `count: integer` |
+| <span id="queueannotatedetailresult">`QueueAnnotateDetailResult`</span> | `item: any`, `queue: any`, `labels: any[]`, `annotations: any[]`, `review_comments: any[]`, `review_threads: any[]`, `existing_notes: string`, `span_notes: any[]`, `span_notes_source_id: string`, `progress: any`, `next_item_id: string`, `prev_item_id: string` |
+| <span id="queueannotatornested">`QueueAnnotatorNested`</span> | `id: string`, `user_id: string`, `name: string`, `email: string`, `role: string`, `roles: string[]` |
+| <span id="queueassignitemsresult">`QueueAssignItemsResult`</span> | `assigned: integer` |
+| <span id="queuebulkremoveitemsresult">`QueueBulkRemoveItemsResult`</span> | `removed: integer` |
+| <span id="queueexporttodatasetresult">`QueueExportToDatasetResult`</span> | `dataset_id: string`, `dataset_name: string`, `rows_created: integer`, `columns: string[]` |
+| <span id="queueimportannotationsresult">`QueueImportAnnotationsResult`</span> | `imported: integer` |
+| <span id="queueitem">`QueueItem`</span> | `id: string`, `queue: string`, `source_type: string`, `source_id: string`, `status: string`, `workflow_status: any`, `workflow_status_label: any`, `priority: integer`, `order: integer`, `metadata: any`, `assigned_to: string`, `assigned_to_name: string`, `assigned_users:` [`QueueItemAssignedUser`](#queueitemassigneduser)[], `reserved_by: string`, `reserved_by_name: string`, `reservation_expires_at: string`, `review_status: string`, `reviewed_by: string`, `reviewed_by_name: string`, `reviewed_at: string`, `review_notes: string`, `source_preview: any JSON value`, `comment_count: integer`, `open_feedback_count: integer`, `created_at: string` |
+| <span id="queueitemassigneduser">`QueueItemAssignedUser`</span> | `id: string`, `name: string`, `email: string` |
+| <span id="queuelabelnested">`QueueLabelNested`</span> | `id: string`, `label_id: string`, `name: string`, `type: string`, `required: boolean`, `order: integer` |
+| <span id="queuelabelresult">`QueueLabelResult`</span> | `id: string`, `name: string`, `type: string`, `settings: any`, `description: string`, `allow_notes: boolean`, `required: boolean`, `order: integer` |
+| <span id="queuenavigationresult">`QueueNavigationResult`</span> | `completed_item_id: string`, `skipped_item_id: string`, `next_item: any` |
+| <span id="queueprogressannotatorstat">`QueueProgressAnnotatorStat`</span> | `user_id: string`, `name: string`, `completed: integer`, `pending: integer`, `in_progress: integer`, `in_review: integer`, `annotations_count: integer` |
+| <span id="queueprogressresult">`QueueProgressResult`</span> | `total: integer`, `pending: integer`, `in_progress: integer`, `in_review: integer`, `completed: integer`, `skipped: integer`, `progress_pct: number`, `annotator_stats:` [`QueueProgressAnnotatorStat`](#queueprogressannotatorstat)[], `user_progress:` [`QueueProgressUserProgress`](#queueprogressuserprogress) |
+| <span id="queueprogressuserprogress">`QueueProgressUserProgress`</span> | `total: integer`, `completed: integer`, `pending: integer`, `in_progress: integer`, `in_review: integer`, `skipped: integer`, `progress_pct: number` |
+| <span id="queueremovelabelresult">`QueueRemoveLabelResult`</span> | `removed: boolean` |
+| <span id="queuesubmitannotationsresult">`QueueSubmitAnnotationsResult`</span> | `submitted: integer` |
+| <span id="score">`Score`</span> | `id: string`, `source_type: string`, `source_id: any`, `label_id: string`, `label_name: string`, `label_type: string`, `label_settings: any`, `label_allow_notes: boolean`, `value: any`, `value_history: any`, `score_source: string`, `notes: string`, `annotator: string`, `annotator_name: string`, `annotator_email: string`, `queue_item: string`, `queue_id: any`, `created_at: string`, `updated_at: string` |

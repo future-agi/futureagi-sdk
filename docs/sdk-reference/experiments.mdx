@@ -1,0 +1,216 @@
+---
+title: "Experiments"
+description: "Reference for client.experiments in the Future AGI Python and TypeScript SDKs: experiments.create, experiments.get, experiments.list."
+---
+
+`client.experiments` on `fi.Client` (Python) and `client.experiments` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Datasets & evals response models](/docs/sdk/reference/datasets-evals-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+| Method | Description |
+|---|---|
+| [`experiments.create`](#experimentscreate) | Create and start an experiment. |
+| [`experiments.get`](#experimentsget) | Return an experiment by its identifier. |
+| [`experiments.list`](#experimentslist) | List experiments in the current workspace. |
+
+## client.experiments
+
+### experiments.create
+
+Create and start an experiment. The new experiment's id is returned inside the `result` message as `experiment_id=\<uuid>`; pass it to get_experiment to follow the run.
+
+<ApiEndpoint method="POST" path="/model-hub/experiments/v2/" />
+
+**MCP tool**: `create_experiment`
+
+<CodeGroup>
+
+```python Python
+result = client.experiments.create(
+    name="your-name",
+    dataset_id="your-dataset-id",
+    prompt_config=[],
+    user_eval_metrics=[],
+)
+```
+
+```typescript TypeScript
+const result = await client.experiments.create({
+  name: "your-name",
+  dataset_id: "your-dataset-id",
+  prompt_config: [],
+  user_eval_metrics: [],
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.experiments.create(
+    *,
+    name: str,
+    dataset_id: str,
+    prompt_config: list[dict[str, Any]],
+    user_eval_metrics: list[dict[str, Any]],
+    column_id: str | None | NotGiven = NOT_GIVEN,
+    experiment_type: Literal['llm', 'tts', 'stt', 'image'] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> str
+```
+
+```typescript TypeScript
+client.experiments.create(params: ExperimentsCreateParams, options?: RequestOptions): Promise<string>
+
+export interface ExperimentsCreateParams {
+  name: string;
+  dataset_id: string;
+  prompt_config: Array<Record<string, unknown>>;
+  user_eval_metrics: Array<Record<string, unknown>>;
+  column_id?: string | null;
+  experiment_type?: "llm" | "tts" | "stt" | "image" | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="name" type="string" required />
+<ParamField body="dataset_id" type="string" required />
+<ParamField body="prompt_config" type="object[]" required />
+<ParamField body="user_eval_metrics" type="object[]" required />
+<ParamField body="column_id" type="string" optional />
+<ParamField body="experiment_type" type="string" optional enum={["llm", "tts", "stt", "image"]} />
+
+#### Returns
+
+`string`.
+
+### experiments.get
+
+Return an experiment by its identifier.
+
+<ApiEndpoint method="GET" path="/model-hub/experiments/v2/{experiment_id}/" />
+
+**MCP tool**: `get_experiment`
+
+<CodeGroup>
+
+```python Python
+result = client.experiments.get("your-experiment-id")
+```
+
+```typescript TypeScript
+const result = await client.experiments.get("your-experiment-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.experiments.get(
+    experiment_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.ExperimentDetailV2
+```
+
+```typescript TypeScript
+client.experiments.get(experimentId: string, options?: RequestOptions): Promise<models.ExperimentDetailV2>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="experiment_id" type="string" required>
+  Positional argument `experiment_id`.
+</ParamField>
+
+#### Returns
+
+[`ExperimentDetailV2`](/docs/sdk/reference/datasets-evals-models#experimentdetailv2).
+
+### experiments.list
+
+List experiments in the current workspace.
+
+<ApiEndpoint method="GET" path="/model-hub/experiments/v2/list/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_experiments`
+
+<CodeGroup>
+
+```python Python
+for item in client.experiments.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.experiments.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.experiments.list(
+    *,
+    created_at: str | None | NotGiven = NOT_GIVEN,
+    status: str | None | NotGiven = NOT_GIVEN,
+    dataset_id: str | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    ordering: str | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.ExperimentListV2]
+```
+
+```typescript TypeScript
+client.experiments.list(params: ExperimentsListParams = {}, options?: RequestOptions): Pager<models.ExperimentListV2>
+
+export interface ExperimentsListParams {
+  created_at?: string | null;
+  status?: string | null;
+  dataset_id?: string | null;
+  /** A search term. */
+  search?: string | null;
+  /** Which field to use when ordering the results. */
+  ordering?: string | null;
+  /** Number of results to return per page. */
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="created_at" type="string" optional />
+<ParamField query="status" type="string" optional />
+<ParamField query="dataset_id" type="string" optional />
+<ParamField query="search" type="string" optional>
+  A search term.
+</ParamField>
+<ParamField query="ordering" type="string" optional>
+  Which field to use when ordering the results.
+</ParamField>
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`ExperimentListV2`](/docs/sdk/reference/datasets-evals-models#experimentlistv2) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).

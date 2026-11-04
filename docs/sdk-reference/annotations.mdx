@@ -1,0 +1,305 @@
+---
+title: "Annotations"
+description: "Reference for client.annotations in the Future AGI Python and TypeScript SDKs: annotations.bulk_create, annotations.labels.create, annotations.labels.delete, annotations.labels.get, annotations.labels.list."
+---
+
+`client.annotations` on `fi.Client` (Python) and `client.annotations` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.annotations.labels`. The models these methods return are on [Annotation response models](/docs/sdk/reference/annotation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+| Method | Description |
+|---|---|
+| [`annotations.bulk_create`](#annotationsbulk_create) | Create or update annotations and notes on spans in bulk. |
+| [`annotations.labels.create`](#annotationslabelscreate) | Create an annotation label (text, label, score, ...) with its settings. |
+| [`annotations.labels.delete`](#annotationslabelsdelete) | Delete (archive) an annotation label. |
+| [`annotations.labels.get`](#annotationslabelsget) | Return an annotation label by id. |
+| [`annotations.labels.list`](#annotationslabelslist) | List annotation labels, optionally filtered by project, type or search text. |
+
+## client.annotations
+
+### annotations.bulk_create
+
+Create or update annotations and notes on spans in bulk.
+
+<ApiEndpoint method="POST" path="/tracer/bulk-annotation/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotations.bulk_create(records=[])
+```
+
+```typescript TypeScript
+const result = await client.annotations.bulkCreate({ records: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotations.bulk_create(
+    *,
+    records: list[dict[str, Any]],
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.BulkAnnotationResponseResult
+```
+
+```typescript TypeScript
+client.annotations.bulkCreate(params: AnnotationsBulkCreateParams, options?: RequestOptions): Promise<models.BulkAnnotationResponseResult>
+
+export interface AnnotationsBulkCreateParams {
+  records: Array<Record<string, unknown>>;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="records" type="object[]" required />
+
+#### Returns
+
+[`BulkAnnotationResponseResult`](/docs/sdk/reference/annotation-models#bulkannotationresponseresult).
+
+## client.annotations.labels
+
+TypeScript: `client.annotations.labels`.
+
+### annotations.labels.create
+
+Create an annotation label (text, label, score, ...) with its settings.
+
+<ApiEndpoint method="POST" path="/model-hub/annotations-labels/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotations.labels.create(name="your-name", type="text")
+```
+
+```typescript TypeScript
+const result = await client.annotations.labels.create({
+  name: "your-name",
+  type: "text",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotations.labels.create(
+    *,
+    name: str,
+    type: Literal['text', 'numeric', 'categorical', 'star', 'thumbs_up_down'],
+    settings: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    project: str | None | NotGiven = NOT_GIVEN,
+    description: str | None | NotGiven = NOT_GIVEN,
+    allow_notes: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AnnotationsLabels
+```
+
+```typescript TypeScript
+client.annotations.labels.create(params: AnnotationsLabelsCreateParams, options?: RequestOptions): Promise<models.AnnotationsLabels>
+
+export interface AnnotationsLabelsCreateParams {
+  name: string;
+  type: "text" | "numeric" | "categorical" | "star" | "thumbs_up_down";
+  settings?: Record<string, unknown> | null;
+  project?: string | null;
+  description?: string | null;
+  allow_notes?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="name" type="string" required />
+<ParamField body="type" type="string" required enum={["text", "numeric", "categorical", "star", "thumbs_up_down"]} />
+<ParamField body="settings" type="object" optional />
+<ParamField body="project" type="string" optional />
+<ParamField body="description" type="string" optional />
+<ParamField body="allow_notes" type="boolean" optional />
+
+#### Returns
+
+[`AnnotationsLabels`](/docs/sdk/reference/annotation-models#annotationslabels).
+
+### annotations.labels.delete
+
+Delete (archive) an annotation label.
+
+<ApiEndpoint method="DELETE" path="/model-hub/annotations-labels/{id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotations.labels.delete("your-id")
+```
+
+```typescript TypeScript
+const result = await client.annotations.labels.delete("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotations.labels.delete(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.annotations.labels.delete(id: string, options?: RequestOptions): Promise<unknown>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### annotations.labels.get
+
+Return an annotation label by id.
+
+<ApiEndpoint method="GET" path="/model-hub/annotations-labels/{id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotations.labels.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.annotations.labels.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotations.labels.get(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AnnotationsLabels
+```
+
+```typescript TypeScript
+client.annotations.labels.get(id: string, options?: RequestOptions): Promise<models.AnnotationsLabels>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`AnnotationsLabels`](/docs/sdk/reference/annotation-models#annotationslabels).
+
+### annotations.labels.list
+
+List annotation labels, optionally filtered by project, type or search text.
+
+<ApiEndpoint method="GET" path="/model-hub/annotations-labels/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination))
+
+<CodeGroup>
+
+```python Python
+for item in client.annotations.labels.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.annotations.labels.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotations.labels.list(
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    dataset: str | None | NotGiven = NOT_GIVEN,
+    project_id: str | None | NotGiven = NOT_GIVEN,
+    type: Literal['text', 'numeric', 'categorical', 'star', 'thumbs_up_down'] | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    include_usage_count: bool | None | NotGiven = NOT_GIVEN,
+    include_archived: bool | None | NotGiven = NOT_GIVEN,
+    archived: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.AnnotationsLabels]
+```
+
+```typescript TypeScript
+client.annotations.labels.list(params: AnnotationsLabelsListParams = {}, options?: RequestOptions): Pager<models.AnnotationsLabels>
+
+export interface AnnotationsLabelsListParams {
+  /** Number of results to return per page. */
+  limit?: number | null;
+  dataset?: string | null;
+  project_id?: string | null;
+  type?: "text" | "numeric" | "categorical" | "star" | "thumbs_up_down" | null;
+  search?: string | null;
+  include_usage_count?: boolean | null;
+  include_archived?: boolean | null;
+  archived?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+<ParamField query="dataset" type="string" optional />
+<ParamField query="project_id" type="string" optional />
+<ParamField query="type" type="string" optional enum={["text", "numeric", "categorical", "star", "thumbs_up_down"]} />
+<ParamField query="search" type="string" optional />
+<ParamField query="include_usage_count" type="boolean" optional />
+<ParamField query="include_archived" type="boolean" optional />
+<ParamField query="archived" type="boolean" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`AnnotationsLabels`](/docs/sdk/reference/annotation-models#annotationslabels) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).

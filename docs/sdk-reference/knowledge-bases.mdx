@@ -1,0 +1,289 @@
+---
+title: "Knowledge bases"
+description: "Reference for client.knowledge_bases in the Future AGI Python and TypeScript SDKs: knowledge_bases.create, knowledge_bases.delete, knowledge_bases.get, knowledge_bases.list, knowledge_bases.update."
+---
+
+`client.knowledge_bases` on `fi.Client` (Python) and `client.knowledgeBases` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Knowledge bases response models](/docs/sdk/reference/knowledge-bases-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+| Method | Description |
+|---|---|
+| [`knowledge_bases.create`](#knowledge_basescreate) | Create a knowledge base with a name, an embedding model and a chunk size; it appears in knowledge_bases.list and knowledge_bases.get. |
+| [`knowledge_bases.delete`](#knowledge_basesdelete) | Delete a knowledge base. |
+| [`knowledge_bases.get`](#knowledge_basesget) | Return a knowledge base and its configuration. |
+| [`knowledge_bases.list`](#knowledge_baseslist) | List knowledge bases (the RAG stores with an embedding model and a chunk size) in the current workspace. |
+| [`knowledge_bases.update`](#knowledge_basesupdate) | Update the name, embedding model or chunk size of a knowledge base (a partial update). |
+
+## client.knowledge_bases
+
+### knowledge_bases.create
+
+Create a knowledge base with a name, an embedding model and a chunk size; it appears in knowledge_bases.list and knowledge_bases.get.
+
+<ApiEndpoint method="POST" path="/model-hub/kb/" />
+
+<CodeGroup>
+
+```python Python
+result = client.knowledge_bases.create(name="your-name", chunk_size=1)
+```
+
+```typescript TypeScript
+const result = await client.knowledgeBases.create({
+  name: "your-name",
+  chunk_size: 1,
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.knowledge_bases.create(
+    *,
+    name: str,
+    chunk_size: int,
+    embedding_model: Literal['BAAI/bge-small-en-v1.5'] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.KnowledgeBaseItem
+```
+
+```typescript TypeScript
+client.knowledgeBases.create(params: KnowledgeBasesCreateParams, options?: RequestOptions): Promise<models.KnowledgeBaseItem>
+
+export interface KnowledgeBasesCreateParams {
+  name: string;
+  chunk_size: number;
+  embedding_model?: "BAAI/bge-small-en-v1.5" | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="name" type="string" required />
+<ParamField body="chunk_size" type="integer" required />
+<ParamField body="embedding_model" type="string" optional enum={["BAAI/bge-small-en-v1.5"]} />
+
+#### Returns
+
+[`KnowledgeBaseItem`](/docs/sdk/reference/knowledge-bases-models#knowledgebaseitem).
+
+### knowledge_bases.delete
+
+Delete a knowledge base.
+
+<ApiEndpoint method="DELETE" path="/model-hub/kb/{id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.knowledge_bases.delete("your-id")
+```
+
+```typescript TypeScript
+const result = await client.knowledgeBases.delete("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.knowledge_bases.delete(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.knowledgeBases.delete(id: string, options?: RequestOptions): Promise<unknown>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this knowledge base.
+</ParamField>
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### knowledge_bases.get
+
+Return a knowledge base and its configuration.
+
+<ApiEndpoint method="GET" path="/model-hub/kb/{id}/" />
+
+**MCP tool**: `get_knowledge_base`
+
+<CodeGroup>
+
+```python Python
+result = client.knowledge_bases.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.knowledgeBases.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.knowledge_bases.get(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.KnowledgeBaseItem
+```
+
+```typescript TypeScript
+client.knowledgeBases.get(id: string, options?: RequestOptions): Promise<models.KnowledgeBaseItem>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this knowledge base.
+</ParamField>
+
+#### Returns
+
+[`KnowledgeBaseItem`](/docs/sdk/reference/knowledge-bases-models#knowledgebaseitem).
+
+### knowledge_bases.list
+
+List knowledge bases (the RAG stores with an embedding model and a chunk size) in the current workspace. Knowledge bases built from uploaded files are a separate store, see file_knowledge_bases.
+
+<ApiEndpoint method="GET" path="/model-hub/kb/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_knowledge_bases`
+
+<CodeGroup>
+
+```python Python
+for item in client.knowledge_bases.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.knowledgeBases.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.knowledge_bases.list(
+    *,
+    search: str | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.KnowledgeBaseItem]
+```
+
+```typescript TypeScript
+client.knowledgeBases.list(params: KnowledgeBasesListParams = {}, options?: RequestOptions): Pager<models.KnowledgeBaseItem>
+
+export interface KnowledgeBasesListParams {
+  /** A search term. */
+  search?: string | null;
+  /** Number of results to return per page. */
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="search" type="string" optional>
+  A search term.
+</ParamField>
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`KnowledgeBaseItem`](/docs/sdk/reference/knowledge-bases-models#knowledgebaseitem) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### knowledge_bases.update
+
+Update the name, embedding model or chunk size of a knowledge base (a partial update).
+
+<ApiEndpoint method="PATCH" path="/model-hub/kb/{id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.knowledge_bases.update("your-id")
+```
+
+```typescript TypeScript
+const result = await client.knowledgeBases.update("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.knowledge_bases.update(
+    id: str,
+    *,
+    name: str | None | NotGiven = NOT_GIVEN,
+    embedding_model: Literal['BAAI/bge-small-en-v1.5'] | None | NotGiven = NOT_GIVEN,
+    chunk_size: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.KnowledgeBaseItem
+```
+
+```typescript TypeScript
+client.knowledgeBases.update(id: string, params: KnowledgeBasesUpdateParams = {}, options?: RequestOptions): Promise<models.KnowledgeBaseItem>
+
+export interface KnowledgeBasesUpdateParams {
+  name?: string | null;
+  embedding_model?: "BAAI/bge-small-en-v1.5" | null;
+  chunk_size?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this knowledge base.
+</ParamField>
+<ParamField body="name" type="string" optional />
+<ParamField body="embedding_model" type="string" optional enum={["BAAI/bge-small-en-v1.5"]} />
+<ParamField body="chunk_size" type="integer" optional />
+
+#### Returns
+
+[`KnowledgeBaseItem`](/docs/sdk/reference/knowledge-bases-models#knowledgebaseitem).

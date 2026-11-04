@@ -1,0 +1,106 @@
+---
+title: "Workspaces"
+description: "Reference for client.workspaces in the Future AGI Python and TypeScript SDKs: workspaces.get, workspaces.list."
+---
+
+`client.workspaces` on `fi.Client` (Python) and `client.workspaces` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Account response models](/docs/sdk/reference/account-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+| Method | Description |
+|---|---|
+| [`workspaces.get`](#workspacesget) | Return a workspace by its identifier. |
+| [`workspaces.list`](#workspaceslist) | List workspaces available to the authenticated user. |
+
+## client.workspaces
+
+### workspaces.get
+
+Return a workspace by its identifier.
+
+<ApiEndpoint method="GET" path="/accounts/workspaces/{workspace_id}/" />
+
+**MCP tool**: `get_workspace`
+
+<CodeGroup>
+
+```python Python
+result = client.workspaces.get("your-workspace-id")
+```
+
+```typescript TypeScript
+const result = await client.workspaces.get("your-workspace-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.workspaces.get(
+    workspace_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.WorkspaceManagementListResult
+```
+
+```typescript TypeScript
+client.workspaces.get(workspaceId: string, options?: RequestOptions): Promise<models.WorkspaceManagementListResult>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="workspace_id" type="string" required>
+  Positional argument `workspace_id`.
+</ParamField>
+
+#### Returns
+
+[`WorkspaceManagementListResult`](/docs/sdk/reference/account-models#workspacemanagementlistresult).
+
+### workspaces.list
+
+List workspaces available to the authenticated user.
+
+<ApiEndpoint method="GET" path="/accounts/workspaces/" />
+
+**MCP tool**: `list_workspaces`
+
+<CodeGroup>
+
+```python Python
+result = client.workspaces.list()
+```
+
+```typescript TypeScript
+const result = await client.workspaces.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.workspaces.list(
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.WorkspaceManagementListResult
+```
+
+```typescript TypeScript
+client.workspaces.list(options?: RequestOptions): Promise<models.WorkspaceManagementListResult>
+```
+
+</Expandable>
+
+#### Parameters
+
+This method takes no parameters beyond the per-call `options`.
+
+#### Returns
+
+[`WorkspaceManagementListResult`](/docs/sdk/reference/account-models#workspacemanagementlistresult).

@@ -1,0 +1,508 @@
+---
+title: "Agents"
+description: "Reference for client.agents in the Future AGI Python and TypeScript SDKs: agents.create, agents.get, agents.list, agents.update, agents.versions.create."
+---
+
+`client.agents` on `fi.Client` (Python) and `client.agents` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.agents.versions`. The models these methods return are on [Simulation response models](/docs/sdk/reference/simulation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+| Method | Description |
+|---|---|
+| [`agents.create`](#agentscreate) | Create a text or voice agent definition and its first active version. |
+| [`agents.get`](#agentsget) | Return an agent definition by its identifier. |
+| [`agents.list`](#agentslist) | List agent definitions in the current workspace. |
+| [`agents.update`](#agentsupdate) | Edit an agent definition. |
+| [`agents.versions.create`](#agentsversionscreate) | Snapshot agent configuration into a new version and activate it. |
+
+## client.agents
+
+### agents.create
+
+Create a text or voice agent definition and its first active version. Supply agent_name, agent_type and commit_message plus the configuration required for the chosen provider.
+
+<ApiEndpoint method="POST" path="/simulate/agent-definitions/create/" />
+
+**MCP tool**: `create_agent`
+
+<CodeGroup>
+
+```python Python
+result = client.agents.create(
+    agent_name="your-agent-name",
+    agent_type="voice",
+    commit_message="your-commit-message",
+)
+```
+
+```typescript TypeScript
+const result = await client.agents.create({
+  agent_name: "your-agent-name",
+  agent_type: "voice",
+  commit_message: "your-commit-message",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.agents.create(
+    *,
+    agent_name: str,
+    agent_type: Literal['voice', 'text'],
+    commit_message: str,
+    inbound: bool | None | NotGiven = NOT_GIVEN,
+    target_speaks_first: bool | None | NotGiven = NOT_GIVEN,
+    description: str | None | NotGiven = NOT_GIVEN,
+    provider: str | None | NotGiven = NOT_GIVEN,
+    api_key: str | None | NotGiven = NOT_GIVEN,
+    assistant_id: str | None | NotGiven = NOT_GIVEN,
+    authentication_method: Literal['api_key'] | None | NotGiven = NOT_GIVEN,
+    language: str | None | NotGiven = NOT_GIVEN,
+    languages: list[str] | None | NotGiven = NOT_GIVEN,
+    contact_number: str | None | NotGiven = NOT_GIVEN,
+    knowledge_base: str | None | NotGiven = NOT_GIVEN,
+    observability_enabled: bool | None | NotGiven = NOT_GIVEN,
+    model: str | None | NotGiven = NOT_GIVEN,
+    model_details: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    websocket_url: str | None | NotGiven = NOT_GIVEN,
+    websocket_headers: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    replay_session_id: str | None | NotGiven = NOT_GIVEN,
+    livekit_url: str | None | NotGiven = NOT_GIVEN,
+    livekit_api_key: str | None | NotGiven = NOT_GIVEN,
+    livekit_api_secret: str | None | NotGiven = NOT_GIVEN,
+    livekit_agent_name: str | None | NotGiven = NOT_GIVEN,
+    livekit_config_json: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    livekit_max_concurrency: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AgentDefinitionCreateResponse
+```
+
+```typescript TypeScript
+client.agents.create(params: AgentsCreateParams, options?: RequestOptions): Promise<models.AgentDefinitionCreateResponse>
+
+export interface AgentsCreateParams {
+  agent_name: string;
+  agent_type: "voice" | "text";
+  commit_message: string;
+  inbound?: boolean | null;
+  target_speaks_first?: boolean | null;
+  description?: string | null;
+  provider?: string | null;
+  api_key?: string | null;
+  assistant_id?: string | null;
+  authentication_method?: "api_key" | null;
+  language?: string | null;
+  languages?: Array<string> | null;
+  contact_number?: string | null;
+  knowledge_base?: string | null;
+  observability_enabled?: boolean | null;
+  model?: string | null;
+  model_details?: Record<string, unknown> | null;
+  websocket_url?: string | null;
+  websocket_headers?: Record<string, unknown> | null;
+  replay_session_id?: string | null;
+  livekit_url?: string | null;
+  livekit_api_key?: string | null;
+  livekit_api_secret?: string | null;
+  livekit_agent_name?: string | null;
+  livekit_config_json?: Record<string, unknown> | null;
+  livekit_max_concurrency?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="agent_name" type="string" required />
+<ParamField body="agent_type" type="string" required enum={["voice", "text"]} />
+<ParamField body="commit_message" type="string" required />
+<ParamField body="inbound" type="boolean" optional />
+<ParamField body="target_speaks_first" type="boolean" optional />
+<ParamField body="description" type="string" optional />
+<ParamField body="provider" type="string" optional />
+<ParamField body="api_key" type="string" optional />
+<ParamField body="assistant_id" type="string" optional />
+<ParamField body="authentication_method" type="string" optional enum={["api_key"]} />
+<ParamField body="language" type="string" optional />
+<ParamField body="languages" type="string[]" optional />
+<ParamField body="contact_number" type="string" optional />
+<ParamField body="knowledge_base" type="string" optional />
+<ParamField body="observability_enabled" type="boolean" optional />
+<ParamField body="model" type="string" optional />
+<ParamField body="model_details" type="object" optional />
+<ParamField body="websocket_url" type="string" optional />
+<ParamField body="websocket_headers" type="object" optional />
+<ParamField body="replay_session_id" type="string" optional />
+<ParamField body="livekit_url" type="string" optional />
+<ParamField body="livekit_api_key" type="string" optional />
+<ParamField body="livekit_api_secret" type="string" optional />
+<ParamField body="livekit_agent_name" type="string" optional />
+<ParamField body="livekit_config_json" type="object" optional />
+<ParamField body="livekit_max_concurrency" type="integer" optional />
+
+#### Returns
+
+[`AgentDefinitionCreateResponse`](/docs/sdk/reference/simulation-models#agentdefinitioncreateresponse).
+
+### agents.get
+
+Return an agent definition by its identifier.
+
+<ApiEndpoint method="GET" path="/simulate/agent-definitions/{agent_id}/" />
+
+**MCP tool**: `get_agent`
+
+<CodeGroup>
+
+```python Python
+result = client.agents.get("your-agent-id")
+```
+
+```typescript TypeScript
+const result = await client.agents.get("your-agent-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.agents.get(
+    agent_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AgentDefinitionDetailResponse
+```
+
+```typescript TypeScript
+client.agents.get(agentId: string, options?: RequestOptions): Promise<models.AgentDefinitionDetailResponse>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="agent_id" type="string" required>
+  Positional argument `agent_id`.
+</ParamField>
+
+#### Returns
+
+[`AgentDefinitionDetailResponse`](/docs/sdk/reference/simulation-models#agentdefinitiondetailresponse).
+
+### agents.list
+
+List agent definitions in the current workspace.
+
+<ApiEndpoint method="GET" path="/simulate/agent-definitions/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_agents`
+
+<CodeGroup>
+
+```python Python
+for item in client.agents.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.agents.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.agents.list(
+    *,
+    search: str | None | NotGiven = NOT_GIVEN,
+    agent_type: Literal['voice', 'text'] | None | NotGiven = NOT_GIVEN,
+    agent_definition_id: str | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.AgentDefinitionListResponse]
+```
+
+```typescript TypeScript
+client.agents.list(params: AgentsListParams = {}, options?: RequestOptions): Pager<models.AgentDefinitionListResponse>
+
+export interface AgentsListParams {
+  search?: string | null;
+  agent_type?: "voice" | "text" | null;
+  agent_definition_id?: string | null;
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="search" type="string" optional />
+<ParamField query="agent_type" type="string" optional enum={["voice", "text"]} />
+<ParamField query="agent_definition_id" type="string" optional />
+<ParamField query="limit" type="integer" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`AgentDefinitionListResponse`](/docs/sdk/reference/simulation-models#agentdefinitionlistresponse) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### agents.update
+
+Edit an agent definition. Leave observability_enabled out to keep observability as it is; send true or false to turn it on or off. To use changed configuration in a versioned simulation, subsequently call create_agent_version, or supply the changes directly to create_agent_version.
+
+<ApiEndpoint method="PUT" path="/simulate/agent-definitions/{agent_id}/edit/" />
+
+**MCP tool**: `update_agent`
+
+<CodeGroup>
+
+```python Python
+result = client.agents.update("your-agent-id")
+```
+
+```typescript TypeScript
+const result = await client.agents.update("your-agent-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.agents.update(
+    agent_id: str,
+    *,
+    observability_enabled: bool | None | NotGiven = NOT_GIVEN,
+    agent_name: str | None | NotGiven = NOT_GIVEN,
+    agent_type: Literal['voice', 'text'] | None | NotGiven = NOT_GIVEN,
+    description: str | None | NotGiven = NOT_GIVEN,
+    provider: str | None | NotGiven = NOT_GIVEN,
+    api_key: str | None | NotGiven = NOT_GIVEN,
+    assistant_id: str | None | NotGiven = NOT_GIVEN,
+    authentication_method: Literal['api_key'] | None | NotGiven = NOT_GIVEN,
+    language: str | None | NotGiven = NOT_GIVEN,
+    languages: list[str] | None | NotGiven = NOT_GIVEN,
+    contact_number: str | None | NotGiven = NOT_GIVEN,
+    inbound: bool | None | NotGiven = NOT_GIVEN,
+    target_speaks_first: bool | None | NotGiven = NOT_GIVEN,
+    knowledge_base: str | None | NotGiven = NOT_GIVEN,
+    model: str | None | NotGiven = NOT_GIVEN,
+    model_details: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    websocket_url: str | None | NotGiven = NOT_GIVEN,
+    websocket_headers: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    livekit_url: str | None | NotGiven = NOT_GIVEN,
+    livekit_api_key: str | None | NotGiven = NOT_GIVEN,
+    livekit_api_secret: str | None | NotGiven = NOT_GIVEN,
+    livekit_agent_name: str | None | NotGiven = NOT_GIVEN,
+    livekit_config_json: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    livekit_max_concurrency: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AgentDefinitionEditResponse
+```
+
+```typescript TypeScript
+client.agents.update(agentId: string, params: AgentsUpdateParams = {}, options?: RequestOptions): Promise<models.AgentDefinitionEditResponse>
+
+export interface AgentsUpdateParams {
+  observability_enabled?: boolean | null;
+  agent_name?: string | null;
+  agent_type?: "voice" | "text" | null;
+  description?: string | null;
+  provider?: string | null;
+  api_key?: string | null;
+  assistant_id?: string | null;
+  authentication_method?: "api_key" | null;
+  language?: string | null;
+  languages?: Array<string> | null;
+  contact_number?: string | null;
+  inbound?: boolean | null;
+  target_speaks_first?: boolean | null;
+  knowledge_base?: string | null;
+  model?: string | null;
+  model_details?: Record<string, unknown> | null;
+  websocket_url?: string | null;
+  websocket_headers?: Record<string, unknown> | null;
+  livekit_url?: string | null;
+  livekit_api_key?: string | null;
+  livekit_api_secret?: string | null;
+  livekit_agent_name?: string | null;
+  livekit_config_json?: Record<string, unknown> | null;
+  livekit_max_concurrency?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="agent_id" type="string" required>
+  Positional argument `agent_id`.
+</ParamField>
+<ParamField body="observability_enabled" type="boolean" optional />
+<ParamField body="agent_name" type="string" optional />
+<ParamField body="agent_type" type="string" optional enum={["voice", "text"]} />
+<ParamField body="description" type="string" optional />
+<ParamField body="provider" type="string" optional />
+<ParamField body="api_key" type="string" optional />
+<ParamField body="assistant_id" type="string" optional />
+<ParamField body="authentication_method" type="string" optional enum={["api_key"]} />
+<ParamField body="language" type="string" optional />
+<ParamField body="languages" type="string[]" optional />
+<ParamField body="contact_number" type="string" optional />
+<ParamField body="inbound" type="boolean" optional />
+<ParamField body="target_speaks_first" type="boolean" optional />
+<ParamField body="knowledge_base" type="string" optional />
+<ParamField body="model" type="string" optional />
+<ParamField body="model_details" type="object" optional />
+<ParamField body="websocket_url" type="string" optional />
+<ParamField body="websocket_headers" type="object" optional />
+<ParamField body="livekit_url" type="string" optional />
+<ParamField body="livekit_api_key" type="string" optional />
+<ParamField body="livekit_api_secret" type="string" optional />
+<ParamField body="livekit_agent_name" type="string" optional />
+<ParamField body="livekit_config_json" type="object" optional />
+<ParamField body="livekit_max_concurrency" type="integer" optional />
+
+#### Returns
+
+[`AgentDefinitionEditResponse`](/docs/sdk/reference/simulation-models#agentdefinitioneditresponse).
+
+## client.agents.versions
+
+TypeScript: `client.agents.versions`.
+
+### agents.versions.create
+
+Snapshot agent configuration into a new version and activate it. Can also update agent configuration. Use the returned version when creating a simulation test; existing tests may remain pinned to an older version.
+
+<ApiEndpoint method="POST" path="/simulate/agent-definitions/{agent_id}/versions/create/" />
+
+**MCP tool**: `create_agent_version`
+
+<CodeGroup>
+
+```python Python
+result = client.agents.versions.create("your-agent-id")
+```
+
+```typescript TypeScript
+const result = await client.agents.versions.create("your-agent-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.agents.versions.create(
+    agent_id: str,
+    *,
+    agent_name: str | None | NotGiven = NOT_GIVEN,
+    agent_type: Literal['voice', 'text'] | None | NotGiven = NOT_GIVEN,
+    description: str | None | NotGiven = NOT_GIVEN,
+    provider: str | None | NotGiven = NOT_GIVEN,
+    api_key: str | None | NotGiven = NOT_GIVEN,
+    assistant_id: str | None | NotGiven = NOT_GIVEN,
+    authentication_method: Literal['api_key'] | None | NotGiven = NOT_GIVEN,
+    language: str | None | NotGiven = NOT_GIVEN,
+    languages: list[str] | None | NotGiven = NOT_GIVEN,
+    contact_number: str | None | NotGiven = NOT_GIVEN,
+    inbound: bool | None | NotGiven = NOT_GIVEN,
+    target_speaks_first: bool | None | NotGiven = NOT_GIVEN,
+    knowledge_base: str | None | NotGiven = NOT_GIVEN,
+    model: str | None | NotGiven = NOT_GIVEN,
+    model_details: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    livekit_url: str | None | NotGiven = NOT_GIVEN,
+    livekit_api_key: str | None | NotGiven = NOT_GIVEN,
+    livekit_api_secret: str | None | NotGiven = NOT_GIVEN,
+    livekit_agent_name: str | None | NotGiven = NOT_GIVEN,
+    livekit_config_json: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    livekit_max_concurrency: int | None | NotGiven = NOT_GIVEN,
+    commit_message: str | None | NotGiven = NOT_GIVEN,
+    observability_enabled: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AgentVersionCreateResponse
+```
+
+```typescript TypeScript
+client.agents.versions.create(agentId: string, params: AgentsVersionsCreateParams = {}, options?: RequestOptions): Promise<models.AgentVersionCreateResponse>
+
+export interface AgentsVersionsCreateParams {
+  agent_name?: string | null;
+  agent_type?: "voice" | "text" | null;
+  description?: string | null;
+  provider?: string | null;
+  api_key?: string | null;
+  assistant_id?: string | null;
+  authentication_method?: "api_key" | null;
+  language?: string | null;
+  languages?: Array<string> | null;
+  contact_number?: string | null;
+  inbound?: boolean | null;
+  target_speaks_first?: boolean | null;
+  knowledge_base?: string | null;
+  model?: string | null;
+  model_details?: Record<string, unknown> | null;
+  livekit_url?: string | null;
+  livekit_api_key?: string | null;
+  livekit_api_secret?: string | null;
+  livekit_agent_name?: string | null;
+  livekit_config_json?: Record<string, unknown> | null;
+  livekit_max_concurrency?: number | null;
+  commit_message?: string | null;
+  observability_enabled?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="agent_id" type="string" required>
+  Positional argument `agent_id`.
+</ParamField>
+<ParamField body="agent_name" type="string" optional />
+<ParamField body="agent_type" type="string" optional enum={["voice", "text"]} />
+<ParamField body="description" type="string" optional />
+<ParamField body="provider" type="string" optional />
+<ParamField body="api_key" type="string" optional />
+<ParamField body="assistant_id" type="string" optional />
+<ParamField body="authentication_method" type="string" optional enum={["api_key"]} />
+<ParamField body="language" type="string" optional />
+<ParamField body="languages" type="string[]" optional />
+<ParamField body="contact_number" type="string" optional />
+<ParamField body="inbound" type="boolean" optional />
+<ParamField body="target_speaks_first" type="boolean" optional />
+<ParamField body="knowledge_base" type="string" optional />
+<ParamField body="model" type="string" optional />
+<ParamField body="model_details" type="object" optional />
+<ParamField body="livekit_url" type="string" optional />
+<ParamField body="livekit_api_key" type="string" optional />
+<ParamField body="livekit_api_secret" type="string" optional />
+<ParamField body="livekit_agent_name" type="string" optional />
+<ParamField body="livekit_config_json" type="object" optional />
+<ParamField body="livekit_max_concurrency" type="integer" optional />
+<ParamField body="commit_message" type="string" optional />
+<ParamField body="observability_enabled" type="boolean" optional />
+
+#### Returns
+
+[`AgentVersionCreateResponse`](/docs/sdk/reference/simulation-models#agentversioncreateresponse).

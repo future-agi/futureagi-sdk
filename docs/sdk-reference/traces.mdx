@@ -1,0 +1,312 @@
+---
+title: "Traces"
+description: "Reference for client.traces in the Future AGI Python and TypeScript SDKs: traces.error_analysis, traces.get, traces.list, traces.properties.list."
+---
+
+`client.traces` on `fi.Client` (Python) and `client.traces` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.traces.properties`. The models these methods return are on [Observability response models](/docs/sdk/reference/observability-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+| Method | Description |
+|---|---|
+| [`traces.error_analysis`](#traceserror_analysis) | Return the recorded error analysis for a trace. |
+| [`traces.get`](#tracesget) | Return a trace by its identifier. |
+| [`traces.list`](#traceslist) | Search traces using project, time range, status, and attribute filters. |
+| [`traces.properties.list`](#tracespropertieslist) | Discover filter properties from the shared metrics catalog. |
+
+## client.traces
+
+### traces.error_analysis
+
+Return the recorded error analysis for a trace.
+
+<ApiEndpoint method="GET" path="/tracer/trace-error-analysis/{trace_id}/" />
+
+**MCP tool**: `get_trace_error_analysis`
+
+<CodeGroup>
+
+```python Python
+result = client.traces.error_analysis("your-trace-id")
+```
+
+```typescript TypeScript
+const result = await client.traces.errorAnalysis("your-trace-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.traces.error_analysis(
+    trace_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.TraceErrorAnalysisResult
+```
+
+```typescript TypeScript
+client.traces.errorAnalysis(traceId: string, options?: RequestOptions): Promise<models.TraceErrorAnalysisResult>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="trace_id" type="string" required>
+  Positional argument `trace_id`.
+</ParamField>
+
+#### Returns
+
+[`TraceErrorAnalysisResult`](/docs/sdk/reference/observability-models#traceerroranalysisresult).
+
+### traces.get
+
+Return a trace by its identifier.
+
+<ApiEndpoint method="GET" path="/tracer/trace/{id}/" />
+
+**MCP tool**: `get_trace`
+
+<CodeGroup>
+
+```python Python
+result = client.traces.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.traces.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.traces.get(
+    id: str,
+    *,
+    test_execution_id: str | None | NotGiven = NOT_GIVEN,
+    call_execution_id: str | None | NotGiven = NOT_GIVEN,
+    project_id: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.TraceDetailResult
+```
+
+```typescript TypeScript
+client.traces.get(id: string, params: TracesGetParams = {}, options?: RequestOptions): Promise<models.TraceDetailResult>
+
+export interface TracesGetParams {
+  /** A run the caller can read; opens the hidden simulation project of that run's agent. */
+  test_execution_id?: string | null;
+  /** A run the caller can read; opens the hidden simulation project of that run's agent. */
+  call_execution_id?: string | null;
+  /** Project the detail was opened from. The same id can exist in several projects; when supplied, only that project's copy is read. */
+  project_id?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField query="test_execution_id" type="string" optional>
+  A run the caller can read; opens the hidden simulation project of that run's agent.
+</ParamField>
+<ParamField query="call_execution_id" type="string" optional>
+  A run the caller can read; opens the hidden simulation project of that run's agent.
+</ParamField>
+<ParamField query="project_id" type="string" optional>
+  Project the detail was opened from. The same id can exist in several projects; when supplied, only that project's copy is read.
+</ParamField>
+
+#### Returns
+
+[`TraceDetailResult`](/docs/sdk/reference/observability-models#tracedetailresult).
+
+### traces.list
+
+Search traces using project, time range, status, and attribute filters.
+
+<ApiEndpoint method="GET" path="/tracer/trace/list_traces_of_session/" />
+
+**MCP tool**: `search_traces`
+
+<CodeGroup>
+
+```python Python
+result = client.traces.list()
+```
+
+```typescript TypeScript
+const result = await client.traces.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.traces.list(
+    *,
+    project_id: str | None | NotGiven = NOT_GIVEN,
+    project_version_id: str | None | NotGiven = NOT_GIVEN,
+    session_id: str | None | NotGiven = NOT_GIVEN,
+    filters: str | None | NotGiven = NOT_GIVEN,
+    page_number: int | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    cursor: str | None | NotGiven = NOT_GIVEN,
+    cursor_mode: bool | None | NotGiven = NOT_GIVEN,
+    attribute_keys: str | None | NotGiven = NOT_GIVEN,
+    allow_sampled: bool | None | NotGiven = NOT_GIVEN,
+    interval: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.TraceObserveListResult
+```
+
+```typescript TypeScript
+client.traces.list(params: TracesListParams = {}, options?: RequestOptions): Promise<models.TraceObserveListResult>
+
+export interface TracesListParams {
+  project_id?: string | null;
+  project_version_id?: string | null;
+  session_id?: string | null;
+  filters?: string | null;
+  /** Zero-based numbered page. Pages whose required ordered work exceeds the finite read contract return HTTP 422 with code page_depth_exceeded; request an earlier page or narrow the time range. */
+  page_number?: number | null;
+  page_size?: number | null;
+  /** Opaque continuation token returned by the previous page. When supplied, do not also send the numbered-page parameter. */
+  cursor?: string | null;
+  cursor_mode?: boolean | null;
+  /** JSON-encoded list of custom attribute keys to hydrate; only requested keys are returned. Each key resolves to its latest live span value by (start_time, span_id). Comma-separated simple keys remain supported. */
+  attribute_keys?: string | null;
+  /** Omit for backward-compatible complete bounded pages, which may label total_rows as a lower bound. Send false to require an exact total. Send true to opt in explicitly to lower-bound totals and, on the first page, a clearly labelled bounded partial result when the full ordered prefix cannot be proven inside the read budget. */
+  allow_sampled?: boolean | null;
+  interval?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="project_id" type="string" optional />
+<ParamField query="project_version_id" type="string" optional />
+<ParamField query="session_id" type="string" optional />
+<ParamField query="filters" type="string" optional />
+<ParamField query="page_number" type="integer" optional>
+  Zero-based numbered page. Pages whose required ordered work exceeds the finite read contract return HTTP 422 with code page_depth_exceeded; request an earlier page or narrow the time range.
+</ParamField>
+<ParamField query="page_size" type="integer" optional />
+<ParamField query="cursor" type="string" optional>
+  Opaque continuation token returned by the previous page. When supplied, do not also send the numbered-page parameter.
+</ParamField>
+<ParamField query="cursor_mode" type="boolean" optional />
+<ParamField query="attribute_keys" type="string" optional>
+  JSON-encoded list of custom attribute keys to hydrate; only requested keys are returned. Each key resolves to its latest live span value by (start_time, span_id). Comma-separated simple keys remain supported.
+</ParamField>
+<ParamField query="allow_sampled" type="boolean" optional>
+  Omit for backward-compatible complete bounded pages, which may label total_rows as a lower bound. Send false to require an exact total. Send true to opt in explicitly to lower-bound totals and, on the first page, a clearly labelled bounded partial result when the full ordered prefix cannot be proven inside the read budget.
+</ParamField>
+<ParamField query="interval" type="string" optional />
+
+#### Returns
+
+[`TraceObserveListResult`](/docs/sdk/reference/observability-models#traceobservelistresult).
+
+## client.traces.properties
+
+TypeScript: `client.traces.properties`.
+
+### traces.properties.list
+
+Discover filter properties from the shared metrics catalog. Pass cursor_mode=true, page_size (at most 50), source=traces (search_traces) or source=spans (list_spans), per_eval_config=true and project_ids when known. Use role=dimension to narrow to dimensions. Use name as column_id; set filter_config.col_type by mapping category system_metric to SYSTEM_METRIC, custom_attribute to SPAN_ATTRIBUTE, eval_metric to EVAL_METRIC, and annotation_metric to ANNOTATION. Preserve property_id and source for typed attribute bindings. Follow has_more/next_cursor by passing cursor; omit page and exclude_custom_attributes in cursor mode.
+
+<ApiEndpoint method="GET" path="/tracer/dashboard/metrics/" />
+
+**MCP tool**: `list_trace_properties`
+
+<CodeGroup>
+
+```python Python
+result = client.traces.properties.list()
+```
+
+```typescript TypeScript
+const result = await client.traces.properties.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.traces.properties.list(
+    *,
+    workflow: Literal['observability', 'dataset', 'simulation'] | None | NotGiven = NOT_GIVEN,
+    project_ids: str | None | NotGiven = NOT_GIVEN,
+    agent_definition_id: str | None | NotGiven = NOT_GIVEN,
+    per_eval_config: bool | None | NotGiven = NOT_GIVEN,
+    exclude_custom_attributes: bool | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    category: Literal['system_metric', 'eval_metric', 'annotation_metric', 'custom_attribute', 'custom_column'] | None | NotGiven = NOT_GIVEN,
+    role: Literal['metric', 'dimension'] | None | NotGiven = NOT_GIVEN,
+    source: Literal['traces', 'spans', 'sessions', 'users', 'voice_calls', 'prompts', 'datasets', 'simulation', 'both', 'all'] | None | NotGiven = NOT_GIVEN,
+    page: int | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    cursor_mode: bool | None | NotGiven = NOT_GIVEN,
+    cursor: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DashboardMetricsCatalogResult
+```
+
+```typescript TypeScript
+client.traces.properties.list(params: TracesPropertiesListParams = {}, options?: RequestOptions): Promise<models.DashboardMetricsCatalogResult>
+
+export interface TracesPropertiesListParams {
+  workflow?: "observability" | "dataset" | "simulation" | null;
+  project_ids?: string | null;
+  agent_definition_id?: string | null;
+  per_eval_config?: boolean | null;
+  exclude_custom_attributes?: boolean | null;
+  search?: string | null;
+  category?: "system_metric" | "eval_metric" | "annotation_metric" | "custom_attribute" | "custom_column" | null;
+  role?: "metric" | "dimension" | null;
+  source?: "traces" | "spans" | "sessions" | "users" | "voice_calls" | "prompts" | "datasets" | "simulation" | "both" | "all" | null;
+  page?: number | null;
+  page_size?: number | null;
+  cursor_mode?: boolean | null;
+  cursor?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="workflow" type="string" optional enum={["observability", "dataset", "simulation"]} />
+<ParamField query="project_ids" type="string" optional />
+<ParamField query="agent_definition_id" type="string" optional />
+<ParamField query="per_eval_config" type="boolean" optional />
+<ParamField query="exclude_custom_attributes" type="boolean" optional />
+<ParamField query="search" type="string" optional />
+<ParamField query="category" type="string" optional enum={["system_metric", "eval_metric", "annotation_metric", "custom_attribute", "custom_column"]} />
+<ParamField query="role" type="string" optional enum={["metric", "dimension"]} />
+<ParamField query="source" type="string" optional enum={["traces", "spans", "sessions", "users", "voice_calls", "prompts", "datasets", "simulation", "both", "all"]} />
+<ParamField query="page" type="integer" optional />
+<ParamField query="page_size" type="integer" optional />
+<ParamField query="cursor_mode" type="boolean" optional />
+<ParamField query="cursor" type="string" optional />
+
+#### Returns
+
+[`DashboardMetricsCatalogResult`](/docs/sdk/reference/observability-models#dashboardmetricscatalogresult).

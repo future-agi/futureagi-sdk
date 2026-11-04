@@ -1,0 +1,69 @@
+---
+title: "Usage"
+description: "Reference for client.usage in the Future AGI Python and TypeScript SDKs: usage.overview."
+---
+
+`client.usage` on `fi.Client` (Python) and `client.usage` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Account response models](/docs/sdk/reference/account-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+| Method | Description |
+|---|---|
+| [`usage.overview`](#usageoverview) | Return the current organization's usage and cost overview. |
+
+## client.usage
+
+### usage.overview
+
+Return the current organization's usage and cost overview.
+
+<ApiEndpoint method="GET" path="/usage/v2/usage-overview/" />
+
+**MCP tool**: `get_usage_overview`
+
+<CodeGroup>
+
+```python Python
+result = client.usage.overview()
+```
+
+```typescript TypeScript
+const result = await client.usage.overview();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.usage.overview(
+    *,
+    period: str | None | NotGiven = NOT_GIVEN,
+    period_end: str | None | NotGiven = NOT_GIVEN,
+    workspace_id: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.UsageOverviewResult
+```
+
+```typescript TypeScript
+client.usage.overview(params: UsageOverviewParams = {}, options?: RequestOptions): Promise<models.UsageOverviewResult>
+
+export interface UsageOverviewParams {
+  period?: string | null;
+  period_end?: string | null;
+  workspace_id?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="period" type="string" optional />
+<ParamField query="period_end" type="string" optional />
+<ParamField query="workspace_id" type="string" optional />
+
+#### Returns
+
+[`UsageOverviewResult`](/docs/sdk/reference/account-models#usageoverviewresult).
