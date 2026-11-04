@@ -264,6 +264,20 @@ def test_class_reads_are_value_free(owner, name):
     _assert_value_free_class_read(owner, name)
 
 
+@pytest.mark.parametrize("owner", CLIENT_TYPES, ids=lambda cls: cls.__name__)
+def test_unset_instance_never_reads_another_clients_keys(owner):
+    """Expected RED before the fix: an instance that never set credentials sees the last client's keys."""
+    _client(owner, KEYS_A, StubTransport())
+    _client(owner, KEYS_B, StubTransport())
+    bare = object.__new__(owner)  # never initialised, so it never set its own credentials
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always", DeprecationWarning)
+        assert bare._fi_api_key is None
+        assert bare._fi_secret_key is None
+        assert getattr(bare, "_fi_api_key", "missing") is None
+    assert not caught  # instance access is not the deprecated class path
+
+
 @pytest.mark.parametrize("name", CREDENTIAL_NAMES)
 def test_uninitialized_subclass_class_reads_are_value_free(name):
     """Expected RED: an untouched subclass inherits the base class's key."""
