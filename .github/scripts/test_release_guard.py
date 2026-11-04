@@ -255,9 +255,17 @@ def extended_fixture(*, lockfile=True, constants=False):
     return before, after
 
 
+def assert_guard_accepts(test, call, *args, **kwargs):
+    """In a must-accept case, a guard refusal is a test FAILURE (assertion), not an error."""
+    try:
+        return call(*args, **kwargs)
+    except GuardError as exc:
+        test.fail(f'guard refused a valid release change: {exc}')
+
+
 class ExtendedVersionDiffTests(unittest.TestCase):
     def test_accepts_lockfile_and_constants_with_existing_two_argument_api(self):
-        validate_version_changes(*extended_fixture(constants=True))
+        assert_guard_accepts(self, validate_version_changes, *extended_fixture(constants=True))
 
     def test_rejects_lockfile_dependency_integrity_and_nested_version_edits(self):
         for location, field, value in [
@@ -382,7 +390,7 @@ class ExtendedAuthorizationTests(unittest.TestCase):
             'typescript/futureagi/package.json', 'typescript/futureagi/CHANGELOG.md', LOCKFILE,
         })
         with patch.object(github, 'content', wraps=github.content) as content:
-            self.assertEqual(github.approve(1, 'futureagi-release-bot[bot]'), 'head')
+            self.assertEqual(assert_guard_accepts(self, github.approve, 1, 'futureagi-release-bot[bot]'), 'head')
             content.assert_any_call(LOCKFILE, 'base', optional=True)
             content.assert_any_call(CONSTANTS, 'base', optional=True)
         self.assertEqual(github.posts[0][1]['commit_id'], 'head')
@@ -390,7 +398,7 @@ class ExtendedAuthorizationTests(unittest.TestCase):
     def test_approves_eight_file_shape_with_base_constants(self):
         github = self.github(constants=True)
         self.assertEqual(len(github.after), 8)
-        self.assertEqual(github.approve(1, 'futureagi-release-bot[bot]'), 'head')
+        self.assertEqual(assert_guard_accepts(self, github.approve, 1, 'futureagi-release-bot[bot]'), 'head')
         self.assertEqual(github.posts[0][1]['event'], 'APPROVE')
 
     def test_does_not_require_either_optional_file_when_absent_at_base(self):
