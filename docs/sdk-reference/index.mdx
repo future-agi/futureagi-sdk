@@ -94,7 +94,19 @@ Responses are parsed into models (`fi.platform.models` / `@future-agi/sdk/platfo
 
 ### Errors
 
-HTTP errors raise a subclass of `APIError` (`fi.platform` / `@future-agi/sdk`) with `status_code` / `status`, `body`, `detail` and `request_id` / `requestId`:
+HTTP errors raise a subclass of `APIError` with `status_code` / `status`, `body`, `detail` and `request_id` / `requestId`. Import the error classes from `fi.platform` (Python) and from **`@future-agi/sdk/platform`** (TypeScript): the package root does not export them, and its `RateLimitError` is an older, unrelated class that an `instanceof` check against platform errors never matches.
+
+<CodeGroup>
+```python Python
+from fi.platform import APIError, NotFoundError, RateLimitError
+```
+
+```typescript TypeScript
+import { APIError, NotFoundError, RateLimitError } from "@future-agi/sdk/platform";
+```
+</CodeGroup>
+
+<div class="sdk-ref-table">
 
 | Status | Error |
 |---|---|
@@ -107,6 +119,8 @@ HTTP errors raise a subclass of `APIError` (`fi.platform` / `@future-agi/sdk`) w
 | 422 | `UnprocessableEntityError` |
 | 429 | `RateLimitError` |
 | 5xx | `InternalServerError` |
+
+</div>
 
 Network failures raise `APIConnectionError`. All of them extend `FutureAGIError`.
 

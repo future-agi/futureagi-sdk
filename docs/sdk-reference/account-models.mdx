@@ -3,9 +3,11 @@ title: "Account response models"
 description: "The 8 response models returned by the account resources of the Future AGI Python and TypeScript SDKs, with every field and its type."
 ---
 
-The models returned by `client.account`, `client.workspaces`, `client.usage`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call, and `strict_responses=True` (Python) or `strictResponses: true` (TypeScript) rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)).
+The models returned by `client.account`, `client.workspaces`, `client.usage`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call. In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)); TypeScript has no strict mode.
 
 ## Models
+
+<div class="sdk-ref-table">
 
 | Model | Fields |
 |---|---|
@@ -17,3 +19,5 @@ The models returned by `client.account`, `client.workspaces`, `client.usage`, im
 | <span id="userinfotwofactormethods">`UserInfoTwoFactorMethods`</span> | `totp: boolean`, `passkey: boolean` |
 | <span id="workspacemanagementitem">`WorkspaceManagementItem`</span> | `id: string`, `name: string`, `display_name: string`, `description: string`, `is_default: boolean`, `member_count: integer`, `created_at: string`, `created_by: string` |
 | <span id="workspacemanagementlistresult">`WorkspaceManagementListResult`</span> | `organization: string`, `workspaces:` [`WorkspaceManagementItem`](#workspacemanagementitem)[], `total: integer` |
+
+</div>

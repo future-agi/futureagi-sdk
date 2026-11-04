@@ -3,9 +3,11 @@ title: "Prompts response models"
 description: "The 6 response models returned by the prompts resources of the Future AGI Python and TypeScript SDKs, with every field and its type."
 ---
 
-The models returned by `client.prompts`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call, and `strict_responses=True` (Python) or `strictResponses: true` (TypeScript) rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)).
+The models returned by `client.prompts`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call. In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)); TypeScript has no strict mode.
 
 ## Models
+
+<div class="sdk-ref-table">
 
 | Model | Fields |
 |---|---|
@@ -15,3 +17,5 @@ The models returned by `client.prompts`, importable from `fi.platform.models` (P
 | <span id="prompttemplate">`PromptTemplate`</span> | `id: string`, `name: string`, `description: string`, `variable_names: any`, `organization: string`, `prompt_folder: string`, `placeholders: any`, `created_by: string` |
 | <span id="prompttemplatepatch">`PromptTemplatePatch`</span> | `id: string`, `name: string`, `description: string`, `variable_names: any`, `organization: string`, `prompt_folder: string`, `placeholders: any`, `created_by: string` |
 | <span id="promptsrunresult">`PromptsRunResult`</span> | `template_id: string`, `prompt_config: any[]`, `variable_names: any`, `evaluation_configs: any[]`, `placeholders: any` |
+
+</div>

@@ -3,9 +3,11 @@ title: "Knowledge bases response models"
 description: "The 10 response models returned by the knowledge bases resources of the Future AGI Python and TypeScript SDKs, with every field and its type."
 ---
 
-The models returned by `client.knowledge_bases`, `client.file_knowledge_bases`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call, and `strict_responses=True` (Python) or `strictResponses: true` (TypeScript) rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)).
+The models returned by `client.knowledge_bases`, `client.file_knowledge_bases`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call. In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)); TypeScript has no strict mode.
 
 ## Models
+
+<div class="sdk-ref-table">
 
 | Model | Fields |
 |---|---|
@@ -19,3 +21,5 @@ The models returned by `client.knowledge_bases`, `client.file_knowledge_bases`, 
 | <span id="legacyknowledgebasetablecolumn">`LegacyKnowledgeBaseTableColumn`</span> | `id: string`, `name: string` |
 | <span id="legacyknowledgebasetableresult">`LegacyKnowledgeBaseTableResult`</span> | `column_config:` [`LegacyKnowledgeBaseTableColumn`](#legacyknowledgebasetablecolumn)[], `table_data:` [`LegacyKnowledgeBaseTableRow`](#legacyknowledgebasetablerow)[], `total_rows: integer` |
 | <span id="legacyknowledgebasetablerow">`LegacyKnowledgeBaseTableRow`</span> | `id: string`, `name: string`, `files_uploaded: integer`, `status: string`, `error: string`, `updated_at: string`, `created_by: string` |
+
+</div>

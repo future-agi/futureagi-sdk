@@ -178,15 +178,41 @@ def _model_link(name: str, homes: dict[str, str], here: str | None) -> str:
 # --------------------------------------------------------------------------- #
 
 
-def _example_value(p: Param, lang: str) -> str:
-    schema = p.schema or {}
+def _example_value(p: Param, lang: str, definitions: dict) -> str:
+    return _example_for(p.name, p.schema or {}, lang, definitions, depth=0)
+
+
+def _example_for(
+    name: str, schema: dict, lang: str, definitions: dict, depth: int
+) -> str:
+    """A value that type-checks against `schema` in both SDKs.
+
+    A `$ref` is resolved before the shape is chosen, so an object-valued field is
+    shown as an object literal of its required fields (or, when nothing is
+    required, its first enum field, which is usually the one a user sets), never
+    as a placeholder string the compiler rejects.
+    """
     if is_file(schema):
         return '"path/to/file"'
+    if "$ref" in schema and depth < 3:
+        target = definitions.get(class_name(schema["$ref"]), {})
+        props = target.get("properties", {})
+        chosen = [n for n in target.get("required", []) if n in props]
+        if not chosen:
+            chosen = [n for n, prop in props.items() if prop.get("enum")][:1]
+        fields = [
+            (n, _example_for(n, props[n], lang, definitions, depth + 1)) for n in chosen
+        ]
+        if not fields:
+            return "{}"
+        if lang == "python":
+            return "{" + ", ".join(f"{json.dumps(n)}: {v}" for n, v in fields) + "}"
+        return "{ " + ", ".join(f"{ts.prop_key(n)}: {v}" for n, v in fields) + " }"
     if schema.get("enum"):
         return json.dumps(schema["enum"][0])
     kind = schema.get("type")
     if is_json_value(schema) or kind == "string" or not kind:
-        return json.dumps(f"your-{p.name.replace('_', '-')}")
+        return json.dumps(f"your-{name.replace('_', '-')}")
     if kind == "integer":
         return "1"
     if kind == "number":
@@ -220,11 +246,12 @@ def _example_params(op: Op) -> list[Param]:
     ]
 
 
-def python_example(op: Op) -> str:
+def python_example(op: Op, definitions: dict) -> str:
     call = f"client.{dotted(op.namespace, 'python')}.{op.method_name}"
     args = [_placeholder(p) for p in op.params_in("path")]
     args += [
-        f"{py.arg_name(p)}={_example_value(p, 'python')}" for p in _example_params(op)
+        f"{py.arg_name(p)}={_example_value(p, 'python', definitions)}"
+        for p in _example_params(op)
     ]
     if len(args) > 2:
         call = f"{call}(\n" + "".join(f"    {a},\n" for a in args) + ")"
@@ -235,11 +262,11 @@ def python_example(op: Op) -> str:
     return f"result = {call}"
 
 
-def typescript_example(op: Op) -> str:
+def typescript_example(op: Op, definitions: dict) -> str:
     call = f"client.{dotted(op.namespace, 'typescript')}.{ts.ts_method(op)}"
     args = [_placeholder(p) for p in op.params_in("path")]
     fields = [
-        f"{ts.prop_key(p.name)}: {_example_value(p, 'typescript')}"
+        f"{ts.prop_key(p.name)}: {_example_value(p, 'typescript', definitions)}"
         for p in _example_params(op)
     ]
     if len(fields) > 1:
@@ -324,7 +351,7 @@ def _param_field(p: Param) -> str:
     return f"<ParamField {' '.join(attrs)}>\n  {text}\n</ParamField>\n"
 
 
-def _method_section(op: Op, homes: dict[str, str]) -> str:
+def _method_section(op: Op, homes: dict[str, str], definitions: dict) -> str:
     out = [f"### {op.id}\n\n", f"{md(op.description)}\n\n"]
     out.append(f'<ApiEndpoint method="{op.method}" path="{op.path}" />\n\n')
     facts = []
@@ -352,9 +379,9 @@ def _method_section(op: Op, homes: dict[str, str]) -> str:
         )
     out.append(
         "<CodeGroup>\n\n```python Python\n"
-        + python_example(op)
+        + python_example(op, definitions)
         + "\n```\n\n```typescript TypeScript\n"
-        + typescript_example(op)
+        + typescript_example(op, definitions)
         + "\n```\n\n</CodeGroup>\n\n"
     )
     out.append(
@@ -406,6 +433,7 @@ def resource_page(
     root: tuple[str, ...],
     area: str,
     homes: dict[str, str],
+    definitions: dict,
 ) -> str:
     namespaces = [root] + sorted(ns for ns in tree if ns[0] == root[0] and ns != root)
     ops = [
@@ -424,17 +452,21 @@ def resource_page(
         + f". The models these methods return are on [{area} response models]({models_href(area)}); "
         f"how arguments, pagination, errors and strict mode work is in the [overview]({SITE_PATH}).\n\n"
     )
-    out.append("## Methods\n\n| Method | Description |\n|---|---|\n")
+    # Tables sit in a bounded scroller (<div class="sdk-ref-table">, styled by the docs
+    # site) so a long identifier scrolls inside the table instead of widening a phone page.
+    out.append(
+        '## Methods\n\n<div class="sdk-ref-table">\n\n| Method | Description |\n|---|---|\n'
+    )
     for op in ops:
         summary = md(_first_sentence(op.description)).replace("|", "\\|")
         out.append(f"| [`{op.id}`](#{slug(op.id)}) | {summary} |\n")
-    out.append("\n")
+    out.append("\n</div>\n\n")
     for ns in namespaces:
         out.append(f"## client.{dotted(ns, 'python')}\n\n")
         if ns != root:
             out.append(f"TypeScript: `client.{dotted(ns, 'typescript')}`.\n\n")
         for op in sorted(tree[ns], key=lambda o: o.method_name):
-            out.append(_method_section(op, homes))
+            out.append(_method_section(op, homes, definitions))
     return "".join(out).rstrip() + "\n"
 
 
@@ -469,16 +501,19 @@ def models_page(
     out.append(
         f"The models returned by {resources}, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). "
         "Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. "
-        "Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call, and `strict_responses=True` (Python) or `strictResponses: true` (TypeScript) "
-        f"rejects a response that misses a field the contract requires (see the [overview]({SITE_PATH}#strict-mode)).\n\n"
+        "Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call. "
+        f"In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview]({SITE_PATH}#strict-mode)); TypeScript has no strict mode.\n\n"
     )
-    out.append("## Models\n\n| Model | Fields |\n|---|---|\n")
+    out.append(
+        '## Models\n\n<div class="sdk-ref-table">\n\n| Model | Fields |\n|---|---|\n'
+    )
     for name in names:
         definition = spec["definitions"][name]
         label = f'<span id="{slug(name)}">`{name}`</span>'
         if definition.get("description"):
             label += "<br/>" + md(definition["description"]).replace("|", "\\|")
         out.append(f"| {label} | {_field_cell(spec, name, homes, area)} |\n")
+    out.append("\n</div>\n")
     return "".join(out).rstrip() + "\n"
 
 
@@ -552,10 +587,14 @@ def index_page(
         "`Client(strict_responses=True)` (Python) raises `ResponseValidationError` when a response misses a field the contract marks required. "
         "Use it in tests to catch contract drift; leave it off in production.\n\n"
         "### Errors\n\n"
-        "HTTP errors raise a subclass of `APIError` (`fi.platform` / `@future-agi/sdk`) with `status_code` / `status`, `body`, `detail` and `request_id` / `requestId`:\n\n"
-        "| Status | Error |\n|---|---|\n"
+        "HTTP errors raise a subclass of `APIError` with `status_code` / `status`, `body`, `detail` and `request_id` / `requestId`. "
+        "Import the error classes from `fi.platform` (Python) and from **`@future-agi/sdk/platform`** (TypeScript): the package root does not export them, "
+        "and its `RateLimitError` is an older, unrelated class that an `instanceof` check against platform errors never matches.\n\n"
+        "<CodeGroup>\n```python Python\nfrom fi.platform import APIError, NotFoundError, RateLimitError\n```\n\n"
+        '```typescript TypeScript\nimport { APIError, NotFoundError, RateLimitError } from "@future-agi/sdk/platform";\n```\n</CodeGroup>\n\n'
+        '<div class="sdk-ref-table">\n\n| Status | Error |\n|---|---|\n'
         "| 400 | `BadRequestError` |\n| 401 | `AuthenticationError` |\n| 402 | `PaymentRequiredError` |\n| 403 | `PermissionDeniedError` |\n"
-        "| 404 | `NotFoundError` |\n| 409 | `ConflictError` |\n| 422 | `UnprocessableEntityError` |\n| 429 | `RateLimitError` |\n| 5xx | `InternalServerError` |\n\n"
+        "| 404 | `NotFoundError` |\n| 409 | `ConflictError` |\n| 422 | `UnprocessableEntityError` |\n| 429 | `RateLimitError` |\n| 5xx | `InternalServerError` |\n\n</div>\n\n"
         "Network failures raise `APIConnectionError`. All of them extend `FutureAGIError`.\n\n"
         "### Stability\n\n"
         "A method marked **Beta** may change without notice; the first call emits a `BetaWarning` (Python) or a console warning (TypeScript).\n\n"
@@ -603,6 +642,8 @@ def emit_pages(spec: dict, ops: list[Op]) -> dict[str, str]:
     out = {INDEX_FILE: index_page(tree, areas), NAV_FILE: navigation(areas)}
     for area, members in areas:
         for root in members:
-            out[f"{page_name(root)}.mdx"] = resource_page(tree, root, area, homes)
+            out[f"{page_name(root)}.mdx"] = resource_page(
+                tree, root, area, homes, spec.get("definitions", {})
+            )
         out[f"{models_page_name(area)}.mdx"] = models_page(spec, area, members, homes)
     return out

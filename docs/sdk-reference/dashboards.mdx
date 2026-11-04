@@ -7,6 +7,8 @@ description: "Reference for client.dashboards in the Future AGI Python and TypeS
 
 ## Methods
 
+<div class="sdk-ref-table">
+
 | Method | Description |
 |---|---|
 | [`dashboards.create`](#dashboardscreate) | Create an empty dashboard in the current workspace; add widgets with create_dashboard_widget. |
@@ -22,6 +24,8 @@ description: "Reference for client.dashboards in the Future AGI Python and TypeS
 | [`dashboards.widgets.list`](#dashboardswidgetslist) | List the widgets on a dashboard. |
 | [`dashboards.widgets.query`](#dashboardswidgetsquery) | Execute a saved widget's query and return its chart data. |
 | [`dashboards.widgets.update`](#dashboardswidgetsupdate) | Update selected fields on a dashboard widget, such as its query_config, chart_config, or layout. |
+
+</div>
 
 ## client.dashboards
 
@@ -307,12 +311,12 @@ Run an ad-hoc dashboard query (time_range and metrics, with optional filters and
 <CodeGroup>
 
 ```python Python
-result = client.dashboards.query(time_range="your-time-range", metrics=[])
+result = client.dashboards.query(time_range={"preset": "30m"}, metrics=[])
 ```
 
 ```typescript TypeScript
 const result = await client.dashboards.query({
-  time_range: "your-time-range",
+  time_range: { preset: "30m" },
   metrics: [],
 });
 ```

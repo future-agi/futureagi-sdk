@@ -3,9 +3,11 @@ title: "Annotation response models"
 description: "The 30 response models returned by the annotation resources of the Future AGI Python and TypeScript SDKs, with every field and its type."
 ---
 
-The models returned by `client.annotation_queues`, `client.annotations`, `client.scores`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call, and `strict_responses=True` (Python) or `strictResponses: true` (TypeScript) rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)).
+The models returned by `client.annotation_queues`, `client.annotations`, `client.scores`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call. In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)); TypeScript has no strict mode.
 
 ## Models
+
+<div class="sdk-ref-table">
 
 | Model | Fields |
 |---|---|
@@ -39,3 +41,5 @@ The models returned by `client.annotation_queues`, `client.annotations`, `client
 | <span id="queueremovelabelresult">`QueueRemoveLabelResult`</span> | `removed: boolean` |
 | <span id="queuesubmitannotationsresult">`QueueSubmitAnnotationsResult`</span> | `submitted: integer` |
 | <span id="score">`Score`</span> | `id: string`, `source_type: string`, `source_id: any`, `label_id: string`, `label_name: string`, `label_type: string`, `label_settings: any`, `label_allow_notes: boolean`, `value: any`, `value_history: any`, `score_source: string`, `notes: string`, `annotator: string`, `annotator_name: string`, `annotator_email: string`, `queue_item: string`, `queue_id: any`, `created_at: string`, `updated_at: string` |
+
+</div>

@@ -3,9 +3,11 @@ title: "Observability response models"
 description: "The 59 response models returned by the observability resources of the Future AGI Python and TypeScript SDKs, with every field and its type."
 ---
 
-The models returned by `client.projects`, `client.traces`, `client.spans`, `client.sessions`, `client.dashboards`, `client.error_clusters`, `client.alerts`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call, and `strict_responses=True` (Python) or `strictResponses: true` (TypeScript) rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)).
+The models returned by `client.projects`, `client.traces`, `client.spans`, `client.sessions`, `client.dashboards`, `client.error_clusters`, `client.alerts`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call. In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)); TypeScript has no strict mode.
 
 ## Models
+
+<div class="sdk-ref-table">
 
 | Model | Fields |
 |---|---|
@@ -68,3 +70,5 @@ The models returned by `client.projects`, `client.traces`, `client.spans`, `clie
 | <span id="useralertmonitorlistresult">`UserAlertMonitorListResult`</span> | `column_config:` [`UserAlertMonitorListColumn`](#useralertmonitorlistcolumn)[], `table:` [`UserAlertMonitorListItem`](#useralertmonitorlistitem)[], `metadata:` [`UserAlertMonitorListMetadata`](#useralertmonitorlistmetadata) |
 | <span id="useralertmonitorlog">`UserAlertMonitorLog`</span> | `id: string`, `resolved_by:` [`User`](#user), `created_at: string`, `type: string`, `message: string`, `resolved: boolean`, `resolved_at: string`, `link: string`, `time_window_start: string`, `time_window_end: string` |
 | <span id="useralertmonitortrend">`UserAlertMonitorTrend`</span> | `timestamp: string`, `count: integer` |
+
+</div>

@@ -3,9 +3,11 @@ title: "Simulation response models"
 description: "The 20 response models returned by the simulation resources of the Future AGI Python and TypeScript SDKs, with every field and its type."
 ---
 
-The models returned by `client.agents`, `client.simulation`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call, and `strict_responses=True` (Python) or `strictResponses: true` (TypeScript) rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)).
+The models returned by `client.agents`, `client.simulation`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call. In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)); TypeScript has no strict mode.
 
 ## Models
+
+<div class="sdk-ref-table">
 
 | Model | Fields |
 |---|---|
@@ -29,3 +31,5 @@ The models returned by `client.agents`, `client.simulation`, importable from `fi
 | <span id="simulateevalconfigresponse">`SimulateEvalConfigResponse`</span> | `id: string`, `name: string`, `config: any`, `mapping: any`, `filters: object[]`, `error_localizer: boolean`, `model: string`, `status: string`, `eval_group: string`, `template_id: string`, `eval_type: string`, `regradable: boolean`, `editable: boolean` |
 | <span id="testexecution">`TestExecution`</span> | `id: string`, `run_test: string`, `run_test_name: string`, `agent_definition_name: string`, `status: string`, `error_reason: string`, `started_at: string`, `completed_at: string`, `total_scenarios: integer`, `total_calls: integer`, `completed_calls: integer`, `failed_calls: integer`, `execution_metadata: any`, `duration_seconds: any`, `success_rate: any`, `calls:` [`CallExecution`](#callexecution)[], `created_at: string`, `scenario_ids: any`, `simulator_agent_name: string`, `simulator_agent_id: string`, `agent_definition_used_name: string`, `agent_definition_used_id: string`, `calls_attempted: any`, `calls_connected_percentage: any` |
 | <span id="testexecutionanalytics">`TestExecutionAnalytics`</span> | `fail_rate_over_test_runs: any`, `evaluation_categories_over_test_runs: any`, `metadata: any` |
+
+</div>

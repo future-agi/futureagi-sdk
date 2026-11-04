@@ -3,9 +3,11 @@ title: "Datasets & evals response models"
 description: "The 42 response models returned by the datasets & evals resources of the Future AGI Python and TypeScript SDKs, with every field and its type."
 ---
 
-The models returned by `client.datasets`, `client.evals`, `client.experiments`, `client.optimizations`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call, and `strict_responses=True` (Python) or `strictResponses: true` (TypeScript) rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)).
+The models returned by `client.datasets`, `client.evals`, `client.experiments`, `client.optimizations`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call. In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)); TypeScript has no strict mode.
 
 ## Models
+
+<div class="sdk-ref-table">
 
 | Model | Fields |
 |---|---|
@@ -51,3 +53,5 @@ The models returned by `client.datasets`, `client.evals`, `client.experiments`, 
 | <span id="optimizationscreateresult">`OptimizationsCreateResult`</span> | `id: string`, `name: string`, `optimizer_algorithm: string`, `optimizer_config: any`, `created_at: string` |
 | <span id="_evaltasklistresultresponse">`_EvalTaskListResultResponse`</span> | `metadata: any`, `table:` [`_EvalTaskListRowResponse`](#_evaltasklistrowresponse)[], `config: any[]` |
 | <span id="_evaltasklistrowresponse">`_EvalTaskListRowResponse`</span> | `id: string`, `name: string`, `project_name: string`, `status: string`, `run_type: string`, `filters_applied: any`, `created_at: string`, `evals_applied: string[]`, `sampling_rate: number`, `last_run: string` |
+
+</div>
