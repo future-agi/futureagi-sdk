@@ -1,12 +1,11 @@
 name: Publish
 
-# Dispatched by the main release workflow; manually dispatch on main only to
-# retry an existing tag. A top-level workflow gives npm/PyPI one OIDC identity.
+# Invoked through workflow_dispatch on main by the release workflow's app token;
+# manually dispatch on main to retry an existing tag. Other refs fail verification.
+# A top-level workflow gives npm/PyPI one OIDC identity.
 # Trust: future-agi/futureagi-sdk, publish.yml, environment pypi or npm.
 # No release-event trigger: a release created from another branch cannot publish.
 on:
-  repository_dispatch:
-    types: [sdk-release-publish]
   workflow_dispatch:
     inputs:
       tag:
@@ -18,11 +17,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: sdk-publish-${{ inputs.tag || github.event.client_payload.tag }}
+  group: sdk-publish-${{ inputs.tag }}
   cancel-in-progress: false
 
 env:
-  TAG: ${{ inputs.tag || github.event.client_payload.tag }}
+  TAG: ${{ inputs.tag }}
 
 jobs:
   verify:
@@ -53,7 +52,7 @@ jobs:
   python:
     name: PyPI
     needs: verify
-    if: startsWith(inputs.tag || github.event.client_payload.tag, 'python-v')
+    if: startsWith(inputs.tag, 'python-v')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: pypi
@@ -83,7 +82,7 @@ jobs:
         run: |
           python -m pip install --quiet python/dist/*.whl
           python -c "import fi, fi.platform, fi.gateway; print('futureagi', fi.__version__)"
-      - uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086  # v1.14.3
         with:
           packages-dir: python/dist
           skip-existing: true
@@ -122,7 +121,7 @@ jobs:
   typescript:
     name: npm
     needs: verify
-    if: startsWith(inputs.tag || github.event.client_payload.tag, 'typescript-v')
+    if: startsWith(inputs.tag, 'typescript-v')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: npm

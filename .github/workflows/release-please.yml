@@ -21,6 +21,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    environment: release-please
     permissions:
       contents: read
       actions: read
@@ -49,7 +50,7 @@ jobs:
             echo '::error::Configure RELEASE_BOT_APP_ID and RELEASE_BOT_PRIVATE_KEY; see sdkgen/RELEASING.md.'
             exit 1
           }
-      - uses: actions/create-github-app-token@v2
+      - uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349  # v2.2.2
         if: steps.gate.outputs.ready == 'true'
         id: app-token
         with:
@@ -57,7 +58,7 @@ jobs:
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
           owner: future-agi
           repositories: futureagi-sdk
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071  # v4.4.1
         if: steps.gate.outputs.ready == 'true'
         id: release
         with:
@@ -96,10 +97,9 @@ jobs:
           PYTHON_TAG: ${{ steps.release.outputs['python--tag_name'] }}
           TYPESCRIPT_TAG: ${{ steps.release.outputs['typescript/futureagi--tag_name'] }}
         run: |
-          # repository_dispatch runs publish.yml on the default branch (main),
-          # giving both OIDC providers one stable workflow identity, including retries.
+          # Dispatch publish.yml explicitly on main with the app token (Actions: write).
+          # Both OIDC providers keep one stable workflow identity, including retries.
           for tag in "$PYTHON_TAG" "$TYPESCRIPT_TAG"; do
             [ -n "$tag" ] || continue
-            jq -n --arg tag "$tag" '{event_type:"sdk-release-publish",client_payload:{tag:$tag}}' \
-              | gh api --method POST "repos/$GH_REPO/dispatches" --input -
+            gh workflow run publish.yml --ref main -f tag="$tag"
           done
