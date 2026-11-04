@@ -68,6 +68,7 @@ Allowed changes:
 - `python/pyproject.toml`: only its package-version declaration.
 - `python/fi/__init__.py`: only its `__version__` declaration.
 - `typescript/futureagi/package.json`: only its `version` property.
+- `typescript/futureagi/package-lock.json`: only the top-level `version` and `packages[""].version`, matching the manifest. Dependency versions, constraints, integrity hashes, resolved URLs, scripts, and all other lockfile content must remain unchanged.
 - The corresponding package `CHANGELOG.md` files.
 
 No application code, dependency updates, scripts, workflow edits, renamed/deleted files, or new packages are automatically approved. A changed version must match all of that package's version files and include its changelog. Approval is bound to the validated head SHA; organization stale-review dismissal invalidates it on subsequent pushes.
