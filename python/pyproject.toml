@@ -28,7 +28,6 @@ tzdata = ">=2024.1"
 urllib3 = ">=2.2"
 pydantic = ">=2.9,<3.0"
 tqdm = ">=4.67"
-rouge_score = "*"
 Levenshtein = "*"
 scipy = [
     {version = ">=1.13.0,<1.15.0", python = "<3.10"},
