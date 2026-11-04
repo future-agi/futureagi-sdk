@@ -60,3 +60,6 @@ output/
 
 # node_modules
 node_modules/
+
+# Local backend credentials written by sdkgen/local_api_key.py
+.env.local

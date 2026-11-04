@@ -1,0 +1,205 @@
+name: Publish
+
+# Dispatched by the main release workflow; manually dispatch on main only to
+# retry an existing tag. A top-level workflow gives npm/PyPI one OIDC identity.
+# Trust: future-agi/futureagi-sdk, publish.yml, environment pypi or npm.
+# No release-event trigger: a release created from another branch cannot publish.
+on:
+  repository_dispatch:
+    types: [sdk-release-publish]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish (python-vX.Y.Z or typescript-vX.Y.Z)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sdk-publish-${{ inputs.tag || github.event.client_payload.tag }}
+  cancel-in-progress: false
+
+env:
+  TAG: ${{ inputs.tag || github.event.client_payload.tag }}
+
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      sha: ${{ steps.tag.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require a tag on main with passing CI and E2E
+        id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # Main may advance between release preparation and tag creation. Wait
+        # for THIS tag's commit, never publish based on an earlier green SHA.
+        run: python .github/scripts/release_guard.py validate-tag --tag "$TAG" --wait-seconds 3900
+
+  python:
+    name: PyPI
+    needs: verify
+    if: startsWith(inputs.tag || github.event.client_payload.tag, 'python-v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.verify.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install --quiet --upgrade pip build
+          python -m build python
+          version=$(python - <<'EOF'
+          import pathlib, re
+          print(re.search(r'^version = "(.+)"$', pathlib.Path("python/pyproject.toml").read_text(), re.M).group(1))
+          EOF
+          )
+          [ "python-v$version" = "$TAG" ] || { echo "::error::pyproject.toml is $version, tag is $TAG"; exit 1; }
+          ls -l python/dist
+      - name: Install the wheel and import it
+        run: |
+          python -m pip install --quiet python/dist/*.whl
+          python -c "import fi, fi.platform, fi.gateway; print('futureagi', fi.__version__)"
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python/dist
+          skip-existing: true
+
+      - name: Install the published package from PyPI and run the quickstart
+        # What a user gets, not what we built: a fresh venv, no local files,
+        # the exact version from the index. PyPI's CDN can lag the upload by
+        # a minute or two.
+        run: |
+          version="${TAG#python-v}"
+          python -m venv "$RUNNER_TEMP/smoke"
+          for attempt in $(seq 1 20); do
+            if "$RUNNER_TEMP/smoke/bin/pip" install --quiet --no-cache-dir "futureagi==$version"; then
+              break
+            fi
+            [ "$attempt" -lt 20 ] || { echo "::error::futureagi==$version not installable from PyPI after 10 minutes"; exit 1; }
+            sleep 30
+          done
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/smoke/bin/python" - <<'EOF'
+          import fi
+          from fi import Client
+          from fi.platform import AsyncClient, APIError, NotFoundError, RequestOptions
+          from fi.gateway import Gateway
+
+          client = Client(api_key="smoke", secret_key="smoke", base_url="http://127.0.0.1:9")
+          assert callable(client.datasets.create) and callable(client.spans.ingest)
+          assert len(Client._resources) >= 24, Client._resources
+          try:
+              client.account.whoami(options=RequestOptions(max_retries=0, timeout=1))
+          except Exception as error:  # no server on port 9: the transport must raise its own error type
+              assert type(error).__module__.startswith("fi.platform"), type(error)
+          print("futureagi", fi.__version__, "installed from PyPI; client, gateway and resources import")
+          EOF
+
+  typescript:
+    name: npm
+    needs: verify
+    if: startsWith(inputs.tag || github.event.client_payload.tag, 'typescript-v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    defaults:
+      run:
+        working-directory: typescript/futureagi
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.verify.outputs.sha }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+      - name: Use npm with trusted publishing support
+        run: npm install --global npm@11.6.2
+      - name: Install and build
+        run: |
+          pnpm install --ignore-workspace --frozen-lockfile --ignore-scripts
+          pnpm run build
+          version=$(node -p "require('./package.json').version")
+          [ "typescript-v$version" = "$TAG" ] || { echo "::error::package.json is $version, tag is $TAG"; exit 1; }
+      - name: Publish through the npm trusted publisher
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "$name@$version is already on npm"
+            exit 0
+          fi
+          # Do not use a placeholder/persistent token: npm exchanges the Actions
+          # identity for short-lived publish credentials scoped to this workflow.
+          unset NODE_AUTH_TOKEN NPM_TOKEN
+          npm publish --access public --provenance --ignore-scripts
+
+      - name: Install the published package from npm and run the quickstart
+        # A fresh project, the exact version from the registry, both module
+        # systems the package ships (CommonJS and ESM).
+        working-directory: ${{ runner.temp }}
+        run: |
+          version="${TAG#typescript-v}"
+          mkdir smoke && cd smoke && npm init -y >/dev/null
+          for attempt in $(seq 1 20); do
+            if npm install --no-audit --no-fund "@future-agi/sdk@$version" >/dev/null 2>&1; then
+              break
+            fi
+            [ "$attempt" -lt 20 ] || { echo "::error::@future-agi/sdk@$version not installable from npm after 10 minutes"; exit 1; }
+            sleep 30
+          done
+          node - <<'EOF'
+          const { Client, platform } = require("@future-agi/sdk");
+          const { Datasets } = require("@future-agi/sdk/platform");
+          const client = new Client({ apiKey: "smoke", secretKey: "smoke", baseUrl: "http://127.0.0.1:9", maxRetries: 0, timeout: 1000 });
+          if (typeof client.datasets.create !== "function" || typeof client.spans.ingest !== "function") throw new Error("resources missing");
+          if (!(client.datasets instanceof Datasets)) throw new Error("@future-agi/sdk/platform does not export the resource classes");
+          client.account.whoami().then(
+            () => { throw new Error("unexpected success"); },
+            (error) => {
+              if (!(error instanceof platform.APIConnectionError)) throw error;
+              console.log("@future-agi/sdk installed from npm (CommonJS); client and resources load");
+            },
+          );
+          EOF
+          cat > smoke.mjs <<'EOF'
+          import { Client } from "@future-agi/sdk";
+          import { KnowledgeBases } from "@future-agi/sdk/platform";
+          import "@future-agi/sdk/platform/models";
+          const client = new Client({ apiKey: "smoke", secretKey: "smoke", baseUrl: "http://127.0.0.1:9" });
+          if (typeof client.datasets.createFromFile !== "function" || typeof client.knowledgeBases.create !== "function") throw new Error("ESM resources missing");
+          if (!(client.knowledgeBases instanceof KnowledgeBases)) throw new Error("ESM @future-agi/sdk/platform does not export the resource classes");
+          console.log("ESM import ok");
+          EOF
+          node smoke.mjs

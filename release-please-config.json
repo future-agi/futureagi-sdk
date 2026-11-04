@@ -1,0 +1,31 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "include-v-in-tag": true,
+  "include-component-in-tag": true,
+  "separate-pull-requests": false,
+  "pull-request-title-pattern": "chore(release): ${component} ${version}",
+  "changelog-sections": [
+    { "type": "feat", "section": "Features" },
+    { "type": "fix", "section": "Bug Fixes" },
+    { "type": "perf", "section": "Performance Improvements" },
+    { "type": "revert", "section": "Reverts" },
+    { "type": "docs", "section": "Documentation", "hidden": true },
+    { "type": "chore", "section": "Chores", "hidden": true },
+    { "type": "refactor", "section": "Refactoring", "hidden": true },
+    { "type": "test", "section": "Tests", "hidden": true },
+    { "type": "ci", "section": "CI", "hidden": true }
+  ],
+  "packages": {
+    "python": {
+      "release-type": "python",
+      "package-name": "futureagi",
+      "component": "python",
+      "extra-files": ["fi/__init__.py"]
+    },
+    "typescript/futureagi": {
+      "release-type": "node",
+      "package-name": "@future-agi/sdk",
+      "component": "typescript"
+    }
+  }
+}
