@@ -1,6 +1,7 @@
 {
   "name": "futureagi-sdk",
   "version": "0.1.1",
+  "private": true,
   "description": "FutureAGI SDK",
   "main": "index.js",
   "scripts": {
