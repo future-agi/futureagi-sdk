@@ -59,12 +59,12 @@
   "author": "Future AGI <no-reply@futureagi.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/futureagi/futureagi.git"
+    "url": "git+https://github.com/future-agi/futureagi-sdk.git"
   },
   "bugs": {
-    "url": "https://github.com/futureagi/futureagi/issues"
+    "url": "https://github.com/future-agi/futureagi-sdk/issues"
   },
-  "homepage": "https://github.com/futureagi/futureagi#readme",
+  "homepage": "https://github.com/future-agi/futureagi-sdk#readme",
   "engines": {
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"

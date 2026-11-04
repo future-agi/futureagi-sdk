@@ -1,16 +1,12 @@
 name: Publish
 
-# Ships a release that release-please cut: the python-vX.Y.Z tag goes to PyPI,
-# the typescript-vX.Y.Z tag to npm. Also runnable by hand for a tag that was
-# published but failed to upload.
-#
-# PyPI uses trusted publishing (no secret): register this repository and
-# workflow with the `pypi` environment on https://pypi.org/manage/project/futureagi/settings/publishing/.
-# npm needs NPM_TOKEN (an automation token with publish rights on @future-agi).
-
+# Dispatched by the main release workflow; manually dispatch on main only to
+# retry an existing tag. A top-level workflow gives npm/PyPI one OIDC identity.
+# Trust: future-agi/futureagi-sdk, publish.yml, environment pypi or npm.
+# No release-event trigger: a release created from another branch cannot publish.
 on:
-  release:
-    types: [published]
+  repository_dispatch:
+    types: [sdk-release-publish]
   workflow_dispatch:
     inputs:
       tag:
@@ -21,13 +17,43 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: sdk-publish-${{ inputs.tag || github.event.client_payload.tag }}
+  cancel-in-progress: false
+
 env:
-  TAG: ${{ inputs.tag || github.event.release.tag_name }}
+  TAG: ${{ inputs.tag || github.event.client_payload.tag }}
 
 jobs:
+  verify:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      sha: ${{ steps.tag.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require a tag on main with passing CI and E2E
+        id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # Main may advance between release preparation and tag creation. Wait
+        # for THIS tag's commit, never publish based on an earlier green SHA.
+        run: python .github/scripts/release_guard.py validate-tag --tag "$TAG" --wait-seconds 3900
+
   python:
     name: PyPI
-    if: startsWith(inputs.tag || github.event.release.tag_name, 'python-v')
+    needs: verify
+    if: startsWith(inputs.tag || github.event.client_payload.tag, 'python-v')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: pypi
@@ -37,7 +63,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.TAG }}
+          ref: ${{ needs.verify.outputs.sha }}
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -94,9 +121,11 @@ jobs:
 
   typescript:
     name: npm
-    if: startsWith(inputs.tag || github.event.release.tag_name, 'typescript-v')
+    needs: verify
+    if: startsWith(inputs.tag || github.event.client_payload.tag, 'typescript-v')
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    environment: npm
     permissions:
       contents: read
       id-token: write # npm provenance
@@ -106,25 +135,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.TAG }}
+          ref: ${{ needs.verify.outputs.sha }}
+          persist-credentials: false
       - uses: pnpm/action-setup@v4
         with:
           version: 8.15.0
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           registry-url: https://registry.npmjs.org
-          cache: pnpm
-          cache-dependency-path: typescript/futureagi/pnpm-lock.yaml
+      - name: Use npm with trusted publishing support
+        run: npm install --global npm@11.6.2
       - name: Install and build
         run: |
           pnpm install --ignore-workspace --frozen-lockfile --ignore-scripts
           pnpm run build
           version=$(node -p "require('./package.json').version")
           [ "typescript-v$version" = "$TAG" ] || { echo "::error::package.json is $version, tag is $TAG"; exit 1; }
-      - name: Publish unless this version is already on npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish through the npm trusted publisher
         run: |
           name=$(node -p "require('./package.json').name")
           version=$(node -p "require('./package.json').version")
@@ -132,8 +160,10 @@ jobs:
             echo "$name@$version is already on npm"
             exit 0
           fi
-          [ -n "$NODE_AUTH_TOKEN" ] || { echo "::error::NPM_TOKEN is not set"; exit 1; }
-          pnpm publish --access public --provenance --no-git-checks
+          # Do not use a placeholder/persistent token: npm exchanges the Actions
+          # identity for short-lived publish credentials scoped to this workflow.
+          unset NODE_AUTH_TOKEN NPM_TOKEN
+          npm publish --access public --provenance --ignore-scripts
 
       - name: Install the published package from npm and run the quickstart
         # A fresh project, the exact version from the registry, both module
