@@ -52,9 +52,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # pyproject.toml: python > 3.9. The floor is where typing and
+        # pyproject.toml: Python >=3.10. The floor is where typing and
         # pydantic differences show up.
-        python: ["3.9", "3.11", "3.13"]
+        python: ["3.10", "3.11", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
