@@ -239,6 +239,14 @@ class DependencyFloorsTest(unittest.TestCase):
                 self.assertTrue(directory.is_dir(), package)
                 self.assertTrue((directory / "package.json").is_file(), package)
 
+    def test_workspace_root_depends_only_on_workspace_packages(self):
+        root = json.loads(_read("typescript/package.json"))
+        dependencies = root.get("dependencies", {})
+        workspace = {name for name, spec in dependencies.items() if str(spec).startswith("workspace:")}
+        self.assertNotIn("@future-agi/ai-evaluation", dependencies,
+                         "The retired ai-evaluation package is not a workspace member")
+        self.assertEqual(workspace, {"@future-agi/sdk"})
+
     def test_fallback_reads_legacy_scalar_and_optional_constraints(self):
         result = _parse_manifest_subset(
             '[tool.poetry.dependencies]\n'
