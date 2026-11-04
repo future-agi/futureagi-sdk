@@ -4,7 +4,7 @@ import json
 import unittest
 from unittest.mock import patch
 
-from release_guard import GitHub, GuardError, MANIFEST, PACKAGES, RELEASE_BRANCH, validate_version_changes
+from release_guard import GitHub, GuardError, MANIFEST, PACKAGES, RELEASE_BRANCH, validate_version_changes, version
 
 
 def fixture():
@@ -468,6 +468,23 @@ class ExtendedAuthorizationTests(unittest.TestCase):
                     return original_content(name, sha, optional)
                 with patch.object(github, 'content', side_effect=content):
                     self.assert_rejected(github, 'HTTP 403')
+
+
+class AsciiDigitTests(unittest.TestCase):
+    """Python's \\d also matches non-ASCII decimal digits; versions and tags must use 0-9 only."""
+
+    NON_ASCII = ['١.2.3', '0.７.0', '0.7.٠']  # Arabic-Indic one, fullwidth seven, Arabic-Indic zero
+
+    def test_rejects_non_ascii_digit_versions(self):
+        self.assertEqual(version('1.2.3'), (1, 2, 3))
+        for bad in self.NON_ASCII:
+            with self.subTest(version=bad), self.assertRaisesRegex(GuardError, 'Only stable semantic versions'):
+                version(bad)
+
+    def test_rejects_non_ascii_digit_tags(self):
+        for bad in self.NON_ASCII:
+            with self.subTest(tag=bad), self.assertRaisesRegex(GuardError, 'Invalid release tag'):
+                FakeGitHub().validate_tag('python-v' + bad)
 
 
 if __name__ == '__main__':
