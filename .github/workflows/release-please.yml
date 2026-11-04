@@ -85,7 +85,11 @@ jobs:
           GH_REPO: ${{ github.repository }}
           NUMBER: ${{ steps.approval.outputs.number }}
           HEAD: ${{ steps.approval.outputs.head }}
+          BOT: ${{ steps.app-token.outputs.app-slug }}[bot]
         run: |
+          # Recheck the full approved snapshot (base, draft, author, repositories, current main)
+          # immediately before queueing; any change refuses and nothing is queued.
+          python .github/scripts/release_guard.py revalidate --number "$NUMBER" --head "$HEAD" --bot "$BOT"
           # Compare-and-swap against the exact diff the guard approved.
           # No --admin or bypass: normal protected-branch checks still apply.
           gh pr merge --auto --squash --match-head-commit "$HEAD" "$NUMBER"
