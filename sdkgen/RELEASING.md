@@ -58,6 +58,16 @@ In the existing package's trusted-publisher settings:
 
 The workflow uses Node 24 and npm 11.6.2 (trusted publishing requires npm >=11.5.1). It does not use `NPM_TOKEN`. Package ownership, repository metadata, and publisher identity must agree with the repository publishing the package. See [npm trusted publishing](https://docs.npmjs.com/trusted-publishers).
 
+## Downstream: the docs reference
+
+The chain **backend contract → SDK → docs** has three links, each owned by the repository it runs in:
+
+1. **future-agi `sdk-sync.yml`** (on a backend `vX.Y.Z` release): refreshes `sdkgen/contracts/swagger.json` from that release's OpenAPI, pins `sdkgen/contracts/BACKEND_VERSION`, runs `python sdkgen/generate.py` and opens one PR on `dev`. Because `generate.py` writes the Python client, the TypeScript client **and** `docs/sdk-reference/` from the same pinned contract, that PR carries all three; the **Generated code is current** check fails if any of them drifts. The catalog is the allowlist: an endpoint without a catalog entry never becomes a method or a page. An endpoint the backend removed or moved while the catalog still lists it stops `sync_contract.py` with the operations named: a breaking change needs a person to retire or remap the entry, never a silent sync.
+2. **This repository**: `dev → main` stays a reviewed promotion; `release-please.yml` and `publish.yml` version and publish exactly as described above. Two `repository_dispatch` events go to **future-agi/docs** (`sdk-release`): `stage: candidate` with the version PR's head when release-please prepares a release, and `stage: released` from `publish.yml` after a package is on its registry and the reinstall smoke test passed. Both steps are `continue-on-error`: a docs hiccup never blocks a release. The release app must be installed on `future-agi/docs` (it is: the backend's changelog dispatch uses it).
+3. **future-agi/docs `sdk-reference-sync.yml`**: checks out `docs/sdk-reference` at the dispatched commit, copies it into `src/pages/docs/sdk/reference`, and opens **one PR per Python/TypeScript version pair** (`sdk-reference/python-vX-typescript-vY`); a retry or the candidate→released transition updates that PR instead of opening another, and a no-op diff opens nothing. The PR leaves draft only when `futureagi==X` is on PyPI **and** `@future-agi/sdk@Y` is on npm, checked by the docs side itself, so the docs never describe an SDK users cannot install. A weekly schedule syncs the newest published release in case a dispatch was missed, and `workflow_dispatch` with any ref opens a clearly labelled preview draft.
+
+Backend-side compatibility runs in the monorepo's `e2e-ci.yml`: every backend PR and `dev`/`main` push boots the stack and runs this repository's live suites (`python/tests/platform`, `src/platform/__tests__/live.test.ts`) at a resolved SDK commit, so a backend change that breaks the SDKs fails there first. SDK PRs test against the pinned backend release in `e2e.yml`.
+
 ## Guarded approval scope
 
 Only this same-repository branch is eligible: `release-please--branches--main`, opened by the configured release app and targeting `main`.
