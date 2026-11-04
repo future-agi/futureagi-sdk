@@ -174,6 +174,32 @@ class WorkflowHardeningTests(unittest.TestCase):
             '          done',
         ])
 
+    def test_queue_revalidates_the_approved_snapshot_immediately_before_merge(self):
+        lines = self.workflow('release-please.yml')
+        steps = self.steps(self.job(lines, 'release'))
+        queues = [step for step in steps if any('gh pr merge' in line for line in step)]
+        self.assertEqual(len(queues), 1, 'Expected one merge-queue step')
+        queue = queues[0]
+        self.assertIn("        if: steps.approval.outputs.head != ''", queue)
+        self.assertEqual(self.block(queue, '        env:'), [
+            '          GH_TOKEN: ${{ steps.app-token.outputs.token }}',
+            '          GH_REPO: ${{ github.repository }}',
+            '          NUMBER: ${{ steps.approval.outputs.number }}',
+            '          HEAD: ${{ steps.approval.outputs.head }}',
+            '          BOT: ${{ steps.app-token.outputs.app-slug }}[bot]',
+        ])
+        # The guard rechecks the full approved snapshot (base, draft, author, repositories,
+        # current main) as the command immediately before the compare-and-swap queue.
+        run = self.block(queue, '        run: |')
+        self.assertEqual(run, [
+            '          python .github/scripts/release_guard.py revalidate --number "$NUMBER" --head "$HEAD" --bot "$BOT"',
+            '          gh pr merge --auto --squash --match-head-commit "$HEAD" "$NUMBER"',
+        ])
+        self.assertFalse(any('${{' in line for line in run), 'Values must reach run: only through env:')
+        approval = [step for step in steps if any('release_guard.py approve' in line for line in step)]
+        self.assertEqual(len(approval), 1)
+        self.assertLess(steps.index(approval[0]), steps.index(queue), 'Approval must precede the queue step')
+
     def test_credential_jobs_are_protected_and_checkout_only_main(self):
         expected = {('promote.yml', 'promote'): 'release-promote',
                     ('release-please.yml', 'release'): 'release-please'}
