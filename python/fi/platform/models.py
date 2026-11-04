@@ -2054,7 +2054,7 @@ class UserInfoOrganization(_Model):
 
 
 class UserInfoResponse(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'email', 'get_started_completed', 'id', 'onboarding_completed', 'organization', 'remember_me', 'status', 'ws_enabled'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'email', 'get_started_completed', 'id', 'onboarding_completed', 'organization', 'remember_me', 'restrict_simulate_to_environments', 'status', 'ws_enabled'])
     id: Optional[str] = Field(default=None)
     email: Optional[str] = Field(default=None)
     name: Optional[str] = Field(default=None)
@@ -2080,6 +2080,7 @@ class UserInfoResponse(_Model):
     two_factor_methods: Optional[UserInfoTwoFactorMethods] = Field(default=None)
     org_2fa_required: Optional[bool] = Field(default=None)
     org_2fa_grace_ends_at: Optional[str] = Field(default=None)
+    restrict_simulate_to_environments: Optional[bool] = Field(default=None)
 
 
 class UserInfoTwoFactorMethods(_Model):

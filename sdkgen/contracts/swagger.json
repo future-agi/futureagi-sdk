@@ -33,7 +33,7 @@
       "X-Secret-Key": []
     }
   ],
-  "x-source-sha256": "e3faac5732b8caa78103e3d7cfba7f72faa15a7efc482a72cbade951f5cdf65d",
+  "x-source-sha256": "f4a74ecab77e78df6ca8c6a28b72c655bfd0e4d4f04f91ab376070d60be592d0",
   "paths": {
     "/accounts/user-info/": {
       "parameters": [],
@@ -10557,6 +10557,14 @@
         "description": "List traces filtered by project ID with optimized queries.",
         "parameters": [
           {
+            "name": "sort_params",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "[]",
+            "minLength": 1
+          },
+          {
             "name": "project_id",
             "in": "query",
             "required": false,
@@ -16114,7 +16122,8 @@
             "$ref": "#/definitions/DatasetRowRequest"
           }
         }
-      }
+      },
+      "additionalProperties": false
     },
     "DatasetColumnConfigEntry": {
       "type": "object",
@@ -17005,7 +17014,8 @@
           "x-json-value": true,
           "description": "Any valid JSON value."
         }
-      }
+      },
+      "additionalProperties": false
     },
     "DatasetRowRequest": {
       "type": "object",
@@ -17015,6 +17025,11 @@
           "type": "string",
           "format": "uuid"
         },
+        "order": {
+          "title": "Order",
+          "description": "Legacy input accepted for compatibility; rows are appended in request order.",
+          "type": "integer"
+        },
         "cells": {
           "type": "array",
           "items": {
@@ -17022,7 +17037,8 @@
           },
           "default": []
         }
-      }
+      },
+      "additionalProperties": false
     },
     "DatasetRunPromptStatsPrompt": {
       "required": [
@@ -28038,7 +28054,8 @@
         "default_workspace_role",
         "org_level",
         "ws_level",
-        "effective_level"
+        "effective_level",
+        "restrict_simulate_to_environments"
       ],
       "type": "object",
       "properties": {
@@ -28159,6 +28176,10 @@
           "title": "Org 2fa grace ends at",
           "type": "string",
           "format": "date-time"
+        },
+        "restrict_simulate_to_environments": {
+          "title": "Restrict simulate to environments",
+          "type": "boolean"
         }
       }
     },

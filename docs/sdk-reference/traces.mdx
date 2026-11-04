@@ -156,6 +156,7 @@ const result = await client.traces.list();
 ```python Python
 client.traces.list(
     *,
+    sort_params: str | None | NotGiven = NOT_GIVEN,
     project_id: str | None | NotGiven = NOT_GIVEN,
     project_version_id: str | None | NotGiven = NOT_GIVEN,
     session_id: str | None | NotGiven = NOT_GIVEN,
@@ -176,6 +177,7 @@ client.traces.list(
 client.traces.list(params: TracesListParams = {}, options?: RequestOptions): Promise<models.TraceObserveListResult>
 
 export interface TracesListParams {
+  sort_params?: string | null;
   project_id?: string | null;
   project_version_id?: string | null;
   session_id?: string | null;
@@ -198,6 +200,7 @@ export interface TracesListParams {
 
 #### Parameters
 
+<ParamField query="sort_params" type="string" optional />
 <ParamField query="project_id" type="string" optional />
 <ParamField query="project_version_id" type="string" optional />
 <ParamField query="session_id" type="string" optional />
