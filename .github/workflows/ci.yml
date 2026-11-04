@@ -144,9 +144,21 @@ jobs:
         working-directory: typescript/futureagi
         run: pnpm run check:consumer
 
+  release-guards:
+    name: Release authorization guards
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify release-only approval and main-only publication gates
+        run: python -m unittest discover -s .github/scripts -p 'test_*.py' -v
+
   ci-pass:
     name: CI Pass
-    needs: [generated, python, typescript, packages]
+    needs: [generated, python, typescript, packages, release-guards]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5

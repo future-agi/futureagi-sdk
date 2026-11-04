@@ -200,17 +200,18 @@ The monorepo's E2E CI (`future-agi/.github/workflows/e2e-ci.yml`, PRs and pushes
 
 ## Release cycle
 
-A backend release becomes an SDK release on its own:
+**Main is the release boundary.** Backend syncs still open SDK updates on `dev`, but a dev push never authorizes publication.
 
-1. **Backend release** (`vX.Y.Z` tag in the monorepo, images published by `release-images`) triggers the monorepo's `sdk-sync` workflow. It runs `sync_contract.py --backend-version vX.Y.Z` and `generate.py` against that tag's `swagger.json` and opens a pull request here on `dev` (`feat(contract): sync with backend vX.Y.Z`, or `chore(contract): ...` when nothing generated changed). The PR's E2E run tests against `futureagi/standalone:vX.Y.Z`, the pin in `sdkgen/contracts/BACKEND_VERSION`, and the PR merges itself when `CI Pass` and `E2E Tests Pass` are green.
-2. **`promote.yml`** keeps one `dev → main` pull request open (the SDK's release PR, merged with a merge commit as in the monorepo). It merges itself only while every commit on `dev` that `main` lacks is a sync commit; the moment anything else lands on `dev`, auto-merge is switched off and the PR waits for a person, so a feature awaiting review never rides a backend release to PyPI and npm.
-3. **`release-please.yml`** on `main` opens the version PR from the conventional commits: `python/pyproject.toml` + `python/fi/__init__.py` and `typescript/futureagi/package.json`, with a changelog per package (`release-please-config.json`, `.release-please-manifest.json`). `feat` bumps the minor version, `fix` the patch. It merges itself once CI passes and creates the tags `python-vX.Y.Z` / `typescript-vX.Y.Z` and their GitHub releases.
-4. **`publish.yml`** on a published release builds the package at that tag, checks the version matches the tag, and uploads: PyPI through trusted publishing (environment `pypi`), npm with `NPM_TOKEN` and provenance. Skips a version that is already there. Then it installs the published version from the index into a clean environment and runs a quickstart (import, build a client, every resource present, the transport's own error on a dead host; CommonJS and ESM for npm), so a release that installs broken fails loudly.
-5. **`pr-title-lint.yml`** makes Conventional Commits titles a merge gate on `dev` and `main`: this repository squash-merges, so the title is the commit message release-please reads, and "updated stuff" would ship with no version bump and no changelog line.
+1. `promote.yml` prepares the `dev → main` PR for human review and never auto-merges it. Preserve Conventional Commit history with a merge commit.
+2. After both main-push CI and E2E succeed, `release-please.yml` prepares the version/changelog PR. A fail-closed guard approves only the release app's validated version-only diff, and normal required checks control its auto-merge.
+3. After that version commit passes main-push CI/E2E, release-please creates package tags and dispatches `publish.yml` on main.
+4. Publication requires a real tag on main and passing checks for its exact commit. PyPI and npm use OIDC trusted publishing, not persistent registry tokens. Published packages are reinstalled and smoke-tested.
+
+See [RELEASING.md](RELEASING.md) for the exact app, registry, environment, approval, and recovery configuration. These workflows do not bypass reviews on ordinary code or promotion PRs.
 
 Not gated in CI: the repository's `.pre-commit-config.yaml` (black, flake8, isort) and `eslint`. Running them on the whole repository today reports 70 files isort would reorder and no ESLint config, so enforcing them needs a cleanup commit first; ruff (E, F, W, I) on the generator and the platform client runs in `ci.yml` meanwhile.
 
-One-time setup, repository admin: install the org's release bot app on this repository and expose `RELEASE_BOT_APP_ID` / `RELEASE_BOT_PRIVATE_KEY` (the monorepo's release-please secrets; pull requests opened with the default token get no CI runs); enable "Allow auto-merge"; require `CI Pass` and `E2E Tests Pass` on `dev` and `main`; register the trusted publisher on PyPI (`futureagi`, workflow `publish.yml`, environment `pypi`); add `NPM_TOKEN`. Without the app secrets the sync still opens its PR with a warning instead of auto-merging; without auto-merge every step above is the same, with a human clicking merge.
+The one-time setup is required before automatic releases work. Missing app credentials or registry trust fail loudly; they do not silently publish or bypass checks. The [release runbook](RELEASING.md#one-time-setup) is the canonical setup checklist.
 
 - Run `generate.py --check`, `pytest python/tests/platform` and `pnpm test` in CI against a backend started from the monorepo.
 - Move `operations.yaml` into the monorepo next to the MCP catalog (`tools.yaml`), so one file drives MCP and the SDKs and the sync workflow copies it here with the contract.
