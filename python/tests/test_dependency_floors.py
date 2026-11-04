@@ -7,34 +7,25 @@ from pathlib import Path
 
 try:
     import tomllib
-except ModuleNotFoundError:  # Python 3.9 and 3.10
+except ModuleNotFoundError:  # Python 3.10
     tomllib = None
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DEPENDENCY_KEYS = {
-    "python", "certifi", "idna", "requests", "urllib3", "anyio",
-    "opentelemetry-api", "opentelemetry-sdk",
+SINGLE_FLOORS = {
+    "certifi": ">=2026.10.18",
+    "idna": ">=3.15",
+    "requests": ">=2.33.0",
+    "urllib3": ">=2.8.0",
+    "anyio": ">=4.14.2,<5.0",
+    "scipy": ">=1.15.0",
+    "opentelemetry-api": {"version": ">=1.45.1", "optional": True},
+    "opentelemetry-sdk": {"version": ">=1.45.1", "optional": True},
 }
+DEPENDENCY_KEYS = {"python", "eval-type-backport"} | set(SINGLE_FLOORS)
 EXTRAS = {
     "gateway-tokens": ["tiktoken"],
     "gateway-otel": ["opentelemetry-api", "opentelemetry-sdk"],
-}
-BRANCHES = {
-    "requests": (">=2.32.4", ">=2.33.0"),
-    "urllib3": (">=2.6.3", ">=2.8.0"),
-    "anyio": (">=4.0,<5.0", ">=4.14.2,<5.0"),
-    "opentelemetry-api": (">=1.0", ">=1.45.1"),
-    "opentelemetry-sdk": (">=1.0", ">=1.45.1"),
-}
-BASE_FLOORS = {
-    "certifi": ">=2024.6",
-    "idna": ">=3.7",
-    "requests": ">=2.32",
-    "urllib3": ">=2.2",
-    "anyio": ">=4.0,<5.0",
-    "opentelemetry-api": ">=1.0",
-    "opentelemetry-sdk": ">=1.0",
 }
 
 
@@ -138,52 +129,79 @@ def _dependencies():
     return dependencies
 
 
-def _lower_bound(constraint):
-    assert isinstance(constraint, str), "Missing version constraint"
-    match = re.match(r">=(\d+(?:\.\d+)*)(?:,|$)", constraint)
-    assert match is not None, "Expected an inclusive minimum: " + constraint
-    parts = tuple(int(part) for part in match.group(1).split("."))
-    return parts + (0,) * max(0, 3 - len(parts))
+def _yaml_block(lines, key, indent):
+    """Read one exact mapping block from the workflows, not general YAML."""
+    header = " " * indent + key + ":"
+    matches = [index for index, line in enumerate(lines) if line == header]
+    assert len(matches) == 1, "Expected one mapping: " + key
+    start = matches[0] + 1
+    end = len(lines)
+    for index in range(start, len(lines)):
+        line = lines[index]
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if len(line) - len(line.lstrip(" ")) <= indent:
+            end = index
+            break
+    return lines[start:end]
+
+
+def _python_matrix(relative, job):
+    lines = _read(relative).splitlines()
+    for indent, key in enumerate(("jobs", job, "strategy", "matrix")):
+        lines = _yaml_block(lines, key, indent * 2)
+    rows = [line.strip() for line in lines if line.strip()
+            and not line.lstrip().startswith("#")]
+    assert rows, "Missing Python matrix: " + relative
+    try:
+        if rows[0].startswith("python:"):
+            assert len(rows) == 1, "Unexpected matrix keys: " + relative
+            versions = json.loads(rows[0].partition(":")[2])
+        else:
+            assert rows[0] == "include:", "Expected an include matrix: " + relative
+            values = []
+            for row in rows[1:]:
+                key, separator, value = row.removeprefix("- ").partition(":")
+                assert separator == ":" and key in {"python", "typescript"}, row
+                if key == "python":
+                    values.append(value)
+            assert values, "Missing Python include rows: " + relative
+            versions = [json.loads(value) for value in values]
+    except ValueError as error:
+        raise AssertionError("Invalid Python matrix: " + relative) from error
+    assert isinstance(versions, list), "Expected a version list: " + relative
+    assert versions and all(isinstance(version, str) for version in versions)
+    return versions
 
 
 class DependencyFloorsTest(unittest.TestCase):
-    def test_python_support_allows_the_one_line_310_switch(self):
-        # Dropping 3.9 only changes this declaration; lower branches become dead.
-        self.assertIn(_dependencies().get("python"), {">3.9", ">=3.10"})
+    def test_python_support_requires_310(self):
+        self.assertEqual(_dependencies().get("python"), ">=3.10")
 
-    def test_unconditional_python_floors(self):
+    def test_single_python_floors_exactly(self):
         dependencies = _dependencies()
-        for package, expected in {"certifi": ">=2026.10.18", "idna": ">=3.15"}.items():
+        for package, expected in SINGLE_FLOORS.items():
             with self.subTest(package=package):
+                # Equality rejects arrays, Python markers and lost optional flags.
                 self.assertEqual(dependencies.get(package), expected)
 
-    def test_python_marker_branches_exactly(self):
-        dependencies = _dependencies()
-        for package, (older, current) in BRANCHES.items():
-            with self.subTest(package=package):
-                actual = dependencies.get(package)
-                self.assertIsInstance(actual, list, package)
-                expected = [
-                    {"version": older, "python": "<3.10"},
-                    {"version": current, "python": ">=3.10"},
-                ]
-                if package in {"opentelemetry-api", "opentelemetry-sdk"}:
-                    for branch in expected:
-                        branch["optional"] = True
-                self.assertEqual(actual, expected)
+    def test_python39_only_constraints_removed(self):
+        self.assertNotIn("eval-type-backport", _dependencies())
+        self.assertNotRegex(
+            _read("python/pyproject.toml"),
+            r'''\bpython\s*=\s*["']<\s*3\.10["']''',
+        )
 
-    def test_python39_floors_never_decrease(self):
-        dependencies = _dependencies()
-        for package, baseline in BASE_FLOORS.items():
-            with self.subTest(package=package):
-                actual = dependencies.get(package)
-                if package in BRANCHES:
-                    self.assertIsInstance(actual, list, package)
-                    self.assertTrue(all(isinstance(row, dict) for row in actual))
-                    older = [row for row in actual if row.get("python") == "<3.10"]
-                    self.assertEqual(len(older), 1, package)
-                    actual = older[0].get("version")
-                self.assertGreaterEqual(_lower_bound(actual), _lower_bound(baseline))
+    def test_workflow_python_matrices(self):
+        for relative, job, expected in (
+            (".github/workflows/ci.yml", "python", ["3.10", "3.11", "3.13"]),
+            (".github/workflows/e2e.yml", "e2e", ["3.10", "3.12"]),
+        ):
+            with self.subTest(workflow=relative):
+                versions = _python_matrix(relative, job)
+                self.assertNotIn("3.9", versions)
+                self.assertIn("3.10", versions)
+                self.assertEqual(versions, expected)
 
     def test_extras_membership_unchanged(self):
         self.assertEqual(_poetry().get("extras"), EXTRAS)
@@ -234,11 +252,29 @@ class DependencyFloorsTest(unittest.TestCase):
             "opentelemetry-api": {"version": ">=1.0", "optional": True},
         })
 
+    def test_fallback_reads_base_marker_constraints(self):
+        result = _parse_manifest_subset(
+            '[tool.poetry.dependencies]\n'
+            'requests = [\n'
+            '    { version = ">=2.32.4", python = "<3.10" },\n'
+            '    { version = ">=2.33.0", python = ">=3.10" }\n'
+            ']\n'
+            'eval-type-backport = { version = ">=0.2", python = "<3.10" }\n'
+        )
+        self.assertEqual(result.get("dependencies"), {
+            "requests": [
+                {"version": ">=2.32.4", "python": "<3.10"},
+                {"version": ">=2.33.0", "python": ">=3.10"},
+            ],
+            "eval-type-backport": {"version": ">=0.2", "python": "<3.10"},
+        })
+
     def test_fallback_matches_manifest_parser(self):
         fallback = _parse_manifest_subset(_read("python/pyproject.toml"))
         dependencies = _dependencies()
         self.assertEqual(fallback.get("dependencies"), {
             key: dependencies.get(key) for key in DEPENDENCY_KEYS
+            if key in dependencies
         })
         self.assertEqual(fallback.get("extras"), _poetry().get("extras"))
 
