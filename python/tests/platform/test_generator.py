@@ -150,10 +150,10 @@ def test_surfaces_ship_independently():
 
 
 def test_mcp_names_keep_existing_tools_or_follow_the_id():
-    # Every catalog entry keeps the monorepo's MCP tool name: 105 tools, same names.
+    # Every catalog entry keeps the monorepo's MCP tool name: 107 tools, same names.
     ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
     names = {op_id: ops[op_id].surfaces["mcp"]["name"] for op_id in MCP_IDS}
-    assert len(names) == 105
+    assert len(names) == 107
     assert names["datasets.list"] == "list_datasets"
     assert names["traces.list"] == "search_traces"
     # Without an override the name follows the id.
@@ -235,7 +235,7 @@ def test_body_params_on_a_paginated_op_fail_the_build():
 
 
 def test_sdk_only_parity_ops_do_not_reach_mcp():
-    """The hand-written modules' operations ship to the SDK only; the MCP tool list keeps its 105 tools."""
+    """The hand-written modules' operations ship to the SDK only; the MCP tool list keeps its 107 tools."""
     for op_id in (
         "prompts.commit",
         "file_knowledge_bases.create",
