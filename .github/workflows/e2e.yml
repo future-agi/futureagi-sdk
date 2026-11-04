@@ -59,7 +59,7 @@ jobs:
       matrix:
         include:
           # The floor and a current interpreter; TypeScript rides along once.
-          - python: "3.9"
+          - python: "3.10"
             typescript: false
           - python: "3.12"
             typescript: true

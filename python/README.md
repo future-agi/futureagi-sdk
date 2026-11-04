@@ -48,7 +48,7 @@ npm install @futureagi/sdk
 pnpm add @futureagi/sdk
 ```
 
-**Requirements:** Python >= 3.6 | Node.js >= 14
+**Requirements:** Python >= 3.10 | Node.js >= 14
 
 ---
 
