@@ -78,7 +78,7 @@ The generator/transport SDK tests are separate from these release-authorization 
 ## Recovery
 
 - **No release PR:** inspect `release-please` and the main CI/E2E runs. Missing bot credentials fail clearly. An old workflow event, a failing/running main suite, or a newer main commit skips release preparation until the relevant successful completion event.
-- **Version PR rejected by the guard:** read the failure; do not override it. A release requiring a source or dependency change belongs in a normally reviewed PR.
+- **Version PR rejected by the guard:** read the failure; do not override it. A release requiring a source or dependency change belongs in a normally reviewed PR. After an authorized guard fix reaches main and its checks pass, the next run also discovers an unchanged existing bot version PR (not only `prs_created` outputs). It validates that PR before any update, brings the bot branch up to date through GitHub's expected-head update API, and validates the updated diff again before the separate approval step. Conflicts, changed heads, newer main commits, and unexpected code fail closed. A manually dispatched retry on main uses the same path.
 - **Required check pending:** fix the check/ref alignment. Do not disable required checks or add a bypass.
 - **Registry upload fails:** fix the registry trusted publisher and dispatch **Publish** on **main**, supplying the existing exact tag (`python-vX.Y.Z` or `typescript-vX.Y.Z`). The guard still verifies ancestry and checks. Existing registry versions are not overwritten.
 - **Release creation succeeded but the caller was interrupted:** retry **Publish** with that tag; release-please may correctly report no new release on its own rerun.

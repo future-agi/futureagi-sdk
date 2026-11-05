@@ -197,6 +197,126 @@ class FakeGitHub(GitHub):
         raise AssertionError(suffix)
 
 
+class ReconcileGitHub(FakeGitHub):
+    def __init__(self):
+        super().__init__()
+        self.candidates = [{'number': 1}]
+        self.current_main = 'newbase'
+        self.puts = []
+        self.updated = False
+        self.complete_update = True
+        self.main_passes = True
+        self.conflict = False
+        self.mutate_after_update = False
+        self.main_advances = False
+        self.main_before = dict(self.before)
+        self.main_added_import = ''
+
+    def main_sha(self):
+        return 'another-main' if self.main_advances and self.updated else self.current_main
+
+    def checks_passed(self, sha):
+        return self.main_passes
+
+    def content(self, path, sha, optional=False):
+        if sha == 'newbase':
+            return self.main_before[path]
+        return (self.before if sha == 'base' else self.after)[path]
+
+    def api(self, suffix, method='GET', data=None):
+        if suffix.startswith('pulls?state=open'):
+            return self.candidates
+        if suffix == 'pulls/1/update-branch':
+            if self.conflict:
+                raise GuardError('GitHub API returned HTTP 409 for PUT update-branch')
+            assert method == 'PUT'
+            assert data == {'expected_head_sha': 'head'}
+            self.puts.append(data)
+            if self.complete_update:
+                self.updated = True
+                self.pr['base']['sha'] = self.current_main
+                self.pr['head']['sha'] = 'updated'
+                self.after['python/fi/__init__.py'] += self.main_added_import
+                if self.mutate_after_update:
+                    self.after['python/fi/__init__.py'] += '\nprint("unexpected")\n'
+            return {'message': 'Updating pull request branch.'}
+        if suffix.startswith('compare/'):
+            return {'behind_by': 0 if self.updated or self.current_main == 'base' else 1,
+                    'merge_base_commit': {'sha': self.current_main if self.updated else 'base'}}
+        return super().api(suffix, method, data)
+
+
+class ReconciliationTests(unittest.TestCase):
+    def test_unchanged_pr_recovers_from_failed_prior_run(self):
+        github = ReconcileGitHub()
+        self.assertEqual(github.reconcile('futureagi-release-bot[bot]'), 1)
+        self.assertEqual(github.puts, [{'expected_head_sha': 'head'}])
+        self.assertEqual(github.pr['head']['sha'], 'updated')
+        self.assertEqual(github.posts, [], 'The app reconciles; it does not submit reviews')
+        self.assertEqual(github.approve(1, 'futureagi-release-bot[bot]'), 'updated')
+        self.assertEqual(github.posts[0][1]['commit_id'], 'updated')
+
+    def test_stale_pr_uses_merge_base_then_preserves_new_main_code(self):
+        github = ReconcileGitHub()
+        github.pr['base']['sha'] = 'newbase'  # API may already report current main
+        github.main_added_import = '\nfrom typing import TYPE_CHECKING\n'
+        github.main_before['python/fi/__init__.py'] += github.main_added_import
+        self.assertEqual(github.reconcile('futureagi-release-bot[bot]'), 1)
+        self.assertIn('from typing import TYPE_CHECKING', github.after['python/fi/__init__.py'])
+        self.assertEqual(github.approve(1, 'futureagi-release-bot[bot]'), 'updated')
+
+    def test_current_version_pr_needs_no_update(self):
+        github = ReconcileGitHub(); github.current_main = 'base'
+        self.assertEqual(github.reconcile('futureagi-release-bot[bot]'), 1)
+        self.assertEqual(github.puts, [])
+
+    def test_no_outstanding_pr_is_noop(self):
+        github = ReconcileGitHub(); github.candidates = []
+        self.assertIsNone(github.reconcile('futureagi-release-bot[bot]'))
+        self.assertEqual(github.puts, [])
+
+    def test_multiple_candidates_fail_closed(self):
+        github = ReconcileGitHub(); github.candidates.append({'number': 2})
+        with self.assertRaises(GuardError): github.reconcile('futureagi-release-bot[bot]')
+        self.assertEqual(github.puts, [])
+
+    def test_human_or_code_pr_is_never_updated(self):
+        for defect in ['human', 'code', 'fork', 'dev']:
+            with self.subTest(defect=defect):
+                github = ReconcileGitHub()
+                if defect == 'human': github.pr['user']['type'] = 'User'
+                if defect == 'code': github.after['python/fi/__init__.py'] += '\nprint(1)\n'
+                if defect == 'fork': github.pr['head']['repo']['full_name'] = 'other/repo'
+                if defect == 'dev': github.pr['head']['ref'] = 'dev'
+                with self.assertRaises(GuardError): github.reconcile('futureagi-release-bot[bot]')
+                self.assertEqual(github.puts, [])
+
+    def test_failed_main_cannot_update_candidate(self):
+        github = ReconcileGitHub(); github.main_passes = False
+        with self.assertRaises(GuardError): github.reconcile('futureagi-release-bot[bot]')
+        self.assertEqual(github.puts, [])
+
+    def test_update_conflict_does_not_approve(self):
+        github = ReconcileGitHub(); github.conflict = True
+        with self.assertRaises(GuardError): github.reconcile('futureagi-release-bot[bot]')
+        self.assertEqual(github.posts, [])
+
+    def test_update_is_revalidated_for_unexpected_code(self):
+        github = ReconcileGitHub(); github.mutate_after_update = True
+        with self.assertRaises(GuardError): github.reconcile('futureagi-release-bot[bot]')
+        self.assertEqual(github.posts, [])
+
+    def test_main_advancing_during_update_stops_approval(self):
+        github = ReconcileGitHub(); github.main_advances = True
+        with self.assertRaises(GuardError): github.reconcile('futureagi-release-bot[bot]')
+        self.assertEqual(github.posts, [])
+
+    def test_update_timeout_is_bounded(self):
+        github = ReconcileGitHub(); github.complete_update = False
+        with self.assertRaises(GuardError): github.reconcile('futureagi-release-bot[bot]', wait_seconds=0)
+        self.assertEqual(github.posts, [])
+
+
 class AuthorizationTests(unittest.TestCase):
     def test_approves_valid_exact_commit(self):
         github = FakeGitHub()
