@@ -33,7 +33,7 @@
       "X-Secret-Key": []
     }
   ],
-  "x-source-sha256": "e3faac5732b8caa78103e3d7cfba7f72faa15a7efc482a72cbade951f5cdf65d",
+  "x-source-sha256": "f4a74ecab77e78df6ca8c6a28b72c655bfd0e4d4f04f91ab376070d60be592d0",
   "paths": {
     "/accounts/user-info/": {
       "parameters": [],
@@ -9885,6 +9885,150 @@
         "x-runtime-response-validation": true
       }
     },
+    "/tracer/feed/issues/{cluster_id}/overview/": {
+      "parameters": [
+        {
+          "name": "cluster_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "operationId": "tracer_feed_issues_overview_list",
+        "description": "GET /tracer/feed/issues/{cluster_id}/overview/",
+        "parameters": [
+          {
+            "name": "rep_limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "maximum": 200,
+            "minimum": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/OverviewApiResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/tracer/feed/issues/{cluster_id}/traces/": {
+      "parameters": [
+        {
+          "name": "cluster_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "operationId": "tracer_feed_issues_traces_list",
+        "description": "GET /tracer/feed/issues/{cluster_id}/traces/",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 50,
+            "maximum": 500,
+            "minimum": 1
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/TracesTabApiResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
     "/tracer/observation-span/list_spans_observe/": {
       "parameters": [],
       "get": {
@@ -10556,6 +10700,14 @@
         "operationId": "tracer_trace_list_traces_of_session",
         "description": "List traces filtered by project ID with optimized queries.",
         "parameters": [
+          {
+            "name": "sort_params",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "[]",
+            "minLength": 1
+          },
           {
             "name": "project_id",
             "in": "query",
@@ -12329,6 +12481,35 @@
           "title": "Livekit max concurrency",
           "type": "string",
           "readOnly": true
+        }
+      }
+    },
+    "AgentFlowGraph": {
+      "required": [
+        "nodes",
+        "edges"
+      ],
+      "type": "object",
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "x-nullable": true
+            }
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "x-nullable": true
+            }
+          }
         }
       }
     },
@@ -16114,7 +16295,8 @@
             "$ref": "#/definitions/DatasetRowRequest"
           }
         }
-      }
+      },
+      "additionalProperties": false
     },
     "DatasetColumnConfigEntry": {
       "type": "object",
@@ -17005,7 +17187,8 @@
           "x-json-value": true,
           "description": "Any valid JSON value."
         }
-      }
+      },
+      "additionalProperties": false
     },
     "DatasetRowRequest": {
       "type": "object",
@@ -17015,6 +17198,11 @@
           "type": "string",
           "format": "uuid"
         },
+        "order": {
+          "title": "Order",
+          "description": "Legacy input accepted for compatibility; rows are appended in request order.",
+          "type": "integer"
+        },
         "cells": {
           "type": "array",
           "items": {
@@ -17022,7 +17210,8 @@
           },
           "default": []
         }
-      }
+      },
+      "additionalProperties": false
     },
     "DatasetRunPromptStatsPrompt": {
       "required": [
@@ -19674,6 +19863,34 @@
         }
       }
     },
+    "EventsOverTimePoint": {
+      "required": [
+        "date",
+        "errors",
+        "passing",
+        "users"
+      ],
+      "type": "object",
+      "properties": {
+        "date": {
+          "title": "Date",
+          "type": "string",
+          "minLength": 1
+        },
+        "errors": {
+          "title": "Errors",
+          "type": "integer"
+        },
+        "passing": {
+          "title": "Passing",
+          "type": "integer"
+        },
+        "users": {
+          "title": "Users",
+          "type": "integer"
+        }
+      }
+    },
     "ExecuteRunTest": {
       "type": "object",
       "properties": {
@@ -20581,6 +20798,24 @@
           "title": "Annotator id",
           "type": "string",
           "format": "uuid"
+        }
+      }
+    },
+    "KeyMoment": {
+      "required": [
+        "kevinified",
+        "verbatim"
+      ],
+      "type": "object",
+      "properties": {
+        "kevinified": {
+          "title": "Kevinified",
+          "type": "string",
+          "minLength": 1
+        },
+        "verbatim": {
+          "title": "Verbatim",
+          "type": "string"
         }
       }
     },
@@ -21803,6 +22038,52 @@
         }
       }
     },
+    "OverviewApiResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/OverviewResponse"
+        }
+      }
+    },
+    "OverviewResponse": {
+      "required": [
+        "events_over_time",
+        "pattern_summary",
+        "representative_traces"
+      ],
+      "type": "object",
+      "properties": {
+        "events_over_time": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EventsOverTimePoint"
+          }
+        },
+        "pattern_summary": {
+          "$ref": "#/definitions/PatternSummary"
+        },
+        "representative_traces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RepresentativeTrace"
+          }
+        },
+        "representative_total": {
+          "title": "Representative total",
+          "type": "integer",
+          "default": 0
+        }
+      }
+    },
     "PageDepthExceededError": {
       "required": [
         "code"
@@ -21875,6 +22156,118 @@
               "type": "string",
               "minLength": 1
             }
+          }
+        }
+      }
+    },
+    "PatternInsight": {
+      "required": [
+        "value",
+        "caption"
+      ],
+      "type": "object",
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string",
+          "default": "",
+          "minLength": 1
+        },
+        "value": {
+          "title": "Value",
+          "type": "string",
+          "minLength": 1
+        },
+        "caption": {
+          "title": "Caption",
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/definitions/PatternInsightEvidence"
+        }
+      }
+    },
+    "PatternInsightEvidence": {
+      "type": "object",
+      "properties": {
+        "test": {
+          "title": "Test",
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline": {
+          "title": "Baseline",
+          "type": "string",
+          "minLength": 1
+        },
+        "tool": {
+          "title": "Tool",
+          "type": "string",
+          "minLength": 1
+        },
+        "z": {
+          "title": "Z",
+          "type": "number"
+        },
+        "p_value": {
+          "title": "P value",
+          "type": "number"
+        },
+        "ks_stat": {
+          "title": "Ks stat",
+          "type": "number"
+        },
+        "fail_median": {
+          "title": "Fail median",
+          "type": "number"
+        },
+        "baseline_median": {
+          "title": "Baseline median",
+          "type": "number"
+        },
+        "fail_pct": {
+          "title": "Fail pct",
+          "type": "integer"
+        },
+        "baseline_pct": {
+          "title": "Baseline pct",
+          "type": "integer"
+        },
+        "hits": {
+          "title": "Hits",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "missing_in": {
+          "title": "Missing in",
+          "type": "integer"
+        },
+        "traces_with_tools": {
+          "title": "Traces with tools",
+          "type": "integer"
+        }
+      }
+    },
+    "PatternSummary": {
+      "required": [
+        "insights",
+        "key_moments"
+      ],
+      "type": "object",
+      "properties": {
+        "insights": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PatternInsight"
+          }
+        },
+        "key_moments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/KeyMoment"
           }
         }
       }
@@ -24295,6 +24688,76 @@
           "title": "Confidence",
           "type": "string",
           "minLength": 1,
+          "x-nullable": true
+        }
+      }
+    },
+    "RepresentativeTrace": {
+      "required": [
+        "id",
+        "status",
+        "timestamp",
+        "summary",
+        "evidence",
+        "agent_flow",
+        "root_causes",
+        "recommendations",
+        "what_changed"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "summary": {
+          "$ref": "#/definitions/TraceSummary"
+        },
+        "evidence": {
+          "$ref": "#/definitions/TraceEvidence"
+        },
+        "agent_flow": {
+          "$ref": "#/definitions/AgentFlowGraph"
+        },
+        "root_causes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "x-nullable": true
+            }
+          }
+        },
+        "recommendations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "x-nullable": true
+            }
+          }
+        },
+        "what_changed": {
+          "title": "What changed",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "x-nullable": true
+          },
           "x-nullable": true
         }
       }
@@ -26787,6 +27250,60 @@
         }
       }
     },
+    "TraceEvidence": {
+      "required": [
+        "input",
+        "output",
+        "fail_reel",
+        "pass_reel"
+      ],
+      "type": "object",
+      "properties": {
+        "input": {
+          "title": "Input",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "output": {
+          "title": "Output",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "fail_reel": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "x-nullable": true
+            }
+          }
+        },
+        "pass_reel": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "x-nullable": true
+            }
+          }
+        },
+        "judge_reason": {
+          "title": "Judge reason",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "score": {
+          "title": "Score",
+          "type": "number",
+          "x-nullable": true
+        }
+      }
+    },
     "TraceObserveColumnConfig": {
       "required": [
         "id",
@@ -27368,6 +27885,190 @@
         "x-json-value": true,
         "description": "Any valid JSON value.",
         "x-nullable": true
+      }
+    },
+    "TraceSummary": {
+      "required": [
+        "eval_score",
+        "latency_ms",
+        "turns",
+        "model",
+        "input_tokens",
+        "output_tokens"
+      ],
+      "type": "object",
+      "properties": {
+        "eval_score": {
+          "title": "Eval score",
+          "type": "number",
+          "x-nullable": true
+        },
+        "latency_ms": {
+          "title": "Latency ms",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "turns": {
+          "title": "Turns",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "model": {
+          "title": "Model",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "input_tokens": {
+          "title": "Input tokens",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "output_tokens": {
+          "title": "Output tokens",
+          "type": "integer",
+          "x-nullable": true
+        }
+      }
+    },
+    "TracesAggregates": {
+      "required": [
+        "total_traces",
+        "failing_traces",
+        "passing_traces",
+        "avg_score",
+        "p50_latency",
+        "p95_latency",
+        "avg_turns"
+      ],
+      "type": "object",
+      "properties": {
+        "total_traces": {
+          "title": "Total traces",
+          "type": "integer"
+        },
+        "failing_traces": {
+          "title": "Failing traces",
+          "type": "integer"
+        },
+        "passing_traces": {
+          "title": "Passing traces",
+          "type": "integer"
+        },
+        "avg_score": {
+          "title": "Avg score",
+          "type": "number",
+          "x-nullable": true
+        },
+        "p50_latency": {
+          "title": "P50 latency",
+          "type": "integer"
+        },
+        "p95_latency": {
+          "title": "P95 latency",
+          "type": "integer"
+        },
+        "avg_turns": {
+          "title": "Avg turns",
+          "type": "number",
+          "x-nullable": true
+        }
+      }
+    },
+    "TracesListRow": {
+      "required": [
+        "id",
+        "input",
+        "timestamp",
+        "latency_ms",
+        "tokens",
+        "cost",
+        "score",
+        "turns"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "minLength": 1
+        },
+        "input": {
+          "title": "Input",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "latency_ms": {
+          "title": "Latency ms",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "tokens": {
+          "title": "Tokens",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "cost": {
+          "title": "Cost",
+          "type": "number",
+          "x-nullable": true
+        },
+        "score": {
+          "title": "Score",
+          "type": "number",
+          "x-nullable": true
+        },
+        "turns": {
+          "title": "Turns",
+          "type": "integer",
+          "x-nullable": true
+        }
+      }
+    },
+    "TracesTabApiResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/TracesTabResponse"
+        }
+      }
+    },
+    "TracesTabResponse": {
+      "required": [
+        "aggregates",
+        "traces",
+        "total"
+      ],
+      "type": "object",
+      "properties": {
+        "aggregates": {
+          "$ref": "#/definitions/TracesAggregates"
+        },
+        "traces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TracesListRow"
+          }
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
       }
     },
     "TrendPoint": {
@@ -28038,7 +28739,8 @@
         "default_workspace_role",
         "org_level",
         "ws_level",
-        "effective_level"
+        "effective_level",
+        "restrict_simulate_to_environments"
       ],
       "type": "object",
       "properties": {
@@ -28159,6 +28861,10 @@
           "title": "Org 2fa grace ends at",
           "type": "string",
           "format": "date-time"
+        },
+        "restrict_simulate_to_environments": {
+          "title": "Restrict simulate to environments",
+          "type": "boolean"
         }
       }
     },

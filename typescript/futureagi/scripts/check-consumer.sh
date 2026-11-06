@@ -15,8 +15,11 @@ cd "$work"
 npm init -y >/dev/null
 npm install --no-audit --no-fund --silent "./$tarball" "typescript@5.6.3"
 cp "$pkg"/consumer/*.mts "$pkg"/consumer/tsconfig.json .
+# Every TypeScript example of the generated reference, and its documented imports, as one
+# more consumer module: an example that does not compile against the packed package fails here.
+node "$pkg/scripts/docs-examples.mjs" "$pkg/../../docs/sdk-reference" docs-examples.mts
 
-echo "consumer: tsc against $tarball"
+echo "consumer: tsc against $tarball (consumer-types.mts + docs-examples.mts)"
 npx tsc -p tsconfig.json
 
 echo "consumer: ESM import"
@@ -26,6 +29,23 @@ node --input-type=module -e '
   const c = new Client({ apiKey: "x", secretKey: "y", baseUrl: "http://127.0.0.1:9", maxRetries: 0, timeout: 500 });
   if (!(c.datasets instanceof Datasets) || typeof c.knowledgeBases.create !== "function" || typeof c.fileKnowledgeBases.files.list !== "function") throw new Error("resources missing");
   if (typeof platform.Client !== "function") throw new Error("platform namespace missing");
+'
+echo "consumer: a real HTTP 429 is caught as the documented platform RateLimitError"
+node --input-type=module -e '
+  import http from "node:http";
+  import { Client } from "@future-agi/sdk";
+  import { RateLimitError, APIError } from "@future-agi/sdk/platform";
+  const server = http.createServer((req, res) => { res.writeHead(429, { "content-type": "application/json", "retry-after": "0" }); res.end(JSON.stringify({ detail: "slow down" })); });
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const c = new Client({ apiKey: "x", secretKey: "y", baseUrl: `http://127.0.0.1:${server.address().port}`, maxRetries: 0, timeout: 2000 });
+  try {
+    await c.account.whoami();
+    throw new Error("expected a 429 to throw");
+  } catch (error) {
+    if (!(error instanceof RateLimitError) || !(error instanceof APIError) || error.status !== 429) throw new Error(`429 did not surface as the platform RateLimitError: ${error}`);
+  } finally {
+    server.close();
+  }
 '
 echo "consumer: CommonJS require"
 node -e '
