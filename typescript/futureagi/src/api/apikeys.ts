@@ -218,7 +218,12 @@ class ProviderAPIKeyClient extends APIKeyAuth {
 }
 
 /**
- * Singleton API Key Manager for managing FutureAGI credentials (fi_api_key, fi_secret_key)
+ * Singleton API Key Manager for managing FutureAGI credentials (fi_api_key, fi_secret_key).
+ *
+ * Process-scoped singleton with environment-derived credentials (FI_API_KEY / FI_SECRET_KEY),
+ * never a per-tenant store: every caller in the process shares the same instance and keys.
+ * Credential isolation applies only to separate APIKeyAuth client instances.
+ * Behaviour is unchanged in this release; deprecation is planned.
  */
 class APIKeyManager extends APIKeyAuth {
     private static _instance?: APIKeyManager;
