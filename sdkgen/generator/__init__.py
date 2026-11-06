@@ -15,6 +15,7 @@ Outputs (never edited by hand)
     typescript/futureagi/src/platform/_operations.ts              one Operation constant per call (private)
     typescript/futureagi/src/platform/resources/base.ts           resource base classes + params types (public: @future-agi/sdk/platform)
     typescript/futureagi/src/platform/resources/index.ts
+    docs/sdk-reference/*.mdx, navigation.json                    the SDK reference pages for docs.futureagi.com
 
 Scaffolds (written once when a resource first appears, then owned by hand)
     python/fi/platform/resources/<resource>.py
@@ -29,7 +30,7 @@ from pathlib import Path
 
 import yaml
 
-from . import python, typescript
+from . import docs, python, typescript
 from .catalog import CatalogError, Op, Param, load
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -38,10 +39,20 @@ CONTRACT = SDKGEN / "contracts" / "swagger.json"
 CATALOG = SDKGEN / "catalog" / "operations.yaml"
 PY_PLATFORM = ROOT / "python" / "fi" / "platform"
 TS_PLATFORM = ROOT / "typescript" / "futureagi" / "src" / "platform"
+DOCS_REFERENCE = ROOT / "docs" / "sdk-reference"
 
-TARGETS = ("python", "typescript")
+TARGETS = ("python", "typescript", "docs")
 
-__all__ = ["CatalogError", "Op", "Param", "TARGETS", "build", "load", "load_ops", "scaffolds"]
+__all__ = [
+    "TARGETS",
+    "CatalogError",
+    "Op",
+    "Param",
+    "build",
+    "load",
+    "load_ops",
+    "scaffolds",
+]
 
 
 def load_ops() -> tuple[dict, list[Op], str]:
@@ -65,7 +76,12 @@ def build(targets: tuple[str, ...] = TARGETS) -> dict[Path, str]:
         out[TS_PLATFORM / "models.ts"] = typescript.emit_models(spec, ops)
         out[TS_PLATFORM / "_operations.ts"] = typescript.emit_operations(ops)
         out[TS_PLATFORM / "resources" / "base.ts"] = typescript.emit_resources(ops)
-        out[TS_PLATFORM / "resources" / "index.ts"] = typescript.emit_resource_index(ops)
+        out[TS_PLATFORM / "resources" / "index.ts"] = typescript.emit_resource_index(
+            ops
+        )
+    if "docs" in targets:
+        for name, text in docs.emit_pages(spec, ops).items():
+            out[DOCS_REFERENCE / name] = text
     return out
 
 
@@ -75,8 +91,12 @@ def scaffolds(targets: tuple[str, ...] = TARGETS) -> dict[Path, str]:
     out: dict[Path, str] = {}
     if "python" in targets:
         for ns in python.top_level(ops):
-            out[PY_PLATFORM / "resources" / f"{ns[0]}.py"] = python.scaffold_resource(ns)
+            out[PY_PLATFORM / "resources" / f"{ns[0]}.py"] = python.scaffold_resource(
+                ns
+            )
     if "typescript" in targets:
         for ns in typescript.top_level(ops):
-            out[TS_PLATFORM / "resources" / f"{ns[0]}.ts"] = typescript.scaffold_resource(ns)
+            out[TS_PLATFORM / "resources" / f"{ns[0]}.ts"] = (
+                typescript.scaffold_resource(ns)
+            )
     return out

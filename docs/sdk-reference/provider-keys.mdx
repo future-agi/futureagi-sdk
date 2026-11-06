@@ -1,0 +1,75 @@
+---
+title: "Provider keys"
+description: "Reference for client.provider_keys in the Future AGI Python and TypeScript SDKs: provider_keys.list."
+---
+
+`client.provider_keys` on `fi.Client` (Python) and `client.providerKeys` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Gateway response models](/docs/sdk/reference/gateway-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+<div class="sdk-ref-table">
+
+| Method | Description |
+|---|---|
+| [`provider_keys.list`](#provider_keyslist) | List the model-provider API keys configured for the organization (values are masked). |
+
+</div>
+
+## client.provider_keys
+
+### provider_keys.list
+
+List the model-provider API keys configured for the organization (values are masked).
+
+<ApiEndpoint method="GET" path="/model-hub/api-keys/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination))
+
+<CodeGroup>
+
+```python Python
+for item in client.provider_keys.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.providerKeys.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.provider_keys.list(
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.ApiKeyResponse]
+```
+
+```typescript TypeScript
+client.providerKeys.list(params: ProviderKeysListParams = {}, options?: RequestOptions): Pager<models.ApiKeyResponse>
+
+export interface ProviderKeysListParams {
+  /** Number of results to return per page. */
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`ApiKeyResponse`](/docs/sdk/reference/gateway-models#apikeyresponse) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).

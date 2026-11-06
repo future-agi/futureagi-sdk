@@ -1,0 +1,25 @@
+---
+title: "Knowledge bases response models"
+description: "The 10 response models returned by the knowledge bases resources of the Future AGI Python and TypeScript SDKs, with every field and its type."
+---
+
+The models returned by `client.knowledge_bases`, `client.file_knowledge_bases`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call. In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)); TypeScript has no strict mode.
+
+## Models
+
+<div class="sdk-ref-table">
+
+| Model | Fields |
+|---|---|
+| <span id="knowledgebaseitem">`KnowledgeBaseItem`</span> | `id: string`, `name: string`, `embedding_model: string`, `chunk_size: integer`, `organization: string`, `created_at: string`, `updated_at: string` |
+| <span id="legacyknowledgebasecreateresult">`LegacyKnowledgeBaseCreateResult`</span> | `detail: string`, `kb_id: string`, `kb_name: string`, `file_ids: string[]` |
+| <span id="legacyknowledgebasefilerow">`LegacyKnowledgeBaseFileRow`</span> | `id: string`, `name: string`, `file_size: integer`, `status: string`, `updated: string`, `updated_by: string`, `error: string` |
+| <span id="legacyknowledgebasefilesresult">`LegacyKnowledgeBaseFilesResult`</span> | `table_data:` [`LegacyKnowledgeBaseFileRow`](#legacyknowledgebasefilerow)[], `last_updated: string`, `status: string`, `status_count: integer`, `total_rows: integer` |
+| <span id="legacyknowledgebaselistresult">`LegacyKnowledgeBaseListResult`</span> | `table_data:` [`LegacyKnowledgeBaseOption`](#legacyknowledgebaseoption)[] |
+| <span id="legacyknowledgebasemutationresult">`LegacyKnowledgeBaseMutationResult`</span> | `id: string`, `name: string`, `organization: string`, `status: string`, `files: string[]`, `updated_at: string`, `created_by: string`, `last_error: string` |
+| <span id="legacyknowledgebaseoption">`LegacyKnowledgeBaseOption`</span> | `id: string`, `name: string` |
+| <span id="legacyknowledgebasetablecolumn">`LegacyKnowledgeBaseTableColumn`</span> | `id: string`, `name: string` |
+| <span id="legacyknowledgebasetableresult">`LegacyKnowledgeBaseTableResult`</span> | `column_config:` [`LegacyKnowledgeBaseTableColumn`](#legacyknowledgebasetablecolumn)[], `table_data:` [`LegacyKnowledgeBaseTableRow`](#legacyknowledgebasetablerow)[], `total_rows: integer` |
+| <span id="legacyknowledgebasetablerow">`LegacyKnowledgeBaseTableRow`</span> | `id: string`, `name: string`, `files_uploaded: integer`, `status: string`, `error: string`, `updated_at: string`, `created_by: string` |
+
+</div>
