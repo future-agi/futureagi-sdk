@@ -6,8 +6,8 @@
 - the no-hand-written-URL-path rule of the platform modules finds nothing here, with the
   rule checked against ``scripts/platform/lint/url-path-rule.json``;
 - nothing imports ``openai`` (the transport is AgentCC's own), and the only third-party
-  imports are the declared base dependencies, plus ImportError-guarded tiktoken
-  imports in the released _tokens module only;
+  imports are declared base dependencies and ImportError-guarded optional imports
+  confined to the released tokenizer and telemetry callback modules;
 - the hosted origin is confined to exact released-wrapper constant definitions;
   AgentCC stays explicit-origin and wrapper/helper uses have a symbol-level gate;
 - ``import fi.gateway`` in a fresh interpreter loads no numpy, pandas,
@@ -282,9 +282,11 @@ def test_nothing_imports_openai() -> None:
     assert text_hits == []
 
 
-def _guarded_tiktoken_lines(path: Path) -> set[int]:
-    """RL 2251n: only this module's lexically ImportError-guarded imports."""
-    if path.relative_to(REPO).as_posix() != "python/fi/gateway/_tokens.py":
+def _guarded_optional_lines(path: Path) -> set[int]:
+    """Only the exact released optional modules' ImportError-guarded imports."""
+    if path.relative_to(REPO).as_posix() not in {
+        "python/fi/gateway/_tokens.py", "python/fi/gateway/callbacks/opentelemetry.py",
+    }:
         return set()
     lines: set[int] = set()
 
@@ -315,9 +317,10 @@ def test_only_the_planned_dependencies_are_imported() -> None:
     stdlib = set(sys.stdlib_module_names) | {"__future__"}
     bad = []
     for path in _gateway_sources():
-        guarded_tiktoken = _guarded_tiktoken_lines(path)
+        guarded_optional = _guarded_optional_lines(path)
+        optional = {"_tokens.py": "tiktoken", "opentelemetry.py": "opentelemetry"}.get(path.name)
         for line, module in _imports(path):
-            if module == "tiktoken" and line in guarded_tiktoken:
+            if module == optional and line in guarded_optional:
                 continue
             top = module.split(".")[0]
             if top in stdlib or top in ALLOWED_THIRD_PARTY:

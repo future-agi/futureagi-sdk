@@ -156,7 +156,10 @@ def assert_parity(raw, request):
 def test_sync_wrapper_request_byte_parity(params):
     seen = []
     raw = return_raw_request(model="test", messages=MESSAGES, api_key=KEY, base_url=ORIGIN, **params)
-    with httpx.Client(transport=capture_transport(seen, params.get("stream"))) as http:
+    # Match the no-client inspector's deterministic compression defaults, even
+    # when optional HTTPX decoders are installed in the test environment.
+    with httpx.Client(headers={"Accept": "*/*", "Accept-Encoding": "gzip, deflate", "Connection": "keep-alive"},
+                      transport=capture_transport(seen, params.get("stream"))) as http:
         with Gateway(api_key=KEY, base_url=ORIGIN, http_client=http) as gateway:
             result = gateway.chat.completions.create(model="test", messages=MESSAGES, **params)
             if params.get("stream"):
@@ -173,7 +176,8 @@ def test_sync_wrapper_request_byte_parity(params):
 async def test_async_wrapper_request_byte_parity(params):
     seen = []
     raw = return_raw_request(model="test", messages=MESSAGES, api_key=KEY, base_url=ORIGIN, **params)
-    async with httpx.AsyncClient(transport=capture_transport(seen, params.get("stream"))) as http:
+    async with httpx.AsyncClient(headers={"Accept": "*/*", "Accept-Encoding": "gzip, deflate", "Connection": "keep-alive"},
+                                 transport=capture_transport(seen, params.get("stream"))) as http:
         async with AsyncGateway(api_key=KEY, base_url=ORIGIN, http_client=http) as gateway:
             result = await gateway.chat.completions.create(model="test", messages=MESSAGES, **params)
             if params.get("stream"):

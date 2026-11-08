@@ -8,7 +8,6 @@ from fi._sdk_exception import SDKException
 from fi.gateway._refusal_details import _MetadataDetails, _RefusalDetails
 from fi.gateway._gateway_evidence import GatewayEvidence, _EvidenceDetails, capture_gateway_evidence
 
-
 class AgentCCError(SDKException):
     """Base exception for all gateway SDK errors."""
 
@@ -32,7 +31,6 @@ class AgentCCError(SDKException):
     def get_message(self) -> str:
         return self.message
 
-
 class APIConnectionError(AgentCCError):
     """Network-level errors."""
 
@@ -49,14 +47,12 @@ class APIConnectionError(AgentCCError):
         if gateway_evidence is not None:
             self.gateway_evidence = gateway_evidence
 
-
 class APITimeoutError(APIConnectionError):
     def __init__(
         self, message: str = "Request timed out", *, request: Any = None,
         gateway_evidence: GatewayEvidence | None = None,
     ) -> None:
         super().__init__(message, request=request, gateway_evidence=gateway_evidence)
-
 
 class APIStatusError(AgentCCError):
     """HTTP error, preserving the decoded body even when it is not an object."""
@@ -177,10 +173,8 @@ class APIStatusError(AgentCCError):
             exc._parse_guardrail_headers(response.headers)
         return exc
 
-
 class BadRequestError(APIStatusError):
     """400 — Invalid parameters, missing model, bad JSON."""
-
 
 class AuthenticationError(APIStatusError):
     """401 — Invalid or missing API key."""
@@ -190,10 +184,8 @@ class AuthenticationError(APIStatusError):
         """The gateway's ``error.metadata.reason``, or ``None`` when absent."""
         return _error_metadata(self.body).get("reason")
 
-
 class PermissionDeniedError(APIStatusError):
     """403 — Insufficient permissions."""
-
 
 class FutureAGICreditsOffError(PermissionDeniedError):
     """403 — a Future AGI model was called while the organization's credits are off.

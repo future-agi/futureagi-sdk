@@ -162,7 +162,12 @@ def test_a_copy_made_inside_a_session_is_outside_it(async_):
     # client: it neither sends the session headers nor counts toward the session, so the
     # session's totals always match the requests that carried its id.
     seen = []
-    client = gw(lambda r: (seen.append(r), httpx.Response(200, json=COMPLETION))[1], async_)
+    retained = []
+    def handle(request):
+        retained.append(request)
+        seen.append(httpx.Request(request.method, request.url, headers=list(request.headers.raw)))
+        return httpx.Response(200, json=COMPLETION)
+    client = gw(handle, async_)
     async def run():
         async with client.session(name="checkout", session_id="s1") as session:
             await client.chat.completions.create(model="mock", messages=MSG)
@@ -175,5 +180,6 @@ def test_a_copy_made_inside_a_session_is_outside_it(async_):
             client.chat.completions.create(model="mock", messages=MSG)
             client.with_options(timeout=5).chat.completions.create(model="mock", messages=MSG)
     assert [r.headers.get("x-agentcc-session-id") for r in seen] == ["s1", None]
+    assert [r.headers.get("x-agentcc-session-id") for r in retained] == ["[REDACTED]", None]
     assert session.request_count == 1
     assert session.total_tokens == 5

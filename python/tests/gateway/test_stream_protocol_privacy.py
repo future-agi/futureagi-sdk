@@ -28,3 +28,18 @@ def test_short_credentials_do_not_substring_redact_diagnostics(credential):
     error = httpx.ReadError("stream_blocked while checking transport")
     scrub_error_text(error, (credential,))
     assert str(error) == "stream_blocked while checking transport"
+
+
+@pytest.mark.parametrize("first", ["_scrub", "_scrub_diagnostics"])
+def test_scrub_modules_can_be_imported_in_either_order(first):
+    from pathlib import Path
+    import subprocess
+    import sys
+
+    root = Path(__file__).resolve().parents[2]
+    code = (f"import sys; sys.path.insert(0, {str(root)!r}); "
+            f"import fi.gateway._transport.{first}; "
+            "from fi.gateway._transport._scrub import scrub_error_text; "
+            "from fi.gateway._transport._scrub_diagnostics import bind_stream_scrubber")
+    result = subprocess.run([sys.executable, "-I", "-B", "-c", code], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr

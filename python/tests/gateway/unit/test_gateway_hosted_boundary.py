@@ -94,10 +94,11 @@ def test_only_released_wrappers_default_to_the_fixed_https_origin(cls):
 @pytest.mark.parametrize("name", ["FI_GATEWAY_BASE_URL", "FI_GATEWAY_URL", "AGENTCC_BASE_URL"])
 def test_environment_origins_are_validated_instead_of_falling_back(cls, name, monkeypatch):
     monkeypatch.setenv(name, "http://unsafe.example.test")
-    seen = []
+    seen, retained = [], []
 
     def handle(request):
-        seen.append(request)
+        retained.append(request)
+        seen.append(httpx.Request(request.method, request.url, headers=list(request.headers.raw)))
         return httpx.Response(200, json={"object": "list", "data": []})
 
     http_cls = httpx.AsyncClient if cls is AsyncGateway else httpx.Client
@@ -116,6 +117,7 @@ def test_environment_origins_are_validated_instead_of_falling_back(cls, name, mo
     assert len(seen) == 1
     assert str(seen[0].url) == "http://unsafe.example.test/v1/models"
     assert seen[0].headers["authorization"] == "Bearer unit-key"
+    assert retained[0].headers["authorization"] == "[REDACTED]"
     monkeypatch.setenv(name, "https://explicit.example.test/v1/")
     with pytest.warns(DeprecationWarning):
         client = cls(api_key="unit-key")

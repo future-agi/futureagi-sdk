@@ -40,7 +40,7 @@ def assert_clean(error):
             pending.extend(value)
 
 
-async def failing_call(handler, async_mode, expanded, *, key=KEY, streaming=False, http_type=None):
+async def failing_call(handler, async_mode, expanded, *, key=KEY, streaming=False, http_type=None, preflight=False):
     callbacks, snapshots = [], []
 
     def on_error(request, error):
@@ -55,14 +55,17 @@ async def failing_call(handler, async_mode, expanded, *, key=KEY, streaming=Fals
     if async_mode:
         async with (http_type or httpx.AsyncClient)(transport=httpx.MockTransport(handler)) as http:
             async with gw.AsyncAgentCC(http_client=http, **kwargs) as client:
-                with pytest.raises(gw.APIConnectionError) as caught:
+                with pytest.raises(gw.AgentCCError if preflight else gw.APIConnectionError) as caught:
                     await client.chat.completions.create(model="fixture", messages=[], stream=streaming)
     else:
         with (http_type or httpx.Client)(transport=httpx.MockTransport(handler)) as http:
             with gw.AgentCC(http_client=http, **kwargs) as client:
-                with pytest.raises(gw.APIConnectionError) as caught:
+                with pytest.raises(gw.AgentCCError if preflight else gw.APIConnectionError) as caught:
                     client.chat.completions.create(model="fixture", messages=[], stream=streaming)
     error = caught.value
+    if preflight:
+        assert type(error) is gw.AgentCCError
+        assert str(error) == "Invalid HTTP header value for authorization."
     assert callbacks == [error] and callbacks[0] is error
     assert len(snapshots) == 1
     assert KEY not in snapshots[0] and PRIVATE not in snapshots[0]
@@ -75,12 +78,15 @@ async def failing_call(handler, async_mode, expanded, *, key=KEY, streaming=Fals
 @pytest.mark.parametrize("protocol", [False, True], ids=["diagnostic", "h11-invalid-header"])
 async def test_preserved_transport_text_is_credential_free(async_mode, expanded, protocol):
     requests, originals, inner_errors = [], [], []
-    key = KEY + "\nsynthetic-suffix" if protocol else KEY
+    key = KEY
 
     def handler(request):
         requests.append(request)
         assert request.headers["authorization"] == "Bearer " + key
         if protocol:
+            # Inject malformed data at the transport, after SDK preflight. This
+            # still exercises actual h11 diagnostics with the composed key.
+            request.headers['authorization'] += '\nsynthetic-suffix'
             try:
                 # Actual HTTP/1.1 header validation, without opening a socket.
                 h11.Request(method=request.method, target=request.url.raw_path, headers=request.headers.raw)
@@ -95,6 +101,9 @@ async def test_preserved_transport_text_is_credential_free(async_mode, expanded,
         originals.append(original)
         raise original
 
+    if protocol:
+        await failing_call(handler, async_mode, expanded, key=KEY + '\nsynthetic-suffix', preflight=True)
+        assert requests == originals == inner_errors == []
     error = await failing_call(handler, async_mode, expanded, key=key)
     assert len(requests) == len(originals) == 1
     assert error.__cause__ is originals[0]

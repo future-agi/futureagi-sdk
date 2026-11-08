@@ -14,7 +14,10 @@ class OpenTelemetryCallback(CallbackHandler):
 
     def __init__(self, *, tracer: Any = None) -> None:
         if tracer is None:
-            from opentelemetry import trace
+            try:
+                from opentelemetry import trace
+            except ImportError as exc:
+                raise ImportError("Install futureagi[gateway-otel] or supply a tracer.") from exc
 
             tracer = trace.get_tracer("fi.gateway")
         self._tracer = tracer

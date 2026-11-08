@@ -35,7 +35,7 @@ class InputModel(BaseModel):
 @pytest.mark.parametrize('state', ['slots', 'containers', 'pydantic', 'group_slots', 'dataclass_slots'])
 def test_original_diagnostic_aliases_are_scrubbed_without_graph_reconstruction(asynchronous, redact, state):
     async def exercise():
-        sent, retained, callbacks, wire = [], [], [], []
+        sent, retained, callbacks, wire, diagnostic_aliases = [], [], [], [], []
 
         class Observer:
             def on_error(self, request, error):
@@ -70,6 +70,7 @@ def test_original_diagnostic_aliases_are_scrubbed_without_graph_reconstruction(a
                 error.diagnostic = GroupWithSlot('fixture group', [leaf])
             else:
                 error.diagnostic = Diagnostic(request, 'safe-label')
+            diagnostic_aliases.append(error.diagnostic)
             retained.append(error)
             raise error
 
@@ -97,9 +98,15 @@ def test_original_diagnostic_aliases_are_scrubbed_without_graph_reconstruction(a
                 assert diagnostic.request.headers['authorization'] == '[REDACTED]'
             elif state == 'containers':
                 assert diagnostic['headers']['authorization'] == '[REDACTED]'
-                assert next(iter(diagnostic['keys'])).headers['authorization'] == '[REDACTED]'
+                # Unsafe diagnostic keys/elements are categorical markers. The
+                # retained caller aliases still prove the original header graph
+                # was masked; never require an unsafe container reconstruction.
+                assert diagnostic['keys'] == '[REDACTED]'
+                alias = diagnostic_aliases[0]
+                assert next(iter(alias['keys'])).headers['authorization'] == '[REDACTED]'
                 for name in ('set', 'frozenset'):
-                    item = next(iter(diagnostic[name]))
+                    assert diagnostic[name] == '[REDACTED]'
+                    item = next(iter(alias[name]))
                     assert item.request.headers['authorization'] == '[REDACTED]'
                     assert item.response.request is item.request
             elif state == 'pydantic':

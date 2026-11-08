@@ -29,7 +29,6 @@ logger = logging.getLogger("fi.gateway")
 
 T = TypeVar("T")
 
-
 def _transport_error(
     error: httpx.TransportError,
     evidence: GatewayEvidence,
@@ -66,7 +65,6 @@ def _transport_error(
         translated._status_error = APIStatusError.from_response(snapshot)
     return translated
 
-
 @dataclass
 class Timeout:
     """Fine-grained timeout configuration.
@@ -80,7 +78,6 @@ class Timeout:
     write: float | None = None
     pool: float | None = None
 
-
 @dataclass
 class RetryConfig:
     """Configuration for the retry engine."""
@@ -90,7 +87,6 @@ class RetryConfig:
     backoff_max: float = 8.0
     backoff_jitter: float = 0.25
     respect_retry_after: bool = True
-
 
 @dataclass
 class RequestOptions:

@@ -11,53 +11,11 @@ import pytest
 
 from fi.gateway import AgentCC, AsyncAgentCC
 from fi.gateway.callbacks.base import CallbackHandler
+from ._callback_live_fixtures import (
+    anyio_backend, resolve, form, client_for, assert_caller_values_visible, reachable_text,
+)
 
 pytestmark = [pytest.mark.anyio, pytest.mark.filterwarnings("ignore::DeprecationWarning")]
-
-
-@pytest.fixture
-def anyio_backend():
-    return "asyncio"
-
-
-async def resolve(value):
-    return await value if inspect.isawaitable(value) else value
-
-
-def form(request):
-    envelope = b"Content-Type: " + request.headers["content-type"].encode() + b"\r\nMIME-Version: 1.0\r\n\r\n" + request.content
-    parts = BytesParser(policy=default).parsebytes(envelope).iter_parts()
-    return {p.get_param("name", header="content-disposition"):
-            (p.get_filename(), p.get_payload(decode=True)) for p in parts}
-
-
-@asynccontextmanager
-async def client_for(async_mode, callbacks, redact, handler=None):
-    seen = []
-
-    def serve(request):
-        seen.append(request)
-        if handler:
-            return handler(request)
-        if request.url.path.endswith(("/transcriptions", "/translations")):
-            return httpx.Response(200, json={"text": "ok"})
-        return httpx.Response(200, json={"id": "reply", "object": "chat.completion", "created": 0,
-                                         "model": "test", "choices": []})
-
-    http = (httpx.AsyncClient if async_mode else httpx.Client)(transport=httpx.MockTransport(serve))
-    client = (AsyncAgentCC if async_mode else AgentCC)(
-        api_key="synthetic-client-key", base_url="https://gateway.example.test", http_client=http,
-        max_retries=0, callbacks=callbacks, redact_messages=redact)
-    try:
-        yield client, seen
-    finally:
-        await resolve(http.aclose() if async_mode else http.close())
-
-
-def assert_caller_values_visible(observed, markers):
-    # Per-request values belong to the caller, including credential-named keys.
-    assert all(marker in repr(observed) for marker in markers)
-
 
 @pytest.mark.parametrize("async_mode", [False, True])
 @pytest.mark.parametrize("redact", [False, True])
@@ -96,7 +54,6 @@ async def test_record_mutations(async_mode, redact, operation):
     assert called == ["complete"]
     assert_caller_values_visible(snapshots, ["synthetic-a", "synthetic-b", "synthetic-c", "synthetic-inner"])
     assert json.loads(seen[0].content)["metadata"]["records"] == expected
-
 
 @pytest.mark.parametrize("async_mode", [False, True])
 @pytest.mark.parametrize("redact", [False, True])
@@ -141,7 +98,6 @@ async def test_nested_annotations_and_tool_schema(async_mode, redact, arguments)
     assert_caller_values_visible(observed, ["synthetic-annotation", "synthetic-schema"])
     assert json.loads(seen[0].content)["messages"] == [expected]
 
-
 @pytest.mark.parametrize("async_mode", [False, True])
 @pytest.mark.parametrize("redact", [False, True])
 @pytest.mark.parametrize("route", ["transcriptions", "translations"])
@@ -178,7 +134,6 @@ async def test_header_and_file_mutations(async_mode, redact, route, operation):
     assert actual_headers == expected_headers
     assert form(seen[0])["file"] == expected_file
     assert form(seen[0])["prompt"] == (None, b"text")
-
 
 @pytest.mark.parametrize("async_mode", [False, True])
 @pytest.mark.parametrize("redact", [False, True])
@@ -259,25 +214,6 @@ async def test_callback_response_does_not_expose_authentication(async_mode, reda
     exposed = {marker: marker in repr(observed) for marker in
                ["synthetic-client-key", "synthetic-request-key", "synthetic-config-key"]}
     assert not any(exposed.values()), {"credential_exposed": any(exposed.values()), "hook": hook}
-
-
-def reachable_text(value, seen=None):
-    """Inspect stored object state, including private response/request links."""
-    seen = set() if seen is None else seen
-    if id(value) in seen:
-        return ""
-    seen.add(id(value))
-    if isinstance(value, (str, bytes, int, float, bool, type(None))):
-        return repr(value)
-    if isinstance(value, dict):
-        children = list(value.keys()) + list(value.values())
-    elif isinstance(value, (list, tuple, set)):
-        children = value
-    else:
-        children = list(vars(value).values()) if hasattr(value, "__dict__") else []
-        if isinstance(value, BaseException):
-            children += [value.args, value.__cause__, value.__context__]
-    return " ".join(reachable_text(child, seen) for child in children)
 
 
 @pytest.mark.parametrize("async_mode", [False, True])
