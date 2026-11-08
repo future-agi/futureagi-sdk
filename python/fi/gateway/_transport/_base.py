@@ -19,7 +19,6 @@ from fi.gateway._constants import (
     DEFAULT_MAX_RETRIES, HEADER_RESPONSE_COST, RETRYABLE_STATUS_CODES,
 )
 from fi.gateway._transport._request import RequestBuilder
-from fi.gateway._transport._body import send_arguments
 from fi.gateway._exceptions import APIConnectionError, APIStatusError, APITimeoutError
 from fi.gateway._gateway_evidence import GatewayEvidence
 from fi.gateway._transport._pool import HttpPool
@@ -106,6 +105,11 @@ class RequestOptions:
     max_retries: int | None = None
     files: dict[str, Any] | None = None
     form: dict[str, Any] | None = None
+
+
+# Imported after RequestOptions so ``_body`` can import it back at runtime: its public
+# ``send_arguments`` annotation then resolves under ``typing.get_type_hints``.
+from fi.gateway._transport._body import send_arguments  # noqa: E402
 
 
 class BaseClient(RequestBuilder, CallbackLifecycle, ABC):

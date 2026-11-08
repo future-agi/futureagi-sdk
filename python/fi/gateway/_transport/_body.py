@@ -1,12 +1,9 @@
 """Released JSON and multipart send arguments, without retaining header aliases."""
 from __future__ import annotations
 
-from typing import Any, TYPE_CHECKING
+from typing import Any
 
 from fi.gateway._transport._request import _uses_form
-
-if TYPE_CHECKING:
-    from fi.gateway._transport._base import RequestOptions
 
 
 def send_arguments(options: RequestOptions, headers: dict[str, str]) -> dict[str, Any]:
@@ -34,3 +31,9 @@ def send_arguments(options: RequestOptions, headers: dict[str, str]) -> dict[str
         return {"files": options.files, "data": data}
     finally:
         headers = None
+
+
+# A real import, after send_arguments exists, so get_type_hints resolves the annotation.
+# _base imports this module only after it defines RequestOptions, so either import order
+# finds the other half already defined.
+from fi.gateway._transport._base import RequestOptions  # noqa: E402,F401
