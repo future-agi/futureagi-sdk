@@ -140,6 +140,134 @@ advertising generated Context resources. Do not manufacture a second schema or a
 proposal/campaign methods. Until that sync, `Client.request` uses the same auth/options/error
 boundary for the downstream snapshot and materializer lanes.
 
+## Snapshot and installer integration (unreleased preview)
+
+The branch packages `fi.context`, `fi.skills`, `@future-agi/sdk/context` and
+`@future-agi/sdk/skills`. `ContextClient` and `SkillsClient` are also exported from
+the npm root. The Python wheel remains 0.7.0 and the npm package remains 0.2.0;
+these are **unpublished branch builds**, not versions to advertise as released
+Context support. The generated backend contract has not yet gained these routes.
+
+```python
+from fi.platform import Client, ContextAuth
+from fi.context import ContextClient
+
+with Client(auth=ContextAuth(credential), base_url=origin,
+            workspace_id=workspace_id) as platform:
+    snapshot = ContextClient(platform).resolve("team-policy", label="production")
+    verified = snapshot.read_all()
+    instructions = verified.files["AGENTS.md"]
+```
+
+`AsyncContextClient` has awaited `resolve`, `read_file` and `read_all` counterparts.
+TypeScript uses `new ContextClient(platform).resolve(name, selector?)`, followed by
+`readFile(path)` or `readAll()`. All clients enumerate complete manifest pages,
+verify per-file and complete snapshot hashes, preserve the original requested
+selector and lease, and fail rather than return partial files or renew a lease.
+The caller owns the platform client. There is no content cache.
+
+`SkillsClient(source)` / `AsyncSkillsClient(source)` use the same engine for a
+leaf skill. The source must implement `SnapshotSource` / `AsyncSnapshotSource`
+from `fi.context.client` (TypeScript: `SnapshotSource` from the context subpath).
+This is an adapter seam, **not a standalone REST quickstart**. The serializer-owned
+leaf consumption contract and lease-bound authorizer are still required; legacy
+broad-key Skills APIs are never a fallback.
+
+### CLI and environment
+
+Online context commands require all four environment variables:
+`FI_CONTEXT_ORIGIN` (HTTPS API origin), `FI_CONTEXT_ORGANIZATION_ID`,
+`FI_CONTEXT_WORKSPACE_ID`, and `FI_CONTEXT_CREDENTIAL`. The last is a secret;
+provision it privately in the process environment, never in arguments, locks,
+source, CI output or screenshots. Stale `FI_API_KEY` / `FI_SECRET_KEY` variables
+are ignored. Registry scope must match the reviewed lock/plan.
+
+Run from outside an untrusted project, with the project path explicit. These
+commands describe the actual branch CLI, not a released install recipe:
+
+```sh
+python -I -m fi.context plan --name team-policy --version 1 --client codex \
+  --project /path/to/project --out /private/context-plan.json --allow-preview
+python -I -m fi.context inspect --plan /private/context-plan.json
+# --diff is an explicit opt-in to print bounded source/local instruction text.
+python -I -m fi.context apply --plan /private/context-plan.json --quiescent
+python -I -m fi.context verify --lock /path/to/project/.futureagi-context.lock.json
+python -I -m fi.context doctor --project /path/to/project
+python -I -m fi.context update --lock /path/to/project/.futureagi-context.lock.json --check
+python -I -m fi.context update --lock /path/to/project/.futureagi-context.lock.json \
+  --plan /private/update-plan.json --allow-preview
+python -I -m fi.context restore --lock /private/retained-context.lock.json \
+  --project /path/to/project --plan /private/restore-plan.json --allow-preview
+python -I -m fi.context remove --lock /path/to/project/.futureagi-context.lock.json \
+  --plan /private/remove-plan.json
+python -I -m fi.context recover --project /path/to/project --quiescent
+```
+
+- Omit the selector for production; a missing label is an error. Exact-version
+  installation works before first promotion when the credential grants it.
+- Both `codex` and `claude-code` profiles remain **preview**. Installation requires
+  `--allow-preview`; adopting existing local instructions also requires
+  `--adopt-local`. No settings, hooks, tool grants or plugins are implicitly enabled.
+- Stop clients and other writers before apply/recover and acknowledge with
+  `--quiescent`. POSIX-only writes use private journals/backups, preimage checks,
+  cooperative locking and lock-last commit. Multiple paths are recoverable, not
+  globally atomic for arbitrary live readers. An interrupted install requires
+  reconciliation before another operation.
+- Plans contain exact source/local bytes and a bounded resolution lease; keep them
+  private. Apply rechecks the original immutable manifest with the same lease.
+  Expiry/revocation/quarantine fails closed; explicitly replan rather than renewing
+  part of a staged snapshot. Exact restore requires an eligible exact-version grant.
+- Removal preserves modified/unowned files and reports them. Empty directories may
+  remain. It does not revoke registry credentials or erase prior offline copies.
+  `verify` checks bytes, not current remote authorization, native discovery, model
+  delivery or behavior. `doctor` reports local diagnostics, not certification.
+- JSON output has schema 1. Exit codes: 0 complete, 2 input/configuration syntax,
+  3 denied/missing credentials, 4 transport, 5 stale/local filesystem conflict,
+  6 integrity, 7 unsupported/unverified profile, 8 update available (`--check`).
+
+Standalone `python -I -m fi.skills` exposes `verify --project`,
+`remove --project --name --plan`, `apply --plan --quiescent` for reviewed removal,
+and `recover --project --quiescent`. Online leaf plan/update/restore/application
+is unavailable until the consumption contract is generated. Library consumers can
+compose `fi.skills.installer` with a verified leaf snapshot and live authorizer.
+Context helpers live in `fi.context.materialize`; both share `fi.context.journal`.
+
+### Optional backend and qualification gates
+
+On Python 3.11, the `context-deepagents` extra installs exactly `deepagents==0.4.11`.
+Other interpreters retain transport/CLI support without this optional runtime.
+`fi.context.adapters.deepagents.mount_context(snapshot, default=..., authorize=...)`
+uses the real read-only `/fi_context/` composite mount and preserves the
+application's writable backend. Supply live authorization for each read. This is
+backend protocol support only: session/checkpoint identity, clean-thread upgrades,
+model-boundary delivery receipts and the Simulation entrypoint remain unimplemented
+until their actual joint backend/application contract is frozen.
+
+`ci.yml` targets the `self-hosted`, `linux`, `x64`, `context-sdk-gcp` runner pool
+and checks the GCP metadata project before executing repository checks. Provisioning
+this pool is an **unfulfilled operator prerequisite**, not a runner created by this
+branch. Use disposable single-job, labelled, auto-deleting Ubuntu 24.04 VMs in
+`fagi-omega-staging`; do not attach persistent credentials or trusted workloads to
+PR runners. Missing runners leave the required gate incomplete; there is no hosted
+or local fallback. The existing separate backend `e2e.yml` workflow still needs its
+own approved GCP/E2B topology before execution. This branch does not register
+runners, change credentials or enable paid/native qualification.
+
+CI requires a separate Python 3.11 backend-conformance job, even though the base
+interpreter matrix does not collect that optional suite. Installed-wheel gates run
+snapshot/materializer regressions, the CLI transport integration probe and the
+actual byte-verification action with corruption, pin and hostile-project controls.
+The npm consumer gate checks declarations plus ESM/CommonJS public subpath exports.
+The action installs nothing and executes no project code; it requires a preinstalled
+trusted interpreter, exact SDK version and materializer hash. It is not behavioral CI.
+
+Release prerequisites remain serializer-generated Context/leaf contracts and live
+credential conformance, approved GCP/E2B native qualification orchestration, actual
+host discovery/delivery qualification, full customer journeys, and normal reviewed
+package publication. Native diagnostics and external application work require
+separate approved jobs; ordinary unit-green cannot enable a profile. No 10x result
+or native-session certification is established by these package gates.
+
 ## Adding your own methods (the hand-written layer)
 
 The generator never owns the whole client. Four places are yours:
@@ -268,7 +396,7 @@ Against a local `bin/install` backend:
 
 Two workflows in this repository, both on every pull request and on pushes to `dev` and `main`:
 
-- `.github/workflows/ci.yml`: `generate.py --check`, `check_mcp_parity.py` (the catalog's MCP names against the monorepo's tool list at the backend release in `sdkgen/contracts/BACKEND_VERSION`: a sync that brings new tools fails until the catalog has their entries), ruff on the generator and the platform client, the Python unit suite on 3.9, 3.11 and 3.13, and the TypeScript type check, platform tests and build. Gate: `CI Pass`.
+- `.github/workflows/ci.yml`: `generate.py --check`, `check_mcp_parity.py` (the catalog's MCP names against the monorepo's tool list at the backend release in `sdkgen/contracts/BACKEND_VERSION`: a sync that brings new tools fails until the catalog has their entries), ruff on the generator and platform/context/skills modules and tests, the base Python unit suite on 3.9, 3.11 and 3.13, required pinned Deep Agents backend conformance on 3.11, installed wheel/action and npm consumers, and TypeScript type checking, platform/snapshot tests and builds. Requires the disposable GCP runner pool described above. Gate: `CI Pass`.
 - `.github/workflows/e2e.yml`: the live suites against a real backend. It boots the Standalone setup the way the monorepo's E2E CI does (its `docker-compose.yml` plus `e2e/stack/docker-compose.standalone-e2e.yml`, the released `futureagi/standalone:latest` image, the mock LLM), signs up a fresh account with `local_api_key.py --signup`, and runs `python/tests/platform` on 3.9 and 3.12 and `pnpm test:live`. Also nightly, and on demand with another image tag. Gate: `E2E Tests Pass`.
 
 The monorepo's E2E CI (`future-agi/.github/workflows/e2e-ci.yml`, PRs and pushes on `dev` and `main`) runs the same two live suites against every backend build, so a backend change that breaks the SDK fails there before it is released. It checks out this repository at the branch named like the monorepo PR's branch if one exists, else the base branch (`dev` or `main`).

@@ -14,6 +14,8 @@ from typing import TYPE_CHECKING, Callable, Literal
 if TYPE_CHECKING:
     from fi.context.snapshot import VerifiedSnapshot
 
+from pydantic import Field, model_validator
+
 from fi.context.adapters.codex import check_skill_frontmatter, check_supporting_path
 from fi.context.journal import (
     SKILLS_OWNERSHIP,
@@ -41,7 +43,6 @@ from fi.context.lock import (
     validate_paths,
 )
 from fi.context.materialize import get_profile
-from pydantic import Field, model_validator
 
 
 class SkillBundle(FrozenModel):

@@ -46,4 +46,21 @@ new Client({ auth: contextAuth, apiKey: "broad", secretKey: "broad" });
 // @ts-expect-error A Context credential cannot include paired keys.
 const mixed: Auth = { type: "context", credential: "synthetic", apiKey: "broad", secretKey: "broad" };
 
-export { templateId, mixed };
+// Public snapshot subpaths must carry usable declarations in the packed package.
+import { ContextClient, type VerifiedSnapshot, type SnapshotSource } from "@future-agi/sdk/context";
+import { SkillsClient } from "@future-agi/sdk/skills";
+import { ContextClient as RootContextClient, SkillsClient as RootSkillsClient } from "@future-agi/sdk";
+const snapshots = new ContextClient(context);
+const snapshot = await snapshots.resolve("team-policy", { label: "production" });
+const verified: VerifiedSnapshot = await snapshot.readAll();
+const text: string = await snapshot.readFile("AGENTS.md");
+const sourceText: string | undefined = verified.files["AGENTS.md"];
+declare const leafSource: SnapshotSource;
+const leaf = await new SkillsClient(leafSource).resolve("refund", { version: 2 });
+await leaf.readFile("SKILL.md");
+new RootContextClient(context);
+new RootSkillsClient(leafSource);
+// @ts-expect-error A selector is exclusive, not both label and version.
+await snapshots.resolve("team-policy", { label: "production", version: 2 });
+
+export { templateId, mixed, text, sourceText };

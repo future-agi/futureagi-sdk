@@ -4,6 +4,10 @@ name: CI
 # current, the Python SDK's unit suite passes on the oldest and newest
 # supported interpreters, and the TypeScript package type-checks, tests and
 # builds. Nothing here talks to a backend; that is e2e.yml.
+# Project checks require an ephemeral GCP runner registered with context-sdk-gcp.
+# Provisioning is an operator prerequisite, not a fallback to GitHub-hosted/Mac.
+# Runners must be single-job, labelled and auto-deleting in fagi-omega-staging,
+# with no persistent credentials or access to trusted workloads for PR code.
 
 on:
   pull_request:
@@ -21,10 +25,11 @@ concurrency:
 jobs:
   generated:
     name: Generated code is current
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, context-sdk-gcp]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/require-sdk-test-vm
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -43,14 +48,13 @@ jobs:
         # fails here until the catalog gets their entries.
         run: python sdkgen/check_mcp_parity.py
       - name: Lint the generator, the platform client and its tests
-        run: ruff check --isolated --select E,F,W,I --ignore E501 sdkgen python/fi/platform python/tests/platform
+        run: ruff check --isolated --select E,F,W,I --ignore E501 sdkgen python/fi/platform python/tests/platform python/fi/context python/fi/skills python/tests/r3_l10 python/tests/r3_l11 python/tests/r3_integration python/consumer/context_consumer.py
 
   python:
     name: Python ${{ matrix.python }}
-    # ubuntu-latest became Ubuntu 26.04 on 2026-11-06 and actions/setup-python has no
-    # 3.9 build for it ("The version '3.9' ... was not found for Ubuntu 26.04"). Pin the
-    # jobs that run the 3.9 floor to 24.04 until the floor moves to 3.10.
-    runs-on: ubuntu-24.04
+    # The disposable GCP runner image must use Ubuntu 24.04: setup-python has
+    # no Python 3.9 distribution for Ubuntu 26.04. No shared/local runner fallback.
+    runs-on: [self-hosted, linux, x64, context-sdk-gcp]
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -60,6 +64,7 @@ jobs:
         python: ["3.9", "3.11", "3.13"]
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/require-sdk-test-vm
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
@@ -71,19 +76,42 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e ./python pytest pytest-asyncio respx pyyaml
       - name: Unit tests
-        # python/tests/platform's live tests skip without a backend; e2e.yml
-        # runs them for real.
-        run: PYTHONPATH=python pytest -q python/tests
+        # Live platform tests run in e2e.yml. The optional Deep Agents protocol
+        # suite is mandatory in the separate Python 3.11 job below; other tests
+        # must work without installing an agent runtime.
+        run: PYTHONPATH=python flock /tmp/ctxhub-pytest.lock python -m pytest -q python/tests --ignore=python/tests/r3_l10/test_deepagents.py
+
+  context-backend:
+    name: Context backend protocol (Python 3.11)
+    runs-on: [self-hosted, linux, x64, context-sdk-gcp]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/require-sdk-test-vm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: python/pyproject.toml
+      - name: Install the pinned optional backend and test dependencies
+        run: python -m pip install -e './python[context-deepagents]' pytest pytest-asyncio respx pyyaml
+      - name: Required real backend conformance and snapshot/materializer integration
+        # No importorskip or substitute backend. This tests the real backend
+        # protocol without model calls; it does not certify native delivery.
+        run: |
+          PYTHONPATH=python flock /tmp/ctxhub-pytest.lock python -m pytest -q python/tests/r3_l10 python/tests/r3_l11 python/tests/r3_integration
+          PYTHONPATH=python flock /tmp/ctxhub-pytest.lock python python/tests/r3_l11/integration_snapshot_probe.py
 
   typescript:
     name: TypeScript
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, context-sdk-gcp]
     timeout-minutes: 15
     defaults:
       run:
         working-directory: typescript/futureagi
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/require-sdk-test-vm
       - uses: pnpm/action-setup@v4
         with:
           version: 8.15.0
@@ -96,10 +124,10 @@ jobs:
         run: pnpm install --ignore-workspace --frozen-lockfile --ignore-scripts
       - name: Type check
         run: pnpm run typecheck
-      - name: Unit tests (platform client)
+      - name: Unit tests (platform and snapshot clients)
         # src/kb and src/annotations carry jest suites that fail on dev as
         # well (pre-existing); they are not part of the gate until fixed.
-        run: pnpm test -- src/platform
+        run: pnpm test -- src/platform src/__tests__/r3_l10 --runInBand
       - name: Build (CJS, ESM, ESNext)
         run: pnpm run build
 
@@ -110,10 +138,11 @@ jobs:
     # an empty project. python/consumer/consumer.py and
     # typescript/futureagi/consumer/consumer-types.mts hold the public calls
     # that must run and type-check from there (mypy --strict, tsc --strict).
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, context-sdk-gcp]
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/require-sdk-test-vm
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -125,11 +154,20 @@ jobs:
       - name: Install the wheel into an empty virtualenv, run and type-check the consumer
         run: |
           python -m venv "$RUNNER_TEMP/consumer"
-          "$RUNNER_TEMP/consumer/bin/pip" install --quiet python/dist/*.whl mypy
-          cp python/consumer/consumer.py "$RUNNER_TEMP/consumer/"
+          "$RUNNER_TEMP/consumer/bin/pip" install --quiet python/dist/*.whl mypy pytest pytest-asyncio pyyaml
+          cp python/consumer/*.py "$RUNNER_TEMP/consumer/"
+          mkdir -p "$RUNNER_TEMP/consumer/python/tests" "$RUNNER_TEMP/consumer/.github/actions"
+          cp -R python/tests/r3_l10 python/tests/r3_l11 "$RUNNER_TEMP/consumer/python/tests/"
+          cp -R .github/actions/context-verify "$RUNNER_TEMP/consumer/.github/actions/"
+          ACTION_PATH="$RUNNER_TEMP/consumer/.github/actions/context-verify/action.yml"
           cd "$RUNNER_TEMP/consumer"
+          unset PYTHONPATH
           ./bin/python consumer.py
-          ./bin/python -m mypy --strict --follow-imports=silent consumer.py
+          ./bin/python context_consumer.py
+          ./bin/python -m mypy --strict --follow-imports=silent consumer.py context_consumer.py
+          flock /tmp/ctxhub-pytest.lock ./bin/python -m pytest -q --asyncio-mode=auto python/tests/r3_l10 python/tests/r3_l11 --ignore=python/tests/r3_l10/test_deepagents.py
+          ./bin/python python/tests/r3_l11/integration_snapshot_probe.py
+          ./bin/python python/tests/r3_l11/package_action_probe.py "$ACTION_PATH"
       - uses: pnpm/action-setup@v4
         with:
           version: 8.15.0
@@ -149,10 +187,11 @@ jobs:
 
   release-guards:
     name: Release authorization guards
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, context-sdk-gcp]
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/require-sdk-test-vm
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -161,9 +200,9 @@ jobs:
 
   ci-pass:
     name: CI Pass
-    needs: [generated, python, typescript, packages, release-guards]
+    needs: [generated, python, context-backend, typescript, packages, release-guards]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, context-sdk-gcp]
     timeout-minutes: 5
     steps:
       - name: Fail closed unless every job succeeded

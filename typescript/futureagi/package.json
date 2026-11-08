@@ -21,6 +21,16 @@
       "import": "./dist/esm/platform/models.js",
       "require": "./dist/src/platform/models.js",
       "types": "./dist/esm/platform/models.d.ts"
+    },
+    "./context": {
+      "types": "./dist/esm/context/index.d.ts",
+      "import": "./dist/esm/context/index.js",
+      "require": "./dist/src/context/index.js"
+    },
+    "./skills": {
+      "types": "./dist/esm/skills/index.d.ts",
+      "import": "./dist/esm/skills/index.js",
+      "require": "./dist/src/skills/index.js"
     }
   },
   "files": [

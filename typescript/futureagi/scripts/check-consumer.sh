@@ -34,4 +34,17 @@ node -e '
   const c = new Client({ apiKey: "x", secretKey: "y", baseUrl: "http://127.0.0.1:9", maxRetries: 0, timeout: 500 });
   if (!(c.datasets instanceof Datasets)) throw new Error("@future-agi/sdk/platform does not export the resource classes");
 '
+echo "consumer: snapshot exports (ESM and CommonJS)"
+node --input-type=module -e '
+  import { createRequire } from "node:module";
+  import { ContextClient as RootContextClient, SkillsClient as RootSkillsClient } from "@future-agi/sdk";
+  import { ContextClient, ContextSnapshot } from "@future-agi/sdk/context";
+  import { SkillsClient } from "@future-agi/sdk/skills";
+  if (RootContextClient !== ContextClient || RootSkillsClient !== SkillsClient || typeof ContextSnapshot !== "function") throw new Error("ESM snapshot exports missing");
+  const require = createRequire(import.meta.url);
+  const root = require("@future-agi/sdk");
+  const contexts = require("@future-agi/sdk/context");
+  const skills = require("@future-agi/sdk/skills");
+  if (root.ContextClient !== contexts.ContextClient || root.SkillsClient !== skills.SkillsClient || typeof contexts.ContextSnapshot !== "function") throw new Error("CommonJS snapshot exports missing");
+'
 echo "consumer: ok"
