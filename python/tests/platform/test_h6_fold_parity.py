@@ -4,13 +4,23 @@ from uuid import uuid4
 
 import httpx
 import pytest
-
 from fi import errors
 from fi._core.core_http import AsyncMappedClient, MappedClient
 from fi._core.http_security import check_http_security
+
 from ._h6_k2w_transport import (
-    API_KEY, SECRET_KEY, EU, US, SUBMITTED, assert_private, assert_selected_only,
-    close, invoke, regional_guidance, run, success, wire,  # noqa: F401
+    API_KEY,
+    EU,
+    SECRET_KEY,
+    SUBMITTED,
+    US,
+    assert_private,
+    assert_selected_only,
+    close,
+    invoke,
+    regional_guidance,
+    run,
+    success,
 )
 
 

@@ -3,9 +3,9 @@ import json
 
 import httpx
 import pytest
-
 from fi import FutureAGIClient
 from fi.generated.openapi_client.models.annotation_queue import AnnotationQueue
+
 from ._gates_support import REPO
 
 QUEUE_ID = "00000000-0000-4000-8000-000000000001"

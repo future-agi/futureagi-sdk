@@ -8,7 +8,6 @@ import re
 from pathlib import Path
 
 import pytest
-
 from fi import AsyncFutureAGIClient, FutureAGIClient
 from fi._cli.main import main
 from fi._core.policy import lookup

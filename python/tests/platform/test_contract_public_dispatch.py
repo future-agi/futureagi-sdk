@@ -3,11 +3,10 @@ import asyncio
 
 import httpx
 import pytest
-
 from fi.errors import BadRequestError
+
 from ._contract_runtime import Runtime, resolve, success
 from .test_operation_contracts import check_wire
-
 
 PROMPT = {"id": "core:prompts.get", "adapter": "core", "name": "prompts.get",
           "method": "GET", "path": "/model-hub/prompt-templates/{id}/",

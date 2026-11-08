@@ -11,7 +11,6 @@ from . import test_contract_offerings as offerings
 from ._contract_public import unavailable_python_paths
 from ._gates_support import REPO
 
-
 INVENTORY = json.loads((REPO / "tests/fixtures/contracts/operations.json").read_text())
 RUN_WRAPPERS = [
     (row, {**wrapper, "py": path})
@@ -64,8 +63,8 @@ def tree_absence(declared_absent):
 def hidden_console(row, mode):
     if not row.get("public_absence"):
         return False
-    from ._contract_runtime import Runtime
     from ._console_absence import assert_console_absent
+    from ._contract_runtime import Runtime
     async def run():
         subject = Runtime(row, mode, lambda _: pytest.fail("absence must not request"))
         try:

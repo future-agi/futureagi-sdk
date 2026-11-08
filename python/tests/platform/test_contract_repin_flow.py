@@ -1,6 +1,4 @@
 """Repin integration with stub generators; no backend or tool installation."""
-import copy
-import json
 from types import SimpleNamespace
 
 import pytest

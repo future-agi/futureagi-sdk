@@ -1,6 +1,5 @@
 """Catalog expectations follow certified source identities, never runtime tables."""
 import copy
-import json
 
 import pytest
 

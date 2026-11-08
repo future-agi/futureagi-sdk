@@ -7,10 +7,9 @@ import json
 from dataclasses import FrozenInstanceError, is_dataclass
 from decimal import Decimal
 
+import fi.platform as fp
 import httpx
 import pytest
-
-import fi.platform as fp
 from fi.platform import _transport
 
 BASE = "https://platform.example.test"

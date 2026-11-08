@@ -12,9 +12,7 @@ import socket
 
 import httpx
 import pytest
-
-from fi import AsyncFutureAGIClient, FutureAGIClient
-from fi import errors
+from fi import AsyncFutureAGIClient, FutureAGIClient, errors
 from fi.generated.platform.policy import OPERATIONS
 
 US = "https://api.futureagi.com"

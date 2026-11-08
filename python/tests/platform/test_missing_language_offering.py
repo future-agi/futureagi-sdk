@@ -5,8 +5,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from ._gates_support import REPO, load
 from . import test_contract_offerings as gates
+from ._gates_support import REPO, load
 
 
 def regenerated_missing_python(monkeypatch, tmp_path):
@@ -53,7 +53,9 @@ def test_missing_python_path_cannot_conceal_a_registered_method(monkeypatch, tmp
     from fi import AsyncFutureAGIClient, FutureAGIClient
     _, path = regenerated_missing_python(monkeypatch, tmp_path)
     parts = path.split(".")[1:]
-    target = lambda: None
+    def target():
+        return None
+
     for part in reversed(parts[1:]):
         target = SimpleNamespace(**{part: target})
     cls = AsyncFutureAGIClient if mode == "async" else FutureAGIClient

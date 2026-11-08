@@ -11,9 +11,6 @@ import pytest
 from .test_all_operations_live import (
     _name,
     allow,
-    code_template,
-    dataset,
-    prompt,
     wait_until,
 )
 

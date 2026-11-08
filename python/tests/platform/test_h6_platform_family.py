@@ -5,7 +5,6 @@ import asyncio
 
 import httpx
 import pytest
-
 from fi import platform as sdk
 from fi._core import http_security
 from fi.platform import _transport as released_transport

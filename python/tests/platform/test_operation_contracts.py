@@ -7,13 +7,13 @@ import json
 
 import httpx
 import pytest
-
 from fi import errors
 from fi._core.pagination import alist_page, list_page
-from ._contract_runtime import Runtime, path_args, resolve, success, stream_events
-from ._contract_payloads import envelope_adapter, payloads, plain
-from ._gates_support import REPO
+
 from ._console_absence import assert_console_absent
+from ._contract_payloads import envelope_adapter, payloads, plain
+from ._contract_runtime import Runtime, path_args, resolve, stream_events, success
+from ._gates_support import REPO
 
 DATA = json.loads((REPO / "tests/fixtures/contracts/operations.json").read_text())
 EE_RESOURCE_ERROR = json.loads((REPO / "tests/fixtures/server-contracts/console-404.json").read_text())["ee"][0]["body"]

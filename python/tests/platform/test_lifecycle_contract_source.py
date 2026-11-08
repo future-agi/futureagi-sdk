@@ -1,6 +1,8 @@
 """The older base pin and separately sourced lifecycle extension remain independent."""
 import json
+
 import pytest
+
 from ._gates_support import REPO, load
 
 

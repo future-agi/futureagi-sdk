@@ -8,13 +8,22 @@ from uuid import uuid4
 
 import httpx
 import pytest
-
 from fi import errors
+
 from ._h6_k2w_transport import (
-    ACTIONS, EU, US, SUBMITTED, assert_private, assert_selected_only, close,
-    invoke, run, wire,  # noqa: F401
+    ACTIONS,
+    EU,
+    NOT_APPLICABLE_AT_FOLD,
+    SANDBOX_ABSENT,
+    SUBMITTED,
+    US,
+    assert_private,
+    assert_selected_only,
+    close,
+    invoke,
+    regional_guidance,
+    run,
 )
-from ._h6_k2w_transport import NOT_APPLICABLE_AT_FOLD, SANDBOX_ABSENT, regional_guidance
 from .test_k2w_transport_safety import assert_warning_safety, warning_texts
 
 

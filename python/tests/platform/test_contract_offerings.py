@@ -68,6 +68,7 @@ def test_effective_url_prefix_is_namespace_drift(monkeypatch, metadata):
 
 def test_every_scheduled_method_resolves_on_real_root_clients(monkeypatch):
     import asyncio
+
     from ._contract_public import method_at, public_path
     from ._contract_runtime import Runtime
     generated = module(monkeypatch).generate()
@@ -92,6 +93,7 @@ def test_every_scheduled_method_resolves_on_real_root_clients(monkeypatch):
 
 def test_unavailable_declarations_do_not_hide_registered_python_methods(monkeypatch):
     import asyncio
+
     from ._contract_public import absence_candidates, method_at
     from ._contract_runtime import Runtime
     generated = module(monkeypatch).generate()

@@ -7,9 +7,7 @@ from pathlib import Path
 
 import httpx
 import pytest
-
-from fi import AsyncFutureAGIClient, FutureAGIClient
-from fi import errors
+from fi import AsyncFutureAGIClient, FutureAGIClient, errors
 from fi._core.platform_async import AsyncPlatformCore
 from fi._core.platform_base import PlatformCore
 from fi._core.transport import PlatformShared

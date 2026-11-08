@@ -5,7 +5,6 @@ import json
 
 import httpx
 import pytest
-
 from fi import AsyncFutureAGIClient
 from fi._core.platform_async import AsyncPlatformCore
 from fi._core.transport import PlatformShared

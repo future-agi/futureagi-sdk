@@ -14,7 +14,14 @@ from pathlib import Path
 import pytest
 
 from tests.core import _egress
+
 from . import _live_operation_ledger
+
+# Register the original shared fixture objects without changing scope or teardown.
+from ._h6_k2w_transport import wire as wire
+from .test_all_operations_live import code_template as code_template
+from .test_all_operations_live import dataset as dataset
+from .test_all_operations_live import prompt as prompt
 
 HERE = Path(__file__).resolve().parent
 ENV_FILE = HERE.parents[2] / ".env.local"

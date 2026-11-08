@@ -4,9 +4,9 @@ import json
 
 import httpx
 import pytest
-
 from fi._core.catalog import AsyncResource, Resource
 from fi._core.policy import OperationSpec
+
 from ._contract_runtime import Runtime, resolve
 from ._gates_support import REPO
 

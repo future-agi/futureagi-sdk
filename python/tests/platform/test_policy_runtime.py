@@ -15,7 +15,6 @@ import dataclasses
 import typing
 
 import httpx
-
 from fi._core.origins import PlatformOrigin
 from fi._core.platform_base import PlatformCore
 from fi._core.policy import (
@@ -28,8 +27,13 @@ from fi._core.policy import (
 )
 from fi._core.transport import PlatformShared
 
+from ._feature_scope import (
+    HTTP_IDEMPOTENT_COUNT,
+    OPERATION_COUNT,
+    PAGINATED_COUNT,
+    assert_credential_scope,
+)
 from ._gates_support import REPO, SCOPED, read_json, routes, spec_retry_class
-from ._feature_scope import OPERATION_COUNT, HTTP_IDEMPOTENT_COUNT, PAGINATED_COUNT, assert_credential_scope
 
 BASE = "http://127.0.0.1:9/omega/api"
 POLICY_SOURCE = REPO / "python" / "fi" / "generated" / "platform" / "policy.py"

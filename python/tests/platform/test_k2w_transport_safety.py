@@ -9,11 +9,21 @@ from uuid import uuid4
 
 import httpx
 import pytest
-
 from fi import errors
+
 from ._h6_k2w_transport import (
-    API_KEY, SECRET_KEY, TOKEN, EU, US, NOT_APPLICABLE_AT_FOLD, SANDBOX_ABSENT, assert_private,
-    assert_selected_only, close, invoke, run, wire,  # noqa: F401
+    API_KEY,
+    EU,
+    NOT_APPLICABLE_AT_FOLD,
+    SANDBOX_ABSENT,
+    SECRET_KEY,
+    TOKEN,
+    US,
+    assert_private,
+    assert_selected_only,
+    close,
+    invoke,
+    run,
 )
 
 

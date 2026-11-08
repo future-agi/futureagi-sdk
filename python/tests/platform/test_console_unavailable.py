@@ -5,10 +5,9 @@ import asyncio
 import json
 from pathlib import Path
 
+import fi
 import httpx
 import pytest
-
-import fi
 from fi import AsyncFutureAGIClient, FutureAGIClient, errors
 
 FIXTURE = json.loads((Path(__file__).resolve().parents[3] / "tests/fixtures/server-contracts/console-404.json").read_text())

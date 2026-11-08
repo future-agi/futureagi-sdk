@@ -4,10 +4,9 @@ from __future__ import annotations
 import asyncio
 import json
 
+import fi
 import httpx
 import pytest
-
-import fi
 from fi import errors
 
 API_KEY = "composition-api-key"

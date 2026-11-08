@@ -8,7 +8,7 @@ import re
 
 import pytest
 
-from ._generator_support import CATALOG, CONTRACT, MCP_IDS, ROOT, _with, generate, pygen, tsgen
+from ._generator_support import CATALOG, CONTRACT, _with, generate, pygen, tsgen
 
 
 def test_patch_bodies_are_partial_unless_the_catalog_says_otherwise():

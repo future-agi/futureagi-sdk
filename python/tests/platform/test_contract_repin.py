@@ -1,6 +1,4 @@
 """Repinning validates all input identities before writing and reports schema drift."""
-import json
-from pathlib import Path
 from types import SimpleNamespace
 
 import pytest

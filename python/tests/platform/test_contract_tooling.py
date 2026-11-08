@@ -1,7 +1,4 @@
 """Contract tooling fails closed on missing coverage and admission conflicts."""
-import copy
-import json
-from pathlib import Path
 
 import pytest
 

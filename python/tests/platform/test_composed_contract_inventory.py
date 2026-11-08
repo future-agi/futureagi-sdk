@@ -5,11 +5,11 @@ import json
 
 import pytest
 
+from ._console_absence import assert_console_absent
 from ._contract_public import method_at, public_path
 from ._contract_runtime import Runtime, success
 from ._gates_support import REPO
 from .test_operation_contracts import check_wire
-from ._console_absence import assert_console_absent
 
 DATA = json.loads((REPO / "tests/fixtures/contracts/operations.json").read_text())
 INPUTS = json.loads((REPO / "openapi/contract-inputs.json").read_text())

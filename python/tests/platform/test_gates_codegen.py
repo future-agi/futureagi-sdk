@@ -16,7 +16,12 @@ from types import ModuleType
 
 import pytest
 
-from ._feature_scope import OPERATION_COUNT, HTTP_IDEMPOTENT_COUNT, PAGINATED_COUNT, assert_credential_scope
+from ._feature_scope import (
+    HTTP_IDEMPOTENT_COUNT,
+    OPERATION_COUNT,
+    PAGINATED_COUNT,
+    assert_credential_scope,
+)
 from ._gates_support import (
     PLATFORM,
     REPO,

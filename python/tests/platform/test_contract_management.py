@@ -4,12 +4,11 @@ from types import SimpleNamespace
 
 import httpx
 import pytest
-
 from fi._resources import AsyncCoreResource, CoreResource
 from fi.errors import BadRequestError
 
-from ._gates_support import REPO, load
 from ._contract_runtime import Runtime, resolve
+from ._gates_support import REPO, load
 
 
 def inputs():

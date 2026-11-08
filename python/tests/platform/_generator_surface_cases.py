@@ -3,12 +3,19 @@
 from __future__ import annotations
 
 import copy
-import json
-import re
 
 import pytest
 
-from ._generator_support import CATALOG, CONTRACT, MCP_IDS, ROOT, _with, generate, pygen, tsgen
+from ._generator_support import (
+    CATALOG,
+    CONTRACT,
+    MCP_IDS,
+    ROOT,
+    _with,
+    generate,
+    pygen,
+    tsgen,
+)
 
 
 def test_committed_outputs_are_up_to_date():

@@ -5,10 +5,9 @@ from __future__ import annotations
 import asyncio
 from decimal import Decimal
 
+import fi.platform as fp
 import httpx
 import pytest
-
-import fi.platform as fp
 from fi.platform import _transport
 from fi.platform.managed_credits import _amount
 

@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import httpx
 import pytest
 
-from ._contract_runtime import Runtime, resolve, path_args
+from ._contract_runtime import Runtime, path_args, resolve
 from ._gates_support import REPO
 
 DATA = json.loads((REPO / "tests/fixtures/contracts/operations.json").read_text())

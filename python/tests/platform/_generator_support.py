@@ -15,6 +15,8 @@ from sdkgen import generator as generate  # noqa: E402
 from sdkgen.generator import python as pygen  # noqa: E402
 from sdkgen.generator import typescript as tsgen  # noqa: E402
 
+__all__ = ["CATALOG", "CONTRACT", "MCP_IDS", "ROOT", "_with", "generate", "pygen", "tsgen"]
+
 CONTRACT = json.loads((ROOT / "sdkgen" / "contracts" / "swagger.json").read_text())
 CATALOG = yaml.safe_load((ROOT / "sdkgen" / "catalog" / "operations.yaml").read_text())
 # The MCP server and its manifest live in the monorepo (futureagi/mcp_server/catalog); the

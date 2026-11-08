@@ -11,11 +11,20 @@ import re
 
 import httpx
 import pytest
-
 from fi import errors
+
 from ._h6_k2w_transport import (
-    ACTIONS, EU, US, SUBMITTED, NOT_APPLICABLE_AT_FOLD, SANDBOX_ABSENT, assert_private, assert_selected_only, close,
-    invoke, run, wire,  # noqa: F401 -- fixture shared only by these new tests
+    ACTIONS,
+    EU,
+    NOT_APPLICABLE_AT_FOLD,
+    SANDBOX_ABSENT,
+    SUBMITTED,
+    US,
+    assert_private,
+    assert_selected_only,
+    close,
+    invoke,
+    run,
 )
 
 # STRING error, never a nested code/message fixture. No varying headers invented.

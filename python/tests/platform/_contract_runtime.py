@@ -4,10 +4,10 @@ from __future__ import annotations
 import inspect
 
 import httpx
-
 from fi import AsyncFutureAGIClient, FutureAGIClient
-from ._contract_public import UUID, invoke, method_at, public_path
+
 from ._contract_payloads import payloads
+from ._contract_public import UUID, invoke, method_at, public_path
 
 BASE = "http://127.0.0.1:9"
 
