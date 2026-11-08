@@ -13,8 +13,8 @@ export interface Operation {
   pagination: Pagination | null;
   /** Body fields go as form data, file params as uploads. */
   multipart?: boolean;
-  /** How the response body is read: JSON (default), text, or auto (JSON when the response says so, else text). */
-  decode?: "json" | "text" | "auto";
+  /** JSON (default), text, auto (JSON when indicated), or bytes (lossless downloads). */
+  decode?: "json" | "text" | "auto" | "bytes";
   /** The contract leaves the `{status, result}` envelope out of many responses, so by default one is removed
    * whenever present even when `unwrap` names no key. `client.request(..., { unwrap: null })` turns that off. */
   autoUnwrap?: boolean;
@@ -27,8 +27,40 @@ export type FileInput = string | Uint8Array | Blob | { name: string; data: Uint8
  * a string or number is as valid there as an object. */
 export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
+/** Explicit credentials never fall back to environment keys. Purpose/grants are server-enforced. */
+export type Auth =
+  | { type: "api_key"; apiKey: string; secretKey: string; credential?: never }
+  | { type: "context"; credential: string; apiKey?: never; secretKey?: never };
+
+const AUTH_HEADERS = new Set(["authorization", "x-api-key", "x-secret-key", "proxy-authorization", "cookie"]);
+const OPERATION_HEADERS = new Set(["idempotency-key", "x-context-resolution"]);
+
+function headerToken(value: unknown, name: string): asserts value is string {
+  if (typeof value !== "string" || !/^[\x21-\x7e]+$/.test(value)) {
+    throw new Error(`${name} must be a nonempty ASCII token without whitespace`);
+  }
+}
+
+export function validateAuth(auth: Auth): void {
+  if (!auth || (auth.type !== "api_key" && auth.type !== "context")) {
+    throw new Error("auth must have type api_key or context");
+  }
+  if (auth.type === "context") {
+    if (auth.apiKey !== undefined || auth.secretKey !== undefined) throw new Error("Context auth cannot include API keys");
+    headerToken(auth.credential, "credential");
+  } else {
+    if (auth.credential !== undefined) throw new Error("API key auth cannot include a Context credential");
+    headerToken(auth.apiKey, "apiKey");
+    headerToken(auth.secretKey, "secretKey");
+  }
+}
+
 /** Per-call overrides, accepted by every generated method as its last argument. */
 export interface RequestOptions {
+  /** Credential-bound immutable lease; never silently renewed by resolving a moving label. */
+  resolutionId?: string;
+  /** Caller-owned operation identity, unchanged on retries. */
+  idempotencyKey?: string;
   /** Added to (and overriding) the client's headers. */
   headers?: Record<string, string>;
   /** Milliseconds. */
@@ -50,8 +82,9 @@ export interface RequestArgs {
 export type FetchLike = (url: string, init: RequestInit) => Promise<Response>;
 
 export interface ResolvedConfig {
-  apiKey: string;
-  secretKey: string;
+  apiKey?: string;
+  secretKey?: string;
+  auth?: Auth;
   baseUrl: string;
   workspaceId?: string;
   /** Milliseconds. */
@@ -81,6 +114,25 @@ function mergeHeaders(...layers: Array<Record<string, string> | undefined>): Rec
     }
   }
   return Object.fromEntries(byName.values());
+}
+
+/** Merge generated allowlisted headers without replacing a caller's operation/lease identity. */
+export function operationOptions(options: RequestOptions | undefined, headers: Record<string, unknown>, required: string[] = []): RequestOptions {
+  let merged = { ...options?.headers };
+  for (const [name, value] of Object.entries(headers)) {
+    if (!OPERATION_HEADERS.has(name.toLowerCase())) throw new Error("operation headers may only carry idempotency or resolution IDs");
+    if (value === undefined || value === null) {
+      if (required.includes(name)) throw new Error(`${name} is required`);
+      continue;
+    }
+    headerToken(value, name);
+    const typed = name.toLowerCase() === "x-context-resolution" ? options?.resolutionId : options?.idempotencyKey;
+    if ((typed !== undefined && typed !== value) || Object.entries(merged).some(([k, v]) => k.toLowerCase() === name.toLowerCase() && v !== value)) {
+      throw new Error(`conflicting ${name} values`);
+    }
+    merged = mergeHeaders(merged, { [name]: value });
+  }
+  return { ...options, headers: merged };
 }
 
 const originOf = (url: string) => new URL(url).origin.toLowerCase();
@@ -244,18 +296,52 @@ function decode(op: Operation, status: number, headers: Headers, text: string): 
 }
 
 export class Transport {
-  constructor(readonly config: ResolvedConfig) {}
+  constructor(readonly config: ResolvedConfig) {
+    if (config.auth !== undefined) {
+      validateAuth(config.auth);
+      if (config.apiKey !== undefined || config.secretKey !== undefined) throw new Error("auth cannot be combined with apiKey or secretKey");
+      const url = new URL(config.baseUrl);
+      if (url.username || url.password) throw new Error("explicit auth does not allow URL credentials");
+      this.config = { ...config, auth: Object.freeze({ ...config.auth }), defaultHeaders: { ...config.defaultHeaders } };
+    } else if (!config.apiKey || !config.secretKey) {
+      throw new Error("apiKey and secretKey are required without auth");
+    }
+    this.headers();
+  }
+
+  private validateHeaders(headers?: Record<string, string>): void {
+    if (!this.config.auth) return; // Preserve legacy overrides for existing paired-key clients.
+    for (const [name, value] of Object.entries(headers ?? {})) {
+      if (AUTH_HEADERS.has(name.toLowerCase())) throw new Error("explicit auth does not allow authentication header overrides");
+      if (this.config.auth.type === "context" && name.toLowerCase() === "x-workspace-id" &&
+          (this.config.workspaceId === undefined || value !== this.config.workspaceId)) {
+        throw new Error("Context auth does not allow workspace header overrides");
+      }
+    }
+  }
 
   headers(options?: RequestOptions): Record<string, string> {
-    const headers: Record<string, string> = {
-      "X-Api-Key": this.config.apiKey,
-      "X-Secret-Key": this.config.secretKey,
-      "User-Agent": "futureagi-typescript",
-    };
-    if (this.config.workspaceId) {
-      headers["X-Workspace-Id"] = this.config.workspaceId;
+    this.validateHeaders(this.config.defaultHeaders);
+    this.validateHeaders(options?.headers);
+    const headers: Record<string, string> = { "User-Agent": "futureagi-typescript" };
+    if (this.config.auth?.type === "context") {
+      headers.Authorization = `Context ${this.config.auth.credential}`;
+    } else {
+      const pair = this.config.auth ?? this.config;
+      headers["X-Api-Key"] = pair.apiKey!;
+      headers["X-Secret-Key"] = pair.secretKey!;
     }
-    return mergeHeaders(headers, this.config.defaultHeaders, options?.headers);
+    if (this.config.workspaceId) headers["X-Workspace-Id"] = this.config.workspaceId;
+    let merged = mergeHeaders(headers, this.config.defaultHeaders, options?.headers);
+    for (const [name, value] of Object.entries({ "X-Context-Resolution": options?.resolutionId, "Idempotency-Key": options?.idempotencyKey })) {
+      if (value === undefined) continue;
+      headerToken(value, name);
+      for (const layer of [this.config.defaultHeaders, options?.headers]) {
+        if (Object.entries(layer ?? {}).some(([k, v]) => k.toLowerCase() === name.toLowerCase() && v !== value)) throw new Error(`conflicting ${name} values`);
+      }
+      merged = mergeHeaders(merged, { [name]: value });
+    }
+    return merged;
   }
 
   /** One HTTP call for `op`: auth, retries, envelope unwrap, typed errors. Resolves to decoded JSON. */
@@ -264,6 +350,7 @@ export class Transport {
     let method = op.method;
     const timeout = options?.timeout ?? this.config.timeout;
     const maxRetries = options?.maxRetries ?? this.config.maxRetries;
+    const requestHeaders = this.headers(options); // Validate once, outside retry handling.
     let attempt = 0;
     let redirects = 0;
     for (;;) {
@@ -274,7 +361,8 @@ export class Transport {
       try {
         response = await this.config.fetch(url, {
           method,
-          headers: mergeHeaders(this.headers(options), headers),
+          headers: mergeHeaders(requestHeaders, headers),
+          ...(this.config.auth ? { credentials: "omit" as const } : {}),
           body,
           signal: AbortSignal.timeout(timeout),
           redirect: "manual", // followed below, and only within the client's own origin
@@ -282,6 +370,9 @@ export class Transport {
         const location = response.headers.get("location");
         if (REDIRECT_STATUSES.has(response.status) && location) {
           discard(response);
+          if (this.config.auth?.type === "context" || Object.keys(requestHeaders).some(k => k.toLowerCase() === "x-context-resolution")) {
+            throw new APIConnectionError("Context credentials and resolution leases cannot follow redirects");
+          }
           if (++redirects > MAX_REDIRECTS) {
             throw new APIConnectionError(`${op.id}: more than ${MAX_REDIRECTS} redirects`);
           }
@@ -293,6 +384,9 @@ export class Transport {
           await sleep(backoffMs(attempt, response.headers.get("retry-after")));
           attempt++;
           continue;
+        }
+        if (op.decode === "bytes" && response.status < 300 && response.status !== 204) {
+          return new Uint8Array(await response.arrayBuffer());
         }
         text = await response.text(); // the connection can still drop or time out mid-body: a transport error like any other
       } catch (error) {

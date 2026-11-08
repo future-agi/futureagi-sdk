@@ -72,6 +72,10 @@ def prop_key(name: str) -> str:
     return name if _IDENTIFIER.match(name) else json.dumps(name)
 
 
+def param_key(p: Param) -> str:
+    return p.arg_name if p.location == "header" else p.name
+
+
 def ts_type(schema: dict | None, *, for_input: bool) -> str:
     if not schema:
         return "unknown"
@@ -153,6 +157,8 @@ def _return_type(op: Op) -> str:
         item = ts_type(op.returns, for_input=False)
     if op.pagination:
         return f"Pager<{item}>"
+    if op.decode == "bytes":
+        return "Promise<Uint8Array>"
     if op.decode == "text":
         return "Promise<string>"
     if op.decode == "auto":
@@ -174,7 +180,7 @@ def _params_interface(op: Op) -> tuple[str, list[Param]]:
         # Optional: left out when undefined, sent as null when null (clears a nullable field). A file
         # field has no null form: it is either uploaded or left out.
         nullable = not p.required and not is_file(p.schema)
-        out.append(f"{desc}  {prop_key(p.name)}{'' if p.required else '?'}: {ts + ' | null' if nullable else ts};\n")
+        out.append(f"{desc}  {prop_key(param_key(p))}{'' if p.required else '?'}: {ts + ' | null' if nullable else ts};\n")
     out.append("}\n\n")
     return "".join(out), fields
 
@@ -196,6 +202,10 @@ def _method(op: Op, fields: list[Param]) -> str:
     lines.append(f"  {ts_method(op)}({', '.join(args)}): {_return_type(op)} {{\n")
     if stability != "stable":
         lines.append(f"    warnStability({json.dumps(op.id)}, {json.dumps(stability)});\n")
+    if op.params_in("header"):
+        headers = ", ".join(f"{prop_key(p.name)}: params.{param_key(p)}" for p in op.params_in("header"))
+        required = [p.name for p in op.params_in("header") if p.required]
+        lines.append(f"    options = operationOptions(options, {{ {headers} }}, {json.dumps(required)});\n")
     path = ", ".join(f"{prop_key(p.name)}: {ts_arg(p)}" for p in path_params)
     parts = [f"path: {{ {path} }}" if path else "path: {}"]
     for location in ("query", "body") if op.sends_body else ("query",):
@@ -247,6 +257,8 @@ def emit_resources(ops: list[Op]) -> str:
         "import { warnStability } from \"../stability\";\n",
         "import type { FileInput, JsonValue, RequestOptions, Transport } from \"../transport\";\n\n",
     ]
+    if any(op.params_in("header") for op in sdk_ops(ops)):
+        out.append('import { operationOptions } from "../transport";\n\n')
     for ns in sorted(tree):
         for op in sorted(tree[ns], key=lambda o: o.method_name):
             out.append(_params_interface(op)[0])

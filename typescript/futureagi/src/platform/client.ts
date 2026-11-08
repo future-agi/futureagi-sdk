@@ -8,13 +8,15 @@
 
 import { API_KEY_ENVVAR_NAME, SECRET_KEY_ENVVAR_NAME, get_base_url } from "../utils/constants";
 import { createResources, ResourceClasses, Resources } from "./resources";
-import { FetchLike, RequestArgs, RequestOptions, ResolvedConfig, Transport } from "./transport";
+import { Auth, FetchLike, Operation, RequestArgs, RequestOptions, ResolvedConfig, Transport } from "./transport";
 
-export interface ClientConfig {
-  /** Defaults to FI_API_KEY. */
-  apiKey?: string;
-  /** Defaults to FI_SECRET_KEY. */
-  secretKey?: string;
+/** Explicit auth is exclusive; legacy top-level pairs keep their environment defaults. */
+export type ClientConfig = ClientOptions & (
+  | { auth: Auth; apiKey?: never; secretKey?: never }
+  | { auth?: never; apiKey?: string; secretKey?: string }
+);
+
+export interface ClientOptions {
   /** Defaults to FI_BASE_URL, then https://api.futureagi.com. */
   baseUrl?: string;
   /** Defaults to FI_WORKSPACE_ID. */
@@ -33,9 +35,12 @@ export interface ClientConfig {
 
 function resolveConfig(config: ClientConfig): ResolvedConfig {
   const env = typeof process !== "undefined" ? process.env : {};
-  const apiKey = config.apiKey ?? env[API_KEY_ENVVAR_NAME];
-  const secretKey = config.secretKey ?? env[SECRET_KEY_ENVVAR_NAME];
-  if (!apiKey || !secretKey) {
+  if (config.auth !== undefined && (config.apiKey !== undefined || config.secretKey !== undefined)) {
+    throw new Error("auth cannot be combined with apiKey or secretKey");
+  }
+  const apiKey = config.auth !== undefined ? undefined : config.apiKey ?? env[API_KEY_ENVVAR_NAME];
+  const secretKey = config.auth !== undefined ? undefined : config.secretKey ?? env[SECRET_KEY_ENVVAR_NAME];
+  if (config.auth === undefined && (!apiKey || !secretKey)) {
     throw new Error(`pass apiKey and secretKey, or set ${API_KEY_ENVVAR_NAME} and ${SECRET_KEY_ENVVAR_NAME}`);
   }
   if (config.maxRetries !== undefined && config.maxRetries < 0) {
@@ -48,8 +53,9 @@ function resolveConfig(config: ClientConfig): ResolvedConfig {
   return {
     apiKey,
     secretKey,
+    auth: config.auth,
     baseUrl: (config.baseUrl ?? get_base_url()).replace(/\/+$/, ""),
-    workspaceId: config.workspaceId ?? env.FI_WORKSPACE_ID,
+    workspaceId: config.auth?.type === "context" ? config.workspaceId : config.workspaceId ?? env.FI_WORKSPACE_ID,
     timeout: config.timeout ?? 60_000,
     maxRetries: config.maxRetries ?? 2,
     defaultHeaders: config.defaultHeaders,
@@ -79,7 +85,7 @@ export class Client {
    * `unwrap` key (the backend's `{status, result}` envelope) removed when present, or the whole body
    * as sent with `unwrap: null`.
    */
-  request(method: string, path: string, args: RequestArgs & { unwrap?: string | null; multipart?: boolean; decode?: "json" | "text" | "auto" } = {}, options?: RequestOptions): Promise<unknown> {
+  request(method: string, path: string, args: RequestArgs & { unwrap?: string | null; multipart?: boolean; decode?: Operation["decode"] } = {}, options?: RequestOptions): Promise<unknown> {
     return this.transport.raw(method, path, args, options);
   }
 }

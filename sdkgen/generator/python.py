@@ -176,6 +176,8 @@ def _return_annotation(op: Op, *, is_async: bool) -> tuple[str, str | None]:
         item, model = py_type(op.returns, for_input=False), None
     if op.pagination:
         return (f"AsyncPager[{item}]" if is_async else f"SyncPager[{item}]"), model
+    if op.decode == "bytes":
+        return "bytes", None
     if op.decode == "text":
         return "str", None
     if op.decode == "auto":
@@ -220,6 +222,10 @@ def _method(op: Op, *, is_async: bool) -> str:
     lines.append(f'        """{doc}\n\n        {op.method} {op.path}\n        """\n')
     if stability != "stable":
         lines.append(f"        _stability({op.id!r}, {stability!r})\n")
+    if op.params_in("header"):
+        headers = ", ".join(f"{p.name!r}: {a}" for p, a in named if p.location == "header")
+        required = tuple(p.name for p in op.params_in("header") if p.required)
+        lines.append(f"        options = operation_options(options, {{{headers}}}, required={required!r})\n")
     for location in ("path", "query", "body") if op.sends_body else ("path", "query"):
         group = [(p, a) for p, a in named if p.location == location and not (location == "body" and is_file(p.schema))]
         items = ", ".join(f"{p.name!r}: {a}" for p, a in group)
@@ -275,7 +281,9 @@ def emit_resources(ops: list[Op]) -> str:
         "from .._pagination import AsyncPager, SyncPager\n",
         "from .._resource import Resource\n",
         "from .._stability import _stability\n",
-        "from .._transport import (\n    NOT_GIVEN,\n    AsyncTransport,\n    FileInput,\n    NotGiven,\n    RequestOptions,\n    SyncTransport,\n)\n",
+        "from .._transport import (\n    NOT_GIVEN,\n    AsyncTransport,\n    FileInput,\n    NotGiven,\n    RequestOptions,\n    SyncTransport,\n",
+        "    operation_options,\n" if any(op.params_in("header") for op in sdk_ops(ops)) else "",
+        ")\n",
     ]
     for is_async in (False, True):
         for ns in sorted(tree, key=lambda ns: (-len(ns), ns)):  # children before parents

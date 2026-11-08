@@ -1468,6 +1468,12 @@ export interface RunTestResponse {
   deleted_at?: string | null;
 }
 
+export interface ScenarioCreateResponse {
+  message?: string | null;
+  scenario?: ScenarioResponse | null;
+  status?: string | null; // one of: processing
+}
+
 export interface ScenarioDetailResponse {
   id?: string | null;
   name?: string | null;

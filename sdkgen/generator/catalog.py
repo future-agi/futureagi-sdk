@@ -17,7 +17,8 @@ MCP_ACCESS = {"read", "write", "destructive"}
 MCP_KEYS = {"name", "group", "access", "open_world", "max_page_size", "stability"}
 CONTRACT_FIXES = {"note", "untyped", "page_items", "returns", "optional_in_response", "body", "body_fields", "body_required", "query"}
 FIX_TYPES = {"string", "integer", "number", "boolean", "object", "array", "file", "json"}
-DECODE_MODES = {"json", "text", "auto"}  # auto: JSON when the response says so, else the body text
+DECODE_MODES = {"json", "text", "auto", "bytes"}  # bytes: lossless ZIP/download response
+OPERATION_HEADERS = {"idempotency-key": "idempotency_key", "x-context-resolution": "resolution_id"}
 BODY_METHODS = ("post", "put", "patch")
 
 
@@ -28,7 +29,7 @@ class CatalogError(Exception):
 @dataclass
 class Param:
     name: str  # as sent on the wire
-    location: str  # path | query | body
+    location: str  # path | query | body | header
     schema: dict
     required: bool
     description: str = ""
@@ -361,9 +362,18 @@ def _contract_params(op_id: str, spec: dict, method: str, item: dict, contract_o
                 if prop.get("readOnly"):
                     continue  # server-owned fields never appear in inputs
                 params.append(Param(name, "body", prop, name in required, prop.get("title", "")))
-        elif p["in"] in ("path", "query"):
+        elif p["in"] in ("path", "query", "header"):
             schema = {k: v for k, v in p.items() if k not in ("name", "in", "required", "description")}
-            params.append(Param(p["name"], p["in"], schema, p["in"] == "path" or p.get("required", False), p.get("description", "")))
+            alias = None
+            if p["in"] == "header":
+                alias = OPERATION_HEADERS.get(p["name"].lower())
+                if alias is None:
+                    raise CatalogError(f"{op_id}: header is not allowlisted: {p['name']}")
+                if schema.get("type") != "string":
+                    raise CatalogError(f"{op_id}: operation headers must be strings")
+                if any(other.location == "header" and other.name.lower() == p["name"].lower() for other in params):
+                    raise CatalogError(f"{op_id}: duplicate operation header")
+            params.append(Param(p["name"], p["in"], schema, p["in"] == "path" or p.get("required", False), p.get("description", ""), alias))
         else:
             raise CatalogError(f"{op_id}: unsupported parameter location {p['in']!r}")
     return params
@@ -401,6 +411,9 @@ def _load_one(spec: dict, entry: dict, seen_mcp: set[str]) -> Op:
     fix = entry.get("contract_fix")
 
     params = _apply_request_fix(op_id, fix, _contract_params(op_id, spec, method, item, contract_op))
+    for header in (p for p in params if p.location == "header"):
+        if any(p is not header and (p.arg_name or re.sub(r"\W", "_", p.name)) == header.arg_name for p in params):
+            raise CatalogError(f"{op_id}: operation header argument collides with another parameter")
 
     multipart = bool(entry["operation"].get("multipart", False))
     decode = entry["operation"].get("decode", "json")
@@ -418,7 +431,7 @@ def _load_one(spec: dict, entry: dict, seen_mcp: set[str]) -> Op:
         raise CatalogError(f"{op_id}: path placeholders {placeholders} != path params {path_params}")
 
     # What the caller gets back: unwrap the {status, result} envelope, then the page items.
-    ok = contract_op["responses"].get("200") or contract_op["responses"].get("201") or {}
+    ok = contract_op["responses"].get("200") or contract_op["responses"].get("201") or contract_op["responses"].get("202") or {}
     returns = ok.get("schema")
     resolved = resolve(spec, returns) or {}
     unwrap = None

@@ -8,7 +8,7 @@ import os
 import random
 import time
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 from typing import IO, Any, Dict, List, Mapping, Optional, Tuple, Union
 from urllib.parse import quote
 
@@ -77,20 +77,84 @@ class Operation:
     unwrap: str | None
     pagination: dict | None
     multipart: bool = False  # body fields go as form data, file params as uploads
-    decode: str = "json"  # json | text | auto (json when the response says so, else text)
+    decode: str = "json"  # json | text | auto (JSON when indicated) | bytes (lossless downloads)
     # The contract leaves the {status, result} envelope out of many responses, so by default one
     # is removed whenever present even when `unwrap` names no key. `client.request(unwrap=None)`
     # turns that off: the caller gets the body exactly as sent.
     auto_unwrap: bool = True
 
 
+def _header_token(value: str, name: str) -> str:
+    """Validate without putting credential/lease values in errors."""
+    if not isinstance(value, str) or not value or any(ord(c) <= 32 or ord(c) >= 127 for c in value):
+        raise ValueError(f"{name} must be a nonempty ASCII token without whitespace")
+    return value
+
+
+@dataclass(frozen=True)
+class ApiKeyAuth:
+    """Explicit API/secret pair. Does not read environment credentials."""
+
+    api_key: str = field(repr=False)
+    secret_key: str = field(repr=False)
+
+    def __post_init__(self) -> None:
+        _header_token(self.api_key, "api_key")
+        _header_token(self.secret_key, "secret_key")
+
+
+@dataclass(frozen=True)
+class ContextAuth:
+    """An isolated consume/report credential, supplied as `credential-id.secret`.
+
+    Purpose and grants are enforced by the server, never inferred by this client.
+    No API/secret pair or ambient workspace is used in this mode.
+    """
+
+    credential: str = field(repr=False)
+
+    def __post_init__(self) -> None:
+        _header_token(self.credential, "credential")
+
+
+Auth = Union[ApiKeyAuth, ContextAuth]
+_AUTH_HEADERS = {"authorization", "x-api-key", "x-secret-key", "proxy-authorization", "cookie"}
+_OPERATION_HEADERS = {"idempotency-key", "x-context-resolution"}
+
+
 @dataclass(frozen=True)
 class RequestOptions:
-    """Per-call overrides, accepted by every generated method as `options=`."""
+    """Per-call settings. Context auth/scope cannot be overridden by headers.
 
-    headers: Optional[Mapping[str, str]] = None  # added to (and overriding) the client's headers
+    A resolution ID is a credential-bound lease, not bearer authority. Keep it
+    on every immutable page/chunk/download/access check for the same snapshot.
+    Never renew a lease by silently re-resolving a moving label.
+    """
+
+    headers: Optional[Mapping[str, str]] = field(default=None, repr=False)
     timeout: Optional[float] = None
     max_retries: Optional[int] = None
+    resolution_id: Optional[str] = field(default=None, repr=False)
+    idempotency_key: Optional[str] = None
+
+
+def operation_options(options: RequestOptions | None, headers: Mapping[str, Any], *, required: tuple[str, ...] = ()) -> RequestOptions:
+    """Merge generated, allowlisted operation headers without overwriting a caller's key."""
+    merged = dict(options.headers or {}) if options else {}
+    for name, value in headers.items():
+        if name.lower() not in _OPERATION_HEADERS:
+            raise ValueError("operation headers may only carry idempotency or resolution IDs")
+        if value is None or value is NOT_GIVEN:
+            if name in required:
+                raise ValueError(f"{name} is required")
+            continue
+        _header_token(value, name)
+        existing = [v for k, v in merged.items() if k.lower() == name.lower()]
+        typed = (options.resolution_id if name.lower() == "x-context-resolution" else options.idempotency_key) if options else None
+        if any(v != value for v in existing) or (typed is not None and typed != value):
+            raise ValueError(f"conflicting {name} values")
+        merged = _merge_headers(merged, {name: value})
+    return replace(options or RequestOptions(), headers=merged)
 
 
 # What a caller may pass for a file parameter: a path, raw bytes, an open binary
@@ -117,11 +181,11 @@ def _files(files: Dict[str, Any] | None) -> List[Tuple[str, Tuple[str, bytes]]] 
     if not files:
         return None
     out: List[Tuple[str, Tuple[str, bytes]]] = []
-    for field, value in files.items():
+    for file_field, value in files.items():
         if value is None or value is NOT_GIVEN:
             continue
         for item in value if isinstance(value, list) else [value]:
-            out.append((field, _file_tuple(item)))
+            out.append((file_field, _file_tuple(item)))
     return out or None
 
 
@@ -164,24 +228,71 @@ def _follow_redirect(base_url: str, response: httpx.Response, method: str) -> tu
 
 @dataclass
 class Config:
-    api_key: str
-    secret_key: str
+    api_key: str | None = field(repr=False)
+    secret_key: str | None = field(repr=False)
     base_url: str
     timeout: float
     max_retries: int
     workspace_id: str | None = None
     strict_responses: bool = False
-    default_headers: Optional[Mapping[str, str]] = None
+    default_headers: Optional[Mapping[str, str]] = field(default=None, repr=False)
+    auth: Optional[Auth] = None
+
+    def __post_init__(self) -> None:
+        if self.auth is not None:
+            if not isinstance(self.auth, (ApiKeyAuth, ContextAuth)):
+                raise TypeError("auth must be ApiKeyAuth or ContextAuth")
+            if self.api_key is not None or self.secret_key is not None:
+                raise ValueError("auth cannot be combined with api_key or secret_key")
+            url = httpx.URL(self.base_url)
+            if url.username or url.password:
+                raise ValueError("explicit auth does not allow URL credentials")
+        elif not self.api_key or not self.secret_key:
+            raise ValueError("api_key and secret_key are required without auth")
+        self.headers()  # Fail at construction, not after a caller starts staging files.
+
+    def validate_headers(self, headers: Mapping[str, str] | None) -> None:
+        if self.auth is None:
+            return  # Retain legacy header-override behavior for existing clients.
+        for name, value in (headers or {}).items():
+            if name.lower() in _AUTH_HEADERS:
+                raise ValueError("explicit auth does not allow authentication header overrides")
+            if isinstance(self.auth, ContextAuth) and name.lower() == "x-workspace-id":
+                if self.workspace_id is None or value != self.workspace_id:
+                    raise ValueError("Context auth does not allow workspace header overrides")
+
+    def validate_http_client(self, client: httpx.Client | httpx.AsyncClient) -> None:
+        if self.auth is not None:
+            self.validate_headers(client.headers)
+            if client.auth is not None or client.cookies:
+                raise ValueError("explicit auth requires an HTTP client without auth or cookies")
 
     def headers(self, options: RequestOptions | None = None) -> dict[str, str]:
-        headers = {
-            "X-Api-Key": self.api_key,
-            "X-Secret-Key": self.secret_key,
-            "User-Agent": "futureagi-python",
-        }
+        self.validate_headers(self.default_headers)
+        self.validate_headers(options.headers if options else None)
+        headers = {"User-Agent": "futureagi-python"}
+        if isinstance(self.auth, ContextAuth):
+            headers["Authorization"] = f"Context {self.auth.credential}"
+        else:
+            pair = self.auth if isinstance(self.auth, ApiKeyAuth) else self
+            headers.update({"X-Api-Key": pair.api_key, "X-Secret-Key": pair.secret_key})
         if self.workspace_id:
             headers["X-Workspace-Id"] = self.workspace_id
-        return _merge_headers(headers, self.default_headers, options.headers if options else None)
+        headers = _merge_headers(headers, self.default_headers, options.headers if options else None)
+        typed = {
+            "X-Context-Resolution": options.resolution_id if options else None,
+            "Idempotency-Key": options.idempotency_key if options else None,
+        }
+        for name, value in typed.items():
+            if value is None:
+                continue
+            _header_token(value, name)
+            # Defaults are not allowed to hide a different operation/snapshot identity.
+            for layer in (self.default_headers, options.headers if options else None):
+                if any(k.lower() == name.lower() and v != value for k, v in (layer or {}).items()):
+                    raise ValueError(f"conflicting {name} values")
+            headers = _merge_headers(headers, {name: value})
+        return headers
 
     def timeout_for(self, options: RequestOptions | None) -> float:
         return options.timeout if options and options.timeout is not None else self.timeout
@@ -194,8 +305,8 @@ def raw_operation(method: str, path: str, *, unwrap: str | None = "result", mult
     """An ad-hoc operation for an endpoint the catalog does not describe (`client.request`)."""
     if not path.startswith("/"):
         raise ValueError(f"path must start with '/', got {path!r}")
-    if decode not in ("json", "text", "auto"):
-        raise ValueError(f"decode must be 'json', 'text' or 'auto', got {decode!r}")
+    if decode not in ("json", "text", "auto", "bytes"):
+        raise ValueError(f"decode must be 'json', 'text', 'auto' or 'bytes', got {decode!r}")
     return Operation(
         id=f"raw:{method.upper()} {path}", method=method.upper(), path=path, unwrap=unwrap, pagination=None, multipart=multipart, decode=decode,
         auto_unwrap=unwrap is not None,  # unwrap=None is an explicit "give me the whole body"
@@ -228,6 +339,8 @@ def _payload(op: Operation, body: Any, files: Dict[str, Any] | None) -> Dict[str
 
 
 def _decode(op: Operation, response: httpx.Response) -> Any:
+    if op.decode == "bytes" and response.status_code != 204:
+        return response.content
     if response.status_code == 204 or not response.content:
         return None
     content_type = response.headers.get("content-type", "")
@@ -304,6 +417,7 @@ class SyncTransport:
         # Redirects are followed here, not by httpx: only to the client's own origin (see _follow_redirect).
         # Every request also says so itself, because a caller's client may have follow_redirects=True.
         self._http = http_client or httpx.Client(follow_redirects=False)
+        config.validate_http_client(self._http)
 
     def request(self, op: Operation, *, path=None, query=None, body=None, files=None, options: RequestOptions | None = None) -> Any:
         """One HTTP call for `op`: auth, retries, envelope unwrap, typed errors. Returns decoded JSON."""
@@ -312,8 +426,9 @@ class SyncTransport:
         headers, timeout, retries = self.config.headers(options), self.config.timeout_for(options), self.config.retries_for(options)
         attempt = redirects = 0
         while True:
+            self.config.validate_http_client(self._http)
             try:
-                response = self._http.request(method, url, params=_clean(query), headers=headers, timeout=timeout, follow_redirects=False, **payload)
+                response = self._http.request(method, url, params=_clean(query), headers=headers, timeout=timeout, follow_redirects=False, **({"auth": None} if self.config.auth is not None else {}), **payload)
             except httpx.TransportError as exc:
                 if _can_retry(op, None, attempt, retries):
                     time.sleep(_backoff(attempt, None))
@@ -321,6 +436,8 @@ class SyncTransport:
                     continue
                 raise APIConnectionError(str(exc)) from exc
             if response.status_code in REDIRECT_STATUSES and response.headers.get("location"):
+                if isinstance(self.config.auth, ContextAuth) or any(k.lower() == "x-context-resolution" for k in headers):
+                    raise APIConnectionError("Context credentials and resolution leases cannot follow redirects")
                 redirects += 1
                 if redirects > MAX_REDIRECTS:
                     raise APIConnectionError(f"{op.id}: more than {MAX_REDIRECTS} redirects")
@@ -364,6 +481,7 @@ class AsyncTransport:
         self.config = config
         self._owns_http = http_client is None
         self._http = http_client or httpx.AsyncClient(follow_redirects=False)
+        config.validate_http_client(self._http)
 
     async def request(self, op: Operation, *, path=None, query=None, body=None, files=None, options: RequestOptions | None = None) -> Any:
         url, method = self.config.base_url + _url(op, path), op.method
@@ -371,8 +489,9 @@ class AsyncTransport:
         headers, timeout, retries = self.config.headers(options), self.config.timeout_for(options), self.config.retries_for(options)
         attempt = redirects = 0
         while True:
+            self.config.validate_http_client(self._http)
             try:
-                response = await self._http.request(method, url, params=_clean(query), headers=headers, timeout=timeout, follow_redirects=False, **payload)
+                response = await self._http.request(method, url, params=_clean(query), headers=headers, timeout=timeout, follow_redirects=False, **({"auth": None} if self.config.auth is not None else {}), **payload)
             except httpx.TransportError as exc:
                 if _can_retry(op, None, attempt, retries):
                     await asyncio.sleep(_backoff(attempt, None))
@@ -380,6 +499,8 @@ class AsyncTransport:
                     continue
                 raise APIConnectionError(str(exc)) from exc
             if response.status_code in REDIRECT_STATUSES and response.headers.get("location"):
+                if isinstance(self.config.auth, ContextAuth) or any(k.lower() == "x-context-resolution" for k in headers):
+                    raise APIConnectionError("Context credentials and resolution leases cannot follow redirects")
                 redirects += 1
                 if redirects > MAX_REDIRECTS:
                     raise APIConnectionError(f"{op.id}: more than {MAX_REDIRECTS} redirects")

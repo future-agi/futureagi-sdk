@@ -16,15 +16,40 @@ import httpx
 
 from fi.utils.constants import API_KEY_ENVVAR_NAME, SECRET_KEY_ENVVAR_NAME, get_base_url
 
-from ._transport import AsyncTransport, Config, FileInput, RequestOptions, SyncTransport
+from ._transport import (
+    ApiKeyAuth,
+    AsyncTransport,
+    Auth,
+    Config,
+    ContextAuth,
+    FileInput,
+    RequestOptions,
+    SyncTransport,
+)
 from .resources import AsyncResources, Resources
 
 
-def _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses, default_headers) -> Config:
-    api_key = api_key or os.environ.get(API_KEY_ENVVAR_NAME)
-    secret_key = secret_key or os.environ.get(SECRET_KEY_ENVVAR_NAME)
-    if not api_key or not secret_key:
-        raise ValueError(f"pass api_key= and secret_key=, or set {API_KEY_ENVVAR_NAME} and {SECRET_KEY_ENVVAR_NAME}")
+def _config(
+    api_key: str | None,
+    secret_key: str | None,
+    base_url: str | None,
+    timeout: float,
+    max_retries: int,
+    workspace_id: str | None,
+    strict_responses: bool,
+    default_headers: Mapping[str, str] | None,
+    auth: Auth | None,
+) -> Config:
+    if auth is not None:
+        if api_key is not None or secret_key is not None:
+            raise ValueError("auth cannot be combined with api_key or secret_key")
+        if not isinstance(auth, (ApiKeyAuth, ContextAuth)):
+            raise TypeError("auth must be ApiKeyAuth or ContextAuth")
+    else:
+        api_key = api_key or os.environ.get(API_KEY_ENVVAR_NAME)
+        secret_key = secret_key or os.environ.get(SECRET_KEY_ENVVAR_NAME)
+        if not api_key or not secret_key:
+            raise ValueError(f"pass api_key= and secret_key=, or set {API_KEY_ENVVAR_NAME} and {SECRET_KEY_ENVVAR_NAME}")
     if max_retries < 0:
         raise ValueError("max_retries must be >= 0")
     return Config(
@@ -33,7 +58,8 @@ def _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, s
         base_url=(base_url or get_base_url()).rstrip("/"),
         timeout=timeout,
         max_retries=max_retries,
-        workspace_id=workspace_id or os.environ.get("FI_WORKSPACE_ID"),
+        workspace_id=workspace_id if isinstance(auth, ContextAuth) else workspace_id or os.environ.get("FI_WORKSPACE_ID"),
+        auth=auth,
         strict_responses=strict_responses,
         default_headers=dict(default_headers) if default_headers else None,
     )
@@ -53,6 +79,7 @@ class Client(Resources):
         *,
         api_key: str | None = None,
         secret_key: str | None = None,
+        auth: Auth | None = None,
         base_url: str | None = None,
         workspace_id: str | None = None,
         timeout: float = 60.0,
@@ -62,7 +89,7 @@ class Client(Resources):
         http_client: httpx.Client | None = None,
     ) -> None:
         self._transport = SyncTransport(
-            _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses, default_headers), http_client
+            _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses, default_headers, auth), http_client
         )
         self._init_resources(self._transport)
 
@@ -106,6 +133,7 @@ class AsyncClient(AsyncResources):
         *,
         api_key: str | None = None,
         secret_key: str | None = None,
+        auth: Auth | None = None,
         base_url: str | None = None,
         workspace_id: str | None = None,
         timeout: float = 60.0,
@@ -115,7 +143,7 @@ class AsyncClient(AsyncResources):
         http_client: httpx.AsyncClient | None = None,
     ) -> None:
         self._transport = AsyncTransport(
-            _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses, default_headers), http_client
+            _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses, default_headers, auth), http_client
         )
         self._init_resources(self._transport)
 

@@ -5,7 +5,7 @@
 // Each block names the review finding it guards (nik13, PR #35, 2026-11-03).
 
 import { Client } from "@future-agi/sdk";
-import type { JsonValue } from "@future-agi/sdk/platform";
+import type { Auth, JsonValue, RequestOptions } from "@future-agi/sdk/platform";
 import type { DashboardDetail, KnowledgeBaseItem, PromptsRunResult } from "@future-agi/sdk/platform/models";
 
 declare const c: Client;
@@ -35,4 +35,15 @@ for await (const prompt of c.prompts.list({}, { extraQuery: { team: "x" } })) {
   prompt.name;
 }
 
-export { templateId };
+// Exclusive auth and continuation options survive package export/declaration generation.
+const contextAuth: Auth = { type: "context", credential: "synthetic-context" };
+const context = new Client({ auth: contextAuth, workspaceId: "workspace-1" });
+const options: RequestOptions = { resolutionId: "lease", idempotencyKey: "operation" };
+await context.request("GET", "/fixture/download/", { decode: "bytes" }, options);
+new Client({ auth: { type: "api_key", apiKey: "key", secretKey: "secret" } });
+// @ts-expect-error Mixed authentication must be rejected for package consumers.
+new Client({ auth: contextAuth, apiKey: "broad", secretKey: "broad" });
+// @ts-expect-error A Context credential cannot include paired keys.
+const mixed: Auth = { type: "context", credential: "synthetic", apiKey: "broad", secretKey: "broad" };
+
+export { templateId, mixed };

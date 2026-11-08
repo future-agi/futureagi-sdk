@@ -31,11 +31,22 @@ from ._errors import (
 from ._pagination import AsyncPager, Page, SyncPager
 from ._resource import Resource, ResourceSet
 from ._stability import BetaWarning
-from ._transport import NOT_GIVEN, FileInput, NotGiven, RequestOptions
+from ._transport import (
+    NOT_GIVEN,
+    ApiKeyAuth,
+    Auth,
+    ContextAuth,
+    FileInput,
+    NotGiven,
+    RequestOptions,
+)
 
 __all__ = [
     "APIConnectionError",
     "APIError",
+    "ApiKeyAuth",
+    "Auth",
+    "ContextAuth",
     "AsyncClient",
     "AsyncPager",
     "AuthenticationError",

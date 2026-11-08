@@ -1603,6 +1603,12 @@ class RunTestResponse(_Model):
     deleted_at: Optional[str] = Field(default=None)
 
 
+class ScenarioCreateResponse(_Model):
+    message: Optional[str] = Field(default=None)
+    scenario: Optional[ScenarioResponse] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: processing
+
+
 class ScenarioDetailResponse(_Model):
     id: Optional[str] = Field(default=None)
     name: Optional[str] = Field(default=None)
@@ -2258,6 +2264,7 @@ RcaTrailStep.model_rebuild()
 RunEnvironmentRef.model_rebuild()
 RunTestExecutionResponse.model_rebuild()
 RunTestResponse.model_rebuild()
+ScenarioCreateResponse.model_rebuild()
 ScenarioDetailResponse.model_rebuild()
 ScenarioEditResponse.model_rebuild()
 ScenarioPromptItem.model_rebuild()
@@ -2430,6 +2437,7 @@ __all__ = [
     'RunEnvironmentRef',
     'RunTestExecutionResponse',
     'RunTestResponse',
+    'ScenarioCreateResponse',
     'ScenarioDetailResponse',
     'ScenarioEditResponse',
     'ScenarioPromptItem',

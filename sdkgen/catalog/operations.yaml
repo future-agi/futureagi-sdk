@@ -13,6 +13,13 @@
 #   pagination: how the SDK auto-paginates (page param, size param, first page,
 #               where the items are, and `next` or `total_pages` to know when to stop)
 #
+# Operation headers come from OpenAPI `in: header` parameters, never auth overrides.
+# Only Idempotency-Key and X-Context-Resolution are supported (idempotency_key and
+# resolution_id SDK arguments). Downloads use operation.decode: bytes.
+# Context/leaf consumption entries must be added with the integrated backend's
+# serializer-generated contract; the pinned contract here has neither facade yet.
+# Do not fabricate endpoints or register disabled proposal/campaign operations.
+#
 # Imported from future-agi/futureagi/mcp_server/catalog/tools.yaml (all 105 tools).
 
 version: 1
