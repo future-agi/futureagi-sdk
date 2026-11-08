@@ -79,7 +79,7 @@
   },
   "files": [
     "dist/esm", "dist/src", "dist/esnext", "dist/gateway", "CHANGELOG.md", "LICENSE", "NOTICE",
-    "!dist/**/__tests__/**", "!dist/**/*.test.*", "!dist/**/*.spec.*", "!dist/**/*.tsbuildinfo",
+    "!dist/**/__tests__/**", "!dist/**/__fixtures__/**", "!dist/**/*.test.*", "!dist/**/*.spec.*", "!dist/**/*.tsbuildinfo",
     "!dist/**/deployments/**", "!dist/**/deployments.*",
     "!dist/esm/evals/**", "!dist/esm/evals.*",
     "!dist/src/evals/**", "!dist/src/evals.*",

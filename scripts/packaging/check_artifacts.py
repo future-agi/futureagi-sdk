@@ -161,7 +161,7 @@ def main(repo, wheel, sdist, tarball, output):
             if not path.is_file():
                 continue
             relative = path.relative_to(dist).as_posix()
-            if "__tests__" in path.parts or ".test." in path.name or ".spec." in path.name or path.suffix == ".tsbuildinfo":
+            if "__tests__" in path.parts or "__fixtures__" in path.parts or ".test." in path.name or ".spec." in path.name or path.suffix == ".tsbuildinfo":
                 continue
             if is_deferred_evals(relative):
                 continue
