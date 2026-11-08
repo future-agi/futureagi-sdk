@@ -21,5 +21,5 @@ export {
 export { RateLimitError, ServerError, RateLimitError as DatasetRateLimitError, ServerError as DatasetServerError } from './utils/errors';
 export * from './webhooks';
 // The released Client is not an alias for FutureAGIClient.
-export { Client, ClientConfig, RequestOptions } from './platform';
+export { Client, type ClientConfig, type RequestOptions } from './platform';
 export * as platform from './platform';
