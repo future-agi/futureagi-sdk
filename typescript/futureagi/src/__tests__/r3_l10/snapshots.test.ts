@@ -568,3 +568,11 @@ test("leaf chunks reject contradictory identity", () => {
     new ChunkCollector(pages.finish(), "SKILL.md").add(chunk),
   ).toThrow(SnapshotIntegrityError);
 });
+
+test("snapshot serialization never exposes the authenticated transport", async () => {
+  const fixture = new Fixture();
+  const snapshot = await client(fixture).resolve("fixture");
+  const serialized = JSON.stringify(snapshot);
+  expect(serialized).not.toContain("synthetic-credential");
+  expect(Object.keys(snapshot)).toEqual(["manifest"]);
+});

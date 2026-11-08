@@ -503,10 +503,12 @@ export class VerifiedSnapshot {
 }
 
 export class ContextSnapshot {
+  readonly #source: SnapshotSource;
   constructor(
     readonly manifest: SnapshotManifest,
-    private readonly source: SnapshotSource,
+    source: SnapshotSource,
   ) {
+    this.#source = source;
     Object.freeze(this);
   }
   get identity(): SnapshotIdentity {
@@ -517,7 +519,7 @@ export class ContextSnapshot {
     while (!chunks.eof) {
       requireLive(this.manifest.lease);
       chunks.add(
-        await this.source.chunk(this.identity, path, chunks.offset, {
+        await this.#source.chunk(this.identity, path, chunks.offset, {
           resolutionId: this.manifest.lease.resolutionId,
         }),
       );
