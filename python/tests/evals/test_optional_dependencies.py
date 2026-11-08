@@ -70,7 +70,7 @@ EXTRA = {"jinja2", "litellm", "nltk", "openai", "opentelemetry", "yaml",
 CLOUD = ("Evaluator", "evaluate", "Protect", "Execution", "EvalTemplateManager",
          "list_evaluations")
 MESSAGE = ('Local metrics and LLM judges require Python 3.11+ and futureagi[evals]. '
-           'Install with: pip install "futureagi[evals]" on Python 3.11+.')
+           'On Python 3.11+, install with: pip install "futureagi[evals]".')
 blocked = set()
 attempts = []
 

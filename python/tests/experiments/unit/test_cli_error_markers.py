@@ -16,7 +16,7 @@ EVALS_HINT = 'pip install "futureagi[evals]"'
 EVALS_FALLBACK = f"Local evaluations require Python 3.11+ and {EVALS_HINT}"
 EVALS_GUARD = (
     "Local metrics and LLM judges require Python 3.11+ and futureagi[evals]. "
-    f"Install with: {EVALS_HINT} on Python 3.11+."
+    f"On Python 3.11+, install with: {EVALS_HINT}."
 )
 
 
