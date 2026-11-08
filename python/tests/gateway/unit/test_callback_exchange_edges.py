@@ -1,10 +1,14 @@
 """Small second-pass edge checks and explicit grouped-exception backreference proof."""
+import sys
 import inspect
 import json
 import httpx
 import pytest
 from fi.gateway import AgentCC, AsyncAgentCC
 from fi.gateway.callbacks.base import CallbackHandler
+
+REQUIRES_EXCEPTION_GROUP = pytest.mark.skipif(
+    sys.version_info < (3, 11), reason='ExceptionGroup is a Python 3.11+ builtin')
 
 pytestmark = [pytest.mark.anyio, pytest.mark.filterwarnings('ignore::DeprecationWarning')]
 
@@ -46,6 +50,7 @@ async def test_method_url_timeout_and_body_assignment(async_mode, redact):
     finally:
         await resolve(http.aclose() if async_mode else http.close())
 
+@REQUIRES_EXCEPTION_GROUP
 @pytest.mark.parametrize('async_mode', [False, True])
 @pytest.mark.parametrize('redact', [False, True])
 async def test_grouped_connection_error_children_have_sanitized_request(async_mode, redact):

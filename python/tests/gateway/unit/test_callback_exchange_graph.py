@@ -1,4 +1,5 @@
 """Independent callback graph and caller-original fidelity checks; synthetic data only."""
+import sys
 import inspect
 import json
 from contextlib import asynccontextmanager
@@ -9,6 +10,9 @@ import pytest
 from fi.gateway import AgentCC, AsyncAgentCC
 from fi.gateway.callbacks.base import CallbackHandler
 from fi.gateway._gateway_config import GatewayConfig, LoadBalanceConfig, LoadBalanceTarget
+
+REQUIRES_EXCEPTION_GROUP = pytest.mark.skipif(
+    sys.version_info < (3, 11), reason='ExceptionGroup is a Python 3.11+ builtin')
 
 pytestmark = [pytest.mark.anyio, pytest.mark.filterwarnings('ignore::DeprecationWarning')]
 
@@ -72,7 +76,8 @@ class Capture(CallbackHandler):
 
 @pytest.mark.parametrize('async_mode', [False, True])
 @pytest.mark.parametrize('redact', [False, True])
-@pytest.mark.parametrize('mode', ['success', 'retry', 'status_error', 'connection', 'exception_group', 'stream', 'stream_error'])
+@pytest.mark.parametrize('mode', ['success', 'retry', 'status_error', 'connection',
+    pytest.param('exception_group', marks=REQUIRES_EXCEPTION_GROUP), 'stream', 'stream_error'])
 async def test_composed_credentials_absent_from_graph(async_mode, redact, mode):
     capture = Capture()
     originals, sent, wire = [], [], []

@@ -106,7 +106,8 @@ async function main(): Promise<void> {
     search_text: process.env.FI_LIVE_DATASET_NAME ?? "sdk-live-dataset",
   });
   const sdkEvals = await futureagi.evals.listSdkEvals();
-  const traceProjects = await futureagi.tracing.projects({ limit: 5 });
+  // GET /tracer/project/ pages with page_size/page_number; the server rejects other paging keys.
+  const traceProjects = await futureagi.tracing.projects({ page_size: 5 });
   const traceLabels = await futureagi.tracing.annotationLabels();
 
   const routeStatuses: Record<string, number> = {};

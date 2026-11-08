@@ -1,4 +1,5 @@
 """Bounded diagnostic links, fresh per-exchange names, and active sessions."""
+import sys
 import inspect
 
 import httpx
@@ -8,6 +9,9 @@ from fi.gateway import AgentCC, AsyncAgentCC
 from fi.gateway._transport._base import RequestOptions
 from fi.gateway._transport._request import RequestBuilder
 from fi.gateway._transport._scrub import scrub_sent_request
+
+REQUIRES_EXCEPTION_GROUP = pytest.mark.skipif(
+    sys.version_info < (3, 11), reason='ExceptionGroup is a Python 3.11+ builtin')
 
 pytestmark = pytest.mark.filterwarnings('ignore::DeprecationWarning')
 ORIGIN = 'https://gateway.example.test'
@@ -37,6 +41,7 @@ def test_composed_name_inventory_is_exchange_local():
     assert options.headers == {'X-Caller': 'visible'}
 
 
+@REQUIRES_EXCEPTION_GROUP
 def test_diagnostic_args_history_groups_and_header_aliases():
     requests = [httpx.Request('GET', ORIGIN, headers={'Authorization': 'synthetic-key', 'X-Private': 'synthetic-default'}) for _ in range(4)]
     response = httpx.Response(200, headers={'Set-Cookie': 'synthetic-cookie'}, request=requests[0])
