@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Literal
 
@@ -155,11 +156,9 @@ def validate_bundle(bundle: SourceBundle) -> Descriptor:
         skill_ids: set[str] = set()
         mounts: set[str] = set()
         for link in descriptor.links:
-            mount = link.mount.rstrip("/")
-            parts = mount.split("/")
+            mount = link.mount.removesuffix("/")
             if (
-                len(parts) != 2
-                or parts[0] != "skills"
+                not re.fullmatch(r"skills/[a-z0-9]+(?:-[a-z0-9]+)*/", link.mount)
                 or link.skill_id in skill_ids
                 or mount in mounts
             ):
