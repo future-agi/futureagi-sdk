@@ -14,8 +14,6 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
-from pydantic import ValidationError
-
 from fi.platform import Client, ContextAuth, RequestOptions
 from fi.platform._errors import APIConnectionError, APIError
 
@@ -390,7 +388,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "message": "Registry transport failed. No fallback occurred.",
             },
         }, 4
-    except (ValidationError, ValueError, UnicodeError):
+    except ValueError:
         # Validation exceptions can contain submitted bytes: never print them.
         outcome, status = {
             "schema": 1,

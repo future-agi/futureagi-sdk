@@ -16,7 +16,6 @@ import tempfile
 from pathlib import Path
 
 import yaml
-
 from fi.context import materialize
 from test_materializer import bundle
 
@@ -34,9 +33,7 @@ def main(action_path: Path) -> None:
         prepared = materialize.plan_install(
             source, project=project, profile="codex", allow_preview=True
         )
-        materialize.apply_plan(
-            prepared, authorize=lambda auth: None, quiescent=True
-        )
+        materialize.apply_plan(prepared, authorize=lambda auth: None, quiescent=True)
         trap = project / "PROJECT_CODE_EXECUTED"
         (project / "json.py").write_text(
             f"from pathlib import Path\nPath({str(trap)!r}).touch()\n"
