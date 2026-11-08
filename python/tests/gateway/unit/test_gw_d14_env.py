@@ -13,6 +13,7 @@ import warnings
 import httpx
 import pytest
 
+from ._published_helpers import wire_snapshot
 from fi.gateway import (
     AgentCC,
     AgentCCError,
@@ -45,7 +46,7 @@ def clean_env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def _client(seen: list[httpx.Request], **kwargs: object) -> AgentCC:
     def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         return httpx.Response(200, json=COMPLETION)
 
     return AgentCC(
@@ -254,7 +255,7 @@ def test_with_every_fi_and_openai_variable_set_only_the_gateway_key_leaves(
     seen: list[httpx.Request] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         if request.url.path == "/v1/models":
             return httpx.Response(200, json={"object": "list", "data": []})
         if request.url.path == "/v1/embeddings":

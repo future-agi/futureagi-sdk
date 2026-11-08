@@ -224,14 +224,26 @@ async def test_wire_credentials_and_all_retained_requests(async_mode, redact, re
         assert descriptors and all(request is descriptors[0] for request in descriptors)
         assert descriptors[0].headers["CoOkIe"] == extra["CoOkIe"]
         assert all(name.lower() not in descriptors[0].headers for name in defaults)
-        retained = list(reachable_requests([result, caught, capture.events, requests, responses, errors]))
-        assert retained
+        # Reachability, not enumeration: every request reachable through data attributes
+        # from the returned, raised and callback objects must be masked. The mock
+        # transport's own lists are the caller's side (wire-time values were asserted
+        # above); a failed auth flow's first request lives only there.
+        retained = list(reachable_requests([result, caught, capture.events]))
+        # A raw bytes result carries no exchange, so nothing may be reachable from it.
+        assert retained or isinstance(result, (bytes, bytearray))
         for request in retained:
             for name in CREDENTIAL_HEADER_NAMES:
                 if name in request.headers:
                     assert request.headers[name] == MASK, name
             # Even a benign arbitrary default is client-composed private data.
             assert request.headers["x-visible"] == MASK
+        # Every other sent request stays strictly masked. The single exemption is the
+        # first request of a failed auth flow that no root reaches.
+        reached = {id(request) for request in retained}
+        exempt = {id(requests[0])} if outcome == "auth-error" and id(requests[0]) not in reached else set()
+        for request in requests:
+            if id(request) not in exempt:
+                assert request.headers["authorization"] == MASK
         terminal = [args[0] for name, _, args in capture.events if name == "error"]
         if caught is not None:
             assert terminal == [caught] and terminal[0] is caught

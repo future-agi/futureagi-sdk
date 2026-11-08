@@ -10,18 +10,21 @@ import { createAgentCCClient, resetAgentCCClient } from "../../src/nextjs.js";
 import { fromEnv, resolveApiKey, resolveBaseUrl, KEY_ENV, URL_ENV } from "../../src/env.js";
 
 function okFetch() {
-  return jest.fn<typeof globalThis.fetch>(
-    async () =>
-      new Response(JSON.stringify({ object: "list", data: [] }), {
-        status: 200,
-        headers: { "content-type": "application/json" },
-      }),
-  );
+  const headersAtCall: Record<string, string>[] = [];
+  const fetch = jest.fn<typeof globalThis.fetch>(async (_url, init) => {
+    // Observe the wire before the transport scrubs its attempt-owned headers.
+    headersAtCall.push({ ...(init?.headers as Record<string, string>) });
+    return new Response(JSON.stringify({ object: "list", data: [] }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  });
+  return Object.assign(fetch, { headersAtCall });
 }
 
 function sent(fetch: ReturnType<typeof okFetch>, call = 0): { url: string; headers: Record<string, string> } {
-  const [url, init] = fetch.mock.calls[call] as [string, RequestInit];
-  return { url, headers: { ...(init.headers as Record<string, string>) } };
+  const [url] = fetch.mock.calls[call] as [string, RequestInit];
+  return { url, headers: fetch.headersAtCall[call] };
 }
 
 let saved: NodeJS.ProcessEnv;

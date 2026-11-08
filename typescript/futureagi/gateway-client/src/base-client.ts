@@ -27,14 +27,11 @@ import { BROWSER_REFUSED, isBrowser } from "./browser.js";
 import type { DryRunResult } from "./dry-run.js";
 import { buildHeaders, buildUrl, checkStructuredOutput, connectionError, retryDelay, safeJson, sleep } from "./request-parts.js";
 import { callbackRequest, firePostRequestCallbacks, fireStatusErrorCallbacks } from "./request-callbacks.js";
-import { markScrubbedResponse, scrubCredentialHeaders } from "./redact.js";
+import { markScrubbedResponse } from "./redact.js";
+import { fetchWithScrub, requestInit } from "./request-transport.js";
 
 export type { RequestOptions, ClientOptions, WithResponseResult } from "./client-options.js";
 import type { RequestOptions, ClientOptions, WithResponseResult } from "./client-options.js";
-
-// ---------------------------------------------------------------------------
-// BaseClient
-// ---------------------------------------------------------------------------
 
 export class BaseClient {
   protected _apiKey: string;
@@ -250,33 +247,11 @@ export class BaseClient {
       effectiveOptions.query,
     );
     const headers = this._buildHeaders(effectiveOptions);
-    const isFormData = effectiveOptions.body instanceof FormData;
-
-    const init: RequestInit = {
-      method: effectiveOptions.method,
-      headers,
-      signal: AbortSignal.timeout(
-        effectiveOptions.timeout ?? this._timeout,
-      ),
-    };
-
-    if (effectiveOptions.body && effectiveOptions.method !== "GET") {
-      if (isFormData) {
-        init.body = effectiveOptions.body as FormData;
-      } else {
-        init.body = JSON.stringify(effectiveOptions.body);
-      }
-    }
+    const init = requestInit(effectiveOptions, headers, this._timeout);
 
     let response: Response;
     try {
-      try {
-        response = await this._fetch(url, init);
-      } finally {
-        // Scrub before parsing bodies, delivering callbacks or exposing errors.
-        // These headers belong to this attempt, never to the caller's options.
-        scrubCredentialHeaders(headers);
-      }
+      response = await fetchWithScrub(() => this._fetch(url, init), headers);
     } catch (err: unknown) {
       const connError = errorAtExit(connectionError(err, effectiveOptions.path, url));
 

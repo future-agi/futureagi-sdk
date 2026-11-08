@@ -20,7 +20,7 @@ from fi.gateway._http_security import validate_destination
 from fi.gateway._transport._response import (
     ResponseCapture, body_decode_error, aclose_response, safe_response, protect_stream_cleanup,
 )
-from fi.gateway._transport._scrub import scrub_sent_request
+from fi.gateway._transport._scrub import scrub_reachable, scrub_sent_request
 from fi.gateway._transport._base import (
     BaseClient,
     RequestOptions,
@@ -99,6 +99,7 @@ class AsyncBaseClient(BaseClient):
                 capture.status == 246 or capture.status >= 400
             )):
                 await aclose_response(capture.response)
+            scrub_reachable((response, error, failure, capture.response), composed_names)
         if failure is not None:
             # Transport causes retain their original, already-scrubbed requests.
             raise failure

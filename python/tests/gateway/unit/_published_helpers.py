@@ -27,15 +27,9 @@ def clear_platform_keys(monkeypatch):
         monkeypatch.delenv(name, raising=False)
 
 
-def wire_snapshot(request):
-    """The request exactly as dispatched, for assertions about the wire.
-
-    The client masks credential and client-composed headers on every retained
-    request once a send finishes, so handlers record this copy at dispatch time
-    instead of reading the original request afterwards.
-    """
-    return httpx.Request(request.method, request.url, headers=request.headers,
-                         content=request.content, extensions=request.extensions)
+# Preserve the existing import path while sharing a dependency-light helper
+# with the opt-in fixture; capturing a request must not import deprecated APIs.
+from .._wire_capture import wire_snapshot
 
 
 async def resolve(value):

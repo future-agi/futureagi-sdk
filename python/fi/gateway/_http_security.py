@@ -4,12 +4,35 @@ from __future__ import annotations
 
 import ipaddress
 import warnings
+from collections.abc import Mapping
+from typing import Any
 from urllib.parse import parse_qsl, urlsplit
 
+import httpx
+
+from fi.gateway._constants import is_credential_name
 from fi.gateway._deprecation import AgentCCDeprecationWarning
 from fi.gateway._exceptions import AgentCCError
 
-_CREDENTIAL_QUERY_NAMES = frozenset({"key", "api_key", "token", "access_token"})
+
+def reject_credential_query(query: Any, *, where: str = "default_query") -> None:
+    """Refuse a query-parameter mapping that names a credential.
+
+    Uses the one shared credential-name set (lowercase, "-" equals "_"). The error
+    names the offending key and never its value.
+    """
+    if not query:
+        return
+    if isinstance(query, Mapping):
+        names = [str(name) for name in query]
+    else:
+        try:
+            names = list(httpx.QueryParams(query).keys())
+        except Exception:
+            return
+    for name in names:
+        if is_credential_name(name):
+            raise AgentCCError(f"Gateway {where} must not contain the credential parameter {name!r}.")
 
 
 def _origin(url: str) -> tuple[str, str, int]:
@@ -22,7 +45,7 @@ def _origin(url: str) -> tuple[str, str, int]:
         ):
             raise ValueError
         if any(
-            name.lower() in _CREDENTIAL_QUERY_NAMES
+            is_credential_name(name)
             for name, _ in parse_qsl(parsed.query, keep_blank_values=True)
         ):
             raise AgentCCError("Gateway URL must not contain credential query parameters.")

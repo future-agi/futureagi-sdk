@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field, replace
 from typing import Any
 
-from fi.gateway._constants import CREDENTIAL_HEADER_NAMES
+from fi.gateway._constants import is_credential_name
 
 
 @dataclass
@@ -97,10 +97,6 @@ class CallbackHandler:
 
 REDACTED = "[REDACTED]"
 _TEXT_KEYS = ("prompt", "input", "instructions")
-_CREDENTIAL_KEYS = frozenset(name.replace("-", "_") for name in CREDENTIAL_HEADER_NAMES) | {
-    "virtual_key", "secret_key", "fi_api_key", "fi_secret_key",
-    "access_token", "refresh_token", "client_secret", "password",
-}
 
 
 def _redact_message(message: Any) -> Any:
@@ -125,8 +121,7 @@ def redact_credentials(value: Any) -> Any:
     """Copy structured callback data without credential-bearing fields."""
     if isinstance(value, dict):
         return {
-            key: REDACTED if str(key).lower().replace("-", "_") in _CREDENTIAL_KEYS
-            else redact_credentials(item)
+            key: REDACTED if is_credential_name(key) else redact_credentials(item)
             for key, item in value.items()
         }
     if isinstance(value, tuple):

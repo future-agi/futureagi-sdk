@@ -13,17 +13,20 @@ import { AgentCC } from "../../src/index.js";
 import type { ClientOptions } from "../../src/index.js";
 
 function okFetch() {
-  return jest.fn<typeof fetch>(async () =>
-    new Response(JSON.stringify({ id: "c1", object: "chat.completion", created: 1, model: "m", choices: [] }), {
+  const headersAtCall: Record<string, string>[] = [];
+  const fetchMock = jest.fn<typeof fetch>(async (_url, init) => {
+    // Observe the wire before the transport scrubs its attempt-owned headers.
+    headersAtCall.push({ ...(init?.headers as Record<string, string>) });
+    return new Response(JSON.stringify({ id: "c1", object: "chat.completion", created: 1, model: "m", choices: [] }), {
       status: 200,
       headers: { "content-type": "application/json" },
-    }),
-  );
+    });
+  });
+  return Object.assign(fetchMock, { headersAtCall });
 }
 
 function sentHeaders(fetchMock: ReturnType<typeof okFetch>, call = 0): Record<string, string> {
-  const init = fetchMock.mock.calls[call][1] as RequestInit;
-  return init.headers as Record<string, string>;
+  return fetchMock.headersAtCall[call];
 }
 
 function sentBody(fetchMock: ReturnType<typeof okFetch>, call = 0): Record<string, unknown> {

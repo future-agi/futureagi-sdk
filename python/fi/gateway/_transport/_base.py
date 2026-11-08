@@ -207,20 +207,17 @@ class BaseClient(RequestBuilder, CallbackLifecycle, ABC):
     def _request_arguments(
         self, options: RequestOptions, params: Any = None, *, stream: bool = False,
     ) -> tuple[dict[str, Any], frozenset[str]]:
-        """Build wire arguments and private names together, once per attempt."""
+        """Build wire arguments and private names together, once per attempt.
+
+        As released, a JSON send hands ``json=`` to the client (so a supplied client's
+        ``request()`` policy and its own default headers still apply) and an upload hands
+        ``files=``/``data=``. Only raw inspection pre-encodes a body.
+        """
         headers, composed_names = self._build_headers(options, params)
         if stream and options.form is None:
-            return {
-                "method": options.method, "url": self._build_url(options.url),
-                "headers": headers, "json": options.body,
-            }, composed_names
-        if not _uses_form(options):
-            request = self._build_request(options, params, headers=headers)
-            return {
-                "method": request.method, "url": request.url,
-                "headers": request.headers, "content": request.content,
-            }, composed_names
-        body = send_arguments(options, headers)
+            body: dict[str, Any] = {"json": options.body}
+        else:
+            body = send_arguments(options, headers)
         return {
             "method": options.method, "url": self._build_url(options.url),
             "headers": headers, **body,

@@ -11,6 +11,7 @@ from __future__ import annotations
 import httpx
 import pytest
 
+from ._published_helpers import wire_snapshot
 from fi.gateway import (
     AgentCC,
     AsyncAgentCC,
@@ -36,7 +37,7 @@ SSE = (
 
 def _handler(seen: list[httpx.Request], costs: list[str | None]):
     def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         cost = costs.pop(0) if costs else None
         headers = {"x-agentcc-cost": cost} if cost is not None else {}
         if request.url.path == "/v1/audio/speech":
@@ -99,10 +100,10 @@ def test_an_error_response_adds_nothing() -> None:
     assert client.current_cost == 0.0
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_with_options_copies_share_the_ledger() -> None:
     client = _client(["0.5", "0.25"])
-    copy = client.with_options(timeout=5)
+    with pytest.warns(DeprecationWarning, match="^Deprecated gateway compatibility options:"):
+        copy = client.with_options(timeout=5)
     client.chat.completions.create(model="m", messages=[])
     copy.chat.completions.create(model="m", messages=[])
     assert client.current_cost == copy.current_cost == pytest.approx(0.75)
@@ -110,7 +111,6 @@ def test_with_options_copies_share_the_ledger() -> None:
     assert client.current_cost == 0.0
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 async def test_the_async_client_counts_too() -> None:
     async def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, headers={"x-agentcc-cost": "0.125"}, json=COMPLETION)
@@ -121,17 +121,17 @@ async def test_the_async_client_counts_too() -> None:
         http_client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
     )
     await client.chat.completions.create(model="m", messages=[])
-    await client.with_options(max_retries=0).chat.completions.create(
-        model="m", messages=[]
-    )
+    with pytest.warns(DeprecationWarning, match="^Deprecated gateway compatibility options:"):
+        copy = client.with_options(max_retries=0)
+    await copy.chat.completions.create(model="m", messages=[])
     assert client.current_cost == pytest.approx(0.25)
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_with_options_trace_id_is_sent_and_a_request_trace_id_wins() -> None:
     seen: list[httpx.Request] = []
     client = _client([], seen)
-    traced = client.with_options(trace_id="trace-from-options")
+    with pytest.warns(DeprecationWarning, match="^Deprecated gateway compatibility options:"):
+        traced = client.with_options(trace_id="trace-from-options")
     traced.chat.completions.create(model="m", messages=[])
     traced.chat.completions.create(model="m", messages=[], trace_id="per-request")
     client.chat.completions.create(model="m", messages=[])
@@ -142,17 +142,17 @@ def test_with_options_trace_id_is_sent_and_a_request_trace_id_wins() -> None:
     ]
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_with_options_trace_id_beats_an_extra_header_of_the_same_name() -> None:
     seen: list[httpx.Request] = []
     client = _client([], seen)
-    client.with_options(
-        extra_headers={"x-agentcc-trace-id": "from-headers"}, trace_id="from-trace-id"
-    ).chat.completions.create(model="m", messages=[])
+    with pytest.warns(DeprecationWarning, match="^Deprecated gateway compatibility options:"):
+        copy = client.with_options(
+            extra_headers={"x-agentcc-trace-id": "from-headers"}, trace_id="from-trace-id"
+        )
+    copy.chat.completions.create(model="m", messages=[])
     assert seen[0].headers["x-agentcc-trace-id"] == "from-trace-id"
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_with_options_keeps_the_retry_policy() -> None:
     policy = RetryPolicy(InternalServerErrorRetries=2)
     attempts: list[int] = []
@@ -167,7 +167,8 @@ def test_with_options_keeps_the_retry_policy() -> None:
         retry_policy=policy,
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
-    copy = client.with_options(timeout=5)
+    with pytest.warns(DeprecationWarning, match="^Deprecated gateway compatibility options:"):
+        copy = client.with_options(timeout=5)
     assert copy._retry_policy is policy
     copy._get_base_client()._calculate_delay = lambda attempt, headers=None: 0.0
     with pytest.raises(InternalServerError):

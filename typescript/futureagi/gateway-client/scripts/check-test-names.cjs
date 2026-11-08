@@ -21,6 +21,9 @@
 //   - a shim_tests name is not a 1.0.1 test of that file.
 // Tests the port added (new files, or names after the 1.0.1 ones in a file
 // listed in "added") are counted and listed, never matched against 1.0.1.
+// Register a new name in an existing ported file under that entry's "added".
+// Entirely new files need no manifest entry (entries must name baseline files).
+// The output's "added" list is informational; only "problems" fails this check.
 "use strict";
 const { readFileSync } = require("node:fs");
 const { join, relative, sep } = require("node:path");

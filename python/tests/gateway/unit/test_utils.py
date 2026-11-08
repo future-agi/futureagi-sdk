@@ -47,8 +47,10 @@ def test_redact_headers_authorization() -> None:
         "Content-Type": "application/json",
     }
     result = redact_headers(headers)
-    assert result["Authorization"] == "Bearer sk-...z789"
+    assert result["Authorization"] == "[REDACTED]"
     assert result["Content-Type"] == "application/json"
+    assert headers["Authorization"] == "Bearer sk-abc123xyz789"
+    assert result is not headers
 
 
 def test_redact_headers_short_auth() -> None:
@@ -56,15 +58,18 @@ def test_redact_headers_short_auth() -> None:
 
     headers = {"Authorization": "short"}
     result = redact_headers(headers)
-    assert result["Authorization"] == "***"
+    assert result["Authorization"] == "[REDACTED]"
+    assert headers == {"Authorization": "short"}
 
 
 def test_redact_headers_case_insensitive() -> None:
     from fi.gateway._utils import redact_headers
 
-    headers = {"authorization": "Bearer sk-abc123xyz789"}
-    result = redact_headers(headers)
-    assert "..." in result["authorization"]
+    for name in ("authorization", "AUTHORIZATION", "aUtHoRiZaTiOn"):
+        headers = {name: "Bearer sk-abc123xyz789"}
+        result = redact_headers(headers)
+        assert result == {name: "[REDACTED]"}
+        assert headers == {name: "Bearer sk-abc123xyz789"}
 
 
 def test_redact_headers_no_auth() -> None:

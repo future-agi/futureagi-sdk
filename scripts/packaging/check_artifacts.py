@@ -56,6 +56,15 @@ def same_files(label, actual, expected):
     assert not missing and not extra, f"{label}: missing={missing}, extra={extra}"
 
 
+def is_deferred_evals(dist_path):
+    """Only the root runner is deferred; platform/resources/evals is public."""
+    parts = PurePosixPath(dist_path).parts
+    return (
+        len(parts) >= 2 and parts[0] in {"esm", "src", "esnext"}
+        and (parts[1] == "evals" or parts[1].startswith("evals."))
+    )
+
+
 def main(repo, wheel, sdist, tarball, output):
     repo, wheel, sdist, tarball, output = map(Path, (repo, wheel, sdist, tarball, output))
     with zipfile.ZipFile(wheel) as archive:
@@ -134,8 +143,8 @@ def main(repo, wheel, sdist, tarball, output):
     boundary_spec.loader.exec_module(boundary)
     boundary.check_gateway_boundaries(whl, source, npm)
     assert not any(
-        part == "evals" or part.startswith("evals.")
-        for path in npm if path.startswith("package/dist/") for part in PurePosixPath(path).parts
+        is_deferred_evals(path.removeprefix("package/dist/"))
+        for path in npm if path.startswith("package/dist/")
     ), "Disabled evaluation runner is present in the npm artifact"
     assert not any("evals" in key for mapping in pkg.get("typesVersions", {}).values() for key in mapping)
     for mapping in pkg["typesVersions"].values():
@@ -154,7 +163,7 @@ def main(repo, wheel, sdist, tarball, output):
             relative = path.relative_to(dist).as_posix()
             if "__tests__" in path.parts or ".test." in path.name or ".spec." in path.name or path.suffix == ".tsbuildinfo":
                 continue
-            if any(part == "evals" or part.startswith("evals.") for part in PurePosixPath(relative).parts):
+            if is_deferred_evals(relative):
                 continue
             expected_dist.add("package/dist/" + relative)
     same_files("npm dist", {p for p in npm if p.startswith("package/dist/")}, expected_dist)

@@ -13,7 +13,7 @@ from fi.gateway._constants import (
     HEADER_SDK_VERSION, HEADER_USER_AGENT, NOT_GIVEN, __version__,
 )
 from fi.gateway._env import guard_fi_key_pair
-from fi.gateway._http_security import validate_destination
+from fi.gateway._http_security import reject_credential_query, validate_destination
 from fi.gateway._utils import serialize_agentcc_param
 
 
@@ -37,6 +37,7 @@ class RequestBuilder:
         self._warned_http_origins: set[tuple[str, str, int]] = set()
         self._http_warning_lock = threading.Lock()
         validate_destination(self._base_url, self._base_url, warn_cleartext=False)
+        reject_credential_query(default_query)
         self._default_headers = default_headers or {}
         self._default_query = default_query or {}
         self._session_id = session_id

@@ -9,7 +9,7 @@ from typing import Any
 
 import httpx
 
-from fi.gateway._constants import CREDENTIAL_HEADER_NAMES, DEFAULT_TIMEOUT
+from fi.gateway._constants import DEFAULT_TIMEOUT, is_credential_name
 from fi.gateway._env import KEY_ENV, URL_ENV, from_env, guard_fi_key_pair, normalize_base_url
 from fi.gateway._exceptions import AgentCCError
 
@@ -31,7 +31,7 @@ def parse_timeout(timeout: float | Any | None) -> httpx.Timeout:
 def redact_headers(headers: Mapping[str, str]) -> dict[str, str]:
     """Copy headers without disclosing authentication material."""
     return {
-        key: "[REDACTED]" if key.lower() in CREDENTIAL_HEADER_NAMES
+        key: "[REDACTED]" if is_credential_name(key)
         else value for key, value in headers.items()
     }
 
@@ -78,7 +78,7 @@ def return_raw_request(
 
 def _utility_exchange(send: Callable[..., httpx.Response], url: str, **kwargs: Any) -> httpx.Response:
     """Use the same finally boundary for each independent utility exchange."""
-    from fi.gateway._transport._scrub import scrub_sent_request
+    from fi.gateway._transport._scrub import scrub_reachable
 
     response = None
     error = None
@@ -89,7 +89,7 @@ def _utility_exchange(send: Callable[..., httpx.Response], url: str, **kwargs: A
         error = exc
         raise
     finally:
-        scrub_sent_request(None, response, error)
+        scrub_reachable((response, error))
 
 
 def health_check(

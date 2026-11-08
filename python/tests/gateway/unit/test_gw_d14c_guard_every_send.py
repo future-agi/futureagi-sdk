@@ -14,6 +14,7 @@ import os
 import httpx
 import pytest
 
+from ._published_helpers import wire_snapshot
 from fi.gateway import AgentCC, AgentCCError, AsyncAgentCC, create_headers
 
 GW = "http://127.0.0.1:8090"
@@ -37,7 +38,7 @@ def clean_env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def _sync(seen: list[httpx.Request], key: str = KEY) -> AgentCC:
     def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         if request.url.path == "/v1/files":
             return httpx.Response(
                 200,
@@ -92,10 +93,10 @@ def test_a_client_built_before_the_variable_was_set_refuses_to_send(
     assert name in str(info.value) and KEY not in str(info.value)
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_a_with_options_copy_refuses_too(monkeypatch: pytest.MonkeyPatch) -> None:
     seen: list[httpx.Request] = []
-    copy = _sync(seen).with_options(timeout=5)
+    with pytest.warns(DeprecationWarning, match="^Deprecated gateway compatibility options:"):
+        copy = _sync(seen).with_options(timeout=5)
     monkeypatch.setenv("FI_API_KEY", KEY)
     with pytest.raises(AgentCCError):
         copy.chat.completions.create(model="m", messages=MSG)
@@ -108,7 +109,7 @@ async def test_the_async_client_refuses_at_send(
     seen: list[httpx.Request] = []
 
     async def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         return httpx.Response(200, json=CHAT)
 
     client = AsyncAgentCC(

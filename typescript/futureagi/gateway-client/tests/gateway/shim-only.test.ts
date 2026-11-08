@@ -8,17 +8,20 @@ import { AgentCC, createHeaders } from "../../src/index.js";
 import type { ClientOptions } from "../../src/index.js";
 
 function okFetch() {
-  return jest.fn<typeof fetch>(async () =>
-    new Response(JSON.stringify({ id: "c1", object: "chat.completion", created: 1, model: "m", choices: [] }), {
+  const headersAtCall: Record<string, string>[] = [];
+  const fetchMock = jest.fn<typeof fetch>(async (_url, init) => {
+    // Observe the wire before the transport scrubs its attempt-owned headers.
+    headersAtCall.push({ ...(init?.headers as Record<string, string>) });
+    return new Response(JSON.stringify({ id: "c1", object: "chat.completion", created: 1, model: "m", choices: [] }), {
       status: 200,
       headers: { "content-type": "application/json" },
-    }),
-  );
+    });
+  });
+  return Object.assign(fetchMock, { headersAtCall });
 }
 
 function sentHeaders(fetchMock: ReturnType<typeof okFetch>): Record<string, string> {
-  const init = fetchMock.mock.calls[0][1] as RequestInit;
-  return init.headers as Record<string, string>;
+  return fetchMock.headersAtCall[0];
 }
 
 const PARAMS = { model: "m", messages: [{ role: "user" as const, content: "hi" }] };

@@ -2,6 +2,7 @@
 
 import json
 import socket
+import types
 
 import httpx
 import pytest
@@ -124,7 +125,11 @@ PARAMETERS = [
 
 def capture_transport(seen, streaming):
     def handle(request):
-        seen.append(request)
+        # Observe the wire at send time: after the call the SDK masks credentials on
+        # the retained request, so a later read no longer shows what was sent.
+        seen.append(types.SimpleNamespace(
+            method=request.method, url=request.url,
+            headers=httpx.Headers(list(request.headers.raw)), content=request.content))
         if streaming:
             return httpx.Response(200, text="data: [DONE]\n\n", headers={"content-type": "text/event-stream"})
         return httpx.Response(200, json={

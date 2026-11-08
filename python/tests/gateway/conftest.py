@@ -17,6 +17,19 @@ import pytest
 HERE = Path(__file__).resolve().parent
 
 
+@pytest.fixture
+def wire_snapshot():
+    """Opt-in send-time capture, shared with the published-contract helpers.
+
+    Call this from a mock transport handler, before returning its response.
+    The independent request preserves wire assertions without interfering with
+    the SDK's scrubbing of the original request after dispatch.
+    """
+    from ._wire_capture import wire_snapshot as snapshot
+
+    return snapshot
+
+
 @pytest.hookimpl(hookwrapper=True)
 def pytest_pycollect_makeitem(collector: pytest.Collector, name: str, obj: object):
     # Before pytest-asyncio converts marked coroutines into runnable items. A

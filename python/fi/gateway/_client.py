@@ -10,6 +10,7 @@ from fi.gateway._async_client import AsyncAgentCC
 from fi.gateway._client_common import ClientState, CostLedger, derived_options, resource_property
 from fi.gateway._constants import DEFAULT_MAX_RETRIES, NOT_GIVEN
 from fi.gateway._env import resolve_api_key, resolve_base_url
+from fi.gateway._http_security import reject_credential_query
 from fi.gateway._session import SessionContext
 from fi.gateway._transport._pool import HttpPool
 
@@ -64,6 +65,7 @@ class AgentCC(ClientState):
         callback_mode: str = "published", expanded_callback_events: bool = False,
         metadata_mode: str = "replace", audio_upload_mode: str = "published",
     ) -> None:
+        reject_credential_query(default_query)
         self._api_key = resolve_api_key(api_key)
         self._base_url = resolve_base_url(base_url)
         self._timeout = timeout

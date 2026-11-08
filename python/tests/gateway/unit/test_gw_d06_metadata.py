@@ -12,8 +12,6 @@ import json
 import httpx
 import pytest
 
-pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
-
 from ._published_helpers import wire_snapshot
 from fi.gateway import AgentCC, AsyncAgentCC, Session, create_headers
 
@@ -134,11 +132,11 @@ def test_every_session_resource_layers_the_client_metadata() -> None:
     assert [_metadata(r) for r in seen] == [{"tenant": "A", "cart": "c1"}] * 3
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_a_with_options_copy_layers_its_own_metadata() -> None:
     seen: list[httpx.Request] = []
     client = _client(seen, metadata={"tenant": "A"})
-    copy = client.with_options(metadata={"tenant": "B"})
+    with pytest.warns(DeprecationWarning, match="^Deprecated gateway compatibility options:"):
+        copy = client.with_options(metadata={"tenant": "B"})
     with copy.session(metadata={"cart": "c1"}):
         copy.chat.completions.create(model="m", messages=[])
     with client.session(metadata={"cart": "c2"}):

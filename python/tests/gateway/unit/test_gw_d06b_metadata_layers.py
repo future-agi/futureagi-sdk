@@ -15,8 +15,6 @@ import pytest
 from ._published_helpers import wire_snapshot
 from fi.gateway import AgentCC, AsyncAgentCC
 
-pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
-
 GW = "http://127.0.0.1:8090"
 MSG = [{"role": "user", "content": "hi"}]
 CHAT = {
@@ -187,11 +185,11 @@ def test_an_explicit_header_wins_over_every_layer() -> None:
     assert _metadata(seen[0]) == {"explicit": True}
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_a_with_options_copy_s_metadata_is_its_client_layer() -> None:
     seen: list[httpx.Request] = []
     parent = _client(seen, metadata={"tenant": "A", "tier": "gold"})
-    copy = parent.with_options(metadata={"tenant": "B"})
+    with pytest.warns(DeprecationWarning, match="^Deprecated gateway compatibility options:"):
+        copy = parent.with_options(metadata={"tenant": "B"})
     copy.chat.completions.create(model="m", messages=MSG, request_metadata={"x": 1})
     parent.chat.completions.create(model="m", messages=MSG, request_metadata={"x": 2})
     assert [_metadata(r) for r in seen] == [

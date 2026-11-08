@@ -15,6 +15,7 @@ from typing import Any
 import httpx
 import pytest
 
+from ._published_helpers import wire_snapshot
 from fi.gateway import AgentCC, AsyncAgentCC
 
 GW = "http://127.0.0.1:8090"
@@ -72,7 +73,7 @@ def _reply(request: httpx.Request) -> httpx.Response:
 
 def _sync(seen: list[httpx.Request], **opts: Any) -> AgentCC:
     def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         return _reply(request)
 
     return AgentCC(
@@ -86,7 +87,7 @@ def _sync(seen: list[httpx.Request], **opts: Any) -> AgentCC:
 
 def _async(seen: list[httpx.Request], **opts: Any) -> AsyncAgentCC:
     async def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         return _reply(request)
 
     return AsyncAgentCC(
@@ -140,33 +141,33 @@ def test_without_default_query_the_url_is_unchanged() -> None:
     assert all(r.url.query == b"" for r in seen)
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_extra_query_on_a_copy_adds_keys_and_wins_on_a_shared_key() -> None:
     seen: list[httpx.Request] = []
     parent = _sync(seen, default_query={"tenant": "t1", "region": "eu"})
-    copy = parent.with_options(extra_query={"region": "us", "trace": "x"})
+    with pytest.warns(DeprecationWarning, match="^Deprecated gateway compatibility options:"):
+        copy = parent.with_options(extra_query={"region": "us", "trace": "x"})
     copy.chat.completions.create(model="m", messages=MSG)
     parent.chat.completions.create(model="m", messages=MSG)
     assert _query(seen[0]) == [("tenant", "t1"), ("region", "us"), ("trace", "x")]
     assert _query(seen[1]) == [("tenant", "t1"), ("region", "eu")]
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_extra_query_without_a_default_query() -> None:
     seen: list[httpx.Request] = []
-    _sync(seen).with_options(extra_query={"q": "1"}).chat.completions.create(
-        model="m", messages=MSG
-    )
+    with pytest.warns(DeprecationWarning, match="^Deprecated gateway compatibility options:"):
+        copy = _sync(seen).with_options(extra_query={"q": "1"})
+    copy.chat.completions.create(model="m", messages=MSG)
     assert _query(seen[0]) == [("q", "1")]
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_a_copy_made_after_the_parent_has_sent_sends_its_own_query() -> None:
     seen: list[httpx.Request] = []
     parent = _sync(seen, default_query={"tenant": "t1"})
     parent.chat.completions.create(model="m", messages=MSG)
-    a = parent.with_options(extra_query={"tenant": "A"})
-    b = a.with_options(extra_query={"tenant": "B"})
+    with pytest.warns(DeprecationWarning, match="^Deprecated gateway compatibility options:"):
+        a = parent.with_options(extra_query={"tenant": "A"})
+    with pytest.warns(DeprecationWarning, match="^Deprecated gateway compatibility options:"):
+        b = a.with_options(extra_query={"tenant": "B"})
     a.chat.completions.create(model="m", messages=MSG)
     b.chat.completions.create(model="m", messages=MSG)
     a.chat.completions.create(model="m", messages=MSG)
@@ -206,12 +207,12 @@ def test_the_transport_url_join_keeps_an_absolute_url_and_adds_the_query() -> No
             client._build_url("https://other.example.test/v1/x?a=1")
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 @pytest.mark.parametrize("stream", [False, True])
 async def test_the_async_client_sends_it_too(stream: bool) -> None:
     seen: list[httpx.Request] = []
     client = _async(seen, default_query={"tenant": "t1"})
-    copy = client.with_options(extra_query={"q": "1"})
+    with pytest.warns(DeprecationWarning, match="^Deprecated gateway compatibility options:"):
+        copy = client.with_options(extra_query={"q": "1"})
     if stream:
         async for _ in await copy.chat.completions.create(
             model="m", messages=MSG, stream=True

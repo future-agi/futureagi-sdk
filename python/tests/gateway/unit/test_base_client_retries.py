@@ -10,53 +10,45 @@ from ._base_client_fixtures import _MockResponse, _make_sync_client
 
 
 class TestShouldRetry:
-    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_retryable_429_first_attempt(self) -> None:
-        client = _make_sync_client()
+        client = _make_sync_client(base_url="https://gateway.test")
         assert client._should_retry(429, attempt=0, max_retries=2) is True
 
-    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_retryable_429_exhausted(self) -> None:
-        client = _make_sync_client()
+        client = _make_sync_client(base_url="https://gateway.test")
         assert client._should_retry(429, attempt=2, max_retries=2) is False
 
-    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_not_retryable_400(self) -> None:
-        client = _make_sync_client()
+        client = _make_sync_client(base_url="https://gateway.test")
         assert client._should_retry(400, attempt=0, max_retries=2) is False
 
-    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_retryable_500(self) -> None:
-        client = _make_sync_client()
+        client = _make_sync_client(base_url="https://gateway.test")
         assert client._should_retry(500, attempt=0, max_retries=2) is True
 
-    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_retryable_502(self) -> None:
-        client = _make_sync_client()
+        client = _make_sync_client(base_url="https://gateway.test")
         assert client._should_retry(502, attempt=1, max_retries=3) is True
 
-    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_not_retryable_401(self) -> None:
-        client = _make_sync_client()
+        client = _make_sync_client(base_url="https://gateway.test")
         assert client._should_retry(401, attempt=0, max_retries=5) is False
 
 
 class TestCalculateDelay:
-    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_respects_retry_after(self) -> None:
-        client = _make_sync_client()
+        client = _make_sync_client(base_url="https://gateway.test")
         delay = client._calculate_delay(0, {"retry-after": "2.5"})
         assert delay == 2.5
 
-    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_retry_after_capped(self) -> None:
-        client = _make_sync_client(retry_config=RetryConfig(backoff_max=5.0))
+        client = _make_sync_client(base_url="https://gateway.test", retry_config=RetryConfig(backoff_max=5.0))
         delay = client._calculate_delay(0, {"retry-after": "100"})
         assert delay == 5.0
 
-    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_exponential_backoff(self) -> None:
         client = _make_sync_client(
+            base_url="https://gateway.test",
             retry_config=RetryConfig(backoff_factor=0.5, backoff_jitter=0.0)
         )
         d0 = client._calculate_delay(0)
@@ -66,9 +58,9 @@ class TestCalculateDelay:
         assert d1 == 1.0  # 0.5 * 2^1
         assert d2 == 2.0  # 0.5 * 2^2
 
-    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_backoff_capped(self) -> None:
         client = _make_sync_client(
+            base_url="https://gateway.test",
             retry_config=RetryConfig(
                 backoff_factor=1.0, backoff_max=3.0, backoff_jitter=0.0
             )
@@ -76,9 +68,9 @@ class TestCalculateDelay:
         delay = client._calculate_delay(5)  # 1.0 * 2^5 = 32 → capped to 3.0
         assert delay == 3.0
 
-    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_jitter_within_range(self) -> None:
         client = _make_sync_client(
+            base_url="https://gateway.test",
             retry_config=RetryConfig(backoff_factor=1.0, backoff_jitter=0.5)
         )
         delays = [client._calculate_delay(0) for _ in range(100)]
@@ -200,3 +192,33 @@ class TestRetryIntegration:
         with pytest.raises(BadRequestError):
             client._request_with_retry(opts, _MockResponse)
         assert route.call_count == 1
+
+
+def test_cleartext_origin_warns_and_still_sends(wire_snapshot) -> None:
+    from fi.gateway._deprecation import AgentCCDeprecationWarning
+
+    seen = []
+
+    def handler(request):
+        seen.append(wire_snapshot(request))
+        return httpx.Response(200, json={"id": "reply", "content": "ok"})
+
+    with httpx.Client(transport=httpx.MockTransport(handler)) as http:
+        client = _make_sync_client(base_url="http://gateway.test", http_client=http)
+        opts = RequestOptions(method="POST", url="/v1/test", body={"test": True})
+        with pytest.warns(
+            AgentCCDeprecationWarning,
+            match=r"^futureagi: sending gateway credentials in cleartext over HTTP to http://gateway\.test\.",
+        ) as caught:
+            result = client._request(opts, _MockResponse)
+        assert len(caught) == 1
+        assert result.id == "reply" and result.content == "ok"
+        assert len(seen) == 1
+        assert seen[0].method == "POST"
+        assert str(seen[0].url) == "http://gateway.test/v1/test"
+        assert seen[0].headers["authorization"] == "Bearer sk-test-key-12345"
+        assert seen[0].content == b'{"test":true}'
+        # Warning deduplication is per client; under warnings-as-errors the
+        # next successful send must not warn again.
+        assert client._request(opts, _MockResponse).id == "reply"
+        assert len(seen) == 2

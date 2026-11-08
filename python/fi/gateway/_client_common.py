@@ -133,6 +133,9 @@ def derived_options(
     per-request ``trace_id=`` still wins). agentcc 1.x dropped both (D-15).
     """
     from fi.gateway._constants import HEADER_TRACE_ID, NOT_GIVEN
+    from fi.gateway._http_security import reject_credential_query
+
+    reject_credential_query(extra_query, where="extra_query")
 
     def pick(value: Any, current: Any) -> Any:
         return current if value is NOT_GIVEN else value

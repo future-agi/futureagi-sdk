@@ -40,6 +40,7 @@ if mode == 'python':
     run([installed_python, '-I', '-B', '-m', 'mypy', '--strict', '--follow-imports=silent', 'consumer.py'], consumer)
     run([installed_python, '-I', '-B', 'docs_examples.py', 'sdk-reference'], consumer)
 elif mode == 'typescript':
+    run(['node', '--test', root / 'tests/packaging/packed-entry-graph.test.cjs'], root)
     package = root / 'typescript/futureagi'
     packed = evidence / 'candidate'
     run(['node', package / 'gateway-client/scripts/stage-package.cjs', packed], root)

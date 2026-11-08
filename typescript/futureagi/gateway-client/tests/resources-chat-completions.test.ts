@@ -2,12 +2,16 @@ import { describe, it, expect, jest } from "@jest/globals";
 import { AgentCC } from "../src/client.js";
 
 function mockJsonResponse(data: Record<string, unknown>, status = 200) {
-  return jest.fn<any>().mockResolvedValue(
-    new Response(JSON.stringify(data), {
+  const headersAtCall: Record<string, string>[] = [];
+  const mockFetch = jest.fn<any>().mockImplementation(async (_url: unknown, init: RequestInit) => {
+    // Observe the wire before the transport scrubs its attempt-owned headers.
+    headersAtCall.push({ ...(init.headers as Record<string, string>) });
+    return new Response(JSON.stringify(data), {
       status,
       headers: { "content-type": "application/json" },
-    }),
-  );
+    });
+  });
+  return Object.assign(mockFetch, { headersAtCall });
 }
 
 function completionPayload(content = "Hello!") {
@@ -77,7 +81,7 @@ describe("chat.completions resource", () => {
 
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.session_id).toBeUndefined(); // extracted to header
-    const headers = mockFetch.mock.calls[0][1].headers;
+    const headers = mockFetch.headersAtCall[0];
     expect(headers["x-agentcc-session-id"]).toBe("sess-123");
   });
 
@@ -91,7 +95,7 @@ describe("chat.completions resource", () => {
       extra_headers: { "X-Custom": "value" },
     });
 
-    const headers = mockFetch.mock.calls[0][1].headers;
+    const headers = mockFetch.headersAtCall[0];
     expect(headers["X-Custom"]).toBe("value");
   });
 
