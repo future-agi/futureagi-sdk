@@ -5,10 +5,10 @@ import pytest
 import fi.gateway as gw
 from fi.gateway._retry_policy import RetryPolicy
 from fi.gateway._transport._base import BaseClient, RequestOptions, RetryConfig
-from onekey_contract_oracle import (
+from .onekey_contract_oracle import (
     ROWS, BY_CODE, AFTER, BACKOFF, sample, response, check_error, expected_attempts,
 )
-from test_onekey_unknown_refusals import invoke, settings, sleeps  # noqa: F401
+from .test_onekey_unknown_refusals import invoke, settings, sleeps  # noqa: F401
 
 VARIANTS = [
     (row, variant) for row in ROWS for variant in row.get("variants", [])

@@ -9,7 +9,7 @@ import pytest
 
 import fi.gateway as gw
 from fi.gateway._transport import _async, _sync
-from test_terminal_outcomes import assert_safe
+from .test_terminal_outcomes import assert_safe
 
 UID = "01ARZ3NDEKTSV4RRFFQ69G5FAV"
 HEADERS = {"x-agentcc-request-id": UID, "x-agentcc-dispatched": "false"}

@@ -5,7 +5,7 @@ import pytest
 import fi.gateway as gw
 from fi.gateway._retry_policy import _REFUSALS, classify_refusal
 from fi.gateway._transport._base import BaseClient, RequestOptions, RetryConfig
-from onekey_contract_oracle import R3_ADDITIONS, expected_class, sample, wire
+from .onekey_contract_oracle import R3_ADDITIONS, expected_class, sample, wire
 
 ROWS = R3_ADDITIONS["rows"]
 

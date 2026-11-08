@@ -5,9 +5,9 @@ import pytest
 
 import fi.gateway as gw
 from fi.gateway._retry_policy import _REFUSALS, classify_refusal
-from test_onekey_unknown_refusals import invoke, response, settings, sleeps  # noqa: F401
+from .test_onekey_unknown_refusals import invoke, response, settings, sleeps  # noqa: F401
 
-from onekey_contract_oracle import BY_CODE
+from .onekey_contract_oracle import BY_CODE
 
 TOP_UP = BY_CODE["managed_credits_exhausted"]["remedy"]
 TOP_UP_OR_SMALLER = BY_CODE["managed_credits_insufficient"]["remedy"]

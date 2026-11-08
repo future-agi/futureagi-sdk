@@ -4,11 +4,11 @@ import httpx
 import pytest
 import fi.gateway as gw
 from fi.gateway._retry_policy import _REFUSALS
-from onekey_contract_oracle import (
+from .onekey_contract_oracle import (
     ROWS, R1, CONTRACT, STATUS_CLASSES, sample, response, wire,
     check_error, expected_attempts, expected_class, expected_remedy,
 )
-from test_onekey_unknown_refusals import invoke, settings, sleeps  # noqa: F401
+from .test_onekey_unknown_refusals import invoke, settings, sleeps  # noqa: F401
 
 
 @pytest.fixture

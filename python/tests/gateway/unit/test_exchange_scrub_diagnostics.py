@@ -25,12 +25,12 @@ def test_composed_name_inventory_is_exchange_local():
     builder = RequestBuilder(api_key='synthetic-sdk', base_url=ORIGIN, default_headers=defaults, config=config,
                              session_id='synthetic-session', metadata={'private': 'synthetic-metadata'})
     options = RequestOptions('POST', '/v1/test', headers={'X-Caller': 'visible'})
-    headers, first = builder._build_headers(options, {'cache_namespace': 'visible'})
+    headers, first = builder._build_headers_with_names(options, {'cache_namespace': 'visible'})
     assert first == frozenset({'authorization', 'x-first', 'x-config-1', 'x-agentcc-session-id', 'x-agentcc-metadata'})
     assert headers['X-Caller'] == 'visible'
     defaults.clear()
     defaults['X-Second'] = 'synthetic-second'
-    _, second = builder._build_headers(options)
+    _, second = builder._build_headers_with_names(options)
     assert 'x-first' not in second and 'x-config-1' not in second
     assert {'x-second', 'x-config-2'} <= second
     assert first != second and config.calls == 2

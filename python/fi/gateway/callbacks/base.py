@@ -149,4 +149,7 @@ def redact_body(body: Any) -> Any:
 
 def redact_callback_request(request: CallbackRequest) -> CallbackRequest:
     """One descriptor copy with exactly the published shallow message redaction."""
-    return replace(request, body=redact_body(request.body))
+    if not isinstance(request.body, dict):
+        return request
+    body = redact_body(request.body)
+    return request if body == request.body else replace(request, body=body)

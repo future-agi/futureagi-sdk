@@ -15,7 +15,7 @@ class TestBuildHeaders:
     def test_sdk_auto_headers_present(self) -> None:
         client = _make_sync_client(base_url="https://gateway.test")
         opts = RequestOptions(method="POST", url="/v1/chat/completions")
-        headers, _ = client._build_headers(opts)
+        headers = client._build_headers(opts)
         assert headers["User-Agent"].startswith("agentcc-python/")
         assert headers["Content-Type"] == "application/json"
         assert "x-agentcc-sdk-version" in headers
@@ -23,13 +23,13 @@ class TestBuildHeaders:
     def test_auth_header_present(self) -> None:
         client = _make_sync_client(base_url="https://gateway.test")
         opts = RequestOptions(method="POST", url="/v1/chat/completions")
-        headers, _ = client._build_headers(opts)
+        headers = client._build_headers(opts)
         assert headers["Authorization"] == "Bearer sk-test-key-12345"
 
     def test_agentcc_params_session_id_and_cache_ttl(self) -> None:
         client = _make_sync_client(base_url="https://gateway.test")
         opts = RequestOptions(method="POST", url="/v1/chat/completions")
-        headers, _ = client._build_headers(
+        headers = client._build_headers(
             opts, agentcc_params={"session_id": "abc", "cache_ttl": "10m"}
         )
         assert headers["x-agentcc-session-id"] == "abc"
@@ -40,27 +40,27 @@ class TestBuildHeaders:
         opts = RequestOptions(
             method="POST", url="/v1/test", headers={"x-custom": "override"}
         )
-        headers, _ = client._build_headers(opts)
+        headers = client._build_headers(opts)
         assert headers["x-custom"] == "override"
 
     def test_request_metadata_serialized_as_json(self) -> None:
         client = _make_sync_client(base_url="https://gateway.test")
         opts = RequestOptions(method="POST", url="/v1/test")
         meta = {"user": "test", "session": 123}
-        headers, _ = client._build_headers(opts, agentcc_params={"request_metadata": meta})
+        headers = client._build_headers(opts, agentcc_params={"request_metadata": meta})
         parsed = json.loads(headers["x-agentcc-metadata"])
         assert parsed == meta
 
     def test_client_level_session_id(self) -> None:
         client = _make_sync_client(base_url="https://gateway.test", session_id="client-session")
         opts = RequestOptions(method="POST", url="/v1/test")
-        headers, _ = client._build_headers(opts)
+        headers = client._build_headers(opts)
         assert headers["x-agentcc-session-id"] == "client-session"
 
     def test_per_request_overrides_client_session_id(self) -> None:
         client = _make_sync_client(base_url="https://gateway.test", session_id="client-session")
         opts = RequestOptions(method="POST", url="/v1/test")
-        headers, _ = client._build_headers(
+        headers = client._build_headers(
             opts, agentcc_params={"session_id": "request-session"}
         )
         assert headers["x-agentcc-session-id"] == "request-session"
@@ -68,7 +68,7 @@ class TestBuildHeaders:
     def test_not_given_params_skipped(self) -> None:
         client = _make_sync_client(base_url="https://gateway.test")
         opts = RequestOptions(method="POST", url="/v1/test")
-        headers, _ = client._build_headers(
+        headers = client._build_headers(
             opts, agentcc_params={"session_id": NOT_GIVEN, "cache_ttl": None}
         )
         assert "x-agentcc-session-id" not in headers
@@ -77,7 +77,7 @@ class TestBuildHeaders:
     def test_client_level_metadata(self) -> None:
         client = _make_sync_client(base_url="https://gateway.test", metadata={"user": "global"})
         opts = RequestOptions(method="POST", url="/v1/test")
-        headers, _ = client._build_headers(opts)
+        headers = client._build_headers(opts)
         parsed = json.loads(headers["x-agentcc-metadata"])
         assert parsed == {"user": "global"}
 

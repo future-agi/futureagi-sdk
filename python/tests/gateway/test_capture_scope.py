@@ -5,7 +5,7 @@ import httpx
 import pytest
 
 import fi.gateway as gw
-from test_terminal_outcomes import assert_safe
+from .test_terminal_outcomes import assert_safe
 
 UID = "01ARZ3NDEKTSV4RRFFQ69G5FAV"
 

@@ -49,6 +49,12 @@ class RequestBuilder:
 
     def _build_headers(
         self, options: Any, agentcc_params: dict[str, Any] | None = None,
+    ) -> dict[str, str]:
+        """Preserve the released header-only helper return shape."""
+        return self._build_headers_with_names(options, agentcc_params)[0]
+
+    def _build_headers_with_names(
+        self, options: Any, agentcc_params: dict[str, Any] | None = None,
     ) -> tuple[dict[str, str], frozenset[str]]:
         """Return the released merge and its exchange-local client header names."""
         guard_fi_key_pair(self._api_key)
@@ -121,7 +127,7 @@ class RequestBuilder:
         if _uses_form(options):
             raise TypeError("Raw JSON request construction does not accept file uploads")
         if headers is None:
-            headers, _ = self._build_headers(options, params)
+            headers = self._build_headers(options, params)
         wire_headers = httpx.Headers({
             "Accept": "*/*", "Accept-Encoding": "gzip, deflate",
             "Connection": "keep-alive",

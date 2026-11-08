@@ -17,8 +17,6 @@ from fi.gateway.callbacks import (CallbackHandler, LoggingCallback,
 from fi.gateway.testing import RequestRecorder
 from fi.gateway.types.chat import ChatCompletion
 
-pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
-
 GW = "http://127.0.0.1:8090"
 COMPLETION = {
     "id": "chatcmpl-1",
@@ -90,7 +88,7 @@ class _Seen(CallbackHandler):
         self.calls.append(("on_retry", (request, error, attempt, delay)))
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
+@pytest.mark.filterwarnings(r'default:^Deprecated gateway compatibility options\x3a callbacks$:DeprecationWarning')
 def test_the_hooks_get_the_request_descriptor_and_the_returned_model() -> None:
     seen = _Seen()
     result = _client([seen], 200).chat.completions.create(model="m", messages=MSG)
@@ -113,7 +111,7 @@ def test_the_hooks_get_the_request_descriptor_and_the_returned_model() -> None:
     assert snapshot_response.body["id"] == snapshot_result.id
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
+@pytest.mark.filterwarnings(r'default:^Deprecated gateway compatibility options\x3a callbacks$:DeprecationWarning')
 def test_retry_then_error_fires_retry_then_error() -> None:
     seen = _Seen()
     with pytest.raises(BadRequestError):
@@ -127,7 +125,7 @@ def test_retry_then_error_fires_retry_then_error() -> None:
     assert isinstance(seen.calls[2][1][1], BadRequestError)
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
+@pytest.mark.filterwarnings(r'default:^Deprecated gateway compatibility options\x3a callbacks$:DeprecationWarning')
 def test_logging_callback_logs_every_firing_hook(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
@@ -155,7 +153,7 @@ def test_logging_callback_logs_every_firing_hook(
     assert len(lines) == 5
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
+@pytest.mark.filterwarnings(r'default:^Deprecated gateway compatibility options\x3a callbacks$:DeprecationWarning')
 def test_metrics_callback_counts_requests_errors_tokens_cost_and_latency() -> None:
     metrics = MetricsCallback(count_tokens=True)
     client = _client([metrics], 200, 200, 400, max_retries=0)
@@ -171,7 +169,7 @@ def test_metrics_callback_counts_requests_errors_tokens_cost_and_latency() -> No
     assert metrics.error_rate == pytest.approx(1 / 3)
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
+@pytest.mark.filterwarnings(r'default:^Deprecated gateway compatibility options\x3a callbacks$:DeprecationWarning')
 def test_request_recorder_records_the_request_and_the_response(tmp_path: Path) -> None:
     path = tmp_path / "recordings.json"
     with RequestRecorder(str(path), format="compact") as recorder:
@@ -190,7 +188,7 @@ def test_request_recorder_records_the_request_and_the_response(tmp_path: Path) -
     assert "agentcc" not in rec["response"]["body"]
 
 
-@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
+@pytest.mark.filterwarnings(r'default:^Deprecated gateway compatibility options\x3a callbacks$:DeprecationWarning')
 async def test_the_async_client_fires_the_same_hooks() -> None:
     seen = _Seen()
     metrics = MetricsCallback(count_tokens=True)

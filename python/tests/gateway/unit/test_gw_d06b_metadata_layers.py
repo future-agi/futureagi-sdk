@@ -216,9 +216,9 @@ def test_the_transport_merges_the_request_layer_over_the_client_s() -> None:
 
     base = _client([], metadata={"tenant": "A"})._get_base_client()
     opts = RequestOptions(method="POST", url="/v1/x")
-    headers, _ = base._build_headers(opts, {"request_metadata": {"x": 1}})
+    headers = base._build_headers(opts, {"request_metadata": {"x": 1}})
     assert json.loads(headers["x-agentcc-metadata"]) == {"tenant": "A", "x": 1}
-    assert json.loads(base._build_headers(opts)[0]["x-agentcc-metadata"]) == {
+    assert json.loads(base._build_headers(opts)["x-agentcc-metadata"]) == {
         "tenant": "A"
     }
 

@@ -218,7 +218,7 @@ class BaseClient(RequestBuilder, CallbackLifecycle, ABC):
         ``request()`` policy and its own default headers still apply) and an upload hands
         ``files=``/``data=``. Only raw inspection pre-encodes a body.
         """
-        headers, composed_names = self._build_headers(options, params)
+        headers, composed_names = self._build_headers_with_names(options, params)
         if stream and options.form is None:
             body: dict[str, Any] = {"json": options.body}
         else:

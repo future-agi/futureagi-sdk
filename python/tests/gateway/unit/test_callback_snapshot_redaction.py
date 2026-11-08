@@ -78,8 +78,8 @@ def test_snapshot_does_not_disclose_or_mutate_credentials(transport_type, redact
         assert snapshot.body["prompt"] == "private prompt"
     assert body == original
     assert headers["Authorization"] == f"Bearer {KEY}"
-    assert KEY in transport._build_headers(options)[0]["Authorization"]
-    assert VIRTUAL_KEY in transport._build_headers(options)[0]["x-agentcc-config"]
+    assert KEY in transport._build_headers(options)["Authorization"]
+    assert VIRTUAL_KEY in transport._build_headers(options)["x-agentcc-config"]
     assert snapshot.body is not body
 
 
