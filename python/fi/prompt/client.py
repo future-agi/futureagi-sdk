@@ -69,7 +69,7 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
                 prompt_config_raw = pc
             cfg_src = (prompt_config_raw or {}).get("configuration", {})
             cfg = {
-                "model_name": cfg_src.get("model_name") or cfg_src.get("model"),
+                "model_name": cfg_src.get("model") or "unavailable",
                 "temperature": cfg_src.get("temperature"),
                 "frequency_penalty": cfg_src.get("frequency_penalty"),
                 "presence_penalty": cfg_src.get("presence_penalty"),
@@ -80,7 +80,7 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
                 "tools": cfg_src.get("tools"),
             }
             model_config = ModelConfig(
-                model_name=cfg["model_name"] or "unavailable",
+                model_name=cfg["model_name"],
                 temperature=cfg["temperature"] if cfg["temperature"] is not None else 0,
                 frequency_penalty=cfg["frequency_penalty"] if cfg["frequency_penalty"] is not None else 0,
                 presence_penalty=cfg["presence_penalty"] if cfg["presence_penalty"] is not None else 0,
@@ -130,7 +130,13 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
         if response.status_code == 400:
             try:
                 detail = response.json()
-                error_code = detail.get("error_code") if isinstance(detail, dict) else None
+                # Backend returns `code` (snake_case-style single word);
+                # accept `errorCode` as a legacy alternative.
+                error_code = (
+                    detail.get("code")
+                    if isinstance(detail, dict)
+                    else None
+                )
             except Exception:
                 error_code = None
 
@@ -162,7 +168,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             pc = prompt_config_raw[0] if isinstance(prompt_config_raw, list) else prompt_config_raw
             cfg_raw = pc.get("configuration", {})
             cfg = {
-                "model_name": cfg_raw.get("model_name") or cfg_raw.get("model"),
+                "model_name": cfg_raw.get("model") or "unavailable",
                 "temperature": cfg_raw.get("temperature"),
                 "frequency_penalty": cfg_raw.get("frequency_penalty"),
                 "presence_penalty": cfg_raw.get("presence_penalty"),
@@ -173,7 +179,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                 "tools": cfg_raw.get("tools"),
             }
             model_config = ModelConfig(
-                model_name=cfg["model_name"] or "unavailable",
+                model_name=cfg["model_name"],
                 temperature=cfg["temperature"] if cfg["temperature"] is not None else 0,
                 frequency_penalty=cfg["frequency_penalty"] if cfg["frequency_penalty"] is not None else 0,
                 presence_penalty=cfg["presence_penalty"] if cfg["presence_penalty"] is not None else 0,
@@ -243,6 +249,22 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         fi_base_url: Optional[str] = None,
         **kwargs,
     ):
+        """Initialize the Prompt client.
+
+        If ``template`` has no ``id`` but has a ``name``, the SDK will attempt
+        to fetch the corresponding template from the backend. This supports
+        two workflows:
+
+        1. Existing template — pass a ``PromptTemplate(name=...)`` and the
+           constructor will populate ``id``/``version`` from the backend.
+        2. New template — pass a ``PromptTemplate(name=..., messages=...)``
+           for a name that doesn't yet exist; the fetch will fail softly
+           (logged warning) and the user-provided template is retained with
+           ``id=None`` so ``create()`` can register it.
+
+        For explicit retrieval use ``Prompt.get_template_by_name()`` which
+        raises ``TemplateNotFound`` on miss instead of falling back.
+        """
         super().__init__(
             fi_api_key=fi_api_key,
             fi_secret_key=fi_secret_key,
@@ -252,6 +274,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
 
         # Label requested during draft create; will be assigned on commit
         self._pending_label: Optional[str] = None
+        self._last_generation_id: Optional[str] = None
 
         if template and not template.id:
             try:
@@ -265,7 +288,16 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             self.template = template
 
     def generate(self, requirements: str) -> "Prompt":
-        """Generate a prompt and return self for chaining"""
+        """Submit a prompt-generation job to the backend (asynchronous).
+
+        The backend queues the generation and returns a ``generation_id``.
+        The result is **not** available synchronously — there is currently no
+        public endpoint in the backend to poll for a generation job's output by
+        ``generation_id``. The generated prompt is surfaced through the
+        FutureAGI UI / job queue rather than through this SDK.
+
+        Use ``last_generation_id`` to retrieve the id for logging / correlation.
+        """
         if not self.template:
             raise ValueError("No template configured")
         response = self.request(
@@ -274,13 +306,20 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                 url=self._base_url + "/" + Routes.generate_prompt.value,
                 json={"statement": requirements},
             ),
-            response_handler=PromptResponseHandler,
+            response_handler=SimpleJsonResponseHandler,
         )
-        self.template.messages[-1].content = response["result"]["prompt"]
+        result = response.get("result", response) if isinstance(response, dict) else response
+        self._last_generation_id = (
+            result.get("generation_id") if isinstance(result, dict) else None
+        )
         return self
 
     def improve(self, requirements: str) -> "Prompt":
-        """Improve prompt and return self for chaining"""
+        """Submit a prompt-improvement job to the backend (asynchronous).
+
+        The backend queues the improvement and returns a ``generation_id``.
+        See ``generate()`` for notes on async result retrieval.
+        """
         if not self.template:
             raise ValueError("No template configured")
 
@@ -297,10 +336,22 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                     "improvement_requirements": requirements,
                 },
             ),
-            response_handler=PromptResponseHandler,
+            response_handler=SimpleJsonResponseHandler,
         )
-        self.template.messages[-1].content = improved_response["result"]["prompt"]
+        result = (
+            improved_response.get("result", improved_response)
+            if isinstance(improved_response, dict)
+            else improved_response
+        )
+        self._last_generation_id = (
+            result.get("generation_id") if isinstance(result, dict) else None
+        )
         return self
+
+    @property
+    def last_generation_id(self) -> Optional[str]:
+        """Return the generation_id from the most recent generate()/improve() call."""
+        return self._last_generation_id
 
     def create(self, *, label: Optional[str] = None) -> "Prompt":
         """Create a draft prompt template and return self for chaining.
@@ -426,6 +477,14 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         if not self.template or not self.template.id:
             raise ValueError("Template ID missing; cannot delete.")
 
+        # Invalidate cache for this template before deleting so subsequent
+        # lookups don't return stale entries.
+        if self.template.name:
+            try:
+                prompt_cache.invalidate(self.template.name)
+            except Exception:
+                logger.warning("prompt_cache.invalidate failed during delete()", exc_info=True)
+
         self.request(
             config=RequestConfig(
                 method=HttpMethod.DELETE,
@@ -461,7 +520,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             tmpl: PromptTemplate = client.request(
                 config=RequestConfig(
                     method=HttpMethod.GET,
-                    url=client._base_url + "/" + Routes.prompt_label_get_by_name.value,
+                    url=client._base_url + "/" + Routes.get_template_by_name.value,
                     params={"name": name},
                 ),
                 response_handler=PromptResponseHandler,
@@ -476,6 +535,10 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                 ),
                 response_handler=None,
             )
+            try:
+                prompt_cache.invalidate(name)
+            except Exception:
+                logger.warning("prompt_cache.invalidate failed during delete_template_by_name()", exc_info=True)
             return True
         finally:
             client.close()
@@ -486,7 +549,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         response = self.request(
             config=RequestConfig(
                 method=HttpMethod.GET,
-                url=self._base_url + "/" + Routes.prompt_label_get_by_name.value,
+                url=self._base_url + "/" + Routes.get_template_by_name.value,
                 params={"name": name},
             ),
             response_handler=PromptResponseHandler,
@@ -518,9 +581,9 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
     def list_template_versions(self):
         """Return full version history as provided by the backend.
 
-        Each element in the returned list is the raw JSON entry that includes
-        at least these keys: ``template_version``, ``is_draft`` and
-        ``created_at``.
+        Each element in the returned list is the raw JSON entry. The backend
+        returns snake_case keys (``template_version``, ``is_draft``,
+        ``created_at``); callers that need camelCase should normalize.
         """
         return self._fetch_template_version_history()
 
@@ -532,7 +595,8 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         """Check backend state to know if the current version is still draft."""
         history = self._fetch_template_version_history()
         for entry in history:
-            if entry.get("template_version") == self.template.version:
+            entry_version = entry.get("template_version")
+            if entry_version == self.template.version:
                 return bool(entry.get("is_draft"))
         # If not found assume draft (conservative)
         return True
