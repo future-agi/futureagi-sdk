@@ -53,6 +53,20 @@ class StreamTracking:
             self._redact_error(error)
         scrub_reachable((error,), self._composed_names)
 
+    def _failure(self, exc: Exception) -> StreamError:
+        from fi.gateway._retry_policy import _UNKNOWN_DISPATCH_REMEDY
+
+        self._scrub_error(exc)
+        error = exc if isinstance(exc, StreamError) else StreamError(f"Stream interrupted: {exc}")
+        error.gateway_evidence = self.agentcc.gateway_evidence
+        error.request_id = error.gateway_request_id
+        # Transport interruptions have no definitive gateway outcome. Apply this
+        # before callbacks, including streams with no published lifecycle hooks.
+        if not isinstance(exc, StreamError) and error.dispatched == "unknown":
+            error.message += " " + _UNKNOWN_DISPATCH_REMEDY
+            error.args = (error.message,)
+        return error
+
     def _tracked(self, iterator: Any) -> Any:
         try:
             for chunk in iterator:
@@ -61,10 +75,7 @@ class StreamTracking:
                 yield self._note(chunk)
         except Exception as exc:
             # Scrub before formatting/wrapping, preserving the original cause/traceback.
-            self._scrub_error(exc)
-            self._error = exc if isinstance(exc, StreamError) else StreamError(f"Stream interrupted: {exc}")
-            self._error.gateway_evidence = self.agentcc.gateway_evidence
-            self._error.request_id = self._error.gateway_request_id
+            self._error = self._failure(exc)
             raise self._error from exc if self._error is not exc else None
         except BaseException as exc:
             self._scrub_error(exc)
@@ -88,10 +99,7 @@ class StreamTracking:
                 yield self._note(chunk)
         except Exception as exc:
             # Scrub before formatting/wrapping, preserving the original cause/traceback.
-            self._scrub_error(exc)
-            self._error = exc if isinstance(exc, StreamError) else StreamError(f"Stream interrupted: {exc}")
-            self._error.gateway_evidence = self.agentcc.gateway_evidence
-            self._error.request_id = self._error.gateway_request_id
+            self._error = self._failure(exc)
             raise self._error from exc if self._error is not exc else None
         except BaseException as exc:
             self._scrub_error(exc)

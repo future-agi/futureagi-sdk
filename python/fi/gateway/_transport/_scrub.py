@@ -420,6 +420,11 @@ def scrub_error_text(error: BaseException, credentials: tuple[bytes, ...]) -> No
     Do not traverse arbitrary caller objects or traceback locals.
     Byte/str repr forms matter: h11 quotes invalid headers, escaping newlines.
     """
+    from fi.gateway._exceptions import StreamError
+
+    # Short synthetic keys are not meaningful substring secrets: replacing them
+    # can corrupt ordinary words. Header masking remains unconditional.
+    credentials = tuple(value for value in credentials if len(value) >= 8)
     if not credentials:
         return
     text_values: set[str] = set()
@@ -532,8 +537,15 @@ def scrub_error_text(error: BaseException, credentials: tuple[bytes, ...]) -> No
         # properties or __dict__ override. Normal exception dictionaries have
         # exact string keys; injected collision keys are outside that layout.
         stored = BaseException.__dict__["__dict__"].__get__(current, type(current))
+        protocol_fields = {"code", "type", "param", "gateway_evidence", "request_id"}
+        if _is(current, StreamError):
+            # Stream fields are parsed protocol data, or a wrapper around an
+            # already-scrubbed transport cause. Do not rewrite their semantics.
+            protocol_fields.update(("body", "message", "args"))
         if all(type(name) is str for name in dict.__iter__(stored)):
             for name, original in tuple(dict.items(stored)):
+                if name in protocol_fields:
+                    continue
                 cleaned = clean_field(name, original)
                 if cleaned is not original:
                     dict.__setitem__(stored, name, cleaned)
@@ -542,7 +554,7 @@ def scrub_error_text(error: BaseException, credentials: tuple[bytes, ...]) -> No
         fields = {"args", "message", "msg", "reason", "strerror", "filename", "filename2", "text", "object", "__notes__"}
         for namespace in _class_dicts(current):
             for name, descriptor in types.MappingProxyType.items(namespace):
-                if type(name) is not str or name not in fields:
+                if type(name) is not str or name not in fields or name in protocol_fields:
                     continue
                 if type(descriptor) not in (types.MemberDescriptorType, types.GetSetDescriptorType):
                     continue
