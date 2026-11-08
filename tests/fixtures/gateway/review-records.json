@@ -1,0 +1,877 @@
+{
+ "about": "Retained independent review verdicts projected from historical provenance; no new acceptance is claimed. Each digest binds the exact comparison rules reviewed.",
+ "entries": {
+  "D-01a": {
+   "reviewer": {
+    "by": "independent review of the fixed 1.0.0 -> 1.0.1 golden comparisons",
+    "record": "review-golden-comparisons",
+    "verdict": "confirmed: a third independent review re-recorded every golden at review-golden-comparisons on a fresh host (identical to the committed files) and found the fixed 1.0.0 -> 1.0.1 comparisons exactly D-01 in both comparators, with the same coverage (ESM D-01a 316, D-01b 6, D-01c 948; CJS D-01a 10, D-01b 6, D-01c 2, D-01d 466), and the label guard refusing D-01 for a mutated 1.0.1 copy, a 1.0.0 baseline and a tampered golden (exit 2). The earlier finding at the pre-fold commit (removal and message rules broad enough to hide a dropped chunk or a changed message) was closed by narrowing them to the error-frame items, the frame texts and the error-frame cases of the fixed comparison; this review confirms the narrowed rules."
+   },
+   "contract_sha256": "5e42f62d5ff65767225fe669958ca894a11c2aab2dffab26c7ea732196839028"
+  },
+  "D-01b": {
+   "reviewer": {
+    "by": "independent review of the fixed 1.0.0 -> 1.0.1 golden comparisons",
+    "record": "review-golden-comparisons",
+    "verdict": "confirmed: a third independent review re-recorded every golden at review-golden-comparisons on a fresh host (identical to the committed files) and found the fixed 1.0.0 -> 1.0.1 comparisons exactly D-01 in both comparators, with the same coverage (ESM D-01a 316, D-01b 6, D-01c 948; CJS D-01a 10, D-01b 6, D-01c 2, D-01d 466), and the label guard refusing D-01 for a mutated 1.0.1 copy, a 1.0.0 baseline and a tampered golden (exit 2); no finding against this entry"
+   },
+   "contract_sha256": "79e93bf4062ff273826289267b5e5f67a81039fe59247ca08e1ac7beae78b39f"
+  },
+  "D-01c": {
+   "reviewer": {
+    "by": "independent review of the fixed 1.0.0 -> 1.0.1 golden comparisons",
+    "record": "review-golden-comparisons",
+    "verdict": "confirmed: a third independent review re-recorded every golden at review-golden-comparisons on a fresh host (identical to the committed files) and found the fixed 1.0.0 -> 1.0.1 comparisons exactly D-01 in both comparators, with the same coverage (ESM D-01a 316, D-01b 6, D-01c 948; CJS D-01a 10, D-01b 6, D-01c 2, D-01d 466), and the label guard refusing D-01 for a mutated 1.0.1 copy, a 1.0.0 baseline and a tampered golden (exit 2); no finding against this entry"
+   },
+   "contract_sha256": "0ae1854324ee0983735268ea816d4922d2e7d72d8a7fcbe651f508b2ebf6375f"
+  },
+  "D-01d": {
+   "reviewer": {
+    "by": "independent review of the fixed 1.0.0 -> 1.0.1 golden comparisons",
+    "record": "review-golden-comparisons",
+    "verdict": "confirmed: a third independent review re-recorded every golden at review-golden-comparisons on a fresh host (identical to the committed files) and found the fixed 1.0.0 -> 1.0.1 comparisons exactly D-01 in both comparators, with the same coverage (ESM D-01a 316, D-01b 6, D-01c 948; CJS D-01a 10, D-01b 6, D-01c 2, D-01d 466), and the label guard refusing D-01 for a mutated 1.0.1 copy, a 1.0.0 baseline and a tampered golden (exit 2); no finding against this entry"
+   },
+   "contract_sha256": "d7e9d2d237f4d8cf39fa6db15602fbfcd8d3d75c9fe78fc6d22bda479f752800"
+  },
+  "D-02-py": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-stream-errors",
+    "verdict": "acceptable as described, value-pinned (the first review, at review-python-stream-errors); the review at review-python-core-transport found that this acceptance stands, and the rules are unchanged since; a re-probe at review-python-resource-shapes of the edited behaviour (chat streams close the response on invalid JSON, non-object frames and error frames, with type, code and param, sync and async) found it holds; in two byte-identical pinned recordings at review-python-resource-shapes every rule of every port entry was used and no difference fell outside them"
+   },
+   "contract_sha256": "d014aa1a0048154409067fe58400ad1d625ffec2725c83e5e42a747d4227d702"
+  },
+  "D-03-py": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-core-transport",
+    "verdict": "accepted: unchanged since the first review, whose acceptance stands; at review-python-core-transport two pinned recordings (Python 3.12.3 with the golden's constraints) were byte-identical and every difference was covered with 0 unused rules; the entry is unchanged since, and a re-check at review-python-resource-shapes again found every rule used and no difference outside the port's entries"
+   },
+   "contract_sha256": "3fa2841d71a96caaa5f284a140613c15a4a6b9dba8e098b57e4c3f2c6c93eb5c"
+  },
+  "D-06-py": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-session-paths",
+    "verdict": "accepted: the summary is now true (the client's metadata is kept inside a session) and its 7 rules are anchored exact values; in two byte-identical pinned recordings at review-python-resource-shapes every rule of every port entry was used and no difference fell outside them"
+   },
+   "contract_sha256": "c7c74971e0f177f0976120298aa0b8784e70ce813c189234e97479865e7c3156"
+  },
+  "D-06b-py": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-resource-shapes",
+    "verdict": "accepted: the summary names all 8 methods; probes confirm the client < session < request rule on chat, speech, transcriptions, translations, completions and responses (sync), and on async speech and transcription in a session; the matrix test fails exactly the 3 speech cases on the code before the speech fix; in two byte-identical pinned recordings at review-python-resource-shapes every rule of every port entry was used and no difference fell outside them"
+   },
+   "contract_sha256": "53e905028a61e31caf3b49a2ed205c5f4038697fade7a1883eb77e4451553fab"
+  },
+  "D-07-py": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-core-transport",
+    "verdict": "accepted: unchanged since the first review, whose acceptance stands; at review-python-core-transport two pinned recordings (Python 3.12.3 with the golden's constraints) were byte-identical and every difference was covered with 0 unused rules; the entry is unchanged since, and a re-check at review-python-resource-shapes again found every rule used and no difference outside the port's entries"
+   },
+   "contract_sha256": "aaa98f7a7e3b5a869b9963e2050db9c63567ca8c321b26eaab324ecf4d5eb22b"
+  },
+  "D-09-py": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-core-transport",
+    "verdict": "accepted: unchanged since the first review, whose acceptance stands; at review-python-core-transport two pinned recordings (Python 3.12.3 with the golden's constraints) were byte-identical and every difference was covered with 0 unused rules; the entry is unchanged since, and a re-check at review-python-resource-shapes again found every rule used and no difference outside the port's entries"
+   },
+   "contract_sha256": "50f51df304fd1012b0e254be1939df8e8ba1e0245335b2cec4e5a1e6c00d3263"
+  },
+  "D-10-py": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-core-transport",
+    "verdict": "accepted: unchanged since the first review, whose acceptance stands; at review-python-core-transport two pinned recordings (Python 3.12.3 with the golden's constraints) were byte-identical and every difference was covered with 0 unused rules; the entry is unchanged since, and a re-check at review-python-resource-shapes again found every rule used and no difference outside the port's entries"
+   },
+   "contract_sha256": "69b8a82b46afb5fc9ad9b1a072efe867d2dd1cf90baedc7b8bda5a9d312db1d4"
+  },
+  "D-14-py": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-stream-errors",
+    "verdict": "acceptable as described, value-pinned (the first review, at review-python-stream-errors); the review at review-python-core-transport found that this acceptance stands, and the rules are unchanged since; a re-probe at review-python-resource-shapes of the edited behaviour (the key-pair guard at send for chat, a with_options copy, a stream, multipart and speech: nothing is sent and the value is never echoed; also on the constructor, the environment, create_headers and openai_kwargs) found it holds; in two byte-identical pinned recordings at review-python-resource-shapes every rule of every port entry was used and no difference fell outside them"
+   },
+   "contract_sha256": "71a82ad71a1d9dc6fa4d7d494a0c74c0bd66b532dd8db1b92ff0cbc67e8244df"
+  },
+  "D-15-py": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-core-transport",
+    "verdict": "accepted: its rules are anchored exact values (trace-id ^derived\\-trace$; current_cost 0.0 -> 0.5) and the summary matches the probed behaviour; two pinned recordings (Python 3.12.3 with the golden's constraints) were byte-identical; unchanged since, and a re-check at review-python-resource-shapes again found every rule used"
+   },
+   "contract_sha256": "9a7ec94f9a1be8339356257c56c4c5f1971345db62386bc0cabd5a0636ecf81a"
+  },
+  "D-16-py": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-core-transport",
+    "verdict": "accepted: unchanged since the first review, whose acceptance stands; at review-python-core-transport two pinned recordings (Python 3.12.3 with the golden's constraints) were byte-identical and every difference was covered with 0 unused rules; the entry is unchanged since, and a re-check at review-python-resource-shapes again found every rule used and no difference outside the port's entries"
+   },
+   "contract_sha256": "dfb7cb185f0d558f1d8f8219c12be048f816945fde5851d98401d8ca75fbcd16"
+  },
+  "D-17-py": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-surface",
+    "verdict": "accepted at review-python-surface with its rule for the error frame's type 'error', and again at review-python-session-paths; the rules are unchanged since; a re-probe at review-python-resource-shapes of the edited behaviour (a Responses event: error in flat, nested and invalid-JSON form gives type, code, param and request_id, and closes the response) found it holds; in two byte-identical pinned recordings at review-python-resource-shapes every rule of every port entry was used and no difference fell outside them"
+   },
+   "contract_sha256": "77e8b2c5f4d7072c8892dcd1a4efcf60e14468361ef3f3def7364f6f53825ace"
+  },
+  "D-20-py": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-core-transport",
+    "verdict": "accepted: unchanged since the first review, whose acceptance stands; at review-python-core-transport two pinned recordings (Python 3.12.3 with the golden's constraints) were byte-identical and every difference was covered with 0 unused rules; the entry is unchanged since, and a re-check at review-python-resource-shapes again found every rule used and no difference outside the port's entries"
+   },
+   "contract_sha256": "c06e7533e5d8b4a100f36a8cb3be9cd75d8f5ad0fee98209c70acd82b6c9dd78"
+  },
+  "D-21-py": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-surface",
+    "verdict": "accepted: a wording-only change, re-checked (values and rules untouched since the acceptance at review-python-core-transport); the rule audit over every port entry found 0 unanchored rules, and every test id resolves to a collected test; a re-check at review-python-resource-shapes again found every rule used"
+   },
+   "contract_sha256": "8a27d740bdaf6610566d00cb2e9e8398ae61d1bf475cc59d9f8dbd1ee4d450a4"
+  },
+  "PY-1.2-audio-multipart": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-resource-shapes",
+    "verdict": "accepted, with a note: all 10 rules truncate the value with a middle wildcard, so the multipart content type and form body are pinned by the named unit test, not by this entry; in two byte-identical pinned recordings at review-python-resource-shapes every rule of every port entry was used and no difference fell outside them"
+   },
+   "contract_sha256": "4e01e76c0556fbd122effda78addb08db0a21af5c1d961c9e59c21077a2402d0"
+  },
+  "PY-1.2-completions-stream": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-resource-shapes",
+    "verdict": "accepted; in two byte-identical pinned recordings at review-python-resource-shapes every rule of every port entry was used and no difference fell outside them"
+   },
+   "contract_sha256": "063757a10875ae934d87f1ecfae11b85716a413fc76f51465d5368c12d74a5a8"
+  },
+  "PY-1.2-embedding-usage": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-resource-shapes",
+    "verdict": "accepted; in two byte-identical pinned recordings at review-python-resource-shapes every rule of every port entry was used and no difference fell outside them"
+   },
+   "contract_sha256": "7cf2864d9c02155adc180f4baeba30a68a713a82a2a7f1187ab80e2023a59953"
+  },
+  "PY-1.2-request-recorder": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-surface",
+    "verdict": "accepted: a wording-only change, re-checked (values and rules untouched since the acceptance at review-python-core-transport); the rule audit over every port entry found 0 unanchored rules, and every test id resolves to a collected test; a re-check at review-python-resource-shapes again found every rule used"
+   },
+   "contract_sha256": "bc98cdfb61f883fe5d4af753c65120345b432ad19fdb636fea00ae625bd8cb1c"
+  },
+  "PY-1.2-session-path": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-session-paths",
+    "verdict": "accepted: 4 rules re-pinned to SessionContext, each an anchored exact value; in two byte-identical pinned recordings at review-python-resource-shapes every rule of every port entry was used and no difference fell outside them"
+   },
+   "contract_sha256": "28dea04f609dfa8f5ca85f3d877d4b182d356bd408ade7b4fa02a25b1b20bbf8"
+  },
+  "PY-1.2-typed-returns": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-session-paths",
+    "verdict": "accepted: mypy and pyright reveals on the installed wheel name the returned classes; in two byte-identical pinned recordings at review-python-resource-shapes every rule of every port entry was used and no difference fell outside them"
+   },
+   "contract_sha256": "2d4b39ef918ccd7b9e3a909d9b93e8e63c2b9ad3b875c499ab4831f6426198c3"
+  },
+  "PY-1.3-create-headers-guardrail": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-surface",
+    "verdict": "accepted: a wording-only change, re-checked (values and rules untouched since the acceptance at review-python-core-transport); the rule audit over every port entry found 0 unanchored rules, and every test id resolves to a collected test; a re-check at review-python-resource-shapes again found every rule used"
+   },
+   "contract_sha256": "5b2c80e74f1db6279b740f16bb9a23c895a73e64c4576c42d5abb43f7781f1af"
+  },
+  "PY-1.3-module-split": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-resource-shapes",
+    "verdict": "accepted: the re-pin leaves 0 unused rules and no difference outside the port's entries in the pinned environment; in two byte-identical pinned recordings at review-python-resource-shapes every rule of every port entry was used and no difference fell outside them"
+   },
+   "contract_sha256": "15291aafa6b41793f4de7b18e7ec07d9a2d28b827889703c0b75f2126b0c83fb"
+  },
+  "PY-1.3-new-names": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-surface",
+    "verdict": "accepted: a wording-only change, re-checked (values and rules untouched since the acceptance at review-python-core-transport); the rule audit over every port entry found 0 unanchored rules, and every test id resolves to a collected test; a re-check at review-python-resource-shapes again found every rule used"
+   },
+   "contract_sha256": "62873f336d15ad4671782966dabdb5c430782bf69da0bc3aeadf9928898554ba"
+  },
+  "PY-1.4-default-query": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-session-paths",
+    "verdict": "accepted: 6 differences covered; probed on 21 resource calls (sync) and 6 (async), with key precedence and with_options copies; in two byte-identical pinned recordings at review-python-resource-shapes every rule of every port entry was used and no difference fell outside them"
+   },
+   "contract_sha256": "62dcc2be37865843d69afbb087a8426550747e488fe36d28384f443b12bf9e0f"
+  },
+  "PY-3.1-lazy-dir": {
+   "reviewer": {
+    "by": "independent review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-surface",
+    "verdict": "accepted: a wording-only change, re-checked (values and rules untouched since the acceptance at review-python-core-transport); the rule audit over every port entry found 0 unanchored rules, and every test id resolves to a collected test; a re-check at review-python-resource-shapes again found every rule used"
+   },
+   "contract_sha256": "27364a27f42c8189cb6ac84990f4d7513ef94df3367307a429259ae1582c29d4"
+  },
+  "D-03-ts": {
+   "reviewer": {
+    "by": "independent review of the TypeScript client recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-typescript-client",
+    "verdict": "accepted at historical-change-022: User-Agent futureagi-typescript/<v> and x-agentcc-sdk-version <v> on every request; 972 differences per format, value-pinned; at historical-change-022 the ESM and CJS recordings (each from two install paths) were byte-identical to those the entries were built from (typescript-overlay-source, historical-change-006). Reviewed again at review-typescript-client with the rules as they now stand (the 1.0.1 values pinned exactly, the new values in the version shape D-03-py uses): 972 differences per format covered, and each of the 2438 differences per format is covered by exactly one entry. That review also found that these rules alone do not keep the release gate passing on a version bump: TS-3.2-dts-surface pinned the sha256 of constants.d.ts, into which tsc wrote the VERSION literal, so a bump left those two differences unlisted in both formats. That is fixed in TS-3.2-dts-surface (VERSION is declared string), not here"
+   },
+   "contract_sha256": "67dfb791a45d2c022b2492c916e5701a417f8dbf411721912d83600895542cc0"
+  },
+  "D-04-ts": {
+   "reviewer": {
+    "by": "independent review of the TypeScript client recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-typescript-client",
+    "verdict": "accepted: the error message comes from the gateway envelope; 118 differences, all value-pinned; at historical-change-022 the ESM and CJS recordings (each from two install paths) were byte-identical to those the entries were built from (typescript-overlay-source, historical-change-006). Reviewed again at review-typescript-client as the entry now stands: there the ESM and CJS recordings (each from two install paths, byte-identical) pass the release gate, and each of their 2438 differences per format is covered by exactly one entry"
+   },
+   "contract_sha256": "e44b6328622d67e0dbb31501323f953e666ce8be7fd0045e81e2f4abd62801d0"
+  },
+  "D-06b-ts": {
+   "reviewer": {
+    "by": "independent review of the TypeScript client recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-typescript-client",
+    "verdict": "accepted: client, then session, then request metadata merged key by key; the one changed case pinned exactly; the migration line is present; at historical-change-022 the ESM and CJS recordings (each from two install paths) were byte-identical to those the entries were built from (typescript-overlay-source, historical-change-006). Reviewed again at review-typescript-client as the entry now stands: there the ESM and CJS recordings (each from two install paths, byte-identical) pass the release gate, and each of their 2438 differences per format is covered by exactly one entry"
+   },
+   "contract_sha256": "83b3a6b9104fa152a5c6f6eb94f5c608bb6d895576ad4594bdbbd10fda590ffb"
+  },
+  "D-07-ts": {
+   "reviewer": {
+    "by": "independent review of the TypeScript client recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-typescript-client",
+    "verdict": "accepted: a trailing /v1 is stripped; 4 paths pinned; at historical-change-022 the ESM and CJS recordings (each from two install paths) were byte-identical to those the entries were built from (typescript-overlay-source, historical-change-006). Reviewed again at review-typescript-client as the entry now stands: there the ESM and CJS recordings (each from two install paths, byte-identical) pass the release gate, and each of their 2438 differences per format is covered by exactly one entry"
+   },
+   "contract_sha256": "3b54b8ad69295e3d58203ef9383e5169ce83c2d0bb97a6ccf1289fa31db4728d"
+  },
+  "D-10-ts": {
+   "reviewer": {
+    "by": "independent review of the TypeScript client recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-typescript-client",
+    "verdict": "accepted: configIgnored and clientRequestId are added wherever metadata is returned, including the nextjs SSE text; 748 differences; at historical-change-022 the ESM and CJS recordings (each from two install paths) were byte-identical to those the entries were built from (typescript-overlay-source, historical-change-006). Reviewed again at review-typescript-client as the entry now stands: there the ESM and CJS recordings (each from two install paths, byte-identical) pass the release gate, and each of their 2438 differences per format is covered by exactly one entry"
+   },
+   "contract_sha256": "ffca2d0646ea54a3c5caa8ca676d12fb3b3e6a7361baa11e0ad18f108fc1ae6b"
+  },
+  "D-11b-ts": {
+   "reviewer": {
+    "by": "independent review of the TypeScript client recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-typescript-client",
+    "verdict": "accepted: resource.chat.stream.tools final finish_reason stop -> tool_calls; matches the corrected D-11b row; at historical-change-022 the ESM and CJS recordings (each from two install paths) were byte-identical to those the entries were built from (typescript-overlay-source, historical-change-006). Reviewed again at review-typescript-client as the entry now stands: there the ESM and CJS recordings (each from two install paths, byte-identical) pass the release gate, and each of their 2438 differences per format is covered by exactly one entry"
+   },
+   "contract_sha256": "1218268f8606bdd04f77eec890e86d8f9548e7c9af371b9ff1d73ae0a1ef991f"
+  },
+  "D-12-ts": {
+   "reviewer": {
+    "by": "independent review of the TypeScript client recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-typescript-client",
+    "verdict": "accepted: a JSON answer to a stream request is yielded as one chunk. It also covers status.stream.246 (a JSON guardrail-warning answer), which the summary now names, as the review asked; at historical-change-022 the ESM and CJS recordings (each from two install paths) were byte-identical to those the entries were built from (typescript-overlay-source, historical-change-006). Reviewed again at review-typescript-client as the entry now stands: there the ESM and CJS recordings (each from two install paths, byte-identical) pass the release gate, and each of their 2438 differences per format is covered by exactly one entry"
+   },
+   "contract_sha256": "d2e3fd6a0dfed77ef44a77b78a76543a1c5bd9b52ada2812b37ac2f0b84b2734"
+  },
+  "D-14-ts": {
+   "reviewer": {
+    "by": "independent review of the TypeScript client recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-typescript-client",
+    "verdict": "accepted on edit, rules unchanged: the summary now also says that the client warns (console.warn) when FI_GATEWAY_* and AGENTCC_* are both set to different values, which 11 golden cases record; at historical-change-022 the ESM and CJS recordings (each from two install paths) were byte-identical to those the entries were built from (typescript-overlay-source, historical-change-006). Reviewed again at review-typescript-client as the entry now stands: there the ESM and CJS recordings (each from two install paths, byte-identical) pass the release gate, and each of their 2438 differences per format is covered by exactly one entry"
+   },
+   "contract_sha256": "61e92dd54f38895d0505069ff389b6264c51c1e908b617ac2dfb5cf4403c2086"
+  },
+  "D-16-ts": {
+   "reviewer": {
+    "by": "independent review of the TypeScript client recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-typescript-client",
+    "verdict": "accepted: done comes once, last, after the body; a late error frame raises before done; at historical-change-022 the ESM and CJS recordings (each from two install paths) were byte-identical to those the entries were built from (typescript-overlay-source, historical-change-006). Reviewed again at review-typescript-client as the entry now stands: there the ESM and CJS recordings (each from two install paths, byte-identical) pass the release gate, and each of their 2438 differences per format is covered by exactly one entry"
+   },
+   "contract_sha256": "7c6d0f58f45b03240ceba465eaeed110ce17fd9871d2d6d01a9be555a39e675f"
+  },
+  "D-21-ts": {
+   "reviewer": {
+    "by": "independent review of the TypeScript client recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-typescript-client",
+    "verdict": "accepted on edit: the 8 rules for the removed interface ClientOptions, RequestOptions and WithResponseResult in base-client.d.ts and function parseSSE in streaming.d.ts (ESM and CJS) moved to TS-3.2-dts-surface, because those declarations moved (to client-options.d.ts, re-exported from base-client.d.ts, and to the sse module) and did not leave; the summary now names the five never-called hooks and the public types SessionSummary and StreamInfo that leave the package root, with a migration line; the evidence count is 309. All 32 removed runtime exports are shim-only names, and no kept runtime export is removed; at historical-change-022 the ESM and CJS recordings (each from two install paths) were byte-identical to those the entries were built from (typescript-overlay-source, historical-change-006). Reviewed again at review-typescript-client: 309 differences per format covered, each glob rule covering exactly two cases; that review asked that the four rules for AgentCCError becoming TypeError (raised/__exception__, raised/attrs/name, raised/chain/* and raised/class) name the two cases they are for, client_option.preCallRules.allow and .block, rather than every case, so that no later case making the same change is covered unseen. They now start client_option.preCallRules.* and cover the same 8 differences per format; they wait for the next review to confirm them. The other rules are as reviewed at review-typescript-client, and each of the 2438 differences per format is still covered by exactly one entry"
+   },
+   "contract_sha256": "9d3d2a77072bbd1621cace3f8819d4bc495c0504e002290950603ea852d29999"
+  },
+  "TS-1.5-cache-only-config": {
+   "reviewer": {
+    "by": "independent review of the TypeScript client recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-typescript-client",
+    "verdict": "accepted on edit, rules unchanged: the summary now names every cache field that raises TypeError (1.0.1's declared enabled, strategy, semantic_threshold, cache_by_model and ignore_keys, and any undeclared key such as camelCase forceRefresh), with a migration line, and the test id names the per-field TypeError tests; at historical-change-022 the ESM and CJS recordings (each from two install paths) were byte-identical to those the entries were built from (typescript-overlay-source, historical-change-006). Reviewed again at review-typescript-client as the entry now stands: there the ESM and CJS recordings (each from two install paths, byte-identical) pass the release gate, and each of their 2438 differences per format is covered by exactly one entry"
+   },
+   "contract_sha256": "39830a01d6afced8c2ece313293059b03973a9d9f71f28e046456f02dbf4de85"
+  },
+  "TS-1.5-new-names": {
+   "reviewer": {
+    "by": "independent review of the TypeScript client recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-typescript-client",
+    "verdict": "accepted; at historical-change-022 the ESM and CJS recordings (each from two install paths) were byte-identical to those the entries were built from (typescript-overlay-source, historical-change-006). Reviewed again at review-typescript-client as the entry now stands: there the ESM and CJS recordings (each from two install paths, byte-identical) pass the release gate, and each of their 2438 differences per format is covered by exactly one entry"
+   },
+   "contract_sha256": "97d3fcd5e30054eaa39cb631a880c11929e4aafce02a98312bb53b2cb7fffeb6"
+  },
+  "TS-3.2-dts-surface": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the TypeScript client recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-typescript-declarations-request-preparation",
+    "verdict": "requalified: the four sha256 rules for base-client.d.ts and client.d.ts (ESM and CJS) pinned the declaration text before the public prepareRequest extension point and the class-preserving withOptions and session types; they no longer match, so they are removed here and TS-3.3-request-preparation pins the current hashes. The other 98 rules are unchanged from the acceptance at review-typescript-client and each still covers one difference per format. Not release acceptance."
+   },
+   "contract_sha256": "9b1c300675eab31abb6a979febb88636cbe3bbbfc6ba380e6f07942860e2bcae"
+  },
+  "PY-1.2-typed-results-and-copies": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the Python port recording against the agentcc 1.0.0 golden",
+    "record": "review-python-typed-results",
+    "verdict": "intended: 6 differences, one per rule, each an exact path with the old and new signature anchored whole. Only return annotations change, and each now names what the method returns at run time instead of Any or the base class; no parameter, default or behaviour changes and no annotation becomes Any, so every agentcc 1.0 call still type-checks and the gateway compatibility promise in CHANGELOG.md (no breaking change below 1.0) holds. Not release acceptance."
+   },
+   "contract_sha256": "9963c6377cbc830a7f26044541cdb2b30a78c5aa2c65ddd58c25cf570ceb63ee"
+  },
+  "TS-3.3-request-preparation": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the TypeScript client recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-typescript-request-preparation",
+    "verdict": "intended: 4 differences per format, the same in ESM and CJS, each an exact path with the 1.0.1 and current sha256 anchored. The declarations only add a method whose default is an identity and narrow two return types to the receiving class, so every 1.0.1 call and assignment still type-checks and the gateway compatibility promise in CHANGELOG.md (no breaking change below 1.0) holds. Not release acceptance."
+   },
+   "contract_sha256": "90b3c7e9ef943ee846c46c460765a2b3ff0c6d3e48eac95a974e5e1c11232981"
+  },
+  "SHIM-INT-D-03-cjs": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the five @agentcc 2.0.0 shim recordings against the @agentcc 1.0.0 integration goldens",
+    "record": "review-shim-int-d-03-cjs",
+    "verdict": "intended: the same change as the signed D-03-ts. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "5b198a3831aa79523d3859cdbe4a772c84e5908de512b909e5c50cab0b845251"
+  },
+  "SHIM-INT-D-03-esm": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the five @agentcc 2.0.0 shim recordings against the @agentcc 1.0.0 integration goldens",
+    "record": "review-shim-int-d-03-esm",
+    "verdict": "intended: the same change as the signed D-03-ts. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "3af6bd202aa2717e050e217a202df95b12198e686d69207900a6a7fd29b11a8f"
+  },
+  "SHIM-INT-D-10-cjs": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the five @agentcc 2.0.0 shim recordings against the @agentcc 1.0.0 integration goldens",
+    "record": "review-shim-int-d-10-cjs",
+    "verdict": "intended: the same change as the signed D-10-ts. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "56e26fdc1abcd993a23406e7e7f2707dfe969994c038e0efec996d9cfc8ca891"
+  },
+  "SHIM-INT-D-10-esm": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the five @agentcc 2.0.0 shim recordings against the @agentcc 1.0.0 integration goldens",
+    "record": "review-shim-int-d-10-esm",
+    "verdict": "intended: the same change as the signed D-10-ts. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "b01a4ca20b4a998f850837fe9c7766b648d949f8419500e3af8f029bed6aa099"
+  },
+  "SHIM-PY-D-02": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-d-02",
+    "verdict": "intended: the same change as the signed D-02-py. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "d9e8565b928ebb69a2164daaa11e22ec211a25598f086b4ea3ea3629e13aa485"
+  },
+  "SHIM-PY-D-03": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-d-03",
+    "verdict": "intended: the same change as the signed D-03-py. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "0205d6fe2dd2b51dbf3f87f2abd8a18025161f22fa0a119fb61d1c3f6a1ad4d2"
+  },
+  "SHIM-PY-D-06": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-d-06",
+    "verdict": "intended: the same change as the signed D-06-py. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "c99ce77adb76646031aa05b1c82af1d4a3ec38bc2d1054b0ccff93b40fc33686"
+  },
+  "SHIM-PY-D-06b": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-d-06b",
+    "verdict": "intended: the same change as the signed D-06b-py. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "374be40d5819eb840f14269a1c7a18bc8e664c6ec5ca72a5ac431a76c6a8fc41"
+  },
+  "SHIM-PY-D-07": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-d-07",
+    "verdict": "intended: the same change as the signed D-07-py. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "ad8867ef55b4fd480589172bf0d056b61d5b1f640f72c30804b687e5fb43f6cc"
+  },
+  "SHIM-PY-D-09": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-d-09",
+    "verdict": "intended: the same change as the signed D-09-py. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "9783af61d1a64fb31c39d2cf28108f697ced90634a839b4a1fda68f26399247d"
+  },
+  "SHIM-PY-D-10": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-d-10",
+    "verdict": "intended: the same change as the signed D-10-py. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "01d469890ab91124fe21ced91855dfdb3fde6c22f70658ef44364cf2824184c1"
+  },
+  "SHIM-PY-D-14": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-d-14",
+    "verdict": "intended: the same change as the signed D-14-py. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "6d3bb344bbbd7a82e59bc226d139226eac1611b86053834bd6ada176c824d82c"
+  },
+  "SHIM-PY-D-15": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-d-15",
+    "verdict": "intended: the same change as the signed D-15-py. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "6de6e6e397aa15b5ccbdc37ffe956b672ea1e17644597ef0ba4b9f823fbb7a35"
+  },
+  "SHIM-PY-D-16": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-d-16",
+    "verdict": "intended: the same change as the signed D-16-py. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "93995702e0e897a59ba3c64f51238489376c5df3b938125a879eb5015cf3607e"
+  },
+  "SHIM-PY-D-17": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-d-17",
+    "verdict": "intended: the same change as the signed D-17-py. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "3cdcc9ebc36ef4a30cce17751e892c8c28fe117f68422d197d010fe1381b881f"
+  },
+  "SHIM-PY-D-20": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-d-20",
+    "verdict": "intended: the same change as the signed D-20-py. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "3917958c9e27cd8b43314928076f562baeba0dbd65c524271d8c3ecc201c4b9f"
+  },
+  "SHIM-PY-1.2-audio-multipart": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-1.2-audio-multipart",
+    "verdict": "intended: the same change as the signed PY-1.2-audio-multipart. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "76d5f599556f89192c76159251462fae355d269e18bbe4190272f9420853e120"
+  },
+  "SHIM-PY-1.2-completions-stream": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-1.2-completions-stream",
+    "verdict": "intended: the same change as the signed PY-1.2-completions-stream. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "6b6663add97b0a317a25bfe9bfc00f9dac7f0434eb0387bf6a2b18eda511a1f6"
+  },
+  "SHIM-PY-1.2-embedding-usage": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-1.2-embedding-usage",
+    "verdict": "intended: the same change as the signed PY-1.2-embedding-usage. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "17907f72482a3cce6e8062f3da8847b61c9c6d8fc1361840ec164785b84942f1"
+  },
+  "SHIM-PY-1.2-request-recorder": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-1.2-request-recorder",
+    "verdict": "intended: the same change as the signed PY-1.2-request-recorder. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "5b7f197a09234a0939f88cee5747acc8dc69e72f08be237b381907a7a355d45b"
+  },
+  "SHIM-PY-1.2-session-path": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-1.2-session-path",
+    "verdict": "intended: the same change as the signed PY-1.2-session-path. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "577a5fe0ac86f51191748a13081939ba2ed426e0787245ca75906a9ad5d39c50"
+  },
+  "SHIM-PY-1.2-typed-results-and-copies": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-1.2-typed-results-and-copies",
+    "verdict": "intended: the same change as the signed PY-1.2-typed-results-and-copies. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "a11815ce3de092e43e494686b879ce181cdbbf993ec6d12f06e6bf1c86d3789f"
+  },
+  "SHIM-PY-1.2-typed-returns": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-1.2-typed-returns",
+    "verdict": "intended: the same change as the signed PY-1.2-typed-returns. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "fc49988ab63ec8d89a6fa942df0f64fee44e8ae42a7021b9f7cd7bd6864aba96"
+  },
+  "SHIM-PY-1.3-module-split": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-1.3-module-split",
+    "verdict": "intended: the same change as the signed PY-1.3-module-split. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "1e7e093db3c8cc449dfbe609dcb12591d841c9ccc5fecc6ccc4c75050c6d401b"
+  },
+  "SHIM-PY-1.3-new-names": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-1.3-new-names",
+    "verdict": "intended: the same change as the signed PY-1.3-new-names. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "ad0951c4eb54c1320c72b6e5f16627c00c87e27d1d9a2981a8c4d78e14b448d0"
+  },
+  "SHIM-PY-1.4-default-query": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-1.4-default-query",
+    "verdict": "intended: the same change as the signed PY-1.4-default-query. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "0dc924bd4aaff6802d74912eff8a11c20c22ab368bc3303cf5afa54e814df62c"
+  },
+  "SHIM-PY-3.1-lazy-dir": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-3.1-lazy-dir",
+    "verdict": "intended: the same change as the signed PY-3.1-lazy-dir. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "7d0d453174b99eb3eb5020f524b1b72e2696ad3b376703155abdf5509ec26688"
+  },
+  "SHIM-PY-4.0-cache-stream": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-4.0-cache-stream",
+    "verdict": "intended: the same change as the signed PY-4.0-cache-stream. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "0f88e9361b5510f336e4fea4ad668e06a6469273ed928bc6957819129aef33f7"
+  },
+  "SHIM-PY-4.0-sessions": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-4.0-sessions",
+    "verdict": "intended: the same change as the signed PY-4.0-sessions. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "c407510fc9d41408efc46ecf3b078a91664cca4194641597128181555fb4d2d7"
+  },
+  "SHIM-PY-4.0-sse-boundaries": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-4.0-sse-boundaries",
+    "verdict": "intended: the same change as the signed PY-4.0-sse-boundaries. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "7ab406b2f68bb233f1eed0b8978b1bcd00c398be2ed4637f59cc7c90d1ba3de4"
+  },
+  "SHIM-PY-4.0-stream-status": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-4.0-stream-status",
+    "verdict": "intended: the same change as the signed PY-4.0-stream-status. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "6257161b72cfe224a1aa01a458e487c895cf8789b9a835fb08e42fd22171527c"
+  },
+  "SHIM-TS-D-03": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-d-03",
+    "verdict": "intended: the same change as the signed D-03-ts. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "0f7f339ee22140348725c5aa7f6ca729cfc4e5b31a7a0be6bae69ae694cefa35"
+  },
+  "SHIM-TS-D-04": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-d-04",
+    "verdict": "intended: the same change as the signed D-04-ts. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "95de02d5e5670ebb60d563b831ce786ac89e7a17236fe1512331c1f0e6fe4095"
+  },
+  "SHIM-TS-D-06b": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-d-06b",
+    "verdict": "intended: the same change as the signed D-06b-ts. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "c9a9dfe54503869a6e401adec3f0a67b67ee7ce0ab42f1a4c74a8a7dc734ac1c"
+  },
+  "SHIM-TS-D-07": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-d-07",
+    "verdict": "intended: the same change as the signed D-07-ts. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "2572165a9ca6d38cc7e46b2f21c5e5de09504011f276af02e1467615bf259ce6"
+  },
+  "SHIM-TS-D-10": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-d-10",
+    "verdict": "intended: the same change as the signed D-10-ts. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "4417464955f34a38b626bad0587a913ec299d207740bc98c76e5d6e10935e87b"
+  },
+  "SHIM-TS-D-11b": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-d-11b",
+    "verdict": "intended: the same change as the signed D-11b-ts. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "b61825a47480e0add9648db9a1438a59713667071fe68c1f377236f082080ec2"
+  },
+  "SHIM-TS-D-12": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-d-12",
+    "verdict": "intended: the same change as the signed D-12-ts. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "3e579a282e699a2da9758435083909138016d2e0fe9d01a4af713e11d2799c27"
+  },
+  "SHIM-TS-D-14": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-d-14",
+    "verdict": "intended: the same change as the signed D-14-ts. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "94c90cd9af2603fd86694e2dad1ac116fd4037a85944416e1235d51c4c6969d3"
+  },
+  "SHIM-TS-D-16": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-d-16",
+    "verdict": "intended: the same change as the signed D-16-ts. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "8a0478711ada5f067db0b35730f64b545ce0ed96c9455ba7ca29e6b562f72d6a"
+  },
+  "SHIM-TS-1.5-cache-only-config": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-1.5-cache-only-config",
+    "verdict": "intended: the same change as the signed TS-1.5-cache-only-config. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "a3cd36c64e7d50911413c93daa08c157e1f81386132fc6f7214a03930b084489"
+  },
+  "SHIM-TS-1.5-new-names": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-1.5-new-names",
+    "verdict": "intended: the same change as the signed TS-1.5-new-names. The kept names of the 2.0.0 shim are the platform SDK's own objects (the 2.0.0 release notes: kept imports delegate to the platform SDK), so this signed SDK change reaches 1.0 callers in the same form, and 2.0.0 is a major release that ~=1.0 and ^1 users never receive. Not release acceptance."
+   },
+   "contract_sha256": "773ef2b068bb0475887797d214cc89b3501c4e12d01664f9a0059bcd7ab20ac2"
+  },
+  "SHIM-INT-D-08-vercel-no-default-url": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the five @agentcc 2.0.0 shim recordings against the @agentcc 1.0.0 integration goldens",
+    "record": "review-shim-int-d-08-vercel-no-default-url",
+    "verdict": "intended: the 2.0.0 release notes state that the Vercel provider no longer chooses a hosted default URL. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "79a9a3e8444669153c6fd2ccc6556bf8970b64c1efeee1c903027fa613ff9a2f"
+  },
+  "SHIM-INT-D-13-commonjs-load-cjs": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the five @agentcc 2.0.0 shim recordings against the @agentcc 1.0.0 integration goldens",
+    "record": "review-shim-int-d-13-commonjs-load-cjs",
+    "verdict": "intended: the CommonJS export condition is a fix the 1.0 users asked for; nothing that worked in 1.0.0 changes. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "428a91b69f00f463eca2b7da1a0807789c7035c51161611bd646e5df00ba4de0"
+  },
+  "SHIM-INT-client-new-exports-esm": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the five @agentcc 2.0.0 shim recordings against the @agentcc 1.0.0 integration goldens",
+    "record": "review-shim-int-client-new-exports-esm",
+    "verdict": "intended: additions only; every 1.0 export key remains. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "d573e5fa0c2221124e5dd69684d5d9c898544275303c97abecd6cb26ec453836"
+  },
+  "SHIM-INT-declaration-layout": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the five @agentcc 2.0.0 shim recordings against the @agentcc 1.0.0 integration goldens",
+    "record": "review-shim-int-declaration-layout",
+    "verdict": "intended: each shim keeps its 1.0 export keys and re-exports the SDK; files under dist/ are not API. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "9494a4dde82e6db7c831396605b758b2e7e5a7299abe461a59d89caebc7d08ee"
+  },
+  "SHIM-INT-deprecation-warning": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the five @agentcc 2.0.0 shim recordings against the @agentcc 1.0.0 integration goldens",
+    "record": "review-shim-int-deprecation-warning",
+    "verdict": "intended: the 2.0.0 release notes promise one AGENTCC_DEPRECATED warning across the five packages. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "acca808a174be36e55624767f1ff4bc1cb8198f168e9f6b742fc5457327d4f0f"
+  },
+  "SHIM-INT-vercel-guardrail-header": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the five @agentcc 2.0.0 shim recordings against the @agentcc 1.0.0 integration goldens",
+    "record": "review-shim-int-vercel-guardrail-header",
+    "verdict": "intended: the SDK sends only request-side settings the gateway applies; the policy mode now takes effect instead of being ignored (the second of the Vercel helper's D-08 changes). 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "edc90877a754b067f95546faf1dc74b98bd821dd47a8633032db49675e263724"
+  },
+  "SHIM-PY-D-05-guardrail-ids": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-d-05-guardrail-ids",
+    "verdict": "intended: the 2.0.0 release notes state that guardrail identifiers are not sent in the policy-mode header, which the gateway reads as a mode. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "8d78fe0822ac4eb5f308afac6242f2120712f61df65837739d049d895dee4f0a"
+  },
+  "SHIM-PY-D-19-logger": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-d-19-logger",
+    "verdict": "intended: the numbered deltas change the shims too wherever the shim delegates to the SDK, and the transport and callback dispatch are the SDK's, never a second implementation. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "7c4d8a70d98e5f45fd0144094509a5bb6d1bcf7090daf8491f36ddce7d218fd2"
+  },
+  "SHIM-PY-compat-subclass": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-compat-subclass",
+    "verdict": "intended: the frozen client options can only be kept by a subclass that calls the public SDK client; isinstance against fi.gateway holds and every 1.0 member stays reachable on the class and its instances. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "c2e2d7f11d0c2324fdd93db17d539a794ce74b3d22219082c58a89e2e86041a6"
+  },
+  "SHIM-PY-deprecation-warning": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-deprecation-warning",
+    "verdict": "intended: the 2.0.0 release notes promise one visible deprecation warning with the AGENTCC_SILENCE_DEPRECATION=1 opt-out. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "731fdc719d1c4f7d08bcc537c7e89e5a7d3bc043645836f23c7ebc5f643857e3"
+  },
+  "SHIM-PY-inert-option-warning": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-inert-option-warning",
+    "verdict": "intended: the 2.0.0 release notes keep redact_messages accepted and inert, with one warning; a caller who relied on it learns that nothing is redacted. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "60832a756804bf23e152feabd1dd77a517affed184c35e6f3b01a65df9420bf2"
+  },
+  "SHIM-PY-lazy-root": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-lazy-root",
+    "verdict": "intended: every name of the 1.0 root __all__ resolves from the root, and from agentcc import X works for each; only the module dictionary before first use and dir() differ. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "83a73cefb8e8caf37a4f8a99875a9231d75765d17bd429a35acf8fa25c08eee6"
+  },
+  "SHIM-PY-module-identity": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-module-identity",
+    "verdict": "intended: module identity is not preserved by design (objects are the same, so isinstance, except and pickling hold), while every name each 1.0 module defined or exported, private modules included, resolves from its 1.0 path. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "3c0caa25c8a8d76819dbd3d37dd044ab371c43b1fea9568bb00cb7b2e643f084"
+  },
+  "SHIM-PY-no-hosted-default": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-no-hosted-default",
+    "verdict": "intended: the platform SDK has no hosted base-URL fallback and every client resolves an explicit gateway origin or raises; the shim keeps the 1.0 variable it reads and drops only the hosted default. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "ca9c06c48a32a10ed77d3a39c605503e5cd56adeea1e8f00f74c81c63315c374"
+  },
+  "SHIM-PY-unserved-resources": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-unserved-resources",
+    "verdict": "intended: the 2.0.0 release notes state that unsupported batch and moderation operations are explicit refusals that fail before network access, because the gateway serves neither route; a clear error replaces a request that could not succeed. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "aa7cc8bb5c0dfac00382fac0a18456163dda5e1c7271429aff6d60850d19b80a"
+  },
+  "SHIM-PY-version-2.0.0": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the agentcc 2.0.0 shim recording against the agentcc 1.0.0 golden",
+    "record": "review-shim-py-version-2.0.0",
+    "verdict": "intended: the compatibility distribution is versioned 2.0.0, a major release, so ~=1.0 users never move. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "d6002aed303fbf6f281e6c4153af1ea2783871c1d21fdef5e7c5864d6186c7b1"
+  },
+  "SHIM-TS-compat-subclass": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-compat-subclass",
+    "verdict": "intended: the legacy client options can only be kept by a subclass over the public SDK client; every 1.0.1 client method stays a method of the client. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "62781243c83b8e88de3923dda7ee02ffb84356f8f8d304917ffd5f51b823de32"
+  },
+  "SHIM-TS-declaration-layout": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-declaration-layout",
+    "verdict": "intended: the 2.0.0 shim re-exports the SDK's declarations and keeps the 1.0.1 export keys; files under dist/ are not reachable through the exports map, so they are not API. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "8b44414c1a25e8e41c6f2c73b6ec127efddbc726769dd1245e8a6e4763077bb0"
+  },
+  "SHIM-TS-deprecation-warning": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-deprecation-warning",
+    "verdict": "intended: the 2.0.0 release notes promise one AGENTCC_DEPRECATED warning across the five packages, silenced by AGENTCC_SILENCE_DEPRECATION=1. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "09d1a3845a7189a7cce62232ee240400b34e0d20ed8b7c1e14814b3cbdefb098"
+  },
+  "SHIM-TS-inert-option-warning": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-inert-option-warning",
+    "verdict": "intended: the 2.0.0 release notes keep use() registration-only, with one warning; a caller who relied on middleware learns that it never runs. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "07288c76a0ca6e1f55637ee9fef09ceb0184c8c95c4e4fd1c36bd89a6a636298"
+  },
+  "SHIM-TS-no-hosted-default": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-no-hosted-default",
+    "verdict": "intended: the platform SDK has no hosted base-URL fallback; the shim keeps the 1.0.1 variables it reads and drops only the hosted default. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "f08012d9b58a6535109a0ea019fee5ac9b806552356d1434c740ae7919aff446"
+  },
+  "SHIM-TS-private-client-state": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-private-client-state",
+    "verdict": "intended: private fields are not API; the public options behave as in 1.0.1. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "4078c8de03b2f5f6f662cbd5d2e87ef592b33ae025ccb0130e911dc384a5ebb1"
+  },
+  "SHIM-TS-unserved-resources": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-unserved-resources",
+    "verdict": "intended: the 2.0.0 release notes state that batch and moderation calls raise the shared AgentCCError before any network request, because the gateway serves neither route. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "ac5833da367857b7868966347ae939888d6f64d06458652f4bfa9c6fa6bda48d"
+  },
+  "SHIM-TS-version-2.0.0": {
+   "reviewer": {
+    "by": "Claude Opus 5.5 difference review of the @agentcc/client 2.0.0 shim recording against the @agentcc/client 1.0.1 golden",
+    "record": "review-shim-ts-version-2.0.0",
+    "verdict": "intended: the 2.0.0 release notes promise a VERSION declaration that matches the 2.0.0 package. 2.0.0 is a major release that ~=1.0 and ^1 users never receive, and the release notes state the change. Not release acceptance."
+   },
+   "contract_sha256": "eba30ab5cae5f318a7482106e619da260643f4e962bb186b94099839ee27d610"
+  }
+ }
+}

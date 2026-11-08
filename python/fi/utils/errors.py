@@ -10,31 +10,9 @@ from .constants import (
 from .types import Environments, ModelTypes
 
 
-class SDKException(Exception):
-    """Base exception for all SDK errors."""
-
-    def __init__(self, message: Optional[str] = None, cause: Optional[Exception] = None) -> None:
-        self.custom_message = message  # Store custom message if provided
-        self.__cause__ = cause
-        super().__init__(message or self.get_message()) # Use get_message if no specific message is passed
-
-    def __str__(self) -> str:
-        """Default string representation for all exceptions."""
-        # If a specific message was passed to constructor, use it. Otherwise, use get_message().
-        return self.custom_message or self.get_message()
-
-    def get_message(self) -> str:
-        """Return a human-readable error message. Subclasses should override this."""
-        if self.__cause__:
-            return f"An SDK error occurred, caused by: {self.__cause__}"
-        return "An unknown error occurred in the SDK."
-
-    def get_error_code(self) -> str:
-        """Return a machine-readable error code. Subclasses should override this."""
-        return "UNKNOWN_SDK_ERROR"
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(message='{self.get_message()}', code='{self.get_error_code()}')"
+# SDKException lives in fi._sdk_exception (no fi.utils import there).
+from fi._sdk_exception import SDKException  # noqa: E402,F401
+from fi.errors import RateLimitError as _CoreRateLimitError, ServerError as _CoreServerError
 
 
 # Custom Dataset Exceptions
@@ -89,8 +67,13 @@ class DatasetValidationError(DatasetError):  # For 400
         return "Invalid_Dataset_Validation"
 
 
-class RateLimitError(DatasetError):  # For 429
-    """Raised when API rate limits are exceeded."""
+class RateLimitError(_CoreRateLimitError, DatasetError):  # For 429
+    """Dataset rate limit, also catchable as fi.errors.RateLimitError while SDK-owned."""
+
+    def __init__(self, message: Optional[str] = None, cause: Optional[Exception] = None) -> None:
+        # Legacy calls carry no response metadata; 429 is the nominal category.
+        _CoreRateLimitError.__init__(self, 429, None, message=message or self.get_message())
+        SDKException.__init__(self, message, cause)  # Preserve legacy args, custom_message and cause.
 
     def get_message(self) -> str:
         return "Rate Limit Exceeded, please contact FutureAGI support at support@futureagi.com or check your current plan."
@@ -102,8 +85,13 @@ class RateLimitError(DatasetError):  # For 429
         return "Rate_Limit_Exceeded"
 
 
-class ServerError(DatasetError):  # For 500 and other 5xx
-    """Raised for server-side errors."""
+class ServerError(_CoreServerError, DatasetError):  # For 500 and other 5xx
+    """Dataset server error, also catchable as fi.errors.ServerError while SDK-owned."""
+
+    def __init__(self, message: Optional[str] = None, cause: Optional[Exception] = None) -> None:
+        # 500 is nominal, not an observed response status: the legacy signature has none.
+        _CoreServerError.__init__(self, 500, None, message=message or self.get_message())
+        SDKException.__init__(self, message, cause)  # Keep copy/pickle's one-message reconstruction.
 
     def get_message(self) -> str:
         return "Internal Server Error, please contact FutureAGI support at support@futureagi.com."
@@ -163,34 +151,11 @@ class ServiceUnavailableError(DatasetError):  # For 503
         return "Service_Unavailable"
 
 
-class MissingAuthError(SDKException):
-    def __init__(self, fi_api_key: Optional[str], fi_secret_key: Optional[str], cause: Optional[Exception] = None) -> None:
-        self.missing_api_key = fi_api_key is None
-        self.missing_secret_key = fi_secret_key is None
-        super().__init__(cause=cause)
-
-    def get_message(self) -> str:
-        missing_list = []
-        if self.missing_api_key:
-            missing_list.append("'fi_api_key'")
-        if self.missing_secret_key:
-            missing_list.append("'fi_secret_key'")
-
-        return (
-            "FI Client could not obtain credentials. You can pass your fi_api_key and fi_secret_key "
-            "directly to the FI Client, or you can set environment variables which will be read if the "
-            "keys are not directly passed. "
-            "To set the environment variables use the following variable names: \n"
-            f" - {API_KEY_ENVVAR_NAME} for the api key\n"
-            f" - {SECRET_KEY_ENVVAR_NAME} for the secret key\n"
-            f"Missing: {', '.join(missing_list)}"
-        )
-
-    def get_error_code(self) -> str:
-        return "MISSING_FI_CLIENT_AUTHENTICATION"
-    
-    def __repr__(self) -> str: # Custom repr might be useful here
-        return f"MissingAuthError(missing_api_key={self.missing_api_key}, missing_secret_key={self.missing_secret_key})"
+# MissingAuthError lives in fi._credentials (the clients raise it without importing fi.utils).
+# Re-exported here, so existing imports get the same class, but only while this file is
+# the fi/utils/errors.py on disk: agent-learning-kit and ai-evaluation ship their own, with their
+# own MissingAuthError. Catch fi.errors.AuthError to be sure.
+from fi._credentials import MissingAuthError  # noqa: E402,F401
 
 
 class InvalidAuthError(SDKException):

@@ -10,6 +10,9 @@ Tests mock the HTTP layer (HttpClient.request) to verify:
 """
 
 import json
+import uuid
+import warnings
+
 import pytest
 from unittest.mock import MagicMock, patch
 
@@ -17,6 +20,7 @@ from fi.api.types import HttpMethod
 from fi.queues.client import (
     AnnotationQueue,
     _CsvResponseHandler,
+    _DefaultQueueResponseHandler,
     _DictResponseHandler,
     _QueueResponseHandler,
     _QueueListResponseHandler,
@@ -27,6 +31,7 @@ from fi.queues.client import (
 )
 from fi.queues.types import (
     AddItemsResponse,
+    DefaultQueue,
     ExportToDatasetResponse,
     ImportAnnotationsResponse,
     QueueAgreement,
@@ -75,6 +80,20 @@ def mock_request(client):
     """Patch the client's request method to capture calls."""
     with patch.object(client, "request") as m:
         yield m
+
+
+def test_default_queue_is_exported_from_fi():
+    # The name is spelled out on purpose. When this branch merges with the shared base, whose
+    # fi/__init__.py resolves names lazily from a _LAZY map and builds __all__ from that map,
+    # the merge must add "DefaultQueue": "fi.queues" to _LAZY. A test that iterates fi.__all__
+    # cannot notice a missing entry, because __all__ comes from the same map.
+    import fi
+    from fi import DefaultQueue as exported
+    from fi.queues import DefaultQueue as defined
+
+    assert exported is defined
+    assert "DefaultQueue" in fi.__all__
+    assert "DefaultQueue" in dir(fi)
 
 
 # ===========================================================================
@@ -234,26 +253,149 @@ class TestQueueCRUD:
         mock_request.return_value = QueueDetail(id="q1", name="Test")
         result = client.create(
             name="Test",
+            label_ids=["lbl-1", uuid.UUID(int=2)],
             description="A test queue",
             instructions="Rate quality",
             assignment_strategy="round_robin",
             annotations_required=2,
+            auto_assign=True,
+            annotator_ids=["u1"],
+            annotator_roles={"u1": ("reviewer", "annotator")},
         )
         mock_request.assert_called_once()
         config = mock_request.call_args[0][0]
         assert config.method == HttpMethod.POST
         assert "annotation-queues/" in config.url
         assert config.json["name"] == "Test"
+        assert config.json["label_ids"] == ["lbl-1", str(uuid.UUID(int=2))]
         assert config.json["description"] == "A test queue"
         assert config.json["assignment_strategy"] == "round_robin"
         assert config.json["annotations_required"] == 2
+        assert config.json["auto_assign"] is True
+        assert config.json["annotator_ids"] == ["u1"]
+        assert config.json["annotator_roles"] == {"u1": ["reviewer", "annotator"]}
         assert result.id == "q1"
 
     def test_create_minimal(self, client, mock_request):
         mock_request.return_value = QueueDetail(id="q2", name="Min")
-        client.create(name="Min")
+        client.create(name="Min", label_ids=["lbl-1"])
         config = mock_request.call_args[0][0]
-        assert config.json == {"name": "Min"}
+        assert config.json == {"name": "Min", "label_ids": ["lbl-1"]}
+
+    def test_create_requires_label_ids(self, client, mock_request):
+        with pytest.warns(DeprecationWarning, match="label_ids will be required"), pytest.raises(ValueError, match="exactly one"):
+            client.create(name="No labels")
+        with pytest.raises(ValueError, match="at least one annotation label id"):
+            client.create(name="No labels", label_ids=[])
+        with pytest.raises(TypeError, match="list of id strings"):
+            client.create(name="One string", label_ids="lbl-1")
+        with pytest.raises(TypeError, match="non-empty id strings"):
+            client.create(name="Blank id", label_ids=[""])
+        with pytest.raises(ValueError, match="label_ids is required"):
+            client.create(name="None labels", label_ids=None)
+        mock_request.assert_not_called()
+
+    def test_create_refuses_a_null_name(self, client, mock_request):
+        with pytest.raises(ValueError, match=r"^AnnotationQueue.create\(\): name is required"):
+            client.create(name=None, label_ids=["lbl-1"])
+        with pytest.raises(ValueError, match="name and label_ids are required"):
+            client.create(None, label_ids=None)
+        mock_request.assert_not_called()
+
+    def test_create_ignored_scope_fields_warn_and_are_not_sent(self, client, mock_request):
+        mock_request.return_value = QueueDetail(id="q3", name="Scoped")
+        with pytest.warns(DeprecationWarning) as caught:
+            client.create(
+                name="Scoped",
+                label_ids=["lbl-1"],
+                project="p1",
+                dataset="d1",
+                agent_definition="a1",
+            )
+        assert len(caught) == 1
+        message = str(caught[0].message)
+        assert "ignored by the server" in message
+        assert "remain accepted for compatibility" in message
+        # The hint is a call on this client, not a raw endpoint.
+        assert "AnnotationQueue.get_or_create_default(project_id=...)" in message
+        assert "/model-hub/" not in message
+        assert caught[0].filename == __file__
+        assert mock_request.call_args[0][0].json == {"name": "Scoped", "label_ids": ["lbl-1"]}
+
+    def test_create_without_scope_fields_does_not_warn(self, client, mock_request):
+        mock_request.return_value = QueueDetail(id="q4", name="Plain")
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            client.create(name="Plain", label_ids=["lbl-1"])
+
+    @pytest.mark.parametrize(
+        "argument", ["project_id", "dataset_id", "agent_definition_id"]
+    )
+    def test_get_or_create_default(self, client, mock_request, argument):
+        scope_id = uuid.UUID(int=7)
+        mock_request.return_value = DefaultQueue(
+            queue=QueueDetail(id="q5", name="Default - P", is_default=True),
+            created=True,
+            action="created",
+        )
+        result = client.get_or_create_default(**{argument: scope_id})
+        config = mock_request.call_args[0][0]
+        assert config.method == HttpMethod.POST
+        assert config.url.endswith("/model-hub/annotation-queues/get-or-create-default/")
+        assert config.json == {argument: str(scope_id)}
+        assert mock_request.call_args[0][1] is _DefaultQueueResponseHandler
+        assert result.queue.is_default is True
+
+    @pytest.mark.parametrize(
+        "scope, error, match",
+        [
+            ({}, ValueError, "exactly one of project_id, dataset_id or agent_definition_id"),
+            ({"project_id": "p1", "dataset_id": "d1"}, ValueError, "got dataset_id, project_id"),
+            ({"project_id": ""}, TypeError, "non-empty id string or UUID"),
+            ({"dataset_id": 7}, TypeError, "non-empty id string or UUID"),
+        ],
+    )
+    def test_get_or_create_default_needs_exactly_one_id(
+        self, client, mock_request, scope, error, match
+    ):
+        with pytest.raises(error, match=match):
+            client.get_or_create_default(**scope)
+        mock_request.assert_not_called()
+
+    def test_default_queue_response_handler_parses_the_envelope(self):
+        label = {
+            "id": "lbl-1",
+            "name": "Helpful",
+            "type": "thumbs_up_down",
+            "settings": {},
+            "description": "",
+            "allow_notes": False,
+            "required": False,
+            "order": 0,
+        }
+        resp = _mock_response(
+            {
+                "status": True,
+                "result": {
+                    "queue": {
+                        "id": "q6",
+                        "name": "Default - Orders",
+                        "description": "",
+                        "instructions": "",
+                        "status": "active",
+                        "is_default": True,
+                    },
+                    "labels": [label],
+                    "created": False,
+                    "action": "restored",
+                },
+            }
+        )
+        result = _DefaultQueueResponseHandler._parse_success(resp)
+        assert isinstance(result, DefaultQueue)
+        assert result.queue.id == "q6" and result.queue.is_default is True
+        assert result.labels == [label]
+        assert (result.created, result.action) == (False, "restored")
 
     def test_list_queues(self, client, mock_request):
         mock_request.return_value = [QueueDetail(id="q1", name="A")]
@@ -262,6 +404,8 @@ class TestQueueCRUD:
         assert config.method == HttpMethod.GET
         assert config.params["status"] == "active"
         assert config.params["search"] == "test"
+        assert config.params["page"] == 1
+        assert "page_size" not in config.params
         assert len(result) == 1
 
     def test_get(self, client, mock_request):
@@ -371,7 +515,7 @@ class TestItems:
         assert config.method == HttpMethod.GET
         assert config.params["status"] == "pending"
         assert config.params["page"] == 2
-        assert config.params["page_size"] == 10
+        assert config.params["limit"] == 10
 
     def test_remove_items(self, client, mock_request):
         mock_request.return_value = {"removed": 2}

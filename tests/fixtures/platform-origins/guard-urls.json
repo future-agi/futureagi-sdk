@@ -1,0 +1,261 @@
+{
+ "about": "The platform host guard's verdict for each FI_PLATFORM_BASE_URL, with the key pair from arguments (so the origin comes from another source and the guard applies). Python (python/tests/core/test_origins.py) and TypeScript (src/_core/__tests__/origins.test.ts) both read this file and must give the same verdict. allow: the keys may go there; refuse:host: HostNotAllowedError; refuse:invalid: PlatformNotConfiguredError (invalid_platform_url).",
+ "cases": [
+  {
+   "url": "https://api.futureagi.com/omega/api",
+   "verdict": "allow"
+  },
+  {
+   "url": "https://futureagi.com",
+   "verdict": "allow"
+  },
+  {
+   "url": "https://FUTUREAGI.COM.",
+   "verdict": "allow"
+  },
+  {
+   "url": "https://API.FutureAGI.com./omega/api",
+   "verdict": "allow"
+  },
+  {
+   "url": "HTTPS://api.futureagi.com/omega/api",
+   "verdict": "allow"
+  },
+  {
+   "url": "https://a.b.futureagi.com/omega/api/",
+   "verdict": "allow"
+  },
+  {
+   "url": "https://api.futureagi.com:8443",
+   "verdict": "allow"
+  },
+  {
+   "url": "https://staging.futureagi.com/omega/api",
+   "verdict": "allow"
+  },
+  {
+   "url": "https://evilfutureagi.com",
+   "verdict": "refuse:host"
+  },
+  {
+   "url": "https://futureagi.com.evil.com",
+   "verdict": "refuse:host"
+  },
+  {
+   "url": "https://futureagi.co",
+   "verdict": "refuse:host"
+  },
+  {
+   "url": "https://xn--fturagi-xxa.com",
+   "verdict": "refuse:host"
+  },
+  {
+   "url": "https://f\u00fcturagi.com",
+   "verdict": "refuse:host"
+  },
+  {
+   "url": "https://f\u00fatureagi.com/omega/api",
+   "verdict": "refuse:host"
+  },
+  {
+   "url": "https://futureagi.com\u3002evil.com",
+   "verdict": "refuse:host"
+  },
+  {
+   "url": "https://evil.com/.futureagi.com",
+   "verdict": "refuse:host"
+  },
+  {
+   "url": "https://evil\uff0ecom.futureagi.com",
+   "verdict": "allow"
+  },
+  {
+   "url": "https://futureagi\uff0ecom",
+   "verdict": "allow"
+  },
+  {
+   "url": "https://evil.com\uff0efutureagi\uff0ecom",
+   "verdict": "allow"
+  },
+  {
+   "url": "https://evil.com\u3002futureagi.com",
+   "verdict": "allow"
+  },
+  {
+   "url": "http://api.futureagi.com",
+   "verdict": "refuse:host"
+  },
+  {
+   "url": "http://evil.com",
+   "verdict": "refuse:host"
+  },
+  {
+   "url": "https://evil.com",
+   "verdict": "refuse:host"
+  },
+  {
+   "url": "https://evil.com#.futureagi.com",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://evil.com?.futureagi.com",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://api.futureagi.com@evil.com",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://user:pw@api.futureagi.com",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "ftp://api.futureagi.com",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https:evil.com",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https:/evil.com",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https:///evil.com",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "not a url",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://futureagi.com:abc",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://evil.com\\@api.futureagi.com",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://evil.com\\.futureagi.com",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://evil.com%2f.futureagi.com",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://evil.com%2e.futureagi.com",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": " https://evil.com",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://evil.com ",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://\tevil.com",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://api.futureagi.com\t",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://evil.com\n.futureagi.com",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://api.futureagi.com/omega/api\r",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://api.futureagi.com\u0000",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://api.futureagi.com\u007f",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "http://127.0.0.1:9",
+   "verdict": "allow"
+  },
+  {
+   "url": "http://127.0.0.1:18700/omega/api",
+   "verdict": "allow"
+  },
+  {
+   "url": "http://127.0.0.1.",
+   "verdict": "allow"
+  },
+  {
+   "url": "http://[::1]:9",
+   "verdict": "allow"
+  },
+  {
+   "url": "http://[::1]",
+   "verdict": "allow"
+  },
+  {
+   "url": "http://localhost.",
+   "verdict": "allow"
+  },
+  {
+   "url": "http://localhost:8080/x",
+   "verdict": "allow"
+  },
+  {
+   "url": "http://LOCALHOST",
+   "verdict": "allow"
+  },
+  {
+   "url": "http://127.0.0.1.nip.io",
+   "verdict": "refuse:host"
+  },
+  {
+   "url": "http://0.0.0.0",
+   "verdict": "refuse:host"
+  },
+  {
+   "url": "http://[::ffff:127.0.0.1]",
+   "verdict": "refuse:host"
+  },
+  {
+   "url": "http://127.1",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "http://2130706433",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "http://0x7f.0.0.1",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "http://127.0.0.01",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "http://017700000001",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "http://\uff11\uff12\uff17.0.0.1",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "http://127.0.0.\uff11",
+   "verdict": "refuse:invalid"
+  },
+  {
+   "url": "https://10.0.0.1.",
+   "verdict": "refuse:host"
+  }
+ ]
+}

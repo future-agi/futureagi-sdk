@@ -1,0 +1,66 @@
+{
+  "source_head": "d502de895f0add84ed2eaacd4bb6b24287935a25",
+  "source_repository": "future-agi/futureagi",
+  "verified_source_head": "0e70e24255bbe43390bbb287b1350c048f860cf9",
+  "legacy_surfaces": [
+    {
+      "python": "Dataset.add_evaluation",
+      "typescript": "Dataset.addEvaluation",
+      "path": "/model-hub/develops/{dataset_id}/add_user_eval/",
+      "gate": "tfc/ee_gates.py:192-270",
+      "error_contract": "DatasetError is retained for HTTP 402 ENTITLEMENT_DENIED; the FutureAGIClient EvalsClient alternatives raise PaymentRequiredError."
+    },
+    {
+      "python": "EvalTemplateManager.run_playground",
+      "typescript": null,
+      "path": "/model-hub/eval-playground/",
+      "gate": "model_hub/views/separate_evals.py:6941-6961; tfc/ee_gates.py:192-270",
+      "error_contract": "The legacy Exception contract is retained for HTTP 402 ENTITLEMENT_DENIED; this is not LicenseRequiredError.",
+      "sdk_sources": [
+        "python/fi/evals/_manager_eval_template_manager_get_template_charts.py:58-130",
+        "python/fi/evals/manager.py:56-89",
+        "python/fi/utils/routes.py:60",
+        "typescript/futureagi/src/utils/routes.ts (no eval_playground route)",
+        "typescript/futureagi/src/index.ts (no EvalTemplateManager export)"
+      ]
+    }
+  ],
+  "gates": [
+    {
+      "feature": "error_feed",
+      "path_prefix": "/tracer/feed/issues/",
+      "sources": [
+        "tracer/views/feed/_permissions.py:11-24",
+        "tracer/views/feed/list_view.py:40,87",
+        "tracer/views/feed/detail_view.py:42,113",
+        "tracer/views/feed/tab_views.py:65,98,132,160,196,238",
+        "tracer/views/feed/linear_issue_view.py:154",
+        "tracer/urls.py:291-343",
+        "tfc/capabilities/registry.py:160-167",
+        "tfc/capabilities/service.py:317-324"
+      ],
+      "documentation": "Requires an Enterprise licence on self-hosted servers, or an eligible cloud plan. Through FutureAGIClient, raises LicenseRequiredError for HTTP 402 LICENSE_MISSING when this server has no licence. Ask the server administrator to configure a licence that includes error_feed. Other HTTP 402 denials raise PaymentRequiredError."
+    },
+    {
+      "feature": "turing_models",
+      "paths": [
+        "/model-hub/develops/{dataset_id}/add_user_eval/",
+        "/model-hub/develops/{dataset_id}/edit_and_run_user_eval/{eval_id}/"
+      ],
+      "sources": [
+        "model_hub/views/develop_dataset.py:8977-8990,9405-9418",
+        "model_hub/urls.py:921-924,961-964",
+        "tfc/ee_gates.py:139-168,192-235,238-270"
+      ],
+      "documentation": "Selecting Turing/Protect models requires an Enterprise licence including those models on self-hosted servers; cloud plan checks are separate. On a self-hosted model-gate denial, FutureAGIClient raises PaymentRequiredError (HTTP 402 ENTITLEMENT_DENIED), not LicenseRequiredError. Select another model or ask the server administrator to enable the licensed models. Code evaluations are exempt from this model gate."
+    }
+  ],
+  "inventory_notes": [
+    "The pinned public SDK exposes 12 error-feed HTTP operations and three tracing convenience methods (issues, issue, issue_stats/issueStats). The raw generated clients retain their own error contracts; the typed exceptions documented here apply when used through FutureAGIClient.",
+    "The two conditional dataset user-eval operations also have EvalsClient convenience methods. AsyncFutureAGIClient does not expose those legacy EvalsClient methods.",
+    "tfc/capabilities/registry.py:31-35,89-123,160-167 identifies only falcon_ai, turing_models, protect and error_feed as oss_locked. service.py:165-182 allows other paid capabilities on self-hosted servers without a licence; do not mislabel voice simulation, optimization, synthetic data or agreement metrics as licence-required.",
+    "ee/usage/middleware/ee.py:23-27 gates /api/scim/, /api/audit-logs/ and /falcon-ai/. None is exposed by this SDK's pinned operation tables or public wrappers (scripts/build-sdk-openapi.sh:36). Falcon WebSocket consumers are not SDK HTTP methods.",
+    "tracer/views/alerts.py:300-360,404-454 and tracer/views/shared_link.py:386 also gate error-feed alerts and shared links. /tracer/alerts/, /tracer/shared/ and /tracer/feed/integrations/linear/teams/ are not exposed by the pinned SDK. /tracer/user-alerts/ is the separate metric-monitor API and must not be marked as error-feed-only.",
+    "model_hub/views/run_prompt.py:1054-1060 and separate_evals.py:6951-6961,8050-8060 gate Turing selections at /model-hub/run-prompt/, /model-hub/eval-playground/ and /model-hub/test-evaluation/; none is present in the pinned generated operation tables. Python's legacy EvalTemplateManager.run_playground does expose /model-hub/eval-playground/ (model_hub/urls.py:1072), documented separately above; there is no TS counterpart. The two develops routes above are present in both generated SDKs and in convenience/legacy clients."
+  ]
+}

@@ -16,6 +16,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 from typing_extensions import Literal
+from fi.gateway._deprecation import deprecated
 
 # Re-export the dataclass-based config classes as the primary API
 from fi.gateway._gateway_config import (
@@ -40,6 +41,7 @@ from fi.gateway._gateway_config import (
 # ---------------------------------------------------------------------------
 
 
+@deprecated
 class Target(BaseModel):
     """A single routing target (provider + optional model)."""
 
@@ -49,6 +51,7 @@ class Target(BaseModel):
     virtual_key: str | None = None
 
 
+@deprecated
 class LoadBalanceStrategy(BaseModel):
     """Load-balance strategy across multiple targets."""
 
@@ -76,6 +79,7 @@ class LoadBalanceStrategy(BaseModel):
                 raise ValueError(msg)
 
 
+@deprecated
 class FallbackStrategy(BaseModel):
     """Ordered list of fallback targets."""
 
@@ -83,6 +87,7 @@ class FallbackStrategy(BaseModel):
     on_status_codes: list[int] = Field(default=[429, 500, 502, 503, 504])
 
 
+@deprecated
 class RetryConfig(BaseModel):
     """Client-side retry configuration sent to the gateway."""
 
@@ -94,6 +99,7 @@ class RetryConfig(BaseModel):
     respect_retry_after: bool = True
 
 
+@deprecated
 class CacheConfig(BaseModel):
     """Caching configuration sent to the gateway."""
 
@@ -105,6 +111,7 @@ class CacheConfig(BaseModel):
     force_refresh: bool = False
 
 
+@deprecated
 class GuardrailRule(BaseModel):
     """A single guardrail rule."""
 
@@ -113,6 +120,7 @@ class GuardrailRule(BaseModel):
     threshold: float = Field(default=0.8, ge=0.0, le=1.0)
 
 
+@deprecated
 class GuardrailConfig(BaseModel):
     """Pre- and post-request guardrail rules."""
 
@@ -120,6 +128,7 @@ class GuardrailConfig(BaseModel):
     post: list[GuardrailRule] = Field(default_factory=list)
 
 
+@deprecated
 class RouteCondition(BaseModel):
     """A single condition for conditional routing."""
 
@@ -131,6 +140,7 @@ class RouteCondition(BaseModel):
     value: str | int | float | bool | list[str]
 
 
+@deprecated
 class ConditionalRoute(BaseModel):
     """A target selected when a condition matches."""
 
@@ -138,6 +148,7 @@ class ConditionalRoute(BaseModel):
     target: Target
 
 
+@deprecated
 class GatewayConfig(BaseModel):
     """Top-level gateway configuration object (Pydantic version).
 
@@ -153,10 +164,16 @@ class GatewayConfig(BaseModel):
     conditional_routes: list[ConditionalRoute] | None = None
 
     def to_headers(self) -> dict[str, str]:
-        """Emit gateway configuration as HTTP headers."""
-        headers: dict[str, str] = {}
+        """Serialize the deprecated Pydantic config exactly as the released API did."""
+        import warnings
 
-        # Simple cache headers
+        warnings.warn(
+            "The Pydantic gateway config API is deprecated. Legacy fields are "
+            "serialized as released; backend support is not guaranteed. "
+            "Check response config_ignored for unsupported overrides.",
+            DeprecationWarning, stacklevel=2,
+        )
+        headers: dict[str, str] = {}
         if self.cache is not None:
             if self.cache.ttl != "1h":
                 headers["x-agentcc-cache-ttl"] = self.cache.ttl
@@ -166,27 +183,17 @@ class GatewayConfig(BaseModel):
                 headers["x-agentcc-cache-force-refresh"] = "true"
             if not self.cache.enabled:
                 headers["x-agentcc-cache-enabled"] = "false"
-
-        # Complex config -> single JSON header
         complex_config: dict[str, Any] = {}
-        if self.routing is not None:
-            complex_config["routing"] = self.routing.model_dump(exclude_none=True)
-        if self.fallback is not None:
-            complex_config["fallback"] = self.fallback.model_dump(exclude_none=True)
-        if self.retry is not None:
-            complex_config["retry"] = self.retry.model_dump(exclude_none=True)
-        if self.cache is not None:
-            complex_config["cache"] = self.cache.model_dump(exclude_none=True)
-        if self.guardrails is not None:
-            complex_config["guardrails"] = self.guardrails.model_dump(exclude_none=True)
+        for name in ("routing", "fallback", "retry", "cache", "guardrails"):
+            value = getattr(self, name)
+            if value is not None:
+                complex_config[name] = value.model_dump(exclude_none=True)
         if self.conditional_routes:
             complex_config["conditional_routes"] = [
-                cr.model_dump(exclude_none=True) for cr in self.conditional_routes
+                route.model_dump(exclude_none=True) for route in self.conditional_routes
             ]
-
         if complex_config:
             headers["x-agentcc-config"] = json.dumps(complex_config, separators=(",", ":"))
-
         return headers
 
     def to_json(self) -> str:

@@ -1,0 +1,618 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "platform",
+  "about": "Agents: the roster, create, update, revisions, drafts, releases and rollbacks.",
+  "cases": [
+    {
+      "id": "platform.workforce.get",
+      "title": "Read the workforce (agents and teams)",
+      "sdk": {
+        "family": "platform",
+        "method": "agents.roster"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/workforce"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "agents": "array"
+        }
+      }
+    },
+    {
+      "id": "platform.agents.create",
+      "title": "Create an agent",
+      "sdk": {
+        "family": "platform",
+        "method": "agents.create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/workforce/agents"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "call": {
+        "body": {
+          "name": "Conformance agent ${run.short}",
+          "role": "Conformance",
+          "purpose": "An SDK conformance fixture agent.",
+          "responsibilities": [
+            "Reply in one short sentence"
+          ],
+          "workMode": "on_demand",
+          "connectorBindingIds": []
+        }
+      },
+      "args": {
+        "name": "Conformance agent ${run.short}",
+        "role": "Conformance",
+        "purpose": "An SDK conformance fixture agent.",
+        "responsibilities": [
+          "Reply in one short sentence"
+        ],
+        "workMode": "on_demand",
+        "connectorBindingIds": []
+      },
+      "expect": {
+        "status": 201,
+        "contract": true,
+        "fields": {
+          "agent.id": "string"
+        }
+      },
+      "capture": {
+        "agent": "agent.id"
+      },
+      "cleanup": [
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/workforce/agents/{id}"
+          },
+          "params": {
+            "id": "${cap.agent}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "platform.agents.create.missing-fields",
+      "title": "An agent without its required fields is a typed 400",
+      "sdk": {
+        "family": "platform",
+        "method": "agents.create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/workforce/agents"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "body": {
+          "name": "half an agent"
+        },
+        "bodyInvalidOnPurpose": true
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "platform.agents.get",
+      "title": "Get one agent",
+      "sdk": {
+        "family": "platform",
+        "method": "agents.get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/workforce/agents/{id}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "agent"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.agent}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "agent.id": {
+            "equals": "${res.agent}"
+          }
+        }
+      }
+    },
+    {
+      "id": "platform.agents.get.cross-tenant",
+      "title": "Org B's credential on org A's agent answers 404, every time",
+      "sdk": {
+        "family": "platform",
+        "method": "agents.get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/workforce/agents/{id}"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "agent"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.agent}"
+        }
+      },
+      "repeat": 20,
+      "expect": {
+        "status": [
+          404,
+          403
+        ],
+        "codePresent": true
+      }
+    },
+    {
+      "id": "platform.agents.update",
+      "title": "Update an agent's purpose",
+      "sdk": {
+        "family": "platform",
+        "method": "agents.update"
+      },
+      "op": {
+        "method": "PATCH",
+        "path": "/workspace/workforce/agents/{id}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "agent"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.agent}"
+        },
+        "body": {
+          "purpose": "An SDK conformance fixture agent (updated)."
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "platform.agents.revisions",
+      "title": "List an agent's revisions",
+      "sdk": {
+        "family": "platform",
+        "method": "agents.revisions"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/workforce/agents/{id}/revisions"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "agent"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.agent}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "platform.agents.deployments",
+      "title": "List an agent's deployments",
+      "sdk": {
+        "family": "platform",
+        "method": "agents.deployments"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/workforce/agents/{id}/deployments"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "agent"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.agent}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "platform.agents.delete",
+      "title": "Delete an agent (admin)",
+      "sdk": {
+        "family": "platform",
+        "method": "agents.retire"
+      },
+      "op": {
+        "method": "DELETE",
+        "path": "/workspace/workforce/agents/{id}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/workforce/agents"
+          },
+          "body": {
+            "name": "Conformance agent ${run.short}",
+            "role": "Conformance",
+            "purpose": "An SDK conformance fixture agent.",
+            "responsibilities": [
+              "Reply in one short sentence"
+            ],
+            "workMode": "on_demand",
+            "connectorBindingIds": []
+          },
+          "capture": {
+            "agent": "agent.id"
+          },
+          "expectStatus": 201
+        }
+      ],
+      "call": {
+        "params": {
+          "id": "${cap.agent}"
+        }
+      },
+      "expect": {
+        "status": [
+          200,
+          204
+        ]
+      }
+    },
+    {
+      "id": "platform.agent-drafts.create",
+      "title": "Draft an agent from a sentence (model-start)",
+      "sdk": {
+        "family": "platform",
+        "method": "agents.draft"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/workforce/agent-drafts"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "call": {
+        "body": {
+          "message": "An agent that summarises pull requests"
+        }
+      },
+      "expect": {
+        "status": [
+          200,
+          503,
+          502
+        ],
+        "contract": true
+      }
+    },
+    {
+      "id": "platform.agents.revisions.rollback",
+      "title": "Roll an agent back to revision 1 (409 when it is already there)",
+      "sdk": {
+        "family": "platform",
+        "method": "agents.rollbackRevision"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/workforce/agents/{id}/revisions/{id}/rollback"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "agent"
+      ],
+      "call": {
+        "params": [
+          "${res.agent}",
+          "1"
+        ],
+        "body": {}
+      },
+      "expect": {
+        "status": [
+          200,
+          409
+        ],
+        "codePresent": false
+      }
+    },
+    {
+      "id": "platform.agents.deployments.rollback.unknown",
+      "title": "Rolling an agent deployment back to a version that does not exist is a typed refusal",
+      "sdk": {
+        "family": "platform",
+        "method": "agents.rollbackDeployment"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/workforce/agents/{id}/deployments/{id}/rollback"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "agent"
+      ],
+      "call": {
+        "params": [
+          "${res.agent}",
+          "999"
+        ],
+        "body": {
+          "expectedDeploymentVersion": 999,
+          "expectedProcessId": "proc-conformance-missing"
+        }
+      },
+      "expect": {
+        "status": [
+          400,
+          404,
+          409
+        ],
+        "codePresent": true
+      }
+    },
+    {
+      "id": "platform.agents.retire.admin",
+      "title": "An admin can retire an agent (route floor: admin, admitted)",
+      "sdk": {
+        "family": "platform",
+        "method": "agents.retire"
+      },
+      "op": {
+        "method": "DELETE",
+        "path": "/workspace/workforce/agents/{id}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "admin"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/workforce/agents"
+          },
+          "body": {
+            "name": "Conformance agent ${run.short}",
+            "role": "Conformance",
+            "purpose": "An SDK conformance fixture agent.",
+            "responsibilities": [
+              "Reply in one short sentence"
+            ],
+            "workMode": "on_demand",
+            "connectorBindingIds": []
+          },
+          "capture": {
+            "agent": "agent.id"
+          },
+          "expectStatus": 201,
+          "as": "caller"
+        }
+      ],
+      "call": {
+        "params": {
+          "id": "${cap.agent}"
+        }
+      },
+      "expect": {
+        "status": [
+          200,
+          204
+        ]
+      }
+    },
+    {
+      "id": "platform.agents.retire.member-refused",
+      "title": "A member cannot retire an agent (route floor: admin)",
+      "sdk": {
+        "family": "platform",
+        "method": "agents.retire"
+      },
+      "op": {
+        "method": "DELETE",
+        "path": "/workspace/workforce/agents/{id}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "member"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "agent"
+      ],
+      "call": {
+        "params": {
+          "id": "${own.agent}"
+        }
+      },
+      "expect": {
+        "status": 403,
+        "errorClass": "PermissionDeniedError",
+        "codePresent": true
+      }
+    }
+  ]
+}

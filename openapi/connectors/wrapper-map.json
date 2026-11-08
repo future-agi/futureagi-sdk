@@ -1,0 +1,559 @@
+{
+  "sources": {
+    "ee": {
+      "source_label": "enterprise customer contract",
+      "source_digest": "sha256:22dd9c640668b15a7c1687d57b7a1f9c4f722177cd168f1c4cf7a3de825a92a1",
+      "slice": "openapi/connectors/ee.json",
+      "slice_sha256": "ca2caa72b1c4af051278660628d7b945269a1b93ee93eacf852867091b4db76d"
+    },
+    "fa": {
+      "source_label": "customer connector contract",
+      "source_digest": "sha256:ffe769065665b10dc7ce8301045adb8c6fe913be9fc1eb437543c92bc2bec9eb",
+      "slice": "openapi/connectors/fa.json",
+      "slice_sha256": "096d3b59667e8cdc3ff7dce038f12fd16b65a898c0c72085857a903317b0cc48"
+    }
+  },
+  "operations": {
+    "connectors.addCustomMcp": {
+      "operation_id": "addWorkspaceCustomMcp",
+      "source": "ee",
+      "feature": "mcp_core",
+      "methods": [
+        {
+          "py": "client.connectors.add_custom_mcp",
+          "ts": "client.connectors.addCustomMcp",
+          "py_args": [
+            "body"
+          ],
+          "ts_args": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "connectors.attach": {
+      "operation_id": "attachWorkspaceIntegrationAgent",
+      "source": "ee",
+      "feature": "mcp_core",
+      "methods": [
+        {
+          "py": "client.connectors.attach",
+          "ts": "client.connectors.attach",
+          "py_args": [
+            "connection_id",
+            "agent_id",
+            "body"
+          ],
+          "ts_args": [
+            "connectionId",
+            "agentId",
+            "body"
+          ]
+        }
+      ]
+    },
+    "connectors.catalog": {
+      "operation_id": "listWorkspaceIntegrations",
+      "source": "ee",
+      "feature": "mcp_core",
+      "methods": [
+        {
+          "py": "client.connectors.catalog",
+          "ts": "client.connectors.catalog",
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "connectors.connect": {
+      "operation_id": "connectWorkspaceIntegrationApp",
+      "source": "ee",
+      "feature": "oauth_connect",
+      "rename": {
+        "from": "connect",
+        "to": "connect_app",
+        "why": "Use the public namespace vocabulary"
+      },
+      "methods": [
+        {
+          "py": "client.connectors.connect_app",
+          "ts": "client.connectors.connectApp",
+          "py_args": [
+            "app_id",
+            "body"
+          ],
+          "ts_args": [
+            "appId",
+            "body"
+          ]
+        }
+      ]
+    },
+    "connectors.detach": {
+      "operation_id": "detachWorkspaceIntegrationAgent",
+      "source": "ee",
+      "feature": "mcp_core",
+      "methods": [
+        {
+          "py": "client.connectors.detach",
+          "ts": "client.connectors.detach",
+          "py_args": [
+            "connection_id",
+            "agent_id"
+          ],
+          "ts_args": [
+            "connectionId",
+            "agentId"
+          ]
+        }
+      ]
+    },
+    "connectors.disconnect": {
+      "operation_id": "deleteWorkspaceIntegrationConnection",
+      "source": "ee",
+      "feature": "mcp_core",
+      "rename": {
+        "from": "disconnect",
+        "to": "delete",
+        "why": "Use the public namespace vocabulary"
+      },
+      "methods": [
+        {
+          "py": "client.connectors.delete",
+          "ts": "client.connectors.delete",
+          "py_args": [
+            "connection_id",
+            "*",
+            "mine"
+          ],
+          "ts_args": [
+            "connectionId",
+            "options.mine"
+          ]
+        }
+      ]
+    },
+    "connectors.get": {
+      "operation_id": "getWorkspaceIntegrationConnection",
+      "source": "ee",
+      "feature": "mcp_core",
+      "methods": [
+        {
+          "py": "client.connectors.get",
+          "ts": "client.connectors.get",
+          "py_args": [
+            "connection_id"
+          ],
+          "ts_args": [
+            "connectionId"
+          ]
+        }
+      ]
+    },
+    "connectors.refreshTools": {
+      "operation_id": "refreshWorkspaceIntegrationTools",
+      "source": "ee",
+      "feature": "mcp_core",
+      "methods": [
+        {
+          "py": "client.connectors.refresh_tools",
+          "ts": "client.connectors.refreshTools",
+          "py_args": [
+            "connection_id"
+          ],
+          "ts_args": [
+            "connectionId"
+          ]
+        }
+      ]
+    },
+    "platform.credentials.bindings": {
+      "operation_id": "listWorkspaceCredentialBindings",
+      "source": "ee",
+      "feature": "credential_reads",
+      "methods": [
+        {
+          "py": "client.credentials.bindings",
+          "ts": "client.credentials.bindings",
+          "py_args": [
+            "credential_id"
+          ],
+          "ts_args": [
+            "credentialId"
+          ]
+        }
+      ]
+    },
+    "platform.credentials.get": {
+      "operation_id": "getWorkspaceCredential",
+      "source": "ee",
+      "feature": "credential_reads",
+      "methods": [
+        {
+          "py": "client.credentials.get",
+          "ts": "client.credentials.get",
+          "py_args": [
+            "credential_id"
+          ],
+          "ts_args": [
+            "credentialId"
+          ]
+        }
+      ]
+    },
+    "platform.credentials.list": {
+      "operation_id": "listWorkspaceCredentials",
+      "source": "ee",
+      "feature": "credential_reads",
+      "methods": [
+        {
+          "py": "client.credentials.list",
+          "ts": "client.credentials.list",
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "integrations_connections_list": {
+      "operation_id": "integrations_connections_list",
+      "source": "fa",
+      "feature": "data_integrations",
+      "rename": {
+        "from": "integrations_connections_list",
+        "to": "list",
+        "why": "Use the public namespace vocabulary"
+      },
+      "methods": [
+        {
+          "py": "client.integrations.list",
+          "ts": "client.integrations.list",
+          "py_args": [
+            "*",
+            "page_number",
+            "page_size"
+          ],
+          "ts_args": [
+            "options.pageNumber",
+            "options.pageSize"
+          ]
+        }
+      ]
+    },
+    "integrations_connections_create": {
+      "operation_id": "integrations_connections_create",
+      "source": "fa",
+      "feature": "data_integrations",
+      "rename": {
+        "from": "integrations_connections_create",
+        "to": "create",
+        "why": "Use the public namespace vocabulary"
+      },
+      "methods": [
+        {
+          "py": "client.integrations.create",
+          "ts": "client.integrations.create",
+          "py_args": [
+            "body"
+          ],
+          "ts_args": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "integrations_connections_validate_credentials": {
+      "operation_id": "integrations_connections_validate_credentials",
+      "source": "fa",
+      "feature": "data_integrations",
+      "rename": {
+        "from": "integrations_connections_validate_credentials",
+        "to": "validate",
+        "why": "Use the public namespace vocabulary"
+      },
+      "methods": [
+        {
+          "py": "client.integrations.validate",
+          "ts": "client.integrations.validate",
+          "py_args": [
+            "body"
+          ],
+          "ts_args": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "integrations_connections_slack_channels_list": {
+      "operation_id": "integrations_connections_slack_channels_list",
+      "source": "fa",
+      "feature": "slack_channels",
+      "rename": {
+        "from": "integrations_connections_slack_channels_list",
+        "to": "slack_channels",
+        "why": "Use the public namespace vocabulary"
+      },
+      "methods": [
+        {
+          "py": "client.integrations.slack_channels",
+          "ts": "client.integrations.slackChannels",
+          "py_args": [
+            "connection_id",
+            "*",
+            "cursor"
+          ],
+          "ts_args": [
+            "connectionId",
+            "options.cursor"
+          ]
+        }
+      ]
+    },
+    "integrations_connections_read": {
+      "operation_id": "integrations_connections_read",
+      "source": "fa",
+      "feature": "data_integrations",
+      "rename": {
+        "from": "integrations_connections_read",
+        "to": "get",
+        "why": "Use the public namespace vocabulary"
+      },
+      "methods": [
+        {
+          "py": "client.integrations.get",
+          "ts": "client.integrations.get",
+          "py_args": [
+            "connection_id"
+          ],
+          "ts_args": [
+            "connectionId"
+          ]
+        }
+      ]
+    },
+    "integrations_connections_update": {
+      "operation_id": "integrations_connections_update",
+      "source": "fa",
+      "feature": "data_integrations",
+      "rename": {
+        "from": "integrations_connections_update",
+        "to": "replace",
+        "why": "Use the public namespace vocabulary"
+      },
+      "methods": [
+        {
+          "py": "client.integrations.replace",
+          "ts": "client.integrations.replace",
+          "py_args": [
+            "connection_id",
+            "body"
+          ],
+          "ts_args": [
+            "connectionId",
+            "body"
+          ]
+        }
+      ]
+    },
+    "integrations_connections_partial_update": {
+      "operation_id": "integrations_connections_partial_update",
+      "source": "fa",
+      "feature": "data_integrations",
+      "rename": {
+        "from": "integrations_connections_partial_update",
+        "to": "update",
+        "why": "Use the public namespace vocabulary"
+      },
+      "methods": [
+        {
+          "py": "client.integrations.update",
+          "ts": "client.integrations.update",
+          "py_args": [
+            "connection_id",
+            "body"
+          ],
+          "ts_args": [
+            "connectionId",
+            "body"
+          ]
+        }
+      ]
+    },
+    "integrations_connections_delete": {
+      "operation_id": "integrations_connections_delete",
+      "source": "fa",
+      "feature": "data_integrations",
+      "rename": {
+        "from": "integrations_connections_delete",
+        "to": "delete",
+        "why": "Use the public namespace vocabulary"
+      },
+      "methods": [
+        {
+          "py": "client.integrations.delete",
+          "ts": "client.integrations.delete",
+          "py_args": [
+            "connection_id"
+          ],
+          "ts_args": [
+            "connectionId"
+          ]
+        }
+      ]
+    },
+    "integrations_connections_pause": {
+      "operation_id": "integrations_connections_pause",
+      "source": "fa",
+      "feature": "data_integrations",
+      "rename": {
+        "from": "integrations_connections_pause",
+        "to": "pause",
+        "why": "Use the public namespace vocabulary"
+      },
+      "methods": [
+        {
+          "py": "client.integrations.pause",
+          "ts": "client.integrations.pause",
+          "py_args": [
+            "connection_id"
+          ],
+          "ts_args": [
+            "connectionId"
+          ]
+        }
+      ]
+    },
+    "integrations_connections_resume": {
+      "operation_id": "integrations_connections_resume",
+      "source": "fa",
+      "feature": "data_integrations",
+      "rename": {
+        "from": "integrations_connections_resume",
+        "to": "resume",
+        "why": "Use the public namespace vocabulary"
+      },
+      "methods": [
+        {
+          "py": "client.integrations.resume",
+          "ts": "client.integrations.resume",
+          "py_args": [
+            "connection_id"
+          ],
+          "ts_args": [
+            "connectionId"
+          ]
+        }
+      ]
+    },
+    "integrations_connections_sync_now": {
+      "operation_id": "integrations_connections_sync_now",
+      "source": "fa",
+      "feature": "data_integrations",
+      "rename": {
+        "from": "integrations_connections_sync_now",
+        "to": "sync_now",
+        "why": "Use the public namespace vocabulary"
+      },
+      "methods": [
+        {
+          "py": "client.integrations.sync_now",
+          "ts": "client.integrations.syncNow",
+          "py_args": [
+            "connection_id"
+          ],
+          "ts_args": [
+            "connectionId"
+          ]
+        }
+      ]
+    },
+    "integrations_sync-logs_list": {
+      "operation_id": "integrations_sync-logs_list",
+      "source": "fa",
+      "feature": "data_integrations",
+      "rename": {
+        "from": "integrations_sync-logs_list",
+        "to": "list",
+        "why": "Use the public namespace vocabulary"
+      },
+      "methods": [
+        {
+          "py": "client.integrations.sync_logs.list",
+          "ts": "client.integrations.syncLogs.list",
+          "py_args": [
+            "*",
+            "page_number",
+            "page_size",
+            "connection_id"
+          ],
+          "ts_args": [
+            "options.pageNumber",
+            "options.pageSize",
+            "options.connectionId"
+          ]
+        }
+      ]
+    },
+    "integrations_sync-logs_read": {
+      "operation_id": "integrations_sync-logs_read",
+      "source": "fa",
+      "feature": "data_integrations",
+      "rename": {
+        "from": "integrations_sync-logs_read",
+        "to": "get",
+        "why": "Use the public namespace vocabulary"
+      },
+      "methods": [
+        {
+          "py": "client.integrations.sync_logs.get",
+          "ts": "client.integrations.syncLogs.get",
+          "py_args": [
+            "log_id"
+          ],
+          "ts_args": [
+            "logId"
+          ]
+        }
+      ]
+    },
+    "connectors.completeOAuth": {
+      "unwrapped": "OAuth completion requires the browser",
+      "until": "never",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.credentials.create": {
+      "unwrapped": "Human-only credential mutation in the Console",
+      "until": "never",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.credentials.revoke": {
+      "unwrapped": "Human-only credential mutation in the Console",
+      "until": "never",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.credentials.rotate": {
+      "unwrapped": "Human-only credential mutation in the Console",
+      "until": "never",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "integrations_slack_install_create": {
+      "unwrapped": "Browser OAuth installation",
+      "until": "never",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    }
+  }
+}

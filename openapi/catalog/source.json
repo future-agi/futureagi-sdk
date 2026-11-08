@@ -1,0 +1,3710 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Future AGI Management API",
+    "description": "The endpoints defined below allow users to programmatically carry out various actions on the Future AGI platform.",
+    "termsOfService": "https://futureagi.com/legal",
+    "contact": {
+      "email": "help@futureagi.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "v1"
+  },
+  "basePath": "/",
+  "host": "localhost:8000",
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/accounts/workspaces/": {
+      "get": {
+        "operationId": "accounts_workspaces_list",
+        "description": "Get workspaces for the current organization",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/WorkspaceManagementListResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AccountsErrorResponse"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AccountsErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AccountsErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AccountsErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AccountsErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ],
+        "x-runtime-response-validation": true
+      },
+      "parameters": []
+    },
+    "/accounts/workspaces/{workspace_id}/": {
+      "get": {
+        "operationId": "accounts_workspaces_read",
+        "description": "Get workspaces for the current organization",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/WorkspaceManagementListResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AccountsErrorResponse"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AccountsErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AccountsErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AccountsErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AccountsErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ],
+        "x-runtime-response-validation": true
+      },
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/model-hub/dataset-optimization/": {
+      "get": {
+        "operationId": "model-hub_dataset-optimization_list",
+        "description": "List all dataset optimization runs with table config for dynamic columns.\n\nPagination: page (1-based); limit (page size).",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "column_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "develop_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/DatasetOptimizationList"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ],
+        "x-runtime-request-validation": true
+      },
+      "parameters": [],
+      "post": {
+        "operationId": "model-hub_dataset-optimization_create",
+        "description": "ViewSet for Dataset Optimization Runs.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DatasetOptimizationCreate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DatasetOptimizationCreate"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      }
+    },
+    "/model-hub/dataset-optimization/{id}/": {
+      "get": {
+        "operationId": "model-hub_dataset-optimization_read",
+        "description": "Get run details; payload matches AgentPromptOptimiserRunViewSet.retrieve().",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DatasetOptimizationDetailApiResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "model-hub"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A UUID string identifying this optimize dataset.",
+          "required": true,
+          "type": "string",
+          "format": "uuid"
+        }
+      ]
+    },
+    "/tracer/dashboard/": {
+      "get": {
+        "operationId": "tracer_dashboard_list",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Dashboard"
+              }
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ]
+      },
+      "parameters": [],
+      "post": {
+        "operationId": "tracer_dashboard_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DashboardCreateUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DashboardCreateUpdate"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ]
+      }
+    },
+    "/tracer/dashboard/{id}/": {
+      "get": {
+        "operationId": "tracer_dashboard_read",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DashboardDetail"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "patch": {
+        "operationId": "tracer_dashboard_partial_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DashboardCreateUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DashboardCreateUpdate"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ]
+      },
+      "delete": {
+        "operationId": "tracer_dashboard_delete",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ]
+      }
+    },
+    "/tracer/dashboard/{dashboard_pk}/widgets/": {
+      "get": {
+        "operationId": "tracer_dashboard_widgets_list",
+        "description": "\n\nPagination: limit (page size); page (1-based).",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/DashboardWidget"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "dashboard_pk",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "operationId": "tracer_dashboard_widgets_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DashboardWidget"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DashboardWidget"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ]
+      }
+    },
+    "/tracer/dashboard/{dashboard_pk}/widgets/{id}/": {
+      "get": {
+        "operationId": "tracer_dashboard_widgets_read",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DashboardWidget"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "dashboard_pk",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "patch": {
+        "operationId": "tracer_dashboard_widgets_partial_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DashboardWidget"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DashboardWidget"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ]
+      }
+    },
+    "/tracer/dashboard/{dashboard_pk}/widgets/{id}/query/": {
+      "post": {
+        "operationId": "tracer_dashboard_widgets_execute_query",
+        "description": "Execute the widget's query_config against ClickHouse and return results.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DashboardSampleOptIn"
+            }
+          },
+          {
+            "name": "refresh",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DashboardQueryApiResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "parameters": [
+        {
+          "name": "dashboard_pk",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/tracer/dashboard/query/": {
+      "post": {
+        "operationId": "tracer_dashboard_query",
+        "summary": "Execute a widget query and return chart data.",
+        "description": "Each metric carries a ``source`` field (\"traces\" or \"datasets\").\nMetrics are partitioned by source and dispatched to the appropriate\nquery builder.  Results are merged into a single response.\n\nEach metric is validated against the canonical query contract before\nit reaches any query builder.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DashboardQuery"
+            }
+          },
+          {
+            "name": "refresh",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DashboardQueryApiResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "parameters": []
+    },
+    "/tracer/dashboard/metrics/": {
+      "get": {
+        "operationId": "tracer_dashboard_metrics",
+        "summary": "Return all available metrics across traces and datasets.",
+        "description": "Backward compat: if ``workflow`` param is provided, return only\nthat source's metrics in the old grouped format.\n\nPagination: page (1-based); page_size (page size); cursor_mode (enable cursor pagination); cursor (opaque continuation token).",
+        "parameters": [
+          {
+            "name": "workflow",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "observability",
+              "dataset",
+              "simulation"
+            ]
+          },
+          {
+            "name": "project_ids",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": []
+          },
+          {
+            "name": "agent_definition_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "per_eval_config",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "exclude_custom_attributes",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "",
+            "maxLength": 256
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "system_metric",
+              "eval_metric",
+              "annotation_metric",
+              "custom_attribute",
+              "custom_column"
+            ],
+            "default": ""
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "metric",
+              "dimension"
+            ],
+            "default": ""
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "traces",
+              "spans",
+              "sessions",
+              "users",
+              "voice_calls",
+              "prompts",
+              "datasets",
+              "simulation",
+              "both",
+              "all"
+            ],
+            "default": ""
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "maximum": 200,
+            "minimum": 1
+          },
+          {
+            "name": "cursor_mode",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "maxLength": 262144,
+            "minLength": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DashboardMetricsCatalogResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "parameters": []
+    },
+    "/tracer/dashboard/filter_values/": {
+      "get": {
+        "operationId": "tracer_dashboard_filter_values",
+        "description": "Return distinct values for a given metric/attribute, for filter value picker.\n\nPagination: page_size (page size); cursor (opaque continuation token).",
+        "parameters": [
+          {
+            "name": "property_id",
+            "in": "query",
+            "description": "Stable namespaced property identity returned by the metrics catalog. Legacy metric_name/metric_type remain accepted during migration.",
+            "required": false,
+            "type": "string",
+            "maxLength": 4113,
+            "minLength": 1
+          },
+          {
+            "name": "metric_name",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "name": "metric_type",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "system_metric",
+              "eval_metric",
+              "annotation_metric",
+              "custom_attribute",
+              "custom_column"
+            ]
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "traces",
+              "spans",
+              "sessions",
+              "users",
+              "voice_calls",
+              "prompts",
+              "datasets",
+              "dataset_column",
+              "simulation",
+              "both",
+              "all"
+            ],
+            "default": "traces"
+          },
+          {
+            "name": "project_ids",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": ""
+          },
+          {
+            "name": "dataset_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "",
+            "maxLength": 512
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "maximum": 50,
+            "minimum": 1
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "maxLength": 262144,
+            "minLength": 1
+          },
+          {
+            "name": "attribute_type",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "array",
+              "map",
+              "json"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DashboardFilterValuesResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "parameters": []
+    },
+    "/usage/v2/usage-overview/": {
+      "get": {
+        "operationId": "usage_v2_usage-overview_list",
+        "summary": "Get usage overview for the current billing period.",
+        "description": "Returns per-dimension totals, free allowances, estimated costs,\nand projected month-end usage.\n\nQuery params:\n    period: YYYY-MM (default: current month)\n    workspace_id: optional (filter by workspace)",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}$",
+            "minLength": 1
+          },
+          {
+            "name": "period_end",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}$",
+            "minLength": 1
+          },
+          {
+            "name": "workspace_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UsageOverviewResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UsageErrorResponse"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UsageErrorResponse"
+            }
+          },
+          "402": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UsageErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UsageErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UsageErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UsageErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "usage"
+        ]
+      },
+      "parameters": []
+    }
+  },
+  "definitions": {
+    "WorkspaceManagementListResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/WorkspaceManagementListResult"
+        }
+      }
+    },
+    "WorkspaceManagementListResult": {
+      "required": [
+        "organization",
+        "workspaces",
+        "total"
+      ],
+      "type": "object",
+      "properties": {
+        "organization": {
+          "title": "Organization",
+          "type": "string",
+          "minLength": 1
+        },
+        "workspaces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WorkspaceManagementItem"
+          }
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      }
+    },
+    "WorkspaceManagementItem": {
+      "required": [
+        "id",
+        "name",
+        "display_name",
+        "description",
+        "is_default",
+        "member_count",
+        "created_at",
+        "created_by"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "display_name": {
+          "title": "Display name",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "is_default": {
+          "title": "Is default",
+          "type": "boolean"
+        },
+        "member_count": {
+          "title": "Member count",
+          "type": "integer"
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "minLength": 1
+        },
+        "created_by": {
+          "title": "Created by",
+          "type": "string",
+          "x-nullable": true
+        }
+      }
+    },
+    "AccountsErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "x-nullable": true
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string",
+          "x-nullable": true
+        },
+        "result": {
+          "title": "Result",
+          "type": "object",
+          "x-nullable": true,
+          "description": "String error message or structured account/login error metadata.",
+          "x-string-or-object": true,
+          "properties": {
+            "error": {
+              "type": "string"
+            },
+            "error_code": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "blocked": {
+              "type": "boolean"
+            },
+            "remaining_attempts": {
+              "type": "integer"
+            },
+            "block_time": {
+              "type": "integer"
+            },
+            "block_time_remaining": {
+              "type": "integer"
+            }
+          }
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "title": "Details",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "ManagementAPIErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "x-nullable": true
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string",
+          "x-nullable": true
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "title": "Details",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "DatasetOptimizationList": {
+      "required": [
+        "optimization_name",
+        "started_at"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "optimization_name": {
+          "title": "Optimization name",
+          "type": "string",
+          "minLength": 1
+        },
+        "started_at": {
+          "title": "Started at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "trial_count": {
+          "title": "Trial count",
+          "type": "string",
+          "readOnly": true
+        },
+        "optimizer_algorithm": {
+          "title": "Optimizer algorithm",
+          "type": "string",
+          "enum": [
+            "random_search",
+            "bayesian",
+            "metaprompt",
+            "protegi",
+            "promptwizard",
+            "gepa"
+          ],
+          "x-nullable": true
+        },
+        "optimizer_model_id": {
+          "title": "Optimizer model id",
+          "type": "string",
+          "readOnly": true
+        },
+        "model_deprecated": {
+          "title": "Model deprecated",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "column_id": {
+          "title": "Column id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "enum": [
+            "not_started",
+            "pending",
+            "running",
+            "completed",
+            "failed",
+            "cancelled"
+          ]
+        },
+        "error_message": {
+          "title": "Error message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "optimizer_config": {
+          "title": "Optimizer config",
+          "description": "Optimizer-specific configuration (num_trials, etc.)",
+          "type": "object",
+          "x-nullable": true
+        },
+        "best_score": {
+          "title": "Best score",
+          "type": "number",
+          "x-nullable": true
+        },
+        "baseline_score": {
+          "title": "Baseline score",
+          "type": "number",
+          "x-nullable": true
+        }
+      }
+    },
+    "DatasetOptimizationCreate": {
+      "required": [
+        "name",
+        "column_id",
+        "optimizer_algorithm"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "column_id": {
+          "title": "Column id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "optimizer_algorithm": {
+          "title": "Optimizer algorithm",
+          "type": "string",
+          "enum": [
+            "random_search",
+            "bayesian",
+            "metaprompt",
+            "protegi",
+            "promptwizard",
+            "gepa"
+          ]
+        },
+        "optimizer_model_id": {
+          "title": "Optimizer model id",
+          "type": "string"
+        },
+        "optimizer_config": {
+          "title": "Optimizer config",
+          "description": "Optimizer-specific configuration (num_trials, etc.)",
+          "type": "object",
+          "x-nullable": true
+        },
+        "user_eval_template_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "default": []
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    },
+    "DatasetOptimizationDetailApiResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/DatasetOptimizationDetail"
+        }
+      }
+    },
+    "DatasetOptimizationDetail": {
+      "type": "object",
+      "properties": {
+        "optimiser_name": {
+          "title": "Optimiser name",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "optimiser_type": {
+          "title": "Optimiser type",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "model": {
+          "title": "Model",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "model_deprecated": {
+          "title": "Model deprecated",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "provider_logo": {
+          "title": "Provider logo",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "configuration": {
+          "title": "Configuration",
+          "type": "object",
+          "readOnly": true
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "enum": [
+            "not_started",
+            "pending",
+            "running",
+            "completed",
+            "failed",
+            "cancelled"
+          ]
+        },
+        "error_message": {
+          "title": "Error message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "start_time": {
+          "title": "Start time",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatasetOptimizationParameterItem"
+          },
+          "readOnly": true
+        },
+        "column_id": {
+          "title": "Column id",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "column_name": {
+          "title": "Column name",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "best_score": {
+          "title": "Best score",
+          "type": "number",
+          "x-nullable": true
+        },
+        "baseline_score": {
+          "title": "Baseline score",
+          "type": "number",
+          "x-nullable": true
+        },
+        "table": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatasetOptimizationTrialTableRow"
+          },
+          "readOnly": true
+        },
+        "column_config": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatasetOptimizationColumnConfigItem"
+          },
+          "readOnly": true
+        },
+        "optimizer_model_id": {
+          "title": "Optimizer model id",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "user_eval_templates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatasetOptimizationEvalTemplateItem"
+          },
+          "readOnly": true
+        }
+      }
+    },
+    "DatasetOptimizationParameterItem": {
+      "required": [
+        "key",
+        "label",
+        "description",
+        "value"
+      ],
+      "type": "object",
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "title": "Label",
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "object"
+        }
+      }
+    },
+    "DatasetOptimizationTrialTableRow": {
+      "required": [
+        "id",
+        "trial",
+        "prompt",
+        "is_best",
+        "eval_scores"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "minLength": 1
+        },
+        "trial": {
+          "title": "Trial",
+          "type": "string",
+          "minLength": 1
+        },
+        "prompt": {
+          "title": "Prompt",
+          "type": "string"
+        },
+        "is_best": {
+          "title": "Is best",
+          "type": "boolean"
+        },
+        "score_percentage_change": {
+          "title": "Score percentage change",
+          "type": "number",
+          "x-nullable": true
+        },
+        "eval_scores": {
+          "title": "Eval scores",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/DatasetOptimizationTrialEvalScore"
+          }
+        }
+      }
+    },
+    "DatasetOptimizationTrialEvalScore": {
+      "type": "object",
+      "properties": {
+        "score": {
+          "title": "Score",
+          "type": "number",
+          "x-nullable": true
+        },
+        "percentage_change": {
+          "title": "Percentage change",
+          "type": "number",
+          "x-nullable": true
+        }
+      }
+    },
+    "DatasetOptimizationColumnConfigItem": {
+      "required": [
+        "id",
+        "name",
+        "is_visible"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "is_visible": {
+          "title": "Is visible",
+          "type": "boolean"
+        }
+      }
+    },
+    "DatasetOptimizationEvalTemplateItem": {
+      "required": [
+        "id",
+        "eval_id",
+        "name",
+        "template_id"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "minLength": 1
+        },
+        "eval_id": {
+          "title": "Eval id",
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "template_id": {
+          "title": "Template id",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        }
+      }
+    },
+    "Dashboard": {
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "workspace": {
+          "title": "Workspace",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "created_by": {
+          "$ref": "#/definitions/User"
+        },
+        "updated_by": {
+          "$ref": "#/definitions/User"
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "widget_count": {
+          "title": "Widget count",
+          "type": "string",
+          "readOnly": true
+        }
+      }
+    },
+    "User": {
+      "required": [
+        "email",
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "email": {
+          "title": "Email",
+          "type": "string",
+          "format": "email",
+          "maxLength": 254,
+          "minLength": 1
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "organization_role": {
+          "title": "Organization role",
+          "type": "string",
+          "enum": [
+            "Owner",
+            "Admin",
+            "Member",
+            "Viewer",
+            "workspace_admin",
+            "workspace_member",
+            "workspace_viewer"
+          ],
+          "x-nullable": true
+        },
+        "organization": {
+          "$ref": "#/definitions/Organization"
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "readOnly": true
+        },
+        "role": {
+          "title": "Role",
+          "description": "User's job role (e.g., Data Scientist, ML Engineer, or custom role)",
+          "type": "string",
+          "maxLength": 255,
+          "x-nullable": true
+        },
+        "goals": {
+          "title": "Goals",
+          "description": "List of user's goals for using the platform",
+          "type": "object",
+          "x-nullable": true
+        }
+      }
+    },
+    "Organization": {
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "display_name": {
+          "title": "Display name",
+          "type": "string",
+          "maxLength": 255
+        },
+        "is_new": {
+          "title": "Is new",
+          "type": "boolean"
+        },
+        "ws_enabled": {
+          "title": "Ws enabled",
+          "type": "boolean"
+        },
+        "region": {
+          "title": "Region",
+          "type": "string",
+          "maxLength": 16,
+          "minLength": 1
+        },
+        "require_2fa": {
+          "title": "Require 2fa",
+          "type": "boolean"
+        },
+        "require_2fa_grace_period_days": {
+          "title": "Require 2fa grace period days",
+          "type": "integer",
+          "maximum": 32767,
+          "minimum": 0
+        },
+        "require_2fa_enforced_at": {
+          "title": "Require 2fa enforced at",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        }
+      }
+    },
+    "DashboardCreateUpdate": {
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        }
+      }
+    },
+    "DashboardDetail": {
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "workspace": {
+          "title": "Workspace",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "created_by": {
+          "$ref": "#/definitions/User"
+        },
+        "updated_by": {
+          "$ref": "#/definitions/User"
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "widgets": {
+          "title": "Widgets",
+          "type": "string",
+          "readOnly": true
+        }
+      }
+    },
+    "DashboardWidget": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "position": {
+          "title": "Position",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648
+        },
+        "width": {
+          "title": "Width",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648
+        },
+        "height": {
+          "title": "Height",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648
+        },
+        "query_config": {
+          "title": "Query config",
+          "description": "Saved query in the same shape as the dashboard query request: time_range and metrics are required once any metric is set, with optional workflow, project_ids, granularity, filters, and breakdowns.",
+          "type": "object"
+        },
+        "chart_config": {
+          "title": "Chart config",
+          "description": "Chart presentation. chart_type must be one of line, stacked_line, column, stacked_column, bar, stacked_bar, pie, table, or metric.",
+          "type": "object"
+        },
+        "created_by": {
+          "title": "Created by",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    },
+    "DashboardSampleOptIn": {
+      "type": "object",
+      "properties": {
+        "allow_sampled": {
+          "title": "Allow sampled",
+          "description": "Deprecated compatibility parameter; accepted but ignored. The response explicitly labels exact, rollup, or unavailable provenance.",
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "DashboardQueryApiResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/DashboardQueryResult"
+        }
+      }
+    },
+    "DashboardQueryResult": {
+      "required": [
+        "metrics",
+        "time_range",
+        "granularity"
+      ],
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DashboardQueryMetricResult"
+          }
+        },
+        "time_range": {
+          "$ref": "#/definitions/DashboardQueryTimeRangeResult"
+        },
+        "granularity": {
+          "title": "Granularity",
+          "type": "string",
+          "enum": [
+            "minute",
+            "hour",
+            "day",
+            "week",
+            "month"
+          ]
+        },
+        "query_complete": {
+          "title": "Query complete",
+          "type": "boolean"
+        },
+        "query_status": {
+          "title": "Query status",
+          "type": "string",
+          "enum": [
+            "complete",
+            "degraded",
+            "pending"
+          ]
+        },
+        "query_sampled": {
+          "title": "Query sampled",
+          "type": "boolean"
+        },
+        "query_exact": {
+          "title": "Query exact",
+          "type": "boolean"
+        },
+        "query_provenance": {
+          "title": "Query provenance",
+          "type": "string",
+          "enum": [
+            "exact_snapshot",
+            "materialized_rollup",
+            "authorized_empty_scope",
+            "bounded_unavailable"
+          ]
+        },
+        "query_error_code": {
+          "title": "Query error code",
+          "type": "string",
+          "enum": [
+            "sample_limit",
+            "read_budget_exceeded",
+            "query_failed",
+            "bounded_shape_unavailable",
+            "invalid_window",
+            "malformed_result"
+          ]
+        },
+        "query_sampling_strategy": {
+          "title": "Query sampling strategy",
+          "type": "string",
+          "minLength": 1
+        },
+        "query_count": {
+          "title": "Query count",
+          "type": "integer",
+          "maximum": 256,
+          "minimum": 0
+        },
+        "query_rows_returned": {
+          "title": "Query rows returned",
+          "type": "integer",
+          "minimum": 0
+        },
+        "query_elapsed_ms": {
+          "title": "Query elapsed ms",
+          "type": "number",
+          "minimum": 0
+        },
+        "query_completed_at": {
+          "title": "Query completed at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "query_cached": {
+          "title": "Query cached",
+          "type": "boolean"
+        },
+        "query_refresh_failed": {
+          "title": "Query refresh failed",
+          "type": "boolean"
+        },
+        "query_refreshing": {
+          "title": "Query refreshing",
+          "type": "boolean"
+        },
+        "query_snapshot_version_ceiling": {
+          "title": "Query snapshot version ceiling",
+          "type": "integer",
+          "minimum": 1
+        },
+        "query_snapshot_capture_count": {
+          "title": "Query snapshot capture count",
+          "type": "integer",
+          "minimum": 0
+        },
+        "query_snapshot_relation_count": {
+          "title": "Query snapshot relation count",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "DashboardQueryMetricResult": {
+      "required": [
+        "id",
+        "name",
+        "aggregation",
+        "unit",
+        "series"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "aggregation": {
+          "title": "Aggregation",
+          "type": "string",
+          "enum": [
+            "avg",
+            "median",
+            "max",
+            "min",
+            "p25",
+            "p50",
+            "p75",
+            "p90",
+            "p95",
+            "p99",
+            "count",
+            "count_distinct",
+            "sum",
+            "pass_rate",
+            "fail_rate",
+            "pass_count",
+            "fail_count",
+            "true_rate"
+          ]
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "series": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DashboardQuerySeries"
+          }
+        },
+        "series_total": {
+          "title": "Series total",
+          "type": "integer",
+          "minimum": 0
+        },
+        "series_truncated": {
+          "title": "Series truncated",
+          "type": "boolean"
+        },
+        "query_complete": {
+          "title": "Query complete",
+          "type": "boolean"
+        },
+        "query_sampled": {
+          "title": "Query sampled",
+          "type": "boolean"
+        },
+        "query_status": {
+          "title": "Query status",
+          "type": "string",
+          "enum": [
+            "complete",
+            "degraded"
+          ]
+        },
+        "query_error_code": {
+          "title": "Query error code",
+          "type": "string",
+          "enum": [
+            "sample_limit",
+            "read_budget_exceeded",
+            "query_failed",
+            "bounded_shape_unavailable",
+            "invalid_window",
+            "malformed_result"
+          ]
+        },
+        "query_exact": {
+          "title": "Query exact",
+          "type": "boolean"
+        },
+        "query_provenance": {
+          "title": "Query provenance",
+          "type": "string",
+          "enum": [
+            "exact_snapshot",
+            "materialized_rollup",
+            "authorized_empty_scope",
+            "bounded_unavailable"
+          ]
+        },
+        "query_sampling_strategy": {
+          "title": "Query sampling strategy",
+          "type": "string",
+          "minLength": 1
+        },
+        "query_sampling_interval_seconds": {
+          "title": "Query sampling interval seconds",
+          "type": "integer",
+          "minimum": 1
+        },
+        "query_sample_limit": {
+          "title": "Query sample limit",
+          "type": "integer",
+          "minimum": 1
+        },
+        "query_sample_per_bucket": {
+          "title": "Query sample per bucket",
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "DashboardQuerySeries": {
+      "required": [
+        "name",
+        "data"
+      ],
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DashboardQuerySeriesPoint"
+          }
+        }
+      }
+    },
+    "DashboardQuerySeriesPoint": {
+      "required": [
+        "timestamp",
+        "value"
+      ],
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "title": "Value",
+          "type": "number",
+          "x-nullable": true
+        }
+      }
+    },
+    "DashboardQueryTimeRangeResult": {
+      "required": [
+        "start",
+        "end"
+      ],
+      "type": "object",
+      "properties": {
+        "start": {
+          "title": "Start",
+          "type": "string",
+          "minLength": 1
+        },
+        "end": {
+          "title": "End",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "ApiErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "x-nullable": true
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string",
+          "x-nullable": true
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "title": "Details",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "DashboardQuery": {
+      "required": [
+        "time_range",
+        "metrics"
+      ],
+      "type": "object",
+      "properties": {
+        "workflow": {
+          "title": "Workflow",
+          "type": "string",
+          "enum": [
+            "observability",
+            "dataset",
+            "simulation"
+          ],
+          "default": "observability"
+        },
+        "project_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": []
+        },
+        "time_range": {
+          "$ref": "#/definitions/DashboardTimeRange"
+        },
+        "granularity": {
+          "title": "Granularity",
+          "type": "string",
+          "enum": [
+            "minute",
+            "hour",
+            "day",
+            "week",
+            "month"
+          ],
+          "default": "day"
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DashboardMetric"
+          }
+        },
+        "filters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "column_id": {
+                "type": "string",
+                "description": "Column or attribute id to filter on."
+              },
+              "property_id": {
+                "type": "string",
+                "description": "Optional stable namespaced Property Registry identity."
+              },
+              "display_name": {
+                "type": "string",
+                "description": "Optional UI label for chips and saved views."
+              },
+              "source": {
+                "type": "string",
+                "description": "Optional source surface for mixed-source filters, for example traces, datasets, or simulation."
+              },
+              "output_type": {
+                "type": "string",
+                "description": "Optional metric output type metadata used by eval and annotation filters."
+              },
+              "filter_config": {
+                "type": "object",
+                "properties": {
+                  "filter_type": {
+                    "type": "string",
+                    "description": "Canonical field type, for example text, number, boolean, datetime, categorical, thumbs, annotator, array, or map. Legacy json is value-sensitive for SPAN_ATTRIBUTE filters: list values become array and object values become map."
+                  },
+                  "filter_op": {
+                    "type": "string",
+                    "description": "Canonical operator from api_contracts/filter_contract.json, for example equals, not_equals, in, not_in, between, not_between, is_null, or is_not_null."
+                  },
+                  "filter_value": {
+                    "description": "Scalar, list, range tuple, boolean, or null depending on filter_op and filter_type."
+                  },
+                  "col_type": {
+                    "type": "string",
+                    "description": "Column family such as SYSTEM_METRIC, SPAN_ATTRIBUTE, EVAL_METRIC, ANNOTATION, or NORMAL."
+                  },
+                  "attribute_value_types": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "string",
+                        "number",
+                        "boolean"
+                      ],
+                      "x-nullable": true
+                    },
+                    "description": "Optional storage-family provenance aligned one-for-one with filter_value for mixed SPAN_ATTRIBUTE in/not_in filters. Null entries retain filter_type semantics for manually entered values."
+                  }
+                },
+                "required": [
+                  "filter_type",
+                  "filter_op"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "column_id",
+              "filter_config"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "breakdowns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DashboardBreakdown"
+          },
+          "default": []
+        },
+        "allow_sampled": {
+          "title": "Allow sampled",
+          "description": "Deprecated compatibility parameter; accepted but ignored. The response explicitly labels exact, rollup, or unavailable provenance.",
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "DashboardTimeRange": {
+      "type": "object",
+      "properties": {
+        "preset": {
+          "title": "Preset",
+          "type": "string",
+          "enum": [
+            "30m",
+            "6h",
+            "today",
+            "yesterday",
+            "7D",
+            "30D",
+            "3M",
+            "6M",
+            "12M"
+          ]
+        },
+        "custom_start": {
+          "title": "Custom start",
+          "type": "string",
+          "format": "date-time"
+        },
+        "custom_end": {
+          "title": "Custom end",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DashboardMetric": {
+      "required": [
+        "name",
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "property_id": {
+          "title": "Property id",
+          "type": "string",
+          "minLength": 1
+        },
+        "display_name": {
+          "title": "Display name",
+          "type": "string"
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "system_metric",
+            "eval_metric",
+            "annotation_metric",
+            "custom_attribute",
+            "custom_column"
+          ]
+        },
+        "source": {
+          "title": "Source",
+          "type": "string",
+          "enum": [
+            "traces",
+            "datasets",
+            "simulation",
+            "both",
+            "all"
+          ],
+          "default": "traces"
+        },
+        "aggregation": {
+          "title": "Aggregation",
+          "type": "string",
+          "enum": [
+            "avg",
+            "median",
+            "max",
+            "min",
+            "p25",
+            "p50",
+            "p75",
+            "p90",
+            "p95",
+            "p99",
+            "count",
+            "count_distinct",
+            "sum",
+            "pass_rate",
+            "fail_rate",
+            "pass_count",
+            "fail_count",
+            "true_rate"
+          ],
+          "default": "avg"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "output_type": {
+          "title": "Output type",
+          "type": "string"
+        },
+        "eval_key": {
+          "title": "Eval key",
+          "type": "string"
+        },
+        "config_id": {
+          "title": "Config id",
+          "type": "string"
+        },
+        "label_id": {
+          "title": "Label id",
+          "type": "string"
+        },
+        "attribute_key": {
+          "title": "Attribute key",
+          "type": "string"
+        },
+        "attribute_type": {
+          "title": "Attribute type",
+          "type": "string",
+          "enum": [
+            "string",
+            "text",
+            "number",
+            "float",
+            "integer",
+            "boolean",
+            "datetime",
+            "date"
+          ]
+        },
+        "column_id": {
+          "title": "Column id",
+          "type": "string"
+        },
+        "data_type": {
+          "title": "Data type",
+          "type": "string",
+          "enum": [
+            "string",
+            "text",
+            "number",
+            "float",
+            "integer",
+            "boolean",
+            "datetime",
+            "date"
+          ],
+          "default": "string"
+        },
+        "filters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "column_id": {
+                "type": "string",
+                "description": "Column or attribute id to filter on."
+              },
+              "property_id": {
+                "type": "string",
+                "description": "Optional stable namespaced Property Registry identity."
+              },
+              "display_name": {
+                "type": "string",
+                "description": "Optional UI label for chips and saved views."
+              },
+              "source": {
+                "type": "string",
+                "description": "Optional source surface for mixed-source filters, for example traces, datasets, or simulation."
+              },
+              "output_type": {
+                "type": "string",
+                "description": "Optional metric output type metadata used by eval and annotation filters."
+              },
+              "filter_config": {
+                "type": "object",
+                "properties": {
+                  "filter_type": {
+                    "type": "string",
+                    "description": "Canonical field type, for example text, number, boolean, datetime, categorical, thumbs, annotator, array, or map. Legacy json is value-sensitive for SPAN_ATTRIBUTE filters: list values become array and object values become map."
+                  },
+                  "filter_op": {
+                    "type": "string",
+                    "description": "Canonical operator from api_contracts/filter_contract.json, for example equals, not_equals, in, not_in, between, not_between, is_null, or is_not_null."
+                  },
+                  "filter_value": {
+                    "description": "Scalar, list, range tuple, boolean, or null depending on filter_op and filter_type."
+                  },
+                  "col_type": {
+                    "type": "string",
+                    "description": "Column family such as SYSTEM_METRIC, SPAN_ATTRIBUTE, EVAL_METRIC, ANNOTATION, or NORMAL."
+                  },
+                  "attribute_value_types": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "string",
+                        "number",
+                        "boolean"
+                      ],
+                      "x-nullable": true
+                    },
+                    "description": "Optional storage-family provenance aligned one-for-one with filter_value for mixed SPAN_ATTRIBUTE in/not_in filters. Null entries retain filter_type semantics for manually entered values."
+                  }
+                },
+                "required": [
+                  "filter_type",
+                  "filter_op"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "column_id",
+              "filter_config"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        }
+      },
+      "additionalProperties": false
+    },
+    "DashboardBreakdown": {
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "property_id": {
+          "title": "Property id",
+          "type": "string",
+          "minLength": 1
+        },
+        "display_name": {
+          "title": "Display name",
+          "type": "string"
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "system_metric",
+            "eval_metric",
+            "annotation_metric",
+            "custom_attribute",
+            "custom_column"
+          ],
+          "default": "system_metric"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string",
+          "enum": [
+            "traces",
+            "datasets",
+            "simulation",
+            "both",
+            "all"
+          ],
+          "default": "traces"
+        },
+        "output_type": {
+          "title": "Output type",
+          "type": "string"
+        },
+        "label_id": {
+          "title": "Label id",
+          "type": "string"
+        },
+        "config_id": {
+          "title": "Config id",
+          "type": "string"
+        },
+        "eval_key": {
+          "title": "Eval key",
+          "type": "string"
+        },
+        "attribute_key": {
+          "title": "Attribute key",
+          "type": "string"
+        },
+        "attribute_type": {
+          "title": "Attribute type",
+          "type": "string",
+          "enum": [
+            "string",
+            "text",
+            "number",
+            "float",
+            "integer",
+            "boolean",
+            "datetime",
+            "date"
+          ],
+          "default": "string"
+        },
+        "column_id": {
+          "title": "Column id",
+          "type": "string"
+        },
+        "data_type": {
+          "title": "Data type",
+          "type": "string",
+          "enum": [
+            "string",
+            "text",
+            "number",
+            "float",
+            "integer",
+            "boolean",
+            "datetime",
+            "date"
+          ],
+          "default": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DashboardMetricsCatalogResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/DashboardMetricsCatalogResult"
+        }
+      }
+    },
+    "DashboardMetricsCatalogResult": {
+      "required": [
+        "metrics"
+      ],
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DashboardMetricCatalogItem"
+          }
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer",
+          "minimum": 0,
+          "x-nullable": true
+        },
+        "total_is_exact": {
+          "title": "Total is exact",
+          "type": "boolean"
+        },
+        "category_counts": {
+          "title": "Category counts",
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "category_counts_exact": {
+          "title": "Category counts exact",
+          "type": "boolean"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer",
+          "minimum": 1
+        },
+        "page_size": {
+          "title": "Page size",
+          "type": "integer",
+          "maximum": 200,
+          "minimum": 1
+        },
+        "has_more": {
+          "title": "Has more",
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "title": "Next cursor",
+          "type": "string",
+          "maxLength": 262144,
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "catalog_epoch": {
+          "title": "Catalog epoch",
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "catalog_revision": {
+          "title": "Catalog revision",
+          "type": "integer",
+          "minimum": 1
+        },
+        "activation_fingerprint": {
+          "title": "Activation fingerprint",
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "minLength": 1
+        },
+        "query_complete": {
+          "title": "Query complete",
+          "description": "Whether this page read completed, not whether all source history is indexed.",
+          "type": "boolean"
+        },
+        "query_exact": {
+          "title": "Query exact",
+          "type": "boolean"
+        },
+        "query_status": {
+          "title": "Query status",
+          "type": "string",
+          "enum": [
+            "complete",
+            "partial"
+          ]
+        },
+        "query_provenance": {
+          "title": "Query provenance",
+          "type": "string",
+          "enum": [
+            "activated_property_catalog",
+            "current_property_catalog"
+          ]
+        }
+      }
+    },
+    "DashboardMetricCatalogItem": {
+      "required": [
+        "name",
+        "property_id",
+        "property_kind"
+      ],
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "property_id": {
+          "title": "Property id",
+          "type": "string",
+          "minLength": 1
+        },
+        "property_kind": {
+          "title": "Property kind",
+          "type": "string",
+          "enum": [
+            "system_attribute",
+            "custom_attribute",
+            "eval_config",
+            "eval_template",
+            "annotation",
+            "dataset_column"
+          ]
+        },
+        "display_name": {
+          "title": "Display name",
+          "type": "string"
+        },
+        "category": {
+          "title": "Category",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "output_type": {
+          "title": "Output type",
+          "type": "string"
+        },
+        "eval_template_id": {
+          "title": "Eval template id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string",
+          "enum": [
+            "metric",
+            "dimension"
+          ]
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "x-json-value": true,
+            "description": "Any valid JSON value."
+          }
+        },
+        "choice_options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "x-json-value": true,
+            "description": "Any valid JSON value."
+          }
+        },
+        "allowed_aggregations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "data_type": {
+          "title": "Data type",
+          "type": "string"
+        },
+        "attribute_types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "array",
+              "map",
+              "json"
+            ]
+          }
+        },
+        "attribute_types_exact": {
+          "title": "Attribute types exact",
+          "type": "boolean"
+        }
+      }
+    },
+    "DashboardFilterValuesResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/DashboardFilterValuesResult"
+        }
+      }
+    },
+    "DashboardFilterValuesResult": {
+      "required": [
+        "values"
+      ],
+      "type": "object",
+      "properties": {
+        "query_exact": {
+          "title": "Query exact",
+          "type": "boolean"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DashboardFilterValueOption"
+          }
+        },
+        "query_complete": {
+          "title": "Query complete",
+          "description": "Whether this page read completed, not whether all source history is indexed.",
+          "type": "boolean"
+        },
+        "query_status": {
+          "title": "Query status",
+          "type": "string",
+          "enum": [
+            "complete",
+            "sampled",
+            "degraded",
+            "partial"
+          ]
+        },
+        "query_error_code": {
+          "title": "Query error code",
+          "type": "string",
+          "enum": [
+            "sample_limit",
+            "read_budget_exceeded",
+            "query_failed"
+          ]
+        },
+        "query_window_start": {
+          "title": "Query window start",
+          "type": "string",
+          "format": "date-time"
+        },
+        "query_window_end": {
+          "title": "Query window end",
+          "type": "string",
+          "format": "date-time"
+        },
+        "query_window_mode": {
+          "title": "Query window mode",
+          "type": "string",
+          "enum": [
+            "frozen_snapshot"
+          ]
+        },
+        "query_count": {
+          "title": "Query count",
+          "type": "integer",
+          "minimum": 0
+        },
+        "has_more": {
+          "title": "Has more",
+          "type": "boolean"
+        },
+        "browse_status": {
+          "title": "Browse status",
+          "type": "string",
+          "enum": [
+            "continuation",
+            "exhausted",
+            "limit_reached"
+          ]
+        },
+        "next_cursor": {
+          "title": "Next cursor",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "attribute_type": {
+          "title": "Attribute type",
+          "type": "string",
+          "enum": [
+            "string",
+            "number",
+            "boolean",
+            "array",
+            "map",
+            "json"
+          ]
+        },
+        "attribute_types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "array",
+              "map",
+              "json"
+            ]
+          }
+        },
+        "attribute_types_exact": {
+          "title": "Attribute types exact",
+          "type": "boolean"
+        },
+        "catalog_epoch": {
+          "title": "Catalog epoch",
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "catalog_revision": {
+          "title": "Catalog revision",
+          "type": "integer",
+          "minimum": 1
+        },
+        "activation_fingerprint": {
+          "title": "Activation fingerprint",
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "minLength": 1
+        },
+        "query_provenance": {
+          "title": "Query provenance",
+          "type": "string",
+          "enum": [
+            "activated_property_catalog",
+            "current_property_catalog"
+          ]
+        }
+      }
+    },
+    "DashboardFilterValueOption": {
+      "required": [
+        "value",
+        "label"
+      ],
+      "type": "object",
+      "properties": {
+        "value": {
+          "title": "Value",
+          "type": "object",
+          "x-nullable": true,
+          "x-json-value": true,
+          "description": "Any valid JSON value."
+        },
+        "label": {
+          "title": "Label",
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "string",
+            "number",
+            "boolean",
+            "array",
+            "map",
+            "json"
+          ]
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "email": {
+          "title": "Email",
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "UsageOverviewResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/UsageOverviewResult"
+        }
+      }
+    },
+    "UsageOverviewResult": {
+      "required": [
+        "plan",
+        "plan_display_name",
+        "platform_fee",
+        "period",
+        "billing_period_start",
+        "billing_period_end",
+        "total_estimated_cost",
+        "total_with_platform",
+        "dimensions",
+        "pending_cancel"
+      ],
+      "type": "object",
+      "properties": {
+        "plan": {
+          "title": "Plan",
+          "type": "string",
+          "minLength": 1
+        },
+        "plan_display_name": {
+          "title": "Plan display name",
+          "type": "string",
+          "minLength": 1
+        },
+        "platform_fee": {
+          "title": "Platform fee",
+          "type": "number"
+        },
+        "period": {
+          "title": "Period",
+          "type": "string",
+          "minLength": 1
+        },
+        "billing_period_start": {
+          "title": "Billing period start",
+          "type": "string",
+          "minLength": 1
+        },
+        "billing_period_end": {
+          "title": "Billing period end",
+          "type": "string",
+          "minLength": 1
+        },
+        "total_estimated_cost": {
+          "title": "Total estimated cost",
+          "type": "number"
+        },
+        "total_with_platform": {
+          "title": "Total with platform",
+          "type": "number"
+        },
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UsageOverviewDimension"
+          }
+        },
+        "pending_cancel": {
+          "title": "Pending cancel",
+          "type": "boolean"
+        },
+        "cancel_at": {
+          "title": "Cancel at",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        }
+      }
+    },
+    "UsageOverviewDimension": {
+      "required": [
+        "key",
+        "display_name",
+        "display_unit",
+        "current_usage",
+        "current_usage_raw",
+        "free_allowance",
+        "projected_usage",
+        "estimated_cost",
+        "usage_pct"
+      ],
+      "type": "object",
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string",
+          "minLength": 1
+        },
+        "display_name": {
+          "title": "Display name",
+          "type": "string",
+          "minLength": 1
+        },
+        "display_unit": {
+          "title": "Display unit",
+          "type": "string",
+          "minLength": 1
+        },
+        "current_usage": {
+          "title": "Current usage",
+          "type": "number"
+        },
+        "current_usage_raw": {
+          "title": "Current usage raw",
+          "type": "number"
+        },
+        "free_allowance": {
+          "title": "Free allowance",
+          "type": "number"
+        },
+        "projected_usage": {
+          "title": "Projected usage",
+          "type": "number"
+        },
+        "estimated_cost": {
+          "title": "Estimated cost",
+          "type": "number"
+        },
+        "tier_breakdown": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UsageTierBreakdown"
+          }
+        },
+        "usage_pct": {
+          "title": "Usage pct",
+          "type": "number"
+        }
+      }
+    },
+    "UsageTierBreakdown": {
+      "type": "object",
+      "properties": {
+        "tier_start": {
+          "title": "Tier start",
+          "type": "number"
+        },
+        "tier_end": {
+          "title": "Tier end",
+          "type": "number",
+          "x-nullable": true
+        },
+        "quantity": {
+          "title": "Quantity",
+          "type": "number"
+        },
+        "rate": {
+          "title": "Rate",
+          "type": "number"
+        },
+        "cost": {
+          "title": "Cost",
+          "type": "number"
+        }
+      }
+    },
+    "UsageErrorResponse": {
+      "required": [
+        "status"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "title": "Details",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-source-sha256": "sha256:ffe769065665b10dc7ce8301045adb8c6fe913be9fc1eb437543c92bc2bec9eb",
+  "x-sdk-pagination-dialects": "openapi/sdk/pagination-dialects.json"
+}

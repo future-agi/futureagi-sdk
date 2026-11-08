@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "../dist/gateway/esm",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  }
+}

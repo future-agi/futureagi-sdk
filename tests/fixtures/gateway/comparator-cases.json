@@ -1,0 +1,139 @@
+{
+ "about": "Conformance cases for the two parity comparators (python/tests/gateway/parity/compare.py and typescript/futureagi/gateway-client/tests/parity/compare.mjs). Each case runs compare_cases(golden, new, intended, label) and must give exactly 'expect'; each unlisted difference is [path, kind, the planned entries that match it]. Values avoid int-vs-float pairs (Python tells 0 from 0.0, JavaScript cannot).",
+ "cases": [
+  {
+   "name": "identical recordings pass with nothing covered",
+   "label": "g->n",
+   "golden": {"c[sync]": {"result": {"a": 1}, "requests": []}},
+   "new": {"c[sync]": {"result": {"a": 1}, "requests": []}},
+   "intended": [],
+   "expect": {"ok": true, "unlisted": [], "covered": {}, "unobserved_proven": [], "unobserved_planned": []}
+  },
+  {
+   "name": "an unlisted change fails and names the path",
+   "label": "g->n",
+   "golden": {"c[sync]": {"result": {"a": 1}}},
+   "new": {"c[sync]": {"result": {"a": 2}}},
+   "intended": [],
+   "expect": {"ok": false, "unlisted": [["c[sync]/result/a", "changed", []]], "covered": {}, "unobserved_proven": [], "unobserved_planned": []}
+  },
+  {
+   "name": "brackets in case ids are literal, star matches across slashes",
+   "label": "g->n",
+   "golden": {"c[sync]": {"result": {"a": 1}}},
+   "new": {"c[sync]": {"result": {"a": 2}}},
+   "intended": [{"id": "D-x", "status": "proven", "applies_to": ["g->*"], "match": [{"path": "c[sync]/*"}]}],
+   "expect": {"ok": true, "unlisted": [], "covered": {"D-x": 1}, "unobserved_proven": [], "unobserved_planned": []}
+  },
+  {
+   "name": "a rule only applies to comparisons its applies_to names",
+   "label": "other->n",
+   "golden": {"c": {"v": "x"}},
+   "new": {"c": {"v": "y"}},
+   "intended": [{"id": "D-x", "status": "proven", "applies_to": ["g->*"], "match": [{"path": "*"}]}],
+   "expect": {"ok": false, "unlisted": [["c/v", "changed", []]], "covered": {}, "unobserved_proven": [], "unobserved_planned": []}
+  },
+  {
+   "name": "a proven rule that covers nothing fails; a planned one does not",
+   "label": "g->n",
+   "golden": {"c": {"v": "x"}},
+   "new": {"c": {"v": "x"}},
+   "intended": [
+    {"id": "D-p", "status": "proven", "applies_to": ["g->n"], "match": [{"path": "c/v"}]},
+    {"id": "D-q", "status": "planned", "applies_to": ["g->n"], "match": [{"path": "c/v"}]}
+   ],
+   "expect": {"ok": false, "unlisted": [], "covered": {}, "unobserved_proven": ["D-p"], "unobserved_planned": ["D-q"]}
+  },
+  {
+   "name": "headers compare by name, so a reordered header list is equal and one changed value is one difference",
+   "label": "g->n",
+   "golden": {"c": {"requests": [{"headers": [["a", "1"], ["user-agent", "agentcc-python/0.1.0"]]}]}},
+   "new": {"c": {"requests": [{"headers": [["user-agent", "futureagi-python/0.7.0"], ["a", "1"]]}]}},
+   "intended": [{"id": "D-03", "status": "proven", "applies_to": ["g->n"], "match": [{"path": "*/requests/*/headers/user-agent", "kind": "changed", "old": "^agentcc-python/", "new": "^futureagi-python/"}]}],
+   "expect": {"ok": true, "unlisted": [], "covered": {"D-03": 1}, "unobserved_proven": [], "unobserved_planned": []}
+  },
+  {
+   "name": "old/new regexes must both match",
+   "label": "g->n",
+   "golden": {"c": {"requests": [{"headers": [["user-agent", "agentcc-python/0.1.0"]]}]}},
+   "new": {"c": {"requests": [{"headers": [["user-agent", "something-else/1"]]}]}},
+   "intended": [{"id": "D-03", "status": "planned", "applies_to": ["g->n"], "match": [{"path": "*/headers/user-agent", "new": "^futureagi-"}]}],
+   "expect": {"ok": false, "unlisted": [["c/requests/0/headers/user-agent", "changed", []]], "covered": {}, "unobserved_proven": [], "unobserved_planned": ["D-03"]}
+  },
+  {
+   "name": "duplicate header names keep every value",
+   "label": "g->n",
+   "golden": {"c": {"headers": [["authorization", "Bearer a"], ["authorization", "Bearer b"]]}},
+   "new": {"c": {"headers": [["authorization", "Bearer a"]]}},
+   "intended": [],
+   "expect": {"ok": false, "unlisted": [["c/headers/authorization", "changed", []]], "covered": {}, "unobserved_proven": [], "unobserved_planned": []}
+  },
+  {
+   "name": "name lists compare as sets: one added export is one difference",
+   "label": "g->n",
+   "golden": {"<index>": {"loads": {"pkg": {"exports": ["A", "C"]}}}},
+   "new": {"<index>": {"loads": {"pkg": {"exports": ["A", "B", "C"]}}}},
+   "intended": [],
+   "expect": {"ok": false, "unlisted": [["<index>/loads/pkg/exports/B", "added", []]], "covered": {}, "unobserved_proven": [], "unobserved_planned": []}
+  },
+  {
+   "name": "top_level rules match whole cases only",
+   "label": "g->n",
+   "golden": {"a": {"x": 1}},
+   "new": {"a": {"x": 1, "y": 2}, "b": {"x": 1}},
+   "intended": [{"id": "D-13", "status": "proven", "applies_to": ["g->n"], "match": [{"path": "*", "kind": "added", "top_level": true}]}],
+   "expect": {"ok": false, "unlisted": [["a/y", "added", []]], "covered": {"D-13": 1}, "unobserved_proven": [], "unobserved_planned": []}
+  },
+  {
+   "name": "removed and added list items",
+   "label": "g->n",
+   "golden": {"c": {"items": ["a", "b", "c"]}},
+   "new": {"c": {"items": ["a"]}},
+   "intended": [{"id": "D-x", "status": "proven", "applies_to": ["g->n"], "match": [{"path": "c/items/*", "kind": "removed"}]}],
+   "expect": {"ok": true, "unlisted": [], "covered": {"D-x": 2}, "unobserved_proven": [], "unobserved_planned": []}
+  },
+  {
+   "name": "a type change (object to string) is one change at that path",
+   "label": "g->n",
+   "golden": {"c": {"result": {"ok": true}}},
+   "new": {"c": {"result": "<undefined>"}},
+   "intended": [],
+   "expect": {"ok": false, "unlisted": [["c/result", "changed", []]], "covered": {}, "unobserved_proven": [], "unobserved_planned": []}
+  },
+  {
+   "name": "regex on a non-string value sees compact sorted JSON",
+   "label": "g->n",
+   "golden": {"c": {"v": {"b": 1, "a": [true, null]}}},
+   "new": {"c": {"v": "x"}},
+   "intended": [{"id": "D-x", "status": "proven", "applies_to": ["g->n"], "match": [{"path": "c/v", "old": "^\\{\"a\":\\[true,null\\],\"b\":1\\}$"}]}],
+   "expect": {"ok": true, "unlisted": [], "covered": {"D-x": 1}, "unobserved_proven": [], "unobserved_planned": []}
+  },
+  {
+   "name": "a planned rule does not cover: the difference is unlisted and names the planned entry",
+   "label": "g->n",
+   "golden": {"c": {"v": "x"}},
+   "new": {"c": {"v": "y"}},
+   "intended": [{"id": "D-q", "status": "planned", "applies_to": ["g->n"], "match": [{"path": "c/v"}]}],
+   "expect": {"ok": false, "unlisted": [["c/v", "changed", ["D-q"]]], "covered": {}, "unobserved_proven": [], "unobserved_planned": []}
+  },
+  {
+   "name": "a difference a proven and a planned rule both match is covered by the proven one only",
+   "label": "g->n",
+   "golden": {"c": {"v": "x", "w": "x"}},
+   "new": {"c": {"v": "y", "w": "y"}},
+   "intended": [
+    {"id": "D-p", "status": "proven", "applies_to": ["g->n"], "match": [{"path": "c/v"}]},
+    {"id": "D-q", "status": "planned", "applies_to": ["g->n"], "match": [{"path": "c/*"}]}
+   ],
+   "expect": {"ok": false, "unlisted": [["c/w", "changed", ["D-q"]]], "covered": {"D-p": 1}, "unobserved_proven": [], "unobserved_planned": []}
+  },
+  {
+   "name": "an entry with any status other than proven never covers",
+   "label": "g->n",
+   "golden": {"c": {"v": "x"}},
+   "new": {"c": {"v": "y"}},
+   "intended": [{"id": "D-r", "applies_to": ["g->n"], "match": [{"path": "c/v"}]}],
+   "expect": {"ok": false, "unlisted": [["c/v", "changed", ["D-r"]]], "covered": {}, "unobserved_proven": [], "unobserved_planned": []}
+  }
+ ]
+}

@@ -46,9 +46,8 @@ class ResponseObject(BaseModel):
 class ResponseStreamEvent(BaseModel):
     """One server-sent event of a streamed `/v1/responses` call.
 
-    `delta` is the text fragment of `response.output_text.delta` and
-    `response.function_call_arguments.delta` events (a string), or a structured delta on
-    others; `response` carries the full object on `response.created` / `response.completed`.
+    `delta` is a text fragment or structured delta. `response` carries the full
+    object on `response.created` / `response.completed`; extra fields are retained.
     """
 
     model_config = ConfigDict(extra="allow")

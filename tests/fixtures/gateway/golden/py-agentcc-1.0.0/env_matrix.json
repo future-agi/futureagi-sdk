@@ -1,0 +1,6190 @@
+{
+ "area": "env_matrix",
+ "cases": {
+  "env.async.key_agentcc_env[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.async.key_arg[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.base_url.localhost[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "localhost:8090"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "localhost:8090"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models/gpt-4o-mini",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.localhost[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "localhost:8090"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "localhost:8090"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models/gpt-4o-mini",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.port[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "127.0.0.1:8090"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "127.0.0.1",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "127.0.0.1:8090"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "127.0.0.1",
+     "method": "GET",
+     "path": "/v1/models/gpt-4o-mini",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.port[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "127.0.0.1:8090"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "127.0.0.1",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "127.0.0.1:8090"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "127.0.0.1",
+     "method": "GET",
+     "path": "/v1/models/gpt-4o-mini",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.prefix[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/gw/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/gw/v1/models/gpt-4o-mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.prefix[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/gw/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/gw/v1/models/gpt-4o-mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.prefix_v1[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/gw/v1/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/gw/v1/v1/models/gpt-4o-mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.prefix_v1[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/gw/v1/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/gw/v1/v1/models/gpt-4o-mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.trailing_slash[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models/gpt-4o-mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.trailing_slash[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models/gpt-4o-mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.uppercase_v1[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/V1/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/V1/v1/models/gpt-4o-mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.uppercase_v1[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/V1/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/V1/v1/models/gpt-4o-mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.v1[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/v1/models/gpt-4o-mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.v1[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/v1/models/gpt-4o-mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.v1_slash[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/v1/models/gpt-4o-mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.v1_slash[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/v1/models/gpt-4o-mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.v1_twice[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/v1/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/v1/v1/models/gpt-4o-mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.base_url.v1_twice[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/v1/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/v1/v1/models/gpt-4o-mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": [
+    "chatcmpl-parity",
+    "gpt-4o-mini"
+   ]
+  },
+  "env.fi_api_key_reused_as_gateway_key[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "env.fi_api_key_reused_as_gateway_key[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "env.fi_secret_key_reused_as_gateway_key[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "env.fi_secret_key_reused_as_gateway_key[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "env.gateway_url_constant.agentcc_base_url[sync]": {
+   "requests": [],
+   "result": {
+    "exit": 0,
+    "stderr_tail": [],
+    "stdout": "https://from-env.example.test"
+   }
+  },
+  "env.gateway_url_constant.agentcc_gateway_url[sync]": {
+   "requests": [],
+   "result": {
+    "exit": 0,
+    "stderr_tail": [],
+    "stdout": "https://gateway.futureagi.com/v1"
+   }
+  },
+  "env.gateway_url_constant.both[sync]": {
+   "requests": [],
+   "result": {
+    "exit": 0,
+    "stderr_tail": [],
+    "stdout": "https://from-env.example.test"
+   }
+  },
+  "env.gateway_url_constant.unset[sync]": {
+   "requests": [],
+   "result": {
+    "exit": 0,
+    "stderr_tail": [],
+    "stdout": "https://gateway.futureagi.com/v1"
+   }
+  },
+  "env.isolation.all_fi_openai_set[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.isolation.all_fi_openai_set[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.isolation.chat[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": false
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "env.isolation.chat[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": false
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "env.key_agentcc_env.url_agentcc_env[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "agentcc-env.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_agentcc_env.url_arg[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_agentcc_env.url_arg_over_env[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_agentcc_env.url_both_env_differ[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "agentcc-env.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_agentcc_env.url_empty_arg_env[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "agentcc-env.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_agentcc_env.url_fi_gateway_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    ],
+    "attrs": {
+     "message": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+     ],
+     "ok": true,
+     "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.')",
+    "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_agentcc_env.url_gateway_url_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    ],
+    "attrs": {
+     "message": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+     ],
+     "ok": true,
+     "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.')",
+    "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_agentcc_env.url_none[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    ],
+    "attrs": {
+     "message": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+     ],
+     "ok": true,
+     "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.')",
+    "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_arg.url_agentcc_env[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "agentcc-env.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_arg.url_arg[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_arg.url_arg_over_env[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_arg.url_both_env_differ[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "agentcc-env.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_arg.url_empty_arg_env[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "agentcc-env.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_arg.url_fi_gateway_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    ],
+    "attrs": {
+     "message": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+     ],
+     "ok": true,
+     "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.')",
+    "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_arg.url_gateway_url_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    ],
+    "attrs": {
+     "message": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+     ],
+     "ok": true,
+     "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.')",
+    "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_arg.url_none[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    ],
+    "attrs": {
+     "message": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+     ],
+     "ok": true,
+     "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.')",
+    "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_arg_over_env.url_agentcc_env[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "agentcc-env.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_arg_over_env.url_arg[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_arg_over_env.url_arg_over_env[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_arg_over_env.url_both_env_differ[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "agentcc-env.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_arg_over_env.url_empty_arg_env[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "agentcc-env.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_arg_over_env.url_fi_gateway_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    ],
+    "attrs": {
+     "message": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+     ],
+     "ok": true,
+     "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.')",
+    "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_arg_over_env.url_gateway_url_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    ],
+    "attrs": {
+     "message": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+     ],
+     "ok": true,
+     "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.')",
+    "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_arg_over_env.url_none[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    ],
+    "attrs": {
+     "message": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+     ],
+     "ok": true,
+     "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.')",
+    "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_both_env_differ.url_agentcc_env[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-agentcc"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "agentcc-env.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_both_env_differ.url_arg[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-agentcc"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_both_env_differ.url_arg_over_env[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-agentcc"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_both_env_differ.url_both_env_differ[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-agentcc"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "agentcc-env.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_both_env_differ.url_empty_arg_env[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-agentcc"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "agentcc-env.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_both_env_differ.url_fi_gateway_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    ],
+    "attrs": {
+     "message": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+     ],
+     "ok": true,
+     "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.')",
+    "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_both_env_differ.url_gateway_url_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    ],
+    "attrs": {
+     "message": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+     ],
+     "ok": true,
+     "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.')",
+    "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_both_env_differ.url_none[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    ],
+    "attrs": {
+     "message": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+     ],
+     "ok": true,
+     "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.')",
+    "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_empty_arg_env.url_agentcc_env[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "agentcc-env.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_empty_arg_env.url_arg[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_empty_arg_env.url_arg_over_env[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_empty_arg_env.url_both_env_differ[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "agentcc-env.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_empty_arg_env.url_empty_arg_env[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "agentcc-env.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ModelList",
+    "agentcc": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     }
+    },
+    "data": {
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    }
+   }
+  },
+  "env.key_empty_arg_env.url_fi_gateway_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    ],
+    "attrs": {
+     "message": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+     ],
+     "ok": true,
+     "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.')",
+    "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_empty_arg_env.url_gateway_url_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    ],
+    "attrs": {
+     "message": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+     ],
+     "ok": true,
+     "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.')",
+    "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_empty_arg_env.url_none[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    ],
+    "attrs": {
+     "message": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+     ],
+     "ok": true,
+     "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable.')",
+    "str": "base_url is required. Pass it as a parameter or set the AGENTCC_BASE_URL environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_fi_gateway_env.url_agentcc_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_fi_gateway_env.url_arg[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_fi_gateway_env.url_arg_over_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_fi_gateway_env.url_both_env_differ[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_fi_gateway_env.url_empty_arg_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_fi_gateway_env.url_fi_gateway_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_fi_gateway_env.url_gateway_url_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_fi_gateway_env.url_none[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_none.url_agentcc_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_none.url_arg[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_none.url_arg_over_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_none.url_both_env_differ[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_none.url_empty_arg_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_none.url_fi_gateway_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_none.url_gateway_url_env[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "env.key_none.url_none[sync]": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "args": [
+     "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    ],
+    "attrs": {
+     "message": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+    },
+    "mro": [
+     "AgentCCError",
+     "Exception",
+     "BaseException",
+     "object"
+    ],
+    "pickle": {
+     "args": [
+      "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+     ],
+     "ok": true,
+     "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.",
+     "type": "AgentCCError"
+    },
+    "repr": "AgentCCError('api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable.')",
+    "str": "api_key is required. Pass it as a parameter or set the AGENTCC_API_KEY environment variable."
+   },
+   "requests": [],
+   "unused_replies": 1
+  }
+ },
+ "format": 1
+}

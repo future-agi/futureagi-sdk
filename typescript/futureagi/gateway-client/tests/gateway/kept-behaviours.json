@@ -1,0 +1,133 @@
+{
+ "about": "The behaviour of @agentcc/client 1.0.1 that only an SDK gives (an OpenAI SDK pointed at the gateway does not), which @future-agi/sdk/gateway keeps, each with the tests that hold it. kept-behaviours.test.ts fails when a named test is gone. 'follow_up' names a behaviour the TypeScript client did not have in 1.0.1 either.",
+ "items": {
+  "stream_error_frames": {
+   "behaviour": "A data: {\"error\": {...}} frame on a 200 SSE stream (stream_blocked) raises a typed StreamError with type, code and param, including through the nextjs and express helpers.",
+   "tests": [
+    {
+     "file": "tests/stream-error.test.ts",
+     "title": "chat.completions.create({ stream: true }) iteration throws StreamError with the code and message"
+    },
+    {
+     "file": "tests/stream-error.test.ts",
+     "title": "StreamManager.events() throws StreamError"
+    },
+    {
+     "file": "tests/stream-error.test.ts",
+     "title": "nextjs streamResponse() forwards the gateway's error code and message"
+    },
+    {
+     "file": "tests/stream-error.test.ts",
+     "title": "cancels the response body once the error frame is read"
+    },
+    {
+     "file": "tests/gateway/helpers-stream-error.test.ts",
+     "title": "express: the client agentccMiddleware attaches raises StreamError with type, code and param"
+    },
+    {
+     "file": "tests/gateway/helpers-stream-error.test.ts",
+     "title": "nextjs: createAgentCCClient + streamResponse forward type, code and param and end without [DONE]"
+    },
+    {
+     "file": "tests/gateway/stream-d16-events.test.ts",
+     "title": "late_error_after_finish_reason: events() yields content and usage, then throws StreamError before done"
+    },
+    {
+     "file": "tests/gateway/stream-d12-json-answer.test.ts",
+     "title": "an error body on a JSON answer raises a typed StreamError; a body that is not JSON raises StreamError"
+    },
+    {
+     "file": "tests/react/route-mode.test.ts",
+     "title": "a gateway guardrail block reaches the page as a typed StreamError, after the text before it"
+    }
+   ],
+   "follow_up": "event: error on /v1/responses: the TypeScript client has no responses resource yet (it comes in a later minor release); fi.gateway (Python) raises StreamError on it."
+  },
+  "request_header_helpers": {
+   "behaviour": "Request header helpers: x-agentcc-config, cache-ttl, cache-namespace, cache-force-refresh, session-id, session-name, session-path, trace-id, user-id, metadata, property-*, request-timeout and timeout-ms.",
+   "tests": [
+    {
+     "file": "tests/gateway/header-helpers.test.ts",
+     "title": "createHeaders sends %s"
+    },
+    {
+     "file": "tests/gateway/header-helpers.test.ts",
+     "title": "per-request parameters become headers on the wire and leave the body"
+    },
+    {
+     "file": "tests/gateway/header-helpers.test.ts",
+     "title": "client options send session id, metadata and the cache config on every request"
+    },
+    {
+     "file": "tests/gateway/header-helpers.test.ts",
+     "title": "a session client sends the session id, name and metadata"
+    },
+    {
+     "file": "tests/gateway/stock-sdk.test.ts",
+     "title": "returns an explicit key, the gateway origin plus /v1, and x-agentcc-* headers"
+    },
+    {
+     "file": "tests/gateway/request-metadata.test.ts",
+     "title": "all three layers: one header, in layer order, the latest layer winning each shared key"
+    }
+   ],
+   "follow_up": "x-agentcc-timeout-ms as a request helper: TypeScript 1.0.1 had none (only the x-agentcc-timeout-ms response reader, metadata.timeoutMs); it comes in a later minor release. x-agentcc-request-timeout is kept (per-request request_timeout)."
+  },
+  "response_metadata_readers": {
+   "behaviour": "Response metadata readers: x-agentcc-request-id, provider, model-used, latency-ms, cost, cache, fallback-used, routing-strategy, and guardrail-triggered, -name, -action, -confidence, -message and -policy.",
+   "tests": [
+    {
+     "file": "tests/gateway/metadata.test.ts",
+     "title": "a plain response carries every gateway reader, configIgnored as a list and clientRequestId"
+    },
+    {
+     "file": "tests/gateway/metadata.test.ts",
+     "title": "a streamed response carries the same metadata"
+    },
+    {
+     "file": "tests/gateway/stream-d16-events.test.ts",
+     "title": "done comes exactly once, last, after [DONE], with the final completion"
+    }
+   ],
+   "follow_up": "guardrail-policy as a response reader: TypeScript 1.0.1 had none and the gateway does not emit one yet."
+  },
+  "stream_usage": {
+   "behaviour": "Usage: the usage stream event and the final completion's usage come from the finish chunk when stream_options is not set; the SDK never adds stream_options. One usage event per stream, even when the gateway sends the usage again on a trailing chunk with empty choices.",
+   "tests": [
+    {
+     "file": "tests/gateway/stream-d11-usage.test.ts",
+     "title": "usage comes from the finish chunk the gateway sends, and no stream_options is ever added"
+    },
+    {
+     "file": "tests/gateway/stream-d11-usage.test.ts",
+     "title": "a chunk after the usage chunk no longer erases it"
+    },
+    {
+     "file": "tests/stream-error.test.ts",
+     "title": "StreamManager, textStream() and events() complete"
+    },
+    {
+     "file": "tests/gateway/stream-usage-once.test.ts",
+     "title": "the recorded gateway stream (usage sent twice) yields one usage event, then done"
+    },
+    {
+     "file": "tests/gateway/stream-usage-once.test.ts",
+     "title": "adding up the usage events counts the tokens once"
+    }
+   ]
+  },
+  "sdk_headers_not_read": {
+   "behaviour": "The gateway reads neither x-agentcc-sdk-version nor the SDK User-Agent, so renaming them is safe.",
+   "tests": [
+    {
+     "file": "tests/gateway/version.test.ts",
+     "title": "every request sends User-Agent futureagi-typescript/<v> and x-agentcc-sdk-version <v>"
+    },
+    {
+     "file": "tests/gateway/browser.test.ts",
+     "title": "with dangerouslyAllowBrowser: true the client is built and sends no x-agentcc-sdk-version or User-Agent"
+    }
+   ]
+  }
+ }
+}

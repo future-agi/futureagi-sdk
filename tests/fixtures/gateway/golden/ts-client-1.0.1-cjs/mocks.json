@@ -1,0 +1,228 @@
+{
+ "area": "mocks",
+ "cases": {
+  "mock.testing": {
+   "requests": [],
+   "result": {
+    "calls": [
+     {
+      "params": {
+       "messages": [
+        {
+         "content": "Say hello",
+         "role": "user"
+        }
+       ],
+       "model": "gpt-4o-mini"
+      }
+     },
+     {
+      "params": {
+       "messages": [
+        {
+         "content": "Say hello",
+         "role": "user"
+        }
+       ],
+       "model": "gpt-4o-mini"
+      }
+     }
+    ],
+    "checks": {
+     "content": {
+      "raised": {
+       "__exception__": "Error",
+       "attrs": {},
+       "chain": [
+        "Error"
+       ],
+       "class": "Error",
+       "message": "Expected content \"first\", got \"[object Object]\"",
+       "toString": "Error: Expected content \"first\", got \"[object Object]\""
+      }
+     },
+     "contentFail": {
+      "raised": {
+       "__exception__": "Error",
+       "attrs": {},
+       "chain": [
+        "Error"
+       ],
+       "class": "Error",
+       "message": "Expected content \"nope\", got \"[object Object]\"",
+       "toString": "Error: Expected content \"nope\", got \"[object Object]\""
+      }
+     },
+     "cost": {
+      "ok": "<undefined>"
+     },
+     "meta": {
+      "raised": {
+       "__exception__": "Error",
+       "attrs": {},
+       "chain": [
+        "Error"
+       ],
+       "class": "Error",
+       "message": "AgentCCMetadata missing requestId",
+       "toString": "Error: AgentCCMetadata missing requestId"
+      }
+     },
+     "usage": {
+      "ok": "<undefined>"
+     },
+     "valid": {
+      "ok": "<undefined>"
+     }
+    },
+    "first": {
+     "agentcc": {
+      "cacheStatus": null,
+      "cost": null,
+      "fallbackUsed": false,
+      "guardrailAction": null,
+      "guardrailConfidence": null,
+      "guardrailMessage": null,
+      "guardrailName": null,
+      "guardrailTriggered": false,
+      "latencyMs": 100,
+      "modelUsed": null,
+      "provider": "openai",
+      "ratelimit": null,
+      "requestId": "req-mock",
+      "routingStrategy": null,
+      "timeoutMs": null,
+      "traceId": "trace-mock"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "message": {
+        "content": {
+         "content": "first"
+        },
+        "role": "assistant"
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-mock",
+     "model": "gpt-4o",
+     "object": "chat.completion",
+     "usage": {
+      "completion_tokens": 5,
+      "prompt_tokens": 10,
+      "total_tokens": 15
+     }
+    },
+    "second": {
+     "ok": {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 100,
+       "modelUsed": null,
+       "provider": "openai",
+       "ratelimit": null,
+       "requestId": "req-mock",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "trace-mock"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+         "content": "Mock response",
+         "role": "assistant"
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-mock",
+      "model": "gpt-4o",
+      "object": "chat.completion",
+      "usage": {
+       "completion_tokens": 5,
+       "prompt_tokens": 10,
+       "total_tokens": 15
+      }
+     }
+    },
+    "values": {
+     "completion": {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 100,
+       "modelUsed": null,
+       "provider": "openai",
+       "ratelimit": null,
+       "requestId": "req-mock",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "trace-mock"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+         "content": null,
+         "role": "assistant"
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-mock",
+      "model": "gpt-4o",
+      "object": "chat.completion",
+      "usage": {
+       "completion_tokens": 5,
+       "prompt_tokens": 10,
+       "total_tokens": 15
+      }
+     },
+     "meta": {
+      "cacheStatus": null,
+      "cost": null,
+      "fallbackUsed": false,
+      "guardrailAction": null,
+      "guardrailConfidence": null,
+      "guardrailMessage": null,
+      "guardrailName": null,
+      "guardrailTriggered": false,
+      "latencyMs": 100,
+      "modelUsed": null,
+      "provider": "openai",
+      "ratelimit": null,
+      "requestId": "req-mock",
+      "routingStrategy": null,
+      "timeoutMs": null,
+      "traceId": "trace-mock"
+     },
+     "usage": {
+      "completion_tokens": 5,
+      "prompt_tokens": 10,
+      "total_tokens": 15
+     }
+    }
+   }
+  }
+ },
+ "format": 1
+}

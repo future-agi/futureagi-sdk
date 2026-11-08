@@ -25,7 +25,7 @@ GATEWAY_RESPONSE = {
 }
 
 GATEWAY_HEADERS = {
-    "x-agentcc-request-id": "req-abc",
+    "x-agentcc-request-id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
     "x-agentcc-trace-id": "trace-xyz",
     "x-agentcc-provider": "openai",
     "x-agentcc-latency-ms": "42",
@@ -131,7 +131,7 @@ class TestEndToEnd:
         assert result.id == "chatcmpl-abc123"
         assert result.choices[0].message.content == "Hello!"
         assert result.agentcc is not None
-        assert result.agentcc.request_id == "req-abc"
+        assert result.agentcc.request_id == "01ARZ3NDEKTSV4RRFFQ69G5FAV"
         assert result.agentcc.provider == "openai"
 
     @respx.mock

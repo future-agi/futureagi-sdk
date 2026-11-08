@@ -19,6 +19,8 @@ export interface KnowledgeBaseConfig {
     /** Current status of the knowledge base */
     status?: string;
     /** Last error message if any */
+    /** @deprecated Use last_error. SDK runtime paths warn once per alias per process. */
+    lastError?: string;
     last_error?: string;
     /** List of file IDs or names in the knowledge base */
     files?: string[];
@@ -28,9 +30,17 @@ export interface KnowledgeBaseConfig {
  * Response interface for knowledge base creation
  */
 export interface KnowledgeBaseCreateResponse {
+    /** @deprecated Use kb_id. SDK runtime paths warn once per alias per process. */
+    kbId?: string;
     kb_id: string;
+    /** @deprecated Use kb_name. SDK runtime paths warn once per alias per process. */
+    kbName?: string;
     kb_name: string;
+    /** @deprecated Use file_ids. SDK runtime paths warn once per alias per process. */
+    fileIds?: string[];
     file_ids?: string[];
+    /** @deprecated Use not_uploaded. SDK runtime paths warn once per alias per process. */
+    notUploaded?: string[];
     not_uploaded?: string[];
 }
 
@@ -41,6 +51,8 @@ export interface KnowledgeBaseUpdateResponse {
     id: string;
     name: string;
     files?: string[];
+    /** @deprecated Use not_uploaded. SDK runtime paths warn once per alias per process. */
+    notUploaded?: string[];
     not_uploaded?: string[];
 }
 
@@ -49,14 +61,28 @@ export interface KnowledgeBaseUpdateResponse {
  */
 export interface KnowledgeBaseListResponse {
     result: {
-        table_data: Array<{
-            id: string;
-            name: string;
-            status?: string;
-            files?: string[];
-        }>;
+        /** @deprecated Use table_data. SDK response access warns once per process. */
+        tableData?: Array<KnowledgeBaseConfig & { id: string }>;
+        table_data: Array<KnowledgeBaseConfig & { id: string }>;
     };
 }
+
+/** Older camelCase creation input, separate from the 0.2.0 canonical interface. */
+export type LegacyKnowledgeBaseCreateResponse = Omit<KnowledgeBaseCreateResponse, 'kbId' | 'kbName' | 'kb_id' | 'kb_name'> & {
+    kbId: string;
+    kbName: string;
+    kb_id?: string;
+    kb_name?: string;
+};
+/** Older camelCase list input. */
+export interface LegacyKnowledgeBaseListResponse {
+    result: {
+        tableData: Array<KnowledgeBaseConfig & { id: string }>;
+        table_data?: Array<KnowledgeBaseConfig & { id: string }>;
+    };
+}
+export type KnowledgeBaseCreateResult = KnowledgeBaseCreateResponse & LegacyKnowledgeBaseCreateResponse;
+export type KnowledgeBaseListResult = KnowledgeBaseListResponse & LegacyKnowledgeBaseListResponse;
 
 /**
  * Supported file types for knowledge base uploads

@@ -1,0 +1,21 @@
+{
+  "handle_fixtures": {
+    "Run": {
+      "py": {"path": "client.agents.runs.get", "args": ["00000000-0000-4000-8000-000000000001"]},
+      "ts": {"path": "client.agents.runs.get", "args": ["00000000-0000-4000-8000-000000000001"]},
+      "request": {"method": "GET", "path": "/omega/api/workspace/conversations/00000000-0000-4000-8000-000000000001"},
+      "response": {"conversation": {"id": "00000000-0000-4000-8000-000000000001", "status": "done"}, "messages": [], "marker": "setup"}
+    }
+  },
+  "module_absences": [
+    {"id": "typescript-evaluation-runner", "status": "NOT-OFFERED", "owner": "evals", "reason": "Only REST evaluation management is offered; the source-compatible execution subpath is hidden", "ts_subpath": "./evals"}
+  ],
+  "namespace_absences": [
+    {"id": "simulations", "status": "NOT-OFFERED", "owner": "client-core", "reason": "Simulation APIs are not offered in this release.", "py": ["client.simulations"], "ts": ["client.simulations"]},
+    {"id": "workspace-capabilities", "status": "NOT-OFFERED", "owner": "client-core", "reason": "The public workspace capability accessor is not registered", "py": ["client.workspace"], "ts": ["client.workspace"]},
+    {"id": "sandboxes", "status": "NOT-OFFERED", "owner": "sandboxes", "reason": "Hosted sandboxes are hidden from this release", "py": ["client.sandboxes"], "ts": ["client.sandboxes"]},
+    {"id": "deployments", "status": "NOT-OFFERED", "owner": "deployments", "reason": "Hosted project deployments are hidden from this release", "py": ["client.deployments"], "ts": ["client.deployments"]},
+    {"id": "billing", "status": "NOT-OFFERED", "owner": "billing", "reason": "Billing reads await a certified and qualified backend", "py": ["client.billing", "client.usage"], "ts": ["client.billing", "client.usage"]},
+    {"id": "keys", "status": "NOT-OFFERED", "owner": "identity", "reason": "No certified personal-owner-scoped key enumeration is offered", "py": ["client.keys"], "ts": ["client.keys"]}
+  ]
+}

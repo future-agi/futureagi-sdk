@@ -1,10 +1,13 @@
+import { legacyFields, columnFields, cellFields, datasetConfigFields, datasetTableFields, huggingfaceFields } from '../_compat-fields';
 import { AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
 import FormData from 'form-data';
-import { APIKeyAuth, APIKeyAuthConfig, ResponseHandler } from '../api/auth';
-import { HttpMethod, RequestConfig } from '../api/types';
+import { APIKeyAuth, ResponseHandler } from '../api/auth';
+import type { APIKeyAuthConfig } from '../api/auth';
+import { HttpMethod } from '../api/types';
+import type { RequestConfig } from '../api/types';
 import { Routes } from '../utils/routes';
 import { DEFAULT_SETTINGS } from '../utils/constants';
 import {
@@ -17,12 +20,6 @@ import {
     ServiceUnavailableError,
 } from '../utils/errors';
 import {
-    DatasetConfig,
-    DatasetTable,
-    HuggingfaceDatasetConfig,
-    Column,
-    Row,
-    Cell,
     createColumn,
     createRow,
     createCell,
@@ -30,6 +27,16 @@ import {
     DataTypeChoices,
     SourceChoices,
     ModelTypes,
+} from './types';
+import type {
+    DatasetConfig,
+    DatasetTable,
+    DatasetTableResult,
+    HuggingfaceDatasetConfig,
+    Column,
+    ColumnResult,
+    Row,
+    Cell,
 } from './types';
 
 const DEFAULT_API_TIMEOUT = 30000; // 30 seconds in milliseconds
@@ -89,7 +96,7 @@ class LRUCache<K, V> {
  * Response handler for dataset operations
  */
 export class DatasetResponseHandler extends ResponseHandler {
-    static _parseSuccess(response: AxiosResponse): DatasetConfig | DatasetTable {
+    static _parseSuccess(response: AxiosResponse): DatasetConfig | DatasetTableResult {
         const data = response.data;
         const url = response.config.url || '';
 
@@ -102,18 +109,18 @@ export class DatasetResponseHandler extends ResponseHandler {
                 throw new Error("Multiple datasets found. Please specify a dataset name.");
             }
             
-            return {
+            return legacyFields({
                 id: datasets[0].dataset_id,
                 name: datasets[0].name,
                 model_type: datasets[0].model_type,
-            };
+            }, datasetConfigFields);
         }
 
         if (url.includes('/get-dataset-table/')) {
             const id = url.split('/').slice(-3, -2)[0];
             const result = data.result;
             
-            const columns: Column[] = result.column_config.map((col: any) => ({
+            const columns: ColumnResult[] = result.column_config.map((col: any) => legacyFields({
                 id: col.id,
                 name: col.name,
                 data_type: col.data_type,
@@ -124,7 +131,7 @@ export class DatasetResponseHandler extends ResponseHandler {
                 eval_tags: col.eval_tag || [],
                 average_score: col.average_score,
                 order_index: col.order_index,
-            }));
+            }, columnFields) as ColumnResult);
 
             const rows: Row[] = result.table.map((row: any) => {
                 const cells: Cell[] = [];
@@ -148,22 +155,24 @@ export class DatasetResponseHandler extends ResponseHandler {
                 return createRow({ cells, order });
             });
 
-            return {
+            const table = legacyFields(result, datasetTableFields);
+            return legacyFields({
                 id,
                 columns,
                 rows,
                 metadata: result.metadata,
-            };
+                ...(table.dataset_config ? { dataset_config: legacyFields(table.dataset_config, datasetConfigFields) } : {}),
+            }, datasetTableFields);
         }
 
         if (url.includes(Routes.dataset_empty) || 
             url.includes(Routes.dataset_local) || 
             url.includes(Routes.dataset_huggingface)) {
-            return {
+            return legacyFields({
                 id: data.result.dataset_id,
                 name: data.result.dataset_name,
                 model_type: data.result.dataset_model_type,
-            };
+            }, datasetConfigFields);
         }
 
         return data;
@@ -200,7 +209,9 @@ export class DatasetResponseHandler extends ResponseHandler {
 }
 
 /**
- * Dataset manager class for handling dataset operations
+ * Dataset manager class for handling dataset operations.
+ * Published camelCase model inputs and properties remain available. Prefer
+ * snake_case fields; using each legacy alias warns once per process.
  */
 export class Dataset extends APIKeyAuth {
     private static _datasetInstanceCache = new LRUCache<string, Dataset>(100);
@@ -211,7 +222,7 @@ export class Dataset extends APIKeyAuth {
         
         if (config.datasetConfig) {
             // Directly assign; caller will decide whether to call create()
-            this._datasetConfig = config.datasetConfig;
+            this._datasetConfig = legacyFields(config.datasetConfig, datasetConfigFields);
         }
     }
 
@@ -221,7 +232,7 @@ export class Dataset extends APIKeyAuth {
             this._datasetConfig = fetchedConfig;
         } catch (error) {
             if (error instanceof DatasetNotFoundError) {
-                this._datasetConfig = datasetConfig;
+                this._datasetConfig = legacyFields(datasetConfig, datasetConfigFields);
             } else {
                 throw new DatasetError(`Failed to initialize dataset configuration for ${datasetConfig.name}: ${error}`);
             }
@@ -239,12 +250,12 @@ export class Dataset extends APIKeyAuth {
         }
 
         const responseConfig = await this._createDataset(this._datasetConfig, source);
-        this._datasetConfig = {
+        this._datasetConfig = legacyFields({
             ...this._datasetConfig,
             id: responseConfig.id,
             name: responseConfig.name,
             model_type: responseConfig.model_type,
-        };
+        }, datasetConfigFields);
         
         return this;
     }
@@ -286,7 +297,8 @@ export class Dataset extends APIKeyAuth {
             throw new DatasetValidationError("Columns list cannot be empty.");
         }
 
-        const processedColumns: Column[] = columns.map(col => {
+        const processedColumns: Column[] = columns.map(input => {
+            const col = legacyFields(input, columnFields);
             if ('id' in col && col.id) {
                 // Already a complete Column
                 return col as Column;
@@ -320,7 +332,8 @@ export class Dataset extends APIKeyAuth {
             throw new DatasetValidationError("Rows list cannot be empty.");
         }
 
-        const processedRows: Row[] = rows.map(row => {
+        const processedRows: Row[] = rows.map(input => {
+            const row = { ...input, cells: input.cells?.map(cell => legacyFields(cell, cellFields)) };
             if ('id' in row && row.id) {
                 // Already a complete Row
                 return row as Row;
@@ -372,6 +385,12 @@ export class Dataset extends APIKeyAuth {
         return column?.id || null;
     }
 
+    /**
+     * Add a prompt column and return this dataset. Numeric generation options
+     * are sent in config.run_prompt_config; model, messages, output format,
+     * concurrency, tools, toolChoice and responseFormat remain under config.
+     * Public options and defaults are unchanged, including explicit zero values.
+     */
     async addRunPrompt(options: {
         name: string;
         model: string;
@@ -496,11 +515,13 @@ export class Dataset extends APIKeyAuth {
                 output_format: outputFormat,
                 concurrency,
                 messages: processedMessages,
-                max_tokens: maxTokens,
-                temperature,
-                presence_penalty: presencePenalty,
-                frequency_penalty: frequencyPenalty,
-                top_p: topP,
+                run_prompt_config: {
+                    max_tokens: maxTokens,
+                    temperature,
+                    presence_penalty: presencePenalty,
+                    frequency_penalty: frequencyPenalty,
+                    top_p: topP,
+                },
             },
         };
 
@@ -528,6 +549,16 @@ export class Dataset extends APIKeyAuth {
         return this;
     }
 
+    /**
+     * Add a dataset evaluation using the legacy dataset client.
+     * Selecting Turing/Protect models requires an Enterprise licence including
+     * those models on self-hosted servers; cloud plan checks are separate.
+     * A model-gate denial returns HTTP 402 ENTITLEMENT_DENIED. This legacy
+     * method retains DatasetError; FutureAGIClient.evals.addDatasetUserEval
+     * instead throws PaymentRequiredError, not LicenseRequiredError.
+     * Select another model or ask the server administrator to enable the
+     * licensed models. Code evaluations are exempt from this model gate.
+     */
     async addEvaluation(options: {
         name: string;
         evalTemplate: string;
@@ -715,6 +746,11 @@ export class Dataset extends APIKeyAuth {
         return response.result || {};
     }
 
+    /**
+     * Add an optimization using the existing column and its evaluation mappings.
+     * optimizationName is sent as name and promptColumnName as prompt_name;
+     * public options, validation and the returned dataset instance are unchanged.
+     */
     async addOptimization(options: {
         optimizationName: string;
         promptColumnName: string;
@@ -739,17 +775,84 @@ export class Dataset extends APIKeyAuth {
             throw new DatasetValidationError("Prompt column name cannot be empty.");
         }
 
+        const validOptimizeTypes = ["PROMPT_TEMPLATE", "MODEL_PARAMETERS", "HYBRID"];
+        if (!validOptimizeTypes.includes(optimizeType)) {
+            throw new DatasetValidationError(
+                `Invalid optimizeType: '${optimizeType}'. Must be one of: ${validOptimizeTypes.join(", ")}`
+            );
+        }
+
+        const columnId = await this.getColumnId(promptColumnName);
+        if (!columnId) {
+            throw new DatasetError(
+                `Prompt column '${promptColumnName}' not found in dataset '${this._datasetConfig.name}'`
+            );
+        }
+
+        let evalTemplateIds: string[] = [];
+        try {
+            class MetricsByColumnResponseHandler extends ResponseHandler {
+                static _parseSuccess(response: AxiosResponse): any {
+                    return response.data;
+                }
+            }
+
+            const metricsResponse = await this.request<any>(
+                {
+                    method: HttpMethod.GET,
+                    url: `${this._baseUrl}/model-hub/metrics/by-column/`,
+                    params: { column_id: columnId },
+                    timeout: DEFAULT_API_TIMEOUT,
+                },
+                MetricsByColumnResponseHandler
+            ) as Record<string, any>;
+            const metrics = metricsResponse?.result ?? [];
+            if (Array.isArray(metrics)) {
+                evalTemplateIds = metrics
+                    .map((metric: Record<string, any>) => metric.id)
+                    .filter((id: unknown): id is string => typeof id === "string" && id.length > 0);
+            }
+        } catch {
+            evalTemplateIds = [];
+        }
+
+        if (evalTemplateIds.length === 0) {
+            const evalStats = await this.getEvalStats();
+            const stats = Array.isArray(evalStats?.result)
+                ? evalStats.result
+                : Array.isArray(evalStats)
+                    ? evalStats
+                    : [];
+            evalTemplateIds = stats
+                .map((metric: Record<string, any>) => metric.id)
+                .filter((id: unknown): id is string => typeof id === "string" && id.length > 0);
+        }
+
+        if (evalTemplateIds.length === 0) {
+            throw new DatasetError(
+                `No evaluation templates found for optimization in dataset '${this._datasetConfig.name}'.`
+            );
+        }
+
+        const userEvalTemplateMapping = Object.fromEntries(
+            evalTemplateIds.map((id) => [String(id), String(id)])
+        );
+
         const url = `${this._baseUrl}/${Routes.dataset_optimization_create}`;
         await this.request(
             {
                 method: HttpMethod.POST,
                 url,
                 json: {
-                    dataset_id: this._datasetConfig.id,
-                    optimization_name: optimizationName,
-                    prompt_column_name: promptColumnName,
+                    name: optimizationName,
+                    prompt_name: promptColumnName,
+                    column_id: columnId,
                     optimize_type: optimizeType,
-                    model_config: modelConfig,
+                    user_eval_template_ids: evalTemplateIds,
+                    dataset_id: this._datasetConfig.id,
+                    model_config: modelConfig || {},
+                    messages: [],
+                    user_eval_template_mapping: userEvalTemplateMapping,
                 },
                 timeout: DEFAULT_API_TIMEOUT,
             },
@@ -838,6 +941,7 @@ export class Dataset extends APIKeyAuth {
         config: DatasetConfig,
         hfConfig: HuggingfaceDatasetConfig
     ): Promise<DatasetConfig> {
+        hfConfig = legacyFields(hfConfig, huggingfaceFields);
         const url = `${this._baseUrl}/${Routes.dataset_huggingface}`;
         const response = await this.request<DatasetConfig>(
             {
@@ -1037,4 +1141,4 @@ export class Dataset extends APIKeyAuth {
             throw err;
         }
     }
-} 
+}

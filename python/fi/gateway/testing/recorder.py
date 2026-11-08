@@ -7,7 +7,30 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from fi.gateway.callbacks.base import CallbackHandler, CallbackRequest, CallbackResponse
+from fi.gateway.callbacks.base import CallbackHandler, CallbackRequest, CallbackResponse, redact_credentials
+
+
+def _response_record(response: Any) -> dict[str, Any]:
+    """Record release wrappers, parsed current values or raw bytes without gateway metadata."""
+    if isinstance(response, CallbackResponse):
+        parsed = response._parsed
+        if isinstance(parsed, (bytes, bytearray)):
+            body = {"bytes": len(parsed)}
+        elif hasattr(parsed, "model_dump"):
+            body = parsed.model_dump(mode="json", exclude={"agentcc"})
+        else:
+            body = response.body
+        return {"status_code": response.status_code, "body": body}
+    meta = getattr(response, "agentcc", None)
+    http = getattr(meta, "http_response", None)
+    status = getattr(http, "status_code", None)
+    if hasattr(response, "model_dump"):
+        body = response.model_dump(mode="json", exclude={"agentcc"})
+    elif isinstance(response, (bytes, bytearray)):
+        body = {"bytes": len(response)}
+    else:
+        body = response
+    return {"status_code": status if isinstance(status, int) else None, "body": body}
 
 
 @dataclass
@@ -30,22 +53,28 @@ class RequestRecorder(CallbackHandler):
         # recordings.json now contains all request/response pairs
     """
 
-    def __init__(self, file_path: str) -> None:
+    def __init__(self, file_path: str, *, format: str = "published") -> None:
+        """Use ``format='compact'`` for JSON snapshots and raw-byte summaries."""
+        if format not in {"published", "compact"}:
+            raise ValueError("format must be 'published' or 'compact'")
+        self._format = format
         self._file_path = file_path
         self._recordings: list[dict[str, Any]] = []
 
-    def on_request_end(self, request: CallbackRequest, response: CallbackResponse) -> None:
-        self._recordings.append({
-            "request": {
-                "method": request.method,
-                "url": request.url,
-                "body": request.body,
-            },
-            "response": {
-                "status_code": response.status_code,
-                "body": response.body,
-            },
-        })
+    def on_request_end(self, request: CallbackRequest, response: Any) -> None:
+        self._recordings.append(
+            {
+                "request": {
+                    "method": request.method,
+                    "url": request.url,
+                    "body": redact_credentials(request.body),
+                },
+                "response": (_response_record(response) if self._format == "compact" else {
+                    "status_code": getattr(response, "status_code", None),
+                    "body": getattr(response, "body", None),
+                }),
+            }
+        )
 
     @property
     def recordings(self) -> list[dict[str, Any]]:
@@ -114,7 +143,9 @@ class _RecordingChatCompletions:
         result = self._recorder._client.chat.completions.create(**kwargs)
         req_data = {k: v for k, v in kwargs.items() if k != "extra_headers"}
         resp_data = result.model_dump() if hasattr(result, "model_dump") else {}
-        self._recorder._interactions.append(Interaction(request=req_data, response=resp_data))
+        self._recorder._interactions.append(
+            Interaction(request=req_data, response=resp_data)
+        )
         return result
 
 

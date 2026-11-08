@@ -52,9 +52,9 @@ env:
 jobs:
   e2e:
     name: e2e (python ${{ matrix.python }}${{ matrix.typescript && ', typescript' || '' }})
-    # ubuntu-latest became Ubuntu 26.04 on 2026-11-06 and actions/setup-python has no
-    # 3.9 build for it ("The version '3.9' ... was not found for Ubuntu 26.04"). Pin the
-    # jobs that run the 3.9 floor to 24.04 until the floor moves to 3.10.
+    # The supported floor is Python 3.10. Keep the explicit Ubuntu 24.04
+    # runner until setup-python availability for every matrix version is
+    # verified on ubuntu-latest; a floor change alone does not verify it.
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     strategy:
@@ -62,12 +62,14 @@ jobs:
       matrix:
         include:
           # The floor and a current interpreter; TypeScript rides along once.
-          - python: "3.9"
+          - python: "3.10"
             typescript: false
           - python: "3.12"
             typescript: true
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Pick the backend image tag
         env:
@@ -89,6 +91,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: future-agi/future-agi
+          persist-credentials: false
           ref: ${{ env.BACKEND_REF }}
           path: future-agi
           sparse-checkout: |
@@ -126,7 +129,7 @@ jobs:
       - name: Install the Python SDK
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ./python pytest pyyaml
+          python -m pip install -e ./python "pytest>=8.3.3,<9" "pytest-asyncio>=0.24,<0.25" respx pyyaml
 
       - name: Sign up an account and write .env.local
         run: python sdkgen/local_api_key.py --signup --base-url "$FI_BASE_URL" --label "gh${{ github.run_id }}"
@@ -138,6 +141,7 @@ jobs:
         if: matrix.typescript
         with:
           version: 8.15.0
+          package_json_file: typescript/futureagi/package.json
       - uses: actions/setup-node@v4
         if: matrix.typescript
         with:
@@ -148,10 +152,15 @@ jobs:
         if: matrix.typescript
         working-directory: typescript/futureagi
         run: pnpm install --ignore-workspace --frozen-lockfile --ignore-scripts
-      - name: TypeScript live suite
+      - name: TypeScript released platform live suite
         if: matrix.typescript
         working-directory: typescript/futureagi
         run: pnpm run test:live
+      - name: TypeScript facade live smoke
+        if: matrix.typescript
+        working-directory: typescript/futureagi
+        # The facade script requires env vars; parse the signup file without sourcing it.
+        run: node --env-file=../../.env.local --import tsx tests/live/smoke.ts
 
       - name: Dump the stack on failure
         if: failure()

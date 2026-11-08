@@ -9,7 +9,7 @@ import {
     type Column,
     type Cell,
     type Row,
-    type DatasetTable,
+    type DatasetTableInput,
 } from '../types';
 import { ModelProvider } from '../../api/types';
 
@@ -230,7 +230,7 @@ describe('createRow', () => {
 });
 
 describe('DatasetTableUtils', () => {
-    const mockTable: DatasetTable = {
+    const mockTable: DatasetTableInput = {
         id: 'table-123',
         columns: [
             {
@@ -303,7 +303,7 @@ describe('DatasetTableUtils', () => {
         });
 
         test('should handle empty table', () => {
-            const emptyTable: DatasetTable = {
+            const emptyTable: DatasetTableInput = {
                 id: 'empty',
                 columns: [],
                 rows: [],
@@ -315,7 +315,7 @@ describe('DatasetTableUtils', () => {
         });
 
         test('should escape CSV values with commas', () => {
-            const tableWithCommas: DatasetTable = {
+            const tableWithCommas: DatasetTableInput = {
                 id: 'table-commas',
                 columns: [
                     {

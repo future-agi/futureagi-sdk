@@ -1,0 +1,1484 @@
+{
+  "about": "The rules for a whole published tree, read by scripts/platform/hygiene-tree.mjs on top of hygiene-rules.json (which still applies to every file; the patterns under inherit.platformPathsOnly apply only under the platform paths). This file is scanned like every other file and passes its own scan: a pattern that would match its own text is written with a one-character class, and internal names are listed only as sha256 under \"names\" (the plain list is kept outside this repository). \"patterns\" may skip path globs (`*` stays inside one directory, `**` crosses them). \"generated\" marks files that are regenerated from their inputs: a hit there is fixed at the input. \"shas\" accounts for commit ids: pins are allowed by place; digestKeys maps exact case-insensitive content-digest keys to full hexadecimal lengths, never ambiguous revision keys; reviewed commits are allowed by value. \"binaries\" lists each file that is not UTF-8 text by path and the sha256 of its bytes. \"exemptions\" lets one line (by the sha256 of its stripped text) of one file hit the listed rules. A malformed entry, or one that matches nothing scanned, is itself a hit.",
+  "inherit": {
+    "platformPathsOnly": [
+      "source-ts-path"
+    ]
+  },
+  "generated": [
+    "go/**",
+    "java/**",
+    "openapi/platform/generated/**",
+    "openapi/sdk/generated/**",
+    "python/fi/generated/**",
+    "typescript/futureagi/src/generated/**"
+  ],
+  "patterns": [
+    {
+      "id": "ascii-escape",
+      "about": "printable ASCII encoded as a Unicode escape needs review, in any text format",
+      "regex": "\\\\[uU]00(?:[2-6][0-9a-fA-F]|7[0-eE])"
+    },
+    {
+      "id": "stream-id",
+      "about": "the names the build gave its work streams and phases",
+      "regex": "\\b(?:[U](?:[0-9]|[12][0-9])|[A]1|[B]0|[G]EN|[P][0-9])\\b"
+    },
+    {
+      "id": "ticket-id",
+      "about": "tracker ids, which a public reader cannot open",
+      "regex": "\\b(?:T[H]|SDKREP[O]|AL[K]|SDKCON[F])-[0-9]+\\b"
+    },
+    {
+      "id": "team-ref",
+      "about": "internal team names as owners of code",
+      "regex": "\\b(?:T[H]|DS[X])\\b"
+    },
+    {
+      "id": "review-ref",
+      "about": "numbered review findings and lettered requests",
+      "regex": "\\b[Rr]evie[w] [A-Z][0-9]{1,2}\\b|\\b[A]sk [a-z](?=[:;,)])|\\b[A-Z][0-9]{1,2} \\([^)]*\\brevie[w]\\)"
+    },
+    {
+      "id": "internal-doc",
+      "about": "internal design documents by name",
+      "regex": "\\b(?:P[L]AN|D[E]SIGN rev[0-9]+|B[A]CKLOG|C[O]RRECTIONS|L[A]UNCH-ARCH|J[O]URNEYS|S[H]ARED-BASE)\\b"
+    },
+    {
+      "id": "decision-ref",
+      "about": "numbered decisions and their addenda",
+      "regex": "\\b[Rr]ulin[g]s? [0-9]{2,4}\\b|\\b[Aa]ddend(?:um|a) [0-9]+\\b|\\b[Oo]wne[r](?:'s)? (?:go|ruling|packet)\\b"
+    },
+    {
+      "id": "run-id",
+      "about": "workflow and cloud job ids",
+      "regex": "\\bw[f]_[0-9a-f]{8}|\\b[j]-20[0-9]{6}t[0-9]{4}-[0-9a-f]{6}\\b"
+    },
+    {
+      "id": "process-word",
+      "about": "the build process's own words; generated files keep the contract's vocabulary",
+      "regex": "(?<![A-Za-z])[Ll]a[n]es?(?![A-Za-z])|\\b(?:[Vv]erif(?:y|ier)|[Ff]ix|[Rr]eview) [r]ound [0-9]+\\b|\\b[Ss]po[t] (?:VM|instance)s?\\b|\\b[A]cceptance [0-9]+\\b",
+      "skipPaths": [
+        "go/**",
+        "java/**",
+        "openapi/platform/generated/**",
+        "openapi/sdk/generated/**",
+        "python/fi/generated/**",
+        "typescript/futureagi/src/generated/**"
+      ]
+    }
+  ],
+  "names": {
+    "about": "Internal names as the sha256 of their lower-case text, each mapped to the rule it fails. The plain list is kept outside this repository; node scripts/platform/hygiene-tree.mjs --names <file> checks the two agree, and node scripts/platform/hygiene-scan.mjs --hash <rule id> <name> prints a new entry.",
+    "maxWords": 4,
+    "sha256": {
+      "1a1f87e00f7dac4e3d55443bd853afaf46777a3caae4df85e136b8f1cdd68742": "internal-doc",
+      "3067fd1534e6fa67c18249cae9ee30cdc1fd4adb32d3b5979be021b5565cc48a": "internal-doc",
+      "5471f888bdd49927b6db9b53107315771d5a9cea8fd3f8c91595d17b38aed3ae": "internal-doc",
+      "7a99ceabf789368ec223f01628dc4a763685d1f0aa25ec4a3167bb9248e495d8": "internal-doc",
+      "906e3475c94fd21f954addb6a4d6b2e3eef659b80c112b8b08c7adf5873595cd": "internal-doc",
+      "fd22e72be172bf9e0429271cd06d429b0d9ddecd155aef05923e719b185c4d28": "internal-doc",
+      "5f7b5151610562a54380a860c03160e60f52f521c527db313fb38c59f7cbfdff": "local-state",
+      "87fd8d3c89b8fb83043881add6353807ef73a7ad2c57698c3a493e43ac83a842": "local-state",
+      "b23fb78261fe3c71257cb7082faca052580a809ad55c97dc7917a20fd953cfbf": "local-state",
+      "ec6bf87ad190b50df05ad1256d00495563a7afb0e3afa9af9eb0b1d7ca868a50": "local-state"
+    }
+  },
+  "shas": {
+    "pins": [
+      {
+        "path": "openapi/platform/source.json",
+        "keys": [
+          "commit"
+        ],
+        "why": "the commit of the pinned customer contract; regeneration rewrites it"
+      },
+      {
+        "path": "openapi/sdk/*-source.json",
+        "keys": [
+          "backend_revision"
+        ],
+        "why": "the backend revision a scoped operation set was reviewed at"
+      },
+      {
+        "path": "python/fi/generated/platform/policy.py",
+        "keys": [
+          "commit"
+        ],
+        "why": "the generated policy table carries the contract pin it was generated from"
+      },
+      {
+        "path": "typescript/futureagi/src/generated/platform/policy.gen.*",
+        "keys": [
+          "commit"
+        ],
+        "why": "the generated policy table carries the contract pin it was generated from"
+      }
+    ],
+    "digestKeys": {
+      "npm_pack_shasum": [
+        40
+      ],
+      "sha1_computed": [
+        40
+      ]
+    },
+    "reviewed": [
+      {
+        "sha": "32ea09fa63d0ffa2e5178d1ede94f0f8b5796b7a",
+        "repository": "future-agi/future-agi",
+        "why": "a public backend commit on public branches: the trial-stability contract the notes and fixtures cite"
+      }
+    ]
+  },
+  "binaries": [
+    {
+      "path": ".github/assets/Logo.png",
+      "sha256": "88f359082b47b931de3de86f752190b8f713d3864eb9c831a16683c3f06be442",
+      "why": "the README logo"
+    },
+    {
+      "path": ".github/assets/logo-banner-dark.png",
+      "sha256": "88f359082b47b931de3de86f752190b8f713d3864eb9c831a16683c3f06be442",
+      "why": "the README banner (dark)"
+    },
+    {
+      "path": ".github/assets/logo-banner.png",
+      "sha256": "88f359082b47b931de3de86f752190b8f713d3864eb9c831a16683c3f06be442",
+      "why": "the README banner"
+    },
+    {
+      "path": "Logo.png",
+      "sha256": "000bd4beff0340164e78a9290cd6c2a61736d0c5830aa8aa7ebe2942c9120933",
+      "why": "the package logo"
+    },
+    {
+      "path": "java/futureagi/gradle/wrapper/gradle-wrapper.jar",
+      "sha256": "cb0da6751c2b753a16ac168bb354870ebb1e162e9083f116729cec9c781156b8",
+      "why": "the standard Gradle wrapper of the generated Java client"
+    }
+  ],
+  "exemptions": [
+    {
+      "path": "python/tests/experiments/unit/contract_server.py",
+      "lineSha256": "9534db7e477f9cb0c6044246cc72a6c9f57383dce64b2b576fa4362a34507588",
+      "rules": [
+        "internal-review"
+      ],
+      "why": "Synthetic contract-server error about the request's metric plan, not an internal planning document."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/gateway/public-hygiene.test.ts",
+      "lineSha256": "033d38b78daff9f889057bb03b11f5ae9e710d9e7f9d9429ff39c766c815ae17",
+      "rules": [
+        "plan-reference"
+      ],
+      "why": "Synthetic negative public-text matcher sample; this exact input exercises reference detection."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/gateway/public-hygiene.test.ts",
+      "lineSha256": "f253a072829e838deb3a7c91f4b754a99f48824de858027a041160ef5a2b94db",
+      "rules": [
+        "plan-reference"
+      ],
+      "why": "Synthetic negative public-text matcher sample; this exact input exercises reference detection."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/gateway/public-hygiene.test.ts",
+      "lineSha256": "f7c2078b94f86cdf286d94d8a526f1a2cc8cf1a706d94c295db3555a3e61e7ea",
+      "rules": [
+        "internal-review"
+      ],
+      "why": "Synthetic positive matcher sample about a request plan, not an internal planning document."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/gateway/public-hygiene.test.ts",
+      "lineSha256": "a3cf9aad448a5b971c3878f1daa0c21b726cbc2c517ee2b83f185a813abd7108",
+      "rules": [
+        "team-ref"
+      ],
+      "why": "Synthetic detector pattern assembled to test private-name rejection; exact line only."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/gateway/public-hygiene.test.ts",
+      "lineSha256": "8fe243c084e81cbdc466d6ccff14babb23b627a8b1a28cc730e98f857f07c6c2",
+      "rules": [
+        "process-word"
+      ],
+      "why": "Description of a synthetic rejection pattern, not implementation ownership or provenance."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/gateway/public-hygiene.test.ts",
+      "lineSha256": "5f50e7021711f72b9666160aa8d8c21c6b16576a1df03a8cb0f978b90e045173",
+      "rules": [
+        "process-word"
+      ],
+      "why": "Description of a synthetic rejection pattern, not implementation ownership or provenance."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/gateway/public-hygiene.test.ts",
+      "lineSha256": "80e91b011a07c61369604a6365e70492aa26ad0989e6e2ddd3fafdbf87fcec19",
+      "rules": [
+        "process-word"
+      ],
+      "why": "Description of a synthetic rejection pattern, not implementation ownership or provenance."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/gateway/public-hygiene.test.ts",
+      "lineSha256": "152777e0a2996c29eb648d439cffda373b69cf70d00d2ef69c161e7e5af60b58",
+      "rules": [
+        "team-ref"
+      ],
+      "why": "Synthetic negative private-name matcher sample, not a provenance citation."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/gateway/public-hygiene.test.ts",
+      "lineSha256": "b111a3729f63283569a9e348437780ab2218852e53da9af62ab22af581cd84f1",
+      "rules": [
+        "stream-id"
+      ],
+      "why": "Synthetic negative identifier matcher sample, not a real workstream reference."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/gateway/public-hygiene.test.ts",
+      "lineSha256": "e348f91b002dc8931e0ae392e0d7ce588b17d330ce861b54107dc492792cf6af",
+      "rules": [
+        "process-word"
+      ],
+      "why": "Synthetic negative public-text matcher sample, not implementation ownership or provenance."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "100df2c56d42b750704703533847049166c4d6a4f15ccf85b35c6cee15161231",
+      "rules": [
+        "stream-id"
+      ],
+      "why": "Plaintext synthetic negative example; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "81103afb37f52e69523cbaa0e663f955e8e1cb8607a0c5d9adc66b6c6ef1b2d6",
+      "rules": [
+        "ticket-id"
+      ],
+      "why": "Plaintext synthetic negative example; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "99bbd6c6f1fff7ca30021db3b8f207560b7430c781ba81c1fdc50f43ad7d0e49",
+      "rules": [
+        "review-ref"
+      ],
+      "why": "Plaintext synthetic negative example; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "44f8036cb53d38c33b2dea7aed6a6305d47bc245268eace07d9336d50ee14e33",
+      "rules": [
+        "decision-ref"
+      ],
+      "why": "Plaintext synthetic negative example; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "e5ddf79a6b678da5b437df8e5f9626ba141fa96ecc73209a7b7eaa7fe0a745e3",
+      "rules": [
+        "decision-ref"
+      ],
+      "why": "Plaintext synthetic negative example; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "ca0ccceb83a6ed50bb83ca4d50ce1daef19fb97c65fb692eb4a8495868ef967d",
+      "rules": [
+        "run-id"
+      ],
+      "why": "Plaintext synthetic negative example; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "509c0f8b91b5b5596db801656fee9f5772427fd01539604a86297f28abddda8a",
+      "rules": [
+        "run-id"
+      ],
+      "why": "Plaintext synthetic negative example; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "914446cbb192669934126b597ba7f210b1ae5139c4732ff7aec7d568c052c013",
+      "rules": [
+        "process-word"
+      ],
+      "why": "Plaintext generic vocabulary negative example; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "30c2759e07527a8073378ea2bafd5b41b595a0a993e602de747559c34f47e152",
+      "rules": [
+        "process-word"
+      ],
+      "why": "Plaintext synthetic negative example; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "ef1de21069b5bdfc5fa5208a2ad5295431d0cb50ea11728fe07c5db43e848beb",
+      "rules": [
+        "process-word"
+      ],
+      "why": "Plaintext generic vocabulary negative example; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "e1aed5ea898530b85d2578cade117855a5613dd7d5e48ee5ed793fef2b7b9ff9",
+      "rules": [
+        "process-word"
+      ],
+      "why": "Plaintext synthetic negative example; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "5479797e47be5b4435f977b811c62a6e915d936f5dfe8613da9c78fb537556a3",
+      "rules": [
+        "process-word"
+      ],
+      "why": "Plaintext generic vocabulary negative example; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "604f3150abe22d230fb92d0798bae4e257926a0583a9af7b89d386a2b0dac1bd",
+      "rules": [
+        "process-word"
+      ],
+      "why": "Plaintext synthetic negative example; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "2150cbc73d1ef773a8d14d007eb9116a926c7a64e84b91c87e86e6a0ea73f502",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic repeated-pair revision, not a real commit; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "ba25137c2743d65952a1bb5edec3ff5662095f95b774e3efda7863a968e9c964",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic repeated-pair revision, not a real commit; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "95281220a581b365e66fff419357bbd56835a1c83507956c2d02d430e351e493",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic repeated-pair revision, not a real commit; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "6e2ecc60dac0ce2fecffdf61cea7af6719d4276485499b44b5491b4fc823ccd8",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic repeated-pair revision, not a real commit; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "0292b60fd053e5c56adc0cf587c9f6c3fedc06b5e1fad3e3911b0d40ea875ac4",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic repeated-pair revision, not a real commit; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "ce6c01a2a023a24908568dc5b41f5df4ab1ad03ee4ea05ca92008db717da4631",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic repeated-pair revision, not a real commit; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "4384c6ddcb2d539063526159e64ac2d5c2105a93af0ad6b6945b1093459a9526",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic repeated-pair revision, not a real commit; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "31fda0ade59bdfbc24df0d61466cb21f3abaa7b563d0225f0ae7de9fe1774d98",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic repeated-pair revision, not a real commit; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-tree-cases.json",
+      "lineSha256": "7770658d661109a09b7632352a2ab90580a2058b1830144304c82a3a4314a810",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic repeated-pair revision, not a real commit; exact line only."
+    },
+    {
+      "path": "go/futureagi/go.sum",
+      "lineSha256": "70cd0421210db336a8db201bd9406d236b7a199e76c7d57f8287db99ee616fff",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Public Go dependency pseudo-version; this exact checksum line is generated dependency metadata."
+    },
+    {
+      "path": "go/futureagi/go.sum",
+      "lineSha256": "99fb497d8c2bce7d936b0919ec481b97ac31e774e50c3164c586ccf48f478dad",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Public Go dependency pseudo-version; this exact checksum line is generated dependency metadata."
+    },
+    {
+      "path": "go/futureagi/go.sum",
+      "lineSha256": "1fd8e29d3cdc4192018c0abb756e3670c5ad473288f5f24b444a6aaefd8d4cf4",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Public Go dependency pseudo-version; this exact checksum line is generated dependency metadata."
+    },
+    {
+      "path": "go/futureagi/go.sum",
+      "lineSha256": "bf72e4fbb17a1d9b0ed2c55a136fe91fd690650d811f910c07423aa64188043e",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Public Go dependency pseudo-version; this exact checksum line is generated dependency metadata."
+    },
+    {
+      "path": "go/futureagi/go.sum",
+      "lineSha256": "84f76098f2de66da57abef06b8da6f4fd6ab29092926dfd5a3c8972b71e8286c",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Public Go dependency pseudo-version; this exact checksum line is generated dependency metadata."
+    },
+    {
+      "path": "python/fi/evals/framework/context.py",
+      "lineSha256": "df1ee814f88b82545f543c3ee11efb3fafb80b38fe41ede3c312932c05dd2789",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "python/fi/evals/guardrails/scanners/secrets.py",
+      "lineSha256": "22b949e7fc0ad5a5957a0a8c67e7f24d27f03c4ff5423f51fb7e518156d7c11e",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Public SSH algorithm name inside the detector regex, not a source revision."
+    },
+    {
+      "path": "python/fi/evals/metrics/code_security/benchmarks/_builtin_autocomplete.py",
+      "lineSha256": "f3daa0c891d3571b84927b812f5d52e53aa219862e03630b55a0c9db5e3a91c1",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic hexadecimal alphabet in the insecure random-token benchmark, not a source revision."
+    },
+    {
+      "path": "python/tests/experiments/unit/test_judge_meaning.py",
+      "lineSha256": "4afce3eafffbac505bd362f1628c4c6e64bd8e66f5f5693ad6bfc68ce79e0b95",
+      "rules": [
+        "stream-id"
+      ],
+      "why": "Synthetic paraphrase-case label used to assert recorded fixture coverage, not a workstream name."
+    },
+    {
+      "path": "python/tests/experiments/unit/test_redaction.py",
+      "lineSha256": "e6020beefbae855f059b9a373f63242b4a7e12413c4767cabae5857889e581ae",
+      "rules": [
+        "openai-style-key"
+      ],
+      "why": "Synthetic redaction input: alphabetic placeholder, standard documentation EXAMPLE identifier, or PEM header without usable key material."
+    },
+    {
+      "path": "python/tests/experiments/unit/test_redaction.py",
+      "lineSha256": "7b1df1dfa3daf1ae4accc8920a5c0537ddb362b50c6f16379a590cc3cd6e63c2",
+      "rules": [
+        "openai-style-key"
+      ],
+      "why": "Synthetic redaction input: alphabetic placeholder, standard documentation EXAMPLE identifier, or PEM header without usable key material."
+    },
+    {
+      "path": "python/tests/experiments/unit/test_redaction.py",
+      "lineSha256": "b6fcf936fcd090724b393d9504fc905659cbd0d9b778bb417c6c85e19d12569e",
+      "rules": [
+        "aws-key"
+      ],
+      "why": "Synthetic redaction input: alphabetic placeholder, standard documentation EXAMPLE identifier, or PEM header without usable key material."
+    },
+    {
+      "path": "python/tests/experiments/unit/test_redaction.py",
+      "lineSha256": "a422c3c4f298954771ca1abb11a09b49c098074e0b896b05cd57db1678b0ffd5",
+      "rules": [
+        "private-key"
+      ],
+      "why": "Synthetic redaction input: alphabetic placeholder, standard documentation EXAMPLE identifier, or PEM header without usable key material."
+    },
+    {
+      "path": "python/tests/experiments/unit/test_redaction.py",
+      "lineSha256": "bd70dde557b94ffffaf1c6a6c7618cb7cbacdf3802aefbeb996e2cb284aece39",
+      "rules": [
+        "openai-style-key"
+      ],
+      "why": "Synthetic redaction input: alphabetic placeholder, standard documentation EXAMPLE identifier, or PEM header without usable key material."
+    },
+    {
+      "path": "python/tests/experiments/unit/test_redaction.py",
+      "lineSha256": "5d8574f8b26a0848083e94cf6046eac461d73fa43e65263fdeb2c4669cad3325",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic credential or revision-shaped test input with a constructed hexadecimal alphabet, not a real secret or commit."
+    },
+    {
+      "path": "python/tests/experiments/unit/test_redaction.py",
+      "lineSha256": "51f784097f52655b925ed23593f3d42c9a401a2ee7414590dfadb40fe30ae8d2",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic credential or revision-shaped test input with a constructed hexadecimal alphabet, not a real secret or commit."
+    },
+    {
+      "path": "python/tests/experiments/unit/test_redaction.py",
+      "lineSha256": "4c9711f1d5b66d6657bc03e976b289ccd5e903e555406cb84c9bda6d47046bce",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic credential or revision-shaped test input with a constructed hexadecimal alphabet, not a real secret or commit."
+    },
+    {
+      "path": "python/tests/experiments/unit/test_resume_params.py",
+      "lineSha256": "a6d46cb1fe02ba89740bd4bb493db7d48f11161f4153eb2d17dcd8cebe749829",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic credential or revision-shaped test input with a constructed hexadecimal alphabet, not a real secret or commit."
+    },
+    {
+      "path": "python/tests/experiments/unit/test_user_register_provider.py",
+      "lineSha256": "aa816ecd06b4e8dd17a840fd0a970df10e32abe3b5a1d700bab51c091d1b998f",
+      "rules": [
+        "openai-style-key",
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic redaction input: alphabetic placeholder, standard documentation EXAMPLE identifier, or PEM header without usable key material."
+    },
+    {
+      "path": "python/tests/experiments/unit/test_user_register_provider.py",
+      "lineSha256": "34affb944a65fe6cb888928432debd2f6056c8db21e77e3ff1002f66792c7789",
+      "rules": [
+        "stream-id"
+      ],
+      "why": "Synthetic row identifier used by the matching assertion, not an internal workstream name."
+    },
+    {
+      "path": "python/tests/experiments/unit/test_user_register_provider.py",
+      "lineSha256": "74661cf86e30177a518dd5884dcfdfd648653ae382f027f1fe269e98555fbc3c",
+      "rules": [
+        "stream-id"
+      ],
+      "why": "Synthetic row identifier used by the matching assertion, not an internal workstream name."
+    },
+    {
+      "path": "python/tests/experiments/unit/test_judge_checklist_scope.py",
+      "lineSha256": "0f6598ab3a602ebc95f30316a4b14489a1dc539f3dc1d30613b4b6355454603d",
+      "rules": [
+        "stream-id"
+      ],
+      "why": "Synthetic row identifier used by the matching assertion, not an internal workstream name."
+    },
+    {
+      "path": "python/tests/experiments/unit/test_judge_checklist_scope.py",
+      "lineSha256": "5349ec23b2713bea4516c2a36c6bf0f3121e4403525c967417f47482db162cd7",
+      "rules": [
+        "stream-id"
+      ],
+      "why": "Synthetic row identifier used by the matching assertion, not an internal workstream name."
+    },
+    {
+      "path": "python/tests/gateway/parity/test_parity_artifacts.py",
+      "lineSha256": "24b8bfdaa09b03ab3a674cbe20438e477e7bec74c82f8f8776b695ad982563ce",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/parity/test_parity_artifacts.py",
+      "lineSha256": "1458a536dd9dc51b26dfe053d649a348c97cb970abd19fede1bf8a51afb73ea0",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/parity/test_parity_goldens.py",
+      "lineSha256": "4008deeed6de7e7898e3f8e11017e06cb6a7418f14214121ca4d8955d37e00d6",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/parity/test_parity_goldens.py",
+      "lineSha256": "bedea9920f2da5bbcd1377e8ed6d8512101389463d999d9ab7a144d8e4fc566f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_client.py",
+      "lineSha256": "370b02a2f3a920bf306ec352af04c0646186649ccaf6a1ca65e6d3dd4e402d28",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic gateway credential with a constructed hexadecimal alphabet, not a real credential or source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "d459b02097c1500bbe896a37fa8b5474047af8c6ef312a0f20e104c0014a5bcb",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "b6f1f8a38f0903b1e80cafe7743860b093e4d855c35974a19a8318eb808e6f44",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "e5df77039a3e10cb11d90f36af9ddb6b8c11eb54dc698eb063d48e55c2c0c26a",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "42b28747cb5cac3e9fbc15250c3b1c50eb37f022a916a38171dac891d8602115",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "79b2e23b7136db8a057c4c41e0038efe9f590fa9ce40c88677a4916b2e685921",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "cbe54d6645979f5896f82428ab4db7de8314d317f0ed42176acf046edd165bb4",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "f54047271e0dacdd17b366c0ea42705fc90485e16da415e1cf5bd0a259ca9dc5",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "908d6ba58cc56c495833614dd2914b0b32d7408cca955f9b6e4a7c65dff740b1",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "a3aedc1ddceb0e2914477b845df2a8f1391eadfea7f23a9ea5d88861a45c1800",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "b8e78885901528a1a43729cd130f01fe0370da1faba98070006d91f8193c8d2a",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "d6f64e12314db6673a3314b1932baa6985806615274e8ba51cf7b1dd298e1059",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "2504b966334e5371903b9c3d8b27078b0522baacf93cffa4fcce57938f464395",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "e64aa7161242944f22eb525c130a43d06f7e40ecb7988d275927e85a4655958d",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "d1fb2095e66d815408e7ce8b3aeeaa658a669341a87f9c5a0167928820920021",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "6b6e5adfbfd83ebd702aeaaafd7d32598f361e49d3615026a56afb00818a13cf",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "d2e546c83f59d1b403dc27fa25b6c1b648985a8f432473aec1dfcd7ef2701833",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "3e4f7a8c3c3b096032d06e74068528596080dfd102baaf561e95dce4ecc8bd6b",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "fc749216f645d82cb8e72d40dda50c5c1e483428156cc7a50d3315341aa053d4",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "4650ef9cb46b7853a0002de529a7fd7c1f060e30e1c0500a71e1ae89991cd09f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "85041168f6c80716dfb01507d00c3e8e7b1a4b267f2e311f071aae5331b42a8f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "ea6824e741e60ef98e75773a63bc9198c805fadfa5719edc1214784d249a09c7",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "c6bc953834fc1a71e8cb50cca9de4d01c72c51dd7900528b85ea81ff78bd6c99",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Truncated SHA-256 detector dictionary entry; opaque test digest, not a source revision."
+    },
+    {
+      "path": "python/tests/gateway/unit/test_gw_public_hygiene.py",
+      "lineSha256": "a3207c48e4016d5241d60e29caf51697184902128807100a3a5d91ccffb50602",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic credential or revision-shaped test input with a constructed hexadecimal alphabet, not a real secret or commit."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "82528f37542d15c067302b3b5a9941c1bd6e47c117d891f83d4cdaeb143c8c11",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "d562b435aa4ff733f2e62c9bbd3ef5e3dade306509b551bbd6c9b1235b091260",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "453db3fa004ddd5021161455584ed75c31b7c3ec95404b9d9a7d06202d7f1d21",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "ffd39294655db1367dfd55472de382f00aa0d05cba366014dad56d61db031843",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "a02f9085bf413a453119ca80d98adededd7e1a0cf575646c9c2070dc30071c15",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "c421b61b968588b00dc015096f2f893b448b9b7db543ddeb275b87b13ebb3bd5",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "934120079e21a9c00e15991ff9d230fbb963fe34720ed3ae4b41014bcabb0169",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "a96852e62e87bd64c7114d3db3cd7c08991877226844b13cdf08ac169d8f1dc5",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "e603482df70ff090df44cce9104473735ae45120b2075365aa1f1c427f1f8de1",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "fe136e8af5343501bd078846d330b0f3efc107fb9d9e0937e26115f93f59ad06",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "bdd45918386e585f617a8484f495ba722a2ddda4c231011a171762f2cb8936e7",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "e719d1ee8898dbfa4c47a7d966edc51a75dfc928fa96b40aeaaad501cbfe09dd",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "85cf0679c45e5241aee64d4e065c308641e28efa43e4e12dfcffaf642db0fd8b",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "1441c7736eb7a7c15a95605e30e0b37793155aaa039d513004facd8447c9eb52",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "aff7b252268c9a9f00d89e9ea507b755f255921544cec3cd3b7c965b8843e9a2",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "034c8fa8296e2cc3651f14788adbb92d9ff8ffcf0e0a593d690a9208f58150e3",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "1097179fdaeb4146ea9b7b55213917c8c638b78edb4539d0ef22980eb83146d3",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "dab5959a353a246c0bb331c125c054cd4da686ca6b911565788ef63fe4243a05",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "c6b689f82a92515deded85c9f9d107f89629a534e4f17a4dc87c8131118ea3f7",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "d431b35bcd29fb5c6d41d99bffdb9f877c6c5eaab960353ea8523d89e8b8c9a0",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "9a6184a8ee295035b8e02788eefc7244311aec39d0a9bb911e72ecc274d4267b",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "fe5c9a1c6d4ba50fc65bfe2f3cca0a8094be30f53072ae84362f3f6171d2ac40",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "71875b25d0360d1ef1a01ec1238149083d7f53e7408c7c77ef8563df565ca6c4",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "scripts/platform/test/hygiene-cases.json",
+      "lineSha256": "e6a42bb1947e64a8520d756900d5e762c1679060057420d6d8f8eaf094d1b842",
+      "rules": [
+        "ascii-escape"
+      ],
+      "why": "Synthetic negative scanner fixture uses a JSON escape to exercise decoded matching; exact line only."
+    },
+    {
+      "path": "tests/fixtures/gateway/README.md",
+      "lineSha256": "aa8bd9744fe6e3aa1e1922762263db7de02251bfa177f2bf72df26cee85e440f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/catalog.json",
+      "lineSha256": "37ae1c2d9f61ffda43486101b445902a8ac175ac5fd39fc1edce2d497588b550",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/e-old/artifacts.json",
+      "lineSha256": "2b0896abe0173aa0804de2f0fc20954007325bb575b8a537592579ec27934ce3",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/e-old/artifacts.json",
+      "lineSha256": "70b389d0abd031a0479c11e76e6c0845751d9cfd3d268a57631ad854ce38668d",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/e-old/artifacts.json",
+      "lineSha256": "70734ed0603c3e10e72feb85bcc63703c0b6db9f537bf5ef73ea71da8907868f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/e-old/artifacts.json",
+      "lineSha256": "67eb221d6eef854fa5634f02902e788bc12186ccbdd8c9b50e0f656808e1da7b",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/e-old/artifacts.json",
+      "lineSha256": "8073c4f7d2b7aba12db333058a73e72e962dcede6a0054486560ac8ec4c9eb9b",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/e-old/artifacts.json",
+      "lineSha256": "d94c1cc3a8918e53f7a9d1340ca58764991ddf36c6eeca3e79074cc46efed9ab",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/e-old/artifacts.json",
+      "lineSha256": "5ae21b9024bcaf7db7594ccbc9ac333d23bb8668642df733445e1e80c70f4268",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/e-old/registry-npm.json",
+      "lineSha256": "e1ee7188ffc70853c9c660f5df564c049b8e15d990ea53d9a6d49b5ca6053fa3",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/e-old/registry-npm.json",
+      "lineSha256": "46caae514079f04b6b5adf77b1f873b2d44559167aaac3895d6a321b4e2a72a1",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/e-old/registry-npm.json",
+      "lineSha256": "34cb7afe7b6b8fc75f678fe87eb56c0d41a08518fee28b98052e7743acb53cb5",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/e-old/registry-npm.json",
+      "lineSha256": "efb116a9172f171eec114de2f71f1aaeb41af36885155d4eedf6eab580c91e5a",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/e-old/registry-npm.json",
+      "lineSha256": "7524b5cc6756b70a283cf775f43db095f0cc11891f0d90a10714bee56991f354",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/e-old/registry-npm.json",
+      "lineSha256": "d56aa2dd5726dd59eec1fc26b7336a37820754037ef03865901717fea6fe4ba6",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/e-old/summarize_artifacts.py",
+      "lineSha256": "50379dff4c7310ffc49586b061e7ffa2bb2c69f9ab54c5dc8614ac4bc61a19ae",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/e-old/summarize_artifacts.py",
+      "lineSha256": "722ca9c2354429885896b5c154673a8c3876c9c369eec9ca6a3effb2451024c1",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Published package artifact checksum or checked checksum prefix, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/py-agentcc-1.0.0/utilities.json",
+      "lineSha256": "2868705d4c569667fce6908b0cda1ed017df7a2907a70c08cf2c6309aad9ef24",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Exponent fragment of a recorded floating-point cost, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.0-esm/express_nextjs.json",
+      "lineSha256": "a2c58ec5ac54427633461d754588bb0507c82ab51bf4c07d5593a646a33584af",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.0-esm/express_nextjs.json",
+      "lineSha256": "84f4f30b7f4fe105fa60d22c1c3bf83e4063339344af96a135ed70a91919905f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.0-esm/header_merge.json",
+      "lineSha256": "c8fad388c0c58e217259feabdf531cb5789f323cd8ef4ddab2d3e220f1d6ccbb",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.0-esm/header_merge.json",
+      "lineSha256": "84f4f30b7f4fe105fa60d22c1c3bf83e4063339344af96a135ed70a91919905f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.0-esm/params.json",
+      "lineSha256": "c8fad388c0c58e217259feabdf531cb5789f323cd8ef4ddab2d3e220f1d6ccbb",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.0-esm/params.json",
+      "lineSha256": "84f4f30b7f4fe105fa60d22c1c3bf83e4063339344af96a135ed70a91919905f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.0-esm/utilities.json",
+      "lineSha256": "d9ceb4087b98d2d8c2f286750820914746e8354a03b80163a0036a3f8ebc9b1d",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.0-esm/utilities.json",
+      "lineSha256": "0fd5e43f00f8788c39844dfe4682ca351bcd1fa0349d900f3912e954808dafbc",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-cjs/express_nextjs.json",
+      "lineSha256": "a2c58ec5ac54427633461d754588bb0507c82ab51bf4c07d5593a646a33584af",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-cjs/express_nextjs.json",
+      "lineSha256": "84f4f30b7f4fe105fa60d22c1c3bf83e4063339344af96a135ed70a91919905f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-cjs/header_merge.json",
+      "lineSha256": "c8fad388c0c58e217259feabdf531cb5789f323cd8ef4ddab2d3e220f1d6ccbb",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-cjs/header_merge.json",
+      "lineSha256": "84f4f30b7f4fe105fa60d22c1c3bf83e4063339344af96a135ed70a91919905f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-cjs/params.json",
+      "lineSha256": "c8fad388c0c58e217259feabdf531cb5789f323cd8ef4ddab2d3e220f1d6ccbb",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-cjs/params.json",
+      "lineSha256": "84f4f30b7f4fe105fa60d22c1c3bf83e4063339344af96a135ed70a91919905f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-cjs/utilities.json",
+      "lineSha256": "d9ceb4087b98d2d8c2f286750820914746e8354a03b80163a0036a3f8ebc9b1d",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-cjs/utilities.json",
+      "lineSha256": "0fd5e43f00f8788c39844dfe4682ca351bcd1fa0349d900f3912e954808dafbc",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-esm/express_nextjs.json",
+      "lineSha256": "a2c58ec5ac54427633461d754588bb0507c82ab51bf4c07d5593a646a33584af",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-esm/express_nextjs.json",
+      "lineSha256": "84f4f30b7f4fe105fa60d22c1c3bf83e4063339344af96a135ed70a91919905f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-esm/header_merge.json",
+      "lineSha256": "c8fad388c0c58e217259feabdf531cb5789f323cd8ef4ddab2d3e220f1d6ccbb",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-esm/header_merge.json",
+      "lineSha256": "84f4f30b7f4fe105fa60d22c1c3bf83e4063339344af96a135ed70a91919905f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-esm/params.json",
+      "lineSha256": "c8fad388c0c58e217259feabdf531cb5789f323cd8ef4ddab2d3e220f1d6ccbb",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-esm/params.json",
+      "lineSha256": "84f4f30b7f4fe105fa60d22c1c3bf83e4063339344af96a135ed70a91919905f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-esm/utilities.json",
+      "lineSha256": "d9ceb4087b98d2d8c2f286750820914746e8354a03b80163a0036a3f8ebc9b1d",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "tests/fixtures/gateway/golden/ts-client-1.0.1-esm/utilities.json",
+      "lineSha256": "0fd5e43f00f8788c39844dfe4682ca351bcd1fa0349d900f3912e954808dafbc",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/express-middleware.test.ts",
+      "lineSha256": "2dec8857caf1514143bed0bcbe068f99a401d8f7637148ed3e03885733e2a3f5",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/parity/cases/client-core.mjs",
+      "lineSha256": "82409a804e4b47764a336621250c695c73e6ccb8a56be4842af0668632ddfd7f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/parity/cases/client-core.mjs",
+      "lineSha256": "ea16f3ce176bb974804feed2dc6340bfffc55533d54bc1782747772a5340b1c7",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/parity/cases/client-extras.mjs",
+      "lineSha256": "1af9094fbaf2821e98fb48711a51fc6d7dd39e612ad4203eaaf10dc6ce295776",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/parity/cases/client-extras.mjs",
+      "lineSha256": "9fa7d27cd04b18aaefdde1d8f75963e57ea5fcbf1a7075fbe1a4117f8127d5a7",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/trace-context.test.ts",
+      "lineSha256": "f46887d0933423eedeede1db826a56f6afff619dd068b9d65ba9bc8869762c02",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/trace-context.test.ts",
+      "lineSha256": "a9454ff97ad9b7584915a265c974da97acf3c7001ff89e962c8227cee85feb95",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/trace-context.test.ts",
+      "lineSha256": "b9e9c958204c0722234533931002a68ee1bad880773e2a2bd655a012d6e221dd",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/trace-context.test.ts",
+      "lineSha256": "ede0b9a7ccb19235f6013e4b4b61d86f0d3d14048c07587e897232d8da3519c3",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/trace-context.test.ts",
+      "lineSha256": "8e4eb7a059a1a98cc2add961915ed4ef8322604c5993b1cfba8ad1b9bd054578",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/trace-context.test.ts",
+      "lineSha256": "6cd874906e7633b72bf50472d752906150076e64127d9e4abafa9148b75e4ed5",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "typescript/futureagi/gateway-client/tests/trace-context.test.ts",
+      "lineSha256": "16449e96719cc93d5a89dbfc052ae488f3492248400d29a466d6a277c7ce074f",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Synthetic W3C trace or span identifier in a deterministic example or fixture, not a source revision."
+    },
+    {
+      "path": "typescript/futureagi/src/queues/__tests__/create-contract.test.ts",
+      "lineSha256": "80a828b545cba18992e60a2bdce0352cf71382dd3054bb622c3012c68d941f02",
+      "rules": [
+        "owner-question"
+      ],
+      "why": "Synthetic annotation queue name used by the request and its matching assertion, not an internal question."
+    },
+    {
+      "path": "typescript/futureagi/src/queues/__tests__/create-contract.test.ts",
+      "lineSha256": "f263ee113d0ca878742280005217fc79c871977d536f8d92c24da27e9e60498c",
+      "rules": [
+        "owner-question"
+      ],
+      "why": "Synthetic annotation queue name used by the request and its matching assertion, not an internal question."
+    },
+    {
+      "path": ".github/workflows/sdk-contract-check.yml",
+      "lineSha256": "229bfa98f73b1d4d4e43b68079bf12314185575beb859c58b78b422f83825430",
+      "rules": [
+        "unreviewed-sha"
+      ],
+      "why": "Exact immutable pin of the public external compliance-harness dependency (future-agi/futureagi-sdk-test-harness); repository visibility and commit verified via GitHub API."
+    }
+  ]
+}

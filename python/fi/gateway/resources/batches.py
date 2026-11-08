@@ -10,8 +10,10 @@ import anyio
 from fi.gateway._base_client import RequestOptions
 from fi.gateway._exceptions import APITimeoutError
 from fi.gateway.types.batch import BatchResponse
+from fi.gateway._deprecation import deprecated
 
 
+@deprecated
 class Batches:
     """Sync batches resource."""
 
@@ -70,6 +72,7 @@ class Batches:
         return self.wait(batch.batch_id, poll_interval=poll_interval, timeout=timeout)
 
 
+@deprecated
 class AsyncBatches:
     """Async batches resource."""
 

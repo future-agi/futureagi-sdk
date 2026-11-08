@@ -1,0 +1,235 @@
+{
+  "about": "One rule set for the public platform files, read by scripts/platform/scope-filter.mjs, scripts/platform/hygiene-scan.mjs and scripts/platform/hygiene_scan.py (which the Python gates import). A hit fails the build. This file is scanned like every other file and passes its own scan: a pattern that would match its own text is written with a one-character class, and internal names are listed only as sha256 under \"names\" (see scripts/platform/hygiene-names.mjs). \"patterns\" are regular expressions; local paths are matched by their operating-system roots, which name no one. \"wording\" lists patches the scope filter applies to kept descriptions that would otherwise fail a rule: each pattern must match exactly once. \"exemptions\" lets one line (by the sha256 of its stripped text) of one file hit the listed rules; a malformed exemption, or one that matches no line of a scanned file, is itself a hit.",
+  "extensions": {
+    "operation": [
+      "x-omega-sdk",
+      "x-omega-idempotent",
+      "x-omega-idempotency",
+      "x-omega-not-found-on-retry-means-applied",
+      "x-omega-stream",
+      "x-omega-pagination",
+      "x-omega-rate-class",
+      "x-omega-timeout-class",
+      "x-omega-body-class",
+      "x-omega-min-role"
+    ],
+    "schema": [
+      "x-omega-secret"
+    ],
+    "subkeys": {
+      "x-omega-idempotency": [
+        "durable",
+        "keyRequired",
+        "replayOmits"
+      ]
+    }
+  },
+  "nameMaps": [
+    "properties",
+    "headers",
+    "schemas",
+    "responses",
+    "parameters",
+    "securitySchemes",
+    "content",
+    "examples",
+    "variables",
+    "mapping",
+    "paths",
+    "patternProperties",
+    "$defs",
+    "encoding"
+  ],
+  "forbiddenKeys": [
+    "evidence"
+  ],
+  "patterns": [
+    {
+      "id": "consumer-revision",
+      "paths": [
+        "python/tests/evals/fixtures/census-fi-evals.json"
+      ],
+      "regex": "\"(?:commit|revision|consumer_head)\"\\s*:\\s*\"[0-9a-f]{40}\""
+    },
+    {
+      "id": "volumes-path",
+      "regex": "/Volumes/[A-Za-z0-9._-]"
+    },
+    {
+      "id": "home-path",
+      "regex": "(?:/Users/|/home/)[A-Za-z0-9._-]+"
+    },
+    {
+      "id": "tmp-path",
+      "regex": "/private/tmp(?=/)"
+    },
+    {
+      "id": "internal-id",
+      "regex": "\\b(?:SB|SBX|DS|CP|GW|EE|OM|PS|SDK|T[H]|DS[X]|W[0-9])-[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*\\b"
+    },
+    {
+      "id": "internal-review",
+      "regex": "\\b(?:release[ ]manifest|cloud[ ]rig|[Tt]he[ ]rig\\b|[Tt]he[ ]plan\\b|day[-]one|forcing[ ]fixture|owner[ ]decision|owner[ ]question)"
+    },
+    {
+      "id": "plan-reference",
+      "regex": "\u00a7\\s*[0-9]|\\bask [a-z](?=[:;,)])"
+    },
+    {
+      "id": "owner-question",
+      "regex": "\\bQ[0-9]{1,2}\\b"
+    },
+    {
+      "id": "source-ts-path",
+      "regex": "[A-Za-z0-9_][\\w/.-]*\\.ts\\b",
+      "skipExtensions": [
+        ".ts",
+        ".mts",
+        ".cts",
+        ".mjs",
+        ".js",
+        ".cjs",
+        ".py",
+        ".sh",
+        ".md"
+      ]
+    },
+    {
+      "id": "ee-source-path",
+      "regex": "(?:packages/(?:server|managed-runtime|console)|(?:^|[\\s\"'`(])workspace)/[\\w/.-]+\\.tsx?\\b"
+    },
+    {
+      "id": "private-key",
+      "regex": "-----BEGIN [A-Z ]*PRIVATE KEY-----"
+    },
+    {
+      "id": "aws-key",
+      "regex": "AKIA[0-9A-Z]{16}"
+    },
+    {
+      "id": "github-token",
+      "regex": "gh[pousr]_[A-Za-z0-9]{30,}"
+    },
+    {
+      "id": "slack-token",
+      "regex": "xox[abpr]-[A-Za-z0-9-]{10,}"
+    },
+    {
+      "id": "google-key",
+      "regex": "AIza[0-9A-Za-z_-]{35}"
+    },
+    {
+      "id": "openai-style-key",
+      "regex": "sk-(?:or-|proj-|ant-)?[A-Za-z0-9_-]{24,}"
+    }
+  ],
+  "names": {
+    "about": "Internal names as the sha256 of their lower-case text, each mapped to the rule it fails. The plain list is kept outside this repository; node scripts/platform/hygiene-scan.mjs --names <file> checks the two agree, and --hash <rule id> <name> prints a new entry.",
+    "maxWords": 4,
+    "sha256": {
+      "3e8b0ca4695cab409ef600bd66ced0bb1b799993a0fc6fc33686f1fdcddda212": "ee-only-marker",
+      "018fa055e30d3aef1b5ffa973ca374b522ccfb26723d384778ce5409fb9c2bf6": "gcp-project",
+      "1047a1f429ff40bc0dc18ab5f0a2fe0ad979d425ede1ce8cf7b9425c7ff78db2": "gcp-project",
+      "5921849a2af3e1969834a91e14b063c66c54ac55e986ccea25b030231988d301": "gcp-project",
+      "9970bd4c46a350289a8c28c2ae1bb5b069beff88a71ea93bca788ecd13530ab0": "gcp-project",
+      "0bbe5bc4573bcf1caa8ba13b58efe7c468bb397ddfe2f5a83f9c76ba92cec5b4": "internal-plan",
+      "5b84f1644e90877200e73488f7602f30210709106216c9bd9375470feee7d155": "internal-plan",
+      "aa4c5d6b708a48962c3143fa54a8926a27d250b3a3ce162580bfb5c1d2681aef": "internal-plan",
+      "ce235019933f4611922cabf612af45cfea7b3b8c45725ae9c4cb784ac5298fa4": "internal-plan",
+      "41fba3ab4b64f3c86e14cdb89a8c92b03160b804a841a780cea08f85035b3b35": "local-state",
+      "4f6d5712fe0dcca75f7a6b4e9d7c1c5f90a1ce08af4b8bc185fa8183b198ebcb": "local-state",
+      "8449038e65b42c4024a715a442d026d87b922507074663fd196b2fd7bd54c9f4": "local-state",
+      "a5642fc689647ef96cfe02e1b19f8d0160274bedd20ebaf51b8bdc85b09ffa1b": "local-state",
+      "634e065038ee6156dc60ba0b476e7061b13c0fd68e93fb44d7b038add1cfde03": "placeholder-host",
+      "3fedb5d16b14e2fe731944ed0819eabefe91f42d456377e5ce6f0a1874232269": "rig",
+      "57105d9b18c14d057bf6a7cb975a262aa34b6fc60bea9695adf3176b464cfd44": "rig",
+      "b74eb82b62ad0e1a120adc84553a66b9918eeae0e3fcfa7c902bd86b4fd9edfd": "rig"
+    }
+  },
+  "wording": [
+    {
+      "pointer": "/components/schemas/OmegaError/description",
+      "pattern": " \\([A-Z]{3}-[A-Z]{4} section 3\\.4\\)",
+      "replace": "",
+      "why": "an internal planning-document reference; the public copy keeps the sentence without it"
+    },
+    {
+      "pointer": "/components/schemas/OmegaRunEventFrame/description",
+      "pattern": " \\([A-Z]{3}-[A-Z]{4} section 2\\.1\\)",
+      "replace": "",
+      "why": "an internal planning-document reference; the public copy keeps the sentence without it"
+    }
+  ],
+  "exemptions": [
+    {
+      "path": "scripts/platform/hygiene-tree-rules.json",
+      "lineSha256": "2ef08461db6f4ad4b227891228069881adab7789763fb1fec721329bd401a6f6",
+      "rules": ["source-ts-path"],
+      "why": "Exact allowlist reference to reviewed synthetic TypeScript matcher fixtures; not a private backend source path."
+    },
+    {
+      "path": "python/fi/evals/framework/backends/Dockerfile.eval-runner",
+      "lineSha256": "2c9f0ed2c989819d9d2ec86a2c5a3bbad3c34f296b62818141f419741964f356",
+      "rules": [
+        "home-path"
+      ],
+      "why": "Reviewed container WORKDIR for the non-root account created immediately above it; not a developer home directory. Keep the runnable container semantics."
+    },
+    {
+      "path": "python/fi/evals/guardrails/README.md",
+      "lineSha256": "2863d4ed43fc9a3f468cac94119f7dc84ab762a1d89ce1933579833b99a00475",
+      "rules": [
+        "openai-style-key"
+      ],
+      "why": "Reviewed synthetic scanner example with an alphabetic/numeric placeholder and trailing ellipsis; no credential. It demonstrates the detector's expected input."
+    },
+    {
+      "path": "python/fi/evals/guardrails/README.md",
+      "lineSha256": "8e016a6f3300a635e5a14041acc30a1ae5881d73f1c70c7dd41bccda32072ddd",
+      "rules": [
+        "aws-key"
+      ],
+      "why": "Reviewed standard AWS documentation EXAMPLE access-key identifier used as a scanner example, not a credential."
+    },
+    {
+      "path": "python/fi/evals/guardrails/README.md",
+      "lineSha256": "909cd4dca5619174631eacde8f48507a930715a2fc3387dcadb3671287eb629b",
+      "rules": [
+        "private-key"
+      ],
+      "why": "Reviewed PEM header alone, with no key material or body; the example tests header detection."
+    },
+    {
+      "path": "python/fi/evals/metrics/code_security/benchmarks/_builtin_repair.py",
+      "lineSha256": "e6a9d1b02a5f63aeb998b924af60e9f734023adca8b8c0aeefa007e6791c4ff4",
+      "rules": [
+        "aws-key"
+      ],
+      "why": "Reviewed standard AWS documentation EXAMPLE identifier in a hardcoded-credential repair benchmark. Preserved so the positive detector fixture retains its semantics; not usable credentials."
+    },
+    {
+      "path": "scripts/platform/hygiene-tree-rules.json",
+      "lineSha256": "11f9915117a47d200686cbda7917a6ee397b0d84e5dc6bf13019a802009b464f",
+      "rules": [
+        "source-ts-path"
+      ],
+      "why": "Exact allowlist reference to a reviewed synthetic TypeScript fixture; not a private backend source path."
+    },
+    {
+      "path": "scripts/platform/hygiene-tree-rules.json",
+      "lineSha256": "32710940264b38e093cce20c7f2e81e899bf12507103a537ac3e0b8026a26db9",
+      "rules": [
+        "source-ts-path"
+      ],
+      "why": "Exact allowlist reference to a reviewed synthetic TypeScript fixture; not a private backend source path."
+    },
+    {
+      "path": "scripts/platform/hygiene-tree-rules.json",
+      "lineSha256": "05749069b8de7a4a6e130fe424e8ce2467ebfdfbfeb19575f248983de9f790d3",
+      "rules": [
+        "source-ts-path"
+      ],
+      "why": "Exact allowlist reference to a reviewed synthetic TypeScript fixture; not a private backend source path."
+    }
+  ]
+}

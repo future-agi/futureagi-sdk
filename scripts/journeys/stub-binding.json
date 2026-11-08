@@ -1,0 +1,6 @@
+{
+  "source": "stub",
+  "served": ["sdk-artifacts", "sdk-config"],
+  "admitted": ["sdk"],
+  "reason": "Local consumer-fixture binding only. No nightly staging or development backend is bound. No namespace admission is inferred."
+}

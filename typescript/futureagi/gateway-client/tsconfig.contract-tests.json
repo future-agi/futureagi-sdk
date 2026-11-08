@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.test.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "isolatedModules": false
+  },
+  "include": [
+    "src/**/*.ts",
+    "tests/onekey-contract-r4.test.ts",
+    "tests/onekey-retry-delay.test.ts"
+  ]
+}

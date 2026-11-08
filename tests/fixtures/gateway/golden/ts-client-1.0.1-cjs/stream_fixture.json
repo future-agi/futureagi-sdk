@@ -1,0 +1,3315 @@
+{
+ "area": "stream_fixture",
+ "cases": {
+  "stream.fixture.guardrail_block_after_content_then_done.break_on_done": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "result": {
+      "raised": {
+       "__exception__": "StreamError",
+       "attrs": {
+        "body": {
+         "code": "stream_blocked",
+         "message": "Content blocked by streaming guardrail",
+         "param": null,
+         "type": "guardrail_error"
+        },
+        "code": "stream_blocked",
+        "name": "StreamError",
+        "param": null,
+        "type": "guardrail_error"
+       },
+       "chain": [
+        "StreamError",
+        "AgentCCError",
+        "Error"
+       ],
+       "class": "StreamError",
+       "message": "Content blocked by streaming guardrail",
+       "toString": "StreamError: Content blocked by streaming guardrail"
+      }
+     },
+     "types": [
+      "content",
+      "content"
+     ]
+    },
+    "text": {
+     "ok": "Hello world"
+    }
+   }
+  },
+  "stream.fixture.guardrail_block_after_content_then_done.events": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "error": {
+      "__exception__": "StreamError",
+      "attrs": {
+       "body": {
+        "code": "stream_blocked",
+        "message": "Content blocked by streaming guardrail",
+        "param": null,
+        "type": "guardrail_error"
+       },
+       "code": "stream_blocked",
+       "name": "StreamError",
+       "param": null,
+       "type": "guardrail_error"
+      },
+      "chain": [
+       "StreamError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "StreamError",
+      "message": "Content blocked by streaming guardrail",
+      "toString": "StreamError: Content blocked by streaming guardrail"
+     },
+     "items": [
+      {
+       "text": "Hello",
+       "type": "content"
+      },
+      {
+       "text": " world",
+       "type": "content"
+      }
+     ]
+    },
+    "text": {
+     "ok": "Hello world"
+    }
+   }
+  },
+  "stream.fixture.guardrail_block_after_content_then_done.final": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "drainedError": {
+      "__exception__": "StreamError",
+      "attrs": {
+       "body": {
+        "code": "stream_blocked",
+        "message": "Content blocked by streaming guardrail",
+        "param": null,
+        "type": "guardrail_error"
+       },
+       "code": "stream_blocked",
+       "name": "StreamError",
+       "param": null,
+       "type": "guardrail_error"
+      },
+      "chain": [
+       "StreamError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "StreamError",
+      "message": "Content blocked by streaming guardrail",
+      "toString": "StreamError: Content blocked by streaming guardrail"
+     },
+     "final": {
+      "ok": {
+       "agentcc": {
+        "cacheStatus": null,
+        "cost": null,
+        "fallbackUsed": false,
+        "guardrailAction": null,
+        "guardrailConfidence": null,
+        "guardrailMessage": null,
+        "guardrailName": null,
+        "guardrailTriggered": false,
+        "latencyMs": 0,
+        "modelUsed": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "requestId": "unknown",
+        "routingStrategy": null,
+        "timeoutMs": null,
+        "traceId": "unknown"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "message": {
+          "content": "Hello world",
+          "role": "assistant"
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-sdk101",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "usage": "<undefined>"
+      }
+     }
+    },
+    "text": {
+     "ok": "Hello world"
+    }
+   }
+  },
+  "stream.fixture.guardrail_block_after_content_then_done.iter": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "error": {
+     "__exception__": "StreamError",
+     "attrs": {
+      "body": {
+       "code": "stream_blocked",
+       "message": "Content blocked by streaming guardrail",
+       "param": null,
+       "type": "guardrail_error"
+      },
+      "code": "stream_blocked",
+      "name": "StreamError",
+      "param": null,
+      "type": "guardrail_error"
+     },
+     "chain": [
+      "StreamError",
+      "AgentCCError",
+      "Error"
+     ],
+     "class": "StreamError",
+     "message": "Content blocked by streaming guardrail",
+     "toString": "StreamError: Content blocked by streaming guardrail"
+    },
+    "items": [
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {
+         "content": "Hello",
+         "role": "assistant"
+        },
+        "finish_reason": null,
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-sdk101",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     },
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {
+         "content": " world"
+        },
+        "finish_reason": null,
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-sdk101",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     }
+    ]
+   }
+  },
+  "stream.fixture.guardrail_block_after_content_then_done.text": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "error": {
+      "__exception__": "StreamError",
+      "attrs": {
+       "body": {
+        "code": "stream_blocked",
+        "message": "Content blocked by streaming guardrail",
+        "param": null,
+        "type": "guardrail_error"
+       },
+       "code": "stream_blocked",
+       "name": "StreamError",
+       "param": null,
+       "type": "guardrail_error"
+      },
+      "chain": [
+       "StreamError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "StreamError",
+      "message": "Content blocked by streaming guardrail",
+      "toString": "StreamError: Content blocked by streaming guardrail"
+     },
+     "items": [
+      "Hello",
+      " world"
+     ]
+    },
+    "text": {
+     "ok": "Hello world"
+    }
+   }
+  },
+  "stream.fixture.guardrail_block_at_finish_then_metadata_then_done.break_on_done": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "result": {
+      "ok": "<undefined>"
+     },
+     "types": [
+      "content",
+      "done"
+     ]
+    },
+    "text": {
+     "ok": "Hello"
+    }
+   }
+  },
+  "stream.fixture.guardrail_block_at_finish_then_metadata_then_done.events": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "error": {
+      "__exception__": "StreamError",
+      "attrs": {
+       "body": {
+        "code": "stream_blocked",
+        "message": "Content blocked by streaming guardrail",
+        "param": null,
+        "type": "guardrail_error"
+       },
+       "code": "stream_blocked",
+       "name": "StreamError",
+       "param": null,
+       "type": "guardrail_error"
+      },
+      "chain": [
+       "StreamError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "StreamError",
+      "message": "Content blocked by streaming guardrail",
+      "toString": "StreamError: Content blocked by streaming guardrail"
+     },
+     "items": [
+      {
+       "text": "Hello",
+       "type": "content"
+      },
+      {
+       "completion": {
+        "agentcc": {
+         "cacheStatus": null,
+         "cost": null,
+         "fallbackUsed": false,
+         "guardrailAction": null,
+         "guardrailConfidence": null,
+         "guardrailMessage": null,
+         "guardrailName": null,
+         "guardrailTriggered": false,
+         "latencyMs": 0,
+         "modelUsed": null,
+         "provider": "unknown",
+         "ratelimit": null,
+         "requestId": "unknown",
+         "routingStrategy": null,
+         "timeoutMs": null,
+         "traceId": "unknown"
+        },
+        "choices": [
+         {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+           "content": "Hello",
+           "role": "assistant"
+          }
+         }
+        ],
+        "created": 1761177600,
+        "id": "chatcmpl-sdk101",
+        "model": "gpt-4o-mini",
+        "object": "chat.completion",
+        "usage": "<undefined>"
+       },
+       "type": "done"
+      }
+     ]
+    },
+    "text": {
+     "ok": "Hello"
+    }
+   }
+  },
+  "stream.fixture.guardrail_block_at_finish_then_metadata_then_done.final": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "drainedError": {
+      "__exception__": "StreamError",
+      "attrs": {
+       "body": {
+        "code": "stream_blocked",
+        "message": "Content blocked by streaming guardrail",
+        "param": null,
+        "type": "guardrail_error"
+       },
+       "code": "stream_blocked",
+       "name": "StreamError",
+       "param": null,
+       "type": "guardrail_error"
+      },
+      "chain": [
+       "StreamError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "StreamError",
+      "message": "Content blocked by streaming guardrail",
+      "toString": "StreamError: Content blocked by streaming guardrail"
+     },
+     "final": {
+      "ok": {
+       "agentcc": {
+        "cacheStatus": null,
+        "cost": null,
+        "fallbackUsed": false,
+        "guardrailAction": null,
+        "guardrailConfidence": null,
+        "guardrailMessage": null,
+        "guardrailName": null,
+        "guardrailTriggered": false,
+        "latencyMs": 0,
+        "modelUsed": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "requestId": "unknown",
+        "routingStrategy": null,
+        "timeoutMs": null,
+        "traceId": "unknown"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "message": {
+          "content": "Hello",
+          "role": "assistant"
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-sdk101",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "usage": "<undefined>"
+      }
+     }
+    },
+    "text": {
+     "ok": "Hello"
+    }
+   }
+  },
+  "stream.fixture.guardrail_block_at_finish_then_metadata_then_done.iter": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "error": {
+     "__exception__": "StreamError",
+     "attrs": {
+      "body": {
+       "code": "stream_blocked",
+       "message": "Content blocked by streaming guardrail",
+       "param": null,
+       "type": "guardrail_error"
+      },
+      "code": "stream_blocked",
+      "name": "StreamError",
+      "param": null,
+      "type": "guardrail_error"
+     },
+     "chain": [
+      "StreamError",
+      "AgentCCError",
+      "Error"
+     ],
+     "class": "StreamError",
+     "message": "Content blocked by streaming guardrail",
+     "toString": "StreamError: Content blocked by streaming guardrail"
+    },
+    "items": [
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {
+         "content": "Hello",
+         "role": "assistant"
+        },
+        "finish_reason": null,
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-sdk101",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     },
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {},
+        "finish_reason": "stop",
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-sdk101",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     }
+    ]
+   }
+  },
+  "stream.fixture.guardrail_block_at_finish_then_metadata_then_done.text": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "error": {
+      "__exception__": "StreamError",
+      "attrs": {
+       "body": {
+        "code": "stream_blocked",
+        "message": "Content blocked by streaming guardrail",
+        "param": null,
+        "type": "guardrail_error"
+       },
+       "code": "stream_blocked",
+       "name": "StreamError",
+       "param": null,
+       "type": "guardrail_error"
+      },
+      "chain": [
+       "StreamError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "StreamError",
+      "message": "Content blocked by streaming guardrail",
+      "toString": "StreamError: Content blocked by streaming guardrail"
+     },
+     "items": [
+      "Hello"
+     ]
+    },
+    "text": {
+     "ok": "Hello"
+    }
+   }
+  },
+  "stream.fixture.guardrail_block_first_frame.break_on_done": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "result": {
+      "raised": {
+       "__exception__": "StreamError",
+       "attrs": {
+        "body": {
+         "code": "stream_blocked",
+         "message": "Content blocked by streaming guardrail",
+         "param": null,
+         "type": "guardrail_error"
+        },
+        "code": "stream_blocked",
+        "name": "StreamError",
+        "param": null,
+        "type": "guardrail_error"
+       },
+       "chain": [
+        "StreamError",
+        "AgentCCError",
+        "Error"
+       ],
+       "class": "StreamError",
+       "message": "Content blocked by streaming guardrail",
+       "toString": "StreamError: Content blocked by streaming guardrail"
+      }
+     },
+     "types": []
+    },
+    "text": {
+     "ok": ""
+    }
+   }
+  },
+  "stream.fixture.guardrail_block_first_frame.events": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "error": {
+      "__exception__": "StreamError",
+      "attrs": {
+       "body": {
+        "code": "stream_blocked",
+        "message": "Content blocked by streaming guardrail",
+        "param": null,
+        "type": "guardrail_error"
+       },
+       "code": "stream_blocked",
+       "name": "StreamError",
+       "param": null,
+       "type": "guardrail_error"
+      },
+      "chain": [
+       "StreamError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "StreamError",
+      "message": "Content blocked by streaming guardrail",
+      "toString": "StreamError: Content blocked by streaming guardrail"
+     },
+     "items": []
+    },
+    "text": {
+     "ok": ""
+    }
+   }
+  },
+  "stream.fixture.guardrail_block_first_frame.final": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "drainedError": {
+      "__exception__": "StreamError",
+      "attrs": {
+       "body": {
+        "code": "stream_blocked",
+        "message": "Content blocked by streaming guardrail",
+        "param": null,
+        "type": "guardrail_error"
+       },
+       "code": "stream_blocked",
+       "name": "StreamError",
+       "param": null,
+       "type": "guardrail_error"
+      },
+      "chain": [
+       "StreamError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "StreamError",
+      "message": "Content blocked by streaming guardrail",
+      "toString": "StreamError: Content blocked by streaming guardrail"
+     },
+     "final": {
+      "ok": {
+       "agentcc": "<undefined>",
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "message": {
+          "content": null,
+          "role": "assistant"
+         }
+        }
+       ],
+       "created": 0,
+       "id": "",
+       "model": "",
+       "object": "chat.completion",
+       "usage": "<undefined>"
+      }
+     }
+    },
+    "text": {
+     "ok": ""
+    }
+   }
+  },
+  "stream.fixture.guardrail_block_first_frame.iter": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "error": {
+     "__exception__": "StreamError",
+     "attrs": {
+      "body": {
+       "code": "stream_blocked",
+       "message": "Content blocked by streaming guardrail",
+       "param": null,
+       "type": "guardrail_error"
+      },
+      "code": "stream_blocked",
+      "name": "StreamError",
+      "param": null,
+      "type": "guardrail_error"
+     },
+     "chain": [
+      "StreamError",
+      "AgentCCError",
+      "Error"
+     ],
+     "class": "StreamError",
+     "message": "Content blocked by streaming guardrail",
+     "toString": "StreamError: Content blocked by streaming guardrail"
+    },
+    "items": []
+   }
+  },
+  "stream.fixture.guardrail_block_first_frame.text": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "error": {
+      "__exception__": "StreamError",
+      "attrs": {
+       "body": {
+        "code": "stream_blocked",
+        "message": "Content blocked by streaming guardrail",
+        "param": null,
+        "type": "guardrail_error"
+       },
+       "code": "stream_blocked",
+       "name": "StreamError",
+       "param": null,
+       "type": "guardrail_error"
+      },
+      "chain": [
+       "StreamError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "StreamError",
+      "message": "Content blocked by streaming guardrail",
+      "toString": "StreamError: Content blocked by streaming guardrail"
+     },
+     "items": []
+    },
+    "text": {
+     "ok": ""
+    }
+   }
+  },
+  "stream.fixture.normal_stream.break_on_done": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "result": {
+      "ok": "<undefined>"
+     },
+     "types": [
+      "content",
+      "content",
+      "done"
+     ]
+    },
+    "text": {
+     "ok": "Hello world"
+    }
+   }
+  },
+  "stream.fixture.normal_stream.events": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "error": null,
+     "items": [
+      {
+       "text": "Hello",
+       "type": "content"
+      },
+      {
+       "text": " world",
+       "type": "content"
+      },
+      {
+       "completion": {
+        "agentcc": {
+         "cacheStatus": null,
+         "cost": null,
+         "fallbackUsed": false,
+         "guardrailAction": null,
+         "guardrailConfidence": null,
+         "guardrailMessage": null,
+         "guardrailName": null,
+         "guardrailTriggered": false,
+         "latencyMs": 0,
+         "modelUsed": null,
+         "provider": "unknown",
+         "ratelimit": null,
+         "requestId": "unknown",
+         "routingStrategy": null,
+         "timeoutMs": null,
+         "traceId": "unknown"
+        },
+        "choices": [
+         {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+           "content": "Hello world",
+           "role": "assistant"
+          }
+         }
+        ],
+        "created": 1761177600,
+        "id": "chatcmpl-sdk101",
+        "model": "gpt-4o-mini",
+        "object": "chat.completion",
+        "usage": "<undefined>"
+       },
+       "type": "done"
+      }
+     ]
+    },
+    "text": {
+     "ok": "Hello world"
+    }
+   }
+  },
+  "stream.fixture.normal_stream.final": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "drainedError": null,
+     "final": {
+      "ok": {
+       "agentcc": {
+        "cacheStatus": null,
+        "cost": null,
+        "fallbackUsed": false,
+        "guardrailAction": null,
+        "guardrailConfidence": null,
+        "guardrailMessage": null,
+        "guardrailName": null,
+        "guardrailTriggered": false,
+        "latencyMs": 0,
+        "modelUsed": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "requestId": "unknown",
+        "routingStrategy": null,
+        "timeoutMs": null,
+        "traceId": "unknown"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "message": {
+          "content": "Hello world",
+          "role": "assistant"
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-sdk101",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "usage": "<undefined>"
+      }
+     }
+    },
+    "text": {
+     "ok": "Hello world"
+    }
+   }
+  },
+  "stream.fixture.normal_stream.iter": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "error": null,
+    "items": [
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {
+         "content": "Hello",
+         "role": "assistant"
+        },
+        "finish_reason": null,
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-sdk101",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     },
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {
+         "content": " world"
+        },
+        "finish_reason": null,
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-sdk101",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     },
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {},
+        "finish_reason": "stop",
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-sdk101",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     }
+    ]
+   }
+  },
+  "stream.fixture.normal_stream.text": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "error": null,
+     "items": [
+      "Hello",
+      " world"
+     ]
+    },
+    "text": {
+     "ok": "Hello world"
+    }
+   }
+  },
+  "stream.fixture.upstream_timeout_cut_after_content.break_on_done": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "result": {
+      "raised": {
+       "__exception__": "StreamError",
+       "attrs": {
+        "body": {
+         "code": "gateway_timeout",
+         "message": "the stream's upstream call timed out",
+         "param": null,
+         "type": "gateway_timeout"
+        },
+        "code": "gateway_timeout",
+        "name": "StreamError",
+        "param": null,
+        "type": "gateway_timeout"
+       },
+       "chain": [
+        "StreamError",
+        "AgentCCError",
+        "Error"
+       ],
+       "class": "StreamError",
+       "message": "the stream's upstream call timed out",
+       "toString": "StreamError: the stream's upstream call timed out"
+      }
+     },
+     "types": [
+      "content"
+     ]
+    },
+    "text": {
+     "ok": "Partial"
+    }
+   }
+  },
+  "stream.fixture.upstream_timeout_cut_after_content.events": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "error": {
+      "__exception__": "StreamError",
+      "attrs": {
+       "body": {
+        "code": "gateway_timeout",
+        "message": "the stream's upstream call timed out",
+        "param": null,
+        "type": "gateway_timeout"
+       },
+       "code": "gateway_timeout",
+       "name": "StreamError",
+       "param": null,
+       "type": "gateway_timeout"
+      },
+      "chain": [
+       "StreamError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "StreamError",
+      "message": "the stream's upstream call timed out",
+      "toString": "StreamError: the stream's upstream call timed out"
+     },
+     "items": [
+      {
+       "text": "Partial",
+       "type": "content"
+      }
+     ]
+    },
+    "text": {
+     "ok": "Partial"
+    }
+   }
+  },
+  "stream.fixture.upstream_timeout_cut_after_content.final": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "drainedError": {
+      "__exception__": "StreamError",
+      "attrs": {
+       "body": {
+        "code": "gateway_timeout",
+        "message": "the stream's upstream call timed out",
+        "param": null,
+        "type": "gateway_timeout"
+       },
+       "code": "gateway_timeout",
+       "name": "StreamError",
+       "param": null,
+       "type": "gateway_timeout"
+      },
+      "chain": [
+       "StreamError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "StreamError",
+      "message": "the stream's upstream call timed out",
+      "toString": "StreamError: the stream's upstream call timed out"
+     },
+     "final": {
+      "ok": {
+       "agentcc": {
+        "cacheStatus": null,
+        "cost": null,
+        "fallbackUsed": false,
+        "guardrailAction": null,
+        "guardrailConfidence": null,
+        "guardrailMessage": null,
+        "guardrailName": null,
+        "guardrailTriggered": false,
+        "latencyMs": 0,
+        "modelUsed": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "requestId": "unknown",
+        "routingStrategy": null,
+        "timeoutMs": null,
+        "traceId": "unknown"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "message": {
+          "content": "Partial",
+          "role": "assistant"
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-sdk101",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "usage": "<undefined>"
+      }
+     }
+    },
+    "text": {
+     "ok": "Partial"
+    }
+   }
+  },
+  "stream.fixture.upstream_timeout_cut_after_content.iter": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "error": {
+     "__exception__": "StreamError",
+     "attrs": {
+      "body": {
+       "code": "gateway_timeout",
+       "message": "the stream's upstream call timed out",
+       "param": null,
+       "type": "gateway_timeout"
+      },
+      "code": "gateway_timeout",
+      "name": "StreamError",
+      "param": null,
+      "type": "gateway_timeout"
+     },
+     "chain": [
+      "StreamError",
+      "AgentCCError",
+      "Error"
+     ],
+     "class": "StreamError",
+     "message": "the stream's upstream call timed out",
+     "toString": "StreamError: the stream's upstream call timed out"
+    },
+    "items": [
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {
+         "content": "Partial",
+         "role": "assistant"
+        },
+        "finish_reason": null,
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-sdk101",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     }
+    ]
+   }
+  },
+  "stream.fixture.upstream_timeout_cut_after_content.text": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "error": {
+      "__exception__": "StreamError",
+      "attrs": {
+       "body": {
+        "code": "gateway_timeout",
+        "message": "the stream's upstream call timed out",
+        "param": null,
+        "type": "gateway_timeout"
+       },
+       "code": "gateway_timeout",
+       "name": "StreamError",
+       "param": null,
+       "type": "gateway_timeout"
+      },
+      "chain": [
+       "StreamError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "StreamError",
+      "message": "the stream's upstream call timed out",
+      "toString": "StreamError: the stream's upstream call timed out"
+     },
+     "items": [
+      "Partial"
+     ]
+    },
+    "text": {
+     "ok": "Partial"
+    }
+   }
+  },
+  "stream.fixture.usage_chunk_with_empty_choices.break_on_done": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "result": {
+      "ok": "<undefined>"
+     },
+     "types": [
+      "content",
+      "done"
+     ]
+    },
+    "text": {
+     "ok": "Hello"
+    }
+   }
+  },
+  "stream.fixture.usage_chunk_with_empty_choices.events": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "error": null,
+     "items": [
+      {
+       "text": "Hello",
+       "type": "content"
+      },
+      {
+       "completion": {
+        "agentcc": {
+         "cacheStatus": null,
+         "cost": null,
+         "fallbackUsed": false,
+         "guardrailAction": null,
+         "guardrailConfidence": null,
+         "guardrailMessage": null,
+         "guardrailName": null,
+         "guardrailTriggered": false,
+         "latencyMs": 0,
+         "modelUsed": null,
+         "provider": "unknown",
+         "ratelimit": null,
+         "requestId": "unknown",
+         "routingStrategy": null,
+         "timeoutMs": null,
+         "traceId": "unknown"
+        },
+        "choices": [
+         {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+           "content": "Hello",
+           "role": "assistant"
+          }
+         }
+        ],
+        "created": 1761177600,
+        "id": "chatcmpl-sdk101",
+        "model": "gpt-4o-mini",
+        "object": "chat.completion",
+        "usage": "<undefined>"
+       },
+       "type": "done"
+      },
+      {
+       "type": "usage",
+       "usage": {
+        "completion_tokens": 1,
+        "prompt_tokens": 9,
+        "total_tokens": 10
+       }
+      }
+     ]
+    },
+    "text": {
+     "ok": "Hello"
+    }
+   }
+  },
+  "stream.fixture.usage_chunk_with_empty_choices.final": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "drainedError": null,
+     "final": {
+      "ok": {
+       "agentcc": {
+        "cacheStatus": null,
+        "cost": null,
+        "fallbackUsed": false,
+        "guardrailAction": null,
+        "guardrailConfidence": null,
+        "guardrailMessage": null,
+        "guardrailName": null,
+        "guardrailTriggered": false,
+        "latencyMs": 0,
+        "modelUsed": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "requestId": "unknown",
+        "routingStrategy": null,
+        "timeoutMs": null,
+        "traceId": "unknown"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "message": {
+          "content": "Hello",
+          "role": "assistant"
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-sdk101",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "usage": {
+        "completion_tokens": 1,
+        "prompt_tokens": 9,
+        "total_tokens": 10
+       }
+      }
+     }
+    },
+    "text": {
+     "ok": "Hello"
+    }
+   }
+  },
+  "stream.fixture.usage_chunk_with_empty_choices.iter": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "error": null,
+    "items": [
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {
+         "content": "Hello",
+         "role": "assistant"
+        },
+        "finish_reason": null,
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-sdk101",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     },
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {},
+        "finish_reason": "stop",
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-sdk101",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     },
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [],
+      "created": 1761177600,
+      "id": "chatcmpl-sdk101",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk",
+      "usage": {
+       "completion_tokens": 1,
+       "prompt_tokens": 9,
+       "total_tokens": 10
+      }
+     }
+    ]
+   }
+  },
+  "stream.fixture.usage_chunk_with_empty_choices.text": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/1.0.1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "1.0.1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "consumed": {
+     "error": null,
+     "items": [
+      "Hello"
+     ]
+    },
+    "text": {
+     "ok": "Hello"
+    }
+   }
+  }
+ },
+ "format": 1
+}

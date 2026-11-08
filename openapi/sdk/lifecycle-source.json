@@ -1,0 +1,12 @@
+{
+  "backend_repository": "future-agi/future-agi",
+  "backend_revision": "17d864bf578ba361f450fc71019dc660f57c79e9",
+  "operations": [
+    "GET /model-hub/datasets/{dataset_id}/versions/",
+    "POST /model-hub/datasets/{dataset_id}/versions/",
+    "GET /model-hub/datasets/{dataset_id}/versions/{version_id}/",
+    "POST /model-hub/experiment-runs/",
+    "POST /model-hub/experiment-runs/{run_id}/results/",
+    "POST /model-hub/experiment-runs/compare/"
+  ]
+}

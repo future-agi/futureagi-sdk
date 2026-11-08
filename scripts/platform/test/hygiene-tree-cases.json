@@ -1,0 +1,37 @@
+{
+  "about": "Synthetic negative examples, intentionally published in plaintext for review. Exact-line exemptions in the tree rules account for the examples that match production rules. No example identifies a real commit, work stream, decision, ticket or run. Test-only names are added by hash to a copy of the rules.",
+  "synthetic": true,
+  "names": [
+    ["internal-doc", "zz-design-notes"],
+    ["local-state", "zz-scratch"]
+  ],
+  "text": [
+    { "path": "python/fi/x.py", "text": "the U29 step", "rules": ["stream-id"] },
+    { "path": "python/fi/x.py", "text": "fixes SDKCONF-9999", "rules": ["ticket-id"] },
+    { "path": "python/fi/x.py", "text": "one identity (review Z99)", "rules": ["review-ref"] },
+    { "path": "python/fi/x.py", "text": "as ruling 999 says", "rules": ["decision-ref"] },
+    { "path": "python/fi/x.py", "text": "addendum 999 applies", "rules": ["decision-ref"] },
+    { "path": "python/fi/x.py", "text": "run wf_00000000-0", "rules": ["run-id"] },
+    { "path": "python/fi/x.py", "text": "job j-20990101t0000-000000", "rules": ["run-id"] },
+    { "path": "python/fi/x.py", "text": "each lane appends its package", "rules": ["process-word"] },
+    { "path": "python/fi/x.py", "text": "verify round 999 found it", "rules": ["process-word"] },
+    { "path": "python/fi/x.py", "text": "on a Spot VM", "rules": ["process-word"] },
+    { "path": "python/fi/x.py", "text": "Acceptance 999 (Python): every status", "rules": ["process-word"] },
+    { "path": "python/fi/generated/x.py", "text": "TEAM mode lanes", "rules": [] },
+    { "path": "java/futureagi/X.java", "text": "Acceptance 999", "rules": [] },
+    { "path": "python/tests/x.py", "text": "pinned at a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1", "rules": ["unreviewed-sha"] },
+    { "path": "openapi/platform/source.json", "text": "  \"commit\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\",", "rules": [] },
+    { "path": "openapi/platform/source.json", "text": "  \"note\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\",", "rules": ["unreviewed-sha"] },
+    { "path": "openapi/sdk/lifecycle-source.json", "text": "  \"backend_revision\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\",", "rules": [] },
+    { "path": "python/fi/x.py", "text": "\"commit\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\"", "rules": ["unreviewed-sha"] },
+    { "path": "docs/x.md", "text": "notes in zz-design-notes and ~/.zz-scratch", "rules": ["internal-doc", "local-state"] },
+    { "path": "docs/x.md", "text": "S3 bucket, UTF-8, ISO-8601, L2 norm, A10, B01, U2F keys, GENERATED, TEAM, WIDTH, the planner", "rules": [] },
+    { "path": "docs/x.md", "text": "commit 1234567, deadbeef, 0x7fffffff1, abc123, cafe-babe", "rules": [] },
+    { "path": "docs/x.md", "text": "id 123e4567-e89b-12d3-a456-426614174000 and run_00000000", "rules": [] },
+    { "path": "docs/x.md", "text": "the rulings page, a review of S3, ask questions, planning, plans and acceptance tests", "rules": [] },
+    { "path": "tests/fixtures/x.json", "text": "  \"npm_pack_shasum\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\",", "rules": [] },
+    { "path": "tests/fixtures/x.json", "text": "  \"sha1_computed\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\",", "rules": [] },
+    { "path": "python/tests/x.py", "text": "    {'digest': 'a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1'}", "rules": ["unreviewed-sha"] },
+    { "path": "tests/fixtures/x.json", "text": "  \"commit\": \"a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\",", "rules": ["unreviewed-sha"] }
+  ]
+}

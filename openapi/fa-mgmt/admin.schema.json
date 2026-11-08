@@ -1,0 +1,4343 @@
+{
+  "$defs": {
+    "A2AAgentConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "auth": {
+          "$ref": "#/$defs/A2AAuthConfig"
+        },
+        "description": {
+          "type": "string"
+        },
+        "skills": {
+          "items": {
+            "$ref": "#/$defs/A2ASkillConfig"
+          },
+          "type": "array"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "A2AAuthConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "header": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "A2ACardConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "A2AOrgConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "agents": {
+          "additionalProperties": {
+            "$ref": "#/$defs/A2AAgentConfig"
+          },
+          "type": "object"
+        },
+        "card": {
+          "$ref": "#/$defs/A2ACardConfig"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "A2ASkillConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AccessGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "aliases": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "description": {
+          "type": "string"
+        },
+        "models": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "AdaptiveRoutingConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "learning_requests": {
+          "type": "integer"
+        },
+        "min_weight": {
+          "type": "number"
+        },
+        "signal_weights": {
+          "$ref": "#/$defs/SignalWeights"
+        },
+        "smoothing_factor": {
+          "type": "number"
+        },
+        "update_interval": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AgentsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "always_emit_metadata": {
+          "default": true,
+          "type": "boolean"
+        },
+        "budget_scope_ttl_seconds": {
+          "default": 86400,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "default_model": {
+          "default": "auto",
+          "type": "string"
+        },
+        "envelopes": {
+          "$ref": "#/$defs/AgentsEnvelopesConfig"
+        },
+        "framework_aliases": {
+          "default": true,
+          "type": "boolean"
+        },
+        "price_ceiling": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AgentsPriceCeiling"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "step_presets": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/Step"
+          },
+          "type": "object"
+        },
+        "unpriced_under_cap": {
+          "default": "reject",
+          "enum": [
+            "reject",
+            "allow"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AgentsEnvelopeDefaults": {
+      "additionalProperties": false,
+      "properties": {
+        "max_calls": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_concurrent_children": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_uncached_input_tokens_per_hour": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_usd": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "max_wall_ms": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "AgentsEnvelopeLoop": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "warn",
+            "stop"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AgentsEnvelopesConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "allow_downgrade": {
+          "type": "boolean"
+        },
+        "defaults": {
+          "$ref": "#/$defs/AgentsEnvelopeDefaults"
+        },
+        "downgrade_model": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "loop": {
+          "$ref": "#/$defs/AgentsEnvelopeLoop"
+        },
+        "on_breach": {
+          "enum": [
+            "warn",
+            "downgrade",
+            "pause",
+            "stop"
+          ],
+          "type": "string"
+        },
+        "soft_threshold": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "AgentsPriceCeiling": {
+      "additionalProperties": false,
+      "properties": {
+        "completion_usd_per_mtok": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "prompt_usd_per_mtok": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "request_usd": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "AlertChannelConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AlertRuleConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "condition": {
+          "type": "string"
+        },
+        "cooldown": {
+          "type": "string"
+        },
+        "metric": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "critical"
+          ],
+          "type": "string"
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "window": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AlertingConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "channels": {
+          "items": {
+            "$ref": "#/$defs/AlertChannelConfig"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "rules": {
+          "items": {
+            "$ref": "#/$defs/AlertRuleConfig"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "AuditOrgConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "categories": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "min_severity": {
+          "type": "string"
+        },
+        "sinks": {
+          "items": {
+            "$ref": "#/$defs/AuditSinkConfig"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "AuditSinkConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "path": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AutoAffinityConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "ttl_seconds": {
+          "default": 1800,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "AutoOutcomeFeedbackConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "min_samples": {
+          "default": 20,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "penalty_weight": {
+          "default": 0.3,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "window_seconds": {
+          "default": 86400,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "AutoPreference": {
+      "enum": [
+        "cost",
+        "balanced",
+        "quality",
+        "latency"
+      ],
+      "type": "string"
+    },
+    "AutoRoutingConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "affinity": {
+          "$ref": "#/$defs/AutoAffinityConfig"
+        },
+        "candidates": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "deadline_latency_fraction": {
+          "default": 0.5,
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "type": "number"
+        },
+        "exclude_states": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "latency_target_ms": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_input_per_mtok": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "max_output_per_mtok": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "outcome_feedback": {
+          "$ref": "#/$defs/AutoOutcomeFeedbackConfig"
+        },
+        "preference": {
+          "$ref": "#/$defs/AutoPreference"
+        },
+        "quality_priors": {
+          "additionalProperties": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "type": "object"
+        },
+        "selector": {
+          "$ref": "#/$defs/AutoSelectorConfig"
+        },
+        "step_profiles": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AutoStepProfile"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/Step"
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "AutoSelectorConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "ambiguity_threshold": {
+          "default": 0.05,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "daily_budget_usd": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "enabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "max_candidates": {
+          "default": 8,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_cost_usd": {
+          "default": 0.002,
+          "minimum": 0,
+          "type": "number"
+        },
+        "mode": {
+          "default": "observe",
+          "enum": [
+            "observe",
+            "enforce"
+          ],
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "timeout_ms": {
+          "default": 800,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "AutoStepProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "max_tier": {
+          "$ref": "#/$defs/Tier"
+        },
+        "min_tier": {
+          "$ref": "#/$defs/Tier"
+        },
+        "prefer": {
+          "$ref": "#/$defs/AutoPreference"
+        },
+        "require": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "AzureBlobCacheConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "compress": {
+          "type": "boolean"
+        },
+        "connection_string": {
+          "type": "string"
+        },
+        "container": {
+          "type": "string"
+        },
+        "prefix": {
+          "type": "string"
+        },
+        "sas_token": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "BudgetLevelConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "action_mode": {
+          "type": "string"
+        },
+        "alert_thresholds": {
+          "default": [
+            0.5,
+            0.75,
+            1.0
+          ],
+          "items": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "hard": {
+          "type": "boolean"
+        },
+        "include_byok": {
+          "default": true,
+          "type": "boolean"
+        },
+        "limit": {
+          "type": "number"
+        },
+        "on_exceed": {
+          "type": "string"
+        },
+        "per_model": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": "object"
+        },
+        "period": {
+          "type": "string"
+        },
+        "throttle_rpm": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "BudgetsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "action_mode": {
+          "type": "string"
+        },
+        "default_period": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "fail_mode": {
+          "enum": [
+            "closed",
+            "open"
+          ],
+          "type": "string"
+        },
+        "hard_limit": {
+          "type": "boolean"
+        },
+        "keys": {
+          "additionalProperties": {
+            "$ref": "#/$defs/BudgetLevelConfig"
+          },
+          "type": "object"
+        },
+        "no_max_tokens": {
+          "enum": [
+            "reserve_default",
+            "clamp"
+          ],
+          "type": "string"
+        },
+        "on_exceed": {
+          "type": "string"
+        },
+        "org": {
+          "$ref": "#/$defs/BudgetLevelConfig"
+        },
+        "org_limit": {
+          "type": "number"
+        },
+        "org_period": {
+          "type": "string"
+        },
+        "organization": {
+          "$ref": "#/$defs/BudgetLevelConfig"
+        },
+        "tags": {
+          "additionalProperties": {
+            "$ref": "#/$defs/BudgetLevelConfig"
+          },
+          "type": "object"
+        },
+        "teams": {
+          "additionalProperties": {
+            "$ref": "#/$defs/BudgetLevelConfig"
+          },
+          "type": "object"
+        },
+        "throttle_rpm": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "users": {
+          "additionalProperties": {
+            "$ref": "#/$defs/BudgetLevelConfig"
+          },
+          "type": "object"
+        },
+        "warn_threshold": {
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "CacheConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "azure_blob": {
+          "$ref": "#/$defs/AzureBlobCacheConfig"
+        },
+        "backend": {
+          "type": "string"
+        },
+        "default_ttl": {
+          "type": "integer"
+        },
+        "disk": {
+          "$ref": "#/$defs/DiskCacheConfig"
+        },
+        "edge": {
+          "$ref": "#/$defs/EdgeCacheConfig"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "gcs": {
+          "$ref": "#/$defs/GCSCacheConfig"
+        },
+        "max_entries": {
+          "type": "integer"
+        },
+        "redis": {
+          "$ref": "#/$defs/RedisCacheConfig"
+        },
+        "s3": {
+          "$ref": "#/$defs/S3CacheConfig"
+        },
+        "semantic": {
+          "$ref": "#/$defs/SemanticCacheConfig"
+        }
+      },
+      "type": "object"
+    },
+    "CapabilityOverrideOrg": {
+      "additionalProperties": false,
+      "properties": {
+        "audio_input": {
+          "type": "boolean"
+        },
+        "audio_output": {
+          "type": "boolean"
+        },
+        "function_calling": {
+          "type": "boolean"
+        },
+        "parallel_tool_calls": {
+          "type": "boolean"
+        },
+        "pdf_input": {
+          "type": "boolean"
+        },
+        "prompt_caching": {
+          "type": "boolean"
+        },
+        "reasoning": {
+          "type": "boolean"
+        },
+        "response_schema": {
+          "type": "boolean"
+        },
+        "streaming": {
+          "type": "boolean"
+        },
+        "system_messages": {
+          "type": "boolean"
+        },
+        "vision": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "CircuitBreakerConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "cooldown": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "failure_threshold": {
+          "type": "integer"
+        },
+        "on_status_codes": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "success_threshold": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "ComplexityRoutingConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "default_tier": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "tiers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ComplexityTier"
+          },
+          "type": "object"
+        },
+        "weights": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "ComplexityTier": {
+      "additionalProperties": false,
+      "properties": {
+        "max_score": {
+          "type": "integer"
+        },
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ConditionalRoute": {
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "value": {}
+      },
+      "type": "object"
+    },
+    "ConfigMeta": {
+      "additionalProperties": false,
+      "properties": {
+        "config_id": {
+          "type": "string"
+        },
+        "pushed_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version"
+      ],
+      "type": "object"
+    },
+    "ContentMode": {
+      "enum": [
+        "full",
+        "metadata",
+        "none"
+      ],
+      "type": "string"
+    },
+    "CostTrackingConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "custom_pricing": {
+          "additionalProperties": {
+            "$ref": "#/$defs/CustomPricing"
+          },
+          "type": "object"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "CreateKeyRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "metadata": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "models": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "providers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "CustomPricing": {
+      "additionalProperties": false,
+      "properties": {
+        "input_per_mtok": {
+          "type": "number"
+        },
+        "output_per_mtok": {
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "DataCollection": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "type": "string"
+    },
+    "DataPolicyConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_regions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "block_preview_in_envs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "data_collection": {
+          "$ref": "#/$defs/DataCollection",
+          "default": "allow"
+        },
+        "zdr": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "DelegatedGrant": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "grant_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "grantor_user_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "max_usd": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "preapproved_rules": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "scopes": {
+          "$ref": "#/$defs/DelegatedGrantScopes"
+        }
+      },
+      "required": [
+        "grant_id",
+        "agent_id",
+        "grantor_user_id",
+        "scopes",
+        "expires_at"
+      ],
+      "type": "object"
+    },
+    "DelegatedGrantScopes": {
+      "additionalProperties": false,
+      "properties": {
+        "models": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "servers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "tools": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "DiskCacheConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "cleanup_interval": {
+          "type": "string"
+        },
+        "compress": {
+          "type": "boolean"
+        },
+        "directory": {
+          "type": "string"
+        },
+        "max_size_bytes": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "EdgeCacheConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "cacheable_models": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "default_ttl": {
+          "type": "integer"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "max_size": {
+          "type": "integer"
+        },
+        "require_opt_in": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "FailoverConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "max_attempts": {
+          "type": "integer"
+        },
+        "on_status_codes": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "on_timeout": {
+          "type": "boolean"
+        },
+        "per_attempt_timeout": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "FastestResponseConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "allow_managed": {
+          "default": false,
+          "type": "boolean"
+        },
+        "cancel_delay": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "excluded_providers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "hedge_after_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_concurrent": {
+          "type": "integer"
+        },
+        "max_hedges": {
+          "maximum": 2,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "GCSCacheConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "compress": {
+          "type": "boolean"
+        },
+        "credentials_file": {
+          "type": "string"
+        },
+        "prefix": {
+          "type": "string"
+        },
+        "project": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "GuardrailCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "confidence_threshold": {
+          "type": "number"
+        },
+        "config": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "GuardrailConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "additionalProperties": {
+            "$ref": "#/$defs/GuardrailCheck"
+          },
+          "type": "object"
+        },
+        "fail_open": {
+          "type": "boolean"
+        },
+        "pipeline_mode": {
+          "type": "string"
+        },
+        "timeout_ms": {
+          "type": "integer"
+        },
+        "tool_calls": {
+          "$ref": "#/$defs/ToolCallGuardrailConfig"
+        }
+      },
+      "type": "object"
+    },
+    "IPACLConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "deny": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "IdempotencyConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "accept_attempt_id": {
+          "default": false,
+          "type": "boolean"
+        },
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "ttl_seconds": {
+          "default": 86400,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "IdentityConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "delegated_grants": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DelegatedGrant"
+          },
+          "type": "object"
+        },
+        "grants": {
+          "$ref": "#/$defs/IdentityGrantsConfig"
+        },
+        "idp": {
+          "$ref": "#/$defs/IdentityIdPConfig"
+        },
+        "require_human_sponsor": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "IdentityGrantsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "max_ttl_days": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "IdentityIdPConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "client_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "client_secret": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "issuer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "token_endpoint": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ImportKeysRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "keys": {
+          "items": {
+            "$ref": "#/$defs/SyncedKey"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "type": "object"
+    },
+    "ImportKeysResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "loaded": {
+          "type": "integer"
+        },
+        "received": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "received",
+        "loaded"
+      ],
+      "type": "object"
+    },
+    "KeyListResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/$defs/KeyResponse"
+          },
+          "type": "array"
+        },
+        "object": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "KeyResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_models": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "allowed_providers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "credit_balance": {
+          "type": "number"
+        },
+        "id": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "key_prefix": {
+          "type": "string"
+        },
+        "key_type": {
+          "type": "string"
+        },
+        "last_used_at": {
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "models": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "providers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "status": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "MCPAccessConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "default": {
+          "enum": [
+            "deny",
+            "allow"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "MCPAccessRule": {
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "deny": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "match": {
+          "$ref": "#/$defs/MCPAccessRuleMatch"
+        }
+      },
+      "required": [
+        "match"
+      ],
+      "type": "object"
+    },
+    "MCPAccessRuleMatch": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_ids": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "key_ids": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "user_ids": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "MCPAdminServerStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "era": {
+          "type": "string"
+        },
+        "healthy": {
+          "type": "boolean"
+        },
+        "last_error": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_refreshed_at": {
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "server_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "tool_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "transport": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "server_id",
+        "healthy",
+        "tool_count"
+      ],
+      "type": "object"
+    },
+    "MCPAdminStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "org_enabled": {
+          "type": "boolean"
+        },
+        "prompts": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "resources": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "servers": {
+          "items": {
+            "$ref": "#/$defs/MCPAdminServerStatus"
+          },
+          "type": "array"
+        },
+        "sessions": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "tools": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enabled",
+        "org_enabled",
+        "servers",
+        "sessions",
+        "tools",
+        "resources",
+        "prompts"
+      ],
+      "type": "object"
+    },
+    "MCPAdminTool": {
+      "additionalProperties": false,
+      "properties": {
+        "annotations": {
+          "type": "object"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "price": {
+          "$ref": "#/$defs/MCPToolPrice"
+        },
+        "quarantined": {
+          "type": "boolean"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "server_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "upstream_name": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "server_id",
+        "upstream_name",
+        "quarantined"
+      ],
+      "type": "object"
+    },
+    "MCPAdminTools": {
+      "additionalProperties": false,
+      "properties": {
+        "tools": {
+          "items": {
+            "$ref": "#/$defs/MCPAdminTool"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "tools"
+      ],
+      "type": "object"
+    },
+    "MCPApproval": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_run_id": {
+          "type": "string"
+        },
+        "approval_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "args_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "decided_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "decided_by": {
+          "type": "string"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "org_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "principal": {
+          "$ref": "#/$defs/MCPApprovalPrincipal"
+        },
+        "requested_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "approved",
+            "denied",
+            "expired",
+            "used"
+          ],
+          "type": "string"
+        },
+        "tool": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "virtual_server_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "approval_id",
+        "org_id",
+        "virtual_server_id",
+        "tool",
+        "args_hash",
+        "principal",
+        "status",
+        "requested_at",
+        "expires_at"
+      ],
+      "type": "object"
+    },
+    "MCPApprovalConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "require": {
+          "enum": [
+            "none",
+            "destructive",
+            "listed"
+          ],
+          "type": "string"
+        },
+        "tools": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "ttl_seconds": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "validity": {
+          "enum": [
+            "once",
+            "ttl",
+            "step"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "MCPApprovalDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "actor": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "approve",
+            "deny"
+          ],
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "org_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "org_id",
+        "decision",
+        "actor"
+      ],
+      "type": "object"
+    },
+    "MCPApprovalPrincipal": {
+      "additionalProperties": false,
+      "properties": {
+        "client_id": {
+          "type": "string"
+        },
+        "key_id": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "key",
+            "oauth",
+            "runtime",
+            "callback",
+            "admin"
+          ],
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    "MCPAuthOrgConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "header": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "MCPCredentialMode": {
+      "enum": [
+        "none",
+        "shared",
+        "per_user",
+        "exchange",
+        "id_jag",
+        "vendor_end_user"
+      ],
+      "type": "string"
+    },
+    "MCPCredentialSecret": {
+      "additionalProperties": false,
+      "properties": {
+        "header": {
+          "type": "string"
+        },
+        "type": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "value": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "type": "object"
+    },
+    "MCPCredentialState": {
+      "enum": [
+        "active",
+        "revoked",
+        "expired",
+        "needs_reauth"
+      ],
+      "type": "string"
+    },
+    "MCPFlowControlConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "off",
+            "shadow",
+            "enforce"
+          ],
+          "type": "string"
+        },
+        "on_egress_after_taint": {
+          "enum": [
+            "approve",
+            "deny"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "MCPGuardrailOrgConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_servers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "blocked_tools": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "tool_rate_limits": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "type": "object"
+        },
+        "validate_inputs": {
+          "type": "boolean"
+        },
+        "validate_outputs": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "MCPIdentityBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "in": {
+          "enum": [
+            "header",
+            "query",
+            "path"
+          ],
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "in",
+        "name"
+      ],
+      "type": "object"
+    },
+    "MCPManagedToolCredential": {
+      "additionalProperties": false,
+      "properties": {
+        "credential_id": {
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "shared",
+            "per_user"
+          ],
+          "type": "string"
+        },
+        "secret": {
+          "$ref": "#/$defs/MCPCredentialSecret"
+        },
+        "state": {
+          "$ref": "#/$defs/MCPCredentialState"
+        }
+      },
+      "type": "object"
+    },
+    "MCPManagedToolsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "allow_user_tokens": {
+          "type": "boolean"
+        },
+        "credentials": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MCPManagedToolCredential"
+          },
+          "type": "object"
+        },
+        "deny": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "fallback_to_managed": {
+          "type": "boolean"
+        },
+        "max_call_cost_usd": {
+          "minimum": 0,
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "MCPOAuthKeysPush": {
+      "additionalProperties": false,
+      "properties": {
+        "issuer": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "keys": {
+          "items": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "d"
+                  ]
+                },
+                {
+                  "required": [
+                    "p"
+                  ]
+                },
+                {
+                  "required": [
+                    "q"
+                  ]
+                },
+                {
+                  "required": [
+                    "k"
+                  ]
+                }
+              ]
+            },
+            "required": [
+              "kty",
+              "kid"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "version": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "issuer",
+        "version",
+        "keys"
+      ],
+      "type": "object"
+    },
+    "MCPOrgConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "access": {
+          "$ref": "#/$defs/MCPAccessConfig"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "flow_control": {
+          "$ref": "#/$defs/MCPFlowControlConfig"
+        },
+        "guardrails": {
+          "$ref": "#/$defs/MCPGuardrailOrgConfig"
+        },
+        "managed_tools": {
+          "$ref": "#/$defs/MCPManagedToolsConfig"
+        },
+        "pinning": {
+          "$ref": "#/$defs/MCPPinningConfig"
+        },
+        "policy": {
+          "$ref": "#/$defs/MCPPolicyConfig"
+        },
+        "scanning": {
+          "$ref": "#/$defs/MCPScanningConfig"
+        },
+        "servers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MCPServerOrgConfig"
+          },
+          "propertyNames": {
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,47}$",
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "shaping": {
+          "$ref": "#/$defs/MCPShapingConfig"
+        },
+        "virtual_servers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MCPVirtualServerConfig"
+          },
+          "propertyNames": {
+            "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+            "type": "string"
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "MCPPerToolBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "max_calls_per_run": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "rpm": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "MCPPinningConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "auto_baseline": {
+          "type": "boolean"
+        },
+        "mode": {
+          "enum": [
+            "off",
+            "warn",
+            "quarantine"
+          ],
+          "type": "string"
+        },
+        "new_tools": {
+          "enum": [
+            "quarantine",
+            "allow"
+          ],
+          "type": "string"
+        },
+        "pins": {
+          "additionalProperties": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "MCPPolicyAction": {
+      "enum": [
+        "allow",
+        "approve",
+        "deny"
+      ],
+      "type": "string"
+    },
+    "MCPPolicyCombo": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "deny",
+            "approve"
+          ],
+          "type": "string"
+        },
+        "id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "sequence": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        },
+        "within": {
+          "enum": [
+            "run"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "sequence",
+        "within",
+        "action"
+      ],
+      "type": "object"
+    },
+    "MCPPolicyConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "combos": {
+          "items": {
+            "$ref": "#/$defs/MCPPolicyCombo"
+          },
+          "type": "array"
+        },
+        "default_tier": {
+          "$ref": "#/$defs/MCPPolicyDefaultTier"
+        },
+        "rules": {
+          "items": {
+            "$ref": "#/$defs/MCPPolicyRule"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "MCPPolicyDefaultTier": {
+      "additionalProperties": false,
+      "properties": {
+        "destructive": {
+          "$ref": "#/$defs/MCPPolicyAction"
+        },
+        "destructive_prod": {
+          "$ref": "#/$defs/MCPPolicyAction"
+        },
+        "read_only": {
+          "$ref": "#/$defs/MCPPolicyAction"
+        },
+        "undeclared": {
+          "$ref": "#/$defs/MCPPolicyAction"
+        }
+      },
+      "type": "object"
+    },
+    "MCPPolicyMatch": {
+      "additionalProperties": false,
+      "properties": {
+        "agents": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "env": {
+          "items": {
+            "enum": [
+              "prod",
+              "staging",
+              "dev"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "servers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/Step"
+          },
+          "type": "array"
+        },
+        "tools": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "tools"
+      ],
+      "type": "object"
+    },
+    "MCPPolicyRule": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/MCPPolicyAction"
+        },
+        "id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "match": {
+          "$ref": "#/$defs/MCPPolicyMatch"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "shadow": {
+          "type": "boolean"
+        },
+        "when": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "match",
+        "action",
+        "reason"
+      ],
+      "type": "object"
+    },
+    "MCPProbeAuth": {
+      "additionalProperties": false,
+      "properties": {
+        "header": {
+          "type": "string"
+        },
+        "type": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "value": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "type": "object"
+    },
+    "MCPProbeRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "auth": {
+          "$ref": "#/$defs/MCPProbeAuth"
+        },
+        "credential_id": {
+          "type": "string"
+        },
+        "org_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "transport": {
+          "type": "string"
+        },
+        "url": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "org_id",
+        "url"
+      ],
+      "type": "object"
+    },
+    "MCPProbeResult": {
+      "additionalProperties": false,
+      "properties": {
+        "era": {
+          "type": "string"
+        },
+        "error": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "latency_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "server_info": {
+          "$ref": "#/$defs/MCPProbeServerInfo"
+        },
+        "tool_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "tools_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ok",
+        "latency_ms"
+      ],
+      "type": "object"
+    },
+    "MCPProbeServerInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "MCPRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "collides_with": {
+          "type": "string"
+        },
+        "definition": {
+          "type": "object"
+        },
+        "diff": {
+          "items": {
+            "$ref": "#/$defs/MCPRevisionDiff"
+          },
+          "type": "array"
+        },
+        "first_seen_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "org_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "previous_definition": {
+          "type": "object"
+        },
+        "previous_revision": {
+          "type": "string"
+        },
+        "reason": {
+          "enum": [
+            "changed",
+            "new",
+            "collision"
+          ],
+          "type": "string"
+        },
+        "revision": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "server_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "tool": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "org_id",
+        "server_id",
+        "tool",
+        "revision",
+        "definition",
+        "diff",
+        "first_seen_at",
+        "reason"
+      ],
+      "type": "object"
+    },
+    "MCPRevisionDiff": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {},
+        "before": {},
+        "field": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "field"
+      ],
+      "type": "object"
+    },
+    "MCPScanningConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "arguments": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "descriptions": {
+          "enum": [
+            "off",
+            "warn",
+            "block"
+          ],
+          "type": "string"
+        },
+        "results": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "shadow": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "MCPServerCredential": {
+      "additionalProperties": false,
+      "properties": {
+        "credential_id": {
+          "type": "string"
+        },
+        "header": {
+          "type": "string"
+        },
+        "identity_binding": {
+          "$ref": "#/$defs/MCPIdentityBinding"
+        },
+        "mode": {
+          "$ref": "#/$defs/MCPCredentialMode"
+        },
+        "secret": {
+          "$ref": "#/$defs/MCPCredentialSecret"
+        },
+        "state": {
+          "$ref": "#/$defs/MCPCredentialState"
+        },
+        "vendor": {
+          "enum": [
+            "pipedream",
+            "composio",
+            "arcade",
+            "merge",
+            "nango",
+            "zapier"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "MCPServerOAuthConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {
+          "enum": [
+            "auto",
+            "generic",
+            "entra",
+            "okta",
+            "slack",
+            "github",
+            "atlassian",
+            "google"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "MCPServerOrgConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "auth": {
+          "$ref": "#/$defs/MCPAuthOrgConfig"
+        },
+        "credential": {
+          "$ref": "#/$defs/MCPServerCredential"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "era": {
+          "enum": [
+            "auto",
+            "2026-07-28",
+            "2025-11-25",
+            "2025-06-18",
+            "2025-03-26",
+            "2024-11-05"
+          ],
+          "type": "string"
+        },
+        "forward_headers": {
+          "items": {
+            "minLength": 1,
+            "pattern": "^[!#$%&'*+.^_`|~0-9A-Za-z-]+$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "labels": {
+          "items": {
+            "$ref": "#/$defs/MCPToolLabel"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "oauth": {
+          "$ref": "#/$defs/MCPServerOAuthConfig"
+        },
+        "propagate_depth": {
+          "type": "boolean"
+        },
+        "timeout_ms": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "tools_cache_ttl": {
+          "type": "string"
+        },
+        "tools_cache_ttl_seconds": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "transport": {
+          "type": "string"
+        },
+        "trusted_annotations": {
+          "type": "boolean"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "MCPShapingConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "per_tool": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MCPShapingToolConfig"
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "MCPShapingToolConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "budget_bytes": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "project": {
+          "items": {
+            "pattern": "^(/.*)?$",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "MCPStepProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "include": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "MCPToolFilter": {
+      "additionalProperties": false,
+      "properties": {
+        "exclude": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "include": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "MCPToolLabel": {
+      "enum": [
+        "private_data",
+        "untrusted_input",
+        "egress"
+      ],
+      "type": "string"
+    },
+    "MCPToolOverride": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "hidden": {
+          "type": "boolean"
+        },
+        "labels": {
+          "items": {
+            "$ref": "#/$defs/MCPToolLabel"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "MCPToolPrice": {
+      "additionalProperties": false,
+      "properties": {
+        "markup_percent": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "sku": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "usd_per_unit_billed": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "sku",
+        "usd_per_unit_billed",
+        "markup_percent"
+      ],
+      "type": "object"
+    },
+    "MCPVirtualServerAccess": {
+      "additionalProperties": false,
+      "properties": {
+        "agents": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "default_for_org": {
+          "type": "boolean"
+        },
+        "keys": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "rules": {
+          "items": {
+            "$ref": "#/$defs/MCPAccessRule"
+          },
+          "type": "array"
+        },
+        "users": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "MCPVirtualServerBudgets": {
+      "additionalProperties": false,
+      "properties": {
+        "max_tool_calls_per_run": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_tool_usd_per_run": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "per_tool": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MCPPerToolBudget"
+          },
+          "type": "object"
+        },
+        "rpm_per_key": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "MCPVirtualServerConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "access": {
+          "$ref": "#/$defs/MCPVirtualServerAccess"
+        },
+        "approval": {
+          "$ref": "#/$defs/MCPApprovalConfig"
+        },
+        "budgets": {
+          "$ref": "#/$defs/MCPVirtualServerBudgets"
+        },
+        "cache_scope": {
+          "enum": [
+            "private"
+          ],
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^vs_[0-9A-HJKMNP-TV-Z]{26}$",
+          "type": "string"
+        },
+        "members": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "mode": {
+          "enum": [
+            "direct",
+            "search"
+          ],
+          "type": "string"
+        },
+        "naming": {
+          "enum": [
+            "prefixed",
+            "flat"
+          ],
+          "type": "string"
+        },
+        "overrides": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MCPToolOverride"
+          },
+          "type": "object"
+        },
+        "step_profiles": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MCPStepProfile"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/Step"
+          },
+          "type": "object"
+        },
+        "title": {
+          "type": "string"
+        },
+        "tools": {
+          "$ref": "#/$defs/MCPToolFilter"
+        }
+      },
+      "type": "object"
+    },
+    "ManagedModelsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "allow_data_collection": {
+          "default": false,
+          "type": "boolean"
+        },
+        "allow_free": {
+          "default": true,
+          "type": "boolean"
+        },
+        "allow_models": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "allow_vendors": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "default_max_tokens_estimate": {
+          "default": 4096,
+          "minimum": 1024,
+          "type": "integer"
+        },
+        "deny_models": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "deny_vendors": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "fallback_to_managed": {
+          "default": false,
+          "type": "boolean"
+        },
+        "hedging": {
+          "default": false,
+          "type": "boolean"
+        },
+        "max_call_cost_usd": {
+          "default": null,
+          "minimum": 0,
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "spend_guard": {
+          "$ref": "#/$defs/ManagedSpendGuardConfig"
+        },
+        "topup": {
+          "$ref": "#/$defs/ManagedTopupConfig"
+        },
+        "upstream_keys": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ManagedUpstreamKey"
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "ManagedSpendGuardConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "alert_usd_per_hour": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "auto_pause": {
+          "default": false,
+          "type": "boolean"
+        },
+        "max_usd_per_hour": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "max_usd_per_minute": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "new_org_daily_cap_usd": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "ManagedTopupConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "min_usd": {
+          "default": 25,
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "ManagedUpstreamKey": {
+      "additionalProperties": false,
+      "properties": {
+        "api_key": {
+          "type": "string"
+        },
+        "key_hash": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "api_key",
+        "key_hash"
+      ],
+      "type": "object"
+    },
+    "MirrorConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "rules": {
+          "items": {
+            "$ref": "#/$defs/MirrorRule"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "MirrorRule": {
+      "additionalProperties": false,
+      "properties": {
+        "sample_rate": {
+          "type": "number"
+        },
+        "source_model": {
+          "type": "string"
+        },
+        "target_model": {
+          "type": "string"
+        },
+        "target_provider": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ModelDatabaseOrgConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "overrides": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ModelOverrideOrgConfig"
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "ModelOverrideOrgConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "capabilities": {
+          "$ref": "#/$defs/CapabilityOverrideOrg"
+        },
+        "max_input_tokens": {
+          "type": "integer"
+        },
+        "max_output_tokens": {
+          "type": "integer"
+        },
+        "pricing": {
+          "$ref": "#/$defs/PricingOverrideOrg"
+        }
+      },
+      "type": "object"
+    },
+    "OrgConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "a2a": {
+          "$ref": "#/$defs/A2AOrgConfig"
+        },
+        "alerting": {
+          "$ref": "#/$defs/AlertingConfig"
+        },
+        "audit": {
+          "$ref": "#/$defs/AuditOrgConfig"
+        },
+        "budgets": {
+          "$ref": "#/$defs/BudgetsConfig"
+        },
+        "cache": {
+          "$ref": "#/$defs/CacheConfig"
+        },
+        "cost_tracking": {
+          "$ref": "#/$defs/CostTrackingConfig"
+        },
+        "guardrails": {
+          "$ref": "#/$defs/GuardrailConfig"
+        },
+        "identity": {
+          "$ref": "#/$defs/IdentityConfig"
+        },
+        "ip_acl": {
+          "$ref": "#/$defs/IPACLConfig"
+        },
+        "managed_models": {
+          "$ref": "#/$defs/ManagedModelsConfig"
+        },
+        "mcp": {
+          "$ref": "#/$defs/MCPOrgConfig"
+        },
+        "meta": {
+          "$ref": "#/$defs/ConfigMeta"
+        },
+        "model_database": {
+          "$ref": "#/$defs/ModelDatabaseOrgConfig"
+        },
+        "model_map": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "privacy": {
+          "$ref": "#/$defs/PrivacyConfig"
+        },
+        "providers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ProviderConfig"
+          },
+          "type": "object"
+        },
+        "rate_limiting": {
+          "$ref": "#/$defs/RateLimitConfig"
+        },
+        "routing": {
+          "$ref": "#/$defs/RoutingConfig"
+        },
+        "tool_policy": {
+          "$ref": "#/$defs/ToolPolicyConfig"
+        },
+        "tools": {
+          "$ref": "#/$defs/ToolsConfig"
+        }
+      },
+      "type": "object"
+    },
+    "OrgConfigListResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "data": {
+          "additionalProperties": {
+            "$ref": "#/$defs/OrgConfig"
+          },
+          "type": "object"
+        },
+        "object": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PercentileThresholds": {
+      "additionalProperties": false,
+      "properties": {
+        "p50": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "p75": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "p90": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "p99": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "PineconeConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "api_key": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PricingOverrideOrg": {
+      "additionalProperties": false,
+      "properties": {
+        "batch_input_per_token": {
+          "type": "number"
+        },
+        "batch_output_per_token": {
+          "type": "number"
+        },
+        "cached_input_per_token": {
+          "type": "number"
+        },
+        "input_per_token": {
+          "type": "number"
+        },
+        "output_per_token": {
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "PrivacyConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "content_mode": {
+          "$ref": "#/$defs/ContentMode",
+          "default": "full"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "mode": {
+          "type": "string"
+        },
+        "redact_patterns": {
+          "items": {
+            "$ref": "#/$defs/RedactPatternConfig"
+          },
+          "type": "array"
+        },
+        "retention": {
+          "$ref": "#/$defs/PrivacyRetentionConfig"
+        }
+      },
+      "type": "object"
+    },
+    "PrivacyRetentionConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_days": {
+          "default": null,
+          "maximum": 36500,
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "request_log_days": {
+          "default": null,
+          "maximum": 36500,
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "store_bodies": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "PromptCachingConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "default": "off",
+          "enum": [
+            "off",
+            "auto"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ProviderConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "api_format": {
+          "type": "string"
+        },
+        "api_key": {
+          "type": "string"
+        },
+        "api_path_prefix": {
+          "type": "string"
+        },
+        "aws_access_key_id": {
+          "type": "string"
+        },
+        "aws_region": {
+          "type": "string"
+        },
+        "aws_secret_access_key": {
+          "type": "string"
+        },
+        "aws_session_token": {
+          "type": "string"
+        },
+        "base_url": {
+          "type": "string"
+        },
+        "conn_pool_size": {
+          "type": "integer"
+        },
+        "data_region": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "max_concurrent": {
+          "type": "integer"
+        },
+        "models": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "service_account_json": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer"
+        },
+        "weight": {
+          "type": "number"
+        },
+        "zdr_attested": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "ProviderLockConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_providers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "deny_providers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "ProviderMaxPrice": {
+      "additionalProperties": false,
+      "properties": {
+        "completion": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "image": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "prompt": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "request": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "ProviderPrefs": {
+      "additionalProperties": false,
+      "properties": {
+        "allow_fallbacks": {
+          "type": "boolean"
+        },
+        "data_collection": {
+          "$ref": "#/$defs/DataCollection"
+        },
+        "ignore": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "max_price": {
+          "$ref": "#/$defs/ProviderMaxPrice"
+        },
+        "only": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "order": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "preferred_max_latency": {
+          "oneOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/PercentileThresholds"
+            }
+          ]
+        },
+        "preferred_min_throughput": {
+          "oneOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/PercentileThresholds"
+            }
+          ]
+        },
+        "quantizations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "require_parameters": {
+          "type": "boolean"
+        },
+        "sort": {
+          "oneOf": [
+            {
+              "enum": [
+                "price",
+                "throughput",
+                "latency"
+              ],
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/ProviderSortSpec"
+            }
+          ]
+        },
+        "zdr": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "ProviderSortSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "by": {
+          "enum": [
+            "price",
+            "throughput",
+            "latency"
+          ],
+          "type": "string"
+        },
+        "partition": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "by"
+      ],
+      "type": "object"
+    },
+    "QdrantConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "api_key": {
+          "type": "string"
+        },
+        "collection": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "RateLimitConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "global_rpm": {
+          "type": "integer"
+        },
+        "global_tpm": {
+          "type": "integer"
+        },
+        "per_key_max_parallel": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "per_key_rpm": {
+          "type": "integer"
+        },
+        "per_key_tpm": {
+          "type": "integer"
+        },
+        "per_model_rpm": {
+          "type": "integer"
+        },
+        "per_user_rpm": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "RedactPatternConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "pattern": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "RedisCacheConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "addresses": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "compress": {
+          "type": "boolean"
+        },
+        "db": {
+          "type": "integer"
+        },
+        "key_prefix": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "pool_size": {
+          "type": "integer"
+        },
+        "tls": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "RetryBudgetConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "max_hedges_per_minute": {
+          "default": 60,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_retry_ratio": {
+          "default": 0.2,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "RetryConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "initial_delay": {
+          "type": "string"
+        },
+        "max_delay": {
+          "type": "string"
+        },
+        "max_retries": {
+          "type": "integer"
+        },
+        "multiplier": {
+          "type": "number"
+        },
+        "on_status_codes": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "on_timeout": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "RolloutConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "managed_models": {
+          "$ref": "#/$defs/ManagedModelsConfig"
+        },
+        "percent": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "routing": {
+          "$ref": "#/$defs/RolloutRoutingConfig"
+        },
+        "started_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "sticky_by": {
+          "enum": [
+            "session",
+            "key",
+            "request"
+          ],
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "percent",
+        "sticky_by",
+        "routing"
+      ],
+      "type": "object"
+    },
+    "RolloutRoutingConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "access_groups": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AccessGroup"
+          },
+          "type": "object"
+        },
+        "adaptive": {
+          "$ref": "#/$defs/AdaptiveRoutingConfig"
+        },
+        "agents": {
+          "$ref": "#/$defs/AgentsConfig"
+        },
+        "auto": {
+          "$ref": "#/$defs/AutoRoutingConfig"
+        },
+        "circuit_breaker": {
+          "$ref": "#/$defs/CircuitBreakerConfig"
+        },
+        "complexity": {
+          "$ref": "#/$defs/ComplexityRoutingConfig"
+        },
+        "conditional_routes": {
+          "items": {
+            "$ref": "#/$defs/ConditionalRoute"
+          },
+          "type": "array"
+        },
+        "data_policy": {
+          "$ref": "#/$defs/DataPolicyConfig"
+        },
+        "default_model": {
+          "type": "string"
+        },
+        "failover": {
+          "$ref": "#/$defs/FailoverConfig"
+        },
+        "fallback_enabled": {
+          "type": "boolean"
+        },
+        "fallback_on_status_codes": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "fastest": {
+          "$ref": "#/$defs/FastestResponseConfig"
+        },
+        "idempotency": {
+          "$ref": "#/$defs/IdempotencyConfig"
+        },
+        "max_total_attempts": {
+          "default": 6,
+          "maximum": 16,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "mirror": {
+          "$ref": "#/$defs/MirrorConfig"
+        },
+        "model_fallbacks": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": "object"
+        },
+        "model_timeouts": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "presets": {
+          "additionalProperties": {
+            "$ref": "#/$defs/RoutingPreset"
+          },
+          "type": "object"
+        },
+        "prompt_caching": {
+          "$ref": "#/$defs/PromptCachingConfig"
+        },
+        "provider_lock": {
+          "$ref": "#/$defs/ProviderLockConfig"
+        },
+        "retry": {
+          "$ref": "#/$defs/RetryConfig"
+        },
+        "retry_budget": {
+          "$ref": "#/$defs/RetryBudgetConfig"
+        },
+        "scheduled": {
+          "$ref": "#/$defs/ScheduledConfig"
+        },
+        "strategy": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "RoutingConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "access_groups": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AccessGroup"
+          },
+          "type": "object"
+        },
+        "adaptive": {
+          "$ref": "#/$defs/AdaptiveRoutingConfig"
+        },
+        "agents": {
+          "$ref": "#/$defs/AgentsConfig"
+        },
+        "auto": {
+          "$ref": "#/$defs/AutoRoutingConfig"
+        },
+        "circuit_breaker": {
+          "$ref": "#/$defs/CircuitBreakerConfig"
+        },
+        "complexity": {
+          "$ref": "#/$defs/ComplexityRoutingConfig"
+        },
+        "conditional_routes": {
+          "items": {
+            "$ref": "#/$defs/ConditionalRoute"
+          },
+          "type": "array"
+        },
+        "data_policy": {
+          "$ref": "#/$defs/DataPolicyConfig"
+        },
+        "default_model": {
+          "type": "string"
+        },
+        "failover": {
+          "$ref": "#/$defs/FailoverConfig"
+        },
+        "fallback_enabled": {
+          "type": "boolean"
+        },
+        "fallback_on_status_codes": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "fastest": {
+          "$ref": "#/$defs/FastestResponseConfig"
+        },
+        "idempotency": {
+          "$ref": "#/$defs/IdempotencyConfig"
+        },
+        "max_total_attempts": {
+          "default": 6,
+          "maximum": 16,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "mirror": {
+          "$ref": "#/$defs/MirrorConfig"
+        },
+        "model_fallbacks": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": "object"
+        },
+        "model_timeouts": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "presets": {
+          "additionalProperties": {
+            "$ref": "#/$defs/RoutingPreset"
+          },
+          "type": "object"
+        },
+        "prompt_caching": {
+          "$ref": "#/$defs/PromptCachingConfig"
+        },
+        "provider_lock": {
+          "$ref": "#/$defs/ProviderLockConfig"
+        },
+        "retry": {
+          "$ref": "#/$defs/RetryConfig"
+        },
+        "retry_budget": {
+          "$ref": "#/$defs/RetryBudgetConfig"
+        },
+        "rollout": {
+          "$ref": "#/$defs/RolloutConfig"
+        },
+        "scheduled": {
+          "$ref": "#/$defs/ScheduledConfig"
+        },
+        "strategy": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "RoutingPreset": {
+      "additionalProperties": false,
+      "properties": {
+        "auto": {
+          "$ref": "#/$defs/RoutingPresetAuto"
+        },
+        "model": {
+          "type": "string"
+        },
+        "models": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 5,
+          "type": "array"
+        },
+        "params": {
+          "$ref": "#/$defs/RoutingPresetParams"
+        },
+        "provider": {
+          "$ref": "#/$defs/ProviderPrefs"
+        }
+      },
+      "type": "object"
+    },
+    "RoutingPresetAuto": {
+      "additionalProperties": false,
+      "properties": {
+        "preference": {
+          "$ref": "#/$defs/AutoPreference"
+        }
+      },
+      "type": "object"
+    },
+    "RoutingPresetParams": {
+      "additionalProperties": false,
+      "properties": {
+        "max_tokens": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "reasoning_effort": {
+          "type": "string"
+        },
+        "temperature": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "top_p": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "S3CacheConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "access_key_id": {
+          "type": "string"
+        },
+        "bucket": {
+          "type": "string"
+        },
+        "compress": {
+          "type": "boolean"
+        },
+        "prefix": {
+          "type": "string"
+        },
+        "region": {
+          "type": "string"
+        },
+        "secret_access_key": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ScheduledConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "max_pending_jobs": {
+          "type": "integer"
+        },
+        "max_schedule_ahead": {
+          "type": "string"
+        },
+        "result_ttl": {
+          "type": "string"
+        },
+        "retry_attempts": {
+          "type": "integer"
+        },
+        "worker_count": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "SemanticCacheConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "backend": {
+          "type": "string"
+        },
+        "dimensions": {
+          "type": "integer"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "max_entries": {
+          "type": "integer"
+        },
+        "pinecone": {
+          "$ref": "#/$defs/PineconeConfig"
+        },
+        "qdrant": {
+          "$ref": "#/$defs/QdrantConfig"
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "weaviate": {
+          "$ref": "#/$defs/WeaviateConfig"
+        }
+      },
+      "type": "object"
+    },
+    "SignalWeights": {
+      "additionalProperties": false,
+      "properties": {
+        "cost": {
+          "type": "number"
+        },
+        "error_rate": {
+          "type": "number"
+        },
+        "latency": {
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "StatusResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "deleted": {
+          "type": "boolean"
+        },
+        "loaded": {
+          "type": "integer"
+        },
+        "org_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "Step": {
+      "enum": [
+        "plan",
+        "act",
+        "tool",
+        "extract",
+        "verify",
+        "reflect",
+        "memory",
+        "coordinate",
+        "summarize",
+        "final",
+        "other"
+      ],
+      "type": "string"
+    },
+    "SyncedKey": {
+      "additionalProperties": false,
+      "properties": {
+        "expires_at": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "key_hash": {
+          "type": "string"
+        },
+        "key_prefix": {
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "models": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "providers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "key_hash"
+      ],
+      "type": "object"
+    },
+    "Tier": {
+      "enum": [
+        "simple",
+        "standard",
+        "complex"
+      ],
+      "type": "string"
+    },
+    "ToolCallGuardrailConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "apply_to": {
+          "default": "all",
+          "enum": [
+            "all",
+            "managed",
+            "byok"
+          ],
+          "type": "string"
+        },
+        "checks": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "max_args_bytes": {
+          "default": 65536,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "on_block": {
+          "default": "error",
+          "enum": [
+            "error",
+            "strip"
+          ],
+          "type": "string"
+        },
+        "stop_run_on_block": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "ToolPolicyConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "default_action": {
+          "type": "string"
+        },
+        "deny": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "max_tools_per_request": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "ToolsCapabilityConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "defaults": {
+          "type": "object"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "max_cost_usd_per_call": {
+          "minimum": 0,
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "pinned": {
+          "type": "object"
+        },
+        "providers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "ToolsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "capabilities": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ToolsCapabilityConfig"
+          },
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_.]*$",
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "policy": {
+          "$ref": "#/$defs/ToolsPolicyConfig"
+        }
+      },
+      "type": "object"
+    },
+    "ToolsDomainsPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "deny": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "ToolsPolicyConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "domains": {
+          "$ref": "#/$defs/ToolsDomainsPolicy"
+        },
+        "no_training_vendors_only": {
+          "type": "boolean"
+        },
+        "regions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "retention_override": {
+          "enum": [
+            "none",
+            "metadata",
+            "full"
+          ],
+          "type": "string"
+        },
+        "zdr_required": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "UpdateKeyRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "metadata": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "models": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "providers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "WeaviateConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "api_key": {
+          "type": "string"
+        },
+        "class": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://futureagi.com/contracts/gateway/agentcc-admin.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCC Gateway Admin Contract",
+  "type": "object"
+}

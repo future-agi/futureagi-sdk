@@ -1,0 +1,6 @@
+{
+  "about": "TSDoc gaps known when a module landed, by module directory under typescript/futureagi/src. A new gap fails, and a listed gap that is documented or gone fails until it is removed here, so this list only shrinks. The shared platform core has no known gaps.",
+  "known": {
+    "_core": []
+  }
+}

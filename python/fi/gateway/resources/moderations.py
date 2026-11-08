@@ -7,8 +7,10 @@ from typing import Any
 from fi.gateway._base_client import RequestOptions
 from fi.gateway._constants import NOT_GIVEN
 from fi.gateway.types.moderation import ModerationResponse
+from fi.gateway._deprecation import deprecated
 
 
+@deprecated
 class Moderations:
     """Sync moderations resource."""
 
@@ -42,6 +44,7 @@ class Moderations:
         return self._client._get_base_client()._request_with_retry(opts, ModerationResponse)
 
 
+@deprecated
 class AsyncModerations:
     """Async moderations resource."""
 

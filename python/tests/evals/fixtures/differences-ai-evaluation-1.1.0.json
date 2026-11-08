@@ -1,0 +1,175 @@
+{
+ "note": "What changes for code and docs written against ai-evaluation 1.1.0 when they run on futureagi. Imports, call shapes, results, exported names and type hints not listed here match 1.1.0 (test_compat_examples.py, test_surface.py, test_shared_paths.py, test_type_hints.py). Each entry names the tests that hold it true; the documentation sweep reads this file, next to census-fi-evals.json, which counts the fi.evals imports and `fi` command lines in the docs, the site and the app's snippets.",
+ "differences": [
+  {
+   "id": "cli",
+   "area": "command line",
+   "ai_evaluation": "The `fi` console script: `fi init`, `fi run`, `fi list`, `fi validate`, `fi view`, `fi export` and `fi config`. `fi run` takes `--config/-c`, `--eval/-e`, `--data/-d`, `--output/-o`, `--parallel/-p`, `--timeout`, `--model/-m`, `--dry-run`, `--output-file`, `--quiet/-q`, `--no-save`, `--check/--no-check`, `--fail-fast`, `--strict`, `--mode`, `--local-llm` and `--offline`; `fi list` takes `templates|categories`, `--format/-f` and `--category/-c`.",
+   "futureagi": "No `fi` script and no `fi.cli` package. `futureagi-py evals list [--json]` lists the templates the keys can run. `futureagi-py evals run TEMPLATE [--input KEY=VALUE ...] [--inputs FILE] [--model NAME] [--timeout SECONDS] [--json]` runs one template on one set of inputs (a JSON object). There is no counterpart for init, validate, view, export or config, for config or data files, assertions, parallel runs, local or offline modes, saved run history, listing categories, or writing results to a file.",
+   "docs": "Replace `fi run --eval NAME` with `futureagi-py evals run NAME --input KEY=VALUE` (or `--inputs FILE` for one JSON object of inputs), `--output json` with `--json`, and `fi list` with `futureagi-py evals list`. Pages built on config files, data files, assertions or run history move to Python (`Evaluator().evaluate(...)`). The census counts one `fi run` line on the site.",
+   "tests": [
+    "tests/evals/test_provenance.py::test_the_package_ships_fi_evals_and_no_fi_console_script",
+    "tests/evals/test_provenance.py::test_the_legacy_cli_tree_is_not_shipped",
+    "tests/evals/test_differences.py::test_the_retired_fi_commands_have_no_evals_counterpart",
+    "tests/evals/test_differences.py::test_evals_run_takes_one_template_and_these_options",
+    "tests/evals/test_cli.py::test_run_json",
+    "tests/evals/test_cli.py::test_list_json"
+   ]
+  },
+  {
+   "id": "evals-extra",
+   "area": "installation",
+   "ai_evaluation": "`pip install ai-evaluation` installed every dependency, so every fi.evals module imported.",
+   "futureagi": "`pip install futureagi` covers the cloud client: `Evaluator`, `evaluate()`, the templates, `Protect`, `Execution`, `EvalTemplateManager` and `list_evaluations`, including on Python 3.10 without rouge-score. The metrics (`fi.evals.metrics`: the local metrics, the LLM judges and the code-security metrics), the local evaluator (`fi.evals.local`), the LLM providers (`fi.evals.llm`) and the OpenTelemetry helpers in `fi.evals.otel_utils` also need `pip install \"futureagi[evals]\"` (jinja2, litellm, nltk, openai, opentelemetry, pyyaml, rouge-score and filelock). The `[evals]` extra needs Python 3.11+; importing local metrics or LLM judges on Python 3.10 raises a value-free `ImportError` naming Python 3.11+ and `futureagi[evals]`. Rouge-score is no longer a base dependency: installing `[evals]` builds rouge-score from its source distribution. Constructing ROUGEScore without rouge-score raises `ModuleNotFoundError` naming `futureagi[evals]` and Python 3.11+. Other missing optional dependencies still raise `ModuleNotFoundError` naming the missing module; `fi.evals.otel_utils` raises `ImportError` asking for `fi-instrumentation-otel`, which the extra also satisfies. The optional distributed backends (Temporal, Celery, Ray, Kubernetes) name only their own dependency when it is missing; 1.1.0 also suggested an `fi-evals[...]` extra that no package provides.",
+   "docs": "Pages that use only the cloud client install `pip install futureagi`, including on Python 3.10. Pages that import anything from `fi.evals.metrics`, `fi.evals.local`, `fi.evals.llm` or `fi.evals.otel_utils` need Python 3.11+ and `pip install \"futureagi[evals]\"`. Explain that rouge-score comes with `[evals]`, not the base SDK, and that installing `[evals]` builds its source distribution. A troubleshooting note can map `No module named 'jinja2'` (or `litellm`) to that extra.",
+   "tests": [
+    "tests/evals/test_differences.py::test_local_metrics_need_the_evals_extra_and_the_cloud_client_does_not",
+    "tests/evals/test_optional_dependencies.py::test_python310_local_imports_name_python_and_extra_before_dependencies",
+    "tests/evals/test_optional_dependencies.py::test_cloud_names_import_without_attempting_rouge_or_litellm",
+    "tests/evals/test_optional_dependencies.py::test_every_shipped_non_evals_module_imports_without_evals_dependencies",
+    "tests/evals/test_optional_dependencies.py::test_rouge_without_dependency_names_extra_and_python",
+    "tests/evals/test_openai_call_paths.py::test_guardrails_constructs_installed_sync_and_async_clients_and_calls",
+    "tests/evals/test_openai_call_paths.py::test_litellm_provider_completes_through_installed_mock_response_api",
+    "tests/evals/test_openai_call_paths.py::test_litellm_provider_wraps_installed_openai_exception_types",
+    "tests/evals/test_openai_call_paths.py::test_instrumentor_wraps_calls_and_restores_installed_openai_targets",
+    "tests/evals/test_port_gates.py::test_install_guidance_names_only_futureagi_or_a_third_party_dependency"
+   ]
+  },
+  {
+   "id": "http-error-retries",
+   "area": "requests",
+   "ai_evaluation": "A request that got an HTTP error status was sent again: 3 attempts, 1 second apart.",
+   "futureagi": "It is sent once. Only transport failures (a connection error or a timeout) are retried, by the client's shared retry policy.",
+   "docs": "Do not promise automatic retries of 4xx or 5xx responses.",
+   "tests": [
+    "tests/evals/test_compat_examples.py::test_an_http_error_status_is_sent_once_not_three_times"
+   ],
+   "examples": [
+    "error_server_rejects_keys"
+   ]
+  },
+  {
+   "id": "missing-keys-message",
+   "area": "credentials",
+   "ai_evaluation": "Keys came from the arguments or from FI_API_KEY and FI_SECRET_KEY; `MissingAuthError` said to pass them or set those variables.",
+   "futureagi": "The same error class. Keys resolve from the arguments, then the environment, then the login saved by `futureagi-py login`, and the message names `futureagi-py login` as a third way to supply them.",
+   "docs": "Pages may add `futureagi-py login` as a way to supply keys; examples that pass keys or set the variables are unchanged.",
+   "tests": [
+    "tests/evals/test_compat_examples.py::test_missing_keys_raise_the_same_error_class",
+    "tests/evals/test_cli.py::test_missing_keys_exit_3_before_any_request"
+   ],
+   "examples": [
+    "error_missing_keys"
+   ]
+  },
+  {
+   "id": "per-instance-keys",
+   "area": "credentials",
+   "ai_evaluation": "The keys were class attributes of the client: after a second client was built with other keys, an earlier client's template-registry lookup sent the later keys.",
+   "futureagi": "Each client keeps its own keys, and the client class no longer holds any: reading `_fi_api_key` or `_fi_secret_key` from `APIKeyAuth` or a subclass returns None with a DeprecationWarning instead of the keys of the last client built. Instances keep their own keys as before.",
+   "docs": "No change to examples. Code that relied on one client's keys changing another's behaves differently, and code that read the keys from the class must read them from the client instance.",
+   "tests": [
+    "tests/evals/test_delegate.py::test_two_evaluators_with_different_keys_each_send_their_own",
+    "tests/evals/test_delegate.py::test_two_platform_clients_do_not_share_keys",
+    "tests/core/test_apikeyauth_isolation.py::test_class_reads_are_value_free",
+    "tests/core/test_apikeyauth_isolation.py::test_two_clients_send_their_own_headers_in_sequence"
+   ]
+  },
+  {
+   "id": "success-status",
+   "area": "responses",
+   "ai_evaluation": "`fi.api.auth.ResponseHandler.parse` treated every status other than 200 as an error.",
+   "futureagi": "The shared `ResponseHandler.parse` treats every 2xx status as a success and calls `_parse_success` for it.",
+   "docs": "No change to examples. A custom `ResponseHandler` subclass now sees 201 to 299 as successes.",
+   "tests": [
+    "tests/evals/test_differences.py::test_any_2xx_status_is_a_success",
+    "tests/evals/test_differences.py::test_a_status_outside_2xx_is_an_error"
+   ]
+  },
+  {
+   "id": "patch-targets",
+   "area": "testing code that uses fi.evals",
+   "ai_evaluation": "Each class's methods were defined in the module that exports the class, so `mock.patch(\"fi.evals.<module>.<name>\")` changed what those methods saw.",
+   "futureagi": "Modules over 400 lines were split: some methods, classes and functions now live in private modules beside the public one. Every public name still imports from where it did, and moved classes keep their published `__module__`, but a moved method's `__module__` names its new module. A function reads the globals of the module that defines it, so patching the public module's attribute reaches a moved body only when that body imports the name each time it runs.",
+   "docs": "A test that patches a name a method uses patches it in the module that defines the code, `function.__globals__[\"__name__\"]` (for example `StreamingEvaluator.add_eval.__globals__[\"__name__\"]`), or patches the attribute on the class.",
+   "tests": [
+    "tests/evals/test_differences.py::test_moved_code_reads_the_globals_of_its_own_module"
+   ]
+  },
+  {
+   "id": "registry-session",
+   "area": "signatures",
+   "ai_evaluation": "`fi.evals.core.cloud_registry.load_registry`, `get_template_info`, `get_required_keys`, `map_inputs_to_backend` and `list_known_names` took no session.",
+   "futureagi": "Each also takes a keyword-only `session=None`, which `FutureAGIClient().evals` uses to share its HTTP configuration; with the default they behave as in 1.1.0.",
+   "docs": "No change; reference pages generated from signatures show the extra keyword.",
+   "tests": [
+    "tests/evals/test_differences.py::test_the_registry_functions_take_an_optional_session_keyword"
+   ]
+  },
+  {
+   "id": "ground-truth-setup",
+   "area": "current platform routes",
+   "ai_evaluation": "EvalTemplateManager used separate ground-truth config, variable-mapping, role-mapping and search routes. The shared Routes enum also advertised the legacy model logging route.",
+   "futureagi": "The current platform no longer serves these routes. Mapping setters use PUT /model-hub/ground-truth/{ground_truth_id}/setup/ with both mappings, max_examples and enabled. The existing positional parameters remain unchanged; the other mapping, max_examples and enabled are optional keyword-only parameters defaulting to None, with fi.errors.ConfigurationValueError (also ConfigurationError and ValueError) before HTTP when state is missing or invalid. Unknown role_mapping keys are rejected locally rather than silently dropped; accepted keys are output, explanation, expected_output, reasoning and reason. Setup has no GET, data/status omit settings, and the GT root supports only DELETE. Only the template-scoped list exposes setup state, so the SDK cannot read-merge by GT ID. Explicit enabled avoids the server default silently re-enabling disabled datasets. Config reads/writes and search, plus legacy fi.client.Client.log, raise fi.errors.PlatformNotConfiguredError with code unsupported_operation before HTTP. Retired route constants keep their original paths for source compatibility with ai-evaluation 1.1.0, but no fi.evals or fi.client code path references them. ground_truth_setup is added.",
+   "docs": "Call list_ground_truth(template_id) for current dataset state, then pass both mappings, max_examples (1-20) and enabled explicitly to either mapping setter. Preserve unchanged values. Two-argument setter calls now raise unless the other mapping, max_examples and enabled are also passed as keywords. This is an atomic replacement, not a patch or concurrency-safe read-merge. Setup makes this dataset the template's ACTIVE ground truth and deactivates the others for the same template, organization and workspace, even when enabled=False. Changing variable_mapping on a COMPLETED dataset resets embedding_status to PENDING; re-run trigger_ground_truth_embeddings(ground_truth_id). Config mode, similarity_threshold and injection_format have no setup counterpart; there is no replacement search or legacy model-log route. For tracing, emit traces through traceAI instrumentation and query stored traces via client.tracing on a FutureAGIClient; these are not drop-in model-log replacements. Method names and prior call shapes remain available, but removed operations fail locally.",
+   "tests": [
+    "tests/evals/test_ground_truth_routes.py::test_mapping_uses_atomic_setup_and_preserves_all_supplied_fields",
+    "tests/evals/test_ground_truth_routes.py::test_setup_requires_explicit_state_without_http",
+    "tests/evals/test_ground_truth_routes.py::test_setup_rejects_unknown_role_keys_before_http",
+    "tests/evals/test_ground_truth_routes.py::test_setup_preserves_declared_role_keys_and_legacy_aliases",
+    "tests/evals/test_ground_truth_routes.py::test_dead_routes_are_never_referenced",
+    "tests/evals/test_ground_truth_routes.py::test_removed_manager_methods_fail_locally",
+    "tests/evals/test_ground_truth_routes.py::test_legacy_client_log_fails_locally",
+    "tests/evals/test_ground_truth_routes.py::test_mapping_signature_keeps_positional_arguments_and_adds_only_optional_keywords",
+    "tests/evals/test_shared_paths.py::test_every_route_ai_evaluation_had_is_here_with_the_same_path",
+    "tests/evals/test_module_extractions.py::test_extracted_functions_keep_the_published_signature_and_body"
+   ],
+   "source_contract": {
+    "fi/evals/manager.py:EvalTemplateManager.get_ground_truth_config": {
+     "upstream_ast_sha256": "8eea297eb4a1d69090d598986ed02632cc62202d17cf378dc16dac20a9d7599d",
+     "ast_sha256": "156805506bae79d7990019b6f28fc63ef3b51e461b70140825f08b4d03a1389b"
+    },
+    "fi/evals/manager.py:EvalTemplateManager.set_ground_truth_config": {
+     "upstream_ast_sha256": "a2b6583e1a885acf4045344670aa83de81a89c266fa851ed4b10721157919afc",
+     "ast_sha256": "dac3481a25de1a2faea43b6981ba51fe43d5178d31d0e46b033a0e65a893ab15"
+    },
+    "fi/evals/manager.py:EvalTemplateManager.set_ground_truth_variable_mapping": {
+     "upstream_ast_sha256": "2bd35af0823eebda72f735e9acba3b7cf8ff30627b3cfd41dfe35052b5d754f1",
+     "ast_sha256": "8857e614fe72df74c5c4b1838498846fa64e285ad0b2b89af71a5d8303925668"
+    },
+    "fi/evals/manager.py:EvalTemplateManager.set_ground_truth_role_mapping": {
+     "upstream_ast_sha256": "7135a98485fc6b9dc7e699753de7ce66781c5376a8ffa254530d7a08958b821c",
+     "ast_sha256": "bc231d270c20c4019ca003947d25bac3742a2660d5c0494507913208f7fff4c8"
+    },
+    "fi/evals/manager.py:EvalTemplateManager.search_ground_truth": {
+     "upstream_ast_sha256": "d6c5b2e08e0ef524973073cac829835bbbcc4982d7d290006b469cb1cae9243d",
+     "ast_sha256": "33bba78cd9cf7162165b6814223d2442e5fa4b74c680cb0ec9bfae9685bb736c"
+    }
+   }
+  },
+  {
+   "id": "log-privacy",
+   "area": "logging",
+   "ai_evaluation": "Evaluator log lines could carry evaluated content: a timed-out or failed evaluation logged the whole input case and the exception text, a non-200 configuration response logged the response body, a missing fi-instrumentation-otel package logged a traceback, and span enrichment logged scores and exception text.",
+   "futureagi": "Those log lines carry only operational context: the evaluation or template name, the timeout, the status code and the exception class name. Missing-instrumentation messages are logged as errors without a traceback. Return values, raised exceptions, retries and timeouts are unchanged.",
+   "docs": "No change to examples. Code or log processing that read inputs, response bodies, scores or exception text out of these log messages no longer finds them there.",
+   "tests": [
+    "tests/evals/test_evaluator_log_privacy.py::test_request_failure_logs_no_inputs_or_exception_text",
+    "tests/evals/test_evaluator_log_privacy.py::test_mapping_failure_logs_only_exception_type",
+    "tests/evals/test_evaluator_log_privacy.py::test_configuration_warning_omits_response_body",
+    "tests/evals/test_evaluator_log_privacy.py::test_registry_failure_inside_evaluate_omits_exception_text",
+    "tests/evals/test_evaluator_log_privacy.py::test_real_auto_enrichment_never_logs_evaluation_output"
+   ],
+   "source_contract": {
+    "fi/evals/evaluator.py:Evaluator.evaluate": {
+     "upstream_ast_sha256": "dc1f24c471429d9b0f3c57ecd241d0bd1de5ddd3bef5e13e5b6f504831d68043",
+     "ast_sha256": "a53b1c8ff44f4a3560dd6d64c47f889fa48f80a67fd0bf9ff506a2476b798e70"
+    },
+    "fi/evals/evaluator.py:Evaluator._configure_evaluations": {
+     "upstream_ast_sha256": "29c6b61989a256c7c7a4b7155c6d48e7cf88df174a6d1386f1a12f3d831dfdf7",
+     "ast_sha256": "6a9d3221a3860687c872a3b8f2c7bfadc6c6415f8515b53078ab5734a7737d21"
+    }
+   }
+  }
+ ]
+}

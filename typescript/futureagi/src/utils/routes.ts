@@ -5,7 +5,7 @@ export const Routes = {
     // Healthcheck
     healthcheck: "healthcheck",
 
-    // Logging
+    /** @deprecated Retained for source compatibility; model logging is unsupported. */
     log_model: "sdk/api/v1/log/model/",
 
     // Evaluation
@@ -50,8 +50,8 @@ export const Routes = {
     improve_prompt: "model-hub/prompt-templates/improve-prompt/",
     run_template: "model-hub/prompt-templates/{template_id}/run_template/",
     create_template: "model-hub/prompt-templates/create-draft/",
-    delete_template: "model-hub/prompt-templates/{template_id}",
-    get_template_by_id: "model-hub/prompt-templates/{template_id}",
+    delete_template: "model-hub/prompt-templates/{template_id}/",
+    get_template_by_id: "model-hub/prompt-templates/{template_id}/",
     get_template_id_by_name: "model-hub/prompt-templates/",
     list_templates: "model-hub/prompt-templates/",
     get_template_by_name: "model-hub/prompt-templates/get-template-by-name/",
@@ -97,6 +97,7 @@ export const Routes = {
 
     // Annotation queues
     ANNOTATION_QUEUES: "model-hub/annotation-queues/",
+    ANNOTATION_QUEUE_GET_OR_CREATE_DEFAULT: "model-hub/annotation-queues/get-or-create-default/",
     ANNOTATION_QUEUE_DETAIL: "model-hub/annotation-queues/{queue_id}/",
     ANNOTATION_QUEUE_STATUS: "model-hub/annotation-queues/{queue_id}/update-status/",
     ANNOTATION_QUEUE_PROGRESS: "model-hub/annotation-queues/{queue_id}/progress/",

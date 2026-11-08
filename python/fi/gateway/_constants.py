@@ -1,11 +1,13 @@
-"""Constants for the AgentCC SDK — header names, defaults, version, sentinel."""
+"""Constants for the gateway client: header names, defaults, version, sentinel."""
 
 from __future__ import annotations
 
-import os
 from typing import Any
 
-__version__ = "0.1.0"
+from fi.gateway._version import futureagi_version
+
+__version__ = futureagi_version()
+"""The futureagi version (agentcc 1.0 reported a fixed ``0.1.0``)."""
 
 # --- Defaults ---
 
@@ -32,6 +34,32 @@ HEADER_CACHE_CONTROL = "Cache-Control"
 HEADER_GUARDRAIL_POLICY = "X-Guardrail-Policy"
 HEADER_CONFIG = "x-agentcc-config"
 
+# The one credential-name set. Names are compared lowercase with "-" and "_" equivalent,
+# so it holds the underscore spelling. Header scrubbing, the callback sinks, the send-time
+# URL check and the default-query check all use it through is_credential_name().
+CREDENTIAL_NAMES = frozenset({
+    "authorization", "proxy_authorization", "cookie", "set_cookie",
+    "x_api_key", "api_key", "x_goog_api_key", "x_agentcc_config",
+    "x_auth_token", "x_access_token", "x_api_token", "x_agentcc_api_key",
+    "x_secret_key", "virtual_key", "secret_key", "fi_api_key", "fi_secret_key",
+    "access_token", "refresh_token", "client_secret", "password",
+    "key", "token", "secret",
+})
+
+
+def normalize_credential_name(name: Any) -> str:
+    """Lowercase *name* with "-" and "_" equivalent."""
+    return str(name).lower().replace("-", "_")
+
+
+def is_credential_name(name: Any) -> bool:
+    """Whether *name* (a header, query or structured-data key) is a credential name."""
+    return normalize_credential_name(name) in CREDENTIAL_NAMES
+
+
+# The hyphen spellings of the same set, for importers that compare header names.
+CREDENTIAL_HEADER_NAMES = frozenset(name.replace("_", "-") for name in CREDENTIAL_NAMES)
+
 # --- Response header names ---
 
 HEADER_RESPONSE_REQUEST_ID = "x-agentcc-request-id"
@@ -49,6 +77,8 @@ HEADER_RESPONSE_GUARDRAIL_MESSAGE = "x-agentcc-guardrail-message"
 HEADER_RESPONSE_FALLBACK_USED = "x-agentcc-fallback-used"
 HEADER_RESPONSE_ROUTING_STRATEGY = "x-agentcc-routing-strategy"
 HEADER_RESPONSE_TIMEOUT = "x-agentcc-timeout-ms"
+HEADER_RESPONSE_CONFIG_IGNORED = "x-agentcc-config-ignored"
+HEADER_RESPONSE_CLIENT_REQUEST_ID = "x-agentcc-client-request-id"
 HEADER_RATELIMIT_LIMIT = "x-ratelimit-limit-requests"
 HEADER_RATELIMIT_REMAINING = "x-ratelimit-remaining-requests"
 HEADER_RATELIMIT_RESET = "x-ratelimit-reset-requests"
@@ -102,7 +132,6 @@ class _NotGiven:
 NOT_GIVEN: Any = _NotGiven()
 """Sentinel value indicating a parameter was not provided."""
 
-# --- Gateway URL ---
-
-AGENTCC_GATEWAY_URL: str = os.environ.get("AGENTCC_BASE_URL", "https://gateway.futureagi.com/v1")
-"""Default AgentCC Gateway URL. Override via ``AGENTCC_BASE_URL`` env var."""
+# Compatibility constant, never populated from a response or environment.
+AGENTCC_GATEWAY_URL: str = "https://gateway.futureagi.com/v1"
+"""Hosted OpenAI-compatible URL; only Gateway wrappers implicitly choose this host."""

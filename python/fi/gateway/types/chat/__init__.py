@@ -22,7 +22,10 @@ from fi.gateway.types.chat.chat_completion_message import (
     FunctionCallParam,
     ToolCall,
 )
-from fi.gateway.types.chat.completion_create_params import CompletionCreateParams, StreamOptions
+from fi.gateway.types.chat.completion_create_params import (
+    CompletionCreateParams,
+    StreamOptions,
+)
 
 __all__ = [
     "ChatCompletion",

@@ -1,17 +1,19 @@
 import time
+import warnings
 from typing import Dict, List, Optional, Union
 
 from requests import Response
 
 from fi.api.auth import APIKeyAuth, ResponseHandler
+# Published 0.6.13 imports remain aliases of their canonical definitions.
 from fi.api.types import HttpMethod, RequestConfig
+from fi.utils.routes import Routes
 from fi.utils.constants import (
     MAX_FUTURE_YEARS_FROM_CURRENT_TIME,
     MAX_PAST_YEARS_FROM_CURRENT_TIME,
 )
 from fi.utils.errors import InvalidSupportedType, InvalidValueType, MissingRequiredKey
 from fi.utils.logging import logger
-from fi.utils.routes import Routes
 from fi.utils.types import Environments, ModelTypes
 from fi.utils.utils import is_timestamp_in_range
 
@@ -49,7 +51,7 @@ class ClientResponseHandler(ResponseHandler[Dict, None]):
 
 
 class Client(APIKeyAuth):
-    """Client for logging model predictions and conversations"""
+    """Legacy model-logging client for backends supporting the published log route."""
 
     def __init__(
         self,
@@ -264,7 +266,14 @@ class Client(APIKeyAuth):
         tags: Optional[Dict[str, Union[str, bool, float, int]]] = None,
         timeout: Optional[int] = None,
     ) -> Response:
-        """Log model predictions and conversations
+        """Log model predictions and conversations using the published legacy payload.
+
+        This deprecated method retains validation and dispatch to the configured
+        base URL. It requires a backend implementing ``POST /sdk/api/v1/log/model/``;
+        retaining client behavior does not establish hosted endpoint availability.
+        For new tracing integrations, use traceAI instrumentation to emit traces
+        and ``client.tracing`` on a ``FutureAGIClient`` to query stored traces.
+        Neither is a drop-in replacement for this model-log payload.
 
         Args:
             model_id: Model identifier
@@ -277,15 +286,23 @@ class Client(APIKeyAuth):
             timeout: Optional timeout value for the request
 
         Returns:
-            Response object containing the logging result
+            Parsed JSON logging result with a default status when absent
 
         Raises:
             InvalidValueType: If parameter types are invalid
             InvalidSupportedType: If model type is not supported
             MissingRequiredKey: If required conversation keys are missing
             ValueError: If timestamp is invalid
-            Exception: If the API request fails
+            requests.HTTPError: If the backend returns an HTTP error
         """
+        warnings.warn(
+            "Client.log is deprecated. Use traceAI instrumentation to emit traces "
+            "and client.tracing on a FutureAGIClient to query stored traces; "
+            "these are not drop-in model-log replacements. Legacy requests require "
+            "a backend supporting POST /sdk/api/v1/log/model/.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self._validate_params(
             model_id=model_id,
             model_type=model_type,

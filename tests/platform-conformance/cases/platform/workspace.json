@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "platform",
+  "about": "The workspace: capabilities and approvals.",
+  "cases": [
+    {
+      "id": "platform.capabilities.get",
+      "title": "Read which products and features this workspace has",
+      "sdk": {
+        "family": "platform",
+        "method": "capabilities.get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/capabilities"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "features": "object"
+        }
+      }
+    },
+    {
+      "id": "platform.capabilities.revoked-key",
+      "title": "A revoked credential cannot read capabilities",
+      "sdk": {
+        "family": "platform",
+        "method": "capabilities.get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/capabilities"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "revoked"
+      },
+      "modes": [
+        "ee-key",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "expect": {
+        "status": 401,
+        "errorClass": "AuthenticationError"
+      }
+    },
+    {
+      "id": "platform.approvals.list",
+      "title": "List pending approvals",
+      "sdk": {
+        "family": "platform",
+        "method": "approvals.list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/approvals"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "approvals": "array"
+        }
+      }
+    }
+  ]
+}

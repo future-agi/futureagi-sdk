@@ -1,0 +1,129 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "cross",
+  "about": "Client-side must-exist cases: the SDK refuses before any request, or keeps planted secrets out of everything it writes; run by both SDK languages.",
+  "cases": [
+    {
+      "id": "must-exist.host-guard.fi-keypair",
+      "title": "The FI key pair is refused toward a platform URL outside the guard, before any network call",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "fi-keypair"
+      ],
+      "tags": [
+        "must-exist",
+        "deterministic",
+        "failure"
+      ],
+      "runners": [
+        "ts",
+        "py",
+        "fake"
+      ],
+      "client": {
+        "platformBaseUrl": "https://foreign.invalid/omega/api",
+        "credential": "fi-keypair"
+      },
+      "expect": {
+        "errorClass": "HostNotAllowedError"
+      }
+    },
+    {
+      "id": "must-exist.host-guard.env-switches-ignored",
+      "title": "Other SDKs' spellings of the allow flag in the environment change nothing",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "fi-keypair"
+      ],
+      "tags": [
+        "must-exist",
+        "deterministic",
+        "failure"
+      ],
+      "runners": [
+        "ts",
+        "py",
+        "fake"
+      ],
+      "client": {
+        "platformBaseUrl": "https://foreign.invalid/omega/api",
+        "credential": "fi-keypair",
+        "env": {
+          "FUTUREAGI_OMEGA_ALLOW_CUSTOM_BASE_URL": "true",
+          "OMEGA_ALLOW_CUSTOM_BASE_URL": "1",
+          "FUTUREAGI_OMEGA_DANGEROUSLY_ALLOW_BROWSER": "true"
+        }
+      },
+      "expect": {
+        "errorClass": "HostNotAllowedError"
+      }
+    },
+    {
+      "id": "must-exist.planted-secret.scan",
+      "title": "Planted secrets never reach a debug log, cassette, span or error string",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "commands.run"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/exec"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "must-exist",
+        "deterministic"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "runners": [
+        "ts",
+        "py"
+      ],
+      "client": {
+        "plant": [
+          "exec-env-value",
+          "deployment-access-token",
+          "fixed-token"
+        ],
+        "debugLog": true,
+        "cassette": true,
+        "spans": true
+      },
+      "expect": {
+        "status": 200
+      }
+    }
+  ]
+}

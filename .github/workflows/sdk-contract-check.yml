@@ -1,0 +1,90 @@
+name: SDK Contract Check
+
+# Keep the runner in this repository so workflow policy can inspect every step.
+# The harness source is immutable, and receives no repository credentials.
+on:
+  workflow_call:
+    inputs:
+      adapter-dockerfile:
+        required: true
+        type: string
+      adapter-context:
+        required: false
+        type: string
+        default: "."
+      report-name:
+        required: false
+        type: string
+        default: sdk-compliance-report
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout SDK repo
+        uses: actions/checkout@v4
+        with:
+          path: sdk-repo
+          persist-credentials: false
+
+      - name: Checkout harness
+        uses: actions/checkout@v4
+        with:
+          repository: future-agi/futureagi-sdk-test-harness
+          ref: b12c95d65b46c126c26583a9e9360c4db5dc33a6
+          path: harness
+          persist-credentials: false
+
+      - name: Build adapter
+        env:
+          ADAPTER_DOCKERFILE: ${{ inputs.adapter-dockerfile }}
+          ADAPTER_CONTEXT: ${{ inputs.adapter-context }}
+        run: |
+          docker build \
+            -f "sdk-repo/${ADAPTER_DOCKERFILE}" \
+            -t futureagi-sdk-adapter:test \
+            "sdk-repo/${ADAPTER_CONTEXT}"
+
+      - name: Start adapter
+        run: |
+          docker run -d --name sdk-adapter -p 8080:8080 \
+            --add-host=host.docker.internal:host-gateway \
+            futureagi-sdk-adapter:test
+
+      - name: Wait for adapter
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8080/health >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs sdk-adapter
+          exit 1
+
+      - name: Install harness
+        working-directory: harness
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Run compliance tests
+        working-directory: harness
+        run: |
+          set -o pipefail
+          futureagi-sdk-test-harness run \
+            --adapter-url http://127.0.0.1:8080 \
+            --mock-bind-host 0.0.0.0 \
+            --mock-public-host host.docker.internal \
+            | tee sdk-compliance-report.md
+
+      - name: Upload compliance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.report-name }}
+          path: harness/sdk-compliance-report.md

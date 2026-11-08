@@ -1,0 +1,64 @@
+{
+ "provenance": "Computed independently with hashlib + json (sort_keys, compact separators, ensure_ascii=False, allow_nan=False); receipt = sha256(run_id 0x1f example_id 0x1f trial 0x1f sha256hex(bytes)). Written 2026-10-21 by L-SDK wave 0; a change here changes every receipt and breaks resume across SDK versions.",
+ "cases": [
+  {
+   "run_id": "2f1c3d4e-0000-4000-8000-000000000001",
+   "example_id": "T1",
+   "trial": 1,
+   "item": {
+    "example_id": "T1",
+    "trial_number": 1,
+    "status": "completed",
+    "output": "Refund issued",
+    "error": null,
+    "latency_ms": 12.5,
+    "scores": {
+     "correct": {
+      "value": 1.0,
+      "passed": true,
+      "status": "assessed"
+     }
+    }
+   },
+   "canonical": "{\"error\":null,\"example_id\":\"T1\",\"latency_ms\":12.5,\"output\":\"Refund issued\",\"scores\":{\"correct\":{\"passed\":true,\"status\":\"assessed\",\"value\":1.0}},\"status\":\"completed\",\"trial_number\":1}",
+   "receipt_key": "8ecb8b94d296e55bf76b63e0f5dec13b93168abb49d749215fb07696ba65ba3f"
+  },
+  {
+   "run_id": "2f1c3d4e-0000-4000-8000-000000000001",
+   "example_id": "T1",
+   "trial": 2,
+   "item": {
+    "example_id": "T1",
+    "trial_number": 2,
+    "status": "failed",
+    "output": null,
+    "error": {
+     "type": "timeout",
+     "message": "the trial passed timeout_s=300"
+    }
+   },
+   "canonical": "{\"error\":{\"message\":\"the trial passed timeout_s=300\",\"type\":\"timeout\"},\"example_id\":\"T1\",\"output\":null,\"status\":\"failed\",\"trial_number\":2}",
+   "receipt_key": "df2ec0b7017a46b730dae7ebc997dfcb7e9c15293ce3bda637328fa8c6092d91"
+  },
+  {
+   "run_id": "2f1c3d4e-0000-4000-8000-000000000002",
+   "example_id": "6f0f-ü",
+   "trial": 3,
+   "item": {
+    "example_id": "6f0f-ü",
+    "trial_number": 3,
+    "status": "completed",
+    "output": {
+     "b": [
+      1,
+      2
+     ],
+     "a": "é"
+    },
+    "cost": 0.00042
+   },
+   "canonical": "{\"cost\":0.00042,\"example_id\":\"6f0f-ü\",\"output\":{\"a\":\"é\",\"b\":[1,2]},\"status\":\"completed\",\"trial_number\":3}",
+   "receipt_key": "172604a7a9724d720588c5f9ea4de5ab9fe1418a58b52c105c2f70dfabf8de75"
+  }
+ ]
+}

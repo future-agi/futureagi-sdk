@@ -12,9 +12,14 @@ from fi.gateway.callbacks.base import (
     CallbackRequest,
     CallbackResponse,
     StreamInfo,
+    redact_credentials,
 )
 
 
+from fi.gateway._deprecation import deprecated
+
+
+@deprecated
 class JSONLoggingCallbackHandler(CallbackHandler):
     """Writes structured JSON logs for every request.
 
@@ -43,8 +48,8 @@ class JSONLoggingCallbackHandler(CallbackHandler):
             "cost": response.agentcc.cost if response.agentcc else None,
             "model": response.body.get("model") if isinstance(response.body, dict) else None,
             "tokens": {
-                "prompt": response.body.get("usage", {}).get("prompt_tokens") if isinstance(response.body, dict) else None,
-                "completion": response.body.get("usage", {}).get("completion_tokens") if isinstance(response.body, dict) else None,
+                "prompt": (response.body.get("usage") or {}).get("prompt_tokens") if isinstance(response.body, dict) else None,
+                "completion": (response.body.get("usage") or {}).get("completion_tokens") if isinstance(response.body, dict) else None,
             },
             "cache_hit": response.agentcc.cache_status if response.agentcc else None,
         }
@@ -76,7 +81,7 @@ class JSONLoggingCallbackHandler(CallbackHandler):
     # ------------------------------------------------------------------
 
     def _write_log(self, entry: dict[str, Any]) -> None:
-        line = json.dumps(entry, default=str)
+        line = json.dumps(redact_credentials(entry), default=str)
         if self._file_path:
             with open(self._file_path, "a") as f:
                 f.write(line + "\n")

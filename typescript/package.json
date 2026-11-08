@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "@future-agi/sdk": "workspace:*",
-    "@future-agi/ai-evaluation": "workspace:*",
     "uuid": "^11.1.0"
   },
   "author": "FutureAGI"

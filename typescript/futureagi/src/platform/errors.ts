@@ -1,5 +1,7 @@
 // One error hierarchy for every resource.
 
+import { isWrongRegionResponse } from "../_core/error-map";
+
 /** Base class for every error the platform client throws. */
 export class FutureAGIError extends Error {
   constructor(message: string) {
@@ -40,6 +42,22 @@ export class AuthenticationError extends APIError {}
 /** Feature not on the organization's plan. */
 export class PaymentRequiredError extends APIError {}
 export class PermissionDeniedError extends APIError {}
+
+/** The exact 403 `error: "wrong_region"` response; correction is manual, never automatic. */
+export class WrongRegionError extends PermissionDeniedError {
+  readonly code = "wrong_region";
+
+  constructor() {
+    super(
+      "403 The selected regional base rejected this request (wrong_region). " +
+        "Manually select the intended regional base: US https://api.futureagi.com or " +
+        "EU https://api-eu.futureagi.com using baseUrl / FI_BASE_URL. " +
+        "The SDK does not discover residency and never probes, redirects or retries against another region.",
+      403, { error: "wrong_region" },
+    );
+  }
+}
+
 export class NotFoundError extends APIError {}
 export class ConflictError extends APIError {}
 export class UnprocessableEntityError extends APIError {}
@@ -68,6 +86,9 @@ export function errorFromResponse(status: number, text: string, requestId: strin
     body = JSON.parse(text);
   } catch {
     // not JSON: keep the text
+  }
+  if (isWrongRegionResponse(status, body)) {
+    return new WrongRegionError();
   }
   let message: string | null = null;
   if (isRecord(body)) {

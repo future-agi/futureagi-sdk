@@ -1,0 +1,24 @@
+{
+  "//": "The gateway client's own build root: agent-command-center-sdk client-patch-source sdk/typescript/tsconfig.json (ES2022, bundler, isolatedModules). Typecheck only; tsconfig.esm.json and tsconfig.cjs.json emit dist/gateway/{esm,cjs}.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "rootDir": "./src",
+    "noEmit": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "tests"]
+}

@@ -1,3 +1,4 @@
+import { legacyFields, queueFields, itemFields, scoreFields, progressFields, analyticsFields, agreementFields, exportFields } from '../_compat-fields';
 /**
  * AnnotationQueue – SDK client for managing annotation queues, items, scores, and analytics.
  *
@@ -7,15 +8,18 @@
  *
  * const client = new AnnotationQueue({ fiApiKey: '...', fiSecretKey: '...' });
  *
- * const queue = await client.create({ name: 'Review Queue' });
+ * const label = await client.createLabel({ name: 'Helpful', type: 'thumbs_up_down' });
+ * const queue = await client.create({ name: 'Review Queue', labelIds: [label.id] });
  * await client.activate(queue.id);
  * await client.addItems(queue.id, [{ sourceType: 'trace', sourceId: 'abc' }]);
  * const progress = await client.getProgress(queue.id);
  * ```
  */
 
-import { APIKeyAuth, APIKeyAuthConfig, ResponseHandler } from '../api/auth';
-import { HttpMethod, RequestConfig } from '../api/types';
+import { APIKeyAuth, ResponseHandler } from '../api/auth';
+import type { APIKeyAuthConfig } from '../api/auth';
+import { HttpMethod } from '../api/types';
+import type { RequestConfig } from '../api/types';
 import { SDKException } from '../utils/errors';
 import { Routes } from '../utils/routes';
 import type { AnnotationLabel } from '../annotations/types';
@@ -23,6 +27,8 @@ import type {
     AddItemsResponse,
     AnnotationPayload,
     AssignmentStrategy,
+    DefaultQueue,
+    DefaultQueueScope,
     ExportToDatasetResponse,
     ImportAnnotationsResponse,
     LabelType,
@@ -32,12 +38,28 @@ import type {
     QueueDetail,
     QueueItem,
     QueueItemSource,
-    QueueProgress,
+    QueueProgressResult,
     Score,
     ScoreInput,
     ScoreValue,
 } from './types';
 import { VALID_SOURCE_TYPES, VALID_ASSIGNMENT_STRATEGIES, VALID_LABEL_TYPES } from './types';
+import {
+    QUEUE_CLIENT_DEFAULT_QUEUE_CALL,
+    QUEUE_CLIENT_DEFAULT_QUEUE_METHOD,
+    QUEUE_CLIENT_REFUSED_SCOPE_KEYS,
+    QUEUE_CREATE_FIELDS,
+    QUEUE_CONFIG_REQUIRED_KEYS,
+    QUEUE_CREATE_IGNORED_KEYS,
+    QUEUE_DEFAULT_SCOPE_KEYS,
+    defaultQueueBody,
+    idList,
+    labelIdList,
+    refuseScopeIds,
+    requireKeys,
+    warnIgnoredOnCreate,
+    withDefaultLabels,
+} from './create-body';
 
 // ---------------------------------------------------------------------------
 // Response type for handlers
@@ -61,15 +83,22 @@ function unwrap(data: any): any {
 
 class QueueResponseHandler extends ResponseHandler<QueueDetail> {
     static _parseSuccess(response: ApiResponse): QueueDetail {
-        return unwrap(response.data);
+        return legacyFields(unwrap(response.data), queueFields);
+    }
+}
+
+class DefaultQueueResponseHandler extends ResponseHandler<DefaultQueue> {
+    static _parseSuccess(response: ApiResponse): DefaultQueue {
+        const data = unwrap(response.data);
+        return { ...data, queue: legacyFields(data.queue, queueFields) };
     }
 }
 
 class QueueListResponseHandler extends ResponseHandler<QueueDetail[]> {
     static _parseSuccess(response: ApiResponse): QueueDetail[] {
         const data = unwrap(response.data);
-        if (Array.isArray(data)) return data;
-        return data?.results ?? data?.table ?? [];
+        const items = Array.isArray(data) ? data : (data?.results ?? data?.table ?? []);
+        return items.map((item: any) => legacyFields(item, queueFields));
     }
 }
 
@@ -82,22 +111,22 @@ class DictResponseHandler extends ResponseHandler<Record<string, any>> {
 class ItemListResponseHandler extends ResponseHandler<QueueItem[]> {
     static _parseSuccess(response: ApiResponse): QueueItem[] {
         const data = unwrap(response.data);
-        if (Array.isArray(data)) return data;
-        return data?.results ?? [];
+        const items = Array.isArray(data) ? data : (data?.results ?? []);
+        return items.map((item: any) => legacyFields(item, itemFields));
     }
 }
 
 class ScoreListResponseHandler extends ResponseHandler<Score[]> {
     static _parseSuccess(response: ApiResponse): Score[] {
         const data = unwrap(response.data);
-        if (Array.isArray(data)) return data;
-        return data?.results ?? [];
+        const items = Array.isArray(data) ? data : (data?.results ?? []);
+        return items.map((item: any) => legacyFields(item, scoreFields));
     }
 }
 
 class ScoreResponseHandler extends ResponseHandler<Score> {
     static _parseSuccess(response: ApiResponse): Score {
-        return unwrap(response.data);
+        return legacyFields(unwrap(response.data), scoreFields);
     }
 }
 
@@ -113,27 +142,27 @@ class ImportAnnotationsResponseHandler extends ResponseHandler<ImportAnnotations
     }
 }
 
-class QueueProgressResponseHandler extends ResponseHandler<QueueProgress> {
-    static _parseSuccess(response: ApiResponse): QueueProgress {
-        return unwrap(response.data);
+class QueueProgressResponseHandler extends ResponseHandler<QueueProgressResult> {
+    static _parseSuccess(response: ApiResponse): QueueProgressResult {
+        return legacyFields(unwrap(response.data), progressFields);
     }
 }
 
 class QueueAnalyticsResponseHandler extends ResponseHandler<QueueAnalytics> {
     static _parseSuccess(response: ApiResponse): QueueAnalytics {
-        return unwrap(response.data);
+        return legacyFields(unwrap(response.data), analyticsFields);
     }
 }
 
 class QueueAgreementResponseHandler extends ResponseHandler<QueueAgreement> {
     static _parseSuccess(response: ApiResponse): QueueAgreement {
-        return unwrap(response.data);
+        return legacyFields(unwrap(response.data), agreementFields);
     }
 }
 
 class ExportToDatasetResponseHandler extends ResponseHandler<ExportToDatasetResponse> {
     static _parseSuccess(response: ApiResponse): ExportToDatasetResponse {
-        return unwrap(response.data);
+        return legacyFields(unwrap(response.data), exportFields);
     }
 }
 
@@ -197,6 +226,14 @@ export class AnnotationQueue extends APIKeyAuth {
     // Queue CRUD
     // ------------------------------------------------------------------
 
+    /**
+     * Create a queue. Omitting labelIds reuses getOrCreateDefault for exactly one of project,
+     * dataset or agentDefinition, with one DeprecationWarning saying labelIds will be required.
+     * The lookup can create or restore the default queue even if the label check then fails;
+     * the new queue remains unscoped. Throws DefaultQueueLabelError (an SDKException, importable
+     * from `@future-agi/sdk`) if no single scope or no usable labels exist on its default queue.
+     * Explicit labelIds avoids the lookup and warning.
+     */
     async create(config: QueueConfig): Promise<QueueDetail> {
         if (config.assignmentStrategy != null &&
             !(VALID_ASSIGNMENT_STRATEGIES as readonly string[]).includes(config.assignmentStrategy)) {
@@ -205,16 +242,34 @@ export class AnnotationQueue extends APIKeyAuth {
             );
         }
 
-        const body: Record<string, any> = { name: config.name };
-        if (config.description != null) body.description = config.description;
-        if (config.instructions != null) body.instructions = config.instructions;
-        if (config.assignmentStrategy != null) body.assignment_strategy = config.assignmentStrategy;
-        if (config.annotationsRequired != null) body.annotations_required = config.annotationsRequired;
-        if (config.reservationTimeoutMinutes != null) body.reservation_timeout_minutes = config.reservationTimeoutMinutes;
-        if (config.requiresReview != null) body.requires_review = config.requiresReview;
-        if (config.project != null) body.project = config.project;
-        if (config.dataset != null) body.dataset = config.dataset;
-        if (config.agentDefinition != null) body.agent_definition = config.agentDefinition;
+        const caller = 'AnnotationQueue.create()';
+        refuseScopeIds(
+            config,
+            caller,
+            QUEUE_CLIENT_REFUSED_SCOPE_KEYS,
+            QUEUE_CLIENT_DEFAULT_QUEUE_METHOD,
+        );
+        config = await withDefaultLabels(
+            config, 'labelIds',
+            { project: 'projectId', dataset: 'datasetId', agentDefinition: 'agentDefinitionId' },
+            (scope) => this.getOrCreateDefault(scope as unknown as DefaultQueueScope), caller,
+        );
+        requireKeys(config, QUEUE_CONFIG_REQUIRED_KEYS, caller);
+        const body: Record<string, any> = {};
+        for (const key of Object.keys(QUEUE_CREATE_FIELDS) as (keyof typeof QUEUE_CREATE_FIELDS)[]) {
+            if (config[key] != null) body[QUEUE_CREATE_FIELDS[key]] = config[key];
+        }
+        body.label_ids = labelIdList(config.labelIds, caller, 'labelIds');
+        if (config.annotatorIds != null) {
+            body.annotator_ids = idList(config.annotatorIds, caller, 'annotatorIds');
+        }
+        if (QUEUE_CREATE_IGNORED_KEYS.some((key) => config[key] != null)) {
+            warnIgnoredOnCreate(
+                caller,
+                'project, dataset and agentDefinition',
+                QUEUE_CLIENT_DEFAULT_QUEUE_CALL,
+            );
+        }
 
         return this.request(
             {
@@ -226,6 +281,36 @@ export class AnnotationQueue extends APIKeyAuth {
         ) as Promise<QueueDetail>;
     }
 
+    /**
+     * Get the default queue of a project, dataset or agent definition: give exactly one id.
+     *
+     * The server returns the active default queue, restores an archived one, or creates it
+     * (`action` is `'fetched'`, `'restored'` or `'created'`), with its labels. Default queues are
+     * open to every member of the organization. This is how a queue belongs to a project, dataset
+     * or agent definition: `create` never scopes one. Throws `SDKException` before any request
+     * when not exactly one id is given.
+     */
+    async getOrCreateDefault(
+        scope: DefaultQueueScope,
+        options?: { timeout?: number },
+    ): Promise<DefaultQueue> {
+        const body = defaultQueueBody(
+            scope,
+            'AnnotationQueue.getOrCreateDefault()',
+            QUEUE_DEFAULT_SCOPE_KEYS,
+        );
+        return this.request(
+            {
+                method: HttpMethod.POST,
+                url: buildUrl(this._baseUrl, Routes.ANNOTATION_QUEUE_GET_OR_CREATE_DEFAULT),
+                json: body,
+                timeout: options?.timeout,
+            },
+            DefaultQueueResponseHandler,
+        ) as Promise<DefaultQueue>;
+    }
+
+    /** List queues with a 1-based page; published pageSize (default 20) is sent as limit. */
     async list(options?: {
         status?: string;
         search?: string;
@@ -236,7 +321,7 @@ export class AnnotationQueue extends APIKeyAuth {
     }): Promise<QueueDetail[]> {
         const params: Record<string, any> = {
             page: options?.page ?? 1,
-            page_size: options?.pageSize ?? 20,
+            limit: options?.pageSize ?? 20,
         };
         if (options?.status) params.status = options.status;
         if (options?.search) params.search = options.search;
@@ -469,13 +554,11 @@ export class AnnotationQueue extends APIKeyAuth {
     // Labels (queue attachment)
     // ------------------------------------------------------------------
 
-    async addLabel(options: {
-        queueId?: string;
-        labelId?: string;
-        queueName?: string;
-        labelName?: string;
-        timeout?: number;
-    }): Promise<Record<string, any>> {
+    /** Attach a label using published positional ids or the additive named-options form. */
+    async addLabel(queueId: string, labelId: string, options?: { timeout?: number }): Promise<Record<string, any>>;
+    async addLabel(options: { queueId?: string; labelId?: string; queueName?: string; labelName?: string; timeout?: number }): Promise<Record<string, any>>;
+    async addLabel(input: string | { queueId?: string; labelId?: string; queueName?: string; labelName?: string; timeout?: number }, labelId?: string, legacyOptions?: { timeout?: number }): Promise<Record<string, any>> {
+        const options = typeof input === 'string' ? { queueId: input, labelId, timeout: legacyOptions?.timeout } : input;
         if (!options.queueId && !options.queueName) {
             throw new SDKException('Provide either queueId or queueName');
         }
@@ -496,13 +579,11 @@ export class AnnotationQueue extends APIKeyAuth {
         ) as Promise<Record<string, any>>;
     }
 
-    async removeLabel(options: {
-        queueId?: string;
-        labelId?: string;
-        queueName?: string;
-        labelName?: string;
-        timeout?: number;
-    }): Promise<Record<string, any>> {
+    /** Detach a label using published positional ids or the additive named-options form. */
+    async removeLabel(queueId: string, labelId: string, options?: { timeout?: number }): Promise<Record<string, any>>;
+    async removeLabel(options: { queueId?: string; labelId?: string; queueName?: string; labelName?: string; timeout?: number }): Promise<Record<string, any>>;
+    async removeLabel(input: string | { queueId?: string; labelId?: string; queueName?: string; labelName?: string; timeout?: number }, labelId?: string, legacyOptions?: { timeout?: number }): Promise<Record<string, any>> {
+        const options = typeof input === 'string' ? { queueId: input, labelId, timeout: legacyOptions?.timeout } : input;
         if (!options.queueId && !options.queueName) {
             throw new SDKException('Provide either queueId or queueName');
         }
@@ -560,6 +641,7 @@ export class AnnotationQueue extends APIKeyAuth {
         ) as Promise<AddItemsResponse>;
     }
 
+    /** List items with a 1-based page; published pageSize (default 50) is sent as limit. */
     async listItems(
         queueId: string,
         options?: {
@@ -572,7 +654,7 @@ export class AnnotationQueue extends APIKeyAuth {
     ): Promise<QueueItem[]> {
         const params: Record<string, any> = {
             page: options?.page ?? 1,
-            page_size: options?.pageSize ?? 50,
+            limit: options?.pageSize ?? 50,
         };
         if (options?.status) params.status = options.status;
         if (options?.assignedTo) params.assigned_to = options.assignedTo;
@@ -845,7 +927,8 @@ export class AnnotationQueue extends APIKeyAuth {
     // Progress & Analytics
     // ------------------------------------------------------------------
 
-    async getProgress(queueId: string, options?: { timeout?: number }): Promise<QueueProgress> {
+    /** Progress includes both in_progress and deprecated inProgress (warning once on use). */
+    async getProgress(queueId: string, options?: { timeout?: number }): Promise<QueueProgressResult> {
         return this.request(
             {
                 method: HttpMethod.GET,
@@ -853,7 +936,7 @@ export class AnnotationQueue extends APIKeyAuth {
                 timeout: options?.timeout,
             },
             QueueProgressResponseHandler,
-        ) as Promise<QueueProgress>;
+        ) as Promise<QueueProgressResult>;
     }
 
     async getAnalytics(queueId: string, options?: { timeout?: number }): Promise<QueueAnalytics> {

@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "composite": false,
+    "incremental": false
+  },
+  "include": ["compat-0.2.0.types.ts", "../src/fetch-globals.d.ts"],
+  "exclude": ["../node_modules"]
+}

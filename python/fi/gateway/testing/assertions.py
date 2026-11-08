@@ -28,7 +28,9 @@ def assert_stream_valid(chunks: list[Any]) -> None:
     last = chunks[-1]
     assert hasattr(last, "choices"), "Last chunk missing 'choices'"
     if last.choices:
-        assert last.choices[0].finish_reason is not None, "Last chunk missing finish_reason"
+        assert (
+            last.choices[0].finish_reason is not None
+        ), "Last chunk missing finish_reason"
 
 
 def assert_agentcc_metadata(
@@ -42,11 +44,15 @@ def assert_agentcc_metadata(
     meta = getattr(completion, "agentcc", None)
     assert meta is not None, "Completion has no .agentcc metadata"
     if provider is not None:
-        assert meta.provider == provider, f"Expected provider={provider}, got {meta.provider}"
+        assert (
+            meta.provider == provider
+        ), f"Expected provider={provider}, got {meta.provider}"
     if cost is not None:
         assert meta.cost == cost, f"Expected cost={cost}, got {meta.cost}"
     if cache_status is not None:
-        assert meta.cache_status == cache_status, f"Expected cache_status={cache_status}, got {meta.cache_status}"
+        assert (
+            meta.cache_status == cache_status
+        ), f"Expected cache_status={cache_status}, got {meta.cache_status}"
 
 
 def assert_usage_valid(response: Any) -> None:
@@ -66,6 +72,11 @@ def assert_cost_tracked(response: Any) -> None:
 def assert_guardrail_blocked(exc: Any, guardrail_name: str | None = None) -> None:
     """Assert that an exception is a guardrail block."""
     from fi.gateway._exceptions import GuardrailBlockedError
-    assert isinstance(exc, GuardrailBlockedError), f"Expected GuardrailBlockedError, got {type(exc).__name__}"
+
+    assert isinstance(
+        exc, GuardrailBlockedError
+    ), f"Expected GuardrailBlockedError, got {type(exc).__name__}"
     if guardrail_name is not None:
-        assert exc.guardrail_name == guardrail_name, f"Expected guardrail_name={guardrail_name}, got {exc.guardrail_name}"
+        assert (
+            exc.guardrail_name == guardrail_name
+        ), f"Expected guardrail_name={guardrail_name}, got {exc.guardrail_name}"

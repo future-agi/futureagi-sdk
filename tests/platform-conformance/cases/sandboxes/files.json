@@ -1,0 +1,598 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "sandboxes",
+  "about": "Sandbox files: read, write, list, remove, rename, make a folder, upload and download.",
+  "cases": [
+    {
+      "id": "sandboxes.files.list.ok",
+      "title": "List a sandbox's files",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "files.list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes/{sandbox}/files"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "entries": "array"
+        }
+      }
+    },
+    {
+      "id": "sandboxes.files.read.ok",
+      "title": "Read back the world fixture's file, byte for byte",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "files.read"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes/{sandbox}/files/{filePath}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "sandbox",
+        "filePath"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}",
+          "filePath": "${res.filePath}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "file.content": {
+            "equals": "hello conformance\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "sandboxes.files.write-read.roundtrip",
+      "title": "Write a file, then read the same content back",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "files.write"
+      },
+      "op": {
+        "method": "PUT",
+        "path": "/workspace/sandboxes/{sandbox}/files/{filePath}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}",
+          "filePath": "conf-write-${run.short}.txt"
+        },
+        "body": {
+          "content": "written by conformance"
+        }
+      },
+      "args": {
+        "sandbox": "${res.sandbox}",
+        "path": "conf-write-${run.short}.txt",
+        "data": "written by conformance"
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      },
+      "verify": [
+        {
+          "op": {
+            "method": "GET",
+            "path": "/workspace/sandboxes/{sandbox}/files/{filePath}"
+          },
+          "params": {
+            "sandbox": "${res.sandbox}",
+            "filePath": "conf-write-${run.short}.txt"
+          },
+          "expect": {
+            "status": 200,
+            "fields": {
+              "file.content": {
+                "equals": "written by conformance"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sandboxes.files.write.base64",
+      "title": "Write a base64 file and read its bytes back",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "files.write"
+      },
+      "op": {
+        "method": "PUT",
+        "path": "/workspace/sandboxes/{sandbox}/files/{filePath}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}",
+          "filePath": "conf-b64-${run.short}.bin"
+        },
+        "body": {
+          "content": "AAECAwQ=",
+          "encoding": "base64"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "sandboxes.files.write.missing-content",
+      "title": "A write without content is a typed 400",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "files.write"
+      },
+      "op": {
+        "method": "PUT",
+        "path": "/workspace/sandboxes/{sandbox}/files/{filePath}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}",
+          "filePath": "conf-empty.txt"
+        },
+        "body": {
+          "encoding": "utf8"
+        },
+        "bodyInvalidOnPurpose": true
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.files.read.missing",
+      "title": "Reading a file that does not exist answers 404",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "files.read"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes/{sandbox}/files/{filePath}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}",
+          "filePath": "conf-missing-${run.short}.txt"
+        }
+      },
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.files.read.cross-tenant",
+      "title": "Org B cannot read org A's file",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "files.read"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes/{sandbox}/files/{filePath}"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox",
+        "filePath"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}",
+          "filePath": "${res.filePath}"
+        }
+      },
+      "repeat": 5,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.files.write.cross-tenant",
+      "title": "Org B cannot write into org A's sandbox",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "files.write"
+      },
+      "op": {
+        "method": "PUT",
+        "path": "/workspace/sandboxes/{sandbox}/files/{filePath}"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}",
+          "filePath": "conf-hijack.txt"
+        },
+        "body": {
+          "content": "hijack"
+        }
+      },
+      "repeat": 5,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.files.remove.ok",
+      "title": "Delete a file",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "files.remove"
+      },
+      "op": {
+        "method": "DELETE",
+        "path": "/workspace/sandboxes/{sandbox}/files/{filePath}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "PUT",
+            "path": "/workspace/sandboxes/{sandbox}/files/{filePath}"
+          },
+          "params": {
+            "sandbox": "${res.sandbox}",
+            "filePath": "conf-rm-${run.short}.txt"
+          },
+          "body": {
+            "content": "x"
+          }
+        }
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}",
+          "filePath": "conf-rm-${run.short}.txt"
+        }
+      },
+      "expect": {
+        "status": [
+          200,
+          204
+        ]
+      }
+    },
+    {
+      "id": "sandboxes.files.download.ok",
+      "title": "Download a file's raw bytes",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "files.download"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes/{sandbox}/download/{filePath}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "sandbox",
+        "filePath"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}",
+          "filePath": "${res.filePath}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": false
+      }
+    },
+    {
+      "id": "sandboxes.files.move.ok",
+      "title": "Move a file",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "files.rename"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/move"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "PUT",
+            "path": "/workspace/sandboxes/{sandbox}/files/{filePath}"
+          },
+          "params": {
+            "sandbox": "${res.sandbox}",
+            "filePath": "conf-mv-${run.short}.txt"
+          },
+          "body": {
+            "content": "x"
+          }
+        }
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        },
+        "body": {
+          "from": "conf-mv-${run.short}.txt",
+          "to": "conf-moved-${run.short}.txt"
+        }
+      },
+      "expect": {
+        "status": [
+          200,
+          201
+        ]
+      }
+    },
+    {
+      "id": "sandboxes.files.make-dir.ok",
+      "title": "Create a folder",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "files.makeDir"
+      },
+      "op": {
+        "method": "PUT",
+        "path": "/workspace/sandboxes/{sandbox}/folders/{filePath}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}",
+          "filePath": "conf-dir-${run.short}"
+        }
+      },
+      "expect": {
+        "status": [
+          200,
+          201
+        ]
+      }
+    },
+    {
+      "id": "sandboxes.files.upload.ok",
+      "title": "Upload raw bytes to a path",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "files.upload"
+      },
+      "op": {
+        "method": "PUT",
+        "path": "/workspace/sandboxes/{sandbox}/upload/{filePath}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}",
+          "filePath": "conf-upload-${run.short}.bin"
+        },
+        "rawBody": "uploaded by conformance",
+        "contentType": "application/octet-stream"
+      },
+      "expect": {
+        "status": [
+          200,
+          201
+        ]
+      }
+    }
+  ]
+}

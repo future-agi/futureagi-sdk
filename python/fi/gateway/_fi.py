@@ -4,7 +4,7 @@ The gateway authenticates with its own virtual keys (``sk-agentcc-*``), not with
 the platform's FI_API_KEY / FI_SECRET_KEY pair, so it reads its own variables:
 
     FI_GATEWAY_API_KEY   (fallback: AGENTCC_API_KEY)
-    FI_GATEWAY_URL       (fallback: AGENTCC_BASE_URL, then the hosted gateway)
+    FI_GATEWAY_BASE_URL  (fallback: FI_GATEWAY_URL, AGENTCC_BASE_URL, hosted gateway)
 
 Managing gateways (keys, providers, logs, analytics) is a platform API and lives
 on ``fi.Client().gateway`` (the generated platform client, PR #35); this module is
@@ -16,13 +16,20 @@ from __future__ import annotations
 from typing import Any
 
 from fi.gateway._client import AgentCC, AsyncAgentCC
-from fi.gateway._env import clean_base_url, env_api_key, env_base_url
+from fi.gateway._env import resolve_wrapper_settings
 
 DEFAULT_GATEWAY_URL = "https://gateway.futureagi.com"
 
 
 def _resolve(api_key: str | None, base_url: str | None) -> tuple[str | None, str]:
-    return api_key or env_api_key() or None, clean_base_url(base_url or env_base_url() or DEFAULT_GATEWAY_URL)
+    import warnings
+
+    warnings.warn(
+        "Gateway and AsyncGateway are deprecated released compatibility adapters; "
+        "AgentCC and AsyncAgentCC require an explicit gateway origin.",
+        DeprecationWarning, stacklevel=3,
+    )
+    return resolve_wrapper_settings(api_key, base_url)
 
 
 class Gateway(AgentCC):

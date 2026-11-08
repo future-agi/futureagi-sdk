@@ -1,0 +1,8 @@
+{
+  "name": "parity-e-old-client-1.0.1",
+  "private": true,
+  "description": "E-OLD install for the parity recorder: @agentcc/client 1.0.1 packed from agent-command-center-sdk client-patch-source by fetch-artifacts.sh (the tarball is copied in before install).",
+  "dependencies": {
+    "@agentcc/client": "file:agentcc-client-1.0.1.tgz"
+  }
+}

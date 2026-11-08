@@ -63,6 +63,8 @@ await client.fileKnowledgeBases.create({ name: "docs", file: ["./notes.txt", { n
 
 `client.<resource>`: `account`, `workspaces`, `datasets` (`.columns`, `.rows`, `.cells`, `.evals`, `.prompts`), `knowledge_bases`, `file_knowledge_bases` (`.files`), `prompts` (`.versions`, `.labels`), `evals` (`.templates`, `.groups`, `.tasks`, `.configs`), `projects`, `traces` (`.properties`), `spans`, `sessions`, `alerts` (`.logs`, `.rules`), `error_clusters`, `annotations` (`.labels`), `annotation_queues` (`.items`), `scores`, `experiments`, `optimizations`, `agents` (`.versions`), `simulation` (`.scenarios`, `.tests`, `.executions`), `gateway` (`.request_logs`, `.guardrail_rules`, `.sessions`), `dashboards` (`.widgets`, `.metrics`), `models`, `provider_keys`, `usage`.
 
+`client.gateway.managed_credits()` (Owner/Admin only) reads the organization-scoped managed-credit summary in USD; use `await` with `AsyncClient`.
+
 See `python/examples/platform_client.py` for a runnable tour.
 
 ## Adding your own methods (the hand-written layer)

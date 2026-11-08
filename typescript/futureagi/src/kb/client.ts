@@ -1,5 +1,7 @@
+import { legacyFields, kbConfigFields, kbCreateFields, kbUpdateFields, kbListFields } from '../_compat-fields';
 import { APIKeyAuth, ResponseHandler } from '../api/auth';
-import { RequestConfig, HttpMethod } from '../api/types';
+import { HttpMethod } from '../api/types';
+import type { RequestConfig } from '../api/types';
 import { Routes } from '../utils/routes';
 import {
     KnowledgeBaseConfig,
@@ -43,17 +45,22 @@ class KBResponseHandler extends ResponseHandler<
         }
 
         if (method === HttpMethod.POST && url.includes(Routes.knowledge_base)) {
-            return data.result;
+            return legacyFields(data.result, kbCreateFields);
         }
 
         if (method === HttpMethod.PATCH && url.includes(Routes.knowledge_base)) {
-            return data.result;
+            return legacyFields(data.result, kbUpdateFields);
         }
 
         if (method === HttpMethod.DELETE) {
             return data;
         }
 
+        if (data?.result && (Array.isArray(data.result.table_data) || Array.isArray(data.result.tableData))) {
+            const result = legacyFields(data.result, kbListFields);
+            result.table_data = result.table_data.map((item: KnowledgeBaseConfig) => legacyFields(item, kbConfigFields));
+            return { ...data, result };
+        }
         return data;
     }
 
@@ -92,7 +99,9 @@ class KBResponseHandler extends ResponseHandler<
 }
 
 /**
- * Knowledge Base client for managing knowledge bases and file operations
+ * Knowledge Base client for managing knowledge bases and file operations.
+ * Published camelCase response properties remain synchronized views of snake_case
+ * data. Legacy response inputs/access warn once per alias per process.
  */
 export class KnowledgeBase extends APIKeyAuth {
     public kb?: KnowledgeBaseConfig;
@@ -360,7 +369,8 @@ export class KnowledgeBase extends APIKeyAuth {
 
             // Handle optional files
             const files: Record<string, any> = {};
-            if (filePaths) {
+            const hasFilePaths = Array.isArray(filePaths) ? filePaths.length > 0 : Boolean(filePaths);
+            if (hasFilePaths) {
                 await this._checkFilePaths(filePaths);
 
                 this._validFilePaths.forEach((filePath, idx) => {
@@ -381,7 +391,7 @@ export class KnowledgeBase extends APIKeyAuth {
                 data: bodyFields,
                 files: Object.keys(files).length > 0 ? files : undefined,
                 timeout: 300_000
-            } as RequestConfig, KBResponseHandler) as KnowledgeBaseCreateResponse;
+            } as RequestConfig, KBResponseHandler) as KnowledgeBaseCreateResponse & { kb_id: string; kb_name: string };
 
             // Check if server reported any files that failed to upload during creation
             if (response.not_uploaded && response.not_uploaded.length > 0) {
@@ -390,11 +400,11 @@ export class KnowledgeBase extends APIKeyAuth {
                 );
             }
 
-            this.kb = {
+            this.kb = legacyFields({
                 id: response.kb_id,
                 name: response.kb_name,
                 files: response.file_ids || []
-            };
+            }, kbConfigFields);
 
             return this;
 
@@ -420,14 +430,9 @@ export class KnowledgeBase extends APIKeyAuth {
                 method: HttpMethod.GET,
                 url: `${this.baseUrl}/${Routes.knowledge_base_list}`,
                 params
-            } as RequestConfig, KBResponseHandler) as KnowledgeBaseListResponse;
+            } as RequestConfig, KBResponseHandler) as KnowledgeBaseListResponse & { result: { table_data: KnowledgeBaseConfig[] } };
 
-            return response.result.table_data.map(item => ({
-                id: item.id,
-                name: item.name,
-                status: item.status,
-                files: item.files
-            }));
+            return response.result.table_data.map(item => legacyFields(item, kbConfigFields));
 
         } catch (error) {
             if (error instanceof SDKException) {
@@ -448,19 +453,14 @@ export class KnowledgeBase extends APIKeyAuth {
             method: HttpMethod.GET,
             url: `${this.baseUrl}/${Routes.knowledge_base_list}`,
             params: { search: kbName }
-        } as RequestConfig, KBResponseHandler) as KnowledgeBaseListResponse;
+        } as RequestConfig, KBResponseHandler) as KnowledgeBaseListResponse & { result: { table_data: KnowledgeBaseConfig[] } };
 
         const data = response.result.table_data;
         if (!data || data.length === 0) {
             throw new SDKException(`Knowledge Base with name '${kbName}' not found.`);
         }
 
-        return {
-            id: data[0].id,
-            name: data[0].name,
-            status: data[0].status,
-            files: data[0].files
-        };
+        return legacyFields(data[0], kbConfigFields);
     }
 
     /**
@@ -560,4 +560,4 @@ export class KnowledgeBase extends APIKeyAuth {
     }
 }
 
-export default KnowledgeBase; 
+export default KnowledgeBase;

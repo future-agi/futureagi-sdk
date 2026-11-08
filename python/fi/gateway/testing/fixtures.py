@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-from fi.gateway.types.chat.chat_completion import ChatCompletion, Choice
-from fi.gateway.types.chat.chat_completion_message import ChatCompletionMessage, FunctionCall, ToolCall
 from fi.gateway.types.agentcc_metadata import AgentCCMetadata
+from fi.gateway.types.chat.chat_completion import ChatCompletion, Choice
+from fi.gateway.types.chat.chat_completion_message import (
+    ChatCompletionMessage,
+    FunctionCall,
+    ToolCall,
+)
 from fi.gateway.types.shared import Usage
 
 
@@ -16,7 +20,9 @@ def make_usage(
     return Usage(
         prompt_tokens=prompt_tokens,
         completion_tokens=completion_tokens,
-        total_tokens=total_tokens if total_tokens is not None else prompt_tokens + completion_tokens,
+        total_tokens=total_tokens
+        if total_tokens is not None
+        else prompt_tokens + completion_tokens,
     )
 
 
@@ -53,7 +59,9 @@ def make_tool_call(
     name: str = "get_weather",
     arguments: str = '{"location": "NYC"}',
 ) -> ToolCall:
-    return ToolCall(id=id, type="function", function=FunctionCall(name=name, arguments=arguments))
+    return ToolCall(
+        id=id, type="function", function=FunctionCall(name=name, arguments=arguments)
+    )
 
 
 def make_completion(
@@ -65,7 +73,9 @@ def make_completion(
     id: str = "chatcmpl-test",
     tool_calls: list[ToolCall] | None = None,
 ) -> ChatCompletion:
-    message = make_message(content=content if not tool_calls else None, tool_calls=tool_calls)
+    message = make_message(
+        content=content if not tool_calls else None, tool_calls=tool_calls
+    )
     choice = Choice(index=0, message=message, finish_reason=finish_reason)
     comp = ChatCompletion(
         id=id,
