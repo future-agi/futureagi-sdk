@@ -1,4 +1,5 @@
 import time
+import warnings
 from typing import Dict, List, Optional, Union
 
 from requests import Response
@@ -7,7 +8,6 @@ from fi.api.auth import APIKeyAuth, ResponseHandler
 # Published 0.6.13 imports remain aliases of their canonical definitions.
 from fi.api.types import HttpMethod, RequestConfig
 from fi.utils.routes import Routes
-from fi.errors import PlatformNotConfiguredError
 from fi.utils.constants import (
     MAX_FUTURE_YEARS_FROM_CURRENT_TIME,
     MAX_PAST_YEARS_FROM_CURRENT_TIME,
@@ -51,7 +51,7 @@ class ClientResponseHandler(ResponseHandler[Dict, None]):
 
 
 class Client(APIKeyAuth):
-    """Legacy model-logging client; ``log`` is unsupported on the current platform."""
+    """Legacy model-logging client for backends supporting the published log route."""
 
     def __init__(
         self,
@@ -266,23 +266,70 @@ class Client(APIKeyAuth):
         tags: Optional[Dict[str, Union[str, bool, float, int]]] = None,
         timeout: Optional[int] = None,
     ) -> Response:
-        """Unsupported on the current platform; retained for source compatibility.
+        """Log model predictions and conversations using the published legacy payload.
 
-        The Future AGI platform removed ``POST /sdk/api/v1/log/model/`` before
-        version 1.56.1. No replacement accepts its model-log payload.
-        Use traceAI instrumentation to emit traces and
-        ``client.tracing`` on a ``FutureAGIClient`` to query stored traces; neither
-        is a drop-in model-log replacement. Raises
-        ``fi.errors.PlatformNotConfiguredError`` locally, before validating a
-        payload or making any HTTP request.
+        This deprecated method retains validation and dispatch to the configured
+        base URL. It requires a backend implementing ``POST /sdk/api/v1/log/model/``;
+        retaining client behavior does not establish hosted endpoint availability.
+        For new tracing integrations, use traceAI instrumentation to emit traces
+        and ``client.tracing`` on a ``FutureAGIClient`` to query stored traces.
+        Neither is a drop-in replacement for this model-log payload.
+
+        Args:
+            model_id: Model identifier
+            model_type: Type of model (GENERATIVE_LLM or GENERATIVE_IMAGE)
+            environment: Deployment environment
+            model_version: Optional model version identifier
+            prediction_timestamp: Optional timestamp of prediction
+            conversation: Optional conversation data containing chat_history or chat_graph
+            tags: Optional tags for the log entry
+            timeout: Optional timeout value for the request
+
+        Returns:
+            Parsed JSON logging result with a default status when absent
+
+        Raises:
+            InvalidValueType: If parameter types are invalid
+            InvalidSupportedType: If model type is not supported
+            MissingRequiredKey: If required conversation keys are missing
+            ValueError: If timestamp is invalid
+            requests.HTTPError: If the backend returns an HTTP error
         """
-        raise PlatformNotConfiguredError(
-            "Client.log is unsupported on the current platform: "
-            "POST /sdk/api/v1/log/model/ was removed before Future AGI platform 1.56.1; "
-            "there is no replacement accepting the legacy model-log payload. "
-            "Use traceAI instrumentation (https://github.com/future-agi/traceAI) to emit traces "
+        warnings.warn(
+            "Client.log is deprecated. Use traceAI instrumentation to emit traces "
             "and client.tracing on a FutureAGIClient to query stored traces; "
-            "these are not drop-in model-log replacements.",
-            code="unsupported_operation",
-            operation="Client.log",
+            "these are not drop-in model-log replacements. Legacy requests require "
+            "a backend supporting POST /sdk/api/v1/log/model/.",
+            DeprecationWarning,
+            stacklevel=2,
         )
+        self._validate_params(
+            model_id=model_id,
+            model_type=model_type,
+            environment=environment,
+            model_version=model_version,
+            prediction_timestamp=prediction_timestamp,
+            conversation=conversation,
+            tags=tags,
+        )
+
+        payload = {
+            "model_id": model_id,
+            "model_type": model_type.value,
+            "environment": environment.value,
+            "model_version": model_version,
+            "prediction_timestamp": prediction_timestamp,
+            "conversation": conversation,
+            "tags": tags,
+        }
+
+        response = self.request(
+            config=RequestConfig(
+                method=HttpMethod.POST,
+                json=payload,
+                url=f"{self._base_url}/{Routes.log_model.value}",
+                timeout=timeout,
+            ),
+            response_handler=ClientResponseHandler,
+        )
+        return response

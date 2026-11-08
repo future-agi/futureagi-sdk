@@ -1,10 +1,8 @@
-"""Exact local errors for APIs without a compatible FA replacement.
+"""Local errors for unsupported config/search and invalid legacy log payloads.
 
-FA c062bb9e6e89418073752aa4c8db2cf96ae9f0d6 (#871) removed config/search;
-121c50b06ca2fb70229f6c0256c0c12776d32e14 removed model logging. All were
-already absent at FA 1.56.1 (6840e44914cf), not newly removed in FA 2.0.0.
-Only Client.log is in futureagi 0.6.13: that wheel has no fi.evals package.
 Current list/setup cannot reproduce the old config's mode/injection_format.
+Client.log retains published validation and dispatch for compatible backends;
+its client-side behavior does not establish hosted endpoint availability.
 """
 
 import inspect
@@ -14,6 +12,7 @@ import pytest
 from fi.client import Client
 from fi.errors import PlatformNotConfiguredError
 from fi.evals import EvalTemplateManager
+from fi.utils.errors import MissingRequiredKey
 from fi.utils.types import Environments, ModelTypes
 
 
@@ -85,26 +84,16 @@ def test_manager_error_is_exact_and_makes_no_request(backend, method, args, kwar
         manager.close()
 
 
-def test_client_log_error_is_exact_and_makes_no_request(backend):
+@pytest.mark.filterwarnings("ignore:Client.log is deprecated:DeprecationWarning")
+def test_client_log_validates_before_making_a_request(backend):
     client = Client()
     try:
-        with pytest.raises(PlatformNotConfiguredError) as caught:
-            # Bind all positional arguments from the 0.6.13 wheel. The local
-            # unsupported-operation error wins even over payload validation.
+        with pytest.raises(MissingRequiredKey) as caught:
+            # Published validation checks conversation structure before timestamp range.
             client.log("model-id", ModelTypes.GENERATIVE_LLM, Environments.PRODUCTION,
                        "v1", -1, {"invalid": "conversation"}, {"tag": "value"}, 10)
-        assert type(caught.value) is PlatformNotConfiguredError
-        assert caught.value.code == "unsupported_operation"
-        assert caught.value.operation == "Client.log"
+        assert type(caught.value) is MissingRequiredKey
         assert backend.calls == []
-        assert str(caught.value) == (
-            "Client.log is unsupported on the current platform: "
-            "POST /sdk/api/v1/log/model/ was removed before Future AGI platform 1.56.1; "
-            "there is no replacement accepting the legacy model-log payload. "
-            "Use traceAI instrumentation (https://github.com/future-agi/traceAI) to emit traces "
-            "and client.tracing on a FutureAGIClient to query stored traces; "
-            "these are not drop-in model-log replacements."
-        )
     finally:
         client.close()
 
