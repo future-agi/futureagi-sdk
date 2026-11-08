@@ -134,12 +134,17 @@ def test_verify_imports_only_the_standard_library():
     """A fresh interpreter that imports fi.webhooks.verify loads no third-party module (and not the client)."""
     code = IS_STDLIB + (
         f"import sys; sys.path.insert(0, {str(PY_ROOT)!r})\n"
+        "from pathlib import Path\n"
         "before = set(sys.modules); import fi.webhooks.verify as v\n"
+        "guard = sys.modules['_futureagi_namespace_guard']\n"
+        f"expected = Path({str(PY_ROOT / '_futureagi_namespace_guard.py')!r}).resolve()\n"
+        "assert Path(guard.__file__).resolve() == expected\n"
+        "assert Path(guard.__spec__.origin).resolve() == expected\n"
         "new = sorted(m.split('.')[0] for m in set(sys.modules) - before)\n"
-        "third = sorted({m for m in new if not is_stdlib(m) and m not in ('fi',)})\n"
+        "third = sorted({m for m in new if not is_stdlib(m) and m not in ('fi', '_futureagi_namespace_guard')})\n"
         "print(third); print('fi.webhooks._client' in sys.modules)\n"
     )
-    out = subprocess.run([sys.executable, "-I", "-c", code], capture_output=True, text=True, check=True).stdout.split("\n")
+    out = subprocess.run([sys.executable, "-I", "-B", "-c", code], capture_output=True, text=True, check=True).stdout.split("\n")
     assert out[0] == "[]", out
     assert out[1] == "False"
 
@@ -147,6 +152,6 @@ def test_verify_imports_only_the_standard_library():
 def test_the_package_import_stays_light():
     code = ("import sys; import fi.webhooks as w; from fi.webhooks import verify; "
             "print(sorted(m for m in ('httpx', 'fi.webhooks._client', 'fi._http') if m in sys.modules))")
-    out = subprocess.run([sys.executable, "-I", "-c", f"import sys; sys.path.insert(0, {str(PY_ROOT)!r}); {code}"],
+    out = subprocess.run([sys.executable, "-I", "-B", "-c", f"import sys; sys.path.insert(0, {str(PY_ROOT)!r}); {code}"],
                          capture_output=True, text=True, check=True).stdout.strip()
     assert out == "[]"

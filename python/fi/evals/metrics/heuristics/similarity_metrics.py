@@ -277,7 +277,7 @@ class EmbeddingSimilarity(BaseMetric[TextMetricInput]):
 
     def compute_one(self, inputs: TextMetricInput) -> Dict[str, Any]:
         from scipy.spatial.distance import cosine, euclidean, cityblock
-        
+
         if inputs.expected_response is None:
             raise ValueError("EmbeddingSimilarity requires 'expected_response' to be provided.")
         if not isinstance(inputs.expected_response, str):

@@ -40,7 +40,8 @@ INTERNAL_NAME_RULES = {"gcp-project", "placeholder-host", "ee-only-marker", "rig
 
 
 def _run(code: str) -> str:
-    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, timeout=120, cwd=str(PYTHON))
+    code = f"import sys; sys.path.insert(0, {str(PYTHON)!r})\n" + code
+    out = subprocess.run([sys.executable, "-I", "-B", "-c", code], capture_output=True, text=True, timeout=120, cwd=str(PYTHON))
     assert out.returncode == 0, out.stderr
     return out.stdout.strip()
 
@@ -55,7 +56,28 @@ def test_platform_modules_load_nothing_from_alk_or_experiments():
 
 
 def test_import_fi_and_fi_errors_load_no_platform_module():
-    assert _run("import sys, fi; print(sorted(m for m in sys.modules if m.startswith('fi.')))") == "[]"
+    bootstrap = json.loads(_run(
+        "import json, sys; from pathlib import Path\n"
+        "before = set(sys.modules); import fi\n"
+        "owned = {'fi': 'fi/__init__.py', 'fi._alk_moved': 'fi/_alk_moved.py', "
+        "'_futureagi_namespace_guard': '_futureagi_namespace_guard.py'}\n"
+        f"root = Path({str(PYTHON)!r})\n"
+        "for name, relative in owned.items():\n"
+        "    module = sys.modules[name]\n"
+        "    assert Path(module.__file__).resolve() == (root / relative).resolve()\n"
+        "    assert Path(module.__spec__.origin).resolve() == (root / relative).resolve()\n"
+        "third = sorted(m for m in set(sys.modules) - before "
+        "if m not in owned and m.split('.')[0] not in sys.stdlib_module_names)\n"
+        "print(json.dumps({'fi_modules': sorted(m for m in sys.modules if m.startswith('fi.')), "
+        "'third_party': third}))"
+    ))
+    assert bootstrap == {"fi_modules": ["fi._alk_moved"], "third_party": []}
+    for relative in ("fi/_alk_moved.py", "_futureagi_namespace_guard.py"):
+        for node in ast.walk(ast.parse((PYTHON / relative).read_text())):
+            if isinstance(node, ast.Import):
+                assert all(alias.name.split('.')[0] in sys.stdlib_module_names for alias in node.names)
+            elif isinstance(node, ast.ImportFrom):
+                assert node.level == 0 and node.module.split('.')[0] in sys.stdlib_module_names
     assert _run("import sys, fi.errors; print(sorted(m for m in sys.modules if m.startswith('fi._core')))") == "[]"
     # the clients load the platform executor only on the first platform call
     loaded = _run("import sys, fi.futureagi_client; print(sorted(m for m in sys.modules if m.startswith('fi._core')))")
