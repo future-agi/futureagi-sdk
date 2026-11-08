@@ -1,7 +1,7 @@
 """Compatibility errors preserve SDK exports without loading agent-learning-kit.
 
-The frozen join and simulate reconciliation are partitioned by RL2241 ownership:
-fi.alk belongs to ALK, while fi.simulate and fi.opt remain SDK error stubs.
+The SDK owns fi.* except fi.alk. Retired namespaces receive guidance only when
+no installed provider can resolve them.
 These tests use the evals suite's existing no-egress guard and dependencies.
 """
 
@@ -24,7 +24,7 @@ FIXTURE = json.loads(
 )
 TARGET_NAMESPACES = {
     "fi.simulate": "fi.alk.simulate",
-    "fi.opt": "fi.alk.opt",
+    "fi.opt": "fi.alk.optimize",
 }
 NAME_MODULES = ("fi.evals.metrics", "fi.evals.metrics.agents")
 
@@ -168,7 +168,9 @@ def test_every_frozen_module_raises_its_fixed_namespace_error(row):
     assert f"{namespace}.X -> {target_namespace}.X" in message
     assert f"Use {target_namespace} instead of {namespace}" in message
     if row["error_target"] is not None:
-        assert row["error_target"] == target_namespace + row["module"][len(namespace):]
+        # The frozen historical fixture predates the optimizer target correction.
+        recorded_namespace = "fi.alk.opt" if namespace == "fi.opt" else target_namespace
+        assert row["error_target"] == recorded_namespace + row["module"][len(namespace):]
     private = any(part.startswith("_") for part in row["module"].split("."))
     if row["error_target"] is None:
         assert private

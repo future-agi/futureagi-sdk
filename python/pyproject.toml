@@ -5,9 +5,14 @@ description = "We help GenAI teams maintain high-accuracy for their Models in pr
 authors = ["Future AGI <no-reply@futureagi.com>"]
 readme = "README.md"
 license = "Apache-2.0"
-include = [{ path = "CHANGELOG.md", format = "sdist" }]
+include = [
+    { path = "CHANGELOG.md", format = "sdist" },
+    # Outside fi so an older learning-kit wheel cannot overwrite the guard.
+    { path = "futureagi_namespace_guard.pth", format = ["wheel", "sdist"] }
+]
 packages = [
-    { include = "fi" }
+    { include = "fi" },
+    { include = "_futureagi_namespace_guard.py" }
 ]
 # Archive exclusions apply to both release formats.
 # fi/gateway, the gateway data-plane client, ships in both archives.
