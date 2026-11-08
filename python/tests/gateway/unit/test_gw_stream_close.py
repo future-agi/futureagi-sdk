@@ -120,7 +120,10 @@ async def test_every_async_failure_closes_the_response(frame: str) -> None:
     assert body.closed
     assert stream.response.is_closed
     if frame is FAILURES["error frame, invalid JSON"]:
-        assert (raised.value.type, raised.value.request_id) == ("error", "req-r")
+        assert (raised.value.type, raised.value.request_id) == ("error", None)
+        assert raised.value.gateway_request_id is None
+        assert raised.value.body == "{not json"
+        assert stream.response.headers["x-agentcc-request-id"] == "req-r"
 
 
 CHAT_OK = (

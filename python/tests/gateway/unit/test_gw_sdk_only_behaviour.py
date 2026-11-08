@@ -247,7 +247,9 @@ def test_b_timeout_ms_is_a_response_header_only() -> None:
 @pytest.mark.parametrize(
     "header, value, field, expected",
     [
-        ("x-agentcc-request-id", "req-9", "request_id", "req-9"),
+        pytest.param("x-agentcc-request-id", "req-9", "request_id", None,
+                     id="x-agentcc-request-id-req-9-request_id-req-9"),
+        ("x-agentcc-request-id", "01ARZ3NDEKTSV4RRFFQ69G5FAV", "request_id", "01ARZ3NDEKTSV4RRFFQ69G5FAV"),
         ("x-agentcc-provider", "openai", "provider", "openai"),
         ("x-agentcc-model-used", "gpt-4o-mini", "model_used", "gpt-4o-mini"),
         ("x-agentcc-latency-ms", "42", "latency_ms", 42),
@@ -269,6 +271,10 @@ def test_c_each_response_header_is_read_into_agentcc_metadata(
     reply = httpx.Response(200, json=COMPLETION, headers={header: value})
     result = _client(reply).chat.completions.create(model="m", messages=MSG)
     assert getattr(result.agentcc, field) == expected
+    if field == "request_id":
+        # Wire gateway identity is validated, not substituted from arbitrary text.
+        assert result.agentcc.gateway_request_id == expected
+        assert result.agentcc.http_response.headers[header] == value
 
 
 def test_c_a_guardrail_block_carries_the_guardrail_headers() -> None:

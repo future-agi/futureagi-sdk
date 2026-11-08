@@ -1,9 +1,10 @@
-"""D-20: every gateway error is an ``SDKException``; str, repr, args and pickling are 1.0's.
+"""Pin legacy errors plus the exact additive evidence and safe-pickle contracts.
 
-The comparison is against the agentcc 1.0.0 golden itself
-(``tests/fixtures/gateway/golden/py-agentcc-1.0.0/surface.json``, case ``surface.errors``),
-observed with the parity recorder's own observer and the same constructor arguments, so
-the only allowed difference is ``SDKException`` in the MRO.
+Compare the agentcc 1.0.0 golden with the same observer and constructor arguments.
+The explicit overlays are SDKException ancestry, StreamError's structured fields,
+unknown gateway evidence on bare constructors, and successful status-error pickle
+round trips (the old constructors could not unpickle their keyword-only fields).
+All legacy message, repr, args and attribute values remain exact comparisons.
 """
 
 from __future__ import annotations
@@ -108,13 +109,29 @@ def test_mro_is_1_0_with_sdk_exception_under_agentcc_error(name: str) -> None:
 def test_str_repr_args_attrs_and_pickle_equal_the_golden(name: str) -> None:
     from parity._observe import observe_exception
 
-    observed = observe_exception(_construct(name))
+    error = _construct(name)
+    observed = observe_exception(error)
     golden = dict(GOLDEN_ERRORS[name])
     if name == "StreamError":
         # D-02 adds the gateway frame's fields, None when a StreamError is built bare
         golden["attrs"] = {**golden["attrs"], **D02_FIELDS}
+    golden["attrs"] = {**golden["attrs"], "gateway_evidence": {
+        "__dataclass__": "GatewayEvidence",
+        "fields": {"dispatched": "unknown", "gateway_request_id": None,
+                   "client_request_id": None, "_request_id_present": None},
+    }}
+    if isinstance(error, gw.APIStatusError):
+        # The safe reducer adds support where the old golden recorded TypeError.
+        assert golden["pickle"]["ok"] is False
+        assert golden["pickle"]["error"] == "TypeError"
+        golden["pickle"] = {"ok": True, "type": name,
+                            "str": golden["str"], "args": golden["args"]}
     for key in ("str", "repr", "args", "attrs", "pickle", "__exception__"):
         assert observed[key] == golden[key], key
+    restored = pickle.loads(pickle.dumps(error))
+    assert type(restored) is type(error)
+    assert vars(restored) == vars(error)
+    assert restored.gateway_evidence == error.gateway_evidence
 
 
 def test_an_empty_message_stays_empty() -> None:

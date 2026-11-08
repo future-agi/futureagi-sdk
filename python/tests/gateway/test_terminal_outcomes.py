@@ -23,9 +23,16 @@ def assert_safe(error):
         if id(value) in seen:
             return
         seen.add(id(value))
-        if isinstance(value, httpx.Request):
-            assert not any(name in value.headers for name in
-                           ("authorization", "x-api-key", "x-agentcc-config", "x-agentcc-session-id"))
+        if isinstance(value, (httpx.Request, httpx.Response)):
+            from fi.gateway._constants import CREDENTIAL_HEADER_NAMES
+
+            # Original HTTP objects remain reachable; values, not header names,
+            # define the privacy boundary. Inspect all headers for key material.
+            for name in CREDENTIAL_HEADER_NAMES | {"x-agentcc-config", "x-agentcc-session-id"}:
+                if name in value.headers:
+                    assert value.headers[name] == "[REDACTED]"
+            visit(dict(value.headers))
+            assert SECRET not in str(value) + repr(value)
         if isinstance(value, (str, bytes)):
             assert SECRET not in (value.decode(errors="replace") if isinstance(value, bytes) else value)
         elif isinstance(value, dict):
@@ -121,6 +128,8 @@ async def exercise(monkeypatch, *, async_mode=False, mode="json", policy=False,
         monkeypatch.setattr(streaming, "AsyncResponseStream", fail_construction)
 
     kwargs = dict(api_key=SECRET, base_url="https://gateway.test", max_retries=2,
+                  # Exactly-once callbacks are opt-in for async Responses streams.
+                  expanded_callback_events=async_mode and mode == "responses",
                   session_id=SECRET, default_headers={"x-api-key": SECRET, "x-agentcc-config": SECRET},
                   callbacks=[SimpleNamespace(on_error=lambda request, error: errors.append(error),
                                              on_retry=lambda *args: retries.append(args))])

@@ -127,6 +127,14 @@ class CallbackLifecycle:
             return result
         meta = getattr(result, "agentcc", None)
         http = getattr(meta, "http_response", None)
+        if meta is None and self._expanded_events:
+            # Raw bytes and control-plane JSON have no metadata attribute. Keep
+            # the published empty callback envelope unless events are opted in.
+            http = getattr(options, "_callback_http", None)
+            if http is not None:
+                from fi.gateway.types.agentcc_metadata import AgentCCMetadata
+
+                meta = AgentCCMetadata.from_headers(http.headers, http_response=http)
         try:
             body = result.model_dump() if hasattr(result, "model_dump") else None
         except Exception:

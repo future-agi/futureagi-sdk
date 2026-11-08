@@ -1,4 +1,4 @@
-"""Per-exchange header capture and request-free body failure diagnostics."""
+"""Per-exchange header capture and safe body failure diagnostics."""
 from __future__ import annotations
 
 from contextlib import contextmanager
@@ -158,33 +158,14 @@ class ResponseCapture:
 
 
 def safe_response(response: httpx.Response) -> httpx.Response:
-    """Keep the response surface without the authenticated request or live stream."""
-    try:
-        content = response.content
-    except httpx.ResponseNotRead:
-        content = b""
-    headers = [(key, value) for key, value in response.headers.raw if key.lower() not in {
-        b"authorization", b"proxy-authorization", b"x-api-key", b"x-agentcc-config",
-        b"x-agentcc-session-id", b"set-cookie",
-    }]
-    # Content is already decoded. Building a Response(content=...) with the old
-    # encoding header would decode it twice, so attach the original headers last.
-    extensions: dict[str, Any] = {"fi.gateway_evidence": capture_gateway_evidence(response)}
-    for name in ("http_version", "reason_phrase"):
-        if isinstance(response.extensions.get(name), bytes):
-            extensions[name] = response.extensions[name]
-    snapshot = httpx.Response(response.status_code, content=content, extensions=extensions)
-    snapshot.headers = httpx.Headers(headers)
-    try:
-        request = response.request
-    except RuntimeError:
-        pass
-    else:
-        # Preserve method/origin/path inspection without request headers, body,
-        # extensions, URL userinfo or query values that may carry credentials.
-        url = request.url.copy_with(username="", password="", query=None, fragment=None)
-        snapshot.request = httpx.Request(request.method, url)
-    return snapshot
+    """Retain the published response identity after the send boundary scrub.
+
+    Credential and client-composed header values were masked in place when the
+    exchange finished. Keep its captured evidence, headers and original request
+    rather than replacing the response with a request-free diagnostic snapshot.
+    """
+    capture_gateway_evidence(response)
+    return response
 
 
 def body_decode_error(error: Exception, evidence: GatewayEvidence) -> Exception:

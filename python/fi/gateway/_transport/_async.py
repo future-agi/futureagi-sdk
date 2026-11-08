@@ -100,7 +100,7 @@ class AsyncBaseClient(BaseClient):
             )):
                 await aclose_response(capture.response)
         if failure is not None:
-            # No original request-bearing exception in either cause or context.
+            # Transport causes retain their original, already-scrubbed requests.
             raise failure
         self._check_status(response)
         return response

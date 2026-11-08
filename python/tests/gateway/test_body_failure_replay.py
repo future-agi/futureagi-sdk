@@ -46,6 +46,8 @@ async def test_success_stream_read_failure_exposes_captured_evidence(async_mode,
         return body_response(request, responses, error_cls, content_type)
 
     kwargs = dict(api_key="fixture-only", base_url="https://gateway.test", max_retries=2,
+                  # Published async Responses streams do not emit lifecycle events.
+                  expanded_callback_events=async_mode and resource == "responses",
                   callbacks=[SimpleNamespace(on_error=lambda request, error: callbacks.append(error))])
     caught = None
     if async_mode:

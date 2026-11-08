@@ -49,6 +49,9 @@ def _transport_error(
         message += " " + _UNKNOWN_DISPATCH_REMEDY
     cls = APITimeoutError if isinstance(error, httpx.TimeoutException) else APIConnectionError
     translated = cls(message, gateway_evidence=evidence)
+    # The send boundary masks credentials in place before translation. Keep the
+    # original cause (including its scrubbed request) for published diagnostics.
+    translated.__cause__ = error
     translated._retryable = pre_send and evidence.dispatched is not True
     if response is not None and response_status is not None and response_status >= 400:
         # An unreadable refusal is still an HTTP refusal. Use its status/headers,

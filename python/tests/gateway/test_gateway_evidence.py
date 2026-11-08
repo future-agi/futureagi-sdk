@@ -130,7 +130,8 @@ async def test_transport_captures_before_first_byte(async_mode, mode, status):
     options = RequestOptions("POST", "/v1/test")
     cb = SimpleNamespace(on_request_end=lambda request, result: callbacks.append(result.agentcc),
                          on_error=lambda request, exc: callbacks.append(exc))
-    common = dict(api_key="fixture-only", base_url="https://gateway.test", max_retries=0, callbacks=[cb])
+    common = dict(api_key="fixture-only", base_url="https://gateway.test", max_retries=0, callbacks=[cb],
+                  owner=SimpleNamespace(_expanded_callback_events=True))
     if async_mode:
         async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as http:
             client = _async.AsyncBaseClient(http_client=http, **common)

@@ -20,10 +20,10 @@ HEADERS = {
 ERRORS = [httpx.ReadTimeout, httpx.ReadError, httpx.RemoteProtocolError, httpx.ConnectError]
 
 
-async def call(handler, async_mode, mode, callbacks, max_retries=0):
+async def call(handler, async_mode, mode, callbacks, max_retries=0, *, expanded=False):
     kwargs = dict(
         api_key="fixture-only", base_url="https://gateway.test",
-        max_retries=max_retries, callbacks=callbacks,
+        max_retries=max_retries, callbacks=callbacks, expanded_callback_events=expanded,
     )
     if async_mode:
         async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as http:
@@ -180,7 +180,7 @@ async def test_success_response_and_callback_share_validated_identity(async_mode
         on_request_end=lambda request, result: callbacks.append(result.agentcc),
         on_stream_start=lambda request, stream: callbacks.append(stream.agentcc),
     )
-    result = await call(handler, async_mode, mode, [callback])
+    result = await call(handler, async_mode, mode, [callback], expanded=mode == "binary")
     assert len(callbacks) == 1
     assert_identity(callbacks[0], ids)
     responses[0].headers["x-agentcc-request-id"] = OTHER_ULID
