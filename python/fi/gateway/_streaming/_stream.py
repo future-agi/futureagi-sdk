@@ -146,6 +146,9 @@ class Stream(StreamTracking):
         self._closed = True
         try:
             self._response.close()
+        except BaseException as exc:
+            self._scrub_error(exc)
+            raise
         finally:
             try:
                 self._iterator.close()
@@ -219,6 +222,9 @@ class AsyncStream(StreamTracking):
         self._closed = True
         try:
             await self._response.aclose()
+        except BaseException as exc:
+            self._scrub_error(exc)
+            raise
         finally:
             try:
                 await self._iterator.aclose()

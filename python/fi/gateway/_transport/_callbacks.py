@@ -83,6 +83,7 @@ class CallbackLifecycle:
         """Detach only JSON data and HTTP header diagnostics, never client graphs."""
         from fi.gateway.callbacks.base import CallbackResponse
         from fi.gateway.types.agentcc_metadata import AgentCCMetadata
+        from fi.gateway._transport._scrub import _UNRESOLVED, _Walk
 
         original_meta = getattr(result, "agentcc", None)
         http = getattr(original_meta, "http_response", None)
@@ -92,12 +93,14 @@ class CallbackLifecycle:
         status = getattr(http, "status_code", getattr(result, "status_code", 200))
         # No stream, extensions, history, client or exception graph is copied.
         # A fresh HTTP envelope keeps the diagnostic header API usable.
-        request = getattr(http, "_request", None)
-        detached_http = httpx.Response(
-            status, headers=headers,
-            request=httpx.Request(request.method, str(request.url), headers=request.headers)
-            if request is not None else None,
-        )
+        walk = _Walk()
+        request = walk.field(http, "_request") if http is not None else None
+        detached_request = None
+        if request is not None and request is not _UNRESOLVED:
+            fields = [walk.field(request, name) for name in ("method", "url", "headers")]
+            if all(value is not _UNRESOLVED for value in fields):
+                detached_request = httpx.Request(fields[0], str(fields[1]), headers=fields[2])
+        detached_http = httpx.Response(status, headers=headers, request=detached_request)
         meta = AgentCCMetadata.from_headers(headers, http_response=detached_http)
         body = parsed = None
         try:
@@ -202,25 +205,18 @@ class CallbackLifecycle:
 
     def _stream_hooks(self, options: Any, response: Any) -> tuple[Any, Any]:
         from fi.gateway.callbacks.base import CallbackResponse, StreamInfo
+        from fi.gateway._transport._scrub import scrub_reachable
+
+        composed_names = getattr(options, "_stream_composed_names", frozenset())
 
         def on_chunk(chunk: Any) -> None:
             self._dispatch_callback("on_stream_chunk", options, chunk)
 
         def on_finish(stream: Any, error: Exception | None) -> None:
             if error is not None:
-                import httpx
-                from fi.gateway._retry_policy import _UNKNOWN_DISPATCH_REMEDY
-
-                # Stream iteration is outside the send wrapper. Do not expose its
-                # original HTTPX request through the StreamError exception chain.
-                cause = error.__cause__ or error.__context__
-                if isinstance(cause, httpx.RequestError):
-                    error.message = "Stream interrupted while reading the response body."
-                    error.__cause__ = None
-                    error.__context__ = None
-                    if getattr(error, "dispatched", None) == "unknown":
-                        error.message += " " + _UNKNOWN_DISPATCH_REMEDY
-                error.args = (error.message,)
+                # A late cause can expose data that was closure-only at send time.
+                # Preserve its identity and the StreamError's retry guidance.
+                scrub_reachable((error,), composed_names)
                 self._dispatch_callback("on_error", options, error)
                 return
             self._dispatch_callback(

@@ -20,7 +20,9 @@ from fi.gateway._http_security import validate_destination
 from fi.gateway._transport._response import (
     ResponseCapture, body_decode_error, close_response, safe_response, protect_stream_cleanup,
 )
-from fi.gateway._transport._scrub import scrub_reachable, scrub_sent_request
+from fi.gateway._transport._scrub import (
+    bind_stream_scrubber, composed_credential_values, scrub_reachable, scrub_sent_request,
+)
 from fi.gateway._transport._base import (
     BaseClient,
     RequestOptions,
@@ -57,8 +59,18 @@ class SyncBaseClient(BaseClient):
 
     def _send_response(
         self, options: RequestOptions, agentcc_params: Any, *, streaming: bool,
+        _credential_values: list[bytes] | None = None,
     ) -> httpx.Response:
         arguments, composed_names = self._request_arguments(options, agentcc_params, stream=streaming)
+        if streaming:
+            # Late error graphs retain names only, never the client's key state.
+            options._stream_composed_names = composed_names
+        credentials = composed_credential_values(arguments["headers"], composed_names)
+        if _credential_values is not None:
+            # Stream construction may read a JSON cache-hit body after send.
+            # Carry this exact attempt's snapshot only in the opener's locals,
+            # never on a public response, exception or callback descriptor.
+            _credential_values.extend(credentials)
         timeout = options.timeout or self._timeout
         client = self._ensure_client()
         capture = ResponseCapture()
@@ -88,7 +100,8 @@ class SyncBaseClient(BaseClient):
             if not streaming or response.status_code == 246 or response.status_code >= 400:
                 response.read()
         except httpx.TransportError as exc:
-            failure = _transport_error(exc, capture.evidence, capture.status, capture.response)
+            failure = _transport_error(exc, capture.evidence, capture.status, capture.response,
+                                       credential_values=credentials)
         except (httpx.RequestError, json.JSONDecodeError, UnicodeDecodeError) as exc:
             if capture.response is not None and capture.status is not None and capture.status >= 400:
                 failure = APIStatusError.from_response(safe_response(capture.response))
@@ -104,6 +117,8 @@ class SyncBaseClient(BaseClient):
             # Transport causes retain their original, already-scrubbed requests.
             raise failure
         self._check_status(response)
+        if streaming:
+            bind_stream_scrubber(response, credentials, composed_names)
         return response
 
     def _request(
@@ -193,9 +208,11 @@ class SyncBaseClient(BaseClient):
         self,
         options: RequestOptions,
         agentcc_params: dict[str, Any] | None = None,
+        *, _credential_values: list[bytes] | None = None,
     ) -> httpx.Response:
         """Execute a streaming request and return the raw response."""
-        response = self._send_response(options, agentcc_params, streaming=True)
+        response = self._send_response(options, agentcc_params, streaming=True,
+                                       _credential_values=_credential_values)
         self._record_header_cost(response)
         return response
 
@@ -208,17 +225,20 @@ class SyncBaseClient(BaseClient):
         self._dispatch_callback("on_request_start", options)
         response = None
         failure = None
+        credentials: list[bytes] = []
         try:
-            response = self._stream_request(options, agentcc_params)
+            response = self._stream_request(options, agentcc_params, _credential_values=credentials)
             protect_stream_cleanup(response)
             on_chunk, on_finish = self._stream_hooks(options, response)
             if chunk_cls is ResponseStreamEvent:
                 stream = ResponseStream(response, on_chunk=on_chunk, on_finish=on_finish)
             else:
                 stream = Stream(response, chunk_cls, on_chunk=on_chunk, on_finish=on_finish)
+            stream._composed_names = options._stream_composed_names
         except httpx.TransportError as exc:
             failure = _transport_error(exc, capture_gateway_evidence(response),
-                                       response.status_code if response is not None else None, response)
+                                       response.status_code if response is not None else None, response,
+                                       credential_values=tuple(credentials))
         except (httpx.RequestError, json.JSONDecodeError, UnicodeDecodeError) as exc:
             failure = (body_decode_error(exc, capture_gateway_evidence(response))
                        if response is not None else exc)
@@ -226,6 +246,7 @@ class SyncBaseClient(BaseClient):
             failure = exc
         if failure is not None:
             close_response(response)
+            scrub_reachable((failure,), getattr(options, "_stream_composed_names", frozenset()))
             self._dispatch_callback("on_error", options, failure)
             raise failure
         self._dispatch_callback("on_stream_start", options, StreamInfo(agentcc=stream.agentcc))

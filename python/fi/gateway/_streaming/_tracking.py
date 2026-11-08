@@ -16,6 +16,9 @@ class StreamTracking:
         self._on_finish = on_finish
         self._finished = False
         self._error: Exception | None = None
+        # Set by the transport for this exchange; never retain its client or key.
+        self._composed_names: frozenset[str] = frozenset()
+        self._redact_error = getattr(self._response, "_gateway_error_scrubber", None)
         self.usage: Any = None
         self.chunk_count = 0
         self._accumulator = ChunkAccumulator() if chunk_cls is ChatCompletionChunk else None
@@ -43,6 +46,13 @@ class StreamTracking:
             if self._on_finish is not None:
                 self._on_finish(self, self._error)
 
+    def _scrub_error(self, error: BaseException) -> None:
+        from fi.gateway._transport._scrub import scrub_reachable
+
+        if self._redact_error is not None:
+            self._redact_error(error)
+        scrub_reachable((error,), self._composed_names)
+
     def _tracked(self, iterator: Any) -> Any:
         try:
             for chunk in iterator:
@@ -50,15 +60,23 @@ class StreamTracking:
                     return
                 yield self._note(chunk)
         except Exception as exc:
+            # Scrub before formatting/wrapping, preserving the original cause/traceback.
+            self._scrub_error(exc)
             self._error = exc if isinstance(exc, StreamError) else StreamError(f"Stream interrupted: {exc}")
             self._error.gateway_evidence = self.agentcc.gateway_evidence
             self._error.request_id = self._error.gateway_request_id
             raise self._error from exc if self._error is not exc else None
+        except BaseException as exc:
+            self._scrub_error(exc)
+            raise
         finally:
             try:
                 if not self._closed:
                     self._closed = True
                     self._response.close()
+            except BaseException as exc:
+                self._scrub_error(exc)
+                raise
             finally:
                 self._notify_finish()
 
@@ -69,14 +87,22 @@ class StreamTracking:
                     return
                 yield self._note(chunk)
         except Exception as exc:
+            # Scrub before formatting/wrapping, preserving the original cause/traceback.
+            self._scrub_error(exc)
             self._error = exc if isinstance(exc, StreamError) else StreamError(f"Stream interrupted: {exc}")
             self._error.gateway_evidence = self.agentcc.gateway_evidence
             self._error.request_id = self._error.gateway_request_id
             raise self._error from exc if self._error is not exc else None
+        except BaseException as exc:
+            self._scrub_error(exc)
+            raise
         finally:
             try:
                 if not self._closed:
                     self._closed = True
                     await self._response.aclose()
+            except BaseException as exc:
+                self._scrub_error(exc)
+                raise
             finally:
                 self._notify_finish()

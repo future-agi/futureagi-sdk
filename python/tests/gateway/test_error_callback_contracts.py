@@ -51,7 +51,8 @@ def assert_clean_chain(error):
 
 @pytest.mark.parametrize("async_mode", [False, True], ids=["sync", "async"])
 @pytest.mark.parametrize("failure", ["connection", "timeout", "status"])
-async def test_failing_call_traceback_preserves_clean_originals(async_mode, failure):
+@pytest.mark.parametrize("expanded", [False, True], ids=["published", "expanded"])
+async def test_failing_call_traceback_preserves_clean_originals(async_mode, failure, expanded):
     requests, responses, originals, callbacks = [], [], [], []
 
     def handler(request):
@@ -73,7 +74,8 @@ async def test_failing_call_traceback_preserves_clean_originals(async_mode, fail
 
     callback = SimpleNamespace(on_error=lambda request, error: callbacks.append(error))
     kwargs = dict(api_key=KEY, base_url="https://gateway.test", max_retries=0,
-                  default_headers={"x-private": PRIVATE}, callbacks=[callback])
+                  default_headers={"x-private": PRIVATE}, callbacks=[callback],
+                  expanded_callback_events=expanded)
     if async_mode:
         async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as http:
             async with gw.AsyncAgentCC(http_client=http, **kwargs) as client:

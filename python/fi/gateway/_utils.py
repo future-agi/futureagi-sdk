@@ -78,8 +78,12 @@ def return_raw_request(
 
 def _utility_exchange(send: Callable[..., httpx.Response], url: str, **kwargs: Any) -> httpx.Response:
     """Use the same finally boundary for each independent utility exchange."""
-    from fi.gateway._transport._scrub import scrub_reachable
+    from fi.gateway._transport._scrub import (
+        composed_credential_values, scrub_error_text, scrub_sent_request,
+    )
 
+    names = frozenset(name.lower() for name in kwargs.get("headers", {}))
+    credentials = composed_credential_values(kwargs.get("headers", {}), names)
     response = None
     error = None
     try:
@@ -87,9 +91,10 @@ def _utility_exchange(send: Callable[..., httpx.Response], url: str, **kwargs: A
         return response
     except BaseException as exc:
         error = exc
+        scrub_error_text(exc, credentials)
         raise
     finally:
-        scrub_reachable((response, error))
+        scrub_sent_request(None, response, error, names)
 
 
 def health_check(

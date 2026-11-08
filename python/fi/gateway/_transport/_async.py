@@ -20,7 +20,9 @@ from fi.gateway._http_security import validate_destination
 from fi.gateway._transport._response import (
     ResponseCapture, body_decode_error, aclose_response, safe_response, protect_stream_cleanup,
 )
-from fi.gateway._transport._scrub import scrub_reachable, scrub_sent_request
+from fi.gateway._transport._scrub import (
+    bind_stream_scrubber, composed_credential_values, scrub_reachable, scrub_sent_request,
+)
 from fi.gateway._transport._base import (
     BaseClient,
     RequestOptions,
@@ -59,6 +61,10 @@ class AsyncBaseClient(BaseClient):
         self, options: RequestOptions, agentcc_params: Any, *, streaming: bool,
     ) -> httpx.Response:
         arguments, composed_names = self._request_arguments(options, agentcc_params, stream=streaming)
+        if streaming:
+            # Late error graphs retain names only, never the client's key state.
+            options._stream_composed_names = composed_names
+        credentials = composed_credential_values(arguments["headers"], composed_names)
         timeout = options.timeout or self._timeout
         client = self._ensure_client()
         capture = ResponseCapture()
@@ -88,7 +94,8 @@ class AsyncBaseClient(BaseClient):
             if not streaming or response.status_code == 246 or response.status_code >= 400:
                 await response.aread()
         except httpx.TransportError as exc:
-            failure = _transport_error(exc, capture.evidence, capture.status, capture.response)
+            failure = _transport_error(exc, capture.evidence, capture.status, capture.response,
+                                       credential_values=credentials)
         except (httpx.RequestError, json.JSONDecodeError, UnicodeDecodeError) as exc:
             if capture.response is not None and capture.status is not None and capture.status >= 400:
                 failure = APIStatusError.from_response(safe_response(capture.response))
@@ -104,6 +111,8 @@ class AsyncBaseClient(BaseClient):
             # Transport causes retain their original, already-scrubbed requests.
             raise failure
         self._check_status(response)
+        if streaming:
+            bind_stream_scrubber(response, credentials, composed_names)
         return response
 
     async def _request(
@@ -218,6 +227,7 @@ class AsyncBaseClient(BaseClient):
                 stream = AsyncResponseStream(response, on_chunk=on_chunk, on_finish=on_finish)
             else:
                 stream = AsyncStream(response, chunk_cls, on_chunk=on_chunk, on_finish=on_finish)
+            stream._composed_names = options._stream_composed_names
         except httpx.TransportError as exc:
             failure = _transport_error(exc, capture_gateway_evidence(response),
                                        response.status_code if response is not None else None, response)
@@ -228,6 +238,7 @@ class AsyncBaseClient(BaseClient):
             failure = exc
         if failure is not None:
             await aclose_response(response)
+            scrub_reachable((failure,), getattr(options, "_stream_composed_names", frozenset()))
             self._dispatch_callback("on_error", options, failure)
             raise failure
         self._dispatch_callback("on_stream_start", options, StreamInfo(agentcc=stream.agentcc))

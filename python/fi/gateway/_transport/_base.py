@@ -35,6 +35,7 @@ def _transport_error(
     evidence: GatewayEvidence,
     response_status: int | None,
     response: httpx.Response | None = None,
+    *, credential_values: tuple[bytes, ...] = (),
 ) -> APIConnectionError:
     """Keep public error classes, but replay only when the outcome is provably safe."""
     from fi.gateway._retry_policy import _UNKNOWN_DISPATCH_REMEDY
@@ -49,8 +50,12 @@ def _transport_error(
         message += " " + _UNKNOWN_DISPATCH_REMEDY
     cls = APITimeoutError if isinstance(error, httpx.TimeoutException) else APIConnectionError
     translated = cls(message, gateway_evidence=evidence)
-    # The send boundary masks credentials in place before translation. Keep the
-    # original cause (including its scrubbed request) for published diagnostics.
+    # Headers have already been masked, but transports can quote their original
+    # values in args/message text. Scrub the whole preserved exception chain
+    # before callbacks or formatted tracebacks can observe the original cause.
+    from fi.gateway._transport._scrub import scrub_error_text
+
+    scrub_error_text(error, credential_values)
     translated.__cause__ = error
     translated._retryable = pre_send and evidence.dispatched is not True
     if response is not None and response_status is not None and response_status >= 400:
