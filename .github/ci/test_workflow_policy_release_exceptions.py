@@ -20,8 +20,9 @@ ACTIONS = CONFIG.get("actions", []) if isinstance(CONFIG, dict) else []
 ENTRIES = CONFIG.get("released_workflow_exceptions", []) if isinstance(CONFIG, dict) else []
 RECORD = "RL2251m-W1-W6"
 PINS = {
-    "ci": "fc8844a4891e96f435ed1bddf5d8fb2c53697425",
-    "e2e": "acdcd2fc899719e4094d2a62e7a1f5fd3a66112e",
+    # Runner/comments and installed-wheel reference checks only; grants unchanged.
+    "ci": "2b0e03223558af6db7a3cf688c08e50527abd732",
+    "e2e": "cba54bac7b19da39a12e8175dee35cbc05cac28c",
     "publish": "8764c921cb167ce29c54944baee46b186355b50b",
     "promote": "4dd63903e8404d464e3039fc9e8532dd9b4db079",
     "release-please": "2e5a92ce635a7c49da6fcb81fc9bda773b47898d",

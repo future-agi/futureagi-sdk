@@ -78,11 +78,56 @@ def test_readme_does_not_offer_simulations(path):
     assert "client.simulations" not in (ROOT / path).read_text()
 
 
+WITHDRAWAL_NOTICE = "### Not in this release\n\n- Simulation APIs are not offered in this release."
+FACADE_SCOPE_NOTICE = (
+    "### Simulation facade scope\n\n"
+    "- Only the Python `fi.simulate` facade is withdrawn; its clear-error stub points\n"
+    "  to `fi.alk.simulate`. The released Python and TypeScript platform clients keep\n"
+    "  their `client.simulation` resource, with no alias to the facade or ALK."
+)
+STUB_MIGRATION = (
+    "- `fi.simulate` and `fi.opt` remain clear-error stubs pointing to\n"
+    "  `fi.alk.simulate` and `fi.alk.opt`."
+)
+
+
+def _assert_changelog_withdrawal(text, *, scoped_notice):
+    # The root distinguishes the retained released platform resource from the
+    # withdrawn facade. Neither that notice nor a clear-error stub is an offer
+    # of the withdrawn response types. Exempt only the exact statements, never
+    # an entire section that could hide a newly advertised type or method.
+    notice = FACADE_SCOPE_NOTICE if scoped_notice else WITHDRAWAL_NOTICE
+    assert text.count(notice) == 1
+    remainder = text.replace(notice, "").replace(STUB_MIGRATION, "")
+    assert not re.search(r"simulat|persona|run[-.]?test|test-execution", remainder, re.IGNORECASE)
+
+
 @pytest.mark.parametrize("path", ["CHANGELOG.md", "python/CHANGELOG.md", "typescript/futureagi/CHANGELOG.md"])
 def test_changelog_does_not_reoffer_withdrawn_response_types(path):
-    text = (ROOT / path).read_text()
-    notice = "- Simulation APIs are not offered in this release."
-    assert text.count(notice) == 1
-    assert re.search(r"### Not in this release\s+" + re.escape(notice), text)
-    # Composing A2 must not advertise the withdrawn facade above its withdrawal notice.
-    assert not re.search(r"simulat|persona|run[-.]?test|test-execution", text.replace(notice, ""), re.IGNORECASE)
+    _assert_changelog_withdrawal((ROOT / path).read_text(), scoped_notice=path == "CHANGELOG.md")
+
+
+@pytest.mark.parametrize("scoped_notice", [False, True])
+@pytest.mark.parametrize("claim", [
+    "- Add SimulationResponse and client.simulations responses.",
+    "- Add PersonaResponse types.",
+    "- Add run-test response types.",
+    "- Add test-execution response types.",
+    "- `fi.simulate` now returns response types.",
+    "- Add new simulation fields to client.simulation.",
+])
+def test_changelog_guard_rejects_reoffers_before_and_after_notice(scoped_notice, claim):
+    notice = FACADE_SCOPE_NOTICE if scoped_notice else WITHDRAWAL_NOTICE
+    text = STUB_MIGRATION + "\n\n" + notice
+    _assert_changelog_withdrawal(text, scoped_notice=scoped_notice)
+    for changed in (claim + "\n" + text, text + "\n" + claim):
+        with pytest.raises(AssertionError):
+            _assert_changelog_withdrawal(changed, scoped_notice=scoped_notice)
+
+
+@pytest.mark.parametrize("scoped_notice", [False, True])
+def test_changelog_guard_requires_one_exact_withdrawal_notice(scoped_notice):
+    notice = FACADE_SCOPE_NOTICE if scoped_notice else WITHDRAWAL_NOTICE
+    for text in ("", STUB_MIGRATION, notice + "\n" + notice):
+        with pytest.raises(AssertionError):
+            _assert_changelog_withdrawal(text, scoped_notice=scoped_notice)

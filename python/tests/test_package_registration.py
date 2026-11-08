@@ -5,6 +5,9 @@ from pathlib import Path
 import re
 import sys
 
+from packaging.specifiers import SpecifierSet
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = ROOT / "typescript" / "futureagi"
@@ -46,11 +49,28 @@ def test_both_webhook_formats_have_declarations():
     assert package["typesVersions"]["*"]["webhooks"] == ["./dist/src/webhooks/index.d.ts"]
 
 
+def _anyio_requirement(project):
+    dependencies = project.split("[tool.poetry.dependencies]\n", 1)[1].split("\n[", 1)[0]
+    matches = re.findall(r'^anyio\s*=\s*("[^"]*")\s*$', dependencies, re.MULTILINE)
+    assert len(matches) == 1, "anyio must remain an unconditional base dependency"
+    return SpecifierSet(ast.literal_eval(matches[0]))
+
+
+@pytest.mark.parametrize("requirement, equivalent", [
+    (">=4.0,<5.0", True), (">=4.0,<5", True), ("<5.0,>=4", True),
+    (">=4.1,<5", False), (">=4.0,<6", False), (">=4.0", False),
+    (">=3.0,<5.0", False),
+])
+def test_anyio_requirement_normalization_preserves_both_bounds(requirement, equivalent):
+    project = f'[tool.poetry.dependencies]\nanyio = "{requirement}"\n'
+    assert (_anyio_requirement(project) == SpecifierSet(">=4.0,<5")) is equivalent
+
+
 def test_python_candidate_floor_typing_and_gateway_inclusion():
     project = (ROOT / "python" / "pyproject.toml").read_text()
     assert 'version = "0.7.0"' in project
     assert 'python = ">=3.10"' in project
-    assert 'anyio = ">=4.0,<5"' in project
+    assert _anyio_requirement(project) == SpecifierSet(">=4.0,<5")
     excluded = project.split("exclude = [", 1)[1].split("]", 1)[0]
     assert '"fi/gateway' not in excluded
     for namespace in PYTHON_OFF_EXCLUDES:

@@ -18,7 +18,8 @@
   "pending_audits": [
     "RL2251o items 2-5 remain refused by design: publish branch-action and repository_dispatch-reachable OIDC, plus promote/release-please credential and environment gaps. Separate workflow hardening must land before exception review and re-pinning.",
     "Item 1 remains unexcepted: pr-title-lint has workflow-level pull-requests: read but no explicit jobs.lint.permissions mapping required by the security ruling. Automatic GITHUB_TOKEN is not categorically a W2 secret; no token exception is granted at this blob.",
-    "CI/E2E pins match committed 59c53052 bytes. Any workflow byte change requires review and a new blob pin; 664359b3 blobs are inventory only, never a historical-blob fallback.",
+    "CI/E2E pins cover the explicit Ubuntu 24.04 runner and explanatory comments; CI also runs the generated-reference checker from the installed wheel's temporary project. Triggers, permissions, secrets, publication paths and actions are unchanged.",
+    "Publish and release-please pins remain unchanged: added credential-bearing docs dispatch paths require security and release review before re-pinning.",
     "The record field on every exception and the exact census test must be updated together for reviewed growth."
   ],
   "released_workflow_exceptions": [
@@ -26,7 +27,7 @@
       "id": "ci-push",
       "record": "RL2251m-W1-W6",
       "workflow": ".github/workflows/ci.yml",
-      "blob": "fc8844a4891e96f435ed1bddf5d8fb2c53697425",
+      "blob": "2b0e03223558af6db7a3cf688c08e50527abd732",
       "kind": "trigger",
       "location": "on.push",
       "value": {"branches": ["dev", "main"]}
@@ -35,7 +36,7 @@
       "id": "e2e-push",
       "record": "RL2251m-W1-W6",
       "workflow": ".github/workflows/e2e.yml",
-      "blob": "acdcd2fc899719e4094d2a62e7a1f5fd3a66112e",
+      "blob": "cba54bac7b19da39a12e8175dee35cbc05cac28c",
       "kind": "trigger",
       "location": "on.push",
       "value": {"branches": ["dev", "main"]}
@@ -44,7 +45,7 @@
       "id": "e2e-schedule",
       "record": "RL2251m-W1-W6",
       "workflow": ".github/workflows/e2e.yml",
-      "blob": "acdcd2fc899719e4094d2a62e7a1f5fd3a66112e",
+      "blob": "cba54bac7b19da39a12e8175dee35cbc05cac28c",
       "kind": "trigger",
       "location": "on.schedule",
       "value": [{"cron": "17 3 * * *"}]
@@ -53,7 +54,7 @@
       "id": "e2e-backend-ref",
       "record": "RL2251m-W1-W6",
       "workflow": ".github/workflows/e2e.yml",
-      "blob": "acdcd2fc899719e4094d2a62e7a1f5fd3a66112e",
+      "blob": "cba54bac7b19da39a12e8175dee35cbc05cac28c",
       "kind": "checkout_ref",
       "location": "workflow.jobs.e2e.steps[2].uses",
       "value": {

@@ -52,9 +52,9 @@ env:
 jobs:
   e2e:
     name: e2e (python ${{ matrix.python }}${{ matrix.typescript && ', typescript' || '' }})
-    # ubuntu-latest became Ubuntu 26.04 on 2026-11-06 and actions/setup-python has no
-    # 3.9 build for it ("The version '3.9' ... was not found for Ubuntu 26.04"). Pin the
-    # jobs that run the 3.9 floor to 24.04 until the floor moves to 3.10.
+    # The supported floor is Python 3.10. Keep the explicit Ubuntu 24.04
+    # runner until setup-python availability for every matrix version is
+    # verified on ubuntu-latest; a floor change alone does not verify it.
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     strategy:

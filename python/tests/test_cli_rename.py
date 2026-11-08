@@ -17,6 +17,34 @@ SPEC.loader.exec_module(rename_cli)
 PKG = "futureagi"
 
 
+def _tracked_checkout_paths(root):
+    # Archives have no authoritative index. Never substitute a filesystem walk
+    # or inherit an enclosing repository's index for the checkout contract.
+    if not (root / ".git").exists():
+        pytest.skip("checkout-only assertion requires the source repository's git index")
+    return rename_cli.tracked_paths(root)
+
+
+@pytest.fixture
+def tracked_checkout_paths():
+    return _tracked_checkout_paths(ROOT)
+
+
+def test_checkout_scope_skips_only_archives(tmp_path, monkeypatch):
+    tracked = Mock(return_value=[tmp_path / "tracked.py"])
+    monkeypatch.setattr(rename_cli, "tracked_paths", tracked)
+    with pytest.raises(pytest.skip.Exception, match="checkout-only"):
+        _tracked_checkout_paths(tmp_path)
+    tracked.assert_not_called()
+    # A linked worktree uses a .git file rather than a directory.
+    (tmp_path / ".git").write_text("gitdir: synthetic-index\n")
+    assert _tracked_checkout_paths(tmp_path) == [tmp_path / "tracked.py"]
+    tracked.assert_called_once_with(tmp_path)
+    tracked.side_effect = RuntimeError("index unavailable")
+    with pytest.raises(RuntimeError, match="index unavailable"):
+        _tracked_checkout_paths(tmp_path)
+
+
 @pytest.fixture
 def checkout(tmp_path, monkeypatch):
     content = {
@@ -159,8 +187,8 @@ def test_json_escaped_newlines_and_boundaries():
     assert count == 1
 
 
-def test_scope_includes_installed_wheel_journeys_and_typescript_readme():
-    paths = {path.relative_to(ROOT).as_posix() for path in rename_cli.tracked_paths(ROOT)}
+def test_scope_includes_installed_wheel_journeys_and_typescript_readme(tracked_checkout_paths):
+    paths = {path.relative_to(ROOT).as_posix() for path in tracked_checkout_paths}
     assert {
         "scripts/journeys/installed_cli.py",
         "scripts/journeys/test_cli_entrypoint.py",
@@ -269,11 +297,11 @@ def test_installed_journeys_and_typescript_follow_two_swaps(checkout, monkeypatc
         assert rename_cli.rename(root, new) == (0, 0)
 
 
-def test_current_checkout_can_swap_names_and_round_trip_without_writes():
+def test_current_checkout_can_swap_names_and_round_trip_without_writes(tracked_checkout_paths):
     old = rename_cli.current_name((ROOT / "python/pyproject.toml").read_text())
     alternate = old + ".alternate_cli"
     changed = 0
-    for path in rename_cli.tracked_paths(ROOT):
+    for path in tracked_checkout_paths:
         raw = path.read_bytes()
         if b"\0" in raw:
             continue
