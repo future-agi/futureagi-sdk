@@ -120,12 +120,9 @@ def merge_session_headers(
     active_session = getattr(client, "_active_session", None)
     if active_session is None:
         return headers
-    # Legacy per-key aliases remain available for public inspection. The wire
-    # uses the canonical, layered JSON value so stale aliases cannot disagree.
-    session_hdrs = {
-        key: value for key, value in active_session.to_headers().items()
-        if not key.lower().startswith("x-agentcc-metadata-")
-    }
+    # The session renders its own wire form: per-key aliases by default and one
+    # JSON value only under ``metadata_mode='merge'``, so the two never disagree.
+    session_hdrs = active_session.to_headers()
     session_metadata = getattr(active_session, "metadata", None)
     if session_metadata and getattr(client, "_metadata_mode", "replace") == "merge":
         client_metadata = getattr(client, "_metadata", None)

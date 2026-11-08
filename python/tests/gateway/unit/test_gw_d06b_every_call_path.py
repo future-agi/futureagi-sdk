@@ -22,6 +22,7 @@ from typing import Any
 import httpx
 import pytest
 
+from ._published_helpers import wire_snapshot
 from fi.gateway import AgentCC, AsyncAgentCC
 
 GW = "http://127.0.0.1:8090"
@@ -244,7 +245,7 @@ def _expected(names: tuple[str, ...]) -> dict[str, Any] | None:
 
 def _sync(seen: list[httpx.Request], **kw: Any) -> AgentCC:
     def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         return _reply(request)
 
     return AgentCC(
@@ -258,7 +259,7 @@ def _sync(seen: list[httpx.Request], **kw: Any) -> AgentCC:
 
 def _async(seen: list[httpx.Request], **kw: Any) -> AsyncAgentCC:
     async def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         return _reply(request)
 
     return AsyncAgentCC(

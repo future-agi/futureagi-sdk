@@ -14,6 +14,7 @@ import pytest
 
 pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
 
+from ._published_helpers import wire_snapshot
 from fi.gateway import AgentCC, AsyncAgentCC, Session, create_headers
 
 GW = "http://127.0.0.1:8090"
@@ -28,7 +29,7 @@ COMPLETION = {
 
 def _client(seen: list[httpx.Request], **kwargs: object) -> AgentCC:
     def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         if request.url.path == "/v1/audio/speech":
             return httpx.Response(200, content=b"mp3")
         return httpx.Response(200, json=COMPLETION)
@@ -56,9 +57,6 @@ def test_session_to_headers_is_compact_json_and_keeps_types() -> None:
     assert headers == {
         "x-agentcc-session-id": "s1",
         "x-agentcc-metadata": '{"team":"a","n":2,"ok":true}',
-        "x-agentcc-metadata-team": "a",
-        "x-agentcc-metadata-n": "2",
-        "x-agentcc-metadata-ok": "True",
     }
 
 
@@ -189,7 +187,7 @@ def test_text_completions_merge_the_same_way() -> None:
     seen: list[httpx.Request] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         body = {
             "id": "c",
             "object": "text_completion",
@@ -214,7 +212,7 @@ async def test_the_async_client_too() -> None:
     seen: list[httpx.Request] = []
 
     async def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         return httpx.Response(200, json=COMPLETION)
 
     client = AsyncAgentCC(
@@ -232,7 +230,7 @@ async def test_the_async_client_layers_client_metadata_inside_a_session() -> Non
     seen: list[httpx.Request] = []
 
     async def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         return httpx.Response(200, json=COMPLETION)
 
     client = AsyncAgentCC(

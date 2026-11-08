@@ -21,6 +21,7 @@ from typing import Any
 import httpx
 import pytest
 
+from ._published_helpers import wire_snapshot
 from fi.gateway import (
     AgentCC,
     AsyncAgentCC,
@@ -68,7 +69,7 @@ def _client(
 ) -> AgentCC:
     def handler(request: httpx.Request) -> httpx.Response:
         if seen is not None:
-            seen.append(request)
+            seen.append(wire_snapshot(request))
         return reply(request) if callable(reply) else reply
 
     return AgentCC(

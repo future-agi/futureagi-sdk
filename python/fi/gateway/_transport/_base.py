@@ -179,8 +179,9 @@ class BaseClient(RequestBuilder, CallbackLifecycle, ABC):
         self._redact_messages = redact_messages
         self._owner = owner
         if owner is not None:
-            self._warned_http_origins = owner._warned_http_origins
-            self._http_warning_lock = owner._http_warning_lock
+            # Share the owning client's cleartext-warning state when it has one.
+            self._warned_http_origins = getattr(owner, "_warned_http_origins", self._warned_http_origins)
+            self._http_warning_lock = getattr(owner, "_http_warning_lock", self._http_warning_lock)
         self._timeout = parse_timeout(timeout)
         self._max_retries = max_retries
         self._retry_config = retry_config or RetryConfig(max_retries=max_retries)

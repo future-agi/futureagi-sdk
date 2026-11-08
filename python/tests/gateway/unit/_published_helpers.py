@@ -27,6 +27,17 @@ def clear_platform_keys(monkeypatch):
         monkeypatch.delenv(name, raising=False)
 
 
+def wire_snapshot(request):
+    """The request exactly as dispatched, for assertions about the wire.
+
+    The client masks credential and client-composed headers on every retained
+    request once a send finishes, so handlers record this copy at dispatch time
+    instead of reading the original request afterwards.
+    """
+    return httpx.Request(request.method, request.url, headers=request.headers,
+                         content=request.content, extensions=request.extensions)
+
+
 async def resolve(value):
     return await value if inspect.isawaitable(value) else value
 

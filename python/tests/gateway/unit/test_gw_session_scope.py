@@ -16,6 +16,7 @@ from typing import Any
 import httpx
 import pytest
 
+from ._published_helpers import wire_snapshot
 from fi.gateway import AgentCC
 
 COMPLETION = {
@@ -79,7 +80,7 @@ def _reply(request: httpx.Request) -> httpx.Response:
 
 def _client(seen: list[httpx.Request], **kwargs: Any) -> AgentCC:
     def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         return _reply(request)
 
     return AgentCC(

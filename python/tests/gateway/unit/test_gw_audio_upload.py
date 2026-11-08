@@ -15,6 +15,7 @@ from typing import Any
 import httpx
 import pytest
 
+from ._published_helpers import wire_snapshot
 from fi.gateway import AgentCC, AsyncAgentCC, InternalServerError
 
 from ._forms import read_form
@@ -29,7 +30,7 @@ def _sync(seen: list[httpx.Request], *replies: httpx.Response, **kw: Any) -> Age
     queue = list(replies)
 
     def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         return queue.pop(0) if queue else httpx.Response(200, json=TEXT, headers=COST)
 
     return AgentCC(
@@ -44,7 +45,7 @@ def _sync(seen: list[httpx.Request], *replies: httpx.Response, **kw: Any) -> Age
 
 def _async(seen: list[httpx.Request], **kw: Any) -> AsyncAgentCC:
     async def handler(request: httpx.Request) -> httpx.Response:
-        seen.append(request)
+        seen.append(wire_snapshot(request))
         return httpx.Response(200, json=TEXT, headers=COST)
 
     return AsyncAgentCC(
