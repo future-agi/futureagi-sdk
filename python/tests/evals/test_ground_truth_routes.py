@@ -10,6 +10,9 @@ import inspect
 from pathlib import Path
 
 import pytest
+import requests
+
+from fi.utils.errors import InvalidValueType, MissingRequiredKey
 
 from fi.client import Client
 from fi.errors import ConfigurationError, PlatformNotConfiguredError
@@ -161,18 +164,47 @@ def test_removed_manager_methods_fail_locally(backend, manager, method, args, kw
 
 
 def test_legacy_client_log_fails_locally(backend):
-    client = Client()
+    """Malformed logs fail locally; valid published payloads use only the configured backend."""
+    base_url = "https://logging.example.invalid/tenant"
+    path = "/tenant/sdk/api/v1/log/model/"
+    client = Client("offline-key", "offline-secret", base_url)
+    arguments = {"model_id": "model-id", "model_type": ModelTypes.GENERATIVE_LLM,
+                 "environment": Environments.PRODUCTION}
     try:
-        with pytest.raises(PlatformNotConfiguredError) as caught:
-            client.log("model-id", ModelTypes.GENERATIVE_LLM, Environments.PRODUCTION)
-        assert backend.calls == []
-        assert caught.value.code == "unsupported_operation"
-        assert caught.value.operation == "Client.log"
-        assert "POST /sdk/api/v1/log/model/" in str(caught.value)
-        assert "no replacement" in str(caught.value)
-        assert "traceAI" in str(caught.value)
-        assert "client.tracing" in str(caught.value)
-        assert "FutureAGIClient" in str(caught.value)
+        for changes, error in (({"model_id": 7}, InvalidValueType),
+                               ({"model_type": "GenerativeLLM"}, InvalidValueType),
+                               ({"environment": 3}, InvalidValueType),
+                               ({"conversation": {"other": []}}, MissingRequiredKey)):
+            with pytest.warns(DeprecationWarning, match="Client.log is deprecated") as notices:
+                with pytest.raises(error):
+                    client.log(**{**arguments, **changes})
+            assert backend.calls == []
+            assert len(notices) == 1
+            message = str(notices[0].message)
+            for guidance in ("POST /sdk/api/v1/log/model/", "traceAI", "client.tracing",
+                             "FutureAGIClient", "not drop-in"):
+                assert guidance in message
+
+        conversation = {"chat_history": [{"role": "user", "content": "synthetic prompt"}]}
+        payload = {"model_id": "model-id", "model_type": ModelTypes.GENERATIVE_LLM.value,
+                   "environment": Environments.PRODUCTION.value, "model_version": None,
+                   "prediction_timestamp": None, "conversation": conversation, "tags": None}
+        backend.routes[("POST", path)] = lambda call: (200, {"id": "log-id"})
+        with pytest.warns(DeprecationWarning, match="Client.log is deprecated"):
+            assert client.log(**arguments, conversation=conversation) == {"id": "log-id", "status": "success"}
+        assert len(backend.calls) == 1
+        assert backend.calls[0]["json"] == payload
+        assert backend.calls[0]["query"] == []
+
+        backend.routes[("POST", path)] = lambda call: (400, {"detail": "invalid log"})
+        with pytest.warns(DeprecationWarning, match="Client.log is deprecated"):
+            with pytest.raises(requests.HTTPError) as caught:
+                client.log(**arguments, conversation=conversation)
+        assert caught.value.response.status_code == 400
+        assert caught.value.request.url == base_url + "/sdk/api/v1/log/model/"
+        assert len(backend.calls) == 2
+        assert all((call["method"], call["host"], call["path"], call["json"]) ==
+                   ("POST", "logging.example.invalid", path, payload) for call in backend.calls)
     finally:
         client.close()
 
@@ -194,21 +226,31 @@ def test_list_ground_truth_is_still_the_supported_read(backend, manager):
 
 
 def test_dead_routes_are_never_referenced():
-    """Compatibility constants stay available but no evals/client path may use them."""
+    """Retired ground-truth routes stay unused; only Client.log may use the published log route."""
     retired = {"ground_truth_config", "ground_truth_mapping", "ground_truth_role_mapping",
-               "ground_truth_search", "log_model"}
+               "ground_truth_search"}
     package = Path(__file__).resolve().parents[2] / "fi"
     sources = [package / "client.py", *sorted((package / "evals").rglob("*.py"))]
-    references = []
+    references, log_references = [], []
     for path in sources:
-        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
             # Also catch literal-based getattr(Routes, name) and Routes[name] lookups.
             name = node.attr if isinstance(node, ast.Attribute) else (
                 node.value if isinstance(node, ast.Constant) and isinstance(node.value, str) else None
             )
             if name in retired:
                 references.append((str(path.relative_to(package)), node.lineno, name))
+            if name == "log_model":
+                assert path == package / "client.py"
+                client = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "Client")
+                log = next(n for n in client.body if isinstance(n, ast.FunctionDef) and n.name == "log")
+                assert node in set(ast.walk(log))
+                assert isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name)
+                assert node.value.id == "Routes"
+                log_references.append(node)
     assert references == []
+    assert len(log_references) == 1
     assert Routes.ground_truth_setup.value == "model-hub/ground-truth/{ground_truth_id}/setup/"
 
 
