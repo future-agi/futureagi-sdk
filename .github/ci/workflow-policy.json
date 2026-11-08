@@ -10,8 +10,8 @@
   ],
   "audit": {
     "ci.yml": "Rebind the exact bytes for explicit pnpm run argument forwarding only; triggers, permissions, secrets and actions are unchanged.",
-    "release-sdks.yml": "Package tests and local builds only; all four publication jobs removed.",
-    "sdk-compliance.yml": "Language tests and local reusable compliance checks; no write permissions.",
+    "release-sdks.yml": "Rebind explicit pnpm run argument forwarding only; package tests and local builds remain publication-free, with triggers, permissions, secrets and actions unchanged.",
+    "sdk-compliance.yml": "Rebind explicit pnpm run argument forwarding only; language tests and local reusable compliance checks retain unchanged triggers, read-only permissions, secrets and actions.",
     "sdk-contract-check.yml": "Inspectible local compliance runner; pinned harness source, loopback mock API, report artifact only.",
     "workflow-checks.yml": "Static policy regression tests and actionlint; no SDK credentials or publication.",
     "gateway-client.yml": "Node 18/20/22 unit, typing and parity checks only; non-release pushes, no tag triggers, credential-free checkout and read-only permissions."

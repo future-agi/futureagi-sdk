@@ -73,7 +73,7 @@ jobs:
 
       - name: Run TypeScript tests
         working-directory: typescript/futureagi
-        run: pnpm test --runInBand
+        run: pnpm run test --runInBand
 
       - name: Build TypeScript SDK
         working-directory: typescript/futureagi

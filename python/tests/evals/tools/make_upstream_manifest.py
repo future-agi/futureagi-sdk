@@ -21,6 +21,14 @@ import zipfile
 DIST_INFO = "ai_evaluation-1.1.0.dist-info"
 
 DEVIATIONS = {
+    "fi/evals/core/prompt_generator.py": (
+        "route the optional LiteLLM import through the typed dependency guard, "
+        "preserving completion arguments and missing transitive dependency errors"
+    ),
+    "fi/evals/llm/providers/litellm.py": (
+        "route the optional LiteLLM import through the shared typed dependency guard, "
+        "preserving provider behavior and missing transitive dependency errors"
+    ),
     "fi/evals/guardrails/README.md": (
         "a documentation example spelled so it does not look like a credential "
         "(the scanned string is built at run time)"

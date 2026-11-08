@@ -85,11 +85,13 @@ class WorkflowPolicyTests(unittest.TestCase):
         package = yaml.safe_load((folder / "release-sdks.yml").read_text())
         self.assertEqual(set(package["jobs"]), {"package-checks"})
         commands = "\n".join(s.get("run", "") for s in package["jobs"]["package-checks"]["steps"])
-        for required in ("pytest", "python -m build", "pnpm run typecheck", "pnpm test", "pnpm run build", "go test", "-DskipTests package"):
+        for required in ("pytest", "python -m build", "pnpm run typecheck", "pnpm run test --runInBand", "pnpm run build", "go test", "-DskipTests package"):
             with self.subTest(required=required):
                 self.assertIn(required, commands)
         compliance = yaml.safe_load((folder / "sdk-compliance.yml").read_text())
         self.assertEqual(set(compliance["jobs"]), {"python-tests", "typescript-tests", "python-compliance", "typescript-compliance", "generated-sdk-builds"})
+        test_commands = [s.get("run", "") for s in compliance["jobs"]["typescript-tests"]["steps"]]
+        self.assertIn("pnpm run test --runInBand", test_commands)
         for job in ("python-compliance", "typescript-compliance"):
             self.assertEqual(compliance["jobs"][job]["uses"], "./.github/workflows/sdk-contract-check.yml")
 
