@@ -1,7 +1,7 @@
 """Deprecated released gateway config adapters and header serialization.
 
 The released full config is serialized without dropping fields. Cache
-TTL/namespace/force_refresh and timeout.total also retain the lane's wire headers.
+TTL/namespace/force_refresh and timeout.total also retain the current's wire headers.
 Serialization does not promise that a particular gateway supports every override;
 unsupported legacy options warn, and response config_ignored remains observable.
 """
@@ -162,7 +162,7 @@ def _to_serializable(obj: Any) -> Any:
 @deprecated_options("fallback", "load_balance", "guardrails", "routing", "mirror", "retry", positional=True)
 @dataclass
 class GatewayConfig:
-    """Released constructor and inspection API; safe serialization on lane transports."""
+    """Released constructor and inspection API; safe serialization on current transports."""
 
     fallback: FallbackConfig | None = None
     load_balance: LoadBalanceConfig | None = None

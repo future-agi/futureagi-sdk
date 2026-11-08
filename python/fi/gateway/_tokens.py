@@ -287,7 +287,7 @@ def is_prompt_caching_valid(model: str, messages: list[dict[str, Any]]) -> tuple
     prompt caching can be leveraged.
 
     Args:
-        model: The model name (e.g. ``'claude-3-5-sonnet-20241022'``, ``'gpt-4o'``).
+        model: The model name (e.g. ``'anthropic-direct/claude-sonnet-5'``, ``'gpt-4o'``).
         messages: Chat messages list.
 
     Returns:

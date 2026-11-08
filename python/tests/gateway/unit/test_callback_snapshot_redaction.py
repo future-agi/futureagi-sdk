@@ -2,6 +2,7 @@
 
 import copy
 import json
+from types import SimpleNamespace
 
 import httpx
 import pytest
@@ -41,7 +42,8 @@ def configuration():
 @pytest.mark.parametrize("redact", [False, True])
 @pytest.mark.parametrize("multipart", [False, True])
 def test_snapshot_does_not_disclose_or_mutate_credentials(transport_type, redact, multipart):
-    transport = transport_type(api_key=KEY, base_url=ORIGIN, config=configuration(), redact_messages=redact)
+    transport = transport_type(api_key=KEY, base_url=ORIGIN, config=configuration(), redact_messages=redact,
+                               owner=SimpleNamespace(_callback_mode="snapshot"))
     body = {
         "model": "whisper-1", "prompt": "private prompt",
         "messages": [{"role": "user", "content": "private message"}],
@@ -76,8 +78,8 @@ def test_snapshot_does_not_disclose_or_mutate_credentials(transport_type, redact
         assert snapshot.body["prompt"] == "private prompt"
     assert body == original
     assert headers["Authorization"] == f"Bearer {KEY}"
-    assert KEY in transport._build_headers(options)["Authorization"]
-    assert VIRTUAL_KEY in transport._build_headers(options)["x-agentcc-config"]
+    assert KEY in transport._build_headers(options)[0]["Authorization"]
+    assert VIRTUAL_KEY in transport._build_headers(options)[0]["x-agentcc-config"]
     assert snapshot.body is not body
 
 
@@ -131,7 +133,7 @@ def test_sync_audio_and_files_callbacks_keep_form_not_file(redact):
     recorder, sent = Recorder(), []
     with httpx.Client(transport=httpx.MockTransport(handler(sent))) as http:
         with Gateway(api_key=KEY, base_url=ORIGIN, http_client=http, config=configuration(),
-                     callbacks=[recorder], redact_messages=redact) as gateway:
+                     callbacks=[recorder], redact_messages=redact, callback_mode="snapshot") as gateway:
             gateway.audio.transcriptions.create(file=FILE_BYTES, model="whisper-1", prompt="private prompt")
             gateway.files.create(file=("sample.wav", FILE_BYTES), purpose="assistants")
     assert len(sent) == 2
@@ -144,7 +146,7 @@ async def test_async_audio_and_files_callbacks_keep_form_not_file(redact):
     recorder, sent = Recorder(), []
     async with httpx.AsyncClient(transport=httpx.MockTransport(handler(sent))) as http:
         async with AsyncGateway(api_key=KEY, base_url=ORIGIN, http_client=http, config=configuration(),
-                                callbacks=[recorder], redact_messages=redact) as gateway:
+                                callbacks=[recorder], redact_messages=redact, callback_mode="snapshot") as gateway:
             await gateway.audio.transcriptions.create(file=FILE_BYTES, model="whisper-1", prompt="private prompt")
             await gateway.files.create(file=("sample.wav", FILE_BYTES), purpose="assistants")
     assert len(sent) == 2

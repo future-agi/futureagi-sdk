@@ -105,26 +105,29 @@ def _layer_metadata(*layers: Any) -> Any:
 
 
 def merge_session_headers(
-    client: Any, headers: dict[str, str], agentcc_params: dict[str, Any] | None = None
+    client: Any, headers: dict[str, str], agentcc_params: dict[str, Any] | None = None,
+    *, defer: bool = False,
 ) -> dict[str, str]:
     """Merge active session headers into the extra headers dict.
 
     Session headers are added first so that explicit per-request headers
     take precedence (they overwrite session values).
 
-    Metadata goes as one JSON ``x-agentcc-metadata`` header (D-06), built by one rule
-    (D-06b): the client's ``metadata=``, then the session's metadata, then the
-    request's ``request_metadata``, merged key by key with the later one winning. The
-    transport applies the same rule outside a session (client, then request). agentcc
-    1.x sent session metadata as per-key headers the gateway never reads, and a
-    request's ``request_metadata`` replaced the client's.
+    Published sessions use per-key metadata headers and leave request metadata
+    alone. Only ``metadata_mode='merge'`` layers client/session/request dictionaries
+    into one JSON header. An explicit raw metadata header always wins.
     """
     active_session = getattr(client, "_active_session", None)
     if active_session is None:
         return headers
-    session_hdrs = active_session.to_headers()
+    # Legacy per-key aliases remain available for public inspection. The wire
+    # uses the canonical, layered JSON value so stale aliases cannot disagree.
+    session_hdrs = {
+        key: value for key, value in active_session.to_headers().items()
+        if not key.lower().startswith("x-agentcc-metadata-")
+    }
     session_metadata = getattr(active_session, "metadata", None)
-    if session_metadata:
+    if session_metadata and getattr(client, "_metadata_mode", "replace") == "merge":
         client_metadata = getattr(client, "_metadata", None)
         if agentcc_params is None:
             session_hdrs[HEADER_METADATA] = json.dumps(
@@ -138,6 +141,13 @@ def merge_session_headers(
                 session_metadata,
                 agentcc_params.get("request_metadata"),
             )
+    if defer and agentcc_params is not None:
+        # Compose SDK session values only in the transport's separate wire dict.
+        # The request descriptor must retain just the caller's live headers.
+        agentcc_params["_session_headers"] = session_hdrs
+        if session_metadata and getattr(client, "_metadata_mode", "replace") == "merge":
+            agentcc_params["_client_header_names"] = (HEADER_METADATA,)
+        return headers
     merged = dict(session_hdrs)
     merged.update(headers)
     return merged

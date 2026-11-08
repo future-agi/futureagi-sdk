@@ -28,6 +28,7 @@ from fi.gateway._exceptions import (
     StreamError as StreamError,
     UnprocessableEntityError as UnprocessableEntityError,
 )
+from fi.gateway._gateway_evidence import DispatchState as DispatchState, GatewayEvidence as GatewayEvidence
 from fi.gateway._base_client import Timeout as Timeout
 from fi.gateway._batch import (
     abatch_completion as abatch_completion,

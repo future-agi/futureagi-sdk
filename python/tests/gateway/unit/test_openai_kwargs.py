@@ -273,12 +273,12 @@ def test_the_metadata_models_are_re_exported_at_the_top_level() -> None:
     meta = gw.AgentCCMetadata.from_headers(
         httpx.Headers(
             {
-                "x-agentcc-request-id": "req-1",
+                "x-agentcc-request-id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
                 "x-agentcc-cost": "0.25",
                 "x-ratelimit-limit-requests": "100",
                 "x-ratelimit-remaining-requests": "99",
             }
         )
     )
-    assert meta.request_id == "req-1" and meta.cost == 0.25
+    assert meta.request_id == "01ARZ3NDEKTSV4RRFFQ69G5FAV" and meta.cost == 0.25
     assert isinstance(meta.ratelimit, gw.RateLimitInfo)

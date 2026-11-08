@@ -28,7 +28,7 @@ WITH_COMPLETION_TOKENS = {
     **OPENAI_SHAPED,
     "usage": {"prompt_tokens": 2, "completion_tokens": 0, "total_tokens": 2},
 }
-HEADERS = {"x-agentcc-request-id": "req-e", "x-agentcc-cost": "0.001"}
+HEADERS = {"x-agentcc-request-id": "01ARZ3NDEKTSV4RRFFQ69G5FAV", "x-agentcc-cost": "0.001"}
 
 
 def _sync(body: dict[str, Any]) -> AgentCC:
@@ -54,7 +54,7 @@ def test_an_openai_shaped_answer_parses() -> None:
         result.usage.completion_tokens,
         result.usage.total_tokens,
     ) == (2, 0, 2)
-    assert result.agentcc is not None and result.agentcc.request_id == "req-e"
+    assert result.agentcc is not None and result.agentcc.request_id == "01ARZ3NDEKTSV4RRFFQ69G5FAV"
 
 
 def test_an_answer_that_carries_completion_tokens_still_parses() -> None:
@@ -86,9 +86,10 @@ def test_the_schema_keeps_the_other_usage_fields_required() -> None:
     assert schema["properties"]["completion_tokens"]["default"] == 0
     assert set(Usage.model_json_schema()["required"]) == {
         "prompt_tokens",
-        "completion_tokens",
         "total_tokens",
     }
+    assert Usage.model_json_schema()["properties"]["completion_tokens"]["default"] == 0
+    assert Usage(prompt_tokens=2, total_tokens=2).completion_tokens == 0
 
 
 async def test_the_async_client_parses_it_too() -> None:

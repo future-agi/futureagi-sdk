@@ -10,42 +10,51 @@ from ._base_client_fixtures import _MockResponse, _make_sync_client
 
 
 class TestShouldRetry:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_retryable_429_first_attempt(self) -> None:
         client = _make_sync_client()
         assert client._should_retry(429, attempt=0, max_retries=2) is True
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_retryable_429_exhausted(self) -> None:
         client = _make_sync_client()
         assert client._should_retry(429, attempt=2, max_retries=2) is False
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_not_retryable_400(self) -> None:
         client = _make_sync_client()
         assert client._should_retry(400, attempt=0, max_retries=2) is False
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_retryable_500(self) -> None:
         client = _make_sync_client()
         assert client._should_retry(500, attempt=0, max_retries=2) is True
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_retryable_502(self) -> None:
         client = _make_sync_client()
         assert client._should_retry(502, attempt=1, max_retries=3) is True
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_not_retryable_401(self) -> None:
         client = _make_sync_client()
         assert client._should_retry(401, attempt=0, max_retries=5) is False
 
 
 class TestCalculateDelay:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_respects_retry_after(self) -> None:
         client = _make_sync_client()
         delay = client._calculate_delay(0, {"retry-after": "2.5"})
         assert delay == 2.5
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_retry_after_capped(self) -> None:
         client = _make_sync_client(retry_config=RetryConfig(backoff_max=5.0))
         delay = client._calculate_delay(0, {"retry-after": "100"})
         assert delay == 5.0
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_exponential_backoff(self) -> None:
         client = _make_sync_client(
             retry_config=RetryConfig(backoff_factor=0.5, backoff_jitter=0.0)
@@ -57,6 +66,7 @@ class TestCalculateDelay:
         assert d1 == 1.0  # 0.5 * 2^1
         assert d2 == 2.0  # 0.5 * 2^2
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_backoff_capped(self) -> None:
         client = _make_sync_client(
             retry_config=RetryConfig(
@@ -66,6 +76,7 @@ class TestCalculateDelay:
         delay = client._calculate_delay(5)  # 1.0 * 2^5 = 32 → capped to 3.0
         assert delay == 3.0
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_jitter_within_range(self) -> None:
         client = _make_sync_client(
             retry_config=RetryConfig(backoff_factor=1.0, backoff_jitter=0.5)
@@ -83,7 +94,7 @@ class TestProcessResponse:
             200,
             json={"id": "abc", "content": "hello"},
             headers={
-                "x-agentcc-request-id": "req-1",
+                "x-agentcc-request-id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
                 "x-agentcc-trace-id": "trace-1",
                 "x-agentcc-provider": "openai",
                 "x-agentcc-latency-ms": "50",
@@ -95,7 +106,7 @@ class TestProcessResponse:
         assert result.id == "abc"
         assert result.content == "hello"
         assert hasattr(result, "agentcc")
-        assert result.agentcc.request_id == "req-1"  # type: ignore[attr-defined]
+        assert result.agentcc.request_id == "01ARZ3NDEKTSV4RRFFQ69G5FAV"  # type: ignore[attr-defined]
         assert result.agentcc.provider == "openai"  # type: ignore[attr-defined]
 
     @respx.mock
@@ -144,7 +155,7 @@ class TestRetryIntegration:
                 200,
                 json={"id": "abc", "content": "hello"},
                 headers={
-                    "x-agentcc-request-id": "req-1",
+                    "x-agentcc-request-id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
                     "x-agentcc-trace-id": "trace-1",
                     "x-agentcc-provider": "openai",
                     "x-agentcc-latency-ms": "50",

@@ -39,9 +39,29 @@ def resource_property(attr: str, module: str, cls_name: str) -> property:
 class ClientState:
     """Released mutable redaction option and context-local active sessions."""
 
+    def _init_audio_upload_mode(self, mode: str) -> None:
+        if mode not in {"published", "normalized"}:
+            raise ValueError("audio_upload_mode must be 'published' or 'normalized'")
+        self._audio_upload_mode = mode
+
+    def _init_metadata_mode(self, mode: str) -> None:
+        """Only explicit merge mode layers client, session and request metadata."""
+        if mode not in {"replace", "merge"}:
+            raise ValueError("metadata_mode must be 'replace' or 'merge'")
+        self._metadata_mode = mode
+
+    def _init_callback_options(self, mode: str, expanded: bool) -> None:
+        """Published descriptors by default; snapshots and extra events are opt-in."""
+        if mode not in {"published", "snapshot"}:
+            raise ValueError("callback_mode must be 'published' or 'snapshot'")
+        self._callback_mode = mode
+        self._expanded_callback_events = expanded
+
     def _init_compat(self, redact_messages: bool, pre_call_rules: Any, modify_params: bool) -> None:
         import contextvars
         self._session_var = contextvars.ContextVar(f"gateway_session_{id(self)}", default=None)
+        self._warned_http_origins: set[tuple[str, str, int]] = set()
+        self._http_warning_lock = threading.Lock()
         self._redact_messages = redact_messages
         self._pre_call_rules = pre_call_rules
         self._modify_params = modify_params
@@ -132,8 +152,12 @@ def derived_options(
         "default_query": query or None,
         "session_id": pick(session_id, client._session_id),
         "metadata": pick(metadata, client._metadata),
+        "metadata_mode": client._metadata_mode,
+        "audio_upload_mode": client._audio_upload_mode,
         "config": client._config,
         "callbacks": client._callbacks,
+        "callback_mode": client._callback_mode,
+        "expanded_callback_events": client._expanded_callback_events,
         "http_client": client._http_client,
         "drop_params": pick(drop_params, client._drop_params),
         "retry_policy": client._retry_policy,

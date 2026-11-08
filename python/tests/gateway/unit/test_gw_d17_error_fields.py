@@ -85,7 +85,7 @@ def test_the_recorded_gateway_frame_gives_type_code_and_param() -> None:
     assert seen == ["response.created", "response.output_text.delta"]
     assert (err.type, err.code, err.param) == ("error", "content_blocked", None)
     assert str(err) == BLOCK
-    assert err.request_id == "r1"
+    assert err.request_id is None  # Non-ULID wire IDs are not gateway identity.
     assert err.body == json.loads(RECORDED[-1][1])
 
 

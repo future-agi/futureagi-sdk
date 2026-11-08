@@ -147,7 +147,7 @@ class Completions:
             user_id=user_id,
             request_id=request_id,
         )
-        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params)
+        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params, defer=True)
 
         from fi.gateway._utils import parse_timeout
 
@@ -251,7 +251,7 @@ class AsyncCompletions:
             user_id=user_id,
             request_id=request_id,
         )
-        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params)
+        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params, defer=True)
 
         from fi.gateway._utils import parse_timeout
 
@@ -264,7 +264,14 @@ class AsyncCompletions:
         )
 
         if stream is True or (stream is not NOT_GIVEN and stream):
-            return await self._client._get_base_client()._open_stream(opts, agentcc_params, Completion)
+            base = self._client._get_base_client()
+            if base._expanded_events:
+                return await base._open_stream(opts, agentcc_params, Completion)
+            # Published async streams bypass lifecycle callbacks, including body edits.
+            from fi.gateway._streaming import AsyncStream
+
+            response = await base._stream_request(opts, agentcc_params)
+            return AsyncStream(response, Completion)
 
         return await self._client._get_base_client()._request_with_retry(
             opts, Completion, agentcc_params

@@ -9,6 +9,8 @@ module names are those classes.
 
 from __future__ import annotations
 
+import pytest
+
 import inspect
 import typing
 
@@ -81,6 +83,7 @@ async def test_the_async_ones_too() -> None:
         assert isinstance(m, AsyncStreamManager)
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_create_results_and_copies_are_annotated_with_what_they_return() -> None:
     """agentcc 1.0 annotated create() ``-> ChatCompletion | Any`` and with_options() with
     the base class. create() now names its three results (a completion, a stream, and the

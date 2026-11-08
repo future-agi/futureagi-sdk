@@ -6,6 +6,7 @@
 
 import { APIStatusError } from "../errors.js";
 import { Stream } from "../streaming.js";
+import { markScrubbedResponse, scrubCredentialHeaders } from "../redact.js";
 import type { RouteOptions } from "./types.js";
 
 /** The route a hook calls without an AgentCCProvider. */
@@ -30,12 +31,19 @@ async function errorBody(response: Response): Promise<unknown> {
 export async function routeStream(route: RouteOptions, body: Record<string, unknown>, signal?: AbortSignal): Promise<Stream> {
   const api = route.api ?? DEFAULT_API;
   const doFetch = route.fetch ?? ((input: string, init?: RequestInit) => globalThis.fetch(input, init));
-  const response = await doFetch(api, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "text/event-stream", ...route.headers },
-    body: JSON.stringify(body),
-    signal,
-  });
+  const headers = { "Content-Type": "application/json", Accept: "text/event-stream", ...route.headers };
+  let response: Response;
+  try {
+    response = await doFetch(api, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+      signal,
+    });
+  } finally {
+    scrubCredentialHeaders(headers);
+  }
+  markScrubbedResponse(response);
   if (!response.ok) throw APIStatusError.from(response.status, await errorBody(response), response.headers);
   return new Stream(response);
 }

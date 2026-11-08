@@ -13,6 +13,9 @@ import type { TraceContextManager } from "./trace-context.js";
 import { validateJsonResponse } from "./validate-response.js";
 import type { RequestOptions } from "./client-options.js";
 import { assignHeaders, setMetadataHeader } from "./metadata-header.js";
+import { parseGatewayEvidence } from "./gateway-evidence.js";
+import { UNCONFIRMED_DISPATCH_REMEDY } from "./refusal-policy.js";
+import { failedBeforeSend } from "./transport-dispatch.js";
 
 /** What a client contributes to every request's headers. */
 export interface HeaderSources {
@@ -123,13 +126,20 @@ export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** What a failed fetch() means: a timeout, or a connection error. */
-export function connectionError(err: unknown, path: string, url: string): APIConnectionError {
-  return err instanceof DOMException && err.name === "TimeoutError"
-    ? new APITimeoutError(`Request to ${path} timed out`)
-    : err instanceof TypeError && (err as Error).message?.includes("abort")
-      ? new APITimeoutError(`Request to ${path} timed out`)
-      : new APIConnectionError(`Failed to connect to ${url}: ${(err as Error).message}`, err);
+/** Preserve public error classes without retaining credential-bearing transport
+ * objects, error prose or URLs. Unknown outcomes are terminal under every policy.
+ */
+export function connectionError(err: unknown, _path: string, _url: string): APIConnectionError {
+  const beforeSend = failedBeforeSend(err);
+  const evidence = parseGatewayEvidence(beforeSend ? [["x-agentcc-dispatched", "false"]] : undefined);
+  let timeout = false;
+  try {
+    timeout = (err instanceof DOMException && err.name === "TimeoutError")
+      || (err instanceof TypeError && err.message.includes("abort"));
+  } catch { /* Untrusted transport properties do not escape the error boundary. */ }
+  const message = (timeout ? "Request timed out." : "Request connection failed.")
+    + (beforeSend ? " The request was not sent." : ` ${UNCONFIRMED_DISPATCH_REMEDY}`);
+  return timeout ? new APITimeoutError(message, evidence) : new APIConnectionError(message, undefined, evidence);
 }
 
 /** An error response's body: its JSON, else `{ message: <text> }`. */

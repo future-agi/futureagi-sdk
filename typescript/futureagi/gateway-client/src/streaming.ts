@@ -1,4 +1,7 @@
-import { StreamError } from "./errors.js";
+import { StreamError, errorAtExit, streamBodyError } from "./errors.js";
+import { getGatewayEvidence } from "./gateway-evidence.js";
+import { hasScrubbedResponse } from "./redact.js";
+import type { GatewayEvidence } from "./gateway-evidence.js";
 import type { ChatCompletionChunk } from "./types/chat/chat-completion-chunk.js";
 import type { ChatCompletion, ChatCompletionMessage } from "./types/chat/chat-completion.js";
 import type { AgentCCMetadata, Usage } from "./types/shared.js";
@@ -15,9 +18,11 @@ export class Stream implements AsyncIterable<ChatCompletionChunk> {
   private _response: Response;
   private _agentcc: AgentCCMetadata;
   private _done = false;
+  readonly gatewayEvidence: GatewayEvidence;
 
   constructor(response: Response) {
     this._response = response;
+    this.gatewayEvidence = getGatewayEvidence(response);
     this._agentcc = parseAgentCCMetadata(response.headers);
   }
 
@@ -32,11 +37,19 @@ export class Stream implements AsyncIterable<ChatCompletionChunk> {
   }
 
   async *[Symbol.asyncIterator](): AsyncGenerator<ChatCompletionChunk> {
-    if (this._done) throw new StreamError("Stream already consumed");
+    // Re-consumption is local misuse, not a failed response body read.
+    if (this._done) throw errorAtExit(new StreamError("Stream already consumed", { gatewayEvidence: this.gatewayEvidence }));
     this._done = true;
+    try {
+      yield* this._iterate();
+    } catch (error) {
+      throw errorAtExit(error, this.gatewayEvidence, hasScrubbedResponse(this._response));
+    }
+  }
 
+  private async *_iterate(): AsyncGenerator<ChatCompletionChunk> {
     const body = this._response.body;
-    if (!body) throw new StreamError("Response body is null");
+    if (!body) throw this._bodyError("Response body is null");
 
     // A JSON answer to a stream request (a cache hit or another short-circuit)
     // is one whole completion: yield it as one real chunk.
@@ -55,16 +68,16 @@ export class Stream implements AsyncIterable<ChatCompletionChunk> {
       try {
         data = JSON.parse(event.data);
       } catch {
-        throw new StreamError(`Failed to parse SSE data: ${event.data}`);
+        throw this._bodyError(`Failed to parse SSE data: ${event.data}`);
       }
       if (typeof data !== "object" || data === null) {
-        throw new StreamError(`Failed to parse SSE data: ${event.data}`);
+        throw this._bodyError(`Failed to parse SSE data: ${event.data}`);
       }
 
       // The gateway ends a stream it refuses (a guardrail block, an upstream
       // timeout) with {"error": {...}} in a data frame, sometimes followed by
       // a metadata chunk and [DONE]. Stop there: nothing after it is answer.
-      gatewayError = streamErrorFromEvent(data);
+      gatewayError = streamErrorFromEvent(data, this.gatewayEvidence);
       if (gatewayError) break;
 
       const chunk = data as ChatCompletionChunk;
@@ -79,18 +92,22 @@ export class Stream implements AsyncIterable<ChatCompletionChunk> {
     }
   }
 
+  private _bodyError(message: string): StreamError {
+    return streamBodyError(message, this.gatewayEvidence);
+  }
+
   /** The one chunk a JSON answer to a stream request stands for. */
   private _jsonAnswerChunk(text: string): ChatCompletionChunk {
     let json: unknown;
     try {
       json = JSON.parse(text);
     } catch {
-      throw new StreamError(`Failed to parse JSON answer: ${text.slice(0, 200)}`);
+      throw this._bodyError(`Failed to parse JSON answer: ${text.slice(0, 200)}`);
     }
     if (typeof json !== "object" || json === null || Array.isArray(json)) {
-      throw new StreamError(`Failed to parse JSON answer: ${text.slice(0, 200)}`);
+      throw this._bodyError(`Failed to parse JSON answer: ${text.slice(0, 200)}`);
     }
-    const gatewayError = streamErrorFromEvent(json);
+    const gatewayError = streamErrorFromEvent(json, this.gatewayEvidence);
     if (gatewayError) throw gatewayError;
     const body = json as Record<string, unknown>;
     const chunk = body.object === "chat.completion.chunk" ? (body as ChatCompletionChunk) : chunkFromCompletion(body);
@@ -210,6 +227,10 @@ export class StreamManager implements AsyncIterable<ChatCompletionChunk> {
 
   get agentcc(): AgentCCMetadata {
     return this._stream.agentcc;
+  }
+
+  get gatewayEvidence(): GatewayEvidence {
+    return this._stream.gatewayEvidence;
   }
 
   /** Iterate over raw chunks. */

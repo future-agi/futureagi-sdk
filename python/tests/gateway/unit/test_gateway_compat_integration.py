@@ -50,6 +50,12 @@ async def _client(async_mode, handler, **options):
         yield client
 
 
+@pytest.mark.filterwarnings('default:^AsyncModerations\\ is\\ a\\ deprecated\\ released\\ gateway\\ compatibility\\ API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^Moderations\\ is\\ a\\ deprecated\\ released\\ gateway\\ compatibility\\ API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^(Async)?Batches is a deprecated released gateway compatibility API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^AsyncBatches\\ is\\ a\\ deprecated\\ released\\ gateway\\ compatibility\\ API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^Batches\\ is\\ a\\ deprecated\\ released\\ gateway\\ compatibility\\ API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^client\\.batches is a deprecated released compatibility resource\\.:DeprecationWarning')
 @pytest.mark.anyio
 @pytest.mark.parametrize("async_mode", [False, True], ids=["sync", "async"])
 async def test_deprecated_resources_send_the_released_routes_and_payloads(async_mode):

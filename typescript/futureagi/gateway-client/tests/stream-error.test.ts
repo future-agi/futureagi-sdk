@@ -24,6 +24,7 @@ import type {
   StreamEvent,
 } from "../src/index.js";
 import { streamResponse } from "../src/nextjs.js";
+import { UNCONFIRMED_DISPATCH_REMEDY } from "../src/refusal-policy.js";
 
 // ---------------------------------------------------------------------------
 // Fixture
@@ -370,6 +371,8 @@ describe("StreamError fields", () => {
   it("malformed JSON still raises the parse StreamError", async () => {
     const { error } = await drain(new Stream(sseResponse(["{not json"])));
     expect(error).toBeInstanceOf(StreamError);
-    expect((error as StreamError).message).toBe("Failed to parse SSE data: {not json");
+    expect((error as StreamError).message).toBe(`Failed to parse SSE data: {not json. ${UNCONFIRMED_DISPATCH_REMEDY}`);
+    expect((error as StreamError).remedy).toBe(UNCONFIRMED_DISPATCH_REMEDY);
+    expect((error as StreamError).dispatched).toBe("unknown");
   });
 });

@@ -5,6 +5,7 @@
  */
 
 import type { AgentCCMetadata } from "./types/shared.js";
+import type { GatewayEvidence } from "./gateway-evidence.js";
 import type { Session } from "./session.js";
 
 // ---------------------------------------------------------------------------
@@ -19,6 +20,7 @@ export interface CallbackRequest {
 }
 
 export interface CallbackResponse {
+  readonly gatewayEvidence?: GatewayEvidence;
   statusCode: number;
   headers: Record<string, string>;
   agentcc: AgentCCMetadata;

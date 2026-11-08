@@ -99,6 +99,7 @@ def test_an_error_response_adds_nothing() -> None:
     assert client.current_cost == 0.0
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_with_options_copies_share_the_ledger() -> None:
     client = _client(["0.5", "0.25"])
     copy = client.with_options(timeout=5)
@@ -109,6 +110,7 @@ def test_with_options_copies_share_the_ledger() -> None:
     assert client.current_cost == 0.0
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 async def test_the_async_client_counts_too() -> None:
     async def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, headers={"x-agentcc-cost": "0.125"}, json=COMPLETION)
@@ -125,6 +127,7 @@ async def test_the_async_client_counts_too() -> None:
     assert client.current_cost == pytest.approx(0.25)
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_with_options_trace_id_is_sent_and_a_request_trace_id_wins() -> None:
     seen: list[httpx.Request] = []
     client = _client([], seen)
@@ -139,6 +142,7 @@ def test_with_options_trace_id_is_sent_and_a_request_trace_id_wins() -> None:
     ]
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_with_options_trace_id_beats_an_extra_header_of_the_same_name() -> None:
     seen: list[httpx.Request] = []
     client = _client([], seen)
@@ -148,6 +152,7 @@ def test_with_options_trace_id_beats_an_extra_header_of_the_same_name() -> None:
     assert seen[0].headers["x-agentcc-trace-id"] == "from-trace-id"
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_with_options_keeps_the_retry_policy() -> None:
     policy = RetryPolicy(InternalServerErrorRetries=2)
     attempts: list[int] = []

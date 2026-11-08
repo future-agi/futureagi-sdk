@@ -15,6 +15,18 @@ class _MetadataDetails:
     metadata: dict[str, Any]
 
     @property
+    def model(self) -> str | None:
+        """Supplied model identity, without resolving or rewriting provider prefixes."""
+        value = self.metadata.get("model")
+        return value if isinstance(value, str) else None
+
+    @property
+    def candidates(self) -> list[str] | None:
+        """Complete provider-prefixed candidate IDs, or None for malformed metadata."""
+        value = self.metadata.get("candidates")
+        return list(value) if isinstance(value, list) and all(isinstance(v, str) for v in value) else None
+
+    @property
     def required_usd(self) -> Any:
         """What the request needed, in USD."""
         return self.metadata.get("required_usd")
@@ -47,7 +59,10 @@ class _MetadataDetails:
     @property
     def reason(self) -> Any:
         """The gateway's reason for the refusal."""
-        return self.metadata.get("reason")
+        value = self.metadata.get("reason")
+        if getattr(self, "code", None) == "managed_model_unpriced":
+            return value if value == "unpriced" else None
+        return value
 
     @property
     def cap_scope(self) -> Any:

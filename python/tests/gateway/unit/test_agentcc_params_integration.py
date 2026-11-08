@@ -127,6 +127,7 @@ class TestAgentCCParamsModule:
 
 
 class TestCompletionsAgentCCParams:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_completions_with_session_id(self) -> None:
         route = respx.post("http://gw.test/v1/completions").respond(
@@ -141,6 +142,7 @@ class TestCompletionsAgentCCParams:
         req = route.calls[0].request
         assert req.headers.get("x-agentcc-session-id") == "sess-abc"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_completions_with_all_agentcc_params(self) -> None:
         route = respx.post("http://gw.test/v1/completions").respond(
@@ -165,6 +167,7 @@ class TestCompletionsAgentCCParams:
         assert req.headers.get("x-agentcc-request-id") == "req-99"
         assert req.headers.get("x-agentcc-property-env") == "prod"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_completions_body_does_not_contain_agentcc_params(self) -> None:
         route = respx.post("http://gw.test/v1/completions").respond(
@@ -188,6 +191,7 @@ class TestCompletionsAgentCCParams:
 
 
 class TestResponsesAgentCCParams:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_responses_with_session_id(self) -> None:
         route = respx.post("http://gw.test/v1/responses").respond(
@@ -202,6 +206,7 @@ class TestResponsesAgentCCParams:
         req = route.calls[0].request
         assert req.headers.get("x-agentcc-session-id") == "sess-resp"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_responses_with_all_agentcc_params(self) -> None:
         route = respx.post("http://gw.test/v1/responses").respond(
@@ -226,6 +231,7 @@ class TestResponsesAgentCCParams:
         assert req.headers.get("x-agentcc-request-id") == "r1"
         assert req.headers.get("x-agentcc-property-team") == "backend"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_responses_body_does_not_contain_agentcc_params(self) -> None:
         route = respx.post("http://gw.test/v1/responses").respond(
@@ -246,6 +252,7 @@ class TestResponsesAgentCCParams:
 
 
 class TestAudioAgentCCParams:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_transcriptions_with_agentcc_params(self) -> None:
         route = respx.post("http://gw.test/v1/audio/transcriptions").respond(
@@ -262,6 +269,7 @@ class TestAudioAgentCCParams:
         assert req.headers.get("x-agentcc-session-id") == "sess-audio"
         assert req.headers.get("x-agentcc-trace-id") == "trace-audio"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_translations_with_agentcc_params(self) -> None:
         route = respx.post("http://gw.test/v1/audio/translations").respond(
@@ -278,6 +286,7 @@ class TestAudioAgentCCParams:
         assert req.headers.get("x-agentcc-session-id") == "sess-trans"
         assert req.headers.get("x-agentcc-user-id") == "user-lang"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_speech_with_agentcc_params(self) -> None:
         route = respx.post("http://gw.test/v1/audio/speech").respond(
@@ -301,6 +310,7 @@ class TestAudioAgentCCParams:
 
 
 class TestFilesAgentCCParams:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_files_create_with_agentcc_params(self) -> None:
         route = respx.post("http://gw.test/v1/files").respond(200, json=FILE_OBJECT)
@@ -322,6 +332,7 @@ class TestFilesAgentCCParams:
 
 
 class TestAsyncAgentCCParams:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     @pytest.mark.anyio
     async def test_async_completions_with_agentcc_params(self) -> None:
@@ -337,6 +348,7 @@ class TestAsyncAgentCCParams:
         req = route.calls[0].request
         assert req.headers.get("x-agentcc-session-id") == "async-sess"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     @pytest.mark.anyio
     async def test_async_responses_with_agentcc_params(self) -> None:
@@ -354,6 +366,7 @@ class TestAsyncAgentCCParams:
         assert req.headers.get("x-agentcc-session-id") == "async-resp"
         assert req.headers.get("x-agentcc-trace-id") == "async-trace"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     @pytest.mark.anyio
     async def test_async_transcriptions_with_agentcc_params(self) -> None:
@@ -369,6 +382,7 @@ class TestAsyncAgentCCParams:
         req = route.calls[0].request
         assert req.headers.get("x-agentcc-session-id") == "async-audio"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     @pytest.mark.anyio
     async def test_async_files_create_with_agentcc_params(self) -> None:

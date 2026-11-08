@@ -19,11 +19,13 @@ def _status_code(response: Any) -> int | None:
 
 
 class LoggingCallback(CallbackHandler):
-    def __init__(self, level: str = "INFO", logger_name: str = "fi.gateway") -> None:
+    def __init__(self, level: str = "INFO", logger_name: str = "agentcc") -> None:
         self._level = getattr(logging, level.upper(), logging.INFO)
         self._logger = logging.getLogger(logger_name)
 
     def on_request_start(self, request: CallbackRequest) -> None:
+        # This sink deliberately omits body, headers and files. Never log the
+        # live descriptor: caller-supplied credential fields are not masked there.
         self._logger.log(self._level, "Request: %s %s", request.method, request.url)
 
     def on_request_end(self, request: CallbackRequest, response: Any) -> None:
@@ -36,7 +38,7 @@ class LoggingCallback(CallbackHandler):
                 getattr(meta, "latency_ms", 0) or 0, getattr(meta, "cost", None),
             )
         else:
-            self._logger.log(self._level, "Response: %s %s", request.method, request.url)
+            self._logger.log(self._level, "Response: status=%s", status if status is not None else "-")
 
     def on_error(self, request: CallbackRequest, error: Exception) -> None:
         self._logger.log(logging.ERROR, "Error: %s %s - %s", request.method, request.url, error)
@@ -51,7 +53,9 @@ class LoggingCallback(CallbackHandler):
 class MetricsCallback(CallbackHandler):
     """Thread-safe counters and latency percentiles."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, count_tokens: bool = False) -> None:
+        """Set ``count_tokens=True`` to opt into usage-token aggregation."""
+        self._count_tokens = count_tokens
         self._lock = threading.Lock()
         self._total_requests = 0
         self._total_errors = 0
@@ -67,7 +71,7 @@ class MetricsCallback(CallbackHandler):
             tokens = (response.body.get("usage") or {}).get("total_tokens")
         with self._lock:
             self._total_requests += 1
-            if isinstance(tokens, int):
+            if self._count_tokens and isinstance(tokens, int):
                 self._total_tokens += tokens
             if meta is not None:
                 latency = getattr(meta, "latency_ms", 0)

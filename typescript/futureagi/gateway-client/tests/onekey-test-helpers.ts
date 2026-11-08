@@ -2,6 +2,7 @@ import { expect, jest } from "@jest/globals";
 import * as gateway from "../src/index.js";
 import type { ClientOptions } from "../src/index.js";
 
+export const NO_CODE_REMEDY = "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again.";
 export const HEADERS = {
   "retry-after": "2",
   "x-agentcc-request-id": "req-refusal",

@@ -1,4 +1,4 @@
-"""The released transport import path, backed by the split lane transport."""
+"""The released transport import path, backed by the split current transport."""
 
 from __future__ import annotations
 

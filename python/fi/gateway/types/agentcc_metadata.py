@@ -7,6 +7,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from fi.gateway._gateway_evidence import DispatchState, GatewayEvidence, capture_gateway_evidence, parse_gateway_evidence
+
 
 class RateLimitInfo(BaseModel):
     """Rate-limit information extracted from ``x-ratelimit-*`` headers."""
@@ -25,7 +27,8 @@ class AgentCCMetadata(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-    request_id: str = "unknown"
+    request_id: str | None = None
+    """Validated gateway ULID; ``None`` for absent, malformed or duplicate IDs."""
     trace_id: str = "unknown"
     provider: str = "unknown"
     latency_ms: int = 0
@@ -44,6 +47,16 @@ class AgentCCMetadata(BaseModel):
     """``x-agentcc-client-request-id``: the ``request_id=`` you sent, echoed back.
     ``request_id`` is always the gateway's own id."""
     http_response: Any = Field(default=None, exclude=True)
+    gateway_evidence: GatewayEvidence = Field(default_factory=GatewayEvidence, exclude=True)
+    """Validated final-header evidence shared by the request identity aliases."""
+
+    @property
+    def dispatched(self) -> DispatchState:
+        return self.gateway_evidence.dispatched
+
+    @property
+    def gateway_request_id(self) -> str | None:
+        return self.gateway_evidence.gateway_request_id
 
     @classmethod
     def from_headers(
@@ -63,7 +76,6 @@ class AgentCCMetadata(BaseModel):
             HEADER_RESPONSE_LATENCY,
             HEADER_RESPONSE_MODEL_USED,
             HEADER_RESPONSE_PROVIDER,
-            HEADER_RESPONSE_REQUEST_ID,
             HEADER_RESPONSE_ROUTING_STRATEGY,
             HEADER_RESPONSE_TIMEOUT,
             HEADER_RESPONSE_TRACE_ID,
@@ -79,8 +91,10 @@ class AgentCCMetadata(BaseModel):
                 limit=rl_limit, remaining=rl_remaining, reset=rl_reset
             )
 
+        evidence = capture_gateway_evidence(http_response) if http_response is not None else parse_gateway_evidence(headers)
         return cls(
-            request_id=headers.get(HEADER_RESPONSE_REQUEST_ID, "unknown"),
+            gateway_evidence=evidence,
+            request_id=evidence.gateway_request_id,
             trace_id=headers.get(HEADER_RESPONSE_TRACE_ID, "unknown"),
             provider=headers.get(HEADER_RESPONSE_PROVIDER, "unknown"),
             latency_ms=_int_or_none(headers.get(HEADER_RESPONSE_LATENCY)) or 0,

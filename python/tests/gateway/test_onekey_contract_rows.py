@@ -92,8 +92,10 @@ def test_missing_metadata_is_optional_and_guidance_is_read_only(row):
 def test_table_matches_current_not_pending_contract():
     expected = {(row["status"], row["code"]) for row in ROWS}
     assert len(expected) == 49
-    assert set(_REFUSALS) == expected
+    additions = {(403, "managed_model_unpriced"), (400, "managed_model_ambiguous"),
+                 (400, "managed_resource_unsupported")}
+    assert set(_REFUSALS) == expected | additions
     for row in CONTRACT["pending_rows"]:
-        if (row["status"], row["code"]) not in expected:
+        if (row["status"], row["code"]) not in expected | additions:
             exc = gw.APIStatusError.from_response(response(row))
             assert exc.category == "generic" and exc.remedy is None

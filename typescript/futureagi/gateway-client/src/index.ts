@@ -11,6 +11,7 @@ export {
   AgentCCError,
   APIConnectionError,
   APITimeoutError,
+  ResponseBodyError,
   APIStatusError,
   BadRequestError,
   AuthenticationError,
@@ -32,6 +33,10 @@ export {
 } from "./errors.js";
 export type { ErrorBody, StreamErrorOptions } from "./errors.js";
 export type { RefusalCategory } from "./refusal-policy.js";
+export { MAX_RETRY_AFTER_SECONDS } from "./refusal-policy.js";
+export type { GatewayErrorMetadata, ManagedModelUnpricedMetadata, ManagedModelAmbiguousMetadata } from "./refusal-metadata.js";
+export { parseGatewayEvidence, getGatewayEvidence } from "./gateway-evidence.js";
+export type { DispatchState, GatewayEvidence, GatewayEvidenceOptions, GatewayEvidenceHeaders } from "./gateway-evidence.js";
 
 // ---------------------------------------------------------------------------
 // Gateway Configuration

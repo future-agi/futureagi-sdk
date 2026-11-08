@@ -25,7 +25,7 @@ GATEWAY_RESPONSE = {
 }
 
 GATEWAY_HEADERS = {
-    "x-agentcc-request-id": "req-abc",
+    "x-agentcc-request-id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
     "x-agentcc-trace-id": "trace-xyz",
     "x-agentcc-provider": "openai",
     "x-agentcc-latency-ms": "42",
@@ -100,6 +100,7 @@ class TestClientConstruction:
         with AgentCC(api_key="sk-test", base_url="http://localhost:8080") as client:
             assert isinstance(client, AgentCC)
 
+    @pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
     def test_with_options_returns_new_client(self) -> None:
         client = AgentCC(api_key="sk-test", base_url="http://localhost:8080")
         new = client.with_options(timeout=30.0, session_id="new-session")
@@ -107,6 +108,7 @@ class TestClientConstruction:
         assert new._session_id == "new-session"
         assert new._user_copied is True
 
+    @pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
     def test_with_options_shares_pool(self) -> None:
         client = AgentCC(api_key="sk-test", base_url="http://localhost:8080")
         # Force base client creation
@@ -127,6 +129,7 @@ class TestClientConstruction:
 
 
 class TestEndToEnd:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_chat_completions_create(self) -> None:
         respx.post("http://gateway.test/v1/chat/completions").respond(
@@ -142,9 +145,10 @@ class TestEndToEnd:
         assert result.id == "chatcmpl-abc123"
         assert result.choices[0].message.content == "Hello!"
         assert result.agentcc is not None
-        assert result.agentcc.request_id == "req-abc"
+        assert result.agentcc.request_id == "01ARZ3NDEKTSV4RRFFQ69G5FAV"
         assert result.agentcc.provider == "openai"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_agentcc_params_sent_as_headers(self) -> None:
         route = respx.post("http://gateway.test/v1/chat/completions").respond(
@@ -163,6 +167,7 @@ class TestEndToEnd:
         assert request.headers["x-agentcc-session-id"] == "sess-123"
         assert request.headers["x-agentcc-cache-ttl"] == "10m"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_extra_headers_sent(self) -> None:
         route = respx.post("http://gateway.test/v1/chat/completions").respond(
@@ -179,6 +184,7 @@ class TestEndToEnd:
         request = route.calls[0].request
         assert request.headers["x-custom-header"] == "value"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_extra_body_merged(self) -> None:
         route = respx.post("http://gateway.test/v1/chat/completions").respond(
@@ -198,6 +204,7 @@ class TestEndToEnd:
         body = json.loads(request.content)
         assert body["custom_field"] == "custom_value"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_not_given_params_excluded_from_body(self) -> None:
         route = respx.post("http://gateway.test/v1/chat/completions").respond(
@@ -220,6 +227,7 @@ class TestEndToEnd:
         assert "model" in body
         assert "messages" in body
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_400_raises_bad_request(self) -> None:
         from fi.gateway._exceptions import BadRequestError
@@ -235,6 +243,7 @@ class TestEndToEnd:
                 messages=[{"role": "user", "content": "Hi"}],
             )
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_446_raises_guardrail_blocked(self) -> None:
         from fi.gateway._exceptions import GuardrailBlockedError
@@ -252,6 +261,7 @@ class TestEndToEnd:
             )
         assert exc_info.value.guardrail_name == "prompt-guard"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_246_raises_guardrail_warning(self) -> None:
         from fi.gateway._exceptions import GuardrailWarning
@@ -293,6 +303,7 @@ class TestAsyncClient:
 
         assert isinstance(client.chat, AsyncChat)
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     @pytest.mark.anyio
     async def test_async_create(self) -> None:

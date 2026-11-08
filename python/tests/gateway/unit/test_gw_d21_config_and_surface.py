@@ -2,7 +2,7 @@
 
 Historical test names remain stable for the census. Released names, positional
 orders and config fields are retained with deprecation warnings, not removed.
-The checked-in snapshot pins the union, including the lane-only additions.
+The checked-in snapshot pins the union, including the unit-only additions.
 """
 
 from __future__ import annotations
@@ -183,6 +183,12 @@ def _assert_released_effect(name, value, monkeypatch):
             pytest.fail(f"No released effect assertion for {name}")
 
 
+@pytest.mark.filterwarnings('default:^AsyncModerations\\ is\\ a\\ deprecated\\ released\\ gateway\\ compatibility\\ API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^Moderations\\ is\\ a\\ deprecated\\ released\\ gateway\\ compatibility\\ API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^(Async)?Batches is a deprecated released gateway compatibility API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^AsyncBatches\\ is\\ a\\ deprecated\\ released\\ gateway\\ compatibility\\ API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^Batches\\ is\\ a\\ deprecated\\ released\\ gateway\\ compatibility\\ API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^client\\.batches is a deprecated released compatibility resource\\.:DeprecationWarning')
 @pytest.mark.parametrize("cls", [AgentCC, AsyncAgentCC])
 def test_batches_moderations_and_inert_options_are_gone(cls: type) -> None:
     """Released resources and options are deprecated adapters, not missing APIs."""
@@ -269,7 +275,7 @@ def test_arguments_are_keyword_only() -> None:
 
 
 def test_to_headers_sends_only_the_cache_section_in_the_json() -> None:
-    """Serialize the released full config while retaining the lane wire headers."""
+    """Serialize the released full config while retaining the unit wire headers."""
     config = GatewayConfig(
         cache=CacheConfig(ttl=300, namespace="prod", force_refresh=True),
         timeout=TimeoutConfig(total=1.5),

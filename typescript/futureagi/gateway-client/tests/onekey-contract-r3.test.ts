@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from "@jest/globals
 import * as gateway from "../src/index.js";
 import * as requestParts from "../src/request-parts.js";
 import { CONTRACT_R3_ROWS } from "./onekey-contract-r3-fixtures.js";
-import { details, refusal, setup } from "./onekey-test-helpers.js";
+import { details, NO_CODE_REMEDY, refusal, setup } from "./onekey-test-helpers.js";
 
 const REQUEST = { method: "POST", path: "/v1/chat/completions", body: { model: "example/model", messages: [] } };
 const PATHS = ["request", "requestWithResponse", "requestRaw", "requestStream"] as const;
@@ -23,7 +23,7 @@ for (const path of PATHS) {
         expect(error.remedy).toBe(row.remedy);
         expect(error.body).toEqual(body);
         expect(error.statusCode).toBe(row.status);
-        expect(error.requestId).toBe("req-refusal");
+        expect(error.requestId).toBeNull();
         expect(details(error).metadata).toEqual(row.metadata);
         if (row.metadata) {
           for (const [field, value] of Object.entries(row.metadata)) {
@@ -39,7 +39,8 @@ for (const path of PATHS) {
         const { client, fetch } = setup(row.status, row, { maxRetries: 5 });
         const error = await refusal(client[path](REQUEST));
         expect(error.category).toBe("generic");
-        expect(error.remedy).toBeNull();
+        // No recognized contract row: unknown gateway dispatch requires guidance.
+        expect(error.remedy).toBe(NO_CODE_REMEDY);
         expect(details(error).metadata).toBeNull();
         expect(fetch).toHaveBeenCalledTimes(1);
       });
@@ -49,7 +50,8 @@ for (const path of PATHS) {
           const error = await refusal(client[path](REQUEST));
           expect(error.constructor).toBe(gateway.APIStatusError.from(status, {}, new Headers()).constructor);
           expect(error.category).toBe("generic");
-          expect(error.remedy).toBeNull();
+          // No recognized contract row: unknown gateway dispatch requires guidance.
+          expect(error.remedy).toBe(NO_CODE_REMEDY);
           expect(fetch).toHaveBeenCalledTimes(1);
         }
       });

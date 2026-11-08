@@ -57,7 +57,7 @@ class Files:
             user_id=user_id,
             request_id=request_id,
         )
-        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params)
+        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params, defer=True)
 
         from fi.gateway._utils import parse_timeout
 
@@ -67,8 +67,8 @@ class Files:
             headers=extra_hdrs,
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
+        opts.body = {"purpose": purpose}
         opts.files = {"file": file}
-        opts.form = {"purpose": purpose}
         return self._client._get_base_client()._request_with_retry(opts, FileObject, agentcc_params)
 
     def list(
@@ -173,7 +173,7 @@ class AsyncFiles:
             user_id=user_id,
             request_id=request_id,
         )
-        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params)
+        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params, defer=True)
 
         from fi.gateway._utils import parse_timeout
 
@@ -183,8 +183,8 @@ class AsyncFiles:
             headers=extra_hdrs,
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
+        opts.body = {"purpose": purpose}
         opts.files = {"file": file}
-        opts.form = {"purpose": purpose}
         return await self._client._get_base_client()._request_with_retry(opts, FileObject, agentcc_params)
 
     async def list(

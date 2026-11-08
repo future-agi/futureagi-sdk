@@ -67,6 +67,7 @@ export class AgentCC extends BaseClient {
       metadata: this._metadata ? { ...this._metadata } : undefined,
       config: this._config,
       fetch: this._fetch,
+      gatewayEvidenceOptions: this._evidenceOptions,
       callbacks: this._callbacks.length > 0 ? [...this._callbacks] : undefined,
       retryPolicy: this._retryPolicy,
       redactMessages: this._redactMessages,

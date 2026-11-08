@@ -28,7 +28,7 @@ function check(error: gateway.APIStatusError, row: ContractRow) {
   expect(error.category).toBe(row.category);
   expect(error.remedy).toBe(row.remedy);
   expect(error.body).toEqual(body(row));
-  expect(error.requestId).toBe("req-refusal");
+  expect(error.requestId).toBeNull();
   expect(details(error).metadata).toEqual(row.metadata);
   const metadata = row.metadata as Record<string, unknown> | null;
   for (const [getter, field] of Object.entries(FIELDS)) {

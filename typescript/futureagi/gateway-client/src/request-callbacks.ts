@@ -8,12 +8,13 @@ import type { CallbackHandler, CallbackRequest, CallbackResponse } from "./callb
 import { invokeCallbacks } from "./callbacks.js";
 import { GuardrailBlockedError } from "./errors.js";
 import type { APIStatusError } from "./errors.js";
-import { redactCallbackRequest } from "./redact.js";
+import { redactCallbackRequest, safeDiagnosticHeaders } from "./redact.js";
 import type { AgentCCMetadata } from "./types/shared.js";
 import type { RequestOptions } from "./client-options.js";
 import { mergeMetadata } from "./request-parts.js";
 import { assignHeaders, hasMetadataHeader } from "./metadata-header.js";
 import { HEADER_METADATA } from "./constants.js";
+import { getGatewayEvidence } from "./gateway-evidence.js";
 
 /**
  * What a callback sees of the request (redacted when redactMessages is on):
@@ -32,7 +33,7 @@ export function callbackRequest(
   let cbReq: CallbackRequest = {
     method: options.method,
     url,
-    headers,
+    headers: safeDiagnosticHeaders(Object.entries(headers)),
     body: options.body ?? null,
   };
   if (redact) {
@@ -50,11 +51,8 @@ function viewWithMetadata(options: RequestOptions, clientMetadata?: Record<strin
 
 /** What a callback sees of the response. */
 export function callbackResponse(response: Response, agentcc: AgentCCMetadata, body: unknown): CallbackResponse {
-  const headers: Record<string, string> = {};
-  response.headers.forEach((v, k) => {
-    headers[k] = v;
-  });
-  return { statusCode: response.status, headers, agentcc, body };
+  const headers = safeDiagnosticHeaders(response.headers);
+  return { statusCode: response.status, headers, agentcc, body, gatewayEvidence: getGatewayEvidence(response) };
 }
 
 /** onGuardrailBlock (for a 446), then onError, for an error status. */

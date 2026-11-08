@@ -85,11 +85,8 @@ class TestSession:
         assert headers["x-agentcc-session-id"] == "sess-123"
         assert headers["x-agentcc-session-name"] == "my-session"
         assert headers["x-agentcc-session-path"] == "/search"
-        # D-06: one JSON header (agentcc 1.0 sent x-agentcc-metadata-env / -version)
-        assert json.loads(headers["x-agentcc-metadata"]) == {
-            "env": "prod",
-            "version": "2",
-        }
+        assert headers["x-agentcc-metadata-env"] == "prod"
+        assert headers["x-agentcc-metadata-version"] == "2"
 
     def test_session_to_headers_minimal(self) -> None:
         """to_headers() only includes session_id when name is None and path is /."""
@@ -115,14 +112,21 @@ class TestSession:
         assert session.request_count == 2
 
     def test_session_metadata_in_headers(self) -> None:
-        """Metadata goes as one JSON x-agentcc-metadata header (D-06; 1.0 sent one per key)."""
+        """Published session metadata uses one header per key."""
         session = Session(
             session_id="s1",
             metadata={"team": "backend", "priority": "high"},
         )
         headers = session.to_headers()
-        assert headers["x-agentcc-metadata"] == '{"team":"backend","priority":"high"}'
-        assert not [k for k in headers if k.startswith("x-agentcc-metadata-")]
+        assert {k: v for k, v in headers.items() if k.startswith("x-agentcc-metadata-")} == {
+            "x-agentcc-metadata-team": "backend", "x-agentcc-metadata-priority": "high",
+        }
+        assert headers["x-agentcc-metadata-team"] == "backend"
+        assert headers["x-agentcc-metadata-priority"] == "high"
+        assert "x-agentcc-metadata" not in headers
+        merged = Session(session_id="s1", metadata=session.metadata, metadata_mode="merge").to_headers()
+        assert merged["x-agentcc-metadata"] == '{"team":"backend","priority":"high"}'
+        assert not any(k.startswith("x-agentcc-metadata-") for k in merged)
 
 
 # ===== SessionContext tests =====
@@ -156,6 +160,7 @@ class TestSessionContext:
 
         assert client._active_session is None
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_session_context_auto_headers(self) -> None:
         """Headers from the active session are merged into the request."""
@@ -178,6 +183,7 @@ class TestSessionContext:
         assert request.headers["x-agentcc-session-name"] == "auto-test"
         assert request.headers["x-agentcc-session-path"] == "/search"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_session_context_nested_steps(self) -> None:
         """Multiple steps build the path correctly within a session context."""
@@ -216,6 +222,7 @@ class TestSessionContext:
 
 
 class TestProperties:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_properties_sent_as_headers(self) -> None:
         """Each property is sent as x-agentcc-property-{key}: {value}."""
@@ -234,6 +241,7 @@ class TestProperties:
         request = route.calls[0].request
         assert request.headers["x-agentcc-property-environment"] == "staging"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_properties_multiple_keys(self) -> None:
         """Multiple properties are all sent as separate headers."""
@@ -254,6 +262,7 @@ class TestProperties:
         assert request.headers["x-agentcc-property-team"] == "backend"
         assert request.headers["x-agentcc-property-version"] == "v2"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_properties_none_skipped(self) -> None:
         """When properties is None, no x-agentcc-property-* headers are sent."""
@@ -279,6 +288,7 @@ class TestProperties:
 
 
 class TestUserId:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_user_id_sent_as_header(self) -> None:
         """user_id is sent as x-agentcc-user-id header."""
@@ -297,6 +307,7 @@ class TestUserId:
         request = route.calls[0].request
         assert request.headers["x-agentcc-user-id"] == "user-42"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_user_id_separate_from_openai_user(self) -> None:
         """user_id goes in headers, OpenAI's user goes in the body."""
@@ -325,6 +336,7 @@ class TestUserId:
 
 
 class TestRequestId:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_request_id_sent_as_header(self) -> None:
         """request_id is sent as x-agentcc-request-id header."""
@@ -343,6 +355,7 @@ class TestRequestId:
         request = route.calls[0].request
         assert request.headers["x-agentcc-request-id"] == "req-custom-123"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_request_id_none_not_sent(self) -> None:
         """When request_id is None, x-agentcc-request-id is not set in request headers."""

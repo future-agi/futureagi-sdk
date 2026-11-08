@@ -1,14 +1,14 @@
-"""D-06b on every call path: one metadata rule for every request that takes ``request_metadata``.
+"""Both metadata rules on every call path that takes ``request_metadata``.
 
-``test_gw_d06b_metadata_layers.py`` pins the rule (the client's ``metadata=``, then the
-active session's metadata, then the request's ``request_metadata``, merged key by key,
-the later layer winning) on chat. This file runs all 8 combinations of the three layers
-on every resource method that takes ``request_metadata``, sync and async, streamed and
-not, and fails when a method that takes it is missing from the table: the methods are
-found by walking both clients, so a new one cannot skip the rule unnoticed. (agentcc
-1.x and the first port of ``audio.speech`` wrote the gateway parameters as extra
-headers, so outside a session ``request_metadata`` replaced the client's metadata
-there.)
+By default a request's ``request_metadata`` replaces the client's ``metadata=`` and the
+active session's metadata goes as per-key headers, as published. With
+``metadata_mode="merge"`` (``test_gw_d06b_metadata_layers.py`` pins it on chat) the
+client's, then the session's, then the request's metadata are merged key by key into
+one header, the later layer winning. This file runs all 8 combinations of the three
+layers in both modes on every resource method that takes ``request_metadata``, sync and
+async, streamed and not, and fails when a method that takes it is missing from the
+table: the methods are found by walking both clients, so a new one cannot skip the
+rule unnoticed.
 """
 
 from __future__ import annotations
@@ -219,6 +219,20 @@ def _metadata(request: httpx.Request) -> Any:
     return None if raw is None else json.loads(raw)
 
 
+def _check(request: httpx.Request, names: tuple[str, ...], mode: str) -> None:
+    if mode == "merge":
+        assert _metadata(request) == _expected(names)
+        return
+    prefix = "x-agentcc-metadata-"
+    per_key = {k.lower()[len(prefix):]: v for k, v in request.headers.items()
+               if k.lower().startswith(prefix)}
+    assert per_key == ({k: str(v) for k, v in LAYERS["session"].items()}
+                       if "session" in names else {})
+    raw = request.headers.get("x-agentcc-metadata")
+    layer = "request" if "request" in names else "client" if "client" in names else None
+    assert (None if raw is None else json.loads(raw)) == (LAYERS[layer] if layer else None)
+
+
 def _expected(names: tuple[str, ...]) -> dict[str, Any] | None:
     if not names:
         return None
@@ -256,6 +270,12 @@ def _async(seen: list[httpx.Request], **kw: Any) -> AsyncAgentCC:
     )
 
 
+@pytest.mark.filterwarnings('default:^AsyncModerations\\ is\\ a\\ deprecated\\ released\\ gateway\\ compatibility\\ API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^Moderations\\ is\\ a\\ deprecated\\ released\\ gateway\\ compatibility\\ API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^client\\.moderations\\ is\\ a\\ deprecated\\ released\\ compatibility\\ resource\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^(Async)?Batches is a deprecated released gateway compatibility API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^client\\.batches is a deprecated released compatibility resource\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^client\\.batches\\ is\\ a\\ deprecated\\ released\\ compatibility\\ resource\\.:DeprecationWarning')
 @pytest.mark.parametrize("cls", [AgentCC, AsyncAgentCC], ids=["sync", "async"])
 def test_the_table_covers_every_method_that_takes_request_metadata(cls: type) -> None:
     client = cls(api_key="k", base_url=GW)
@@ -264,6 +284,11 @@ def test_the_table_covers_every_method_that_takes_request_metadata(cls: type) ->
     assert "audio.speech.create" in found and len(found) >= 8
 
 
+@pytest.mark.filterwarnings('default:^Moderations\\ is\\ a\\ deprecated\\ released\\ gateway\\ compatibility\\ API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^client\\.moderations\\ is\\ a\\ deprecated\\ released\\ compatibility\\ resource\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^(Async)?Batches is a deprecated released gateway compatibility API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^client\\.batches is a deprecated released compatibility resource\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^client\\.batches\\ is\\ a\\ deprecated\\ released\\ compatibility\\ resource\\.:DeprecationWarning')
 def test_the_walk_finds_a_new_method_that_takes_request_metadata() -> None:
     class Extra:
         def __init__(self, client: Any) -> None:
@@ -281,13 +306,15 @@ def test_the_walk_finds_a_new_method_that_takes_request_metadata() -> None:
     assert "extra.create" in found
 
 
+@pytest.mark.parametrize("mode", ["replace", "merge"])
 @pytest.mark.parametrize("names", COMBINATIONS, ids=lambda c: "+".join(c) or "none")
 @pytest.mark.parametrize("path", list(CALLS))
 def test_every_sync_call_path_follows_the_rule(
-    path: str, names: tuple[str, ...]
+    path: str, names: tuple[str, ...], mode: str
 ) -> None:
     seen: list[httpx.Request] = []
-    client = _sync(seen, metadata=LAYERS["client"] if "client" in names else None)
+    client = _sync(seen, metadata=LAYERS["client"] if "client" in names else None,
+                   metadata_mode=mode)
     md = {"request_metadata": LAYERS["request"]} if "request" in names else {}
     call = CALLS[path][1]
     if "session" in names:
@@ -296,16 +323,18 @@ def test_every_sync_call_path_follows_the_rule(
     else:
         call(client, **md)
     assert len(seen) == 1
-    assert _metadata(seen[0]) == _expected(names)
+    _check(seen[0], names, mode)
 
 
+@pytest.mark.parametrize("mode", ["replace", "merge"])
 @pytest.mark.parametrize("names", COMBINATIONS, ids=lambda c: "+".join(c) or "none")
 @pytest.mark.parametrize("path", list(CALLS))
 async def test_every_async_call_path_follows_the_rule(
-    path: str, names: tuple[str, ...]
+    path: str, names: tuple[str, ...], mode: str
 ) -> None:
     seen: list[httpx.Request] = []
-    client = _async(seen, metadata=LAYERS["client"] if "client" in names else None)
+    client = _async(seen, metadata=LAYERS["client"] if "client" in names else None,
+                    metadata_mode=mode)
     md = {"request_metadata": LAYERS["request"]} if "request" in names else {}
     call = CALLS[path][2]
     if "session" in names:
@@ -314,7 +343,7 @@ async def test_every_async_call_path_follows_the_rule(
     else:
         await call(client, **md)
     assert len(seen) == 1
-    assert _metadata(seen[0]) == _expected(names)
+    _check(seen[0], names, mode)
 
 
 @pytest.mark.parametrize("path", list(CALLS))

@@ -6,7 +6,6 @@ import type {
   TranslationCreateParams,
   SpeechCreateParams,
 } from "../types/audio.js";
-import { parseAgentCCMetadata } from "../types/shared.js";
 
 class Transcriptions {
   constructor(private _client: BaseClient) {}
@@ -20,15 +19,12 @@ class Transcriptions {
     if (params.response_format) form.append("response_format", params.response_format);
     if (params.temperature != null) form.append("temperature", String(params.temperature));
 
-    const response = await (this._client as any).requestRaw({
+    return this._client.request<Transcription>({
       method: "POST",
       path: "/v1/audio/transcriptions",
       body: form,
       headers: params.extra_headers,
-    }) as Response;
-    const data = (await response.json()) as Transcription;
-    data.agentcc = parseAgentCCMetadata(response.headers);
-    return data;
+    });
   }
 }
 
@@ -43,15 +39,12 @@ class Translations {
     if (params.response_format) form.append("response_format", params.response_format);
     if (params.temperature != null) form.append("temperature", String(params.temperature));
 
-    const response = await (this._client as any).requestRaw({
+    return this._client.request<Translation>({
       method: "POST",
       path: "/v1/audio/translations",
       body: form,
       headers: params.extra_headers,
-    }) as Response;
-    const data = (await response.json()) as Translation;
-    data.agentcc = parseAgentCCMetadata(response.headers);
-    return data;
+    });
   }
 }
 

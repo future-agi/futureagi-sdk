@@ -123,7 +123,7 @@ def _check(exc: BaseException, row: tuple) -> None:
     _, status, type_, code, metadata, name, _ = row
     assert type(exc) is getattr(gw, name)
     assert (exc.status_code, exc.type, exc.code) == (status, type_, code)
-    assert exc.request_id == "req-refused"
+    assert exc.request_id is None  # Non-ULID wire IDs are not gateway identity.
     if name in NEW:
         assert exc.metadata == (metadata or {})
 

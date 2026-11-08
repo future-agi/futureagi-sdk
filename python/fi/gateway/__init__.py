@@ -36,6 +36,7 @@ from fi.gateway._exceptions import (
 )
 
 if TYPE_CHECKING:
+    from fi.gateway._gateway_evidence import DispatchState as DispatchState, GatewayEvidence as GatewayEvidence
     from fi.gateway._base_client import Timeout as Timeout
     from fi.gateway._batch import (
         abatch_completion as abatch_completion,
@@ -123,6 +124,8 @@ if TYPE_CHECKING:
     )
 
 _LAZY: dict[str, str] = {
+    "GatewayEvidence": "fi.gateway._gateway_evidence",
+    "DispatchState": "fi.gateway._gateway_evidence",
     "AgentCC": "fi.gateway._client",
     "AsyncAgentCC": "fi.gateway._client",
     "Gateway": "fi.gateway._fi",

@@ -140,6 +140,7 @@ def test_without_default_query_the_url_is_unchanged() -> None:
     assert all(r.url.query == b"" for r in seen)
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_extra_query_on_a_copy_adds_keys_and_wins_on_a_shared_key() -> None:
     seen: list[httpx.Request] = []
     parent = _sync(seen, default_query={"tenant": "t1", "region": "eu"})
@@ -150,6 +151,7 @@ def test_extra_query_on_a_copy_adds_keys_and_wins_on_a_shared_key() -> None:
     assert _query(seen[1]) == [("tenant", "t1"), ("region", "eu")]
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_extra_query_without_a_default_query() -> None:
     seen: list[httpx.Request] = []
     _sync(seen).with_options(extra_query={"q": "1"}).chat.completions.create(
@@ -158,6 +160,7 @@ def test_extra_query_without_a_default_query() -> None:
     assert _query(seen[0]) == [("q", "1")]
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_a_copy_made_after_the_parent_has_sent_sends_its_own_query() -> None:
     seen: list[httpx.Request] = []
     parent = _sync(seen, default_query={"tenant": "t1"})
@@ -193,16 +196,17 @@ def test_values_are_sent_as_text_and_encoded() -> None:
 def test_the_transport_url_join_keeps_an_absolute_url_and_adds_the_query() -> None:
     base = _sync([], default_query={"tenant": "t1"})._get_base_client()
     assert base._build_url("/v1/models") == f"{GW}/v1/models?tenant=t1"
-    assert (
-        base._build_url("https://other.example.test/v1/x?a=1")
-        == "https://other.example.test/v1/x?tenant=t1&a=1"
-    )
+    assert base._build_url(f"{GW}/v1/x?a=1") == f"{GW}/v1/x?tenant=t1&a=1"
     plain = _sync([])._get_base_client()
-    assert plain._build_url("https://other.example.test/v1/x?a=1") == (
-        "https://other.example.test/v1/x?a=1"
-    )
+    assert plain._build_url(f"{GW}/v1/x?a=1") == f"{GW}/v1/x?a=1"
+    from fi.gateway import AgentCCError
+
+    for client in (base, plain):
+        with pytest.raises(AgentCCError, match="explicitly configured origin"):
+            client._build_url("https://other.example.test/v1/x?a=1")
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 @pytest.mark.parametrize("stream", [False, True])
 async def test_the_async_client_sends_it_too(stream: bool) -> None:
     seen: list[httpx.Request] = []

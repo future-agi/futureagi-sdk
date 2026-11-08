@@ -1,6 +1,6 @@
 """Asyncio ownership for the released, top-level gateway tests.
 
-The shared pytest configuration must use asyncio_mode = "strict": the lane
+The shared pytest configuration must use asyncio_mode = "strict": the unit
 unit/ suite uses anyio, not pytest-asyncio. Give only the released coroutine
 tests the explicit asyncio mark that replaces their former global auto mode.
 Existing anyio marks/parametrization are retained, as in the release auto mode.

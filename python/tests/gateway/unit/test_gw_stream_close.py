@@ -104,7 +104,7 @@ def test_an_error_frame_with_invalid_json_is_the_typed_refusal() -> None:
     error = raised.value
     assert (error.type, error.code, error.param) == ("error", None, None)
     assert error.body == "{not json"
-    assert error.request_id == "req-r"
+    assert error.request_id is None  # Non-ULID wire IDs are not gateway identity.
     assert str(error) == "Stream error: {not json"
 
 

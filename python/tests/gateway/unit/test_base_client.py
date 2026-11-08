@@ -12,72 +12,81 @@ from fi.gateway._constants import NOT_GIVEN
 
 
 class TestBuildHeaders:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_sdk_auto_headers_present(self) -> None:
         client = _make_sync_client()
         opts = RequestOptions(method="POST", url="/v1/chat/completions")
-        headers = client._build_headers(opts)
-        assert headers["User-Agent"].startswith("futureagi-python/")  # D-03
+        headers, _ = client._build_headers(opts)
+        assert headers["User-Agent"].startswith("agentcc-python/")
         assert headers["Content-Type"] == "application/json"
         assert "x-agentcc-sdk-version" in headers
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_auth_header_present(self) -> None:
         client = _make_sync_client()
         opts = RequestOptions(method="POST", url="/v1/chat/completions")
-        headers = client._build_headers(opts)
+        headers, _ = client._build_headers(opts)
         assert headers["Authorization"] == "Bearer sk-test-key-12345"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_agentcc_params_session_id_and_cache_ttl(self) -> None:
         client = _make_sync_client()
         opts = RequestOptions(method="POST", url="/v1/chat/completions")
-        headers = client._build_headers(
+        headers, _ = client._build_headers(
             opts, agentcc_params={"session_id": "abc", "cache_ttl": "10m"}
         )
         assert headers["x-agentcc-session-id"] == "abc"
         assert headers["x-agentcc-cache-ttl"] == "10m"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_per_request_headers_override_defaults(self) -> None:
         client = _make_sync_client(default_headers={"x-custom": "default"})
         opts = RequestOptions(
             method="POST", url="/v1/test", headers={"x-custom": "override"}
         )
-        headers = client._build_headers(opts)
+        headers, _ = client._build_headers(opts)
         assert headers["x-custom"] == "override"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_request_metadata_serialized_as_json(self) -> None:
         client = _make_sync_client()
         opts = RequestOptions(method="POST", url="/v1/test")
         meta = {"user": "test", "session": 123}
-        headers = client._build_headers(opts, agentcc_params={"request_metadata": meta})
+        headers, _ = client._build_headers(opts, agentcc_params={"request_metadata": meta})
         parsed = json.loads(headers["x-agentcc-metadata"])
         assert parsed == meta
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_client_level_session_id(self) -> None:
         client = _make_sync_client(session_id="client-session")
         opts = RequestOptions(method="POST", url="/v1/test")
-        headers = client._build_headers(opts)
+        headers, _ = client._build_headers(opts)
         assert headers["x-agentcc-session-id"] == "client-session"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_per_request_overrides_client_session_id(self) -> None:
         client = _make_sync_client(session_id="client-session")
         opts = RequestOptions(method="POST", url="/v1/test")
-        headers = client._build_headers(
+        headers, _ = client._build_headers(
             opts, agentcc_params={"session_id": "request-session"}
         )
         assert headers["x-agentcc-session-id"] == "request-session"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_not_given_params_skipped(self) -> None:
         client = _make_sync_client()
         opts = RequestOptions(method="POST", url="/v1/test")
-        headers = client._build_headers(
+        headers, _ = client._build_headers(
             opts, agentcc_params={"session_id": NOT_GIVEN, "cache_ttl": None}
         )
         assert "x-agentcc-session-id" not in headers
         assert "x-agentcc-cache-ttl" not in headers
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_client_level_metadata(self) -> None:
         client = _make_sync_client(metadata={"user": "global"})
         opts = RequestOptions(method="POST", url="/v1/test")
-        headers = client._build_headers(opts)
+        headers, _ = client._build_headers(opts)
         parsed = json.loads(headers["x-agentcc-metadata"])
         assert parsed == {"user": "global"}
 
@@ -104,9 +113,14 @@ class TestBuildUrl:
             == "https://gateway.example.com/v1/chat/completions"
         )
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_absolute_url_returned_as_is(self) -> None:
-        client = _make_sync_client()
+        from fi.gateway import AgentCCError
+
+        client = _make_sync_client(base_url="https://other.com")
         assert client._build_url("https://other.com/api") == "https://other.com/api"
+        with pytest.raises(AgentCCError, match="explicitly configured origin"):
+            client._build_url("https://unconfigured.test/api")
 
 
 class TestTimeoutDataclass:
@@ -126,6 +140,7 @@ class TestTimeoutDataclass:
 
 
 class TestClientLifecycle:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_lazy_client_creation(self) -> None:
         client = _make_sync_client()
         assert client._client is None
@@ -133,6 +148,7 @@ class TestClientLifecycle:
         assert isinstance(http, httpx.Client)
         assert client._client is http
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_close(self) -> None:
         client = _make_sync_client()
         client._ensure_client()
@@ -140,6 +156,7 @@ class TestClientLifecycle:
         client.close()
         assert client._client is None
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     def test_custom_http_client_not_closed(self) -> None:
         custom = httpx.Client()
         client = _make_sync_client(http_client=custom)

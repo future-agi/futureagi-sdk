@@ -49,7 +49,8 @@ function respond(body: string, contentType: string, extra: Record<string, string
 }
 
 const EXPECTED = {
-  requestId: "gw-req-1",
+  requestId: null,
+  gatewayEvidence: { dispatched: "unknown", gatewayRequestId: null, clientRequestId: "my-req-7" },
   traceId: "trace-1",
   provider: "openai",
   latencyMs: 42,
@@ -99,7 +100,7 @@ describe("D-10 response metadata", () => {
 
   it("requestId stays the gateway's own id even when the client request id differs", () => {
     const meta = parseAgentCCMetadata(new Headers({ "x-agentcc-request-id": "gw", "x-agentcc-client-request-id": "mine" }));
-    expect(meta.requestId).toBe("gw");
+    expect(meta.requestId).toBeNull();
     expect(meta.clientRequestId).toBe("mine");
   });
 

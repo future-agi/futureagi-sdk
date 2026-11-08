@@ -75,6 +75,7 @@ COPY_WIRE = {
 PARENT_WIRE = dict.fromkeys(HEADERS) | {"read_timeout": 600.0}
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 @pytest.mark.parametrize("parent_sent_first", [False, True])
 def test_a_copy_sends_its_own_options_before_and_after_the_parent_has_sent(
     parent_sent_first: bool,
@@ -91,6 +92,7 @@ def test_a_copy_sends_its_own_options_before_and_after_the_parent_has_sent(
     assert wire == ([PARENT_WIRE] + expected if parent_sent_first else expected)
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_a_copy_of_a_used_client_keeps_its_own_max_retries() -> None:
     seen: list[httpx.Request] = []
     client = _client(seen, status=[200, 500, 500, 500, 500])
@@ -105,6 +107,7 @@ def test_a_copy_of_a_used_client_keeps_its_own_max_retries() -> None:
     assert len(seen) == 5  # the parent still retries twice
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_chained_copies_never_send_another_tenants_session() -> None:
     seen: list[httpx.Request] = []
     client = _client(seen)
@@ -127,21 +130,26 @@ def test_chained_copies_never_send_another_tenants_session() -> None:
     ]
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_parent_and_copies_share_one_pooled_client_and_only_the_parent_closes_it() -> None:
     client = AgentCC(api_key="k", base_url=GW)
     early = client.with_options(timeout=5)  # made before anything was built
-    pooled = early._get_base_client()._ensure_client()
+    independent = early._get_base_client()._ensure_client()
+    pooled = client._get_base_client()._ensure_client()
+    assert independent is not pooled
     late = client.with_options(max_retries=0)
     assert client._get_base_client()._ensure_client() is pooled
     assert late._get_base_client()._ensure_client() is pooled
     assert late.with_options()._get_base_client()._ensure_client() is pooled
     early.close()
+    assert independent.is_closed
     late.close()
     assert not pooled.is_closed
     client.close()
     assert pooled.is_closed
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_a_passed_http_client_is_shared_and_never_closed() -> None:
     http = httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(200)))
     client = AgentCC(api_key="k", base_url=GW, http_client=http)
@@ -153,9 +161,9 @@ def test_a_passed_http_client_is_shared_and_never_closed() -> None:
     http.close()
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_the_client_that_builds_the_pool_does_not_set_the_others_timeout() -> None:
-    """The pooled client keeps the default timeout of whichever client built it; every
-    send passes its own, so the parent still sends at 600 s after a 5 s copy built it."""
+    """A shared pool's defaults never replace each client's explicit send timeout."""
     seen: list[httpx.Request] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -163,16 +171,16 @@ def test_the_client_that_builds_the_pool_does_not_set_the_others_timeout() -> No
         return httpx.Response(200, json=COMPLETION)
 
     client = AgentCC(api_key="k", base_url=GW, timeout=600)
-    copy = client.with_options(timeout=5)
-    builder = copy._get_base_client()
+    builder = client._get_base_client()
     builder._new_http_client = lambda: httpx.Client(
         transport=httpx.MockTransport(handler), timeout=builder._timeout
     )
-    _send(copy)  # the copy builds the pooled client, with its 5 s default
+    pooled = builder._ensure_client()
+    copy = client.with_options(timeout=5)
+    _send(copy)
     _send(client)
-    pooled = client._get_base_client()._ensure_client()
-    assert pooled is builder._ensure_client()
-    assert pooled.timeout.read == 5.0
+    assert pooled is copy._get_base_client()._ensure_client()
+    assert pooled.timeout.read == 600.0
     assert [r.extensions["timeout"]["read"] for r in seen] == [5.0, 600.0]
     client.close()
     assert pooled.is_closed
@@ -191,6 +199,7 @@ def _async_client(seen: list[httpx.Request]) -> AsyncAgentCC:
     )
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 async def test_the_async_copy_of_a_used_client_sends_its_own_options() -> None:
     seen: list[httpx.Request] = []
     client = _async_client(seen)
@@ -212,12 +221,18 @@ async def test_the_async_copy_of_a_used_client_sends_its_own_options() -> None:
     assert wire[4] == PARENT_WIRE
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 async def test_the_async_pool_is_shared_and_only_the_parent_closes_it() -> None:
     client = AsyncAgentCC(api_key="k", base_url=GW)
     early = client.with_options(timeout=5)
-    pooled = early._get_base_client()._ensure_client()
-    assert client._get_base_client()._ensure_client() is pooled
+    independent = early._get_base_client()._ensure_client()
+    pooled = client._get_base_client()._ensure_client()
+    assert independent is not pooled
+    late = client.with_options(timeout=5)
+    assert late._get_base_client()._ensure_client() is pooled
     await early.aclose()
+    assert independent.is_closed
+    await late.aclose()
     assert not pooled.is_closed
     await client.aclose()
     assert pooled.is_closed

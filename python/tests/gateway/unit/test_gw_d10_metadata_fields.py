@@ -35,12 +35,12 @@ def test_from_headers_reads_both() -> None:
         {
             "x-agentcc-config-ignored": "cache.strategy, fallback,retry",
             "x-agentcc-client-request-id": "my-req-7",
-            "x-agentcc-request-id": "gw-req-1",
+            "x-agentcc-request-id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
         }
     )
     assert meta.config_ignored == ["cache.strategy", "fallback", "retry"]
     assert meta.client_request_id == "my-req-7"
-    assert meta.request_id == "gw-req-1"
+    assert meta.request_id == "01ARZ3NDEKTSV4RRFFQ69G5FAV"
 
 
 def test_an_empty_ignored_list_is_empty() -> None:

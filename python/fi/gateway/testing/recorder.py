@@ -7,14 +7,19 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from fi.gateway.callbacks.base import CallbackHandler, CallbackRequest, CallbackResponse
+from fi.gateway.callbacks.base import CallbackHandler, CallbackRequest, CallbackResponse, redact_credentials
 
 
 def _response_record(response: Any) -> dict[str, Any]:
-    """Record release wrappers, parsed lane values or raw bytes without gateway metadata."""
+    """Record release wrappers, parsed current values or raw bytes without gateway metadata."""
     if isinstance(response, CallbackResponse):
         parsed = response._parsed
-        body = {"bytes": len(parsed)} if isinstance(parsed, (bytes, bytearray)) else response.body
+        if isinstance(parsed, (bytes, bytearray)):
+            body = {"bytes": len(parsed)}
+        elif hasattr(parsed, "model_dump"):
+            body = parsed.model_dump(mode="json", exclude={"agentcc"})
+        else:
+            body = response.body
         return {"status_code": response.status_code, "body": body}
     meta = getattr(response, "agentcc", None)
     http = getattr(meta, "http_response", None)
@@ -48,7 +53,11 @@ class RequestRecorder(CallbackHandler):
         # recordings.json now contains all request/response pairs
     """
 
-    def __init__(self, file_path: str) -> None:
+    def __init__(self, file_path: str, *, format: str = "published") -> None:
+        """Use ``format='compact'`` for JSON snapshots and raw-byte summaries."""
+        if format not in {"published", "compact"}:
+            raise ValueError("format must be 'published' or 'compact'")
+        self._format = format
         self._file_path = file_path
         self._recordings: list[dict[str, Any]] = []
 
@@ -58,9 +67,12 @@ class RequestRecorder(CallbackHandler):
                 "request": {
                     "method": request.method,
                     "url": request.url,
-                    "body": request.body,
+                    "body": redact_credentials(request.body),
                 },
-                "response": _response_record(response),
+                "response": (_response_record(response) if self._format == "compact" else {
+                    "status_code": getattr(response, "status_code", None),
+                    "body": getattr(response, "body", None),
+                }),
             }
         )
 

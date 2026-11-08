@@ -245,7 +245,7 @@ def _prepare(
 
         modify_params_for_provider(args["model"], body)
     # Merge session headers if an active session is set on the client
-    extra_hdrs = merge_session_headers(client, extra_hdrs, agentcc_params)
+    extra_hdrs = merge_session_headers(client, extra_hdrs, agentcc_params, defer=True)
     timeout = args.get("timeout", NOT_GIVEN)
     opts = RequestOptions(
         method="POST",

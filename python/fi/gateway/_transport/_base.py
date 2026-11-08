@@ -18,8 +18,9 @@ import httpx
 from fi.gateway._constants import (
     DEFAULT_MAX_RETRIES, HEADER_RESPONSE_COST, RETRYABLE_STATUS_CODES,
 )
-from fi.gateway._transport._request import RequestBuilder
+from fi.gateway._transport._request import RequestBuilder, _uses_form
 from fi.gateway._exceptions import APIConnectionError, APIStatusError, APITimeoutError
+from fi.gateway._gateway_evidence import GatewayEvidence
 from fi.gateway._transport._pool import HttpPool
 from fi.gateway._transport._callbacks import CallbackLifecycle
 from fi.gateway._utils import parse_timeout
@@ -27,6 +28,35 @@ from fi.gateway._utils import parse_timeout
 logger = logging.getLogger("fi.gateway")
 
 T = TypeVar("T")
+
+
+def _transport_error(
+    error: httpx.TransportError,
+    evidence: GatewayEvidence,
+    response_status: int | None,
+    response: httpx.Response | None = None,
+) -> APIConnectionError:
+    """Keep public error classes, but replay only when the outcome is provably safe."""
+    from fi.gateway._retry_policy import _UNKNOWN_DISPATCH_REMEDY
+    from fi.gateway._transport._response import safe_response
+
+    pre_send = response_status is None and isinstance(
+        error, (httpx.ConnectError, httpx.ConnectTimeout, httpx.PoolTimeout),
+    )
+    # Never embed a caller/transport message: it can contain authentication data.
+    message = "Request timed out." if isinstance(error, httpx.TimeoutException) else "Connection error."
+    if not pre_send and evidence.dispatched == "unknown":
+        message += " " + _UNKNOWN_DISPATCH_REMEDY
+    cls = APITimeoutError if isinstance(error, httpx.TimeoutException) else APIConnectionError
+    translated = cls(message, gateway_evidence=evidence)
+    translated._retryable = pre_send and evidence.dispatched is not True
+    if response is not None and response_status is not None and response_status >= 400:
+        # An unreadable refusal is still an HTTP refusal. Use its status/headers,
+        # not the timeout/connection retry budget; preserve the public error type.
+        snapshot = safe_response(response)
+        snapshot.status_code = response_status
+        translated._status_error = APIStatusError.from_response(snapshot)
+    return translated
 
 
 @dataclass
@@ -58,9 +88,8 @@ class RetryConfig:
 class RequestOptions:
     """Internal request descriptor built by resource methods.
 
-    ``body`` is sent as JSON. A request with ``files`` is sent as a multipart form
-    instead: ``files`` holds the file parts and ``form`` the other fields, as httpx
-    takes them.
+    ``body`` is sent as JSON, or serialized as published multipart fields when
+    ``files`` is present. An explicit ``form`` supplies httpx-ready fields instead.
     """
 
     method: str
@@ -80,11 +109,21 @@ def send_arguments(options: RequestOptions, headers: dict[str, str]) -> dict[str
     A multipart send drops the JSON ``Content-Type`` from *headers* (any spelling), so
     httpx sets the form's own with its boundary.
     """
-    if options.files is None:
+    if not _uses_form(options):
         return {"json": options.body}
     for name in [k for k in headers if k.lower() == "content-type"]:
         del headers[name]
-    return {"files": options.files, "data": options.form}
+    data = options.form
+    if data is None:
+        import json
+
+        # Published multipart descriptors retain their unencoded body for callbacks.
+        data = {
+            key: value if isinstance(value, str) else json.dumps(value)
+            if isinstance(value, (list, dict)) else str(value)
+            for key, value in (options.body or {}).items()
+        }
+    return {"files": options.files, "data": data}
 
 
 class BaseClient(RequestBuilder, CallbackLifecycle, ABC):
@@ -123,6 +162,7 @@ class BaseClient(RequestBuilder, CallbackLifecycle, ABC):
         pool: HttpPool | None = None,
         redact_messages: bool = False,
         owner: Any = None,
+        metadata_mode: str = "replace",
     ) -> None:
         """``base_url`` has no default: there is no hosted fallback, so a key is never sent
         to a gateway the caller did not name.
@@ -134,10 +174,13 @@ class BaseClient(RequestBuilder, CallbackLifecycle, ABC):
         super().__init__(
             api_key=api_key, base_url=base_url, default_headers=default_headers,
             default_query=default_query, session_id=session_id,
-            metadata=metadata, config=config,
+            metadata=metadata, config=config, metadata_mode=metadata_mode,
         )
         self._redact_messages = redact_messages
         self._owner = owner
+        if owner is not None:
+            self._warned_http_origins = owner._warned_http_origins
+            self._http_warning_lock = owner._http_warning_lock
         self._timeout = parse_timeout(timeout)
         self._max_retries = max_retries
         self._retry_config = retry_config or RetryConfig(max_retries=max_retries)
@@ -157,20 +200,27 @@ class BaseClient(RequestBuilder, CallbackLifecycle, ABC):
         """Whether closing closes the httpx client (never one passed as ``http_client``)."""
         return self._pool.owned
 
-    def _request_arguments(self, options: RequestOptions, params: Any = None) -> dict[str, Any]:
-        """Use the inspection builder for JSON; preserve streaming multipart bodies."""
-        if options.files is None:
-            request = self._build_request(options, params)
+    def _request_arguments(
+        self, options: RequestOptions, params: Any = None, *, stream: bool = False,
+    ) -> tuple[dict[str, Any], frozenset[str]]:
+        """Build wire arguments and private names together, once per attempt."""
+        headers, composed_names = self._build_headers(options, params)
+        if stream and options.form is None:
+            return {
+                "method": options.method, "url": self._build_url(options.url),
+                "headers": headers, "json": options.body,
+            }, composed_names
+        if not _uses_form(options):
+            request = self._build_request(options, params, headers=headers)
             return {
                 "method": request.method, "url": request.url,
                 "headers": request.headers, "content": request.content,
-            }
-        headers = self._build_headers(options, params)
+            }, composed_names
         body = send_arguments(options, headers)
         return {
             "method": options.method, "url": self._build_url(options.url),
             "headers": headers, **body,
-        }
+        }, composed_names
 
     def _should_retry(self, status_code: int, attempt: int, max_retries: int) -> bool:
         # When a retry_policy is set, use per-status-code retry limits
@@ -232,27 +282,34 @@ class BaseClient(RequestBuilder, CallbackLifecycle, ABC):
         Fires ``on_retry`` (with the delay) or ``on_error`` before returning.
         """
         delay: float | None = None
-        if isinstance(exc, APIStatusError):
+        status_error = exc if isinstance(exc, APIStatusError) else getattr(exc, "_status_error", None)
+        if status_error is not None:
             # Classify before status retry: unknown codes and terminal refusals never replay.
-            from fi.gateway._retry_policy import classify_refusal, positive_retry_after
+            from fi.gateway._retry_policy import (
+                classify_refusal, no_code_outcome_unknown, positive_retry_after,
+            )
             from fi.gateway._exceptions import _error_metadata
 
-            _, retry = classify_refusal(exc.status_code, exc.code, _error_metadata(exc.body))
-            if retry is True and exc.status_code == 402 and attempt >= 1:
+            resp_headers = getattr(status_error.response, "headers", None)
+            _, retry = classify_refusal(status_error.status_code, status_error.code, _error_metadata(status_error.body))
+            if no_code_outcome_unknown(status_error.status_code, status_error.code, status_error.gateway_evidence):
+                retry = False
+            if status_error.code is None and status_error.dispatched is True:
+                retry = False
+            if retry is True and status_error.status_code == 402 and attempt >= 1:
                 # Gateway contract: an in-flight credit refusal is retried once, never more.
                 retry = False
-            status = 429 if retry is True and exc.status_code in (402, 409) else exc.status_code
+            status = 429 if retry is True and status_error.status_code in (402, 409) else status_error.status_code
             if retry is not False and self._should_retry(status, attempt, max_retries):
-                resp_headers = getattr(exc.response, "headers", None)
                 after = positive_retry_after(resp_headers)
                 if retry is True:
                     delay = after  # Missing/invalid header is not permission for backoff.
-                elif exc.code is not None and after is not None:
+                elif status_error.code is not None and after is not None:
                     # Contract Retry-After is a minimum, not capped by backoff_max.
                     delay = after
                 else:
-                    delay = self._calculate_delay(attempt, resp_headers if exc.code is None else None)
-        else:
+                    delay = self._calculate_delay(attempt, resp_headers if status_error.code is None else None)
+        elif exc._retryable:
             policy = self._retry_policy
             if isinstance(exc, APITimeoutError):
                 effective_max = (
@@ -287,7 +344,17 @@ class BaseClient(RequestBuilder, CallbackLifecycle, ABC):
         """Parse response JSON into a Pydantic model and attach AgentCCMetadata."""
         from fi.gateway.types.agentcc_metadata import AgentCCMetadata
 
-        body = response.json()
+        from fi.gateway._gateway_evidence import capture_gateway_evidence
+        from fi.gateway._transport._response import body_decode_error
+
+        failure = None
+        try:
+            body = response.json()
+        except ValueError as exc:
+            failure = body_decode_error(exc, capture_gateway_evidence(response))
+        if failure is not None:
+            # Raise outside the handler so no credential-bearing cause/context escapes.
+            raise failure
 
         # Plain dict/list responses (control-plane resources) — return as-is
         if response_cls is dict or response_cls is list:
@@ -297,7 +364,7 @@ class BaseClient(RequestBuilder, CallbackLifecycle, ABC):
 
         # Attach AgentCCMetadata
         metadata = AgentCCMetadata.from_headers(
-            dict(response.headers), http_response=response
+            response.headers, http_response=response
         )
         object.__setattr__(result, "agentcc", metadata)
         self._record_cost(metadata.cost)
@@ -318,10 +385,14 @@ class BaseClient(RequestBuilder, CallbackLifecycle, ABC):
 
     def _process_error(self, response: httpx.Response) -> None:
         """Raise the appropriate exception for an error response."""
-        exc = APIStatusError.from_response(response)
+        from fi.gateway._transport._response import safe_response
+
+        exc = APIStatusError.from_response(safe_response(response))
         raise exc
 
     def _process_guardrail_warning(self, response: httpx.Response) -> None:
         """Raise a GuardrailWarning with the completion body attached."""
-        exc = APIStatusError.from_response(response)
+        from fi.gateway._transport._response import safe_response
+
+        exc = APIStatusError.from_response(safe_response(response))
         raise exc

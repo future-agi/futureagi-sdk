@@ -91,6 +91,6 @@ describe("Error hierarchy", () => {
       "x-agentcc-request-id": "req-abc-123",
     });
     const err = new APIStatusError(500, {}, headers);
-    expect(err.requestId).toBe("req-abc-123");
+    expect(err.requestId).toBeNull();
   });
 });

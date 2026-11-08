@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from "@jest/globals";
 import * as gateway from "../src/index.js";
 import * as requestParts from "../src/request-parts.js";
-import { details, envelope, errorClass, FULL, HEADERS, IN_FLIGHT, refusal, setup } from "./onekey-test-helpers.js";
+import { details, envelope, errorClass, FULL, HEADERS, IN_FLIGHT, NO_CODE_REMEDY, refusal, setup } from "./onekey-test-helpers.js";
 
 import { CONTRACT_ROWS } from "./onekey-contract-fixtures.js";
 const remedyFor = (code: string) => CONTRACT_ROWS.find((row) => row.code === code)!.remedy;
@@ -54,7 +54,8 @@ for (const path of PATHS) {
         expect(sleep).not.toHaveBeenCalled();
         expect(error.constructor).toBe(status === 429 ? gateway.RateLimitError : gateway.ServiceUnavailableError);
         expect(details(error).category).toBe("generic");
-        expect(details(error).remedy).toBeNull();
+        // Unknown codes still require guidance when the gateway did not confirm dispatch.
+        expect(details(error).remedy).toBe(NO_CODE_REMEDY);
         expect(error.body).toEqual(body);
       });
 
@@ -65,12 +66,14 @@ for (const path of PATHS) {
           { label: "unwrapped code", body: { code: "future_refusal" } },
           { label: "null envelope", body: null },
           { label: "non-JSON", body: "upstream unavailable" },
-        ])(`retains status retries for ${status} with $label`, async ({ body }) => {
+        ])(`never replays a gateway response with unknown dispatch at ${status} with $label`, async ({ body }) => {
           const { client, fetch } = setup(status, body, options);
           if (typeof body === "string") fetch.mockImplementation(async () => new Response(body, { status, headers: HEADERS }));
-          await refusal(client[path](REQUEST));
-          expect(fetch).toHaveBeenCalledTimes(6);
-          expect(sleep.mock.calls).toEqual(Array.from({ length: 5 }, () => [2000]));
+          const error = await refusal(client[path](REQUEST));
+          expect(fetch).toHaveBeenCalledTimes(1);
+          expect(sleep).not.toHaveBeenCalled();
+          expect(error.category).toBe("generic");
+          expect(error.remedy).toBe(NO_CODE_REMEDY);
         });
       }
 
@@ -83,7 +86,7 @@ for (const path of PATHS) {
         expect(details(error).remedy).toBe(row.remedy);
         expect(Reflect.set(error, "category", "changed")).toBe(false);
         expect(Reflect.set(error, "remedy", "changed")).toBe(false);
-        expect(error).toMatchObject({ message: "refused", requestId: "req-refusal" });
+        expect(error).toMatchObject({ message: "refused", requestId: null });
       });
 
       it.each(REASONS)("keeps invalid_api_key reason %p without retry", async (reason) => {

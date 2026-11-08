@@ -51,6 +51,8 @@ class StreamTracking:
                 yield self._note(chunk)
         except Exception as exc:
             self._error = exc if isinstance(exc, StreamError) else StreamError(f"Stream interrupted: {exc}")
+            self._error.gateway_evidence = self.agentcc.gateway_evidence
+            self._error.request_id = self._error.gateway_request_id
             raise self._error from exc if self._error is not exc else None
         finally:
             try:
@@ -68,6 +70,8 @@ class StreamTracking:
                 yield self._note(chunk)
         except Exception as exc:
             self._error = exc if isinstance(exc, StreamError) else StreamError(f"Stream interrupted: {exc}")
+            self._error.gateway_evidence = self.agentcc.gateway_evidence
+            self._error.request_id = self._error.gateway_request_id
             raise self._error from exc if self._error is not exc else None
         finally:
             try:

@@ -1,14 +1,17 @@
 """Released callback contracts and redaction helpers.
 
-The split transport passes CallbackRequest/CallbackResponse objects. Response
-objects additionally delegate parsed-model attributes for lane callback users.
-Exceptions raised by handlers are logged at DEBUG and never replace SDK results.
+Published request descriptors retain live caller-owned values. Snapshot requests
+are detached and masked. CallbackResponse delegates to the original parsed model;
+sent request headers are scrubbed by the transport. Handler errors are logged at
+DEBUG and never replace SDK results.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
+
+from fi.gateway._constants import CREDENTIAL_HEADER_NAMES
 
 
 @dataclass
@@ -19,6 +22,7 @@ class CallbackRequest:
     body: dict[str, Any] | None
     timeout: Any = None
     max_retries: int | None = None
+    files: dict[str, Any] | None = field(default=None, repr=False)
 
 
 @dataclass
@@ -93,6 +97,10 @@ class CallbackHandler:
 
 REDACTED = "[REDACTED]"
 _TEXT_KEYS = ("prompt", "input", "instructions")
+_CREDENTIAL_KEYS = frozenset(name.replace("-", "_") for name in CREDENTIAL_HEADER_NAMES) | {
+    "virtual_key", "secret_key", "fi_api_key", "fi_secret_key",
+    "access_token", "refresh_token", "client_secret", "password",
+}
 
 
 def _redact_message(message: Any) -> Any:
@@ -115,19 +123,18 @@ def _redact_message(message: Any) -> Any:
 
 def redact_credentials(value: Any) -> Any:
     """Copy structured callback data without credential-bearing fields."""
-    credential_keys = {
-        "authorization", "proxy_authorization", "api_key", "x_api_key",
-        "virtual_key", "secret_key", "fi_api_key", "fi_secret_key",
-        "access_token", "refresh_token", "client_secret", "password",
-        "cookie", "set_cookie",
-    }
     if isinstance(value, dict):
         return {
-            key: REDACTED if str(key).lower().replace("-", "_") in credential_keys
+            key: REDACTED if str(key).lower().replace("-", "_") in _CREDENTIAL_KEYS
             else redact_credentials(item)
             for key, item in value.items()
         }
-    if isinstance(value, (list, tuple)):
+    if isinstance(value, tuple):
+        items = tuple(redact_credentials(item) for item in value)
+        if hasattr(value, "_fields"):
+            return type(value)(*items)
+        return type(value)(items)
+    if isinstance(value, list):
         return type(value)(redact_credentials(item) for item in value)
     return value
 
@@ -146,12 +153,5 @@ def redact_body(body: Any) -> Any:
 
 
 def redact_callback_request(request: CallbackRequest) -> CallbackRequest:
-    if not isinstance(request.body, dict):
-        return request
-    body = redact_body(request.body)
-    if body == request.body:
-        return request
-    return CallbackRequest(
-        method=request.method, url=request.url, headers=request.headers, body=body,
-        timeout=request.timeout, max_retries=request.max_retries,
-    )
+    """One descriptor copy with exactly the published shallow message redaction."""
+    return replace(request, body=redact_body(request.body))

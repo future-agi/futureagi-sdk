@@ -1,10 +1,13 @@
 """Embedding, image and completion resources."""
 from __future__ import annotations
+
+import pytest
 import respx
 from fi.gateway import AgentCC, AsyncAgentCC
 from ._resource_fixtures import GATEWAY, AGENTCC_HEADERS, COMPLETIONS_RESPONSE, SPEECH_AUDIO_BYTES
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_embeddings_create():
     respx.post(f"{GATEWAY}/v1/embeddings").respond(
@@ -28,6 +31,7 @@ def test_embeddings_create():
     client.close()
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_images_generate():
     respx.post(f"{GATEWAY}/v1/images/generations").respond(
@@ -48,6 +52,7 @@ def test_images_generate():
     client.close()
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_completions_create_basic():
     respx.post(f"{GATEWAY}/v1/completions").respond(
@@ -71,6 +76,7 @@ def test_completions_create_basic():
     client.close()
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_completions_create_all_params():
     route = respx.post(f"{GATEWAY}/v1/completions").respond(
@@ -124,6 +130,7 @@ def test_completions_create_all_params():
     client.close()
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_completions_create_with_prompt_list():
     respx.post(f"{GATEWAY}/v1/completions").respond(
@@ -153,6 +160,7 @@ def test_completions_create_with_prompt_list():
     client.close()
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_completions_create_with_extra_body():
     route = respx.post(f"{GATEWAY}/v1/completions").respond(
@@ -174,6 +182,7 @@ def test_completions_create_with_extra_body():
     client.close()
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_completions_create_with_extra_headers():
     route = respx.post(f"{GATEWAY}/v1/completions").respond(

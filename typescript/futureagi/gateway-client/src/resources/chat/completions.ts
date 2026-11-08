@@ -2,7 +2,6 @@ import type { BaseClient } from "../../base-client.js";
 import type { ChatCompletionCreateParams } from "../../types/chat/completion-create-params.js";
 import type { ChatCompletion } from "../../types/chat/chat-completion.js";
 import { Stream, StreamManager } from "../../streaming.js";
-import { parseAgentCCMetadata } from "../../types/shared.js";
 import { perRequestParts } from "../../agentcc-params.js";
 import { RunToolsRunner } from "../../run-tools.js";
 import type {
@@ -13,7 +12,6 @@ import type {
 import { isZodSchema, zodToJsonSchema } from "../../structured-output.js";
 import { AgentCCError } from "../../errors.js";
 import type { DryRunResult } from "../../dry-run.js";
-import { validateJsonResponse } from "../../validate-response.js";
 
 export class ChatCompletions {
   constructor(private _client: BaseClient) {}
@@ -43,36 +41,13 @@ export class ChatCompletions {
       return new Stream(response);
     }
 
-    const response = await (this._client as any).requestRaw({
+    return this._client.request<ChatCompletion>({
       method: "POST",
       path: "/v1/chat/completions",
       body,
       headers: mergedHeaders,
       metadata,
-    }) as Response;
-
-    const data = (await response.json()) as ChatCompletion;
-    data.agentcc = parseAgentCCMetadata(response.headers);
-
-    // Auto-validate structured output
-    if ((this._client as any)._enableJsonSchemaValidation) {
-      const rf = body.response_format as Record<string, unknown> | undefined;
-      if (rf && rf.type === "json_schema" && rf.json_schema) {
-        const jsonSchemaObj = rf.json_schema as Record<string, unknown>;
-        const schema = jsonSchemaObj.schema as Record<string, unknown> | undefined;
-        const content = data.choices?.[0]?.message?.content;
-        if (schema && content) {
-          const validation = validateJsonResponse(content, schema);
-          if (!validation.valid) {
-            throw new AgentCCError(
-              `Structured output validation failed: ${validation.errors.join("; ")}`,
-            );
-          }
-        }
-      }
-    }
-
-    return data;
+    });
   }
 
   /**

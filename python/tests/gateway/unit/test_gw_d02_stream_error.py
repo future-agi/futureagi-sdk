@@ -74,7 +74,8 @@ def test_gateway_frames_raise_typed_stream_errors(case: dict[str, Any]) -> None:
         for chunk in stream:
             texts.extend(c.delta.content or "" for c in chunk.choices)
     err = info.value
-    assert str(err) == err.message == expect["message"]
+    assert str(err) == err.message == f"Stream error: {err.body}"
+    assert err.body["message"] == expect["message"]
     assert (err.type, err.code, err.param) == (expect["type"], expect["code"], None)
     assert err.body == {
         "message": expect["message"],
@@ -82,10 +83,10 @@ def test_gateway_frames_raise_typed_stream_errors(case: dict[str, Any]) -> None:
         "param": None,
         "code": expect["code"],
     }
-    assert err.request_id == "gw-req-9"
+    assert err.request_id is None  # Non-ULID wire IDs are not gateway identity.
     assert "".join(texts) == expect["text_before_error"]
     assert bodies[0].closed, "the connection is released at the error frame"
-    assert repr(err) == f"StreamError({expect['message']!r})"
+    assert repr(err) == f"StreamError({str(err)!r})"
 
 
 @pytest.mark.parametrize(
@@ -108,7 +109,11 @@ def test_odd_error_frames(name: str, message: str, fields: dict[str, Any]) -> No
     client = _client([chunk.encode() for chunk in MALFORMED[name]], bodies)
     with pytest.raises(StreamError) as info:
         list(client.chat.completions.create(model="m", messages=[], stream=True))
-    assert str(info.value) == message
+    assert str(info.value) == f"Stream error: {fields['body']}"
+    if isinstance(fields["body"], str):
+        assert fields["body"] == message
+    else:
+        assert message == "Stream error: " + json.dumps(fields["body"], separators=(",", ":"))
     for key, value in fields.items():
         assert getattr(info.value, key) == value, key
     assert bodies[0].closed

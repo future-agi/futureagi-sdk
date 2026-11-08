@@ -37,6 +37,16 @@ from fi.gateway._deprecation import deprecated_options
 class AsyncAgentCC(ClientState):
     """Asynchronous client for the AgentCC LLM Gateway.
 
+    ``callback_mode='snapshot'`` opts into detached absolute-URL requests and
+    JSON response bodies without gateway metadata. Published descriptors remain
+    the default. ``expanded_callback_events=True`` enables additional cache,
+    cost, fallback, guardrail and session hooks. Copies retain these options.
+    ``metadata_mode='merge'`` enables layered metadata and JSON session headers;
+    the default retains replacement and per-key session headers.
+    ``audio_upload_mode='normalized'`` opts into string paths and repeated list
+    form fields; published string content and multipart serialization remain
+    the default, with additive explicit ``Path`` support.
+
     Usage::
 
         from fi.gateway import AsyncAgentCC
@@ -68,6 +78,10 @@ class AsyncAgentCC(ClientState):
         pre_call_rules: list[Any] | None = None,
         modify_params: bool = False,
         enable_json_schema_validation: bool = False,
+        callback_mode: str = "published",
+        expanded_callback_events: bool = False,
+        metadata_mode: str = "replace",
+        audio_upload_mode: str = "published",
     ) -> None:
         self._api_key = resolve_api_key(api_key)
         self._base_url = resolve_base_url(base_url)
@@ -78,8 +92,11 @@ class AsyncAgentCC(ClientState):
         self._default_query = default_query
         self._session_id = session_id
         self._metadata = metadata
+        self._init_metadata_mode(metadata_mode)
+        self._init_audio_upload_mode(audio_upload_mode)
         self._config = config
         self._callbacks = callbacks
+        self._init_callback_options(callback_mode, expanded_callback_events)
         self._http_client = http_client
         self._drop_params = drop_params
         self._retry_policy = retry_policy
@@ -97,6 +114,7 @@ class AsyncAgentCC(ClientState):
         self._files: Any = None
         self._lock = threading.Lock()
         self._user_copied = False
+        self._shares_pool = False
         self._cost = CostLedger()
         self._pool = HttpPool(http_client)
         self._init_compat(redact_messages, pre_call_rules, modify_params)
@@ -146,6 +164,7 @@ class AsyncAgentCC(ClientState):
                 default_query=self._default_query,
                 session_id=self._session_id,
                 metadata=self._metadata,
+                metadata_mode=self._metadata_mode,
                 config=self._config,
                 callbacks=self._callbacks,
                 http_client=self._http_client,
@@ -251,10 +270,10 @@ class AsyncAgentCC(ClientState):
     ) -> _Self:
         """Return a same-class client with merged options, sharing the connection pool.
 
-        The copy sends with its own options (each one not given is carried over) through
-        the same httpx client as this one, whether or not this one has sent yet, and
-        adds to the same ``current_cost``. Closing the copy leaves the pool open;
-        closing this client closes it. ``extra_headers`` and ``extra_query`` are added
+        The copy sends with its own options (each one not given is carried over) and
+        adds to the same ``current_cost``. An initialized transport's pool is shared and remains
+        owned by the parent. A copy made before first use owns its independent pool
+        and closes it itself, preserving the released lifecycle. ``extra_headers`` and ``extra_query`` are added
         over this client's ``default_headers`` and ``default_query`` (the copy's value
         wins for a key both set); every request the copy sends carries them.
         """
@@ -272,14 +291,16 @@ class AsyncAgentCC(ClientState):
             )
         )
         new._cost = self._cost
-        new._pool = self._pool
         new._user_copied = True
+        if self._base_client is not None or self._pool.client is not None:
+            new._pool = self._pool
+            new._shares_pool = True
         return new
 
     async def aclose(self) -> None:
         """Close the underlying HTTP connection pool (a ``with_options()`` copy leaves it
         open; a client passed as ``http_client`` is never closed)."""
-        if not self._user_copied:
+        if not self._shares_pool:
             await self._pool.aclose()
 
     async def __aenter__(self) -> AsyncAgentCC:

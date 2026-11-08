@@ -1,0 +1,4131 @@
+{
+  "rows": [
+    {
+      "http_status": 402,
+      "code": "managed_credits_exhausted",
+      "condition": "any",
+      "sdk_class": "fi.gateway.InsufficientCreditsError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "out_of_credits",
+      "remedy": "Add credit on Settings Billing; on a grant-only install ask its operator to grant credit; alternatively use your own provider key on Gateway Providers.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "available_usd",
+        "limit_source",
+        "remedy_hint",
+        "required_usd",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "limit_source": "agentcc_credits",
+        "remedy_hint": "add_credits",
+        "resets_at": null,
+        "scope": "org",
+        "required_usd": 1,
+        "available_usd": 1
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 402,
+      "code": "managed_credits_insufficient",
+      "condition": "ReserveInFlight",
+      "sdk_class": "fi.gateway.InsufficientCreditsError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "out_of_credits",
+      "remedy": "For in-flight holds, wait for Retry-After; otherwise add credit, lower max_tokens or use your own provider key.",
+      "retry": "at most once after positive Retry-After",
+      "retry_policy": "at most once after positive Retry-After",
+      "retry_rule": "at_most_once_after_retry_after",
+      "classification_retry": true,
+      "metadata_fields": [
+        "available_usd",
+        "limit_source",
+        "remedy_hint",
+        "required_usd",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "limit_source": "agentcc_in_flight",
+        "remedy_hint": "retry",
+        "resets_at": null,
+        "scope": "org",
+        "required_usd": 1,
+        "available_usd": 1
+      },
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 2,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 402,
+      "code": "managed_credits_insufficient",
+      "condition": "insufficient balance, not in-flight",
+      "sdk_class": "fi.gateway.InsufficientCreditsError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "out_of_credits",
+      "remedy": "For in-flight holds, wait for Retry-After; otherwise add credit, lower max_tokens or use your own provider key.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "available_usd",
+        "limit_source",
+        "remedy_hint",
+        "required_usd",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "limit_source": "agentcc_credits",
+        "remedy_hint": "add_credits",
+        "resets_at": null,
+        "scope": "org",
+        "required_usd": 1,
+        "available_usd": 1
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 402,
+      "code": "managed_credits_insufficient",
+      "condition": "other metadata (not in-flight)",
+      "sdk_class": "fi.gateway.InsufficientCreditsError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "out_of_credits",
+      "remedy": "For in-flight holds, wait for Retry-After; otherwise add credit, lower max_tokens or use your own provider key.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "available_usd",
+        "limit_source",
+        "remedy_hint",
+        "required_usd",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 402,
+      "code": "agent_budget_exhausted",
+      "condition": "any",
+      "sdk_class": "fi.gateway.AgentBudgetExhaustedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "agent_budget",
+      "remedy": "Raise the run budget or start a new run; a call-only budget may also be lowered by reducing max_tokens or choosing a cheaper model. Administrative ceilings need an authorized policy change.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "available_usd",
+        "cap_kind",
+        "cap_ref",
+        "cap_scope",
+        "limit_source",
+        "policy_revision",
+        "remedy_hint",
+        "required_usd",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "limit_source": "agentcc_agent_budget",
+        "remedy_hint": "raise_run_budget",
+        "resets_at": null,
+        "available_usd": 1,
+        "scope": "fixture-value",
+        "required_usd": 1
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 429,
+      "code": "budget_exceeded",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BudgetExceededError",
+      "is_subclass_of": [
+        "RateLimitError",
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "budget_limit",
+      "remedy": "An administrator raises the binding budget, or wait for its period to reset; never automatically retry the same refusal.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 429,
+      "code": "org_budget_exceeded",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BudgetExceededError",
+      "is_subclass_of": [
+        "RateLimitError",
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "budget_limit",
+      "remedy": "Raise the binding budget/daily cap through an authorized administrator, or wait for its reset; no automatic retry.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "cap_kind",
+        "cap_ref",
+        "cap_scope",
+        "policy_revision"
+      ],
+      "metadata_presence": "variant-dependent: absent for hierarchical budget; present for administrative daily cap",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "cap_scope": "agent",
+        "cap_ref": "fixture-value",
+        "cap_kind": "daily",
+        "policy_revision": 1
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 429,
+      "code": "managed_spend_velocity",
+      "condition": "filled spend window",
+      "sdk_class": "fi.gateway.RateLimitError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "rate_limit",
+      "remedy": "For a full spend window wait for Retry-After or use your own provider key. For a request above a whole minute/hour cap lower max_tokens; for the new-org daily cap contact support.",
+      "retry": "after positive Retry-After",
+      "retry_policy": "after positive Retry-After",
+      "retry_rule": "after_positive_retry_after",
+      "classification_retry": true,
+      "metadata_fields": [
+        "limit_source",
+        "remedy_hint",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "limit_source": "agentcc_spend_guard",
+        "remedy_hint": "retry",
+        "resets_at": null,
+        "scope": "fixture-value"
+      },
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "evaluated_attempts_max_five": 6,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 429,
+      "code": "managed_spend_velocity",
+      "condition": "request exceeds minute cap",
+      "sdk_class": "fi.gateway.RateLimitError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "rate_limit",
+      "remedy": "For a full spend window wait for Retry-After or use your own provider key. For a request above a whole minute/hour cap lower max_tokens; for the new-org daily cap contact support.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "request_exceeds_minute_cap"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 429,
+      "code": "managed_spend_velocity",
+      "condition": "request exceeds hour cap",
+      "sdk_class": "fi.gateway.RateLimitError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "rate_limit",
+      "remedy": "For a full spend window wait for Retry-After or use your own provider key. For a request above a whole minute/hour cap lower max_tokens; for the new-org daily cap contact support.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "request_exceeds_hour_cap"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 429,
+      "code": "managed_spend_velocity",
+      "condition": "new-org daily allowance exceeded",
+      "sdk_class": "fi.gateway.RateLimitError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "rate_limit",
+      "remedy": "For a full spend window wait for Retry-After or use your own provider key. For a request above a whole minute/hour cap lower max_tokens; for the new-org daily cap contact support.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "new_org_daily_cap"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 429,
+      "code": "managed_spend_velocity",
+      "condition": "other metadata (not a filled spend window)",
+      "sdk_class": "fi.gateway.RateLimitError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "rate_limit",
+      "remedy": "For a full spend window wait for Retry-After or use your own provider key. For a request above a whole minute/hour cap lower max_tokens; for the new-org daily cap contact support.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "limit_source",
+        "reason",
+        "remedy_hint",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 429,
+      "code": "rate_limit_exceeded",
+      "condition": "any",
+      "sdk_class": "fi.gateway.RateLimitError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "rate_limit",
+      "remedy": "Honor Retry-After if present; otherwise bounded exponential backoff.",
+      "retry": "bounded backoff; honor Retry-After when present",
+      "retry_policy": "bounded backoff; honor Retry-After when present",
+      "retry_rule": "configured_status_retry",
+      "classification_retry": null,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "evaluated_attempts_max_five": 6,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 503,
+      "code": "managed_billing_unavailable",
+      "condition": "any",
+      "sdk_class": "fi.gateway.ServiceUnavailableError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "billing_unavailable",
+      "remedy": "Retry with bounded backoff or use your own provider key; persistent credit-store failure needs an operator.",
+      "retry": "bounded backoff; honor Retry-After when present",
+      "retry_policy": "bounded backoff; honor Retry-After when present",
+      "retry_rule": "configured_status_retry",
+      "classification_retry": null,
+      "metadata_fields": [
+        "reason",
+        "remedy_hint"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "redis_unavailable",
+        "remedy_hint": "retry"
+      },
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "evaluated_attempts_max_five": 6,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 403,
+      "code": "permission_denied",
+      "condition": "any",
+      "sdk_class": "fi.gateway.PermissionDeniedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "permission",
+      "remedy": "Choose a managed model with supported pricing, or use your own provider key. A policy/IP refusal sharing this code requires its own policy remedy.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 403,
+      "code": "future_agi_credits_off",
+      "condition": "any",
+      "sdk_class": "fi.gateway.FutureAGICreditsOffError",
+      "is_subclass_of": [
+        "PermissionDeniedError",
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "permission",
+      "remedy": "An organization Owner or Admin uses the \"Turn on Future AGI credits\" control on the Gateway Models page, or adds their own provider key on the Gateway Providers page.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 401,
+      "code": "invalid_api_key",
+      "condition": "any",
+      "sdk_class": "fi.gateway.AuthenticationError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "invalid_key",
+      "remedy": "Create or rotate a gateway API key on Gateway API Keys and supply it in the endpoint-supported authentication header. Do not send Build Keys or provider-vendor keys as gateway credentials.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "present for middleware ErrUnauthorizedKey; absent for expired/inactive pipeline constructors",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "missing_api_key"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 402,
+      "code": "agent_call_cap_exceeded",
+      "condition": "any",
+      "sdk_class": "fi.gateway.AgentBudgetExhaustedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "agent_budget",
+      "remedy": "Lower max_tokens, choose a cheaper model or raise the cap.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "available_usd",
+        "limit_source",
+        "remedy_hint",
+        "required_usd",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "limit_source": "agentcc_call_cap",
+        "remedy_hint": "lower_max_tokens",
+        "resets_at": null,
+        "required_usd": 1,
+        "available_usd": 1,
+        "scope": "fixture-value"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 402,
+      "code": "call_cap_unenforceable",
+      "condition": "any",
+      "sdk_class": "fi.gateway.AgentBudgetExhaustedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "agent_budget",
+      "remedy": "Choose a priced model with an enforceable bound or correct the administrative identity/route/cap policy; do not bypass the cap.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "cap_kind",
+        "cap_ref",
+        "cap_scope",
+        "limit_source",
+        "policy_revision",
+        "remedy_hint",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "variant-dependent: PaymentMeta, administrative identity, or omitted before an Admission exists",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "limit_source": "agentcc_call_cap",
+        "remedy_hint": "use_priced_model",
+        "resets_at": null,
+        "scope": "fixture-value"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 402,
+      "code": "agent_run_stopped",
+      "condition": "any",
+      "sdk_class": "fi.gateway.AgentBudgetExhaustedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "agent_budget",
+      "remedy": "Address the stop cause and start a new run.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "limit_source",
+        "reason",
+        "remedy_hint",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "limit_source": "agentcc_run_stop",
+        "remedy_hint": "start_new_run",
+        "resets_at": null,
+        "scope": "fixture-value",
+        "reason": "fixture-value"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 503,
+      "code": "budget_state_unavailable",
+      "condition": "any",
+      "sdk_class": "fi.gateway.ServiceUnavailableError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "billing_unavailable",
+      "remedy": "Retry transient state failures with bounded backoff; an administrator must correct missing activation/stale policy or persistent unavailable durable state.",
+      "retry": "bounded backoff; honor Retry-After when present",
+      "retry_policy": "bounded backoff; honor Retry-After when present",
+      "retry_rule": "configured_status_retry",
+      "classification_retry": null,
+      "metadata_fields": [
+        "cap_kind",
+        "cap_ref",
+        "cap_scope",
+        "policy_revision",
+        "reason",
+        "remedy_hint",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "remedy_hint": "retry",
+        "scope": "fixture-value",
+        "reason": "redis_unavailable"
+      },
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "evaluated_attempts_max_five": 6,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 402,
+      "code": "managed_spend_paused",
+      "condition": "any",
+      "sdk_class": "fi.gateway.APIStatusError",
+      "is_subclass_of": [
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "budget_limit",
+      "remedy": "An administrator raises the exhausted budget or resumes the anomaly-paused organization; own provider keys are an alternative.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "limit_source",
+        "remedy_hint",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "limit_source": "agentcc_budget",
+        "remedy_hint": "raise_budget",
+        "resets_at": null,
+        "scope": "org"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 402,
+      "code": "payment_required",
+      "condition": "any",
+      "sdk_class": "fi.gateway.InsufficientCreditsError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "out_of_credits",
+      "remedy": "Top up the managed API key prepaid balance.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 429,
+      "code": "budget_throttled",
+      "condition": "any",
+      "sdk_class": "fi.gateway.RateLimitError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "rate_limit",
+      "remedy": "Wait for the throttle slot window or ask an administrator to adjust it.",
+      "retry": "after positive Retry-After",
+      "retry_policy": "after positive Retry-After",
+      "retry_rule": "after_positive_retry_after",
+      "classification_retry": true,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "evaluated_attempts_max_five": 6,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 503,
+      "code": "key_list_not_loaded",
+      "condition": "any",
+      "sdk_class": "fi.gateway.ServiceUnavailableError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Wait for the first control-plane key list; an operator repairs persistent synchronization failure.",
+      "retry": "bounded backoff; honor Retry-After when present",
+      "retry_policy": "bounded backoff; honor Retry-After when present",
+      "retry_rule": "configured_status_retry",
+      "classification_retry": null,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "evaluated_attempts_max_five": 6,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 403,
+      "code": "model_not_permitted",
+      "condition": "any",
+      "sdk_class": "fi.gateway.PermissionDeniedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "permission",
+      "remedy": "Choose an allowed model with supported pricing or ask an authorized administrator to adjust the binding policy.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "fixture-value"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 403,
+      "code": "managed_router_unbounded",
+      "condition": "any",
+      "sdk_class": "fi.gateway.PermissionDeniedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "permission",
+      "remedy": "Use a bounded priced managed model or your own provider key for the vendor router.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 400,
+      "code": "unsupported_field_for_managed",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Remove/change the unsupported field or use your own provider key for the dimension.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 400,
+      "code": "unsupported_routing_field",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Remove the unsupported routing field or select a supported endpoint/own-provider-key route.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 403,
+      "code": "key_scope_denied",
+      "condition": "any",
+      "sdk_class": "fi.gateway.PermissionDeniedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "permission",
+      "remedy": "Use a key authorized for this operation or have an authorized administrator issue an appropriately scoped key.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 402,
+      "code": "agent_key_budget_exhausted",
+      "condition": "any",
+      "sdk_class": "fi.gateway.AgentBudgetExhaustedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "agent_budget",
+      "remedy": "An org administrator raises/repairs the workspace agent-key budget, or wait for its stated reset.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "available_usd",
+        "limit_source",
+        "remedy_hint",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "limit_source": "agentcc_key_limit",
+        "remedy_hint": "raise_key_budget",
+        "resets_at": null,
+        "scope": "fixture-value",
+        "available_usd": 1
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 429,
+      "code": "token_rate_limit_exceeded",
+      "condition": "any",
+      "sdk_class": "fi.gateway.RateLimitError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "rate_limit",
+      "remedy": "Wait for the token-rate window or adjust the authorized token-rate limit.",
+      "retry": "bounded backoff; honor Retry-After when present",
+      "retry_policy": "bounded backoff; honor Retry-After when present",
+      "retry_rule": "configured_status_retry",
+      "classification_retry": null,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "evaluated_attempts_max_five": 6,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 429,
+      "code": "usage_paused",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BudgetExceededError",
+      "is_subclass_of": [
+        "RateLimitError",
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "budget_limit",
+      "remedy": "Adjust the exhausted budget or contact support; this is not transient rate limiting.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 429,
+      "code": "quota_exceeded",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BudgetExceededError",
+      "is_subclass_of": [
+        "RateLimitError",
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "budget_limit",
+      "remedy": "Upgrade the plan or obtain additional request quota; do not blindly retry.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 400,
+      "code": "usage_unavailable",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Send without background so the gateway can observe and bill usage.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 503,
+      "code": "provider_busy",
+      "condition": "any",
+      "sdk_class": "fi.gateway.ServiceUnavailableError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Wait for a provider slot, then retry after Retry-After.",
+      "retry": "after positive Retry-After",
+      "retry_policy": "after positive Retry-After",
+      "retry_rule": "after_positive_retry_after",
+      "classification_retry": true,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "evaluated_attempts_max_five": 6,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 409,
+      "code": "idempotency_in_progress",
+      "condition": "any",
+      "sdk_class": "fi.gateway.APIStatusError",
+      "is_subclass_of": [
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Retry the same request and idempotency key after Retry-After.",
+      "retry": "after positive Retry-After",
+      "retry_policy": "after positive Retry-After",
+      "retry_rule": "after_positive_retry_after",
+      "classification_retry": true,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "evaluated_attempts_max_five": 6,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 422,
+      "code": "idempotency_key_reused",
+      "condition": "any",
+      "sdk_class": "fi.gateway.UnprocessableEntityError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Use a new idempotency key for a genuinely different request body.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 404,
+      "code": "managed_models_disabled",
+      "condition": "any",
+      "sdk_class": "fi.gateway.NotFoundError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "An operator configures managed providers before this admin operation is available.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 400,
+      "code": "deferred_run_unavailable",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Send the organization-key request synchronously.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 404,
+      "code": "model_not_found",
+      "condition": "any",
+      "sdk_class": "fi.gateway.NotFoundError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Use GET /v1/models and choose a model this key can call.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "suggestions"
+      ],
+      "metadata_presence": "present only when eligible suggestions exist; omitted otherwise",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "suggestions": [
+          "fixture-model"
+        ]
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 504,
+      "code": "gateway_timeout",
+      "condition": "any",
+      "sdk_class": "fi.gateway.GatewayTimeoutError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "The gateway timed out; check whether the request was applied before sending it again.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 410,
+      "code": "model_expired",
+      "condition": "any",
+      "sdk_class": "fi.gateway.APIStatusError",
+      "is_subclass_of": [
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Choose an active replacement model; an expired or shut-down model is not restored by retrying.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "fixture-value"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 404,
+      "code": "no_provider_matches",
+      "condition": "any",
+      "sdk_class": "fi.gateway.NotFoundError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Adjust the request provider filters/order/allow_fallbacks to include an eligible endpoint; do not bypass organization policy.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "fixture-value"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 400,
+      "code": "provider_preference_unavailable",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Remove/change the unsupported provider preference, or choose a model whose endpoint information supports it.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "fixture-value"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 400,
+      "code": "model_ambiguous",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Send one of the complete catalog model IDs named by the refusal instead of an ambiguous bare name.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 400,
+      "code": "no_auto_candidate",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Choose an eligible explicit model or correct the auto candidate/capability/price constraints; if there are no usable routes, enable credits or add an own-provider route through authorized controls.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 400,
+      "code": "omega_default_unroutable",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Enable managed models through the authorized credits control or add an own provider; alternatively configure a routable default model.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "model_alias_requested",
+        "remedy_hint"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "remedy_hint": "fixture-value",
+        "model_alias_requested": "fixture-value"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 400,
+      "code": "route_hint_unsupported",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "For model auto, use route-hint cost, balanced or quality, or omit the hint; latency ranking is unsupported.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 400,
+      "code": "routing_field_not_yet_supported",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Remove the unimplemented field or use a routing field the gateway supports.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 400,
+      "code": "invalid_provider_preference",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Correct or remove the field named by error.param; use a supported provider preference with its documented type and allowed values.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 400,
+      "code": "invalid_routing_field",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Correct or remove the field named by error.param. Do not send models and fallbacks together; obey the model-list and fallback-list limits and required shapes.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 400,
+      "code": "extra_body_conflict",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Remove the conflicting duplicate or make it agree with the top-level field. Send pre-read model, messages, streaming, user, metadata and session fields at the top level.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 400,
+      "code": "invalid_extra_body",
+      "condition": "any",
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Send extra_body as a non-nested JSON object whose fields have the request types the gateway expects, or remove it.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 404,
+      "code": "provider_not_found",
+      "condition": "any",
+      "sdk_class": "fi.gateway.NotFoundError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Correct or remove the provider lock, or ask an authorized operator to configure the intended provider; do not bypass provider access policy.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1
+    },
+    {
+      "http_status": 403,
+      "code": "managed_model_unpriced",
+      "condition": "any",
+      "metadata_fields": [
+        "model",
+        "reason"
+      ],
+      "metadata_presence": "present; producer fields model and reason; apply the common gateway-generated mirror overlay separately",
+      "metadata_access": "exc.metadata retains unknown keys; model/candidates are type-guarded",
+      "evaluated_metadata": {
+        "model": "provider/model-variant",
+        "reason": "unpriced"
+      },
+      "stream_attempts": 1,
+      "sdk_class": "fi.gateway.PermissionDeniedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "permission",
+      "remedy": "Choose a priced model or use your own provider key.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1
+    },
+    {
+      "http_status": 400,
+      "code": "managed_model_ambiguous",
+      "condition": "any",
+      "metadata_fields": [
+        "model",
+        "candidates"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata retains unknown keys; model/candidates are type-guarded",
+      "evaluated_metadata": {
+        "model": "model",
+        "candidates": [
+          "provider/team/model-variant",
+          "other/model"
+        ]
+      },
+      "stream_attempts": 1,
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Choose a provider-prefixed candidate ID or use the organization's own provider key for a candidate.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1
+    },
+    {
+      "http_status": 400,
+      "code": "managed_resource_unsupported",
+      "condition": "any",
+      "metadata_fields": [],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata retains unknown keys; model/candidates are type-guarded",
+      "evaluated_metadata": {},
+      "stream_attempts": 1,
+      "sdk_class": "fi.gateway.BadRequestError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "generic",
+      "remedy": "Use a supported managed request shape or your own provider key.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1
+    }
+  ],
+  "variant_evidence": [
+    {
+      "http_status": 402,
+      "code": "managed_credits_insufficient",
+      "condition": "ReserveInFlight",
+      "sdk_class": "fi.gateway.InsufficientCreditsError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "out_of_credits",
+      "remedy": "For in-flight holds, wait for Retry-After; otherwise add credit, lower max_tokens or use your own provider key.",
+      "retry": "at most once after positive Retry-After",
+      "retry_policy": "at most once after positive Retry-After",
+      "retry_rule": "at_most_once_after_retry_after",
+      "classification_retry": true,
+      "metadata_fields": [
+        "available_usd",
+        "limit_source",
+        "remedy_hint",
+        "required_usd",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "limit_source": "agentcc_in_flight",
+        "remedy_hint": "retry",
+        "resets_at": null,
+        "scope": "org",
+        "required_usd": 1,
+        "available_usd": 1
+      },
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 2,
+      "stream_attempts": 1,
+      "contract_retry": "yes, after Retry-After"
+    },
+    {
+      "http_status": 402,
+      "code": "managed_credits_insufficient",
+      "condition": "insufficient balance, not in-flight",
+      "sdk_class": "fi.gateway.InsufficientCreditsError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "out_of_credits",
+      "remedy": "For in-flight holds, wait for Retry-After; otherwise add credit, lower max_tokens or use your own provider key.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "available_usd",
+        "limit_source",
+        "remedy_hint",
+        "required_usd",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "limit_source": "agentcc_credits",
+        "remedy_hint": "add_credits",
+        "resets_at": null,
+        "scope": "org",
+        "required_usd": 1,
+        "available_usd": 1
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 402,
+      "code": "agent_budget_exhausted",
+      "condition": "legacy run/caller budget; required_usd omitted when unknown; scope omitted outside a run",
+      "sdk_class": "fi.gateway.AgentBudgetExhaustedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "agent_budget",
+      "remedy": "Raise the run budget or start a new run; a call-only budget may also be lowered by reducing max_tokens or choosing a cheaper model. Administrative ceilings need an authorized policy change.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "available_usd",
+        "limit_source",
+        "remedy_hint",
+        "required_usd",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "limit_source": "agentcc_agent_budget",
+        "remedy_hint": "raise_run_budget",
+        "resets_at": null,
+        "available_usd": 1,
+        "scope": "fixture-value",
+        "required_usd": 1
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 402,
+      "code": "agent_budget_exhausted",
+      "condition": "effective administrative run ceiling",
+      "sdk_class": "fi.gateway.AgentBudgetExhaustedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "agent_budget",
+      "remedy": "Raise the run budget or start a new run; a call-only budget may also be lowered by reducing max_tokens or choosing a cheaper model. Administrative ceilings need an authorized policy change.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "cap_kind",
+        "cap_ref",
+        "cap_scope",
+        "policy_revision"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "cap_scope": "agent",
+        "cap_ref": "fixture-value",
+        "cap_kind": "daily",
+        "policy_revision": 1
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 429,
+      "code": "org_budget_exceeded",
+      "condition": "hierarchical org budget",
+      "sdk_class": "fi.gateway.BudgetExceededError",
+      "is_subclass_of": [
+        "RateLimitError",
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "budget_limit",
+      "remedy": "Raise the binding budget/daily cap through an authorized administrator, or wait for its reset; no automatic retry.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "cap_kind",
+        "cap_ref",
+        "cap_scope",
+        "policy_revision"
+      ],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 429,
+      "code": "org_budget_exceeded",
+      "condition": "daily administrative cap",
+      "sdk_class": "fi.gateway.BudgetExceededError",
+      "is_subclass_of": [
+        "RateLimitError",
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "budget_limit",
+      "remedy": "Raise the binding budget/daily cap through an authorized administrator, or wait for its reset; no automatic retry.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "cap_kind",
+        "cap_ref",
+        "cap_scope",
+        "policy_revision"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "cap_scope": "agent",
+        "cap_ref": "fixture-value",
+        "cap_kind": "daily",
+        "policy_revision": 1
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 429,
+      "code": "managed_spend_velocity",
+      "condition": "filled spend window",
+      "sdk_class": "fi.gateway.RateLimitError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "rate_limit",
+      "remedy": "For a full spend window wait for Retry-After or use your own provider key. For a request above a whole minute/hour cap lower max_tokens; for the new-org daily cap contact support.",
+      "retry": "after positive Retry-After",
+      "retry_policy": "after positive Retry-After",
+      "retry_rule": "after_positive_retry_after",
+      "classification_retry": true,
+      "metadata_fields": [
+        "limit_source",
+        "remedy_hint",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "limit_source": "agentcc_spend_guard",
+        "remedy_hint": "retry",
+        "resets_at": null,
+        "scope": "fixture-value"
+      },
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "evaluated_attempts_max_five": 6,
+      "stream_attempts": 1,
+      "contract_retry": "yes, after Retry-After"
+    },
+    {
+      "http_status": 429,
+      "code": "managed_spend_velocity",
+      "condition": "request exceeds minute cap",
+      "sdk_class": "fi.gateway.RateLimitError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "rate_limit",
+      "remedy": "For a full spend window wait for Retry-After or use your own provider key. For a request above a whole minute/hour cap lower max_tokens; for the new-org daily cap contact support.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "request_exceeds_minute_cap"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 429,
+      "code": "managed_spend_velocity",
+      "condition": "request exceeds hour cap",
+      "sdk_class": "fi.gateway.RateLimitError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "rate_limit",
+      "remedy": "For a full spend window wait for Retry-After or use your own provider key. For a request above a whole minute/hour cap lower max_tokens; for the new-org daily cap contact support.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "request_exceeds_hour_cap"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 429,
+      "code": "managed_spend_velocity",
+      "condition": "new-org daily allowance exceeded",
+      "sdk_class": "fi.gateway.RateLimitError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "rate_limit",
+      "remedy": "For a full spend window wait for Retry-After or use your own provider key. For a request above a whole minute/hour cap lower max_tokens; for the new-org daily cap contact support.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "new_org_daily_cap"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 503,
+      "code": "managed_billing_unavailable",
+      "condition": "credit store unreachable",
+      "sdk_class": "fi.gateway.ServiceUnavailableError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "billing_unavailable",
+      "remedy": "Retry with bounded backoff or use your own provider key; persistent credit-store failure needs an operator.",
+      "retry": "bounded backoff; honor Retry-After when present",
+      "retry_policy": "bounded backoff; honor Retry-After when present",
+      "retry_rule": "configured_status_retry",
+      "classification_retry": null,
+      "metadata_fields": [
+        "reason",
+        "remedy_hint"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "redis_unavailable",
+        "remedy_hint": "retry"
+      },
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "evaluated_attempts_max_five": 6,
+      "stream_attempts": 1,
+      "contract_retry": "yes, bounded backoff"
+    },
+    {
+      "http_status": 503,
+      "code": "managed_billing_unavailable",
+      "condition": "account is being restored",
+      "sdk_class": "fi.gateway.ServiceUnavailableError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "billing_unavailable",
+      "remedy": "Retry with bounded backoff or use your own provider key; persistent credit-store failure needs an operator.",
+      "retry": "bounded backoff; honor Retry-After when present",
+      "retry_policy": "bounded backoff; honor Retry-After when present",
+      "retry_rule": "configured_status_retry",
+      "classification_retry": null,
+      "metadata_fields": [
+        "reason",
+        "remedy_hint"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "account_state_missing",
+        "remedy_hint": "retry"
+      },
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "evaluated_attempts_max_five": 6,
+      "stream_attempts": 1,
+      "contract_retry": "yes, after Retry-After"
+    },
+    {
+      "http_status": 401,
+      "code": "invalid_api_key",
+      "condition": "no key",
+      "sdk_class": "fi.gateway.AuthenticationError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "invalid_key",
+      "remedy": "Create or rotate a gateway API key on Gateway API Keys and supply it in the endpoint-supported authentication header. Do not send Build Keys or provider-vendor keys as gateway credentials.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "missing_api_key"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 401,
+      "code": "invalid_api_key",
+      "condition": "unknown/revoked/expired/deleted gateway-format network key",
+      "sdk_class": "fi.gateway.AuthenticationError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "invalid_key",
+      "remedy": "Create or rotate a gateway API key on Gateway API Keys and supply it in the endpoint-supported authentication header. Do not send Build Keys or provider-vendor keys as gateway credentials.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "unknown_api_key"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 401,
+      "code": "invalid_api_key",
+      "condition": "Build Keys format",
+      "sdk_class": "fi.gateway.AuthenticationError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "invalid_key",
+      "remedy": "Create or rotate a gateway API key on Gateway API Keys and supply it in the endpoint-supported authentication header. Do not send Build Keys or provider-vendor keys as gateway credentials.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "future_agi_api_key"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 401,
+      "code": "invalid_api_key",
+      "condition": "non-gateway key format",
+      "sdk_class": "fi.gateway.AuthenticationError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "invalid_key",
+      "remedy": "Create or rotate a gateway API key on Gateway API Keys and supply it in the endpoint-supported authentication header. Do not send Build Keys or provider-vendor keys as gateway credentials.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "reason": "not_a_gateway_key"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 401,
+      "code": "invalid_api_key",
+      "condition": "pipeline already has an expired key object",
+      "sdk_class": "fi.gateway.AuthenticationError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "invalid_key",
+      "remedy": "Create or rotate a gateway API key on Gateway API Keys and supply it in the endpoint-supported authentication header. Do not send Build Keys or provider-vendor keys as gateway credentials.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 401,
+      "code": "invalid_api_key",
+      "condition": "pipeline already has an inactive key object",
+      "sdk_class": "fi.gateway.AuthenticationError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "invalid_key",
+      "remedy": "Create or rotate a gateway API key on Gateway API Keys and supply it in the endpoint-supported authentication header. Do not send Build Keys or provider-vendor keys as gateway credentials.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "reason"
+      ],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 402,
+      "code": "call_cap_unenforceable",
+      "condition": "legacy unpriced model under cap",
+      "sdk_class": "fi.gateway.AgentBudgetExhaustedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "agent_budget",
+      "remedy": "Choose a priced model with an enforceable bound or correct the administrative identity/route/cap policy; do not bypass the cap.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "limit_source",
+        "remedy_hint",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "limit_source": "agentcc_call_cap",
+        "remedy_hint": "use_priced_model",
+        "resets_at": null,
+        "scope": "fixture-value"
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 402,
+      "code": "call_cap_unenforceable",
+      "condition": "strict cap qualification before Admission exists",
+      "sdk_class": "fi.gateway.AgentBudgetExhaustedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "agent_budget",
+      "remedy": "Choose a priced model with an enforceable bound or correct the administrative identity/route/cap policy; do not bypass the cap.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "cap_kind",
+        "cap_ref",
+        "cap_scope",
+        "limit_source",
+        "policy_revision",
+        "remedy_hint",
+        "resets_at",
+        "scope"
+      ],
+      "metadata_presence": "omitted",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": null,
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 402,
+      "code": "call_cap_unenforceable",
+      "condition": "strict qualification decorated by Admission.Refusal",
+      "sdk_class": "fi.gateway.AgentBudgetExhaustedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "agent_budget",
+      "remedy": "Choose a priced model with an enforceable bound or correct the administrative identity/route/cap policy; do not bypass the cap.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "cap_kind",
+        "cap_ref",
+        "cap_scope",
+        "policy_revision"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "cap_scope": "agent",
+        "cap_ref": "fixture-value",
+        "cap_kind": "daily",
+        "policy_revision": 1
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 402,
+      "code": "call_cap_unenforceable",
+      "condition": "administrative run limit cannot qualify the request",
+      "sdk_class": "fi.gateway.AgentBudgetExhaustedError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "agent_budget",
+      "remedy": "Choose a priced model with an enforceable bound or correct the administrative identity/route/cap policy; do not bypass the cap.",
+      "retry": "never",
+      "retry_policy": "never",
+      "retry_rule": "never",
+      "classification_retry": false,
+      "metadata_fields": [
+        "cap_kind",
+        "cap_ref",
+        "cap_scope",
+        "policy_revision"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "cap_scope": "agent",
+        "cap_ref": "fixture-value",
+        "cap_kind": "daily",
+        "policy_revision": 1
+      },
+      "evaluated_retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "evaluated_attempts_max_five": 1,
+      "stream_attempts": 1,
+      "contract_retry": "never"
+    },
+    {
+      "http_status": 503,
+      "code": "budget_state_unavailable",
+      "condition": "legacy run-budget store",
+      "sdk_class": "fi.gateway.ServiceUnavailableError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "billing_unavailable",
+      "remedy": "Retry transient state failures with bounded backoff; an administrator must correct missing activation/stale policy or persistent unavailable durable state.",
+      "retry": "bounded backoff; honor Retry-After when present",
+      "retry_policy": "bounded backoff; honor Retry-After when present",
+      "retry_rule": "configured_status_retry",
+      "classification_retry": null,
+      "metadata_fields": [
+        "reason",
+        "remedy_hint",
+        "scope"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "remedy_hint": "retry",
+        "scope": "fixture-value",
+        "reason": "redis_unavailable"
+      },
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "evaluated_attempts_max_five": 6,
+      "stream_attempts": 1,
+      "contract_retry": "yes, bounded backoff"
+    },
+    {
+      "http_status": 503,
+      "code": "budget_state_unavailable",
+      "condition": "daily durable admission-cap state",
+      "sdk_class": "fi.gateway.ServiceUnavailableError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "billing_unavailable",
+      "remedy": "Retry transient state failures with bounded backoff; an administrator must correct missing activation/stale policy or persistent unavailable durable state.",
+      "retry": "bounded backoff; honor Retry-After when present",
+      "retry_policy": "bounded backoff; honor Retry-After when present",
+      "retry_rule": "configured_status_retry",
+      "classification_retry": null,
+      "metadata_fields": [
+        "cap_kind",
+        "cap_ref",
+        "cap_scope",
+        "policy_revision"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "cap_scope": "agent",
+        "cap_ref": "fixture-value",
+        "cap_kind": "daily",
+        "policy_revision": 1
+      },
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "evaluated_attempts_max_five": 6,
+      "stream_attempts": 1,
+      "contract_retry": "yes, bounded backoff; operator correction may be needed"
+    },
+    {
+      "http_status": 503,
+      "code": "budget_state_unavailable",
+      "condition": "run-store failure decorated with administrative identity",
+      "sdk_class": "fi.gateway.ServiceUnavailableError",
+      "is_subclass_of": [
+        "APIStatusError",
+        "AgentCCError",
+        "SDKException"
+      ],
+      "category": "billing_unavailable",
+      "remedy": "Retry transient state failures with bounded backoff; an administrator must correct missing activation/stale policy or persistent unavailable durable state.",
+      "retry": "bounded backoff; honor Retry-After when present",
+      "retry_policy": "bounded backoff; honor Retry-After when present",
+      "retry_rule": "configured_status_retry",
+      "classification_retry": null,
+      "metadata_fields": [
+        "cap_kind",
+        "cap_ref",
+        "cap_scope",
+        "policy_revision"
+      ],
+      "metadata_presence": "present",
+      "metadata_access": "exc.metadata (dict) and read-only field properties; None when absent",
+      "evaluated_metadata": {
+        "cap_scope": "agent",
+        "cap_ref": "fixture-value",
+        "cap_kind": "daily",
+        "policy_revision": 1
+      },
+      "evaluated_retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "evaluated_attempts_max_five": 6,
+      "stream_attempts": 1,
+      "contract_retry": "yes, bounded backoff"
+    }
+  ],
+  "fallback_evidence": [
+    {
+      "http_status": 408,
+      "request_id_present": false,
+      "dispatched_header": null,
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 429,
+      "request_id_present": false,
+      "dispatched_header": null,
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 500,
+      "request_id_present": false,
+      "dispatched_header": null,
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 502,
+      "request_id_present": false,
+      "dispatched_header": null,
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 503,
+      "request_id_present": false,
+      "dispatched_header": null,
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 504,
+      "request_id_present": false,
+      "dispatched_header": null,
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 408,
+      "request_id_present": false,
+      "dispatched_header": "true",
+      "gateway_request_id": null,
+      "dispatched": true,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 429,
+      "request_id_present": false,
+      "dispatched_header": "true",
+      "gateway_request_id": null,
+      "dispatched": true,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 500,
+      "request_id_present": false,
+      "dispatched_header": "true",
+      "gateway_request_id": null,
+      "dispatched": true,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 502,
+      "request_id_present": false,
+      "dispatched_header": "true",
+      "gateway_request_id": null,
+      "dispatched": true,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 503,
+      "request_id_present": false,
+      "dispatched_header": "true",
+      "gateway_request_id": null,
+      "dispatched": true,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 504,
+      "request_id_present": false,
+      "dispatched_header": "true",
+      "gateway_request_id": null,
+      "dispatched": true,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 408,
+      "request_id_present": false,
+      "dispatched_header": "false",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 429,
+      "request_id_present": false,
+      "dispatched_header": "false",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 500,
+      "request_id_present": false,
+      "dispatched_header": "false",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 502,
+      "request_id_present": false,
+      "dispatched_header": "false",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 503,
+      "request_id_present": false,
+      "dispatched_header": "false",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 504,
+      "request_id_present": false,
+      "dispatched_header": "false",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 408,
+      "request_id_present": false,
+      "dispatched_header": "FALSE",
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 429,
+      "request_id_present": false,
+      "dispatched_header": "FALSE",
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 500,
+      "request_id_present": false,
+      "dispatched_header": "FALSE",
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 502,
+      "request_id_present": false,
+      "dispatched_header": "FALSE",
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 503,
+      "request_id_present": false,
+      "dispatched_header": "FALSE",
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 504,
+      "request_id_present": false,
+      "dispatched_header": "FALSE",
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 408,
+      "request_id_present": false,
+      "dispatched_header": " \tfalse ",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 429,
+      "request_id_present": false,
+      "dispatched_header": " \tfalse ",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 500,
+      "request_id_present": false,
+      "dispatched_header": " \tfalse ",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 502,
+      "request_id_present": false,
+      "dispatched_header": " \tfalse ",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 503,
+      "request_id_present": false,
+      "dispatched_header": " \tfalse ",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 504,
+      "request_id_present": false,
+      "dispatched_header": " \tfalse ",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 408,
+      "request_id_present": true,
+      "dispatched_header": null,
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 429,
+      "request_id_present": true,
+      "dispatched_header": null,
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 500,
+      "request_id_present": true,
+      "dispatched_header": null,
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 502,
+      "request_id_present": true,
+      "dispatched_header": null,
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 503,
+      "request_id_present": true,
+      "dispatched_header": null,
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 504,
+      "request_id_present": true,
+      "dispatched_header": null,
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 408,
+      "request_id_present": true,
+      "dispatched_header": "true",
+      "gateway_request_id": null,
+      "dispatched": true,
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 429,
+      "request_id_present": true,
+      "dispatched_header": "true",
+      "gateway_request_id": null,
+      "dispatched": true,
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 500,
+      "request_id_present": true,
+      "dispatched_header": "true",
+      "gateway_request_id": null,
+      "dispatched": true,
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 502,
+      "request_id_present": true,
+      "dispatched_header": "true",
+      "gateway_request_id": null,
+      "dispatched": true,
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 503,
+      "request_id_present": true,
+      "dispatched_header": "true",
+      "gateway_request_id": null,
+      "dispatched": true,
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 504,
+      "request_id_present": true,
+      "dispatched_header": "true",
+      "gateway_request_id": null,
+      "dispatched": true,
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 408,
+      "request_id_present": true,
+      "dispatched_header": "false",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 429,
+      "request_id_present": true,
+      "dispatched_header": "false",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 500,
+      "request_id_present": true,
+      "dispatched_header": "false",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 502,
+      "request_id_present": true,
+      "dispatched_header": "false",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 503,
+      "request_id_present": true,
+      "dispatched_header": "false",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 504,
+      "request_id_present": true,
+      "dispatched_header": "false",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 408,
+      "request_id_present": true,
+      "dispatched_header": "FALSE",
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 429,
+      "request_id_present": true,
+      "dispatched_header": "FALSE",
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 500,
+      "request_id_present": true,
+      "dispatched_header": "FALSE",
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 502,
+      "request_id_present": true,
+      "dispatched_header": "FALSE",
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 503,
+      "request_id_present": true,
+      "dispatched_header": "FALSE",
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 504,
+      "request_id_present": true,
+      "dispatched_header": "FALSE",
+      "gateway_request_id": null,
+      "dispatched": "unknown",
+      "retry_delays_max_five": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "remedy": "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again."
+    },
+    {
+      "http_status": 408,
+      "request_id_present": true,
+      "dispatched_header": " \tfalse ",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 429,
+      "request_id_present": true,
+      "dispatched_header": " \tfalse ",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 500,
+      "request_id_present": true,
+      "dispatched_header": " \tfalse ",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 502,
+      "request_id_present": true,
+      "dispatched_header": " \tfalse ",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 503,
+      "request_id_present": true,
+      "dispatched_header": " \tfalse ",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    },
+    {
+      "http_status": 504,
+      "request_id_present": true,
+      "dispatched_header": " \tfalse ",
+      "gateway_request_id": null,
+      "dispatched": false,
+      "retry_delays_max_five": [
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        null
+      ],
+      "remedy": null
+    }
+  ],
+  "dispatch_wire_evidence": [
+    {
+      "raw_values_hex": [],
+      "dispatched": "unknown"
+    },
+    {
+      "raw_values_hex": [
+        "74727565"
+      ],
+      "dispatched": true
+    },
+    {
+      "raw_values_hex": [
+        "66616c7365"
+      ],
+      "dispatched": false
+    },
+    {
+      "raw_values_hex": [
+        "200966616c736520"
+      ],
+      "dispatched": false
+    },
+    {
+      "raw_values_hex": [
+        "46414c5345"
+      ],
+      "dispatched": "unknown"
+    },
+    {
+      "raw_values_hex": [
+        "46616c7365"
+      ],
+      "dispatched": "unknown"
+    },
+    {
+      "raw_values_hex": [
+        ""
+      ],
+      "dispatched": "unknown"
+    },
+    {
+      "raw_values_hex": [
+        "30"
+      ],
+      "dispatched": "unknown"
+    },
+    {
+      "raw_values_hex": [
+        "66616c73652c2066616c7365"
+      ],
+      "dispatched": "unknown"
+    },
+    {
+      "raw_values_hex": [
+        "66616c7365",
+        "66616c7365"
+      ],
+      "dispatched": "unknown"
+    },
+    {
+      "raw_values_hex": [
+        "74727565",
+        "66616c7365"
+      ],
+      "dispatched": "unknown"
+    },
+    {
+      "raw_values_hex": [
+        "c2a066616c7365c2a0"
+      ],
+      "dispatched": "unknown"
+    }
+  ],
+  "retry_after_evidence": [
+    {
+      "value": "2",
+      "positive_integer_delta_seconds": 2.0
+    },
+    {
+      "value": "120",
+      "positive_integer_delta_seconds": 120.0
+    },
+    {
+      "value": " \t2 ",
+      "positive_integer_delta_seconds": 2.0
+    },
+    {
+      "value": ".5",
+      "positive_integer_delta_seconds": null
+    },
+    {
+      "value": "+2",
+      "positive_integer_delta_seconds": null
+    },
+    {
+      "value": "2.0",
+      "positive_integer_delta_seconds": null
+    },
+    {
+      "value": "2e0",
+      "positive_integer_delta_seconds": null
+    },
+    {
+      "value": "1_0",
+      "positive_integer_delta_seconds": null
+    },
+    {
+      "value": "0",
+      "positive_integer_delta_seconds": null
+    },
+    {
+      "value": "-2",
+      "positive_integer_delta_seconds": null
+    },
+    {
+      "value": "NaN",
+      "positive_integer_delta_seconds": null
+    },
+    {
+      "value": "inf",
+      "positive_integer_delta_seconds": null
+    },
+    {
+      "value": "2, 2",
+      "positive_integer_delta_seconds": null
+    },
+    {
+      "value": "\t2\n",
+      "positive_integer_delta_seconds": null
+    },
+    {
+      "value": "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
+      "positive_integer_delta_seconds": null
+    }
+  ],
+  "classification_key": "(HTTP status, canonical error.code)",
+  "current_contract_rows": 52,
+  "header_evidence": {
+    "legacy_success_metadata": "AgentCCMetadata.request_id retains its diagnostic compatibility value; canonical validated identity is AgentCCMetadata.gateway_request_id or gateway_evidence.gateway_request_id."
+  }
+}

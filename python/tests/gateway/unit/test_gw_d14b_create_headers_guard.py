@@ -132,8 +132,24 @@ def _health_check(value: str) -> str:
     return str(result["error"])
 
 
+def _deprecated_raises(call: Callable[[str], Any]) -> Callable[[str], str]:
+    check = _raises(call)
+
+    def run(value: str) -> str:
+        with pytest.warns(DeprecationWarning, match="deprecated"):
+            return check(value)
+
+    return run
+
+
 # How each entry point is called with the pair as its key, returning the refusal text.
 ENTRY_POINTS: dict[str, Callable[[str], str]] = {
+    "Gateway": _deprecated_raises(lambda v: fi.gateway.Gateway(api_key=v, base_url=GW)),
+    "AsyncGateway": _deprecated_raises(lambda v: fi.gateway.AsyncGateway(api_key=v, base_url=GW)),
+    "return_raw_request": _deprecated_raises(lambda v: fi.gateway.return_raw_request(
+        api_key=v, base_url=GW, model="test", messages=[],
+    )),
+    "patch_openai": _deprecated_raises(lambda v: fi.gateway.patch_openai(api_key=v, base_url=GW)),
     "AgentCC": _raises(lambda v: fi.gateway.AgentCC(api_key=v, base_url=GW)),
     "AsyncAgentCC": _raises(lambda v: fi.gateway.AsyncAgentCC(api_key=v, base_url=GW)),
     "check_valid_key": _raises(lambda v: fi.gateway.check_valid_key(v, GW)),
@@ -164,6 +180,9 @@ def _takes_api_key(obj: Any) -> bool:
     return False
 
 
+@pytest.mark.filterwarnings('default:^fi\\.gateway\\..+ is a deprecated released compatibility API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^fi\\.gateway\\.AsyncGateway\\ is\\ a\\ deprecated\\ released\\ compatibility\\ API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^fi\\.gateway\\.Gateway\\ is\\ a\\ deprecated\\ released\\ compatibility\\ API\\.:DeprecationWarning')
 def test_the_sweep_lists_every_public_callable_that_takes_a_key() -> None:
     found = {
         name

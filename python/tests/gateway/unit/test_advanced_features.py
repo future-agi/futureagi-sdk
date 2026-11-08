@@ -144,6 +144,7 @@ class TestLazyImports:
 
 
 class TestJsonSchemaValidationIntegration:
+    @pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
     def test_enable_json_schema_validation_stored(self) -> None:
         """enable_json_schema_validation is stored on client."""
         client = AgentCC(
@@ -158,6 +159,7 @@ class TestJsonSchemaValidationIntegration:
         client = AgentCC(api_key="sk-test", base_url="http://localhost:8080")
         assert client._enable_json_schema_validation is False
 
+    @pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
     def test_json_schema_validation_passes(self) -> None:
         """Valid JSON response passes validation."""
         client = AgentCC(
@@ -182,6 +184,7 @@ class TestJsonSchemaValidationIntegration:
         )
         assert result.choices[0].message.content == '{"name": "Alice"}'
 
+    @pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
     def test_json_schema_validation_fails(self) -> None:
         """Invalid JSON response raises AgentCCError."""
         client = AgentCC(
@@ -206,6 +209,7 @@ class TestJsonSchemaValidationIntegration:
                 response_format=response_format,
             )
 
+    @pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
     def test_json_schema_validation_not_triggered_without_schema(self) -> None:
         """No response_format -> no validation even if enabled."""
         client = AgentCC(
@@ -220,6 +224,7 @@ class TestJsonSchemaValidationIntegration:
         )
         assert result.choices[0].message.content == "just text, not json"
 
+    @pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
     def test_json_schema_validation_preserved_in_with_options(self) -> None:
         """with_options preserves enable_json_schema_validation."""
         client = AgentCC(

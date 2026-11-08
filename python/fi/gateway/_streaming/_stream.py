@@ -26,18 +26,16 @@ def _str_or_none(value: Any) -> str | None:
 def stream_error_from_frame(error: Any, request_id: str | None = None) -> StreamError:
     """Retain structured error fields; never use a response to choose a destination."""
     if isinstance(error, str):
-        return StreamError(error or "Stream error", body=error, request_id=request_id)
+        return StreamError(f"Stream error: {error}", body=error, request_id=request_id)
     if isinstance(error, dict):
-        message = error.get("message")
-        if not (isinstance(message, str) and message):
-            message = f"Stream error: {_json.dumps(error, separators=(',', ':'))}"
+        message = f"Stream error: {error}"
         if error.get("code") == "wrong_region":
             message = "Gateway request reached the wrong region; check the explicitly configured origin."
         return StreamError(
             message, type=_str_or_none(error.get("type")), code=_str_or_none(error.get("code")),
             param=_str_or_none(error.get("param")), body=error, request_id=request_id,
         )
-    return StreamError(f"Stream error: {_json.dumps(error, separators=(',', ':'))}", body=error, request_id=request_id)
+    return StreamError(f"Stream error: {error}", body=error, request_id=request_id)
 
 
 def _chunk_from_event(event: SSEEvent, chunk_cls: Any, request_id: str | None) -> Any:
@@ -101,12 +99,11 @@ class Stream(StreamTracking):
         self._response = response
         self._chunk_cls = chunk_cls
         self._closed = False
-        self._agentcc = AgentCCMetadata.from_headers(dict(response.headers), http_response=response)
+        self._agentcc = AgentCCMetadata.from_headers(response.headers, http_response=response)
         self._init_tracking(chunk_cls, on_chunk, on_finish)
         self._is_cache_hit = "application/json" in response.headers.get("content-type", "")
         if self._is_cache_hit:
-            response.read()
-            iterator = self._cache_hit_iterator(response.json())
+            iterator = self._cache_hit_iterator(_json.loads(response.read()))
         else:
             iterator = self._iterate_chunks(SSEParser(response.iter_bytes()))
         self._iterator = self._tracked(iterator)
@@ -175,7 +172,7 @@ class AsyncStream(StreamTracking):
         self._response = response
         self._chunk_cls = chunk_cls
         self._closed = False
-        self._agentcc = AgentCCMetadata.from_headers(dict(response.headers), http_response=response)
+        self._agentcc = AgentCCMetadata.from_headers(response.headers, http_response=response)
         self._init_tracking(chunk_cls, on_chunk, on_finish)
         self._is_cache_hit = "application/json" in response.headers.get("content-type", "")
         iterator = self._async_cache_hit_iterator() if self._is_cache_hit else self._async_iterate_chunks()

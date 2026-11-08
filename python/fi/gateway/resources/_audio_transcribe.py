@@ -57,8 +57,8 @@ class Transcriptions:
                 "response_format": response_format,
                 "temperature": temperature,
                 "timestamp_granularities": timestamp_granularities,
-                **kwargs,
             },
+            extra=kwargs,
             gateway={
                 "session_id": session_id,
                 "trace_id": trace_id,
@@ -125,8 +125,8 @@ class AsyncTranscriptions:
                 "response_format": response_format,
                 "temperature": temperature,
                 "timestamp_granularities": timestamp_granularities,
-                **kwargs,
             },
+            extra=kwargs,
             gateway={
                 "session_id": session_id,
                 "trace_id": trace_id,
@@ -190,9 +190,8 @@ class Translations:
                 "prompt": prompt,
                 "response_format": response_format,
                 "temperature": temperature,
-                **(extra_body or {}),
-                **kwargs,
             },
+            extra={**(extra_body or {}), **kwargs},
             gateway={
                 "session_id": session_id,
                 "trace_id": trace_id,
@@ -256,9 +255,8 @@ class AsyncTranslations:
                 "prompt": prompt,
                 "response_format": response_format,
                 "temperature": temperature,
-                **(extra_body or {}),
-                **kwargs,
             },
+            extra={**(extra_body or {}), **kwargs},
             gateway={
                 "session_id": session_id,
                 "trace_id": trace_id,

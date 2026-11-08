@@ -17,6 +17,9 @@ class AgentCCLogger(CallbackHandler):
     here. Each request stores its own start time; concurrent calls do not share it.
     """
 
+    def __init__(self) -> None:
+        """Initialize the no-argument released callback adapter."""
+
     def on_request_start(self, request: CallbackRequest) -> None:
         setattr(request, "_logger_start_time", time.time())
         body = request.body or {}

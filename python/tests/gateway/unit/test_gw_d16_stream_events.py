@@ -50,10 +50,17 @@ def test_only_the_emitted_variants_and_fields_remain() -> None:
         "text",
         "index",
         "tool_call",
+        "guardrail_name",
+        "message",
+        "confidence",
+        "disclaimer_text",
         "usage",
+        "error",
     ]
     hints = typing.get_type_hints(StreamEvent)
-    assert typing.get_args(hints["type"]) == ("content", "tool_call", "usage", "done")
+    assert hints["type"] is str
+    for kind in ("content", "tool_call", "usage", "done", "guardrail_warning", "guardrail_block", "guardrail_disclaimer", "error"):
+        assert StreamEvent(type=kind).type == kind
 
 
 def test_the_fixture_ends_with_an_error_after_finish_and_usage() -> None:

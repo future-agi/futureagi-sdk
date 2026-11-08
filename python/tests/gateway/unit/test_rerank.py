@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 import respx
 
 from fi.gateway._client import AgentCC, AsyncAgentCC
@@ -37,6 +39,7 @@ RERANK_RESPONSE_WITH_USAGE = {
 
 
 class TestRerankCreate:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_rerank_create(self) -> None:
         respx.post(f"{GATEWAY}/v1/rerank").respond(
@@ -67,6 +70,7 @@ class TestRerankCreate:
         assert result.model == "rerank-english-v3.0"
         client.close()
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_rerank_without_return_documents(self) -> None:
         respx.post(f"{GATEWAY}/v1/rerank").respond(
@@ -86,6 +90,7 @@ class TestRerankCreate:
         assert result.results[1].document is None
         client.close()
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_rerank_top_n_param(self) -> None:
         route = respx.post(f"{GATEWAY}/v1/rerank").respond(

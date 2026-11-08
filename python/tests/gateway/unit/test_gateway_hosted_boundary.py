@@ -1,9 +1,13 @@
-"""The hosted compatibility default is not a lane-client or environment bypass."""
+"""The hosted compatibility default is not a unit-client or environment bypass."""
 
 import ast
+import asyncio
 from pathlib import Path
 
+import httpx
 import pytest
+
+from fi.gateway._deprecation import AgentCCDeprecationWarning
 
 from fi.gateway import AgentCC, AgentCCError, AsyncAgentCC
 from fi.gateway._fi import AsyncGateway, Gateway
@@ -73,7 +77,7 @@ def test_the_use_site_gate_detects_a_new_consumer_and_an_alias():
 
 
 @pytest.mark.parametrize("cls", [AgentCC, AsyncAgentCC])
-def test_lane_clients_still_require_an_explicit_origin(cls):
+def test_unit_clients_still_require_an_explicit_origin(cls):
     with pytest.raises(AgentCCError, match="base_url is required"):
         cls(api_key="unit-key")
 
@@ -90,8 +94,28 @@ def test_only_released_wrappers_default_to_the_fixed_https_origin(cls):
 @pytest.mark.parametrize("name", ["FI_GATEWAY_BASE_URL", "FI_GATEWAY_URL", "AGENTCC_BASE_URL"])
 def test_environment_origins_are_validated_instead_of_falling_back(cls, name, monkeypatch):
     monkeypatch.setenv(name, "http://unsafe.example.test")
-    with pytest.warns(DeprecationWarning), pytest.raises(AgentCCError):
-        cls(api_key="unit-key")
+    seen = []
+
+    def handle(request):
+        seen.append(request)
+        return httpx.Response(200, json={"object": "list", "data": []})
+
+    http_cls = httpx.AsyncClient if cls is AsyncGateway else httpx.Client
+    http = http_cls(transport=httpx.MockTransport(handle))
+    with pytest.warns(DeprecationWarning):
+        client = cls(api_key="unit-key", http_client=http)
+    with pytest.warns(AgentCCDeprecationWarning, match="sending gateway credentials in cleartext"):
+        if cls is AsyncGateway:
+            async def send():
+                await client.models.list()
+                await http.aclose()
+            asyncio.run(send())
+        else:
+            client.models.list()
+            http.close()
+    assert len(seen) == 1
+    assert str(seen[0].url) == "http://unsafe.example.test/v1/models"
+    assert seen[0].headers["authorization"] == "Bearer unit-key"
     monkeypatch.setenv(name, "https://explicit.example.test/v1/")
     with pytest.warns(DeprecationWarning):
         client = cls(api_key="unit-key")

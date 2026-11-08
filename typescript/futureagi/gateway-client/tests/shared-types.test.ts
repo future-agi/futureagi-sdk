@@ -25,7 +25,7 @@ describe("parseAgentCCMetadata", () => {
     });
 
     const meta = parseAgentCCMetadata(headers);
-    expect(meta.requestId).toBe("req-123");
+    expect(meta.requestId).toBeNull();
     expect(meta.traceId).toBe("trace-456");
     expect(meta.provider).toBe("openai");
     expect(meta.latencyMs).toBe(150);
@@ -49,7 +49,7 @@ describe("parseAgentCCMetadata", () => {
 
   it("uses defaults for missing headers", () => {
     const meta = parseAgentCCMetadata(new Headers());
-    expect(meta.requestId).toBe("unknown");
+    expect(meta.requestId).toBeNull();
     expect(meta.traceId).toBe("unknown");
     expect(meta.provider).toBe("unknown");
     expect(meta.latencyMs).toBe(0);

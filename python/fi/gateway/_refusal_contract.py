@@ -1,4 +1,4 @@
-"""Current gateway error contract r3; pending wire changes are deliberately absent.
+"""Gateway error contract types; normative rows do not certify deployment.
 
 Each row binds the HTTP status and code, never message prose or error.type.
 Retry predicates and header validation live in _retry_policy.
@@ -162,6 +162,15 @@ _REFUSALS: dict[tuple[int, str], _Refusal] = {
     (404, "provider_not_found"): _Refusal(
         _errors.NotFoundError, False, "generic",
         'Correct or remove the provider lock, or ask an authorized operator to configure the intended provider; do not bypass provider access policy.'),
+    (403, "managed_model_unpriced"): _Refusal(
+        _errors.PermissionDeniedError, False, "permission",
+        'Choose a priced model or use your own provider key.'),
+    (400, "managed_model_ambiguous"): _Refusal(
+        _errors.BadRequestError, False, "generic",
+        "Choose a provider-prefixed candidate ID or use the organization's own provider key for a candidate."),
+    (400, "managed_resource_unsupported"): _Refusal(
+        _errors.BadRequestError, False, "generic",
+        'Use a supported managed request shape or your own provider key.'),
 }
 
 _CREDITS_OFF_REMEDY = _REFUSALS[(403, "future_agi_credits_off")].remedy

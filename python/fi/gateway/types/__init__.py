@@ -1,4 +1,4 @@
-"""Gateway response and request types (released and lane surfaces)."""
+"""Gateway response and request types (released and current surfaces)."""
 
 from __future__ import annotations
 

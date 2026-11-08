@@ -84,7 +84,8 @@ def _assert_gateway_error(exc: StreamError, expect: dict[str, Any]) -> None:
     # error object's repr in the message, "Stream error: {...}").
     assert exc.code == expect["code"]
     assert exc.type == expect["type"]
-    assert exc.message == expect["message"] == str(exc)
+    assert exc.message == str(exc) == f"Stream error: {exc.body}"
+    assert exc.body["message"] == expect["message"]
     assert exc.param is None
     assert isinstance(exc.body, dict) and exc.body["code"] == expect["code"]
 

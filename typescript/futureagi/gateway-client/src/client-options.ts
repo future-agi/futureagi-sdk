@@ -8,6 +8,7 @@ import type { CallbackHandler } from "./callbacks.js";
 import type { GatewayConfig } from "./gateway-config.js";
 import type { RetryPolicy } from "./retry-policy.js";
 import type { AgentCCMetadata } from "./types/shared.js";
+import type { GatewayEvidence, GatewayEvidenceOptions } from "./gateway-evidence.js";
 
 export interface RequestOptions {
   method: string;
@@ -41,6 +42,8 @@ export interface ClientOptions {
   metadata?: Record<string, unknown>;
   config?: GatewayConfig;
   fetch?: typeof globalThis.fetch;
+  /** Declare hidden headers or duplicate-discarding custom fetch adapters. */
+  gatewayEvidenceOptions?: GatewayEvidenceOptions;
   /** Callback handlers for request lifecycle hooks. */
   callbacks?: CallbackHandler[];
   /** Per-error-type retry configuration. Overrides `maxRetries` when set. */
@@ -66,4 +69,5 @@ export interface WithResponseResult<T> {
   data: T;
   response: Response;
   agentcc: AgentCCMetadata;
+  readonly gatewayEvidence: GatewayEvidence;
 }

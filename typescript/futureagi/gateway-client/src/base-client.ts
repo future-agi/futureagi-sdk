@@ -8,6 +8,8 @@ import {
   APIConnectionError,
   APITimeoutError,
   APIStatusError,
+  responseBodyError,
+  errorAtExit,
 } from "./errors.js";
 import type { GatewayConfig } from "./gateway-config.js";
 import { assertGatewayConfig } from "./gateway-config.js";
@@ -16,14 +18,16 @@ import { parseAgentCCMetadata } from "./types/shared.js";
 import type { CallbackHandler, CallbackRequest } from "./callbacks.js";
 import { invokeCallbacks } from "./callbacks.js";
 import type { RetryPolicy } from "./retry-policy.js";
-import { positiveRetryAfter, refusalRetry } from "./refusal-policy.js";
+import { positiveRetryAfter, refusalDetails, refusalRetry } from "./refusal-policy.js";
 import { TraceContextManager } from "./trace-context.js";
+import { captureGatewayEvidence } from "./gateway-evidence.js";
 import { assertNoShimOnlyOptions } from "./shim-only.js";
 import { resolveApiKey, resolveBaseUrl } from "./env.js";
 import { BROWSER_REFUSED, isBrowser } from "./browser.js";
 import type { DryRunResult } from "./dry-run.js";
 import { buildHeaders, buildUrl, checkStructuredOutput, connectionError, retryDelay, safeJson, sleep } from "./request-parts.js";
 import { callbackRequest, firePostRequestCallbacks, fireStatusErrorCallbacks } from "./request-callbacks.js";
+import { markScrubbedResponse, scrubCredentialHeaders } from "./redact.js";
 
 export type { RequestOptions, ClientOptions, WithResponseResult } from "./client-options.js";
 import type { RequestOptions, ClientOptions, WithResponseResult } from "./client-options.js";
@@ -52,6 +56,7 @@ export class BaseClient {
   /** Whether this client runs in a browser page (then the SDK headers are left out). */
   protected _inBrowser: boolean;
   private _totalCost = 0;
+  protected readonly _evidenceOptions: ClientOptions["gatewayEvidenceOptions"];
 
   constructor(opts: ClientOptions = {}) {
     this._inBrowser = isBrowser();
@@ -69,6 +74,7 @@ export class BaseClient {
     this._metadata = opts.metadata;
     this._config = opts.config;
     this._fetch = opts.fetch ?? globalThis.fetch.bind(globalThis);
+    this._evidenceOptions = { ...opts.gatewayEvidenceOptions };
     this._callbacks = opts.callbacks ?? [];
     this._retryPolicy = opts.retryPolicy;
     this._redactMessages = opts.redactMessages ?? false;
@@ -160,10 +166,14 @@ export class BaseClient {
     for (let attempt = 0; attempt <= maxForAttempt; attempt++) {
       try {
         return await this._doRequest<T>(options);
-      } catch (err) {
+      } catch (caught) {
+        const err = errorAtExit(caught);
         lastError = err;
+        // A missing response is not proof of a pre-send failure. This safety
+        // boundary precedes both flat limits and all per-error retry overrides.
+        if (err instanceof APIConnectionError && err.gatewayEvidence.dispatched !== false) throw err;
 
-        const refusal = err instanceof APIStatusError ? refusalRetry(err.statusCode, err.body, err.headers) : null;
+        const refusal = err instanceof APIStatusError ? refusalRetry(err.statusCode, err.body, err.headers, err.gatewayEvidence) : null;
         // Header-only contract rows also admit 409; a code-less 409 stays terminal.
         if (err instanceof APIStatusError && (refusal === "never"
           || (refusal !== "once" && refusal !== "after" && !RETRYABLE_STATUS_CODES.has(err.statusCode)))) throw err;
@@ -200,7 +210,7 @@ export class BaseClient {
         if (attempt >= maxForAttempt) break;
 
         // Required Retry-After waits must not be shortened by the ordinary 60s cap.
-        const requiredDelay = err instanceof APIStatusError && (refusal === "after" || refusal === "once")
+        const requiredDelay = err instanceof APIStatusError && refusalDetails(err.statusCode, err.body) !== null
           ? positiveRetryAfter(err.headers) : null;
         const delay = requiredDelay ?? retryDelay(attempt, err instanceof APIStatusError ? err.headers : undefined);
 
@@ -223,10 +233,6 @@ export class BaseClient {
 
     throw lastError;
   }
-
-  // -----------------------------------------------------------------------
-  // Single request
-  // -----------------------------------------------------------------------
 
   private async _doRequest<T>(
     options: RequestOptions,
@@ -264,9 +270,15 @@ export class BaseClient {
 
     let response: Response;
     try {
-      response = await this._fetch(url, init);
+      try {
+        response = await this._fetch(url, init);
+      } finally {
+        // Scrub before parsing bodies, delivering callbacks or exposing errors.
+        // These headers belong to this attempt, never to the caller's options.
+        scrubCredentialHeaders(headers);
+      }
     } catch (err: unknown) {
-      const connError = connectionError(err, effectiveOptions.path, url);
+      const connError = errorAtExit(connectionError(err, effectiveOptions.path, url));
 
       // Callback: onError
       if (this._callbacks.length > 0) {
@@ -277,6 +289,8 @@ export class BaseClient {
       throw connError;
     }
 
+    markScrubbedResponse(response);
+    const gatewayEvidence = captureGatewayEvidence(response, this._evidenceOptions);
     // Track cost
     const costHeader = response.headers.get("x-agentcc-cost");
     let requestCost = 0;
@@ -308,6 +322,7 @@ export class BaseClient {
           data: response as unknown as T,
           response,
           agentcc,
+          gatewayEvidence,
         };
       }
       throw await this._statusError(response, effectiveOptions);
@@ -318,7 +333,16 @@ export class BaseClient {
       throw await this._statusError(response, effectiveOptions);
     }
 
-    const json = await response.json();
+    let json: unknown;
+    try {
+      json = await response.json();
+    } catch {
+      const error = errorAtExit(responseBodyError(gatewayEvidence));
+      if (this._callbacks.length > 0) {
+        await invokeCallbacks(this._callbacks, "onError", this._buildCallbackRequest(effectiveOptions), error);
+      }
+      throw error;
+    }
 
     // Auto-attach agentcc metadata to response
     if (json && typeof json === "object") {
@@ -339,7 +363,7 @@ export class BaseClient {
       );
     }
 
-    return { data: json as T, response, agentcc };
+    return { data: json as T, response, agentcc, gatewayEvidence };
   }
 
   // -----------------------------------------------------------------------
@@ -368,7 +392,7 @@ export class BaseClient {
 
   /** The APIStatusError for an error answer, after its callbacks fire. */
   private async _statusError(response: Response, options: RequestOptions): Promise<APIStatusError> {
-    const statusError = APIStatusError.from(response.status, await safeJson(response), response.headers);
+    const statusError = errorAtExit(APIStatusError.from(response.status, await safeJson(response), response.headers));
     if (this._callbacks.length > 0) {
       await fireStatusErrorCallbacks(this._callbacks, this._buildCallbackRequest(options), statusError);
     }

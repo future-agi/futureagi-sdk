@@ -1,4 +1,4 @@
-"""Unknown codes fail closed; absent codes retain the status retry contract.
+"""Unknown codes fail closed; absent codes retry only when not dispatched.
 
 Run the same wire bodies through JSON, binary and stream-open paths, with both
 flat and per-status retry limits. All traffic uses httpx.MockTransport.
@@ -44,8 +44,10 @@ def settings(policy):
     }
 
 
-def response(status, wire):
+def response(status, wire, *, dispatched=None):
     headers = {"retry-after": "0", "x-agentcc-request-id": "req-onekey-parity"}
+    if dispatched is not None:
+        headers["x-agentcc-dispatched"] = dispatched
     if isinstance(wire, bytes):
         return httpx.Response(status, content=wire, headers=headers)
     return httpx.Response(status, json=wire, headers=headers)
@@ -140,7 +142,8 @@ def test_no_code_preserves_status_retry_sync(wire, status, policy, path, sleeps)
 
     def handle(request):
         calls.append(request)
-        return response(status, wire)
+        # A gateway request ID now requires explicit evidence of no dispatch.
+        return response(status, wire, dispatched="false")
 
     with httpx.Client(transport=httpx.MockTransport(handle)) as http:
         with gw.AgentCC(http_client=http, **settings(policy)) as client:
@@ -161,7 +164,8 @@ async def test_no_code_preserves_status_retry_async(wire, status, policy, path, 
 
     def handle(request):
         calls.append(request)
-        return response(status, wire)
+        # A gateway request ID now requires explicit evidence of no dispatch.
+        return response(status, wire, dispatched="false")
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(handle)) as http:
         async with gw.AsyncAgentCC(http_client=http, **settings(policy)) as client:

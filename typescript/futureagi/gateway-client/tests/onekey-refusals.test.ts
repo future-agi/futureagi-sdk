@@ -36,7 +36,7 @@ for (const path of ["json", "raw", "stream"] as RequestPath[]) {
       expect(error).toBeInstanceOf(Error);
       expect(error instanceof gateway.RateLimitError).toBe(row.status === 429);
       expect(error.message).toBe("refused");
-      expect(error.requestId).toBe("req-refusal");
+      expect(error.requestId).toBeNull();
       expect(error.body).toEqual(body);
       if (row.status === 429) {
         expect(error).toMatchObject({ ratelimitLimit: 100, ratelimitRemaining: 0, ratelimitReset: 12 });
@@ -120,12 +120,12 @@ describe("classification uses the status and nested code only", () => {
     { status: 500, code: "budget_exceeded", name: "InternalServerError", attempts: 1 },
     { status: 503, code: "managed_credits_insufficient", name: "ServiceUnavailableError", attempts: 1 },
     { status: 403, code: "budget_exceeded", name: "PermissionDeniedError", attempts: 1 },
-    { status: 429, code: null, name: "RateLimitError", attempts: 3 },
+    { status: 429, code: null, name: "RateLimitError", attempts: 1 },
     { status: 429, code: ["budget_exceeded"], name: "RateLimitError", attempts: 1 },
     { status: 429, code: { toString: "budget_exceeded" }, name: "RateLimitError", attempts: 1 },
     { status: 429, code: "toString", name: "RateLimitError", attempts: 1 },
     { status: 429, code: "__proto__", name: "RateLimitError", attempts: 1 },
-  ])("keeps the status class but retries only absent codes for $status / $code", async (row) => {
+  ])("keeps the status class without replaying an unconfirmed refusal for $status / $code", async (row) => {
     const { client, fetch } = setup(row.status, envelope(row.code), { maxRetries: 2 });
     const error = await refusal(send(client));
     expect(fetch).toHaveBeenCalledTimes(row.attempts);

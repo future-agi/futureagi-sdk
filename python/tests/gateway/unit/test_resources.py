@@ -66,6 +66,7 @@ class TestPropertyAccess:
 
 
 class TestModels:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_list_models(self) -> None:
         respx.get("http://gateway.test/v1/models").respond(
@@ -77,6 +78,7 @@ class TestModels:
         assert len(result.data) == 2
         assert result.data[0].id == "gpt-4o"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_retrieve_model(self) -> None:
         respx.get("http://gateway.test/v1/models/gpt-4o").respond(
@@ -89,6 +91,7 @@ class TestModels:
 
 
 class TestAsyncModels:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     @pytest.mark.anyio
     async def test_async_list_models(self) -> None:
@@ -99,6 +102,7 @@ class TestAsyncModels:
         result = await client.models.list()
         assert len(result.data) == 2
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     @pytest.mark.anyio
     async def test_async_retrieve_model(self) -> None:

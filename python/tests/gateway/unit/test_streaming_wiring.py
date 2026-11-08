@@ -31,6 +31,12 @@ def _make_mock_client_with_stream_response(chunks):
 
     mock_base = MagicMock()
     mock_base._stream_request.return_value = resp
+    # The split transport opens the public Stream and owns its lifecycle.
+    from fi.gateway import Stream
+
+    mock_base._open_stream.side_effect = lambda opts, params, chunk_cls: Stream(
+        mock_base._stream_request(opts, params), chunk_cls
+    )
 
     mock_client = MagicMock()
     mock_client._get_base_client.return_value = mock_base

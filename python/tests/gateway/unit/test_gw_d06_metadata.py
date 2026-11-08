@@ -1,22 +1,18 @@
-"""D-06: session metadata goes as one JSON ``x-agentcc-metadata`` header.
+"""Explicit merge mode sends session metadata in one JSON header.
 
-agentcc 1.x sent ``x-agentcc-metadata-{key}`` per entry; the gateway reads only
-``x-agentcc-metadata`` (the request-header contract), so session metadata
-never arrived. ``create_headers(metadata=)`` already sent JSON and is unchanged.
-
-The one header layers the client's ``metadata=``, the session's and the request's
-``request_metadata``, key by key (D-06b, one rule inside and outside a session;
-test_gw_d06b_metadata_layers.py covers every combination). 1.x kept the client's JSON
-header next to the per-key session headers, so the gateway still saw the client's keys
-inside a session, and outside one a request's metadata replaced the client's (golden
-header_merge.l6_over_l4).
+Published replacement and per-key session defaults are covered separately.
 """
 
 from __future__ import annotations
 
+import pytest
+
 import json
 
 import httpx
+import pytest
+
+pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
 
 from fi.gateway import AgentCC, AsyncAgentCC, Session, create_headers
 
@@ -40,6 +36,7 @@ def _client(seen: list[httpx.Request], **kwargs: object) -> AgentCC:
     return AgentCC(
         api_key="k",
         base_url=GW,
+        metadata_mode="merge",
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
         **kwargs,
     )
@@ -54,11 +51,14 @@ def _metadata(request: httpx.Request) -> object:
 
 
 def test_session_to_headers_is_compact_json_and_keeps_types() -> None:
-    session = Session(session_id="s1", metadata={"team": "a", "n": 2, "ok": True})
+    session = Session(session_id="s1", metadata={"team": "a", "n": 2, "ok": True}, metadata_mode="merge")
     headers = session.to_headers()
     assert headers == {
         "x-agentcc-session-id": "s1",
         "x-agentcc-metadata": '{"team":"a","n":2,"ok":true}',
+        "x-agentcc-metadata-team": "a",
+        "x-agentcc-metadata-n": "2",
+        "x-agentcc-metadata-ok": "True",
     }
 
 
@@ -136,6 +136,7 @@ def test_every_session_resource_layers_the_client_metadata() -> None:
     assert [_metadata(r) for r in seen] == [{"tenant": "A", "cart": "c1"}] * 3
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_a_with_options_copy_layers_its_own_metadata() -> None:
     seen: list[httpx.Request] = []
     client = _client(seen, metadata={"tenant": "A"})
@@ -154,7 +155,7 @@ def test_merge_without_request_params_layers_the_header_too() -> None:
     """A caller that passes no gateway params still gets client < session in the header."""
     from fi.gateway._agentcc_params import merge_session_headers
 
-    client = AgentCC(api_key="k", base_url=GW, metadata={"tenant": "A"})
+    client = AgentCC(api_key="k", base_url=GW, metadata={"tenant": "A"}, metadata_mode="merge")
     with client.session(session_id="s1", metadata={"cart": "c1"}):
         merged = merge_session_headers(client, {"x-extra": "e"})
     assert json.loads(merged["x-agentcc-metadata"]) == {"tenant": "A", "cart": "c1"}
@@ -201,6 +202,7 @@ def test_text_completions_merge_the_same_way() -> None:
     client = AgentCC(
         api_key="k",
         base_url=GW,
+        metadata_mode="merge",
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
     with client.session(metadata={"team": "a"}):
@@ -218,6 +220,7 @@ async def test_the_async_client_too() -> None:
     client = AsyncAgentCC(
         api_key="k",
         base_url=GW,
+        metadata_mode="merge",
         http_client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
     )
     async with client.session(metadata={"team": "a"}):
@@ -235,6 +238,7 @@ async def test_the_async_client_layers_client_metadata_inside_a_session() -> Non
     client = AsyncAgentCC(
         api_key="k",
         base_url=GW,
+        metadata_mode="merge",
         metadata={"tenant": "A"},
         http_client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
     )

@@ -1,15 +1,6 @@
-"""D-06b: one metadata rule for every request.
+"""Explicit merge mode layers client, session and request metadata.
 
-A request's ``x-agentcc-metadata`` header is its metadata layers merged key by key, a
-later layer winning: the client's ``metadata=`` (a ``with_options(metadata=)`` copy's
-own value is its client layer), then the active session's ``metadata``, then the
-request's ``request_metadata``. agentcc 1.x had two rules: outside a session a request's
-``request_metadata`` replaced the client's (golden header_merge.l6_over_l4), and session
-metadata went as per-key headers no gateway reads.
-
-Migration: code that passed ``request_metadata`` to drop the client's keys for one call
-now sends them too; to send other values for those keys, set the keys in
-``request_metadata`` (a later layer wins) or use a ``with_options(metadata=...)`` copy.
+Replacement, including an empty dictionary, remains the published default.
 """
 
 from __future__ import annotations
@@ -22,6 +13,8 @@ import httpx
 import pytest
 
 from fi.gateway import AgentCC, AsyncAgentCC
+
+pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
 
 GW = "http://127.0.0.1:8090"
 MSG = [{"role": "user", "content": "hi"}]
@@ -87,6 +80,7 @@ def _client(seen: list[httpx.Request], **kwargs: Any) -> AgentCC:
     return AgentCC(
         api_key="k",
         base_url=GW,
+        metadata_mode="merge",
         max_retries=0,
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
         **kwargs,
@@ -192,6 +186,7 @@ def test_an_explicit_header_wins_over_every_layer() -> None:
     assert _metadata(seen[0]) == {"explicit": True}
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_a_with_options_copy_s_metadata_is_its_client_layer() -> None:
     seen: list[httpx.Request] = []
     parent = _client(seen, metadata={"tenant": "A", "tier": "gold"})
@@ -222,9 +217,9 @@ def test_the_transport_merges_the_request_layer_over_the_client_s() -> None:
 
     base = _client([], metadata={"tenant": "A"})._get_base_client()
     opts = RequestOptions(method="POST", url="/v1/x")
-    headers = base._build_headers(opts, {"request_metadata": {"x": 1}})
+    headers, _ = base._build_headers(opts, {"request_metadata": {"x": 1}})
     assert json.loads(headers["x-agentcc-metadata"]) == {"tenant": "A", "x": 1}
-    assert json.loads(base._build_headers(opts)["x-agentcc-metadata"]) == {
+    assert json.loads(base._build_headers(opts)[0]["x-agentcc-metadata"]) == {
         "tenant": "A"
     }
 
@@ -239,6 +234,7 @@ async def test_the_async_client_follows_the_rule() -> None:
     client = AsyncAgentCC(
         api_key="k",
         base_url=GW,
+        metadata_mode="merge",
         metadata=LAYERS["client"],
         http_client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
     )

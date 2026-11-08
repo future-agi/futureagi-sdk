@@ -92,6 +92,7 @@ def test_a_client_built_before_the_variable_was_set_refuses_to_send(
     assert name in str(info.value) and KEY not in str(info.value)
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_a_with_options_copy_refuses_too(monkeypatch: pytest.MonkeyPatch) -> None:
     seen: list[httpx.Request] = []
     copy = _sync(seen).with_options(timeout=5)

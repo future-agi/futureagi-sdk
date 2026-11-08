@@ -64,7 +64,7 @@ def _sse(frames: list[str]) -> bytes:
 
 
 def _client(
-    reply: httpx.Response | Any, seen: list[httpx.Request] | None = None
+    reply: httpx.Response | Any, seen: list[httpx.Request] | None = None, **kwargs: Any
 ) -> AgentCC:
     def handler(request: httpx.Request) -> httpx.Response:
         if seen is not None:
@@ -76,6 +76,7 @@ def _client(
         base_url=GW,
         max_retries=0,
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        **kwargs,
     )
 
 
@@ -97,7 +98,8 @@ def test_a_data_error_frame_on_a_200_stream_raises_a_typed_stream_error() -> Non
         "stream_blocked",
         None,
     )
-    assert str(err) == "Content blocked by streaming guardrail"
+    assert str(err) == f"Stream error: {err.body}"
+    assert err.body["message"] == "Content blocked by streaming guardrail"
     assert texts == ["Hello", " world"]
 
 
@@ -129,7 +131,7 @@ def test_a_responses_event_error_raises_a_typed_stream_error() -> None:
             events.append(event.type)
     assert events == ["response.created", "response.output_text.delta"]
     assert info.value.code == "stream_blocked"
-    assert info.value.request_id == "req-resp-1"
+    assert info.value.request_id is None  # Non-ULID wire IDs are not gateway identity.
     assert str(info.value) == "Content blocked by streaming guardrail"
     # type, code and param all come from the frame; the gateway's frame is flat and
     # its "type" is "error".
@@ -149,10 +151,11 @@ def test_a_responses_event_error_raises_a_typed_stream_error() -> None:
 @pytest.mark.parametrize(
     "kwargs, header, value",
     [
-        (
+        pytest.param(
             {"config": GatewayConfig(cache=CacheConfig(ttl=60))},
             "x-agentcc-config",
-            '{"cache":{"ttl":60,"force_refresh":false}}',
+            '{"cache":{"enabled":true,"strategy":"exact","ttl":60,"force_refresh":false,"cache_by_model":true}}',
+            id='kwargs0-x-agentcc-config-{"cache":{"ttl":60,"force_refresh":false}}',
         ),
         ({"cache_ttl": 60}, "x-agentcc-cache-ttl", "60"),
         ({"cache_namespace": "ns"}, "x-agentcc-cache-namespace", "ns"),
@@ -203,9 +206,10 @@ def test_b_per_request_parameters_reach_the_wire(
     assert seen[0].headers[header] == value
 
 
-def test_b_a_session_sends_id_name_path_and_metadata() -> None:
+@pytest.mark.parametrize("mode", ["replace", "merge"])
+def test_b_a_session_sends_id_name_path_and_metadata(mode: str) -> None:
     seen: list[httpx.Request] = []
-    client = _client(httpx.Response(200, json=COMPLETION), seen)
+    client = _client(httpx.Response(200, json=COMPLETION), seen, metadata_mode=mode)
     with client.session(
         session_id="s1", name="checkout", metadata={"cart": "c1"}, path="/pay"
     ) as sess:
@@ -215,7 +219,12 @@ def test_b_a_session_sends_id_name_path_and_metadata() -> None:
     assert headers["x-agentcc-session-id"] == "s1"
     assert headers["x-agentcc-session-name"] == "checkout"
     assert headers["x-agentcc-session-path"] == "/pay/confirm"
-    assert json.loads(headers["x-agentcc-metadata"]) == {"cart": "c1"}
+    if mode == "merge":
+        assert json.loads(headers["x-agentcc-metadata"]) == {"cart": "c1"}
+    else:
+        # Published default: per-key session metadata headers.
+        assert headers["x-agentcc-metadata-cart"] == "c1"
+        assert "x-agentcc-metadata" not in headers
 
 
 def test_b_timeout_ms_is_a_response_header_only() -> None:
@@ -279,7 +288,7 @@ def test_c_a_guardrail_block_carries_the_guardrail_headers() -> None:
     assert (err.guardrail_name, err.guardrail_action) == ("pii", "block")
     assert err.guardrail_confidence == 0.93
     assert err.guardrail_message == "PII detected"
-    assert err.request_id == "req-g"
+    assert err.request_id is None  # Non-ULID wire IDs are not gateway identity.
 
 
 # (d) usage from the finish chunk, with no stream_options -------------------------

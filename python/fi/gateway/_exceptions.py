@@ -6,17 +6,22 @@ from typing import Any
 
 from fi._sdk_exception import SDKException
 from fi.gateway._refusal_details import _MetadataDetails, _RefusalDetails
+from fi.gateway._gateway_evidence import GatewayEvidence, _EvidenceDetails, capture_gateway_evidence
 
 
 class AgentCCError(SDKException):
     """Base exception for all gateway SDK errors."""
 
     message: str
+    dispatched = _EvidenceDetails.dispatched
+    gateway_request_id = _EvidenceDetails.gateway_request_id
+    client_request_id = _EvidenceDetails.client_request_id
 
     def __init__(self, message: str) -> None:
         # Preserve Exception.args and implicit exception context.
         Exception.__init__(self, message)
         self.message = message
+        self.gateway_evidence = GatewayEvidence()
 
     def __str__(self) -> str:
         return self.message
@@ -31,14 +36,26 @@ class AgentCCError(SDKException):
 class APIConnectionError(AgentCCError):
     """Network-level errors."""
 
-    def __init__(self, message: str, *, request: Any = None) -> None:
+    # Transport translation may preserve the public class without permitting replay.
+    _retryable: bool = True
+    _status_error: APIStatusError | None = None
+
+    def __init__(
+        self, message: str, *, request: Any = None,
+        gateway_evidence: GatewayEvidence | None = None,
+    ) -> None:
         super().__init__(message)
         self.request = request
+        if gateway_evidence is not None:
+            self.gateway_evidence = gateway_evidence
 
 
 class APITimeoutError(APIConnectionError):
-    def __init__(self, message: str = "Request timed out", *, request: Any = None) -> None:
-        super().__init__(message, request=request)
+    def __init__(
+        self, message: str = "Request timed out", *, request: Any = None,
+        gateway_evidence: GatewayEvidence | None = None,
+    ) -> None:
+        super().__init__(message, request=request, gateway_evidence=gateway_evidence)
 
 
 class APIStatusError(AgentCCError):
@@ -58,6 +75,9 @@ class APIStatusError(AgentCCError):
     policy_revision = _MetadataDetails.policy_revision
     suggestions = _MetadataDetails.suggestions
     model_alias_requested = _MetadataDetails.model_alias_requested
+    model = _MetadataDetails.model
+    candidates = _MetadataDetails.candidates
+    __reduce__ = _RefusalDetails.__reduce__
 
     @property
     def metadata(self) -> dict[str, Any]:
@@ -68,6 +88,7 @@ class APIStatusError(AgentCCError):
         self, message: str, *, status_code: int, type: str | None = None,
         code: str | None = None, param: str | None = None, response: Any = None,
         body: Any = None, request_id: str | None = None,
+        gateway_evidence: GatewayEvidence | None = None,
     ) -> None:
         super().__init__(message)
         self.status_code = status_code
@@ -76,7 +97,9 @@ class APIStatusError(AgentCCError):
         self.param = param
         self.response = response
         self.body = body
-        self.request_id = request_id
+        self.gateway_evidence = gateway_evidence if gateway_evidence is not None else capture_gateway_evidence(response)
+        # Explicit constructor IDs remain supported; wire IDs are validated only.
+        self.request_id = self.gateway_request_id if response is not None else request_id
 
     @property
     def category(self) -> str:
@@ -88,12 +111,23 @@ class APIStatusError(AgentCCError):
     @property
     def remedy(self) -> str | None:
         """Canonical corrective action, or ``None`` when no action is prescribed."""
-        from fi.gateway._retry_policy import refusal_guidance
+        from fi.gateway._retry_policy import (
+            _UNKNOWN_DISPATCH_REMEDY, no_code_outcome_unknown, refusal_guidance,
+        )
 
+        if no_code_outcome_unknown(self.status_code, self.code, self.gateway_evidence):
+            return _UNKNOWN_DISPATCH_REMEDY
         return refusal_guidance(self.status_code, self.code, getattr(self, "metadata", None))[1]
 
     def __str__(self) -> str:
-        return f"Error code: {self.status_code} - {self.message}"
+        from fi.gateway._retry_policy import _REFUSALS, _UNKNOWN_DISPATCH_REMEDY
+
+        text = f"Error code: {self.status_code} - {self.message}"
+        canonical = isinstance(self.code, str) and (self.status_code, self.code) in _REFUSALS
+        if (not canonical and self.gateway_evidence._request_id_present is True
+                and self.dispatched == "unknown"):
+            text += " " + _UNKNOWN_DISPATCH_REMEDY
+        return text
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(status_code={self.status_code}, message={self.message!r})"
@@ -101,6 +135,7 @@ class APIStatusError(AgentCCError):
     @classmethod
     def from_response(cls, response: Any) -> APIStatusError:
         status_code: int = response.status_code
+        evidence = capture_gateway_evidence(response)
         body: Any = None
         error_data: dict[str, Any] = {}
         try:
@@ -120,11 +155,12 @@ class APIStatusError(AgentCCError):
         error_param = error_data.get("param")
         if error_code == "wrong_region":
             message = "Gateway request reached the wrong region; check the explicitly configured origin."
-        request_id = response.headers.get("x-agentcc-request-id") if hasattr(response, "headers") else None
+        request_id = evidence.gateway_request_id
         if status_code == 246:
             return GuardrailWarning._from_response(
                 message=message, response=response, body=body, request_id=request_id,
                 error_type=error_type, error_code=error_code, error_param=error_param,
+                gateway_evidence=evidence,
             )
         # The class follows (status, error.code); see classify_refusal.
         from fi.gateway._retry_policy import classify_refusal
@@ -133,7 +169,7 @@ class APIStatusError(AgentCCError):
         exc = exc_cls(
             message=message, status_code=status_code, type=error_type,
             code=error_code, param=error_param, response=response,
-            body=body, request_id=request_id,
+            body=body, request_id=request_id, gateway_evidence=evidence,
         )
         if isinstance(exc, RateLimitError) and hasattr(response, "headers"):
             exc._parse_ratelimit_headers(response.headers)
@@ -280,11 +316,12 @@ class GuardrailWarning(APIStatusError):
     def _from_response(
         cls, *, message: str, response: Any, body: Any, request_id: str | None,
         error_type: str | None, error_code: str | None, error_param: str | None,
+        gateway_evidence: GatewayEvidence | None = None,
     ) -> GuardrailWarning:
         exc = cls(
             message=message, status_code=246, type=error_type, code=error_code,
             param=error_param, response=response, body=body,
-            request_id=request_id, completion=body,
+            request_id=request_id, completion=body, gateway_evidence=gateway_evidence,
         )
         if hasattr(response, "headers"):
             exc._parse_guardrail_headers_warning(response.headers)

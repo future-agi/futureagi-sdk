@@ -1,14 +1,7 @@
-"""Audio uploads are multipart forms, as the gateway reads them.
+"""Explicit normalized audio uploads use repeated list fields and string paths.
 
-``audio.transcriptions.create`` and ``audio.translations.create`` send the audio as the
-form's ``file`` part and every other field as a form value (a list as repeated
-``<name>[]`` values, the name the gateway reads for ``timestamp_granularities``); the
-gateway parameters stay headers. agentcc 1.x put ``file`` into a JSON body: bytes, file
-objects and tuples failed to serialize before any request, and a JSON-able value reached
-the gateway as ``application/json``, which it refuses with ``400 invalid_form``.
-
-A ``str`` remains a deprecated file path in 0.x; callers are directed to ``Path(...)``.
-Unsafe NUL/newline paths and text-mode files are refused before any request.
+Published uploads already use multipart; their string-content and JSON field
+semantics remain the default and are covered by the published-contract tests.
 """
 
 from __future__ import annotations
@@ -29,7 +22,7 @@ from ._forms import read_form
 GW = "http://127.0.0.1:8090"
 AUDIO = b"RIFF\x00\x01fake-wave\xff"
 TEXT = {"text": "hello world"}
-COST = {"x-agentcc-cost": "0.25", "x-agentcc-request-id": "req-1"}
+COST = {"x-agentcc-cost": "0.25", "x-agentcc-request-id": "01ARZ3NDEKTSV4RRFFQ69G5FAV"}
 
 
 def _sync(seen: list[httpx.Request], *replies: httpx.Response, **kw: Any) -> AgentCC:
@@ -42,6 +35,8 @@ def _sync(seen: list[httpx.Request], *replies: httpx.Response, **kw: Any) -> Age
     return AgentCC(
         api_key="gw-key",
         base_url=GW,
+        audio_upload_mode="normalized",
+        metadata_mode="merge",
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
         **kw,
     )
@@ -55,6 +50,8 @@ def _async(seen: list[httpx.Request], **kw: Any) -> AsyncAgentCC:
     return AsyncAgentCC(
         api_key="gw-key",
         base_url=GW,
+        audio_upload_mode="normalized",
+        metadata_mode="merge",
         http_client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
         **kw,
     )
@@ -148,12 +145,11 @@ def test_translation_fields_extra_body_and_keyword_arguments() -> None:
 
 @pytest.mark.parametrize("route", ["transcriptions", "translations"])
 def test_a_str_is_refused_before_any_request(route: str, tmp_path: Path) -> None:
-    """Historical id: a safe string path now warns and uploads its file bytes."""
+    """Historical id: explicit Path inputs read audio rather than literal path text."""
     path = tmp_path / "a.wav"
     path.write_bytes(AUDIO)
     seen: list[httpx.Request] = []
-    with pytest.warns(DeprecationWarning, match=r"Path\(\.\.\.\)"):
-        result = getattr(_sync(seen).audio, route).create(file=str(path), model="whisper-1")
+    result = getattr(_sync(seen).audio, route).create(file=path, model="whisper-1")
     assert result.text == "hello world"
     assert len(seen) == 1 and seen[0].url.path == f"/v1/audio/{route}"
     assert _assert_form(seen[0], path.name, _guessed(path.name)) == {"model": ["whisper-1"]}
@@ -234,7 +230,7 @@ def test_the_answer_carries_its_metadata_and_cost() -> None:
     client = _sync(seen)
     result = client.audio.transcriptions.create(file=AUDIO, model="whisper-1")
     assert result.agentcc is not None
-    assert result.agentcc.request_id == "req-1"
+    assert result.agentcc.request_id == "01ARZ3NDEKTSV4RRFFQ69G5FAV"
     assert result.agentcc.cost == 0.25
     assert client.current_cost == 0.25
 
@@ -281,8 +277,7 @@ async def test_the_async_uploads_are_multipart_too(tmp_path: Path) -> None:
         seen = []
         path = tmp_path / "a.wav"
         path.write_bytes(AUDIO)
-        with pytest.warns(DeprecationWarning, match=r"Path\(\.\.\.\)"):
-            result = await getattr(_async(seen).audio, route).create(file=str(path), model="m")
+        result = await getattr(_async(seen).audio, route).create(file=path, model="m")
         assert result.text == "hello world"
         assert len(seen) == 1 and seen[0].url.path == f"/v1/audio/{route}"
         assert _assert_form(seen[0], path.name, _guessed(path.name)) == {"model": ["m"]}

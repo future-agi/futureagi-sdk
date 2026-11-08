@@ -72,6 +72,9 @@ def _construct(name: str) -> BaseException:
     return getattr(gw, name)(*args, **kwargs)
 
 
+@pytest.mark.filterwarnings('default:^fi\\.gateway\\..+ is a deprecated released compatibility API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^fi\\.gateway\\.AsyncGateway\\ is\\ a\\ deprecated\\ released\\ compatibility\\ API\\.:DeprecationWarning')
+@pytest.mark.filterwarnings('default:^fi\\.gateway\\.Gateway\\ is\\ a\\ deprecated\\ released\\ compatibility\\ API\\.:DeprecationWarning')
 def test_the_seventeen_errors_are_all_here() -> None:
     assert len(ERROR_NAMES) == 17
     assert set(ERROR_NAMES) == set(GOLDEN_ERRORS)

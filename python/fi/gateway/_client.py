@@ -36,7 +36,20 @@ from fi.gateway._deprecation import deprecated_options
 
 @deprecated_options("redact_messages", "pre_call_rules", "modify_params", "enable_json_schema_validation", "callbacks")
 class AgentCC(ClientState):
-    """Synchronous gateway client requiring a virtual key and explicit origin."""
+    """Synchronous gateway client requiring a virtual key and explicit origin.
+
+    Callbacks use the published relative request descriptor and model response
+    body. ``callback_mode='snapshot'`` opts into detached absolute-URL requests
+    and JSON response bodies without gateway metadata. Set
+    ``expanded_callback_events=True`` to enable cache, cost, fallback, guardrail
+    and session notifications in addition to the published request/stream hooks.
+    ``metadata_mode='merge'`` explicitly enables client/session/request dictionary
+    layering and JSON session metadata; the default replaces request metadata and
+    keeps the published per-key session headers, including on option copies.
+    ``audio_upload_mode='normalized'`` opts into string paths and repeated list
+    form fields. By default strings remain upload content; use ``Path`` to read
+    a local file without changing the published multipart serialization.
+    """
 
     def __init__(
         self, *, api_key: str | None = None, base_url: str | None = None,
@@ -48,6 +61,8 @@ class AgentCC(ClientState):
         http_client: Any = None, drop_params: bool = False, retry_policy: Any = None,
         redact_messages: bool = False, pre_call_rules: list[Any] | None = None,
         modify_params: bool = False, enable_json_schema_validation: bool = False,
+        callback_mode: str = "published", expanded_callback_events: bool = False,
+        metadata_mode: str = "replace", audio_upload_mode: str = "published",
     ) -> None:
         self._api_key = resolve_api_key(api_key)
         self._base_url = resolve_base_url(base_url)
@@ -57,8 +72,11 @@ class AgentCC(ClientState):
         self._default_query = default_query
         self._session_id = session_id
         self._metadata = metadata
+        self._init_metadata_mode(metadata_mode)
+        self._init_audio_upload_mode(audio_upload_mode)
         self._config = config
         self._callbacks = callbacks
+        self._init_callback_options(callback_mode, expanded_callback_events)
         self._http_client = http_client
         self._drop_params = drop_params
         self._retry_policy = retry_policy
@@ -78,6 +96,7 @@ class AgentCC(ClientState):
         self._files: Any = None
         self._lock = threading.Lock()
         self._user_copied = False
+        self._shares_pool = False
         self._cost = CostLedger()
         self._pool = HttpPool(http_client)
 
@@ -96,7 +115,7 @@ class AgentCC(ClientState):
                 api_key=self._api_key, base_url=self._base_url, timeout=self._timeout,
                 max_retries=self._max_retries, default_headers=self._default_headers,
                 default_query=self._default_query, session_id=self._session_id,
-                metadata=self._metadata, config=self._config,
+                metadata=self._metadata, config=self._config, metadata_mode=self._metadata_mode,
                 callbacks=self._callbacks,
                 http_client=self._http_client, retry_policy=self._retry_policy,
                 on_cost=self._cost.add, pool=self._pool,
@@ -158,20 +177,26 @@ class AgentCC(ClientState):
         metadata: Any = NOT_GIVEN, trace_id: Any = NOT_GIVEN,
         drop_params: Any = NOT_GIVEN,
     ) -> _Self:
-        """Copy options, keeping the client class and sharing pool/cost ownership."""
+        """Copy options and cost accounting; share an initialized transport's pool.
+
+        A copy made before the first use owns and closes its independent pool,
+        preserving the released lifecycle. Caller-provided HTTP clients stay shared.
+        """
         new = type(self)(**derived_options(
             self, timeout=timeout, max_retries=max_retries,
             extra_headers=extra_headers, extra_query=extra_query, session_id=session_id,
             metadata=metadata, trace_id=trace_id, drop_params=drop_params,
         ))
         new._cost = self._cost
-        new._pool = self._pool
         new._user_copied = True
+        if self._base_client is not None or self._pool.client is not None:
+            new._pool = self._pool
+            new._shares_pool = True
         return new
 
     def close(self) -> None:
         """Close only an SDK-owned pool; option copies do not own their shared pool."""
-        if not self._user_copied:
+        if not self._shares_pool:
             self._pool.close()
 
     def __enter__(self) -> AgentCC:

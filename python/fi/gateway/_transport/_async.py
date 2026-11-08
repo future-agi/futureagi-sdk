@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Awaitable, Callable
 from typing import Any
 
@@ -13,11 +14,18 @@ from fi.gateway._constants import (
     DEFAULT_KEEPALIVE_EXPIRY,
     DEFAULT_MAX_CONNECTIONS,
 )
-from fi.gateway._exceptions import APIConnectionError, APIStatusError, APITimeoutError
+from fi.gateway._exceptions import APIConnectionError, APIStatusError
+from fi.gateway._gateway_evidence import capture_gateway_evidence
+from fi.gateway._http_security import validate_destination
+from fi.gateway._transport._response import (
+    ResponseCapture, body_decode_error, aclose_response, safe_response, protect_stream_cleanup,
+)
+from fi.gateway._transport._scrub import scrub_sent_request
 from fi.gateway._transport._base import (
     BaseClient,
     RequestOptions,
     T,
+    _transport_error,
 )
 
 
@@ -42,21 +50,58 @@ class AsyncBaseClient(BaseClient):
     async def _send(
         self, options: RequestOptions, agentcc_params: dict[str, Any] | None
     ) -> httpx.Response:
-        """Send one attempt and raise the mapped error for a 246 or an error status."""
-        arguments = self._request_arguments(options, agentcc_params)
+        """Send and consume one attempt, including its completion-warning body."""
+        response = await self._send_response(options, agentcc_params, streaming=False)
+        self._remember_callback_response(options, response)
+        return response
+
+    async def _send_response(
+        self, options: RequestOptions, agentcc_params: Any, *, streaming: bool,
+    ) -> httpx.Response:
+        arguments, composed_names = self._request_arguments(options, agentcc_params, stream=streaming)
         timeout = options.timeout or self._timeout
         client = self._ensure_client()
-
+        capture = ResponseCapture()
+        failure = None
+        request = response = error = None
         try:
-            response = await client.request(
-                **arguments, timeout=timeout, follow_redirects=False,
-            )
-        except httpx.TimeoutException as e:
-            raise APITimeoutError(f"Request timed out: {e}") from e
-        except httpx.ConnectError as e:
-            raise APIConnectionError(f"Connection error: {e}") from e
-
-        options._callback_http = response
+            with capture.client(client, asynchronous=True) as sender:
+                try:
+                    if streaming:
+                        request = sender.build_request(**arguments, timeout=timeout)
+                        validate_destination(self._base_url, str(request.url), warn_cleartext=False)
+                        response = await sender.send(request, stream=True, follow_redirects=False)
+                    else:
+                        # Preserve the caller's request() override without building
+                        # or consuming an upload twice. Capture still observes each
+                        # actual exchange before response hooks and body readers.
+                        url = httpx.URL(arguments["url"], params=client.params or None)
+                        validate_destination(self._base_url, str(url), warn_cleartext=False)
+                        response = await sender.request(**arguments, timeout=timeout, follow_redirects=False)
+                except BaseException as exc:
+                    error = exc
+                    raise
+                finally:
+                    scrub_sent_request(request, response, error, composed_names)
+                    capture.scrub(composed_names)
+            capture.capture(response)
+            if not streaming or response.status_code == 246 or response.status_code >= 400:
+                await response.aread()
+        except httpx.TransportError as exc:
+            failure = _transport_error(exc, capture.evidence, capture.status, capture.response)
+        except (httpx.RequestError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            if capture.response is not None and capture.status is not None and capture.status >= 400:
+                failure = APIStatusError.from_response(safe_response(capture.response))
+            else:
+                failure = body_decode_error(exc, capture.evidence)
+        finally:
+            if error is not None or failure is not None or not streaming or (capture.status is not None and (
+                capture.status == 246 or capture.status >= 400
+            )):
+                await aclose_response(capture.response)
+        if failure is not None:
+            # No original request-bearing exception in either cause or context.
+            raise failure
         self._check_status(response)
         return response
 
@@ -91,6 +136,7 @@ class AsyncBaseClient(BaseClient):
         )
         loop_max = self._retry_loop_bound(max_retries)
         last_exc: Exception | None = None
+        in_flight_replayed = False
 
         self._dispatch_callback("on_request_start", options)
 
@@ -101,10 +147,19 @@ class AsyncBaseClient(BaseClient):
                 return result
             except (APIStatusError, APIConnectionError) as exc:
                 last_exc = exc
+                if in_flight_replayed:
+                    # The one credit replay exhausts this request, even if the
+                    # next failure is a different status, connection or timeout.
+                    self._dispatch_callback("on_error", options, exc)
+                    raise
                 delay = self._retry_delay(options, exc, attempt, max_retries)
                 if delay is None:
                     raise
+                in_flight_replayed = isinstance(exc, APIStatusError) and exc.status_code == 402
                 await anyio.sleep(delay)
+            except Exception as exc:
+                self._dispatch_callback("on_error", options, exc)
+                raise
 
         # Unreachable while every limit is at most the loop bound; kept as a guard.
         if last_exc is not None:
@@ -141,27 +196,7 @@ class AsyncBaseClient(BaseClient):
         agentcc_params: dict[str, Any] | None = None,
     ) -> httpx.Response:
         """Execute a streaming request and return the raw response."""
-        arguments = self._request_arguments(options, agentcc_params)
-        timeout = options.timeout or self._timeout
-        client = self._ensure_client()
-
-        try:
-            response = await client.send(
-                client.build_request(**arguments, timeout=timeout),
-                stream=True, follow_redirects=False,
-            )
-        except httpx.TimeoutException as e:
-            raise APITimeoutError(f"Request timed out: {e}") from e
-        except httpx.ConnectError as e:
-            raise APIConnectionError(f"Connection error: {e}") from e
-
-        if response.status_code == 246 or response.status_code >= 400:
-            try:
-                await response.aread()
-                self._check_status(response)
-            finally:
-                await response.aclose()
-
+        response = await self._send_response(options, agentcc_params, streaming=True)
         self._record_header_cost(response)
         return response
 
@@ -172,18 +207,28 @@ class AsyncBaseClient(BaseClient):
 
         self._bind_request(options, agentcc_params)
         self._dispatch_callback("on_request_start", options)
+        response = None
+        failure = None
         try:
             response = await self._stream_request(options, agentcc_params)
+            protect_stream_cleanup(response)
             on_chunk, on_finish = self._stream_hooks(options, response)
             if chunk_cls is ResponseStreamEvent:
                 stream = AsyncResponseStream(response, on_chunk=on_chunk, on_finish=on_finish)
             else:
                 stream = AsyncStream(response, chunk_cls, on_chunk=on_chunk, on_finish=on_finish)
+        except httpx.TransportError as exc:
+            failure = _transport_error(exc, capture_gateway_evidence(response),
+                                       response.status_code if response is not None else None, response)
+        except (httpx.RequestError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            failure = (body_decode_error(exc, capture_gateway_evidence(response))
+                       if response is not None else exc)
         except Exception as exc:
-            if "response" in locals():
-                await response.aclose()
-            self._dispatch_callback("on_error", options, exc)
-            raise
+            failure = exc
+        if failure is not None:
+            await aclose_response(response)
+            self._dispatch_callback("on_error", options, failure)
+            raise failure
         self._dispatch_callback("on_stream_start", options, StreamInfo(agentcc=stream.agentcc))
         return stream
 

@@ -66,7 +66,7 @@ def _check(exc, route, sleeps):
     assert (exc.status_code, exc.type, exc.code) == (403, "permission", CODE)
     assert exc.message == MESSAGE and str(exc) == f"Error code: 403 - {MESSAGE}"
     assert exc.body == BODY and exc.remedy == REMEDY
-    assert exc.request_id == "req-credits-off"
+    assert exc.request_id is None  # Non-ULID wire IDs are not gateway identity.
 
 
 def _route(mock):

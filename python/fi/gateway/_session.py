@@ -1,4 +1,4 @@
-"""Context-local session tracking with compact layered metadata headers."""
+"""Context-local sessions with published per-key metadata headers by default."""
 
 from __future__ import annotations
 
@@ -21,12 +21,15 @@ class Session:
     name: str | None = None
     path: str = "/"
     metadata: dict[str, Any] = field(default_factory=dict)
+    metadata_mode: str = "replace"
     _total_cost: float = field(default=0.0, init=False, repr=False)
     _request_count: int = field(default=0, init=False, repr=False)
     _total_tokens: int = field(default=0, init=False, repr=False)
     _steps: list[str] = field(default_factory=list, init=False, repr=False)
 
     def __post_init__(self) -> None:
+        if self.metadata_mode not in {"replace", "merge"}:
+            raise ValueError("metadata_mode must be 'replace' or 'merge'")
         if not self.session_id:
             self.session_id = uuid.uuid4().hex
 
@@ -44,8 +47,12 @@ class Session:
             headers["x-agentcc-session-name"] = self.name
         if self.path != "/":
             headers["x-agentcc-session-path"] = self.path
-        if self.metadata:
-            headers["x-agentcc-metadata"] = json.dumps(self.metadata, separators=(",", ":"))
+        if self.metadata_mode == "merge":
+            if self.metadata:
+                headers["x-agentcc-metadata"] = json.dumps(self.metadata, separators=(",", ":"))
+        else:
+            for key, value in self.metadata.items():
+                headers[f"x-agentcc-metadata-{key}"] = str(value)
         return headers
 
     def track_request(self, cost: float = 0.0, tokens: int = 0) -> None:
@@ -75,12 +82,17 @@ class SessionContext:
         path: str | None = None,
     ) -> None:
         self._client = client
-        self._session = Session(session_id=session_id or "", name=name, metadata=metadata or {})
+        self._session = Session(
+            session_id=session_id or "", name=name, metadata=metadata or {},
+            metadata_mode=getattr(client, "_metadata_mode", "replace"),
+        )
         if path:
             self._session.path = path if path.startswith("/") else f"/{path}"
         self._token: contextvars.Token[Any] | None = None
 
     def _dispatch(self, method: str, *args: Any) -> None:
+        if not getattr(self._client, "_expanded_callback_events", False):
+            return
         for callback in self._client._callbacks or []:
             fn = getattr(callback, method, None)
             if fn is not None:

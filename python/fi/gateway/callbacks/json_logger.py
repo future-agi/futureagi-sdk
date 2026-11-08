@@ -12,6 +12,7 @@ from fi.gateway.callbacks.base import (
     CallbackRequest,
     CallbackResponse,
     StreamInfo,
+    redact_credentials,
 )
 
 
@@ -80,7 +81,7 @@ class JSONLoggingCallbackHandler(CallbackHandler):
     # ------------------------------------------------------------------
 
     def _write_log(self, entry: dict[str, Any]) -> None:
-        line = json.dumps(entry, default=str)
+        line = json.dumps(redact_credentials(entry), default=str)
         if self._file_path:
             with open(self._file_path, "a") as f:
                 f.write(line + "\n")

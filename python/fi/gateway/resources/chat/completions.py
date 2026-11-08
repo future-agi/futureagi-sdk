@@ -1,4 +1,4 @@
-"""Chat completions: lane overloads/decomposition with released request adapters."""
+"""Chat completions: current overloads/decomposition with released request adapters."""
 
 from __future__ import annotations
 

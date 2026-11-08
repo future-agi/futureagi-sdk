@@ -1,3 +1,6 @@
+import { evidenceFromHeaders, gatewayRequestIdPresence, parseGatewayEvidence } from "./gateway-evidence.js";
+import type { GatewayEvidence } from "./gateway-evidence.js";
+
 /** Gateway refusals are keyed by HTTP status and code, never type or message prose. */
 type RefusalClass = "InsufficientCreditsError" | "AgentBudgetExhaustedError" | "BudgetExceededError"
   | "RateLimitError" | "ServiceUnavailableError" | "PermissionDeniedError" | "FutureAGICreditsOffError"
@@ -20,8 +23,11 @@ interface RefusalDetails extends Refusal {
 
 export const CREDITS_OFF_REMEDY = "An organization Owner or Admin uses the \"Turn on Future AGI credits\" control on the Gateway Models page, or adds their own provider key on the Gateway Providers page.";
 
-// Contract r3 (49 current rows); pending wire additions are deliberately absent.
+// Contract rows are normative client mappings, not deployment certification.
 const REFUSALS = new Map<string, RefusalDetails>([
+  ["403:managed_model_unpriced", { name: "PermissionDeniedError", retry: "never", category: "permission", remedy: "Choose a priced model or use your own provider key." }],
+  ["400:managed_model_ambiguous", { name: "BadRequestError", retry: "never", category: "generic", remedy: "Choose a provider-prefixed candidate ID or use the organization's own provider key for a candidate." }],
+  ["400:managed_resource_unsupported", { name: "BadRequestError", retry: "never", category: "generic", remedy: "Use a supported managed request shape or your own provider key." }],
   ["402:managed_credits_exhausted", { name: "InsufficientCreditsError", retry: "never", category: "out_of_credits", remedy: "Add credit on Settings Billing; on a grant-only install ask its operator to grant credit; alternatively use your own provider key on Gateway Providers." }],
   ["402:managed_credits_insufficient", { name: "InsufficientCreditsError", retry: "never", category: "out_of_credits", remedy: "For in-flight holds, wait for Retry-After; otherwise add credit, lower max_tokens or use your own provider key." }],
   ["402:agent_budget_exhausted", { name: "AgentBudgetExhaustedError", retry: "never", category: "agent_budget", remedy: "Raise the run budget or start a new run; a call-only budget may also be lowered by reducing max_tokens or choosing a cheaper model. Administrative ceilings need an authorized policy change." }],
@@ -122,18 +128,46 @@ export function classifyRefusal(status: number, body: unknown): Refusal | null {
   return entry ? { name: entry.name, retry: entry.retry } : null;
 }
 
-/** Strict finite positive delta-seconds; partial numbers and HTTP dates are not hints. */
-export function positiveRetryAfter(headers?: Headers): number | null {
-  const raw = headers?.get("retry-after")?.trim();
-  if (!raw || !/^[+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(raw)) return null;
+/**
+ * Maximum automatic Retry-After: 2,147,483 seconds, fitting the signed 32-bit
+ * millisecond timer supported by Node and browsers. Larger positive integer
+ * hints stop automatic replay rather than shortening the server's wait. Valid
+ * hints on recognized retryable rows are not subject to the legacy 60s cap.
+ * Fractional, signed, exponent, HTTP-date and comma-combined hints never
+ * authorize conditional credit/spend-window replay.
+ */
+export const MAX_RETRY_AFTER_SECONDS = 2_147_483;
+function retryAfterSeconds(headers?: Headers): number | null {
+  const raw = headers?.get("retry-after")?.replace(/^[ \t]+|[ \t]+$/g, "");
+  if (!raw || /[^0-9]/.test(raw)) return null;
   const seconds = Number(raw);
-  return Number.isFinite(seconds) && seconds > 0 && Number.isFinite(seconds * 1000) ? seconds * 1000 : null;
+  return seconds > 0 ? seconds : null;
+}
+/** Strict positive ASCII integer delta-seconds within the SDK timer maximum. */
+export function positiveRetryAfter(headers?: Headers): number | null {
+  const seconds = retryAfterSeconds(headers);
+  return seconds !== null && seconds <= MAX_RETRY_AFTER_SECONDS ? seconds * 1000 : null;
 }
 
-/** Only absent/null codes keep status retries; unrecognized codes are terminal. */
-export function refusalRetry(status: number, body: unknown, headers?: Headers): Refusal["retry"] {
+export const UNCONFIRMED_DISPATCH_REMEDY = "The gateway did not confirm whether the request was applied; check whether it was applied before sending it again.";
+
+/** Only response headers establish dispatch; body hints never authorize a replay. */
+export function hasUnconfirmedDispatch(status: number, body: unknown, headers?: Headers, evidence?: GatewayEvidence): boolean {
+  const snapshot = evidence ?? (headers ? evidenceFromHeaders(headers) : parseGatewayEvidence());
+  // Explicit contract rows take precedence. Unknown/mismatched codes do not:
+  // a gateway identity with missing or invalid dispatch still needs guidance.
+  return refusalDetails(status, body) === null
+    && gatewayRequestIdPresence(snapshot) !== "absent"
+    && snapshot.dispatched !== false;
+}
+
+/** Explicit contract rows win; all other retries require a safe dispatch boundary. */
+export function refusalRetry(status: number, body: unknown, headers?: Headers, evidence?: GatewayEvidence): Refusal["retry"] {
+  if (hasUnconfirmedDispatch(status, body, headers, evidence)) return "never";
   const retry = refusalDetails(status, body)?.retry
     ?? (errorObject(body)?.code == null ? "status" : "never");
+  // Never turn an unrepresentable wait into an immediate timer or shorter backoff.
+  if ((retryAfterSeconds(headers) ?? 0) > MAX_RETRY_AFTER_SECONDS) return "never";
   return (retry === "after" || retry === "once") && positiveRetryAfter(headers) === null ? "never" : retry;
 }
 

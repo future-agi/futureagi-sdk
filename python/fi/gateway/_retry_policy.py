@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 import math
+import re
+
+from fi.gateway._constants import RETRYABLE_STATUS_CODES
 
 from fi.gateway import _exceptions as _errors
 from fi.gateway._refusal_contract import _REFUSALS, _CREDITS_OFF_REMEDY
@@ -17,6 +21,26 @@ _FLAT_CODES = frozenset({
 # The one refusal that may pass: credits are short only while other requests hold them.
 _IN_FLIGHT = {"limit_source": "agentcc_in_flight", "remedy_hint": "retry"}
 _RETRIED_IN_FLIGHT = (402, "managed_credits_insufficient")
+_UNKNOWN_DISPATCH_REMEDY = (
+    "The gateway did not confirm whether the request was applied; "
+    "check whether it was applied before sending it again."
+)
+
+
+def no_code_outcome_unknown(status_code: int, code: object, headers: object) -> bool:
+    """A no-code status fallback may replay only before gateway dispatch.
+
+    Header presence, not body fields or a locally supplied request ID, establishes
+    that the response reached the gateway. Only an explicit false dispatch header
+    clears an ambiguous outcome; malformed or conflicting values fail closed.
+    Coded refusals retain their contract-specific decisions.
+    """
+    if code is not None or status_code not in RETRYABLE_STATUS_CODES:
+        return False
+    from fi.gateway._gateway_evidence import GatewayEvidence, parse_gateway_evidence
+
+    evidence = headers if isinstance(headers, GatewayEvidence) else parse_gateway_evidence(headers)
+    return evidence._request_id_present is not False and evidence.dispatched is not False
 
 
 def classify_refusal(
@@ -29,8 +53,9 @@ def classify_refusal(
     settings), ``True`` (only after a positive Retry-After, within the configured
     status retry limit; 402 and 409 use the 429-equivalent limit), or ``None``
     (standard status retry). An unknown or mismatched pair keeps the
-    status's class but is never retried. Only a missing/null code retains status
-    retry; an empty or malformed non-null code also fails closed.
+    status's class but is never retried. A missing/null code defers to status retry
+    subject to the transport's no-code dispatch-header gate; an empty or malformed
+    non-null code also fails closed.
     """
     entry = _REFUSALS.get((status_code, code)) if isinstance(code, str) else None
     if entry is None:
@@ -47,15 +72,24 @@ def classify_refusal(
 
 
 def positive_retry_after(headers: object) -> float | None:
-    """Read finite positive delta-seconds; never infer a delay from body metadata."""
-    if not hasattr(headers, "get"):
+    """Read positive ASCII integer delta-seconds within the portable sleep range.
+
+    Signs, fractions, exponents, dates and combined/duplicate fields cannot
+    authorize a conditional refusal replay. Only HTTP SP/HTAB is outer whitespace.
+    """
+    if not isinstance(headers, Mapping):
         return None
-    raw = headers.get("retry-after") or headers.get("Retry-After")
+    values = [value for name, value in headers.items() if name.lower() == "retry-after"]
+    if len(values) != 1 or not isinstance(values[0], str):
+        return None
+    raw = values[0].strip(" \t")
+    if re.fullmatch(r"[0-9]+", raw) is None:
+        return None
     try:
         seconds = float(raw)
-    except (TypeError, ValueError, OverflowError):
+    except (ValueError, OverflowError):
         return None
-    return seconds if math.isfinite(seconds) and seconds > 0 else None
+    return seconds if math.isfinite(seconds) and 0 < seconds <= 2**31 - 1 else None
 
 
 def _is_in_flight(status_code: int, code: object, metadata: object) -> bool:

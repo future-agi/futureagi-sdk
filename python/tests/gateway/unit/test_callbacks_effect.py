@@ -1,12 +1,4 @@
-"""Effect tests: every callback fi.gateway keeps shows output when a real client fires it.
-
-A callback symbol stays only if a test shows its effect on the
-hooks that fire (``on_request_start``, ``on_request_end``, ``on_retry``, ``on_error``).
-Each test here builds an ``AgentCC`` / ``AsyncAgentCC`` on an ``httpx.MockTransport`` and
-reads what the callback produced. The agentcc 1.0 golden records the opposite for the
-names that left (``utility.json_logging_callback``, ``mock.recorders``: their
-``on_request_end`` raised on every request and nothing was written).
-"""
+"""Offline effects of published callbacks and explicit metrics/recording opt-ins."""
 
 from __future__ import annotations
 
@@ -21,9 +13,11 @@ import pytest
 from fi.gateway import (AgentCC, AsyncAgentCC, BadRequestError,
                         InternalServerError)
 from fi.gateway.callbacks import (CallbackHandler, LoggingCallback,
-                                  MetricsCallback, RequestOptions)
+                                  MetricsCallback, RequestOptions, CallbackRequest, CallbackResponse)
 from fi.gateway.testing import RequestRecorder
 from fi.gateway.types.chat import ChatCompletion
+
+pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
 
 GW = "http://127.0.0.1:8090"
 COMPLETION = {
@@ -96,6 +90,7 @@ class _Seen(CallbackHandler):
         self.calls.append(("on_retry", (request, error, attempt, delay)))
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_the_hooks_get_the_request_descriptor_and_the_returned_model() -> None:
     seen = _Seen()
     result = _client([seen], 200).chat.completions.create(model="m", messages=MSG)
@@ -103,9 +98,22 @@ def test_the_hooks_get_the_request_descriptor_and_the_returned_model() -> None:
     request, response = seen.calls[1][1]
     assert isinstance(request, RequestOptions)
     assert (request.method, request.url) == ("POST", "/v1/chat/completions")
-    assert response is result and isinstance(response, ChatCompletion)
+    assert isinstance(response, CallbackResponse)
+    assert response._parsed is result and isinstance(result, ChatCompletion)
+    assert response.body["id"] == result.id
+    assert response.body == result.model_dump()
+
+    snapshot = _Seen()
+    snapshot_result = _client([snapshot], 200, callback_mode="snapshot").chat.completions.create(model="m", messages=MSG)
+    snapshot_request, snapshot_response = snapshot.calls[1][1]
+    assert isinstance(snapshot_request, CallbackRequest)
+    assert (snapshot_request.method, snapshot_request.url) == ("POST", GW + "/v1/chat/completions")
+    assert isinstance(snapshot_response, CallbackResponse)
+    assert snapshot_response._parsed is not snapshot_result
+    assert snapshot_response.body["id"] == snapshot_result.id
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_retry_then_error_fires_retry_then_error() -> None:
     seen = _Seen()
     with pytest.raises(BadRequestError):
@@ -119,10 +127,11 @@ def test_retry_then_error_fires_retry_then_error() -> None:
     assert isinstance(seen.calls[2][1][1], BadRequestError)
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_logging_callback_logs_every_firing_hook(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    with caplog.at_level(logging.INFO, logger="fi.gateway"):
+    with caplog.at_level(logging.INFO, logger="agentcc"):
         _client([LoggingCallback()], 200).chat.completions.create(
             model="m", messages=MSG
         )
@@ -131,7 +140,7 @@ def test_logging_callback_logs_every_firing_hook(
                 [LoggingCallback()], 503, 400, max_retries=1
             ).chat.completions.create(model="m", messages=MSG)
     lines = [
-        (r.levelname, r.getMessage()) for r in caplog.records if r.name == "fi.gateway"
+        (r.levelname, r.getMessage()) for r in caplog.records if r.name == "agentcc"
     ]
     assert lines[0] == ("INFO", "Request: POST /v1/chat/completions")
     assert lines[1] == (
@@ -146,8 +155,9 @@ def test_logging_callback_logs_every_firing_hook(
     assert len(lines) == 5
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_metrics_callback_counts_requests_errors_tokens_cost_and_latency() -> None:
-    metrics = MetricsCallback()
+    metrics = MetricsCallback(count_tokens=True)
     client = _client([metrics], 200, 200, 400, max_retries=0)
     client.chat.completions.create(model="m", messages=MSG)
     client.chat.completions.create(model="m", messages=MSG)
@@ -161,16 +171,17 @@ def test_metrics_callback_counts_requests_errors_tokens_cost_and_latency() -> No
     assert metrics.error_rate == pytest.approx(1 / 3)
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_request_recorder_records_the_request_and_the_response(tmp_path: Path) -> None:
     path = tmp_path / "recordings.json"
-    with RequestRecorder(str(path)) as recorder:
-        _client([recorder], 200).chat.completions.create(
+    with RequestRecorder(str(path), format="compact") as recorder:
+        _client([recorder], 200, callback_mode="snapshot").chat.completions.create(
             model="gpt-4o-mini", messages=MSG
         )
     (rec,) = json.loads(path.read_text())
     assert rec["request"] == {
         "method": "POST",
-        "url": "/v1/chat/completions",
+        "url": GW + "/v1/chat/completions",
         "body": {"model": "gpt-4o-mini", "messages": MSG},
     }
     assert rec["response"]["status_code"] == 200
@@ -179,9 +190,10 @@ def test_request_recorder_records_the_request_and_the_response(tmp_path: Path) -
     assert "agentcc" not in rec["response"]["body"]
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 async def test_the_async_client_fires_the_same_hooks() -> None:
     seen = _Seen()
-    metrics = MetricsCallback()
+    metrics = MetricsCallback(count_tokens=True)
     client = AsyncAgentCC(
         api_key="gw-key",
         base_url=GW,

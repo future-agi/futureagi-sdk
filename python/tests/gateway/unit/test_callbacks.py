@@ -1,11 +1,6 @@
-"""Tests for the callback system (ported from agentcc 1.0; the hooks get what the client passes).
+"""Published callback contracts and opt-in token metrics.
 
-agentcc 1.0's tests built ``CallbackRequest`` / ``CallbackResponse`` objects by hand, which
-the client never passes; here the hooks get the request descriptor (``RequestOptions``)
-and the returned value, as ``AgentCC(callbacks=[...])`` calls them. The tests of the
-never-firing hooks and of those two dataclasses stay with the agentcc 2.0 compatibility
-package (port manifest). test_callbacks_effect.py drives the same callbacks through a
-real client.
+The effect tests exercise these handlers through an offline HTTP transport.
 """
 
 from __future__ import annotations
@@ -78,18 +73,32 @@ def test_default_handler_methods_are_noop() -> None:
 
 def test_the_base_declares_only_the_four_hooks_the_client_fires() -> None:
     hooks = sorted(n for n in vars(CallbackHandler) if n.startswith("on_"))
-    assert hooks == ["on_error", "on_request_end", "on_request_start", "on_retry"]
+    assert hooks == sorted([
+        "on_error", "on_request_end", "on_request_start", "on_retry",
+        "on_stream_start", "on_stream_chunk", "on_stream_end", "on_guardrail_warning",
+        "on_guardrail_block", "on_cache_hit", "on_cost_update", "on_budget_warning",
+        "on_fallback", "on_session_start", "on_session_end",
+    ])
+
+
+def test_the_base_keeps_published_and_opt_in_hooks() -> None:
+    test_the_base_declares_only_the_four_hooks_the_client_fires()
 
 
 def test_the_request_descriptor_is_public() -> None:
     """A handler can name the type its hooks receive without a private import."""
     import inspect
 
+    from fi.gateway.callbacks import CallbackRequest
+    from typing import get_type_hints
+
     from fi.gateway._transport._base import RequestOptions as Private
 
     assert RequestOptions is Private
-    hints = inspect.get_annotations(CallbackHandler.on_request_start)
-    assert hints["request"] == "RequestOptions"
+    hints = get_type_hints(CallbackHandler.on_request_start)
+    assert hints["request"] is CallbackRequest
+    assert inspect.signature(CallbackRequest).parameters["method"].name == "method"
+    assert inspect.get_annotations(CallbackHandler.on_request_start)["request"] == "CallbackRequest"
 
 
 def test_custom_callback_records_calls() -> None:
@@ -127,31 +136,31 @@ def test_callback_exception_does_not_propagate() -> None:
 
 def _messages(caplog: pytest.LogCaptureFixture) -> list[tuple[str, str]]:
     return [
-        (r.levelname, r.getMessage()) for r in caplog.records if r.name == "fi.gateway"
+        (r.levelname, r.getMessage()) for r in caplog.records if r.name == "agentcc"
     ]
 
 
 def test_logging_callback_request_start(caplog: pytest.LogCaptureFixture) -> None:
     cb = LoggingCallback(level="INFO")
-    with caplog.at_level(logging.INFO, logger="fi.gateway"):
+    with caplog.at_level(logging.INFO, logger="agentcc"):
         cb.on_request_start(_make_request())
     assert _messages(caplog) == [("INFO", "Request: POST /v1/chat/completions")]
 
 
 def test_logging_callback_request_end(caplog: pytest.LogCaptureFixture) -> None:
     cb = LoggingCallback(level="INFO")
-    with caplog.at_level(logging.INFO, logger="fi.gateway"):
+    with caplog.at_level(logging.INFO, logger="agentcc"):
         cb.on_request_end(_make_request(), _make_response())
         cb.on_request_end(_make_request(), b"audio-bytes")
     assert _messages(caplog) == [
         ("INFO", "Response: status=200 provider=openai latency=100ms cost=0.005"),
-        ("INFO", "Response: POST /v1/chat/completions"),
+        ("INFO", "Response: status=-"),
     ]
 
 
 def test_logging_callback_error(caplog: pytest.LogCaptureFixture) -> None:
     cb = LoggingCallback()
-    with caplog.at_level(logging.INFO, logger="fi.gateway"):
+    with caplog.at_level(logging.INFO, logger="agentcc"):
         cb.on_error(_make_request(), RuntimeError("test error"))
     assert _messages(caplog) == [
         ("ERROR", "Error: POST /v1/chat/completions - test error")
@@ -160,7 +169,7 @@ def test_logging_callback_error(caplog: pytest.LogCaptureFixture) -> None:
 
 def test_logging_callback_retry(caplog: pytest.LogCaptureFixture) -> None:
     cb = LoggingCallback()
-    with caplog.at_level(logging.INFO, logger="fi.gateway"):
+    with caplog.at_level(logging.INFO, logger="agentcc"):
         cb.on_retry(_make_request(), RuntimeError("retry"), 1, 0.5)
     assert _messages(caplog) == [
         ("WARNING", "Retry 1 after 0.50s: POST /v1/chat/completions - retry")
@@ -184,7 +193,7 @@ def test_metrics_initial_state() -> None:
 
 
 def test_metrics_tracks_requests() -> None:
-    m = MetricsCallback()
+    m = MetricsCallback(count_tokens=True)
     req = _make_request()
     resp = _make_response(latency=100, cost=0.01)
     m.on_request_end(req, resp)

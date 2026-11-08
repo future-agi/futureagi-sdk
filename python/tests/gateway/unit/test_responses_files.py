@@ -33,6 +33,7 @@ class TestPropertyAccess:
 
 
 class TestResponses:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_responses_create_basic(self) -> None:
         respx.post("http://gateway.test/v1/responses").respond(
@@ -48,6 +49,7 @@ class TestResponses:
         assert len(result.output) == 1
         assert result.output[0].content[0].text == "Hello, world!"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_responses_create_with_tools(self) -> None:
         route = respx.post("http://gateway.test/v1/responses").respond(
@@ -69,6 +71,7 @@ class TestResponses:
         assert request_body["tools"] == tools
         assert request_body["tool_choice"] == "auto"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_responses_create_with_instructions(self) -> None:
         route = respx.post("http://gateway.test/v1/responses").respond(
@@ -86,6 +89,7 @@ class TestResponses:
         request_body = json.loads(route.calls[0].request.content)
         assert request_body["instructions"] == "You are a helpful assistant."
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_responses_create_with_previous_response_id(self) -> None:
         route = respx.post("http://gateway.test/v1/responses").respond(
@@ -103,6 +107,7 @@ class TestResponses:
         request_body = json.loads(route.calls[0].request.content)
         assert request_body["previous_response_id"] == "resp-000"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_responses_create_all_params(self) -> None:
         route = respx.post("http://gateway.test/v1/responses").respond(
@@ -135,6 +140,7 @@ class TestResponses:
         assert request_body["store"] is False
         assert request_body["metadata"] == {"tag": "test"}
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_responses_retrieve(self) -> None:
         respx.get("http://gateway.test/v1/responses/resp-001").respond(
@@ -148,6 +154,7 @@ class TestResponses:
         assert result.usage is not None
         assert result.usage.total_tokens == 15
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_responses_delete(self) -> None:
         respx.delete("http://gateway.test/v1/responses/resp-001").respond(204)
@@ -158,6 +165,7 @@ class TestResponses:
 
 
 class TestAsyncResponses:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     @pytest.mark.anyio
     async def test_async_responses_create_basic(self) -> None:
@@ -170,6 +178,7 @@ class TestAsyncResponses:
         assert result.id == "resp-001"
         assert result.model == "gpt-4o"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     @pytest.mark.anyio
     async def test_async_responses_retrieve(self) -> None:
@@ -180,6 +189,7 @@ class TestAsyncResponses:
         result = await client.responses.retrieve("resp-001")
         assert result.id == "resp-001"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     @pytest.mark.anyio
     async def test_async_responses_delete(self) -> None:

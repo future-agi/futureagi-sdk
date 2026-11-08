@@ -3,7 +3,7 @@ import * as gateway from "../src/index.js";
 import * as requestParts from "../src/request-parts.js";
 import { classifyRefusal } from "../src/refusal-policy.js";
 import { routeStream, routeText } from "../src/react/route.js";
-import { details, errorClass, HEADERS, IN_FLIGHT, refusal, setup } from "./onekey-test-helpers.js";
+import { details, errorClass, HEADERS, IN_FLIGHT, NO_CODE_REMEDY, refusal, setup } from "./onekey-test-helpers.js";
 
 const CODE = "future_agi_credits_off";
 const NAME = "FutureAGICreditsOffError";
@@ -39,7 +39,7 @@ afterEach(() => jest.restoreAllMocks());
 
 function check(error: gateway.APIStatusError) {
   expect(error).toBeInstanceOf(gateway.PermissionDeniedError);
-  expect(error).toMatchObject({ statusCode: 403, message: BODY.error.message, requestId: "req-refusal", body: BODY });
+  expect(error).toMatchObject({ statusCode: 403, message: BODY.error.message, requestId: null, body: BODY });
   expect(error.constructor).toBe(errorClass(NAME));
   expect(error.name).toBe(NAME);
   expect(details(error).remedy).toBe(REMEDY);
@@ -111,7 +111,8 @@ it.each(["permission_denied", "unknown"])("leaves 403 %s unchanged", async (code
   expect(fetch).toHaveBeenCalledTimes(1);
   expect(sleep).not.toHaveBeenCalled();
   expect(error.constructor).toBe(gateway.PermissionDeniedError);
-  expect(details(error).remedy).toBe(code === "permission_denied" ? CONTRACT_ROWS.find((row) => row.code === code)!.remedy : null);
+  // Explicit contract remedies win; otherwise unknown gateway dispatch needs guidance.
+  expect(details(error).remedy).toBe(code === "permission_denied" ? CONTRACT_ROWS.find((row) => row.code === code)!.remedy : NO_CODE_REMEDY);
 });
 
 it.each([400, 401, 402, 404, 408, 418, 422, 429, 446, 500, 502, 503, 504])("does not specialize credits-off on status %i", (status) => {

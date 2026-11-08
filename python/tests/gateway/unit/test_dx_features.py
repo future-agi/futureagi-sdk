@@ -123,6 +123,7 @@ class TestDropParams:
         )
         assert client._drop_params is True
 
+    @pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
     def test_with_options_propagates(self) -> None:
         client = AgentCC(
             api_key="sk-test", base_url="http://localhost:8080", drop_params=True
@@ -130,6 +131,7 @@ class TestDropParams:
         new = client.with_options(timeout=30.0)
         assert new._drop_params is True
 
+    @pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
     def test_with_options_overrides(self) -> None:
         client = AgentCC(
             api_key="sk-test", base_url="http://localhost:8080", drop_params=True
@@ -147,6 +149,7 @@ class TestDropParams:
         )
         assert client._drop_params is True
 
+    @pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
     def test_async_with_options_propagates(self) -> None:
         client = AsyncAgentCC(
             api_key="sk-test", base_url="http://localhost:8080", drop_params=True

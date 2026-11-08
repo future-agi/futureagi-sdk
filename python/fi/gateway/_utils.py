@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import json
 import time
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any
 
 import httpx
 
-from fi.gateway._constants import DEFAULT_TIMEOUT
+from fi.gateway._constants import CREDENTIAL_HEADER_NAMES, DEFAULT_TIMEOUT
 from fi.gateway._env import KEY_ENV, URL_ENV, from_env, guard_fi_key_pair, normalize_base_url
 from fi.gateway._exceptions import AgentCCError
 
@@ -31,8 +31,7 @@ def parse_timeout(timeout: float | Any | None) -> httpx.Timeout:
 def redact_headers(headers: Mapping[str, str]) -> dict[str, str]:
     """Copy headers without disclosing authentication material."""
     return {
-        key: "[REDACTED]" if key.lower() in
-        {"authorization", "x-api-key", "proxy-authorization", "cookie", "set-cookie"}
+        key: "[REDACTED]" if key.lower() in CREDENTIAL_HEADER_NAMES
         else value for key, value in headers.items()
     }
 
@@ -77,6 +76,22 @@ def return_raw_request(
     }
 
 
+def _utility_exchange(send: Callable[..., httpx.Response], url: str, **kwargs: Any) -> httpx.Response:
+    """Use the same finally boundary for each independent utility exchange."""
+    from fi.gateway._transport._scrub import scrub_sent_request
+
+    response = None
+    error = None
+    try:
+        response = send(url, **kwargs)
+        return response
+    except BaseException as exc:
+        error = exc
+        raise
+    finally:
+        scrub_sent_request(None, response, error)
+
+
 def health_check(
     model: str | None = None, api_key: str | None = None,
     base_url: str | None = None, timeout: float = 10.0,
@@ -102,17 +117,17 @@ def health_check(
     try:
         start = time.monotonic()
         if model is None:
-            response = httpx.get(
+            response = _utility_exchange(httpx.get,
                 f"{resolved_url}/healthz", headers=headers, timeout=timeout,
                 follow_redirects=False,
             )
             if response.status_code == 404:
-                response = httpx.get(
+                response = _utility_exchange(httpx.get,
                     f"{resolved_url}/health", headers=headers, timeout=timeout,
                     follow_redirects=False,
                 )
         else:
-            response = httpx.post(
+            response = _utility_exchange(httpx.post,
                 f"{resolved_url}/v1/chat/completions",
                 headers={**headers, "Content-Type": "application/json"},
                 json={"model": model, "messages": [{"role": "user", "content": "hi"}], "max_tokens": 1},
@@ -135,7 +150,7 @@ def check_valid_key(api_key: str, base_url: str) -> bool:
     base_url = normalize_base_url(base_url)
     validate_destination(base_url, base_url)
     try:
-        response = httpx.get(
+        response = _utility_exchange(httpx.get,
             f"{base_url}/v1/models",
             headers={"Authorization": f"Bearer {api_key}"}, timeout=10.0,
             follow_redirects=False,

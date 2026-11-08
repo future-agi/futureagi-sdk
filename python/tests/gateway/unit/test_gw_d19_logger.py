@@ -1,6 +1,11 @@
-"""D-19: the client logs on ``fi.gateway`` (agentcc 1.0 used ``agentcc``)."""
+"""D-19: the client logs on ``fi.gateway`` (agentcc 1.0 used ``agentcc``).
+
+The opt-in ``LoggingCallback`` keeps its published ``agentcc`` default logger.
+"""
 
 from __future__ import annotations
+
+import pytest
 
 import logging
 import re
@@ -26,6 +31,7 @@ class _Broken:
         raise RuntimeError("callback bug")
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_a_failing_callback_is_logged_on_fi_gateway(caplog) -> None:
     transport = httpx.MockTransport(
         lambda request: httpx.Response(200, json=COMPLETION)
@@ -43,8 +49,10 @@ def test_a_failing_callback_is_logged_on_fi_gateway(caplog) -> None:
     assert not [r for r in caplog.records if r.name.startswith("agentcc")]
 
 
-def test_the_logging_callback_defaults_to_fi_gateway() -> None:
-    assert LoggingCallback()._logger.name == "fi.gateway"
+def test_the_logging_callback_keeps_its_published_default_logger() -> None:
+    # LoggingCallback writes where 0.7.0 did; the fi.gateway namespace is an explicit choice.
+    assert LoggingCallback()._logger.name == "agentcc"
+    assert LoggingCallback(logger_name="fi.gateway")._logger.name == "fi.gateway"
     assert LoggingCallback(logger_name="mine")._logger.name == "mine"
 
 
@@ -55,4 +63,9 @@ def test_no_module_asks_for_an_agentcc_logger() -> None:
         for p in PACKAGE.rglob("*.py")
         if pattern.search(p.read_text(encoding="utf-8"))
     ]
-    assert hits == []
+    assert hits == ["callbacks/json_logger.py"]
+    from fi.gateway.callbacks.json_logger import JSONLoggingCallbackHandler
+
+    with pytest.warns(DeprecationWarning, match="JSONLoggingCallbackHandler"):
+        legacy = JSONLoggingCallbackHandler()
+    assert legacy._logger.name == "agentcc.json_logger"

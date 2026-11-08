@@ -1,4 +1,4 @@
-"""RL 2271 keeps string paths in 0.x without allowing unsafe path contents."""
+"""Literal string uploads stay published; normalized mode opts into string paths."""
 
 import io
 from pathlib import Path
@@ -34,8 +34,13 @@ def test_string_path_warns_and_opens_read_only(tmp_path, monkeypatch):
         return original(self, mode, *args, **kwargs)
 
     monkeypatch.setattr(Path, "open", observe)
+    assert upload_part(str(path)) == str(path)
+    assert opened == []
+    assert upload_part(path) == ("sample.wav", b"unit-audio")
+    assert opened == [(path, "rb")]
+    opened.clear()
     with pytest.warns(DeprecationWarning, match=r"Path\(\.\.\.\).*1\.0"):
-        assert upload_part(str(path)) == ("sample.wav", b"unit-audio")
+        assert upload_part(str(path), string_paths=True) == ("sample.wav", b"unit-audio")
     assert opened == [(path, "rb")]
 
 
@@ -49,7 +54,7 @@ def test_unsafe_string_refused_before_any_read(path, monkeypatch):
         patch.setattr(Path, "read_bytes", forbidden)
         patch.setattr(io, "open", forbidden)
         with pytest.raises(TypeError, match="NUL or newline"):
-            upload_part(path)
+            upload_part(path, string_paths=True)
 
 
 def test_nonstring_inputs_unchanged(tmp_path):
@@ -82,10 +87,12 @@ def test_sync_string_upload_and_failed_open_send_order(tmp_path):
         return httpx.Response(200, json={"text": "transcribed"})
 
     with httpx.Client(transport=httpx.MockTransport(handle)) as http:
-        with Gateway(api_key="sk-agentcc-unit", base_url="https://gateway.example.test", http_client=http) as gateway:
+        with Gateway(api_key="sk-agentcc-unit", base_url="https://gateway.example.test", http_client=http, audio_upload_mode="normalized") as gateway:
             with pytest.warns(DeprecationWarning, match=r"Path\(\.\.\.\)"):
                 gateway.audio.transcriptions.create(file=str(path), model="whisper-1")
             assert len(sent) == 1
+            with pytest.raises(FileNotFoundError):
+                gateway.audio.transcriptions.create(file=tmp_path / "missing.wav", model="whisper-1")
             with pytest.warns(DeprecationWarning), pytest.raises(FileNotFoundError):
                 gateway.audio.transcriptions.create(file=str(tmp_path / "missing.wav"), model="whisper-1")
             with pytest.raises(TypeError):
@@ -105,10 +112,12 @@ async def test_async_string_upload_and_failed_open_send_order(tmp_path):
         return httpx.Response(200, json={"text": "transcribed"})
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(handle)) as http:
-        async with AsyncGateway(api_key="sk-agentcc-unit", base_url="https://gateway.example.test", http_client=http) as gateway:
+        async with AsyncGateway(api_key="sk-agentcc-unit", base_url="https://gateway.example.test", http_client=http, audio_upload_mode="normalized") as gateway:
             with pytest.warns(DeprecationWarning, match=r"Path\(\.\.\.\)"):
                 await gateway.audio.transcriptions.create(file=str(path), model="whisper-1")
             assert len(sent) == 1
+            with pytest.raises(FileNotFoundError):
+                await gateway.audio.transcriptions.create(file=tmp_path / "missing.wav", model="whisper-1")
             with pytest.warns(DeprecationWarning), pytest.raises(FileNotFoundError):
                 await gateway.audio.transcriptions.create(file=str(tmp_path / "missing.wav"), model="whisper-1")
             with pytest.raises(TypeError):

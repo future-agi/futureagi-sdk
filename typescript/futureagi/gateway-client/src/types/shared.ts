@@ -1,3 +1,6 @@
+import { evidenceFromHeaders } from "../gateway-evidence.js";
+import type { GatewayEvidence } from "../gateway-evidence.js";
+
 /** Token usage information. */
 export interface Usage {
   prompt_tokens: number;
@@ -19,7 +22,9 @@ export interface RateLimitInfo {
  * Parsed from `x-agentcc-*` response headers.
  */
 export interface AgentCCMetadata {
-  requestId: string;
+  requestId: string | null;
+  /** Immutable owning-response evidence; optional for hand-built legacy metadata. */
+  readonly gatewayEvidence?: GatewayEvidence;
   traceId: string;
   provider: string;
   latencyMs: number;
@@ -53,8 +58,10 @@ export interface AgentCCMetadata {
 /** Parse AgentCCMetadata from HTTP response headers. */
 export function parseAgentCCMetadata(headers: Headers): AgentCCMetadata {
   const rl = parseRateLimit(headers);
+  const gatewayEvidence = evidenceFromHeaders(headers);
   return {
-    requestId: headers.get("x-agentcc-request-id") ?? "unknown",
+    requestId: gatewayEvidence.gatewayRequestId,
+    gatewayEvidence,
     traceId: headers.get("x-agentcc-trace-id") ?? "unknown",
     provider: headers.get("x-agentcc-provider") ?? "unknown",
     latencyMs: intHeader(headers, "x-agentcc-latency-ms") ?? 0,
@@ -71,7 +78,7 @@ export function parseAgentCCMetadata(headers: Headers): AgentCCMetadata {
     timeoutMs: intHeader(headers, "x-agentcc-timeout-ms"),
     ratelimit: rl.limit !== null ? rl : null,
     configIgnored: csvHeader(headers, "x-agentcc-config-ignored"),
-    clientRequestId: headers.get("x-agentcc-client-request-id"),
+    clientRequestId: gatewayEvidence.clientRequestId,
   };
 }
 

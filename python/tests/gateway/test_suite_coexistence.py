@@ -12,7 +12,7 @@ from unittest.mock import Mock
 import pytest
 
 from tests.gateway import conftest as released
-from tests.gateway.unit import conftest as lane
+from tests.gateway.unit import conftest as unit
 from tests.platform import conftest as platform
 
 
@@ -20,29 +20,29 @@ def _marks(fn):
     return {mark.name for mark in getattr(fn, "pytestmark", ())}
 
 
-def test_release_coroutines_get_asyncio_without_marking_lane_coroutines():
+def test_release_coroutines_get_asyncio_without_marking_unit_coroutines():
     async def release_test():
         pass
 
-    async def lane_test():
+    async def unit_test():
         pass
 
     release_collector = SimpleNamespace(fspath=released.HERE / "test_probe.py")
-    lane_collector = SimpleNamespace(fspath=lane.HERE / "test_probe.py")
+    unit_collector = SimpleNamespace(fspath=unit.HERE / "test_probe.py")
     list(released.pytest_pycollect_makeitem(release_collector, "test_probe", release_test))
-    list(released.pytest_pycollect_makeitem(lane_collector, "test_probe", lane_test))
+    list(released.pytest_pycollect_makeitem(unit_collector, "test_probe", unit_test))
     assert _marks(release_test) == {"asyncio"}
-    assert _marks(lane_test) == set()
-    list(lane.pytest_pycollect_makeitem(lane_collector, "test_probe", lane_test))
-    assert _marks(lane_test) == {"anyio"}
+    assert _marks(unit_test) == set()
+    list(unit.pytest_pycollect_makeitem(unit_collector, "test_probe", unit_test))
+    assert _marks(unit_test) == {"anyio"}
 
 
-def test_lane_hook_does_not_mark_a_release_coroutine():
+def test_unit_hook_does_not_mark_a_release_coroutine():
     async def release_test():
         pass
 
     collector = SimpleNamespace(fspath=released.HERE / "test_probe.py")
-    list(lane.pytest_pycollect_makeitem(collector, "test_probe", release_test))
+    list(unit.pytest_pycollect_makeitem(collector, "test_probe", release_test))
     assert _marks(release_test) == set()
 
 
@@ -50,20 +50,20 @@ def test_respx_selection_restores_the_release_module_graph_and_import_path():
     import sys
 
     installed = importlib.import_module("respx")
-    before_modules = lane._respx_modules()
+    before_modules = unit._respx_modules()
     before_path = sys.path[:]
-    with lane._unit_respx():
+    with unit._unit_respx():
         selected = importlib.import_module("respx")
-        from_vendor = Path(selected.__file__).resolve().parent == lane.VENDOR / "respx"
-        assert from_vendor == lane._USE_VENDOR
-        with lane._unit_respx():
+        from_vendor = Path(selected.__file__).resolve().parent == unit.VENDOR / "respx"
+        assert from_vendor == unit._USE_VENDOR
+        with unit._unit_respx():
             assert importlib.import_module("respx") is selected
     assert importlib.import_module("respx") is installed
-    assert lane._respx_modules() == before_modules
+    assert unit._respx_modules() == before_modules
     assert sys.path == before_path
 
     # The unit tests' imported decorators and runtime imports share one graph.
-    with lane._unit_respx():
+    with unit._unit_respx():
         assert importlib.import_module("respx") is selected
     assert importlib.import_module("respx") is installed
 

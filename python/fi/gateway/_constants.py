@@ -34,6 +34,14 @@ HEADER_CACHE_CONTROL = "Cache-Control"
 HEADER_GUARDRAIL_POLICY = "X-Guardrail-Policy"
 HEADER_CONFIG = "x-agentcc-config"
 
+# Shared by header and structured-data redactors; compare names case-insensitively.
+CREDENTIAL_HEADER_NAMES = frozenset({
+    "authorization", "proxy-authorization", "cookie", "set-cookie",
+    "x-api-key", "api-key", "x-goog-api-key", "x-agentcc-config",
+    "x-auth-token", "x-access-token", "x-api-token", "x-agentcc-api-key",
+    "x-secret-key",
+})
+
 # --- Response header names ---
 
 HEADER_RESPONSE_REQUEST_ID = "x-agentcc-request-id"

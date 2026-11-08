@@ -72,7 +72,7 @@ class Speech:
             user_id=user_id,
             request_id=request_id,
         )
-        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params)
+        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params, defer=True)
 
         from fi.gateway._utils import parse_timeout
 
@@ -141,7 +141,7 @@ class AsyncSpeech:
             user_id=user_id,
             request_id=request_id,
         )
-        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params)
+        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params, defer=True)
 
         from fi.gateway._utils import parse_timeout
 

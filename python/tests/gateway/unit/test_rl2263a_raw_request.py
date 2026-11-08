@@ -70,6 +70,16 @@ def test_helper_rejects_exactly_the_wrapper_origins(monkeypatch, origin, env_nam
         monkeypatch.setenv(env_name, origin)
     settings = {"api_key": KEY, **({} if env_name else {"base_url": origin})}
     for wrapper in (Gateway, AsyncGateway):
+        if origin.startswith("http://"):
+            from fi.gateway._deprecation import AgentCCDeprecationWarning
+
+            client = wrapper(**settings)
+            assert client._base_url == origin
+            with pytest.warns(AgentCCDeprecationWarning, match="sending gateway credentials in cleartext"):
+                raw = return_raw_request(model="test", messages=[], **settings)
+            assert raw["url"] == origin + "/v1/chat/completions"
+            assert raw["headers"]["Authorization"] == f"Bearer {KEY}"
+            continue
         with pytest.raises(AgentCCError) as wrapper_error:
             wrapper(**settings)
         with pytest.raises(AgentCCError) as helper_error:

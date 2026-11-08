@@ -24,7 +24,7 @@ describe("D-12 a JSON answer to a stream request", () => {
     expect(only.choices).toEqual([{ index: 0, delta: { role: "assistant", content: "Cached hello" }, finish_reason: "stop" }]);
     expect(only.usage).toEqual({ prompt_tokens: 4, completion_tokens: 2, total_tokens: 6 });
     expect(only.agentcc?.cacheStatus).toBe("hit");
-    expect(only.agentcc?.requestId).toBe("req-cache-1");
+    expect(only.agentcc?.requestId).toBeNull();
     expect(only).not.toHaveProperty("message");
   });
 

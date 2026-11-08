@@ -76,7 +76,14 @@ def test_status_fallback_guidance_is_generic(status, code):
     if (status, code) in _REFUSALS:
         return
     exc = gw.APIStatusError.from_response(response(status, {"error": {"code": code}}))
-    check_guidance(exc, "generic", None)
+    remedy = None
+    if code is None and status in (408, 429, 500, 502, 503, 504):
+        remedy = (
+            "The gateway did not confirm whether the request was applied; "
+            "check whether it was applied before sending it again."
+        )
+    check_guidance(exc, "generic", remedy)
+    # The body-only classifier defers to the transport's response-header gate.
     assert classify_refusal(status, code)[1] is (None if code is None else False)
 
 

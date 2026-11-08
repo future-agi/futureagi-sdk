@@ -75,7 +75,7 @@ def test_every_public_annotation_resolves_at_runtime() -> None:
 def test_the_named_returns_resolve_to_their_classes() -> None:
     from fi.gateway import AgentCC, AsyncAgentCC, SessionContext
     from fi.gateway._streaming import AsyncStreamManager, StreamManager
-    from fi.gateway._transport._base import RequestOptions
+    from fi.gateway.callbacks import CallbackRequest
     from fi.gateway.callbacks.base import CallbackHandler
     from fi.gateway.resources.chat import AsyncChatCompletions, ChatCompletions
     from fi.gateway.testing import RequestRecorder
@@ -86,7 +86,7 @@ def test_the_named_returns_resolve_to_their_classes() -> None:
     hints = typing.get_type_hints(AsyncChatCompletions.stream)
     assert hints["return"] is AsyncStreamManager
     for hook in (CallbackHandler.on_request_start, RequestRecorder.on_request_end):
-        assert typing.get_type_hints(hook)["request"] is RequestOptions
+        assert typing.get_type_hints(hook)["request"] is CallbackRequest
 
 
 @pytest.mark.parametrize(

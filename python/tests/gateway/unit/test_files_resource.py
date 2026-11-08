@@ -7,6 +7,7 @@ from ._responses_files_fixtures import RESPONSE_OBJECT, RESPONSE_WITH_TOOLS, FIL
 
 
 class TestFiles:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_files_create(self) -> None:
         respx.post("http://gateway.test/v1/files").respond(200, json=FILE_OBJECT)
@@ -18,6 +19,7 @@ class TestFiles:
         assert result.purpose == "fine-tune"
         assert result.bytes == 1024
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_files_list(self) -> None:
         respx.get("http://gateway.test/v1/files").respond(200, json=FILE_LIST)
@@ -28,6 +30,7 @@ class TestFiles:
         assert len(result.data) == 1
         assert result.data[0].id == "file-abc123"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_files_list_with_purpose_filter(self) -> None:
         respx.get("http://gateway.test/v1/files?purpose=fine-tune").respond(
@@ -38,6 +41,7 @@ class TestFiles:
         assert len(result.data) == 1
         assert result.data[0].purpose == "fine-tune"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_files_retrieve(self) -> None:
         respx.get("http://gateway.test/v1/files/file-abc123").respond(
@@ -49,6 +53,7 @@ class TestFiles:
         assert result.id == "file-abc123"
         assert result.status == "processed"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_files_content_returns_bytes(self) -> None:
         raw_content = b"line1\nline2\nline3"
@@ -60,6 +65,7 @@ class TestFiles:
         assert isinstance(result, bytes)
         assert result == raw_content
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     def test_files_delete(self) -> None:
         respx.delete("http://gateway.test/v1/files/file-abc123").respond(
@@ -73,6 +79,7 @@ class TestFiles:
 
 
 class TestAsyncFiles:
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     @pytest.mark.anyio
     async def test_async_files_create(self) -> None:
@@ -82,6 +89,7 @@ class TestAsyncFiles:
         assert type(result).__qualname__ == "FileObject"
         assert result.id == "file-abc123"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     @pytest.mark.anyio
     async def test_async_files_list(self) -> None:
@@ -90,6 +98,7 @@ class TestAsyncFiles:
         result = await client.files.list()
         assert len(result.data) == 1
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     @pytest.mark.anyio
     async def test_async_files_retrieve(self) -> None:
@@ -100,6 +109,7 @@ class TestAsyncFiles:
         result = await client.files.retrieve("file-abc123")
         assert result.id == "file-abc123"
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     @pytest.mark.anyio
     async def test_async_files_content_returns_bytes(self) -> None:
@@ -112,6 +122,7 @@ class TestAsyncFiles:
         assert isinstance(result, bytes)
         assert result == raw_content
 
+    @pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
     @respx.mock
     @pytest.mark.anyio
     async def test_async_files_delete(self) -> None:

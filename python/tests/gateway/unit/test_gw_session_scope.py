@@ -77,7 +77,7 @@ def _reply(request: httpx.Request) -> httpx.Response:
     return httpx.Response(200, json=LIST)
 
 
-def _client(seen: list[httpx.Request]) -> AgentCC:
+def _client(seen: list[httpx.Request], **kwargs: Any) -> AgentCC:
     def handler(request: httpx.Request) -> httpx.Response:
         seen.append(request)
         return _reply(request)
@@ -87,6 +87,7 @@ def _client(seen: list[httpx.Request]) -> AgentCC:
         base_url="http://127.0.0.1:8090",
         metadata={"tenant": "A"},
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        **kwargs,
     )
 
 
@@ -118,17 +119,24 @@ CLIENT_ONLY: dict[str, Callable[[AgentCC], Any]] = {
 }
 
 
+@pytest.mark.parametrize("mode", ["replace", "merge"])
 @pytest.mark.parametrize("call", sorted(CARRY))
-def test_model_requests_carry_the_session(call: str) -> None:
+def test_model_requests_carry_the_session(call: str, mode: str) -> None:
     seen: list[httpx.Request] = []
-    client = _client(seen)
+    client = _client(seen, metadata_mode=mode)
     with client.session(**SESSION):
         CARRY[call](client)
     headers = seen[-1].headers
     assert headers["x-agentcc-session-id"] == "s-1"
     assert headers["x-agentcc-session-name"] == "checkout"
     assert headers["x-agentcc-session-path"] == "/checkout"
-    assert json.loads(headers["x-agentcc-metadata"]) == {"tenant": "A", "cart": "c1"}
+    if mode == "merge":
+        assert json.loads(headers["x-agentcc-metadata"]) == {"tenant": "A", "cart": "c1"}
+        assert "x-agentcc-metadata-cart" not in headers
+    else:
+        # The published default: per-key session metadata beside the client's header.
+        assert json.loads(headers["x-agentcc-metadata"]) == {"tenant": "A"}
+        assert headers["x-agentcc-metadata-cart"] == "c1"
 
 
 @pytest.mark.parametrize("call", sorted(CLIENT_ONLY))

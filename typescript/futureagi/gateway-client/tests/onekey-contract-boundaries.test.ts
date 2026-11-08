@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from "@jest/globals
 import * as gateway from "../src/index.js";
 import * as requestParts from "../src/request-parts.js";
 import { CONTRACT_ROWS } from "./onekey-contract-fixtures.js";
-import { details, HEADERS, IN_FLIGHT, refusal, setup } from "./onekey-test-helpers.js";
+import { details, HEADERS, IN_FLIGHT, NO_CODE_REMEDY, refusal, setup } from "./onekey-test-helpers.js";
 
 const REQUEST = { method: "POST", path: "/v1/chat/completions", body: { model: "example/model", messages: [] } };
 const PATHS = ["request", "requestWithResponse", "requestRaw", "requestStream"] as const;
@@ -94,9 +94,10 @@ for (const path of PATHS) {
       } else {
         expect(error.constructor).toBe(gateway.APIStatusError.from(row.status, {}, new Headers()).constructor);
         expect(error.category).toBe("generic");
-        expect(error.remedy).toBeNull();
+        // Unknown gateway dispatch needs check-before-retrying guidance at every status.
+        expect(error.remedy).toBe(NO_CODE_REMEDY);
         expect(details(error).metadata).toBeNull();
-        expect(fetch).toHaveBeenCalledTimes([429, 503, 504].includes(row.status) ? 6 : 1);
+        expect(fetch).toHaveBeenCalledTimes(1);
       }
     });
 
@@ -106,14 +107,18 @@ for (const path of PATHS) {
         const error = await refusal(client[path](REQUEST));
         expect(fetch).toHaveBeenCalledTimes(1);
         expect(error.category).toBe("generic");
-        expect(error.remedy).toBeNull();
+        // Unknown/mismatched codes cannot suppress unknown-dispatch guidance.
+        expect(error.remedy).toBe(NO_CODE_REMEDY);
       }
     });
-    it.each([409, 429, 503, 504])("no error.code at %i keeps standard status retries", async (status) => {
+    it.each([409, 429, 503, 504])("no error.code at %i with unknown gateway dispatch is terminal", async (status) => {
       for (const body of [null, {}, { error: {} }, { error: { code: null } }, { code: "future_code" }]) {
         const { client, fetch } = withHeader(status, body, "2");
-        await refusal(client[path](REQUEST));
-        expect(fetch).toHaveBeenCalledTimes(status === 409 ? 1 : 6);
+        const error = await refusal(client[path](REQUEST));
+        expect(fetch).toHaveBeenCalledTimes(1);
+        expect(error.category).toBe("generic");
+        // A code-less 409 is also an unknown outcome when gateway dispatch is missing.
+        expect(error.remedy).toBe(NO_CODE_REMEDY);
       }
     });
   });

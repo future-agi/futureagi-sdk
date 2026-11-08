@@ -37,8 +37,10 @@ def _response(completion_id: str = "chatcmpl-1") -> SimpleNamespace:
 
 
 class TestRequestRecorder:
+    # A returned model handed straight to the recorder needs the opt-in compact format;
+    # the published format records the client's CallbackResponse attributes as given.
     def test_recorder_captures_request(self) -> None:
-        recorder = RequestRecorder("dummy.json")
+        recorder = RequestRecorder("dummy.json", format="compact")
         recorder.on_request_end(_request(), _response())
 
         assert len(recorder.recordings) == 1
@@ -51,7 +53,7 @@ class TestRequestRecorder:
 
     def test_recorder_save_to_file(self, tmp_path: Path) -> None:
         file_path = str(tmp_path / "recordings.json")
-        recorder = RequestRecorder(file_path)
+        recorder = RequestRecorder(file_path, format="compact")
         recorder.on_request_end(_request(), _response())
         recorder.save()
 
@@ -76,7 +78,7 @@ class TestRequestRecorder:
 
     def test_recorder_multiple_requests(self, tmp_path: Path) -> None:
         file_path = str(tmp_path / "recordings.json")
-        recorder = RequestRecorder(file_path)
+        recorder = RequestRecorder(file_path, format="compact")
         for i in range(3):
             recorder.on_request_end(_request(f"model-{i}"), _response(f"chatcmpl-{i}"))
 
@@ -91,7 +93,7 @@ class TestRequestRecorder:
         ]
 
     def test_recorder_records_raw_bytes_by_length(self) -> None:
-        recorder = RequestRecorder("dummy.json")
+        recorder = RequestRecorder("dummy.json", format="compact")
         recorder.on_request_end(_request(), b"audio")
         assert recorder.recordings[0]["response"] == {
             "status_code": None,

@@ -98,9 +98,9 @@ def test_event_error_raises_a_typed_stream_error_and_closes() -> None:
     assert str(err) == "Content blocked by streaming guardrail"
     assert (err.type, err.code, err.param) == ("error", "stream_blocked", None)
     assert err.body["type"] == "error" and err.body["sequence_number"] == 2
-    assert err.request_id == ERROR_REPLY["headers"]["x-agentcc-request-id"]
+    assert err.request_id is None  # Non-ULID wire IDs are not gateway identity.
     assert bodies[0].closed
-    assert stream.agentcc.request_id == "req-resp-1"
+    assert stream.agentcc.request_id is None
 
 
 def test_a_json_cache_hit_is_one_completed_event() -> None:

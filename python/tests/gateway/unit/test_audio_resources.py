@@ -1,10 +1,13 @@
 """Audio transcription, speech and translation resources."""
 from __future__ import annotations
+
+import pytest
 import respx
 from fi.gateway import AgentCC, AsyncAgentCC
 from ._resource_fixtures import GATEWAY, AGENTCC_HEADERS, COMPLETIONS_RESPONSE, SPEECH_AUDIO_BYTES
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_audio_transcriptions_create():
     respx.post(f"{GATEWAY}/v1/audio/transcriptions").respond(
@@ -23,6 +26,7 @@ def test_audio_transcriptions_create():
     client.close()
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_speech_create_basic():
     respx.post(f"{GATEWAY}/v1/audio/speech").respond(
@@ -43,6 +47,7 @@ def test_speech_create_basic():
     client.close()
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_speech_create_all_params():
     route = respx.post(f"{GATEWAY}/v1/audio/speech").respond(
@@ -74,6 +79,7 @@ def test_speech_create_all_params():
     client.close()
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_speech_returns_bytes():
     """Verify speech returns raw bytes, not a Pydantic model."""
@@ -95,6 +101,7 @@ def test_speech_returns_bytes():
     client.close()
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_speech_default_params_not_sent():
     """When using default response_format and speed, they should not be in the body."""
@@ -121,6 +128,7 @@ def test_speech_default_params_not_sent():
     client.close()
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_speech_with_extra_body():
     route = respx.post(f"{GATEWAY}/v1/audio/speech").respond(
@@ -144,6 +152,7 @@ def test_speech_with_extra_body():
     client.close()
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_translations_create_basic():
     respx.post(f"{GATEWAY}/v1/audio/translations").respond(
@@ -160,6 +169,7 @@ def test_translations_create_basic():
     client.close()
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_translations_create_all_params():
     route = respx.post(f"{GATEWAY}/v1/audio/translations").respond(
@@ -189,6 +199,7 @@ def test_translations_create_all_params():
     client.close()
 
 
+@pytest.mark.filterwarnings("default:^futureagi:fi.gateway._deprecation.AgentCCDeprecationWarning")
 @respx.mock
 def test_translations_create_with_extra_body():
     route = respx.post(f"{GATEWAY}/v1/audio/translations").respond(

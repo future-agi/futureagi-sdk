@@ -98,6 +98,7 @@ def test_embeddings_usage_without_completion_tokens(async_):
     assert result.usage.completion_tokens == 0
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 @pytest.mark.parametrize("async_", [False, True])
 @pytest.mark.parametrize("method", ["files.create", "files.content", "responses.delete"])
 def test_resource_paths_share_retries_and_callbacks(async_, method):
@@ -154,6 +155,7 @@ def test_session_tracks_successful_requests(async_):
     assert session.total_cost == pytest.approx(0.005)
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 @pytest.mark.parametrize("async_", [False, True])
 def test_a_copy_made_inside_a_session_is_outside_it(async_):
     # The session belongs to the client it was opened on. A with_options() copy is a new

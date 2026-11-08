@@ -95,6 +95,7 @@ def test_the_env_base_url_is_normalized(monkeypatch) -> None:
     assert str(seen[0].url) == f"{URL}/v1/chat/completions"
 
 
+@pytest.mark.filterwarnings('default:^Deprecated\\ gateway\\ compatibility\\ options:DeprecationWarning')
 def test_with_options_keeps_the_origin() -> None:
     seen: list[httpx.Request] = []
     client = AgentCC(

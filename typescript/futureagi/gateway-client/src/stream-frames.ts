@@ -3,8 +3,9 @@
 // answer to a stream request.
 // ---------------------------------------------------------------------------
 
-import { StreamError } from "./errors.js";
-import type { ErrorBody } from "./errors.js";
+import { streamFrameError } from "./errors.js";
+import type { ErrorBody, StreamError } from "./errors.js";
+import type { GatewayEvidence } from "./gateway-evidence.js";
 import type { ChatCompletionChunk, StreamChoice, ToolCallDelta } from "./types/chat/chat-completion-chunk.js";
 
 // --- Gateway error frames (moved verbatim from streaming.ts, 1.0.1) ---
@@ -19,13 +20,13 @@ function stringOrNull(value: unknown): string | null {
  * (the gateway's `{"error": {"message", "type", "param", "code"}}`), or null
  * for an ordinary chunk.
  */
-export function streamErrorFromEvent(data: object): StreamError | null {
+export function streamErrorFromEvent(data: object, gatewayEvidence?: GatewayEvidence): StreamError | null {
   if (Array.isArray(data) || !("error" in data)) return null;
   const error = (data as { error: unknown }).error;
   if (error === null || error === undefined) return null;
 
   if (typeof error === "string") {
-    return new StreamError(error || "Stream error", { body: error });
+    return streamFrameError(error || "Stream error", { body: error, gatewayEvidence });
   }
   if (typeof error === "object" && !Array.isArray(error)) {
     const e = error as ErrorBody;
@@ -33,7 +34,8 @@ export function streamErrorFromEvent(data: object): StreamError | null {
       typeof e.message === "string" && e.message
         ? e.message
         : `Stream error: ${JSON.stringify(error)}`;
-    return new StreamError(message, {
+    return streamFrameError(message, {
+      gatewayEvidence,
       type: stringOrNull(e.type),
       code: stringOrNull(e.code),
       param: stringOrNull(e.param),
@@ -41,7 +43,7 @@ export function streamErrorFromEvent(data: object): StreamError | null {
     });
   }
   // Neither an object nor a string: the message carries the value.
-  return new StreamError(`Stream error: ${JSON.stringify(error)}`);
+  return streamFrameError(`Stream error: ${JSON.stringify(error)}`, { gatewayEvidence });
 }
 
 // --- A JSON answer to a stream request ---

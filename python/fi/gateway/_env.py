@@ -73,7 +73,7 @@ def resolve_wrapper_settings(
     from fi.gateway._http_security import validate_destination
 
     origin = clean_base_url(base_url or env_base_url() or AGENTCC_GATEWAY_URL)
-    validate_destination(origin, origin)
+    validate_destination(origin, origin, warn_cleartext=False)
     return api_key or env_api_key() or None, origin
 
 
