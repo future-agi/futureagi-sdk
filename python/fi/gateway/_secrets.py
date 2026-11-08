@@ -44,6 +44,22 @@ class _Secret(Generic[T]):
     def __deepcopy__(self, memo: dict[int, Any]) -> _Secret[T]:
         return self
 
+    def __eq__(self, other: object) -> bool:
+        """Retain native key comparisons without handing values to caller hooks."""
+        if type(self.__value) is str:
+            if type(other) is str:
+                return self.__value == other
+            if type(other) is _Secret and type(other.__value) is str:
+                return self.__value == other.__value
+        if type(other) is _Secret:
+            return self is other
+        return NotImplemented
+
+    def __hash__(self) -> int:
+        if type(self.__value) is str:
+            return hash(self.__value)
+        return object.__hash__(self)
+
     def key_preview(self: _Secret[str]) -> str:
         """Preserve the released client repr without a raw key local."""
         if len(self.__value) > 14:

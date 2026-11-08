@@ -25,11 +25,11 @@ import types
 from collections import deque
 from dataclasses import dataclass
 from typing import Any, Iterable
-from collections.abc import MutableMapping
 
 import httpx
 
-from fi.gateway._constants import CREDENTIAL_HEADER_NAMES, is_credential_name
+from fi.gateway._constants import is_credential_name
+from fi.gateway._transport._scrub_arguments import scrub_argument_headers
 from fi.gateway.callbacks.base import REDACTED
 
 DEPTH_CAP = 12
@@ -55,20 +55,6 @@ _EXCEPTION_GROUP = getattr(builtins, "BaseExceptionGroup", ())
 _TYPE_MRO = type.__dict__["__mro__"]
 _TYPE_DICT = type.__dict__["__dict__"]
 _UNRESOLVED = object()
-
-
-def scrub_argument_headers(
-    headers: MutableMapping[str, str], composed_names: frozenset[str],
-) -> None:
-    """Scrub the SDK-owned header copy retained in a completed send's locals.
-
-    HTTPX copies headers when building a request; scrubbing that request alone
-    leaves this earlier mapping intact. Never pass caller-owned defaults here.
-    """
-    names = CREDENTIAL_HEADER_NAMES | composed_names
-    for name in list(headers):
-        if name.lower() in names:
-            headers[name] = REDACTED
 
 
 @dataclass

@@ -6,7 +6,6 @@ import {
 import {
   AgentCCError,
   APIConnectionError,
-  APITimeoutError,
   APIStatusError,
   responseBodyError,
   errorAtExit,
@@ -25,7 +24,7 @@ import { assertNoShimOnlyOptions } from "./shim-only.js";
 import { resolveApiKey, resolveBaseUrl } from "./env.js";
 import { BROWSER_REFUSED, isBrowser } from "./browser.js";
 import type { DryRunResult } from "./dry-run.js";
-import { buildHeaders, buildUrl, checkStructuredOutput, connectionError, retryDelay, safeJson, sleep } from "./request-parts.js";
+import { buildHeaders, buildUrl, checkStructuredOutput, connectionError, retryDelay, retryLimit, safeJson, sleep } from "./request-parts.js";
 import { callbackRequest, firePostRequestCallbacks, fireStatusErrorCallbacks } from "./request-callbacks.js";
 import { markScrubbedResponse } from "./redact.js";
 import { fetchWithScrub, requestInit } from "./request-transport.js";
@@ -178,31 +177,7 @@ export class BaseClient {
         if (err instanceof APIStatusError && (refusal === "never"
           || (refusal !== "once" && refusal !== "after" && !RETRYABLE_STATUS_CODES.has(err.statusCode)))) throw err;
 
-        // Determine max retries for this error type
-        if (this._retryPolicy) {
-          if (err instanceof APITimeoutError) {
-            maxForAttempt = this._retryPolicy.getRetriesForTimeout();
-          } else if (err instanceof APIConnectionError) {
-            maxForAttempt = this._retryPolicy.getRetriesForConnectionError();
-          } else if (err instanceof APIStatusError) {
-            // Conditional 402 and idempotency-in-progress use the 429-equivalent limit.
-            maxForAttempt = this._retryPolicy.getRetriesForStatus(refusal === "once" || err.statusCode === 409 ? 429 : err.statusCode);
-          } else {
-            throw err;
-          }
-        } else {
-          // Without policy, use flat max for retryable errors
-          if (
-            err instanceof APITimeoutError ||
-            err instanceof APIConnectionError
-          ) {
-            // retryable
-          } else if (err instanceof APIStatusError) {
-            // retryable status (already checked above)
-          } else {
-            throw err;
-          }
-        }
+        maxForAttempt = retryLimit(err, refusal === "once", this._retryPolicy, maxForAttempt);
 
         // Keep the two-attempt ceiling even if a later attempt fails differently.
         if (refusal === "once") refusalMax = 1;
@@ -381,14 +356,8 @@ export class BaseClient {
     body: unknown,
   ): Promise<void> {
     await firePostRequestCallbacks(
-      this._callbacks,
-      this._buildCallbackRequest(options),
-      options,
-      response,
-      agentcc,
-      requestCost,
-      this._totalCost,
-      body,
+      this._callbacks, this._buildCallbackRequest(options), options,
+      response, agentcc, requestCost, this._totalCost, body,
     );
   }
 

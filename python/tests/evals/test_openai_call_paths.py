@@ -126,6 +126,8 @@ def test_litellm_provider_completes_through_installed_mock_response_api(monkeypa
     from fi.evals.llm import LiteLLMProvider
 
     # Use LiteLLM's actual completion() and ModelResponse conversion, not a fake module.
+    # Newer LiteLLM releases remove the telemetry flag; the offline completion
+    # API remains the contract under test, not this optional setup attribute.
     monkeypatch.setattr(litellm, "telemetry", False, raising=False)
     monkeypatch.setattr(litellm, "drop_params", litellm.drop_params)
     provider = LiteLLMProvider(credentials={"api_key": "test-only"})

@@ -23,6 +23,7 @@ check_sandbox_absence = _sandbox_gate.check_sandbox_absence
 
 # The gateway data-plane client ships in both SDKs:
 # five subpaths resolved with the default import/require conditions only.
+NAMESPACE_BOOTSTRAP = frozenset({"_futureagi_namespace_guard.py", "futureagi_namespace_guard.pth"})
 GATEWAY_SUBPATHS = ("./gateway", "./gateway/testing", "./gateway/express", "./gateway/nextjs", "./gateway/react")
 GATEWAY_TYPES = {
     "gateway": ["./dist/gateway/cjs/index.d.ts"],
@@ -101,12 +102,16 @@ def main(repo, wheel, sdist, tarball, output):
     assert any(p.endswith("/fi/gateway/__init__.py") for p in source), "Missing gateway client in the sdist"
     assert not any("/fi/integrations/otel/" in "/" + p for p in whl)
     assert not any("/fi/integrations/otel/" in p for p in source)
+    for name in NAMESPACE_BOOTSTRAP:
+        assert whl.get(name) == (repo / "python" / name).read_bytes(), name
+        matches = [content for path, content in source.items() if path.split("/", 1)[1] == name]
+        assert matches == [whl[name]], name
     for path in whl:
-        assert path.startswith(("fi/", "futureagi-0.7.0.dist-info/")), path
+        assert path.startswith(("fi/", "futureagi-0.7.0.dist-info/")) or path in NAMESPACE_BOOTSTRAP, path
     for path in source:
         relative = path.split("/", 1)[1]
         # Runtime modules only: no test suites or vendored test fixtures (python/tests/gateway/_vendor).
-        assert relative.startswith("fi/") or relative in {
+        assert relative.startswith("fi/") or relative in NAMESPACE_BOOTSTRAP or relative in {
             "pyproject.toml", "README.md", "CHANGELOG.md", "LICENSE", "NOTICE", "PKG-INFO"
         }, path
 

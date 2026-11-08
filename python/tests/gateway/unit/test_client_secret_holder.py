@@ -127,8 +127,29 @@ def test_client_key_holder_redacts_text_format_and_pickle(client_type):
         assert KEY.encode() not in payload
         assert str(pickle.loads(payload)) == MASK
     assert copy.copy(holder).get() == copy.deepcopy(holder).get() == KEY
+    assert holder == KEY and KEY == holder
+    assert holder != KEY + "-different"
+    assert holder == client_type(api_key=KEY, base_url=ORIGIN)._api_key
+    assert hash(holder) == hash(KEY)
     assert KEY not in repr(vars(client))
     assert KEY not in repr(vars(client._get_base_client()))
+
+
+@pytest.mark.parametrize("client_type", [AgentCC, AsyncAgentCC])
+def test_key_comparison_never_passes_raw_value_to_caller_equality(client_type):
+    holder = client_type(api_key=KEY, base_url=ORIGIN)._api_key
+    observed = []
+
+    class Comparison:
+        def __eq__(self, value):
+            observed.append(value)
+            return False
+
+    assert not (holder == Comparison())
+    assert observed == [holder]
+    assert observed[0] is holder
+    assert repr(observed[0]) == MASK
+    assert KEY not in repr(observed)
 
 
 @pytest.mark.parametrize("client_type", [AgentCC, AsyncAgentCC])
