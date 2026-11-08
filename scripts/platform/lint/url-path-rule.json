@@ -1,0 +1,8 @@
+{
+  "about": "The no-hand-written-URL-path rule, read by scripts/platform/lint/no-url-paths.mjs and python/tests/platform/test_gates_hygiene.py so the two cannot drift. A platform module names an operation by SDK name; only the generated table holds path templates. 'pattern' is a quoted literal that starts with an API path: /workspace, /omega-hub or /agentcc, or anything under the platform mount /omega/api/. The bare mount \"/omega/api\" is the origin's base path (the derived platform origin is {base_url}/omega/api), not an operation path, so it is allowed. Comment lines may describe a path. Tests and test fixtures are not platform modules.",
+  "pattern": "[\"'`]/(?:(?:workspace|omega-hub|agentcc)(?:/|[\"'`?])|omega/api/)",
+  "commentPrefixes": ["*", "/*", "//", "#"],
+  "skipDirs": ["node_modules", "dist", "_gen", "generated", "__pycache__", "tests", "test", "__tests__", "__fixtures__"],
+  "skipFiles": "\\.test\\.|_test\\.py$|^test_|^conftest\\.py$|\\.d\\.ts$",
+  "extensions": [".ts", ".mts", ".mjs", ".js", ".py"]
+}

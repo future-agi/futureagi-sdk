@@ -1,0 +1,79 @@
+name: Gateway client (TypeScript)
+
+# The @future-agi/sdk/gateway* subpaths build from their own root,
+# typescript/futureagi/gateway-client, with their own pinned toolchain
+# (gateway-client/package.json and package-lock.json). This workflow runs that
+# suite on every supported Node: jest, the check that every ported
+# @agentcc/client 1.0.1 test still runs under its 1.0.1 name, both
+# typechecks, and the parity comparator and golden hygiene node tests.
+#
+# This copy lives with the client it tests. It runs once it is installed,
+# unchanged, as .github/workflows/gateway-client.yml (tests/gateway/
+# ci-wiring.test.ts fails when an installed copy differs). Without it the same
+# suite still runs in CI: the registered `pnpm test` of typescript/futureagi
+# is scripts/run-all-tests.cjs, which runs both jest runs and these node tests.
+
+on:
+  pull_request:
+    paths:
+      - "typescript/futureagi/gateway-client/**"
+      - "tests/fixtures/gateway/**"
+      - ".github/workflows/gateway-client.yml"
+  push:
+    branches-ignore:
+      - main
+      - master
+      - "release/**"
+      - "releases/**"
+    tags-ignore:
+      - "**"
+    paths:
+      - "typescript/futureagi/gateway-client/**"
+      - "tests/fixtures/gateway/**"
+      - ".github/workflows/gateway-client.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gateway-client:
+    name: Gateway client on Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["18", "20", "22"]
+    defaults:
+      run:
+        working-directory: typescript/futureagi/gateway-client
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: typescript/futureagi/gateway-client/package-lock.json
+
+      - name: Install the pinned toolchain
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Type check (sources, and sources plus tests)
+        run: |
+          node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit
+          node node_modules/typescript/bin/tsc -p tsconfig.typecheck.json
+
+      - name: Jest
+        run: node node_modules/jest/bin/jest.js -c jest.config.cjs --runInBand --ci --json --outputFile="$RUNNER_TEMP/gateway-jest.json"
+
+      - name: Ported test names equal @agentcc/client 1.0.1
+        run: node scripts/check-test-names.cjs "$RUNNER_TEMP/gateway-jest.json"
+
+      - name: Parity comparator and golden hygiene (node --test)
+        run: node --test tests/parity/compare.test.mjs tests/parity/hygiene.test.mjs

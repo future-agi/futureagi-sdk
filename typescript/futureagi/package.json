@@ -1,37 +1,99 @@
 {
   "name": "@future-agi/sdk",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "We help GenAI teams maintain high-accuracy for their Models in production.",
+  "license": "Apache-2.0",
   "type": "module",
-  "main": "./dist/esm/index.js",
+  "main": "./dist/src/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/src/index.js",
-      "types": "./dist/esm/index.d.ts"
+      "import": { "types": "./dist/esm/index.d.ts", "default": "./dist/esm/index.js" },
+      "require": { "types": "./dist/src/index.d.ts", "default": "./dist/src/index.js" }
     },
     "./platform": {
-      "import": "./dist/esm/platform/index.js",
-      "require": "./dist/src/platform/index.js",
-      "types": "./dist/esm/platform/index.d.ts"
+      "import": { "types": "./dist/esm/platform/index.d.ts", "default": "./dist/esm/platform/index.js" },
+      "require": { "types": "./dist/src/platform/index.d.ts", "default": "./dist/src/platform/index.js" }
     },
     "./platform/models": {
-      "import": "./dist/esm/platform/models.js",
-      "require": "./dist/src/platform/models.js",
-      "types": "./dist/esm/platform/models.d.ts"
+      "import": { "types": "./dist/esm/platform/models.d.ts", "default": "./dist/esm/platform/models.js" },
+      "require": { "types": "./dist/src/platform/models.d.ts", "default": "./dist/src/platform/models.js" }
+    },
+    "./agents/runs": {
+      "import": { "types": "./dist/esm/agents/runs/index.d.ts", "default": "./dist/esm/agents/runs/index.js" },
+      "require": { "types": "./dist/src/agents/runs/index.d.ts", "default": "./dist/src/agents/runs/index.js" }
+    },
+    "./connectors": {
+      "import": { "types": "./dist/esm/connectors/index.d.ts", "default": "./dist/esm/connectors/index.js" },
+      "require": { "types": "./dist/src/connectors/index.d.ts", "default": "./dist/src/connectors/index.js" }
+    },
+    "./integrations": {
+      "import": { "types": "./dist/esm/integrations/index.d.ts", "default": "./dist/esm/integrations/index.js" },
+      "require": { "types": "./dist/src/integrations/index.d.ts", "default": "./dist/src/integrations/index.js" }
+    },
+    "./credentials": {
+      "import": { "types": "./dist/esm/credentials/index.d.ts", "default": "./dist/esm/credentials/index.js" },
+      "require": { "types": "./dist/src/credentials/index.d.ts", "default": "./dist/src/credentials/index.js" }
+    },
+    "./webhooks": {
+      "import": { "types": "./dist/esm/webhooks/index.d.ts", "default": "./dist/esm/webhooks/index.js" },
+      "require": { "types": "./dist/src/webhooks/index.d.ts", "default": "./dist/src/webhooks/index.js" }
+    },
+    "./gateway": {
+      "import": { "types": "./dist/gateway/esm/index.d.ts", "default": "./dist/gateway/esm/index.js" },
+      "require": { "types": "./dist/gateway/cjs/index.d.ts", "default": "./dist/gateway/cjs/index.js" }
+    },
+    "./gateway/testing": {
+      "import": { "types": "./dist/gateway/esm/testing.d.ts", "default": "./dist/gateway/esm/testing.js" },
+      "require": { "types": "./dist/gateway/cjs/testing.d.ts", "default": "./dist/gateway/cjs/testing.js" }
+    },
+    "./gateway/express": {
+      "import": { "types": "./dist/gateway/esm/express.d.ts", "default": "./dist/gateway/esm/express.js" },
+      "require": { "types": "./dist/gateway/cjs/express.d.ts", "default": "./dist/gateway/cjs/express.js" }
+    },
+    "./gateway/nextjs": {
+      "import": { "types": "./dist/gateway/esm/nextjs.d.ts", "default": "./dist/gateway/esm/nextjs.js" },
+      "require": { "types": "./dist/gateway/cjs/nextjs.d.ts", "default": "./dist/gateway/cjs/nextjs.js" }
+    },
+    "./gateway/react": {
+      "import": { "types": "./dist/gateway/esm/react/index.d.ts", "default": "./dist/gateway/esm/react/index.js" },
+      "require": { "types": "./dist/gateway/cjs/react/index.d.ts", "default": "./dist/gateway/cjs/react/index.js" }
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "platform": ["./dist/src/platform/index.d.ts"],
+      "platform/models": ["./dist/src/platform/models.d.ts"],
+      "agents/runs": ["./dist/src/agents/runs/index.d.ts"],
+      "connectors": ["./dist/src/connectors/index.d.ts"],
+      "integrations": ["./dist/src/integrations/index.d.ts"],
+      "credentials": ["./dist/src/credentials/index.d.ts"],
+      "webhooks": ["./dist/src/webhooks/index.d.ts"],
+      "gateway": ["./dist/gateway/cjs/index.d.ts"],
+      "gateway/testing": ["./dist/gateway/cjs/testing.d.ts"],
+      "gateway/express": ["./dist/gateway/cjs/express.d.ts"],
+      "gateway/nextjs": ["./dist/gateway/cjs/nextjs.d.ts"],
+      "gateway/react": ["./dist/gateway/cjs/react/index.d.ts"]
     }
   },
   "files": [
-    "dist"
+    "dist/esm", "dist/src", "dist/esnext", "dist/gateway", "CHANGELOG.md", "LICENSE", "NOTICE",
+    "!dist/**/__tests__/**", "!dist/**/*.test.*", "!dist/**/*.spec.*", "!dist/**/*.tsbuildinfo",
+    "!dist/**/deployments/**", "!dist/**/deployments.*",
+    "!dist/**/evals/**", "!dist/**/evals.*"
   ],
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "tsc --build tsconfig.json tsconfig.esm.json tsconfig.esnext.json && tsc-alias -p tsconfig.esm.json && pnpm run postbuild",
+    "build": "tsc --build tsconfig.json tsconfig.esm.json tsconfig.esnext.json && tsc-alias -p tsconfig.esm.json && pnpm run postbuild && pnpm run build:gateway",
     "postbuild": "echo '{\"type\": \"module\"}' > ./dist/esm/package.json && echo '{\"type\": \"commonjs\"}' > ./dist/src/package.json",
+    "build:gateway": "node gateway-client/scripts/build.cjs",
+    "pack:candidate": "node gateway-client/scripts/stage-package.cjs",
     "build:watch": "tsc --build --watch tsconfig.json",
-    "test": "jest",
+    "test": "node gateway-client/scripts/run-all-tests.cjs",
+    "test:platform": "jest --testPathPattern platform/__tests__",
+    "test:live": "jest --testPathPattern platform/__tests__/live",
+    "test:live:facade": "tsx tests/live/smoke.ts",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint . --ext .ts",
@@ -40,47 +102,36 @@
     "format:check": "prettier --check .",
     "clean": "rimraf dist",
     "dev": "tsx src/index.ts",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p gateway-client/tsconfig.json && tsc -p gateway-client/tsconfig.typecheck.json",
     "prepare": "pnpm run build",
-    "test:live": "jest --testPathPattern platform/__tests__/live",
     "check:consumer": "bash scripts/check-consumer.sh"
   },
-  "keywords": [
-    "ai",
-    "evaluation",
-    "genai",
-    "machine-learning",
-    "typescript",
-    "model-evaluation",
-    "accuracy",
-    "esm",
-    "esnext"
-  ],
+  "keywords": ["ai", "evaluation", "genai", "machine-learning", "typescript", "model-evaluation", "accuracy", "esm", "esnext"],
   "author": "Future AGI <no-reply@futureagi.com>",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/future-agi/futureagi-sdk.git"
-  },
-  "bugs": {
-    "url": "https://github.com/future-agi/futureagi-sdk/issues"
-  },
+  "repository": { "type": "git", "url": "git+https://github.com/future-agi/futureagi-sdk.git" },
+  "bugs": { "url": "https://github.com/future-agi/futureagi-sdk/issues" },
   "homepage": "https://github.com/future-agi/futureagi-sdk#readme",
-  "engines": {
-    "node": ">=18.0.0",
-    "pnpm": ">=8.0.0"
-  },
+  "engines": { "node": ">=18.0.0", "pnpm": ">=8.0.0" },
   "packageManager": "pnpm@8.15.0",
+  "peerDependencies": { "react": ">=17.0.0 <20" },
+  "peerDependenciesMeta": { "react": { "optional": true } },
   "devDependencies": {
-    "@jest/globals": "^29.5.0",
+    "@jest/globals": "^29.7.0",
+    "@testing-library/react": "14.3.1",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
+    "@types/react": "18.3.12",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
+    "esbuild": "0.25.5",
     "eslint": "^8.0.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
     "jest": "^29.5.0",
+    "jest-environment-jsdom": "29.7.0",
     "prettier": "^3.0.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "rimraf": "^5.0.0",
     "ts-jest": "^29.1.0",
     "tsc-alias": "^1.8.0",
@@ -97,25 +148,10 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/src"
-    ],
-    "testMatch": [
-      "**/__tests__/**/*.ts",
-      "**/?(*.)+(spec|test).ts",
-      "**/?(*.)+(integration.test).ts"
-    ],
-    "testPathIgnorePatterns": [
-      "<rootDir>/src/datasets/__tests__"
-    ],
-    "collectCoverageFrom": [
-      "src/**/*.ts",
-      "!src/**/*.d.ts",
-      "!src/**/__tests__/**",
-      "!src/**/index.ts"
-    ]
+    "roots": ["<rootDir>/src"],
+    "testMatch": ["**/__tests__/**/*.ts", "**/?(*.)+(spec|test).ts", "**/?(*.)+(integration.test).ts"],
+    "testPathIgnorePatterns": ["<rootDir>/src/datasets/__tests__"],
+    "collectCoverageFrom": ["src/**/*.ts", "!src/**/*.d.ts", "!src/**/__tests__/**", "!src/**/index.ts"]
   },
-  "publishConfig": {
-    "access": "public"
-  }
+  "publishConfig": { "access": "public" }
 }

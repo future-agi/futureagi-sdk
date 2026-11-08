@@ -21,6 +21,7 @@ export {
   PermissionDeniedError,
   RateLimitError,
   UnprocessableEntityError,
+  WrongRegionError,
 } from "./errors";
 export { Page, Pager } from "./pagination";
 export { Resource } from "./resource";

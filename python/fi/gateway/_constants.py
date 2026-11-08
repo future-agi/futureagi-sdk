@@ -1,11 +1,13 @@
-"""Constants for the AgentCC SDK — header names, defaults, version, sentinel."""
+"""Constants for the gateway client: header names, defaults, version, sentinel."""
 
 from __future__ import annotations
 
-import os
 from typing import Any
 
-__version__ = "0.1.0"
+from fi.gateway._version import futureagi_version
+
+__version__ = futureagi_version()
+"""The futureagi version (agentcc 1.0 reported a fixed ``0.1.0``)."""
 
 # --- Defaults ---
 
@@ -49,6 +51,8 @@ HEADER_RESPONSE_GUARDRAIL_MESSAGE = "x-agentcc-guardrail-message"
 HEADER_RESPONSE_FALLBACK_USED = "x-agentcc-fallback-used"
 HEADER_RESPONSE_ROUTING_STRATEGY = "x-agentcc-routing-strategy"
 HEADER_RESPONSE_TIMEOUT = "x-agentcc-timeout-ms"
+HEADER_RESPONSE_CONFIG_IGNORED = "x-agentcc-config-ignored"
+HEADER_RESPONSE_CLIENT_REQUEST_ID = "x-agentcc-client-request-id"
 HEADER_RATELIMIT_LIMIT = "x-ratelimit-limit-requests"
 HEADER_RATELIMIT_REMAINING = "x-ratelimit-remaining-requests"
 HEADER_RATELIMIT_RESET = "x-ratelimit-reset-requests"
@@ -102,7 +106,6 @@ class _NotGiven:
 NOT_GIVEN: Any = _NotGiven()
 """Sentinel value indicating a parameter was not provided."""
 
-# --- Gateway URL ---
-
-AGENTCC_GATEWAY_URL: str = os.environ.get("AGENTCC_BASE_URL", "https://gateway.futureagi.com/v1")
-"""Default AgentCC Gateway URL. Override via ``AGENTCC_BASE_URL`` env var."""
+# Compatibility constant, never populated from a response or environment.
+AGENTCC_GATEWAY_URL: str = "https://gateway.futureagi.com/v1"
+"""Hosted OpenAI-compatible URL; only Gateway wrappers implicitly choose this host."""

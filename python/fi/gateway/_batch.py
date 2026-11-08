@@ -12,12 +12,14 @@ from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from typing import Any
 
 from fi.gateway.types.chat.chat_completion import ChatCompletion
+from fi.gateway._deprecation import deprecated
 
 # ---------------------------------------------------------------------------
 # Sync: batch_completion
 # ---------------------------------------------------------------------------
 
 
+@deprecated
 def batch_completion(
     client: Any,
     model: str,
@@ -89,6 +91,7 @@ def batch_completion(
 # ---------------------------------------------------------------------------
 
 
+@deprecated
 async def abatch_completion(
     client: Any,
     model: str,
@@ -120,6 +123,7 @@ async def abatch_completion(
 # ---------------------------------------------------------------------------
 
 
+@deprecated
 def batch_completion_models(
     client: Any,
     models: list[str],
@@ -170,6 +174,7 @@ def batch_completion_models(
 # ---------------------------------------------------------------------------
 
 
+@deprecated
 async def abatch_completion_models(
     client: Any,
     models: list[str],
@@ -221,6 +226,7 @@ async def abatch_completion_models(
 # ---------------------------------------------------------------------------
 
 
+@deprecated
 def batch_completion_models_all(
     client: Any,
     models: list[str],
@@ -270,6 +276,7 @@ def batch_completion_models_all(
 # ---------------------------------------------------------------------------
 
 
+@deprecated
 async def abatch_completion_models_all(
     client: Any,
     models: list[str],

@@ -1,0 +1,537 @@
+{
+ "area": "surface",
+ "cases": {
+  "surface.runtime": {
+   "requests": [],
+   "result": {
+    "classes": {
+     "APIConnectionError": {
+      "parent": "AgentCCError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     },
+     "APIStatusError": {
+      "parent": "AgentCCError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": [
+       "from"
+      ]
+     },
+     "APITimeoutError": {
+      "parent": "APIConnectionError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     },
+     "AgentCC": {
+      "parent": "BaseClient",
+      "proto": [
+       "constructor",
+       "healthCheck",
+       "session",
+       "withOptions"
+      ],
+      "statics": []
+     },
+     "AgentCCError": {
+      "parent": "Error",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     },
+     "AuthenticationError": {
+      "parent": "APIStatusError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     },
+     "BadGatewayError": {
+      "parent": "APIStatusError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     },
+     "BadRequestError": {
+      "parent": "APIStatusError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     },
+     "BudgetManager": {
+      "parent": "",
+      "proto": [
+       "_maybeResetWindow",
+       "checkBudget",
+       "constructor",
+       "getCurrentSpend",
+       "getRemainingBudget",
+       "isValidUser",
+       "projectedCost",
+       "reset",
+       "setUserBudget",
+       "updateCost"
+      ],
+      "statics": []
+     },
+     "CallbackHandler": {
+      "parent": "",
+      "proto": [
+       "constructor",
+       "onBudgetWarning",
+       "onCacheHit",
+       "onCostUpdate",
+       "onError",
+       "onFallback",
+       "onGuardrailBlock",
+       "onGuardrailWarning",
+       "onRequestEnd",
+       "onRequestStart",
+       "onRetry",
+       "onSessionEnd",
+       "onSessionStart",
+       "onStreamChunk",
+       "onStreamEnd",
+       "onStreamStart"
+      ],
+      "statics": []
+     },
+     "ChunkAccumulator": {
+      "parent": "",
+      "proto": [
+       "add",
+       "constructor",
+       "getFinalCompletion",
+       "getText"
+      ],
+      "statics": []
+     },
+     "GatewayTimeoutError": {
+      "parent": "APIStatusError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     },
+     "GuardrailBlockedError": {
+      "parent": "APIStatusError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     },
+     "GuardrailWarning": {
+      "parent": "APIStatusError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     },
+     "InternalServerError": {
+      "parent": "APIStatusError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     },
+     "JSONLoggingCallback": {
+      "parent": "CallbackHandler",
+      "proto": [
+       "_log",
+       "constructor",
+       "onCostUpdate",
+       "onError",
+       "onGuardrailBlock",
+       "onGuardrailWarning",
+       "onRequestEnd",
+       "onRequestStart",
+       "onRetry",
+       "onSessionEnd",
+       "onSessionStart",
+       "onStreamEnd"
+      ],
+      "statics": []
+     },
+     "LoggingCallback": {
+      "parent": "CallbackHandler",
+      "proto": [
+       "constructor",
+       "onCacheHit",
+       "onError",
+       "onGuardrailBlock",
+       "onGuardrailWarning",
+       "onRequestEnd",
+       "onRequestStart",
+       "onRetry",
+       "onStreamEnd",
+       "onStreamStart"
+      ],
+      "statics": []
+     },
+     "MetricsCallback": {
+      "parent": "CallbackHandler",
+      "proto": [
+       "constructor",
+       "getMetrics",
+       "onCacheHit",
+       "onCostUpdate",
+       "onError",
+       "onGuardrailBlock",
+       "onGuardrailWarning",
+       "onRequestEnd",
+       "onRetry",
+       "reset"
+      ],
+      "statics": []
+     },
+     "NotFoundError": {
+      "parent": "APIStatusError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     },
+     "OTelCallback": {
+      "parent": "CallbackHandler",
+      "proto": [
+       "_deriveSpanName",
+       "_extractHost",
+       "_extractModel",
+       "constructor",
+       "onCostUpdate",
+       "onError",
+       "onRequestEnd",
+       "onRequestStart"
+      ],
+      "statics": []
+     },
+     "PaginatedList": {
+      "parent": "",
+      "proto": [
+       "constructor",
+       "getNextPage",
+       "hasNextPage"
+      ],
+      "statics": [
+       "fromDjango",
+       "fromOpenAI"
+      ]
+     },
+     "PermissionDeniedError": {
+      "parent": "APIStatusError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     },
+     "RateLimitError": {
+      "parent": "APIStatusError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     },
+     "RetryPolicy": {
+      "parent": "",
+      "proto": [
+       "constructor",
+       "getRetriesForConnectionError",
+       "getRetriesForStatus",
+       "getRetriesForTimeout"
+      ],
+      "statics": []
+     },
+     "RunToolsRunner": {
+      "parent": "",
+      "proto": [
+       "constructor",
+       "run"
+      ],
+      "statics": []
+     },
+     "ServiceUnavailableError": {
+      "parent": "APIStatusError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     },
+     "Session": {
+      "parent": "",
+      "proto": [
+       "constructor",
+       "path",
+       "requestCount",
+       "resetPath",
+       "step",
+       "toHeaders",
+       "totalCost",
+       "totalTokens",
+       "trackRequest"
+      ],
+      "statics": []
+     },
+     "Stream": {
+      "parent": "",
+      "proto": [
+       "abort",
+       "agentcc",
+       "constructor",
+       "response"
+      ],
+      "statics": []
+     },
+     "StreamError": {
+      "parent": "AgentCCError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     },
+     "StreamManager": {
+      "parent": "",
+      "proto": [
+       "abort",
+       "agentcc",
+       "constructor",
+       "events",
+       "getFinalCompletion",
+       "getFinalText",
+       "textStream"
+      ],
+      "statics": []
+     },
+     "TraceContextManager": {
+      "parent": "",
+      "proto": [
+       "constructor",
+       "enabled",
+       "getHeaders",
+       "getTraceparent",
+       "nextSpanId",
+       "traceId"
+      ],
+      "statics": []
+     },
+     "UnprocessableEntityError": {
+      "parent": "APIStatusError",
+      "proto": [
+       "constructor"
+      ],
+      "statics": []
+     }
+    },
+    "clientMethods": [
+     "constructor",
+     "healthCheck",
+     "session",
+     "withOptions"
+    ],
+    "errors": {
+     "APIConnectionError": {
+      "__exception__": "APIConnectionError",
+      "attrs": {
+       "cause": "<undefined>",
+       "name": "APIConnectionError"
+      },
+      "chain": [
+       "APIConnectionError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "APIConnectionError",
+      "message": "connection refused",
+      "toString": "APIConnectionError: connection refused"
+     },
+     "APIStatusError": {
+      "construct_error": "TypeError",
+      "message": "headers.get is not a function"
+     },
+     "APITimeoutError": {
+      "__exception__": "APITimeoutError",
+      "attrs": {
+       "cause": "<undefined>",
+       "name": "APITimeoutError"
+      },
+      "chain": [
+       "APITimeoutError",
+       "APIConnectionError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "APITimeoutError",
+      "message": "Request timed out",
+      "toString": "APITimeoutError: Request timed out"
+     },
+     "AgentCCError": {
+      "__exception__": "AgentCCError",
+      "attrs": {
+       "name": "AgentCCError"
+      },
+      "chain": [
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "AgentCCError",
+      "message": "base message",
+      "toString": "AgentCCError: base message"
+     },
+     "AuthenticationError": {
+      "construct_error": "TypeError",
+      "message": "headers.get is not a function"
+     },
+     "BadGatewayError": {
+      "construct_error": "TypeError",
+      "message": "headers.get is not a function"
+     },
+     "BadRequestError": {
+      "construct_error": "TypeError",
+      "message": "headers.get is not a function"
+     },
+     "GatewayTimeoutError": {
+      "construct_error": "TypeError",
+      "message": "headers.get is not a function"
+     },
+     "GuardrailBlockedError": {
+      "construct_error": "TypeError",
+      "message": "headers.get is not a function"
+     },
+     "GuardrailWarning": {
+      "construct_error": "TypeError",
+      "message": "headers.get is not a function"
+     },
+     "InternalServerError": {
+      "construct_error": "TypeError",
+      "message": "headers.get is not a function"
+     },
+     "NotFoundError": {
+      "construct_error": "TypeError",
+      "message": "headers.get is not a function"
+     },
+     "PermissionDeniedError": {
+      "construct_error": "TypeError",
+      "message": "headers.get is not a function"
+     },
+     "RateLimitError": {
+      "construct_error": "TypeError",
+      "message": "headers.get is not a function"
+     },
+     "ServiceUnavailableError": {
+      "construct_error": "TypeError",
+      "message": "headers.get is not a function"
+     },
+     "StreamError": {
+      "__exception__": "StreamError",
+      "attrs": {
+       "name": "StreamError"
+      },
+      "chain": [
+       "StreamError",
+       "AgentCCError",
+       "Error"
+      ],
+      "class": "StreamError",
+      "message": "stream broke",
+      "toString": "StreamError: stream broke"
+     },
+     "UnprocessableEntityError": {
+      "construct_error": "TypeError",
+      "message": "headers.get is not a function"
+     }
+    },
+    "tree": {
+     "audio": {
+      "methods": [
+       "constructor"
+      ],
+      "type": "Audio"
+     },
+     "batches": {
+      "methods": [
+       "cancel",
+       "constructor",
+       "create",
+       "list",
+       "retrieve"
+      ],
+      "type": "Batches"
+     },
+     "chat": {
+      "methods": [
+       "constructor"
+      ],
+      "type": "Chat"
+     },
+     "completions": {
+      "methods": [
+       "constructor",
+       "create"
+      ],
+      "type": "Completions"
+     },
+     "embeddings": {
+      "methods": [
+       "constructor",
+       "create"
+      ],
+      "type": "Embeddings"
+     },
+     "files": {
+      "methods": [
+       "constructor",
+       "content",
+       "create",
+       "delete",
+       "list",
+       "retrieve"
+      ],
+      "type": "Files"
+     },
+     "images": {
+      "methods": [
+       "constructor",
+       "generate"
+      ],
+      "type": "Images"
+     },
+     "models": {
+      "methods": [
+       "constructor",
+       "list",
+       "retrieve"
+      ],
+      "type": "Models"
+     },
+     "moderations": {
+      "methods": [
+       "constructor",
+       "create"
+      ],
+      "type": "Moderations"
+     },
+     "rerank": {
+      "methods": [
+       "constructor",
+       "rank"
+      ],
+      "type": "Rerank"
+     }
+    },
+    "values": {
+     "AGENTCC_GATEWAY_URL": "https://gateway.futureagi.com/v1",
+     "NOT_GIVEN": "Symbol(NOT_GIVEN)",
+     "VERSION": "0.1.0"
+    }
+   }
+  }
+ },
+ "format": 1
+}

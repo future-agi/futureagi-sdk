@@ -1,0 +1,6 @@
+{
+ "format": 1,
+ "about": "The TypeScript client's intended differences against @agentcc/client 1.0.1 (comparisons ts-client-1.0.1-esm->e-new-ts-esm and ts-client-1.0.1-cjs->e-new-ts-cjs) that still wait for a reviewer record. An entry lands here first with status 'landed' (evidence and test_id filled, reviewer null) and moves into tests/fixtures/gateway/intended-differences.json as 'proven' once an independent review signs it (by, commit, verdict); every entry of the client is signed and lives there now. Ids are new: '-ts' splits of the shared D-xx work list, 'TS-*' for changes without a D number. Every rule names the kind of a difference observed in the recordings at 'recorded_at' and either its exact path, with its old and new value pinned by an anchored regex where the value is a string, a boolean, an integer or null, or a glob path with its values pinned that covers exactly the differences it was built from. scripts/enew/compare-enew.mjs reads the client's entries from both files.",
+ "recorded_at": "typescript-overlay-source",
+ "differences": []
+}

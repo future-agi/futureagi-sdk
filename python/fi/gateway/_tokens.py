@@ -6,8 +6,10 @@ import json
 from typing import Any
 
 from fi.gateway._models_info import get_model_info
+from fi.gateway._deprecation import deprecated
 
 
+@deprecated
 def encode(model: str, text: str) -> list[int]:
     """Encode text into token IDs using tiktoken.
 
@@ -37,6 +39,7 @@ def encode(model: str, text: str) -> list[int]:
     return enc.encode(text)
 
 
+@deprecated
 def decode(model: str, tokens: list[int]) -> str:
     """Decode token IDs back to text using tiktoken.
 
@@ -66,6 +69,7 @@ def decode(model: str, tokens: list[int]) -> str:
     return enc.decode(tokens)
 
 
+@deprecated
 def trim_messages(
     messages: list[dict[str, Any]],
     model: str,
@@ -138,6 +142,7 @@ def trim_messages(
     return result
 
 
+@deprecated
 def token_counter(
     model: str,
     text: str | None = None,
@@ -203,6 +208,7 @@ def token_counter(
         return max(count, 1)
 
 
+@deprecated
 def get_max_tokens(model: str) -> int | None:
     """Return the context window size for a model.
 
@@ -213,12 +219,14 @@ def get_max_tokens(model: str) -> int | None:
     return info.max_tokens if info else None
 
 
+@deprecated
 def get_max_output_tokens(model: str) -> int | None:
     """Return the max output tokens for a model."""
     info = get_model_info(model)
     return info.max_output_tokens if info else None
 
 
+@deprecated
 def completion_cost(
     model: str,
     prompt_tokens: int = 0,
@@ -251,6 +259,7 @@ CONTEXT_WINDOW_FALLBACKS: dict[str, str] = {
 }
 
 
+@deprecated
 def get_context_window_fallback(model: str) -> str | None:
     """Return a model with a larger context window, or ``None``."""
     return CONTEXT_WINDOW_FALLBACKS.get(model)
@@ -264,11 +273,13 @@ CONTENT_POLICY_FALLBACKS: dict[str, str] = {
 }
 
 
+@deprecated
 def get_content_policy_fallback(model: str) -> str | None:
     """Return a less restrictive model for content policy errors, or ``None``."""
     return CONTENT_POLICY_FALLBACKS.get(model)
 
 
+@deprecated
 def is_prompt_caching_valid(model: str, messages: list[dict[str, Any]]) -> tuple[bool, str]:
     """Check if a prompt qualifies for provider-side caching.
 
@@ -307,6 +318,7 @@ def is_prompt_caching_valid(model: str, messages: list[dict[str, Any]]) -> tuple
     return (False, "No caching indicators found")
 
 
+@deprecated
 def completion_cost_from_response(response: Any) -> float | None:
     """Estimate cost from a ChatCompletion response object.
 

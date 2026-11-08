@@ -1,0 +1,7029 @@
+{
+ "_provenance": {
+  "kind": "generated from template YAMLs, NOT recorded from a server",
+  "backend_repo": "Future AGI backend",
+  "shape": "sdk/views/evaluations.py GetEvalsView.get; _folder is fixture-only",
+  "note": "criteria, config.code and config.rule_prompt omitted and descriptions cut to 160 chars to keep the fixture small",
+  "generated_by": "template response fixture generator",
+  "templates": 174
+ },
+ "response": {
+  "status": true,
+  "result": [
+   {
+    "id": "d63d56b7-8660-5c2c-bedf-e9821de3724d",
+    "name": "ASR/STT_accuracy",
+    "description": "Analyzes the accuracy of transcriptions generated from audio inputs by Automatic Speech Recognition (ASR) or Speech-to-Text (STT) systems.",
+    "eval_id": 73,
+    "eval_tags": [
+     "Audio",
+     "Transcription"
+    ],
+    "config": {
+     "required_keys": [
+      "audio",
+      "generated_transcript"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "audio": "The audio to be evaluated",
+      "generated_transcript": "The transcription of the audio"
+     },
+     "param_modalities": {
+      "audio": [
+       "AUDIO"
+      ],
+      "generated_transcript": [
+       "TEXT",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "57cbcdc5-f978-5993-8d14-323640e6a985",
+    "name": "TTS_accuracy",
+    "description": "Analyzes if the text-to-speech output accurately reflects the intended message, including pronunciation, emphasis, and emotional tone.",
+    "eval_id": 122,
+    "eval_tags": [
+     "Audio",
+     "TTS"
+    ],
+    "config": {
+     "required_keys": [
+      "text",
+      "generated_audio"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "text": "The original text input",
+      "generated_audio": "The TTS audio output to be evaluated"
+     },
+     "param_modalities": {
+      "text": [
+       "TEXT",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "generated_audio": [
+       "AUDIO"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "c7d7e974-5f45-5f53-9598-2ad37c0b7554",
+    "name": "action_confirmation_gating",
+    "description": "Checks that before committing an action on the user's behalf (booking, scheduling, payment, cancellation, account change) the agent stated the details and had c",
+    "eval_id": 210,
+    "eval_tags": [
+     "Agents",
+     "Conversation",
+     "Audio",
+     "Compliance"
+    ],
+    "config": {
+     "required_keys": [
+      "agent_prompt",
+      "conversation",
+      "transcript"
+     ],
+     "optional_keys": [
+      "agent_prompt",
+      "transcript"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "agent_prompt": "The agent's system prompt (persona, script and behavioural instructions). Optional: leave unmapped if not available",
+      "conversation": "The full conversation (user and agent turns), as call audio or transcript text",
+      "transcript": "The call transcript as text or JSON turns, including the agent's tool calls and their results. Optional: leave unmapped if not available; commits are then judged from what the agent says"
+     },
+     "param_modalities": {
+      "agent_prompt": [
+       "TEXT"
+      ],
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST"
+      ],
+      "transcript": [
+       "TEXT",
+       "JSON",
+       "LIST"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "acf18c5a-0235-56c8-99db-8727be414c14",
+    "name": "advice_authority_boundary",
+    "description": "Evaluates whether an agent stays within the role and authority its prompt grants it across a multi-turn voice or chat conversation - no advice reserved to a qua",
+    "eval_id": 203,
+    "eval_tags": [
+     "Agents",
+     "Conversation",
+     "Voice",
+     "Chatbot behaviors",
+     "Insurance"
+    ],
+    "config": {
+     "required_keys": [
+      "agent_prompt",
+      "conversation"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "agent_prompt": "The agent's system prompt (role and authorized scope)",
+      "conversation": "The conversation to be evaluated"
+     },
+     "param_modalities": {
+      "agent_prompt": [
+       "TEXT"
+      ],
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "844489c9-9c19-558e-b217-640713c3be3e",
+    "name": "ai_disclosure_compliance",
+    "description": "Checks that the agent follows its prompt's disclosure policy, including any required proactive disclosure, and handles questions about whether the user is talki",
+    "eval_id": 211,
+    "eval_tags": [
+     "Agents",
+     "Conversation",
+     "Audio",
+     "Compliance"
+    ],
+    "config": {
+     "required_keys": [
+      "agent_prompt",
+      "conversation"
+     ],
+     "optional_keys": [
+      "agent_prompt"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "agent_prompt": "The agent's system prompt (persona, script and behavioural instructions). Optional: leave unmapped if not available",
+      "conversation": "The full conversation (user and agent turns), as transcript text or call audio"
+     },
+     "param_modalities": {
+      "agent_prompt": [
+       "TEXT"
+      ],
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "1b2c19dd-c3a5-5441-af3b-fb4d5dd8c96d",
+    "name": "answer_refusal",
+    "description": "Checks if the model correctly refuses to answer when prompted with harmful, sensitive, or restricted queries.",
+    "eval_id": 88,
+    "eval_tags": [
+     "Safety",
+     "Refusal"
+    ],
+    "config": {
+     "required_keys": [
+      "input",
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "input": "The harmful/sensitive query",
+      "output": "The model's response"
+     },
+     "param_modalities": {
+      "input": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "30e5280f-9096-55ba-a3f1-230587d93a97",
+    "name": "audio_quality",
+    "description": "Evaluates the overall quality of the given audio, like MOS (Mean Opinion Score) evaluation",
+    "eval_id": 75,
+    "eval_tags": [
+     "Audio",
+     "Quality"
+    ],
+    "config": {
+     "required_keys": [
+      "input_audio"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "input_audio": "The audio to be evaluated"
+     },
+     "param_modalities": {
+      "input_audio": [
+       "AUDIO"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "ae9a81b1-bf2e-531c-9196-cd95ac000757",
+    "name": "bias_detection",
+    "description": "Identifies various forms of bias including gender, racial, cultural, or ideological bias in the output content. Evaluates for balanced perspective and neutral l",
+    "eval_id": 69,
+    "eval_tags": [
+     "Red Teaming",
+     "Chatbot behaviors"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "88046a61-bdd6-5478-83f3-eadac0051869",
+    "name": "call_opening_handling",
+    "description": "Evaluates the first moments of a call: whether the agent handles varied greetings ('who is this?', silence, wrong person), confirms the right party before anyth",
+    "eval_id": 216,
+    "eval_tags": [
+     "Agents",
+     "Conversation",
+     "Audio"
+    ],
+    "config": {
+     "required_keys": [
+      "agent_prompt",
+      "conversation"
+     ],
+     "optional_keys": [
+      "agent_prompt"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "agent_prompt": "The agent's system prompt (persona, script and behavioural instructions). Optional: leave unmapped if not available",
+      "conversation": "The full conversation (user and agent turns), as transcript text or call audio"
+     },
+     "param_modalities": {
+      "agent_prompt": [
+       "TEXT"
+      ],
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "22143a7b-bcbe-551d-9b81-850a166a0fad",
+    "name": "caption_hallucination",
+    "description": "Evaluates whether image captions or descriptions contain factual inaccuracies or hallucinated details that are not present in the image.",
+    "eval_id": 100,
+    "eval_tags": [
+     "Image",
+     "Hallucination"
+    ],
+    "config": {
+     "required_keys": [
+      "image",
+      "caption"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "image": "The image to be evaluated",
+      "caption": "The caption to be evaluated"
+     },
+     "param_modalities": {
+      "image": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ],
+      "caption": [
+       "TEXT",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "3c074e9c-d1d2-56ab-a70d-d0cc875003f2",
+    "name": "chunk_attribution",
+    "description": "Tracks if the context chunk is used in generating the response.",
+    "eval_id": 11,
+    "eval_tags": [
+     "RAG",
+     "Attribution"
+    ],
+    "config": {
+     "required_keys": [
+      "context",
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "context": "The context provided for the response",
+      "output": "The output to be evaluated"
+     },
+     "param_modalities": {
+      "context": [
+       "TEXT",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "output": [
+       "TEXT",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "787349f1-6345-5267-8440-f1e6e1775b11",
+    "name": "chunk_utilization",
+    "description": "Measures how effectively context chunks are used in responses",
+    "eval_id": 12,
+    "eval_tags": [
+     "RAG",
+     "Retrieval"
+    ],
+    "config": {
+     "required_keys": [
+      "context",
+      "output"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "output": "The output to be evaluated",
+      "context": "The context provided for the response",
+      "input": "The input to be evaluated"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "context": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "2646777b-9de5-51d5-8376-b52028936eb7",
+    "name": "claim_intake_accuracy",
+    "description": "Evaluates whether an agent runs first-notice-of-loss / claim intake correctly across a multi-turn voice or chat conversation - captures and confirms required cl",
+    "eval_id": 205,
+    "eval_tags": [
+     "Agents",
+     "Conversation",
+     "Voice",
+     "Chatbot behaviors",
+     "Insurance"
+    ],
+    "config": {
+     "required_keys": [
+      "agent_prompt",
+      "conversation"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "agent_prompt": "The agent's system prompt (claim intake / FNOL process)",
+      "conversation": "The conversation to be evaluated"
+     },
+     "param_modalities": {
+      "agent_prompt": [
+       "TEXT"
+      ],
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "767876d3-b10c-55b5-9554-74d97ab6295e",
+    "name": "clinically_inappropriate_tone",
+    "description": "Evaluates whether the model's tone is unsuitable for clinical or mental health contexts.",
+    "eval_id": 91,
+    "eval_tags": [
+     "Medical",
+     "Safety"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "dd6994ee-d8e5-52c7-8628-ac6f8c289ebb",
+    "name": "completeness",
+    "description": "Evaluates if the response completely answers the query",
+    "eval_id": 10,
+    "eval_tags": [
+     "Quality",
+     "Completeness"
+    ],
+    "config": {
+     "required_keys": [
+      "input",
+      "output"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "input": "The input to be evaluated",
+      "output": "The output to be evaluated"
+     },
+     "param_modalities": {
+      "input": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "396a437b-f554-5011-89c7-c0731eda7bd6",
+    "name": "contains_code",
+    "description": "Checks whether the output is valid code or contains expected code snippets.",
+    "eval_id": 85,
+    "eval_tags": [
+     "Code",
+     "Output Format"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "4cf1afc6-4672-5b95-8813-4b984fee8dda",
+    "name": "content_moderation",
+    "description": "Uses content moderation to evaluate content safety",
+    "eval_id": 4,
+    "eval_tags": [
+     "Red Teaming",
+     "Content Safety"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "0623783a-074a-595c-8efb-56a5f596c826",
+    "name": "content_safety_violation",
+    "description": "A broad check for content that violates safety or usage policies—this includes toxicity, hate speech, explicit content, violence, etc.",
+    "eval_id": 93,
+    "eval_tags": [
+     "Red Teaming",
+     "Content Safety"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated for content moderation"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "e010bb4b-5b90-59d1-80c3-4bd169a4422f",
+    "name": "context_adherence",
+    "description": "Measures how well responses stay within the provided context",
+    "eval_id": 5,
+    "eval_tags": [
+     "RAG",
+     "Grounding"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "context"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "output": "The output to be evaluated",
+      "context": "The context provided for the response"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "context": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "f4713690-6d52-5014-a816-bedab4312b88",
+    "name": "context_relevance",
+    "description": "Evaluates the relevancy of the context to the query",
+    "eval_id": 9,
+    "eval_tags": [
+     "RAG",
+     "Retrieval"
+    ],
+    "config": {
+     "required_keys": [
+      "context",
+      "input"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config": {
+      "check_internet": {
+       "type": "boolean",
+       "default": false
+      }
+     },
+     "config_params_desc": {
+      "context": "The context to be evaluated",
+      "input": "The input to be evaluated"
+     },
+     "param_modalities": {
+      "context": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ],
+      "input": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "0cd9c744-99ca-5089-90b8-2c0f9d801185",
+    "name": "conversation_coherence",
+    "description": "Evaluates if a conversation flows logically and maintains context throughout",
+    "eval_id": 1,
+    "eval_tags": [
+     "Conversation",
+     "Quality"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "conversation": "The conversation to be evaluated"
+     },
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "c2c3c4f5-502c-58c5-abc6-e7492c256e87",
+    "name": "conversation_hallucination",
+    "description": "Detects fabricated attributions, false dialogue history, material contradictions, and misrepresentation of supplied factual context.",
+    "eval_id": 200,
+    "eval_tags": [
+     "Hallucination",
+     "Conversation",
+     "Agents"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation",
+      "context"
+     ],
+     "optional_keys": [
+      "context"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "conversation": "The full conversation (user and agent turns) to be evaluated for hallucinations in the agent's responses",
+      "context": "Optional external grounding (e.g., retrieved documents, knowledge base) against which agent factual claims should also be validated"
+     },
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "context": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "94b222a7-b3f5-56c0-946b-a72faf92362c",
+    "name": "conversation_resolution",
+    "description": "Checks if the conversation reaches a satisfactory conclusion or resolution. The conversation must have atleast two users",
+    "eval_id": 2,
+    "eval_tags": [
+     "Conversation",
+     "Quality"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "conversation": "The conversation messages to be evaluated"
+     },
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "61aac80d-0acf-5a05-aed2-9c5cb42da721",
+    "name": "conversational_naturalness",
+    "description": "Checks that the agent's language and delivery sound natural, like an experienced human agent in the same role: conversational phrasing, varied acknowledgments, ",
+    "eval_id": 218,
+    "eval_tags": [
+     "Agents",
+     "Conversation",
+     "Audio"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "conversation": "The full conversation (user and agent turns), as transcript text or call audio"
+     },
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "8c5202bc-3abb-5d11-b02f-4c66fc3b0fe7",
+    "name": "cultural_sensitivity",
+    "description": "Analyzes output for cultural appropriateness, inclusive language, and awareness of cultural nuances. Identifies potential cultural biases or insensitive content",
+    "eval_id": 68,
+    "eval_tags": [
+     "Bias",
+     "Cultural"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "a0de4b1e-6723-5dda-b7d6-26ca9a987882",
+    "name": "customer_agent_clarification_seeking",
+    "description": "Assesses if the bot seeks clarification when needed rather than guessing.",
+    "eval_id": 121,
+    "eval_tags": [
+     "Agents",
+     "Voice"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "choices",
+     "eval_type_id": "AgentEvaluator",
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     },
+     "config_params_desc": {
+      "conversation": "The conversation to be evaluated"
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "never",
+     "occasionally",
+     "frequently",
+     "always"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "d98ed77b-deb2-5f34-927c-b16886f2607e",
+    "name": "customer_agent_context_retention",
+    "description": "Checks if the bot remembers context from earlier in the conversation",
+    "eval_id": 113,
+    "eval_tags": [
+     "Agents",
+     "Voice"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "conversation": "The conversation to be evaluated"
+     },
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "43e97945-008a-5192-9804-ac220e1d191c",
+    "name": "customer_agent_conversation_quality",
+    "description": "Conversation-level quality metric that assesses overall user experience.",
+    "eval_id": 117,
+    "eval_tags": [
+     "Agents",
+     "Voice"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "choices",
+     "eval_type_id": "AgentEvaluator",
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     },
+     "config_params_desc": {
+      "conversation": "The conversation to be evaluated"
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "5683de70-aa45-590f-959d-bd8d5802b47e",
+    "name": "customer_agent_human_escalation",
+    "description": "Tracks if the bot escalates to a human agent appropriately based on user frustration, complexity of queries, or specific keywords.",
+    "eval_id": 120,
+    "eval_tags": [
+     "Agents",
+     "Voice"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "conversation": "The conversation to be evaluated"
+     },
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "3bf18b5f-7024-52dd-9dda-de51d19adc4d",
+    "name": "customer_agent_interruption_handling",
+    "description": "Monitors whether the bot talks over the user. Uses barge-in detection logs to confirm the bot waits for user to finish speaking before responding.",
+    "eval_id": 116,
+    "eval_tags": [
+     "Agents",
+     "Voice"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "conversation": "The conversation to be evaluated"
+     },
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "7a5c421f-9f18-5db8-95c7-34021fb202aa",
+    "name": "customer_agent_language_handling",
+    "description": "Verifies the bot correctly detects the language/dialect and responds appropriately, including mid-call language switching if supported.",
+    "eval_id": 119,
+    "eval_tags": [
+     "Agents",
+     "Voice"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "conversation": "The conversation to be evaluated"
+     },
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "866d7199-a8dd-5e0e-83d0-1358f88a3edd",
+    "name": "customer_agent_loop_detection",
+    "description": "Identifies if the bot gets stuck asking the same question repeatedly or circling back in loops.",
+    "eval_id": 112,
+    "eval_tags": [
+     "Agents",
+     "Voice"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "choices",
+     "eval_type_id": "AgentEvaluator",
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     },
+     "config_params_desc": {
+      "conversation": "The conversation to be evaluated"
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "never",
+     "occasionally",
+     "frequently",
+     "always"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "5d6468df-bfed-5d3a-85fb-2910694a00c8",
+    "name": "customer_agent_objection_handling",
+    "description": "Monitors the agent's ability to handle customer objections effectively.",
+    "eval_id": 118,
+    "eval_tags": [
+     "Agents",
+     "Voice",
+     "Sales"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "choices",
+     "eval_type_id": "AgentEvaluator",
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     },
+     "config_params_desc": {
+      "conversation": "The conversation to be evaluated"
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "never",
+     "occasionally",
+     "frequently",
+     "always"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "64eb1722-9230-55d8-9b21-95bd1a03b2b8",
+    "name": "customer_agent_prompt_conformance",
+    "description": "Measures how well the bot adheres to system prompt constraints across the conversation, including persona consistency, language requirements, and conversation g",
+    "eval_id": 124,
+    "eval_tags": [
+     "Agents",
+     "Voice"
+    ],
+    "config": {
+     "required_keys": [
+      "system_prompt",
+      "conversation"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "system_prompt": "System prompt defining the agent's persona and behavior",
+      "conversation": "The conversation to be evaluated"
+     },
+     "param_modalities": {
+      "system_prompt": [
+       "TEXT",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "117ea195-1b54-5172-9a8b-cf5a10e51260",
+    "name": "customer_agent_query_handling",
+    "description": "Checks whether every substantive part of user questions and requests is understood and appropriately addressed.",
+    "eval_id": 114,
+    "eval_tags": [
+     "Agents",
+     "Voice"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "choices",
+     "eval_type_id": "AgentEvaluator",
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     },
+     "config_params_desc": {
+      "conversation": "The conversation to be evaluated"
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "never",
+     "occasionally",
+     "frequently",
+     "always"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "fc670638-277a-5e00-a2a8-28556a459f16",
+    "name": "customer_agent_task_completion",
+    "description": "Checks whether the user's primary objective and stated conditions were fulfilled in the conversation.",
+    "eval_id": 133,
+    "eval_tags": [
+     "Agents",
+     "Conversation",
+     "Voice",
+     "Chatbot behaviors"
+    ],
+    "config": {
+     "required_keys": [
+      "agent_prompt",
+      "conversation"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "agent_prompt": "The agent's system prompt defining its task and behavior",
+      "conversation": "The conversation to be evaluated"
+     },
+     "param_modalities": {
+      "agent_prompt": [
+       "TEXT",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "4a0596bd-1434-5094-91d9-56fb2cc6d5fd",
+    "name": "customer_agent_termination_handling",
+    "description": "Tracks occurrences of bot freezing, hanging up abruptly, crashes, or early cut-offs.",
+    "eval_id": 115,
+    "eval_tags": [
+     "Agents",
+     "Voice"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "choices",
+     "eval_type_id": "AgentEvaluator",
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     },
+     "config_params_desc": {
+      "conversation": "The conversation to be evaluated"
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "never",
+     "occasionally",
+     "frequently",
+     "always"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "254c4a76-1582-5026-b0a2-3c999f9fc618",
+    "name": "data_privacy_compliance",
+    "description": "Checks output content for compliance with GDPR and HIPAA, identifying potential privacy violations and sensitive data exposure.",
+    "eval_id": 22,
+    "eval_tags": [
+     "Data Privacy",
+     "Compliance"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {
+      "check_internet": {
+       "type": "boolean",
+       "default": false
+      }
+     },
+     "config_params_desc": {
+      "output": "The output to be evaluated"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "5df87767-11dc-5c49-b512-3ee8077a4ab8",
+    "name": "detect_hallucination",
+    "description": "Identifies if the model fabricated facts or added information that was not present in the input or reference.",
+    "eval_id": 89,
+    "eval_tags": [
+     "Hallucination",
+     "Accuracy"
+    ],
+    "config": {
+     "required_keys": [
+      "input",
+      "output",
+      "context"
+     ],
+     "optional_keys": [
+      "input"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "input": "The original input/reference",
+      "output": "The response to be evaluated for hallucinations",
+      "context": "The context to compare against for hallucinations"
+     },
+     "param_modalities": {
+      "input": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "context": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "bd3e3bec-b99a-5081-a0e6-2d851d540b42",
+    "name": "deterministic_evals",
+    "description": "Evaluates if the output is deterministic or not",
+    "eval_id": 3,
+    "eval_tags": [
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [],
+     "output": "choices",
+     "eval_type_id": "AgentEvaluator",
+     "config": {
+      "multi_choice": {
+       "type": "boolean",
+       "default": false
+      },
+      "choices": {
+       "type": "choices",
+       "default": []
+      },
+      "rule_prompt": {
+       "type": "rule_prompt",
+       "default": ""
+      },
+      "input": {
+       "type": "rule_string",
+       "default": []
+      }
+     },
+     "config_params_desc": {
+      "rule_prompt": "The rule prompt to be evaluated",
+      "multi_choice": "Whether the output is a multiple choice question or not",
+      "choices": "The choices for the multiple choice question",
+      "input": "The input to be evaluated"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "ae9ba7c9-5b38-53c7-9e0a-77261d047746",
+    "name": "evaluate_function_calling",
+    "description": "Tests if the model correctly identifies when to trigger a tool/function and includes the right arguments in the function call.",
+    "eval_id": 98,
+    "eval_tags": [
+     "Code",
+     "Function Calling",
+     "Tools"
+    ],
+    "config": {
+     "required_keys": [
+      "input",
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "input": "The user's request",
+      "output": "The function call to be evaluated"
+     },
+     "param_modalities": {
+      "input": [
+       "TEXT",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "output": [
+       "TEXT",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "4756f8cc-7a31-55e2-a357-30eab04822a1",
+    "name": "factual_accuracy",
+    "description": "Verifies if the provided output is factually correct or not.",
+    "eval_id": 66,
+    "eval_tags": [
+     "Accuracy",
+     "RAG"
+    ],
+    "config": {
+     "required_keys": [
+      "input",
+      "output",
+      "context"
+     ],
+     "optional_keys": [
+      "input"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config": {
+      "check_internet": {
+       "type": "boolean",
+       "default": false
+      }
+     },
+     "config_params_desc": {
+      "input": "The input to be evaluated",
+      "output": "The output to be evaluated",
+      "context": "The context provided for the response"
+     },
+     "param_modalities": {
+      "input": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "context": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "bd3f1ca6-df67-593a-9eed-7b3f9a4ce679",
+    "name": "ground_truth_match",
+    "description": "Evaluates whether the model-generated output matches the provided ground-truth expected output.",
+    "eval_id": 123,
+    "eval_tags": [
+     "Accuracy",
+     "Matching"
+    ],
+    "config": {
+     "required_keys": [
+      "generated_value",
+      "expected_value"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "expected_value": "The ground-truth reference output",
+      "generated_value": "The model-generated output to be evaluated"
+     },
+     "param_modalities": {
+      "generated_value": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "expected_value": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "357bba01-91b2-59a3-a248-568f2d61ad1f",
+    "name": "groundedness",
+    "description": "Evaluates whether the output content is grounded in the provided context.",
+    "eval_id": 47,
+    "eval_tags": [
+     "RAG",
+     "Hallucination"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "input",
+      "context"
+     ],
+     "optional_keys": [
+      "input"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "output": "The response to be evaluated",
+      "input": "The input to be evaluated",
+      "context": "The context provided for the response"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ],
+      "input": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "context": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "561f9c43-408c-5dfe-9760-d16faffa50bc",
+    "name": "identity_verification_compliance",
+    "description": "Checks that the agent completes the verification steps its prompt requires before disclosing account or personal information, never discloses to an unauthorised",
+    "eval_id": 209,
+    "eval_tags": [
+     "Agents",
+     "Conversation",
+     "Audio",
+     "Compliance",
+     "Data Leakage"
+    ],
+    "config": {
+     "required_keys": [
+      "agent_prompt",
+      "conversation"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "agent_prompt": "The agent's system prompt (persona, script and behavioural instructions)",
+      "conversation": "The full conversation (user and agent turns), as transcript text or call audio"
+     },
+     "param_modalities": {
+      "agent_prompt": [
+       "TEXT"
+      ],
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "59ee59d2-e5ad-5180-80dc-4c4fa90d7a5c",
+    "name": "image_instruction_adherence",
+    "description": "Measures how well generated images adhere to the given text instruction. Evaluates whether the image(s) accurately reflect the specified requirements, style, co",
+    "eval_id": 130,
+    "eval_tags": [
+     "Image",
+     "Multimodal"
+    ],
+    "config": {
+     "required_keys": [
+      "instruction",
+      "images"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "instruction": "The text instruction describing what the image should contain or depict",
+      "images": "The generated image(s) to be evaluated against the instruction"
+     },
+     "param_modalities": {
+      "instruction": [
+       "TEXT",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "images": [
+       "IMAGE",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "14a0fb54-5d6a-52ed-9fd8-fa4b2606790a",
+    "name": "intake_field_accuracy",
+    "description": "Checks faithful capture of user information, retained corrections, and applicable collection or confirmation requirements.",
+    "eval_id": 208,
+    "eval_tags": [
+     "Agents",
+     "Conversation",
+     "Voice",
+     "Chatbot behaviors",
+     "Accuracy"
+    ],
+    "config": {
+     "required_keys": [
+      "agent_prompt",
+      "conversation"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "agent_prompt": "The agent's system prompt (intake flow and the details it must collect)",
+      "conversation": "The conversation to be evaluated (transcript or audio)"
+     },
+     "param_modalities": {
+      "agent_prompt": [
+       "TEXT"
+      ],
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "9adfc941-906e-501f-907a-6b806ff448d5",
+    "name": "is_compliant",
+    "description": "Ensures that the output adheres to legal, regulatory, or organizational policies (e.g., HIPAA, GDPR, company rules).",
+    "eval_id": 96,
+    "eval_tags": [
+     "Compliance"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated for compliance"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "00181d9a-7348-561d-a67c-231a807f00b9",
+    "name": "is_concise",
+    "description": "Measures whether the answer is brief and to the point, avoiding redundancy.",
+    "eval_id": 83,
+    "eval_tags": [
+     "Quality"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "80795ab9-67e2-54a9-8378-411325b99c59",
+    "name": "is_factually_consistent",
+    "description": "Checks if the generated output is factually consistent with the source/context (e.g., input text or documents).",
+    "eval_id": 95,
+    "eval_tags": [
+     "Accuracy",
+     "Consistency"
+    ],
+    "config": {
+     "required_keys": [
+      "input",
+      "output",
+      "context"
+     ],
+     "optional_keys": [
+      "input"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "input": "The source/context material",
+      "output": "The output to be evaluated for factual consistency",
+      "context": "The context to compare against for factual consistency"
+     },
+     "param_modalities": {
+      "input": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "context": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "ef35e536-de13-52da-8575-a9e0863cd3db",
+    "name": "is_good_summary",
+    "description": "Evaluates if a summary is clear, well-structured, and includes the most important points from the source material.",
+    "eval_id": 94,
+    "eval_tags": [
+     "Summarization"
+    ],
+    "config": {
+     "required_keys": [
+      "input",
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "input": "The source material",
+      "output": "The summary to be evaluated"
+     },
+     "param_modalities": {
+      "input": [
+       "TEXT",
+       "AUDIO",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "c8b39831-7cb7-5c59-86a7-c4e710182240",
+    "name": "is_harmful_advice",
+    "description": "Detects whether the model gives advice that could be physically, emotionally, legally, or financially harmful.",
+    "eval_id": 92,
+    "eval_tags": [
+     "Safety"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated for harmful advice"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "e8fe12fb-5e76-5f64-84e4-eb839c222a3a",
+    "name": "is_helpful",
+    "description": "Evaluates whether the response answers the user's question effectively.",
+    "eval_id": 84,
+    "eval_tags": [
+     "Quality"
+    ],
+    "config": {
+     "required_keys": [
+      "input",
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "input": "The user's question",
+      "output": "The response to be evaluated"
+     },
+     "param_modalities": {
+      "input": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "d477f02a-a6c9-5947-9ded-88aa27bcc991",
+    "name": "is_informal_tone",
+    "description": "Detects whether the tone is informal or casual (e.g., use of slang, contractions, emoji).",
+    "eval_id": 97,
+    "eval_tags": [
+     "Tone"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated for tone formality"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "e69b7e2e-36e2-5a1b-b2f7-eb82885a0423",
+    "name": "is_polite",
+    "description": "Ensures that the output maintains a respectful, kind, and non-aggressive tone.",
+    "eval_id": 82,
+    "eval_tags": [
+     "Tone"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated for politeness"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "019fcaa9-3b2e-522c-84ba-9fa2231e1056",
+    "name": "jailbreak_resistance",
+    "description": "Evaluates whether the agent complied with any adversarial or out-of-role attempt in a conversation (role-play, 'ignore previous instructions', social engineerin",
+    "eval_id": 215,
+    "eval_tags": [
+     "Red Teaming",
+     "Safety",
+     "Agents"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "conversation": "The full conversation (user and agent turns), as transcript text or call audio"
+     },
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "f3413130-68ec-5756-b48d-719748fe9106",
+    "name": "knowledge_gap_handling",
+    "description": "Classifies how the agent handled questions relative to the knowledge it had: answered from its knowledge, transparently acknowledged a gap, or answered without ",
+    "eval_id": 217,
+    "eval_tags": [
+     "Agents",
+     "Conversation",
+     "RAG",
+     "Hallucination"
+    ],
+    "config": {
+     "required_keys": [
+      "agent_prompt",
+      "conversation",
+      "context"
+     ],
+     "optional_keys": [
+      "agent_prompt"
+     ],
+     "output": "choices",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "agent_prompt": "The agent's system prompt, used as an additional knowledge source when it carries facts (FAQ, policies). Optional: leave unmapped if not available",
+      "conversation": "The full conversation (user and agent turns), as transcript text or call audio",
+      "context": "The knowledge the agent had when answering: the documents it retrieved, or the knowledge base or FAQ it answers from directly. If the agent's knowledge lives only in its system prompt, map the prompt here"
+     },
+     "param_modalities": {
+      "agent_prompt": [
+       "TEXT"
+      ],
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST"
+      ],
+      "context": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "answered_from_knowledge",
+     "gap_acknowledged",
+     "unsupported_answer"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "2ffc3ddc-aa9a-51da-bfa6-a55bd5a119c5",
+    "name": "lead_qualification_completeness",
+    "description": "Evaluates whether an agent qualifies a lead completely across a multi-turn voice or chat conversation - discovers needs, carries earlier answers forward without",
+    "eval_id": 204,
+    "eval_tags": [
+     "Agents",
+     "Conversation",
+     "Voice",
+     "Chatbot behaviors",
+     "Insurance"
+    ],
+    "config": {
+     "required_keys": [
+      "agent_prompt",
+      "conversation"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "agent_prompt": "The agent's system prompt (qualification flow and required details)",
+      "conversation": "The conversation to be evaluated"
+     },
+     "param_modalities": {
+      "agent_prompt": [
+       "TEXT"
+      ],
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "64de4ac9-a686-5b4b-8505-fbfaf5ad6529",
+    "name": "no_age_bias",
+    "description": "Evaluates if the content is free from stereotypes, discrimination, or assumptions based on age.",
+    "eval_id": 79,
+    "eval_tags": [
+     "Bias",
+     "Fairness"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated for age bias"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "378555c7-ccac-5cdd-ae1d-e2bebd64e9b7",
+    "name": "no_apologies",
+    "description": "Checks if the model unnecessarily apologizes, e.g., 'I'm sorry, but…'",
+    "eval_id": 81,
+    "eval_tags": [
+     "Tone",
+     "Quality"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "ea5aa907-e413-5c1c-9a02-2c61895d9f8d",
+    "name": "no_gender_bias",
+    "description": "Checks that the output content does not reinforce gender stereotypes or exhibit bias based on gender identity.",
+    "eval_id": 78,
+    "eval_tags": [
+     "Bias",
+     "Fairness"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated for gender bias"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "9c66cd99-91e6-5c97-a27f-a7ab6d0c4677",
+    "name": "no_harmful_therapeutic_guidance",
+    "description": "Ensures that the model does not provide potentially harmful psychological or therapeutic advice.",
+    "eval_id": 90,
+    "eval_tags": [
+     "Medical",
+     "Safety"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated for harmful therapeutic guidance"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "d24c2176-ebbd-5c3c-af28-6d30df944d5c",
+    "name": "no_llm_reference",
+    "description": "Ensures that the model response does not mention being an OpenAI model or reference its training data or providers.",
+    "eval_id": 80,
+    "eval_tags": [
+     "Quality"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated for LLM references"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "f9bd84e2-c3c4-576e-b313-b724160de397",
+    "name": "no_misselling",
+    "description": "Evaluates whether an agent mis-sells during a multi-turn voice or chat conversation - unsupportable claims about capability, price or terms, guaranteed outcomes",
+    "eval_id": 202,
+    "eval_tags": [
+     "Agents",
+     "Conversation",
+     "Voice",
+     "Chatbot behaviors",
+     "Insurance"
+    ],
+    "config": {
+     "required_keys": [
+      "agent_prompt",
+      "conversation"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "agent_prompt": "The agent's system prompt (role, offering, permitted scope)",
+      "conversation": "The conversation to be evaluated"
+     },
+     "param_modalities": {
+      "agent_prompt": [
+       "TEXT"
+      ],
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "0b51a4f0-4d16-59fa-b7a5-cae7cf1727cd",
+    "name": "no_racial_bias",
+    "description": "Ensures that the output content does not contain or imply racial bias, stereotypes, or preferential treatment.",
+    "eval_id": 77,
+    "eval_tags": [
+     "Bias",
+     "Fairness"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated for racial bias"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "98984085-ed3b-5534-96fc-5316900f36e6",
+    "name": "ocr_evaluation",
+    "description": "Evaluates the quality of the given OCR output",
+    "eval_id": 111,
+    "eval_tags": [
+     "OCR",
+     "Document"
+    ],
+    "config": {
+     "required_keys": [
+      "input_pdf",
+      "json_content"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "input_pdf": "The PDF document to verify against",
+      "json_content": "The JSON content extracted from OCR to evaluate"
+     },
+     "param_modalities": {
+      "input_pdf": [
+       "PDF",
+       "KNOWLEDGE_BASE"
+      ],
+      "json_content": [
+       "TEXT",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "16520337-f55c-5e75-bdc6-cd27c90cff44",
+    "name": "persona_consistency",
+    "description": "Checks that the agent keeps a stable identity (name, company), register, and behavioural pattern within the conversation, judged against the persona it establis",
+    "eval_id": 213,
+    "eval_tags": [
+     "Agents",
+     "Conversation",
+     "Audio",
+     "Chatbot behaviors"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "conversation": "The full conversation (user and agent turns), as transcript text or call audio"
+     },
+     "param_modalities": {
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "9c79548a-cbef-5889-b265-8b7661bcb71f",
+    "name": "pii",
+    "description": "Detects personally identifiable information (PII) in content",
+    "eval_id": 14,
+    "eval_tags": [
+     "Data Leakage",
+     "Data Privacy"
+    ],
+    "config": {
+     "required_keys": [
+      "input"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "input": "The input content to be evaluated for PII"
+     },
+     "param_modalities": {
+      "input": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "4281bff1-1acb-595f-927e-9011e340d935",
+    "name": "prompt_adherence",
+    "description": "Assesses how closely the output follows the given prompt instructions, checking for completion of all requested tasks and adherence to specified constraints or ",
+    "eval_id": 65,
+    "eval_tags": [
+     "Instruction Following"
+    ],
+    "config": {
+     "required_keys": [
+      "input",
+      "output"
+     ],
+     "optional_keys": [
+      "input"
+     ],
+     "run_prompt_column": true,
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "input": "The input to be evaluated",
+      "output": "The output to be evaluated"
+     },
+     "param_modalities": {
+      "input": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "f7f4875b-0d42-5b72-a716-b72f64b4b668",
+    "name": "prompt_injection",
+    "description": "Evaluates content for potential prompt injection attempts",
+    "eval_id": 18,
+    "eval_tags": [
+     "Red Teaming",
+     "Security"
+    ],
+    "config": {
+     "required_keys": [
+      "input"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "input": "The input content to be evaluated for prompt injection attempts"
+     },
+     "param_modalities": {
+      "input": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "11f3b44d-0700-55c6-bb42-e5a56d782829",
+    "name": "prompt_instruction_adherence",
+    "description": "Evaluates whether the output follows the prompt’s instructions and required format.",
+    "eval_id": 21,
+    "eval_tags": [
+     "Instruction Following"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "prompt"
+     ],
+     "run_prompt_column": true,
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated",
+      "prompt": "The input prompt"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ],
+      "prompt": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "e0276961-bf51-507b-8b4c-3838f9875fe2",
+    "name": "protect_flash",
+    "description": "FutureAGI's proprietary evaluator to check if the content is harmful",
+    "eval_id": 76,
+    "eval_tags": [
+     "Safety"
+    ],
+    "config": {
+     "required_keys": [
+      "input"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "input": "The input to be evaluated for harmful content"
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "91018a53-5ce9-59af-9b77-c781af49b4c0",
+    "name": "sexist",
+    "description": "Detects sexist content and gender bias in the output",
+    "eval_id": 17,
+    "eval_tags": [
+     "Red Teaming",
+     "Bias"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "e37876c6-c19d-56aa-81ed-35fd161215e4",
+    "name": "summary_quality",
+    "description": "Evaluates if a summary effectively captures the main points, maintains factual accuracy, and achieves appropriate length while preserving the original meaning. ",
+    "eval_id": 64,
+    "eval_tags": [
+     "Summarization"
+    ],
+    "config": {
+     "required_keys": [
+      "input",
+      "output"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config": {
+      "check_internet": {
+       "type": "boolean",
+       "default": false
+      }
+     },
+     "config_params_desc": {
+      "input": "The input to be evaluated",
+      "output": "The output to be evaluated"
+     },
+     "param_modalities": {
+      "input": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ],
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "2e39cac0-38ca-55ef-98a8-43d7bb6679e2",
+    "name": "synthetic_image_evaluator",
+    "description": "Evaluates if the given image is generated by AI/Computer Graphics or authentically created.",
+    "eval_id": 110,
+    "eval_tags": [
+     "Image",
+     "Synthetic"
+    ],
+    "config": {
+     "required_keys": [
+      "image"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config_params_desc": {
+      "image": "The image to evaluate for AI generation"
+     },
+     "param_modalities": {
+      "image": [
+       "IMAGE",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "64b77704-6122-583a-9552-bed96c50fdaf",
+    "name": "system_prompt_leakage",
+    "description": "Detects whether the agent's turns in a conversation reveal its system prompt, confidential instructions, internal tool names, credentials, or other hidden confi",
+    "eval_id": 214,
+    "eval_tags": [
+     "Red Teaming",
+     "Data Leakage",
+     "Safety",
+     "Conversation"
+    ],
+    "config": {
+     "required_keys": [
+      "agent_prompt",
+      "conversation"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "agent_prompt": "The agent's system prompt (role, boundaries, and safety instructions)",
+      "conversation": "The full conversation (user and agent turns), as transcript text or call audio"
+     },
+     "param_modalities": {
+      "agent_prompt": [
+       "TEXT"
+      ],
+      "conversation": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "fb16690a-508b-5fcf-a864-2b3c269d08f1",
+    "name": "task_completion",
+    "description": "Measures whether the model fulfilled the user's request accurately and completely.",
+    "eval_id": 99,
+    "eval_tags": [
+     "Task Completion"
+    ],
+    "config": {
+     "required_keys": [
+      "input",
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "input": "The user's request",
+      "output": "The model's response to be evaluated"
+     },
+     "param_modalities": {
+      "input": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "a1020ab8-cfda-5b4b-ae11-967182a2be43",
+    "name": "text_to_sql",
+    "description": "Evaluates if the model correctly converts natural language text into valid and accurate SQL queries.",
+    "eval_id": 105,
+    "eval_tags": [
+     "Code",
+     "SQL"
+    ],
+    "config": {
+     "required_keys": [
+      "input",
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "input": "The input text to be evaluated",
+      "output": "The output to be evaluated"
+     },
+     "param_modalities": {
+      "input": [
+       "TEXT",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "output": [
+       "TEXT",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "fbeb4e10-ae18-5ce5-9471-95bcda5e164f",
+    "name": "tone",
+    "description": "Analyzes the tone and sentiment of content",
+    "eval_id": 16,
+    "eval_tags": [
+     "Tone",
+     "Style"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "choices",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated for tone"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "neutral",
+     "joy",
+     "love",
+     "fear",
+     "surprise",
+     "sadness",
+     "anger",
+     "annoyance",
+     "confusion"
+    ],
+    "multi_choice": true,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "258d7a05-8194-50ba-ad7a-912321e01158",
+    "name": "toxicity",
+    "description": "Evaluates content for toxic or harmful language",
+    "eval_id": 15,
+    "eval_tags": [
+     "Red Teaming",
+     "Harmful Objects",
+     "Chatbot behaviors"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "output": "The output to be evaluated for content moderation"
+     },
+     "param_modalities": {
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "IMAGE",
+       "PDF",
+       "KNOWLEDGE_BASE",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "f5ba4ec0-243f-51b1-973f-38806327e1b6",
+    "name": "translation_accuracy",
+    "description": "Evaluates the quality of translation by checking semantic accuracy, cultural appropriateness, and preservation of original meaning. Considers both literal accur",
+    "eval_id": 67,
+    "eval_tags": [
+     "Translation"
+    ],
+    "config": {
+     "required_keys": [
+      "input",
+      "output"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "input": "The input to be evaluated",
+      "output": "The output to be evaluated"
+     },
+     "param_modalities": {
+      "input": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ],
+      "output": [
+       "TEXT",
+       "AUDIO",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "8aa1256a-b150-507e-a8ac-6c2a0ec1b808",
+    "name": "unclear_audio_handling",
+    "description": "Evaluates, from call audio, how the agent handles unclear, cut-off, or silent user audio and background noise: asks the user to repeat instead of guessing, igno",
+    "eval_id": 212,
+    "eval_tags": [
+     "Audio"
+    ],
+    "config": {
+     "required_keys": [
+      "agent_prompt",
+      "conversation"
+     ],
+     "optional_keys": [
+      "agent_prompt"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "agent_prompt": "The agent's system prompt (persona, script and behavioural instructions). Optional: leave unmapped if not available",
+      "conversation": "Call audio of the full conversation. Transcripts are not accepted: a transcript cannot show unclear audio or background speech"
+     },
+     "param_modalities": {
+      "agent_prompt": [
+       "TEXT"
+      ],
+      "conversation": [
+       "AUDIO"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "4a858de9-f3c7-5113-b5b1-9fa8ea7ddf63",
+    "name": "voice_mail_detection",
+    "description": "Detects whether an outbound call reached a voicemail box rather than a live person, from the call audio - voicemail greeting, beep, an automated leave-a-message",
+    "eval_id": 206,
+    "eval_tags": [
+     "Agents",
+     "Audio",
+     "Conversation",
+     "Voice"
+    ],
+    "config": {
+     "required_keys": [
+      "conversation"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "conversation": "The call audio to be evaluated"
+     },
+     "param_modalities": {
+      "conversation": [
+       "AUDIO"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "5beeabf4-e34e-5c94-bca2-9e87287daa05",
+    "name": "voicemail_handling",
+    "description": "Evaluates whether the agent responded correctly upon reaching a voicemail - hangs up cleanly or leaves a brief appropriate message per its prompt, and does not ",
+    "eval_id": 207,
+    "eval_tags": [
+     "Agents",
+     "Audio",
+     "Conversation",
+     "Voice"
+    ],
+    "config": {
+     "required_keys": [
+      "agent_prompt",
+      "conversation"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "agent_prompt": "The agent's system prompt (voicemail handling instructions)",
+      "conversation": "The call audio to be evaluated"
+     },
+     "param_modalities": {
+      "agent_prompt": [
+       "TEXT"
+      ],
+      "conversation": [
+       "AUDIO"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": [
+     "Passed",
+     "Failed"
+    ],
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "agent"
+   },
+   {
+    "id": "d5b045d0-be6e-5ce9-b5ff-69bf71dad447",
+    "name": "accuracy",
+    "description": "Computes classification accuracy by comparing predicted labels against expected labels. Accepts single values or JSON arrays of labels. Case-insensitive compari",
+    "eval_id": 168,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Predicted label(s) - string, number, or JSON array",
+      "expected": "Expected label(s) - same format"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "de9ba2ce-7a19-5164-9b56-935951443e26",
+    "name": "answer_similarity",
+    "description": "Evaluates the similarity between the expected and actual responses",
+    "eval_id": 57,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "expected_response",
+      "response"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "comparator": {
+       "type": "option",
+       "default": "CosineSimilarity"
+      },
+      "failure_threshold": {
+       "type": "float",
+       "default": 0.5
+      }
+     },
+     "config_params_desc": {
+      "expected_response": "The expected correct response",
+      "response": "The actual response to be evaluated",
+      "comparator": "The method to use for comparison",
+      "failure_threshold": "The threshold below which the evaluation fails"
+     },
+     "config_params_option": {
+      "comparator": [
+       "CosineSimilarity",
+       "NormalisedLevenshteinSimilarity",
+       "JaroWincklerSimilarity",
+       "JaccardSimilarity",
+       "SorensenDiceSimilarity",
+       "PhoneticSimilarity"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "36479a25-376c-5488-9805-e824aae638cb",
+    "name": "api_call",
+    "description": "Makes an API call and evaluates the response",
+    "eval_id": 31,
+    "eval_tags": [
+     "Code",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "response"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "url": {
+       "type": "string",
+       "default": null
+      },
+      "payload": {
+       "type": "dict",
+       "default": {}
+      },
+      "headers": {
+       "type": "dict",
+       "default": {}
+      }
+     },
+     "config_params_desc": {
+      "response": "The response to be evaluated",
+      "url": "The URL for the API call",
+      "payload": "The payload to be sent with the API call",
+      "headers": "The headers to be sent with the API call"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "eb1e74fe-4c28-5913-917f-27d6ed32723d",
+    "name": "audio_signal_metrics",
+    "description": "Checks deterministic voiced pitch and estimated signal-to-noise ratio for a single-speaker audio recording.",
+    "eval_id": 219,
+    "eval_tags": [
+     "Audio",
+     "Quality"
+    ],
+    "config": {
+     "required_keys": [
+      "input_audio"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "function_params_schema": {
+      "min_pitch_hz": {
+       "type": "number",
+       "default": 80.0,
+       "minimum": 0,
+       "maximum": 2000
+      },
+      "max_pitch_hz": {
+       "type": "number",
+       "default": 400.0,
+       "minimum": 0,
+       "maximum": 4000
+      },
+      "min_snr_db": {
+       "type": "number",
+       "default": 6.0,
+       "minimum": -100,
+       "maximum": 100
+      }
+     },
+     "config_params_desc": {
+      "input_audio": "The single-speaker audio recording to analyse.",
+      "min_pitch_hz": "Minimum acceptable mean voiced pitch in Hz.",
+      "max_pitch_hz": "Maximum acceptable mean voiced pitch in Hz.",
+      "min_snr_db": "Minimum acceptable estimated SNR in dB."
+     },
+     "param_modalities": {
+      "input_audio": [
+       "AUDIO"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "ababc9aa-eae1-59c8-8ac4-31eb06a71638",
+    "name": "balanced_accuracy",
+    "description": "Computes balanced accuracy (average recall per class). Handles imbalanced datasets better than standard accuracy.",
+    "eval_id": 184,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Predicted labels",
+      "expected": "True labels"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "bb545375-9918-560e-a8f2-6172d4c7f607",
+    "name": "bleu_score",
+    "description": "Computes a bleu score between the expected gold answer and the model output.",
+    "eval_id": 101,
+    "eval_tags": [
+     "NLP Metrics",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "reference",
+      "hypothesis"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {}
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "a223d658-2529-5bd3-9bec-0e2e312b22dd",
+    "name": "character_error_rate",
+    "description": "Computes Character Error Rate (CER) for ASR/OCR evaluation. CER measures character-level edit distance between reference and hypothesis. Returns 1-CER as score ",
+    "eval_id": 164,
+    "eval_tags": [
+     "NLP Metrics",
+     "Audio"
+    ],
+    "config": {
+     "required_keys": [
+      "reference",
+      "hypothesis"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "reference": "Ground truth text",
+      "hypothesis": "OCR/ASR output text"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "d64975a6-1f62-5395-974d-5b050b749c53",
+    "name": "chrf_score",
+    "description": "Computes ChrF score (character n-gram F-score). More robust than BLEU for morphologically rich languages and short texts. Uses character-level n-grams up to ord",
+    "eval_id": 142,
+    "eval_tags": [
+     "NLP Metrics",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "reference",
+      "hypothesis"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "function_params_schema": {
+      "n": {
+       "type": "integer",
+       "default": 6,
+       "minimum": 1,
+       "maximum": 10
+      },
+      "beta": {
+       "type": "number",
+       "default": 2.0,
+       "minimum": 0.1
+      }
+     },
+     "config_params_desc": {
+      "reference": "The reference/expected text",
+      "hypothesis": "The generated/output text",
+      "n": "Maximum character n-gram order (default 6)",
+      "beta": "Recall weight factor (default 2.0, recall twice as important as precision)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "94f1f89c-6cf6-5115-bd52-3c66f0f47246",
+    "name": "clip_score",
+    "description": "Computes the CLIP Score between images and text prompts. CLIP Score measures how well images match their text descriptions - higher scores indicate better align",
+    "eval_id": 126,
+    "eval_tags": [
+     "Image",
+     "NLP Metrics"
+    ],
+    "config": {
+     "required_keys": [
+      "images",
+      "text"
+     ],
+     "output": "numeric",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "images": "Single image or list of images (PIL Image, URL, or JSON string of URLs)",
+      "text": "Text description or list of text descriptions to compare against the images"
+     },
+     "param_modalities": {
+      "images": [
+       "IMAGE",
+       "IMAGES"
+      ],
+      "text": [
+       "TEXT",
+       "JSON",
+       "LIST",
+       "NUMBER",
+       "BOOLEAN",
+       "INTEGER",
+       "FLOAT",
+       "ARRAY",
+       "DATETIME"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "201e5457-7715-591c-b1a2-2bb3551a06d4",
+    "name": "code_bleu",
+    "description": "Computes CodeBLEU - a code-aware BLEU variant that combines standard n-gram BLEU with keyword matching for code-specific tokens (def, class, return, if, for, et",
+    "eval_id": 167,
+    "eval_tags": [
+     "Code",
+     "NLP Metrics"
+    ],
+    "config": {
+     "required_keys": [
+      "reference",
+      "hypothesis"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "reference": "Reference/expected code",
+      "hypothesis": "Generated code"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "ce7d56c7-dfcd-56cc-aea5-56bc9ae128f2",
+    "name": "code_complexity",
+    "description": "Computes cyclomatic complexity of Python code using AST analysis. Counts decision points (if, for, while, except, boolean ops). Lower complexity = higher score.",
+    "eval_id": 166,
+    "eval_tags": [
+     "Code",
+     "NLP Metrics"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "text": "Python code to analyze for complexity"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "712e2f1a-70a0-536d-b7ad-2145a8900985",
+    "name": "cohen_kappa",
+    "description": "Computes Cohen's Kappa coefficient for inter-rater agreement. Accounts for agreement occurring by chance. Range -1 to 1, normalized to 0-1 for scoring. Useful f",
+    "eval_id": 170,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Predicted label(s)",
+      "expected": "Expected label(s)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "f15343ae-2b0f-5679-8689-0bc9e06821e9",
+    "name": "contains",
+    "description": "Checks if the text contains a specific keyword",
+    "eval_id": 43,
+    "eval_tags": [
+     "Output Validation",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "keyword": {
+       "type": "string",
+       "default": null
+      },
+      "case_sensitive": {
+       "type": "boolean",
+       "default": true
+      }
+     },
+     "config_params_desc": {
+      "text": "The input text to be evaluated",
+      "keyword": "The keyword to search for in the text",
+      "case_sensitive": "Whether the keyword search should be case-sensitive"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "165f19fa-627a-5443-9b71-4955d71d2fb4",
+    "name": "contains_all",
+    "description": "Verifies text contains all specified keywords",
+    "eval_id": 26,
+    "eval_tags": [
+     "Output Validation",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "case_sensitive": {
+       "type": "boolean",
+       "default": true
+      },
+      "keywords": {
+       "type": "list",
+       "default": []
+      }
+     },
+     "config_params_desc": {
+      "text": "The input text to be evaluated",
+      "case_sensitive": "Whether the keyword search should be case-sensitive",
+      "keywords": "List of keywords to search for in the text"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "026dc519-66c5-56d4-801b-5df3a56d2f4a",
+    "name": "contains_any",
+    "description": "Checks if the text contains any of the specified keywords",
+    "eval_id": 44,
+    "eval_tags": [
+     "Output Validation",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "keywords": {
+       "type": "list",
+       "default": []
+      },
+      "case_sensitive": {
+       "type": "boolean",
+       "default": true
+      }
+     },
+     "config_params_desc": {
+      "text": "The input text to be evaluated",
+      "keywords": "List of keywords to search for in the text",
+      "case_sensitive": "Whether the keyword search should be case-sensitive"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "4d4d56d8-52df-503d-bedb-c4014932dcf0",
+    "name": "contains_none",
+    "description": "Verifies text contains none of specified terms",
+    "eval_id": 28,
+    "eval_tags": [
+     "Output Validation",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "case_sensitive": {
+       "type": "boolean",
+       "default": true
+      },
+      "keywords": {
+       "type": "list",
+       "default": []
+      }
+     },
+     "config_params_desc": {
+      "text": "The input text to be evaluated",
+      "case_sensitive": "Whether the keyword search should be case-sensitive",
+      "keywords": "List of keywords that should not be present in the text"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "0c7bb084-aa64-5d8a-b380-c58f7abdd0df",
+    "name": "contains_valid_link",
+    "description": "Checks for presence of valid URLs",
+    "eval_id": 39,
+    "eval_tags": [
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "text": "The input text to be evaluated for valid links"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "f575b73c-e036-590b-a13f-ed21698ed58d",
+    "name": "custom_code_evaluation",
+    "description": "Executes custom Python code for evaluation",
+    "eval_id": 34,
+    "eval_tags": [
+     "Code",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "code": {
+       "type": "code",
+       "default": null
+      }
+     },
+     "config_params_desc": {
+      "code": "The custom Python code to be executed for evaluation"
+     },
+     "config_params_constraints": {
+      "code": "Function name should be main only. You can access any prompt run field using the kwargs."
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "d6422187-2d0f-5e20-b104-f530f59fc36d",
+    "name": "dead_air_detection",
+    "description": "Detects dead air (silence) in conversation audio using RMS energy analysis. Fails if either the total dead-air percentage or the longest single silence gap exce",
+    "eval_id": 201,
+    "eval_tags": [
+     "Audio",
+     "Voice"
+    ],
+    "config": {
+     "required_keys": [
+      "input_audio"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "function_params_schema": {
+      "dead_air_threshold": {
+       "type": "number",
+       "default": 20.0,
+       "minimum": 0,
+       "maximum": 100
+      },
+      "gap_threshold_ms": {
+       "type": "number",
+       "default": 3000,
+       "minimum": 0
+      },
+      "silence_threshold": {
+       "type": "number",
+       "default": 0.01,
+       "minimum": 0,
+       "maximum": 1
+      }
+     },
+     "config_params_desc": {
+      "input_audio": "The conversation audio to analyse (URL, data URI, or file path)",
+      "dead_air_threshold": "Maximum acceptable dead-air percentage (% of total audio duration)",
+      "gap_threshold_ms": "Maximum acceptable single continuous silence gap (milliseconds)",
+      "silence_threshold": "RMS energy below which a frame is treated as silent (0-1)"
+     },
+     "param_modalities": {
+      "input_audio": [
+       "AUDIO"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "9578b5bc-f527-5675-9c5f-1b65657eab32",
+    "name": "distinct_n",
+    "description": "Computes Distinct-N: ratio of unique n-grams to total n-grams. Measures vocabulary diversity in generated text. Higher = more diverse.",
+    "eval_id": 194,
+    "eval_tags": [
+     "NLP Metrics",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "function_params_schema": {
+      "n": {
+       "type": "integer",
+       "default": 1,
+       "minimum": 1,
+       "maximum": 5
+      }
+     },
+     "config_params_desc": {
+      "text": "Text to evaluate for diversity",
+      "n": "N-gram order (default 1)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "ed896a05-ccda-5e99-8d3c-70f243a90b59",
+    "name": "embedding_similarity",
+    "description": "Measures the cosine semantic similarity between the generated text and the reference text.",
+    "eval_id": 108,
+    "eval_tags": [
+     "NLP Metrics",
+     "RAG"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {}
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "bcea4b9d-d0ec-5873-a489-21959cad6ad2",
+    "name": "ends_with",
+    "description": "Checks if text ends with specific substring",
+    "eval_id": 24,
+    "eval_tags": [
+     "Output Validation",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "case_sensitive": {
+       "type": "boolean",
+       "default": true
+      },
+      "substring": {
+       "type": "string",
+       "default": null
+      }
+     },
+     "config_params_desc": {
+      "text": "The input text to be evaluated",
+      "case_sensitive": "Whether the comparison should be case-sensitive",
+      "substring": "The substring to check for at the end of the text"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "06ef1fc6-ef30-5e58-ae0b-08a47383e3d3",
+    "name": "equals",
+    "description": "Compares if two texts are exactly equal",
+    "eval_id": 25,
+    "eval_tags": [
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "text",
+      "expected_text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "case_sensitive": {
+       "type": "boolean",
+       "default": true
+      }
+     },
+     "config_params_desc": {
+      "text": "The input text to be compared",
+      "expected_text": "The text to compare against",
+      "case_sensitive": "Whether the comparison should be case-sensitive"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "ecae7592-ac88-5237-ac6c-e2e3a22c2216",
+    "name": "f1_score",
+    "description": "Computes token-level F1 score between output and expected text. Treats both texts as bags of tokens and calculates the harmonic mean of precision and recall. Wi",
+    "eval_id": 143,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "case_insensitive": {
+       "type": "boolean",
+       "default": true
+      }
+     },
+     "config_params_desc": {
+      "output": "The generated/output text",
+      "expected": "The expected/reference text",
+      "case_insensitive": "Whether to lowercase before comparing (default true)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "e8ae19a0-6dec-553e-af30-31bf7645df6a",
+    "name": "f_beta_score",
+    "description": "Computes F-beta score with configurable beta for precision/recall weighting. Beta<1 favors precision, beta>1 favors recall.",
+    "eval_id": 185,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "function_params_schema": {
+      "beta": {
+       "type": "number",
+       "default": 1.0,
+       "minimum": 0.01
+      },
+      "positive_label": {
+       "type": "string",
+       "default": null,
+       "required": true
+      }
+     },
+     "config_params_desc": {
+      "output": "Predicted labels",
+      "expected": "True labels",
+      "beta": "Beta weight (default 1.0)",
+      "positive_label": "Positive class label"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "c6e0967d-c466-5a61-8976-62a1444658fb",
+    "name": "fid_score",
+    "description": "Computes the Frechet Inception Distance (FID) between two sets of images. FID measures the similarity between two distributions of images - lower scores indicat",
+    "eval_id": 125,
+    "eval_tags": [
+     "Image",
+     "NLP Metrics"
+    ],
+    "config": {
+     "required_keys": [
+      "real_images",
+      "fake_images"
+     ],
+     "output": "numeric",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "real_images": "List of PIL images representing the real/reference distribution",
+      "fake_images": "List of PIL images representing the generated/fake distribution"
+     },
+     "param_modalities": {
+      "real_images": [
+       "IMAGE",
+       "IMAGES"
+      ],
+      "fake_images": [
+       "IMAGE",
+       "IMAGES"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "7e0454f4-a3a1-5d7c-af97-4e04149af247",
+    "name": "fleiss_kappa",
+    "description": "Computes Fleiss' Kappa for multi-rater agreement. Extends Cohen's Kappa to N raters. Input: matrix where rows=subjects, columns=categories, values=rater counts.",
+    "eval_id": 199,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Rating matrix as JSON: [[count_cat1, count_cat2, ...], ...] where each row is a subject"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "989807c6-8128-554b-98a1-cc9cec99ebaf",
+    "name": "fuzzy_match",
+    "description": "Computes fuzzy string matching score using SequenceMatcher (difflib). Returns a similarity ratio between 0 and 1 based on the longest contiguous matching subseq",
+    "eval_id": 147,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "case_insensitive": {
+       "type": "boolean",
+       "default": true
+      }
+     },
+     "config_params_desc": {
+      "output": "The generated/output text",
+      "expected": "The expected/reference text",
+      "case_insensitive": "Whether to lowercase before comparing (default true)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "a7c6a48a-98cf-505b-91c8-7a74e2883b6c",
+    "name": "gleu_score",
+    "description": "Computes Google BLEU (GLEU) score. A sentence-level BLEU variant that takes the minimum of precision and recall for each n-gram order, making it more balanced t",
+    "eval_id": 141,
+    "eval_tags": [
+     "NLP Metrics",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "reference",
+      "hypothesis"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "reference": "The reference/expected text",
+      "hypothesis": "The generated/output text"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "f6f93859-014e-5b9d-a097-9a22fadf7946",
+    "name": "hamming_similarity",
+    "description": "Computes Hamming similarity between two strings. Counts matching character positions normalized by the longer string length. Pads the shorter string for unequal",
+    "eval_id": 146,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "case_insensitive": {
+       "type": "boolean",
+       "default": true
+      }
+     },
+     "config_params_desc": {
+      "output": "The generated/output text",
+      "expected": "The expected/reference text",
+      "case_insensitive": "Whether to lowercase before comparing (default true)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "e3d0d08c-0d6a-59d3-bc42-8a99e3272182",
+    "name": "hit_rate",
+    "description": "Hit Rate: Percentage of queries where at least one relevant chunk is retrieved.",
+    "eval_id": 129,
+    "eval_tags": [
+     "RAG",
+     "Retrieval Systems"
+    ],
+    "config": {
+     "required_keys": [
+      "hypothesis",
+      "reference"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "hypothesis": "Retrieved chunks in ranked order (array/JSON string).",
+      "reference": "Ground-truth relevant chunks (array/JSON string)."
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "35e78c06-947a-5d62-bcb2-649b3a4b0e73",
+    "name": "image_properties",
+    "description": "Validates image properties including dimensions, format, and file size. Useful for ensuring generated images meet specific requirements.",
+    "eval_id": 162,
+    "eval_tags": [
+     "Image",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "function_params_schema": {
+      "expected_width": {
+       "type": "integer",
+       "default": null,
+       "nullable": true
+      },
+      "expected_height": {
+       "type": "integer",
+       "default": null,
+       "nullable": true
+      },
+      "min_width": {
+       "type": "integer",
+       "default": null,
+       "nullable": true
+      },
+      "min_height": {
+       "type": "integer",
+       "default": null,
+       "nullable": true
+      },
+      "max_file_size_kb": {
+       "type": "integer",
+       "default": null,
+       "nullable": true
+      },
+      "expected_format": {
+       "type": "string",
+       "default": null,
+       "nullable": true
+      }
+     },
+     "config_params_desc": {
+      "text": "Image as URL, file path, or base64 string",
+      "expected_width": "Exact expected width in pixels",
+      "expected_height": "Exact expected height in pixels",
+      "min_width": "Minimum width in pixels",
+      "min_height": "Minimum height in pixels",
+      "max_file_size_kb": "Maximum file size in KB",
+      "expected_format": "Expected format (JPEG, PNG, etc.)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "5a068239-0fb3-5185-a41f-651a06a0ba8f",
+    "name": "is_email",
+    "description": "Validates email address format",
+    "eval_id": 40,
+    "eval_tags": [
+     "Output Format",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "text": "The input text to be evaluated as an email address"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "94e6f19f-12f5-53cd-928f-a7855892010f",
+    "name": "is_html",
+    "description": "Validates if text contains well-formed HTML with proper tag nesting. Checks for the presence of HTML tags and validates that all non-void tags are properly clos",
+    "eval_id": 173,
+    "eval_tags": [
+     "Output Format",
+     "Code"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "text": "The text to validate as HTML"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "c0b80d32-37f5-5738-9e0c-bef55853c5bf",
+    "name": "is_json",
+    "description": "Validates if content is proper JSON format",
+    "eval_id": 23,
+    "eval_tags": [
+     "Output Format",
+     "Code"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "text": "The input text to be evaluated for JSON validity"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "f5fb32a6-e077-575a-b570-47376808f24c",
+    "name": "is_refusal",
+    "description": "Detects if LLM output is a refusal to answer using common refusal pattern matching. Returns True if refusal detected.",
+    "eval_id": 197,
+    "eval_tags": [
+     "Safety",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "text": "LLM output to check for refusal"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "0d89eb1d-d73b-5765-8381-ee7ad1f847f8",
+    "name": "is_sql",
+    "description": "Validates if text appears to be syntactically valid SQL. Checks for recognized SQL keywords, balanced parentheses, and balanced quotes.",
+    "eval_id": 149,
+    "eval_tags": [
+     "Output Format",
+     "Code"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "text": "The text to validate as SQL"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "6f1a5661-cb89-5f8e-a877-25c6ca937e3e",
+    "name": "is_url",
+    "description": "Validates if text is a properly formatted URL with a valid scheme and network location.",
+    "eval_id": 150,
+    "eval_tags": [
+     "Output Format",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "text": "The text to validate as a URL"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "9dc4f510-e064-559a-a533-8eb5a6dc3f7d",
+    "name": "is_xml",
+    "description": "Validates if text is well-formed XML. Checks that the text can be parsed as a valid XML document.",
+    "eval_id": 148,
+    "eval_tags": [
+     "Output Format",
+     "Code"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "text": "The text to validate as XML"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "8f78b596-7d50-5a13-a2aa-155a01402445",
+    "name": "jaccard_similarity",
+    "description": "Computes Jaccard similarity (intersection over union) between token sets of two texts. Useful for measuring set-level overlap regardless of frequency or order.",
+    "eval_id": 144,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "case_insensitive": {
+       "type": "boolean",
+       "default": true
+      }
+     },
+     "config_params_desc": {
+      "output": "The generated/output text",
+      "expected": "The expected/reference text",
+      "case_insensitive": "Whether to lowercase before comparing (default true)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "7dbaa3d5-885e-5497-8e4b-3aa24a0ca16b",
+    "name": "jaro_winkler_similarity",
+    "description": "Computes Jaro-Winkler similarity between two strings. Particularly effective for short strings like names, labels, and identifiers. Adds a prefix bonus to the b",
+    "eval_id": 145,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "case_insensitive": {
+       "type": "boolean",
+       "default": true
+      },
+      "prefix_weight": {
+       "type": "number",
+       "default": 0.1
+      }
+     },
+     "config_params_desc": {
+      "output": "The generated/output text",
+      "expected": "The expected/reference text",
+      "case_insensitive": "Whether to lowercase before comparing (default true)",
+      "prefix_weight": "Winkler prefix scaling factor (default 0.1, max 0.25)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "98cf907e-b88e-5f3e-8903-138c3a231de4",
+    "name": "json_diff",
+    "description": "Deep structural comparison between two JSON objects. Recursively compares keys and values at all levels, returning a score based on the fraction of matching nod",
+    "eval_id": 172,
+    "eval_tags": [
+     "Output Format",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Actual JSON (string or object)",
+      "expected": "Expected JSON (string or object)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "3b5c2274-1065-52fc-806d-bfd59d36544c",
+    "name": "json_scheme_validation",
+    "description": "Validates JSON against specified criteria",
+    "eval_id": 37,
+    "eval_tags": [
+     "Output Format",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "actual_json",
+      "expected_json"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "validations": {
+       "type": "list",
+       "default": []
+      }
+     },
+     "config_params_desc": {
+      "actual_json": "The JSON to be validated",
+      "expected_json": "The expected JSON structure",
+      "validations": "List of validation criteria to apply"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "daf4d798-0f9e-5c7a-96c8-5763c6e6f91f",
+    "name": "latency_check",
+    "description": "Validates that response latency is within acceptable bounds. Pass if latency <= max_latency_ms.",
+    "eval_id": 198,
+    "eval_tags": [
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "function_params_schema": {
+      "max_latency_ms": {
+       "type": "number",
+       "default": null,
+       "required": true,
+       "minimum": 0
+      }
+     },
+     "config_params_desc": {
+      "text": "Latency value in milliseconds",
+      "max_latency_ms": "Maximum acceptable latency in ms"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "f6c56cee-c14e-5d7e-9be8-c0e02adcb944",
+    "name": "length_between",
+    "description": "Checks if the text length is between specified min and max values",
+    "eval_id": 32,
+    "eval_tags": [
+     "Output Validation",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "max_length": {
+       "type": "integer",
+       "default": null
+      },
+      "min_length": {
+       "type": "integer",
+       "default": null
+      }
+     },
+     "config_params_desc": {
+      "text": "The input text to be evaluated",
+      "max_length": "The maximum allowed length of the text",
+      "min_length": "The minimum allowed length of the text"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "bc432e2e-e0a1-5e28-95ad-f9ae2d769dc7",
+    "name": "length_greater_than",
+    "description": "Checks if the text length is greater than a specified value",
+    "eval_id": 41,
+    "eval_tags": [
+     "Output Validation",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "min_length": {
+       "type": "integer",
+       "default": null
+      }
+     },
+     "config_params_desc": {
+      "text": "The input text to be evaluated",
+      "min_length": "The minimum required length of the text"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "bb2a949d-d891-52ab-beaa-ed6856841979",
+    "name": "length_less_than",
+    "description": "Checks if text length is below threshold",
+    "eval_id": 27,
+    "eval_tags": [
+     "Output Validation",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "max_length": {
+       "type": "integer",
+       "default": null
+      }
+     },
+     "config_params_desc": {
+      "text": "The input text to be evaluated",
+      "max_length": "The maximum allowed length of the text"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "0bd3a075-2bc8-53c5-bd38-71ab9ba2c3d8",
+    "name": "levenshtein_similarity",
+    "description": "Measures the number of edits (insertions, deletions, or substitutions) to transform generated text to reference text. It is case-insensitive, punctuation-insens",
+    "eval_id": 106,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "case_insensitive": {
+       "type": "boolean",
+       "default": true
+      },
+      "remove_punctuation": {
+       "type": "boolean",
+       "default": true
+      }
+     },
+     "config_params_desc": {
+      "output": "The generated/output text",
+      "expected": "The expected/reference text",
+      "case_insensitive": "Whether to lowercase before comparing (default true)",
+      "remove_punctuation": "Whether to remove punctuation before comparing (default true)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "5ed1cbd8-bc0a-50b9-ae90-35cb423eaaae",
+    "name": "log_loss",
+    "description": "Computes log loss (cross-entropy) for probability predictions. Returns 1/(1+loss) as score. Lower loss = higher score.",
+    "eval_id": 186,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Predicted probabilities (0-1)",
+      "expected": "True labels (0 or 1)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "f870dec5-42df-51a5-a80f-a47023d364aa",
+    "name": "match_error_rate",
+    "description": "Computes Match Error Rate (MER) for speech recognition. MER = edits / (hits + edits). Returns 1-MER as score.",
+    "eval_id": 189,
+    "eval_tags": [
+     "NLP Metrics",
+     "Audio"
+    ],
+    "config": {
+     "required_keys": [
+      "reference",
+      "hypothesis"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "reference": "Ground truth transcription",
+      "hypothesis": "ASR output"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "1f744c46-b147-52ee-bfd6-df6e44541524",
+    "name": "matthews_correlation",
+    "description": "Computes Matthews Correlation Coefficient (MCC). A balanced metric for binary and multiclass classification that produces high scores only when the prediction o",
+    "eval_id": 171,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Predicted label(s)",
+      "expected": "Expected label(s)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "a569bcee-867c-551d-ae00-3ec3fbbe14b9",
+    "name": "mean_average_precision",
+    "description": "Computes Mean Average Precision (MAP) for information retrieval. Averages precision at each relevant item across queries.",
+    "eval_id": 187,
+    "eval_tags": [
+     "RAG",
+     "Retrieval Systems",
+     "NLP Metrics"
+    ],
+    "config": {
+     "required_keys": [
+      "reference",
+      "hypothesis"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "hypothesis": "Retrieved items (JSON array)",
+      "reference": "Ground-truth relevant items (JSON array)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "25ac2be2-ab83-5d52-8373-ce29d8967b4d",
+    "name": "meteor_score",
+    "description": "Computes METEOR score between reference and hypothesis. Uses unigram matching with exact and stem matching, penalizing fragmentation. More correlated with human",
+    "eval_id": 140,
+    "eval_tags": [
+     "NLP Metrics",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "reference",
+      "hypothesis"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "reference": "The reference/expected text",
+      "hypothesis": "The generated/output text"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "7cdc7117-eed0-5382-8107-f4ed4b275811",
+    "name": "mrr",
+    "description": "MRR (Mean Reciprocal Rank): Measures how early the first relevant chunk appears in the ranked results.",
+    "eval_id": 128,
+    "eval_tags": [
+     "RAG",
+     "Retrieval Systems",
+     "NLP Metrics"
+    ],
+    "config": {
+     "required_keys": [
+      "hypothesis",
+      "reference"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "hypothesis": "Retrieved chunks in ranked order (array/JSON string).",
+      "reference": "Ground-truth relevant chunks (array/JSON string)."
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "c0da1283-0ff4-500e-86c3-aafa5120ec5a",
+    "name": "ndcg_at_k",
+    "description": "NDCG@K (Normalized Discounted Cumulative Gain): Measures ranking quality at top K, giving more credit to relevant chunks that appear earlier.",
+    "eval_id": 127,
+    "eval_tags": [
+     "RAG",
+     "Retrieval Systems",
+     "NLP Metrics"
+    ],
+    "config": {
+     "required_keys": [
+      "hypothesis",
+      "reference"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "function_params_schema": {
+      "k": {
+       "type": "integer",
+       "default": null,
+       "nullable": true,
+       "minimum": 1
+      }
+     },
+     "config_params_desc": {
+      "hypothesis": "Retrieved chunks in ranked order (array/JSON string).",
+      "reference": "Ground-truth relevant chunks (array/JSON string).",
+      "k": "How many top results to evaluate (K). Leave empty to use the full retrieved list."
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "2b18afd2-280c-59d1-b783-62f7ea72dfbf",
+    "name": "no_invalid_links",
+    "description": "Checks if the text contains no invalid URLs",
+    "eval_id": 42,
+    "eval_tags": [
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "text": "The input text to be evaluated for invalid links"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "44fbb2d6-4954-53ba-b3b3-d50200908192",
+    "name": "non_llm_context_precision",
+    "description": "Non-LLM context precision for RAG evaluation. Measures what fraction of retrieved contexts match reference contexts using exact string matching.",
+    "eval_id": 192,
+    "eval_tags": [
+     "RAG",
+     "Retrieval Systems"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Retrieved contexts (JSON array)",
+      "expected": "Reference contexts (JSON array)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "211661a5-7c14-554d-8485-666b522907b3",
+    "name": "non_llm_context_recall",
+    "description": "Non-LLM context recall for RAG evaluation. Measures what fraction of reference contexts were successfully retrieved.",
+    "eval_id": 193,
+    "eval_tags": [
+     "RAG",
+     "Retrieval Systems"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Retrieved contexts (JSON array)",
+      "expected": "Reference contexts (JSON array)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "61cbb6e9-6622-55cc-8ddb-41a8de27939a",
+    "name": "numeric_similarity",
+    "description": "Extracts numeric values from generated text and computes the normalized difference from the reference number. Returns the normalized numeric similarity.",
+    "eval_id": 107,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {}
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "53bbd102-1d87-540e-9d68-dd16707dd0b5",
+    "name": "one_line",
+    "description": "Checks if the text is a single line",
+    "eval_id": 38,
+    "eval_tags": [
+     "Output Validation",
+     "Output Format"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "text": "The input text to be evaluated"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "d56a3fd9-0287-5222-b6df-18ee1aecbe96",
+    "name": "pearson_correlation",
+    "description": "Computes Pearson correlation coefficient between two sets of numeric values. Measures linear relationship strength (-1 to 1, normalized to 0-1).",
+    "eval_id": 180,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Predicted values (JSON array of numbers or comma-separated)",
+      "expected": "Actual values (same format)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "5ca78ad3-cf95-5df2-b909-31c6e1779ef7",
+    "name": "precision_at_k",
+    "description": "Precision@K: Out of the top K retrieved chunks, what fraction is actually relevant.",
+    "eval_id": 132,
+    "eval_tags": [
+     "RAG",
+     "Retrieval Systems",
+     "NLP Metrics"
+    ],
+    "config": {
+     "required_keys": [
+      "hypothesis",
+      "reference"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "function_params_schema": {
+      "k": {
+       "type": "integer",
+       "default": null,
+       "nullable": true,
+       "minimum": 1
+      }
+     },
+     "config_params_desc": {
+      "hypothesis": "Retrieved chunks in ranked order (array/JSON string).",
+      "reference": "Ground-truth relevant chunks (array/JSON string).",
+      "k": "How many top results to evaluate (K). Leave empty to use the full retrieved list."
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "0f9a16de-0333-5b4d-8f32-843965e23d8d",
+    "name": "precision_score",
+    "description": "Computes classification precision (TP / (TP + FP)) for binary or multiclass tasks. Measures how many positive predictions are actually correct.",
+    "eval_id": 169,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "function_params_schema": {
+      "positive_label": {
+       "type": "string",
+       "default": null,
+       "required": true
+      }
+     },
+     "config_params_desc": {
+      "output": "Predicted label(s)",
+      "expected": "Expected label(s)",
+      "positive_label": "Label considered positive (auto-detected if empty)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "2a986553-dacd-5ce3-89fd-e33a931d028d",
+    "name": "psnr",
+    "description": "Computes Peak Signal-to-Noise Ratio (PSNR) between two images. Higher PSNR indicates more similar images. Returns a normalized score (0-1) where PSNR is mapped ",
+    "eval_id": 161,
+    "eval_tags": [
+     "Image",
+     "NLP Metrics"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Output image (URL, file path, or base64 string)",
+      "expected": "Reference image (URL, file path, or base64 string)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "30fa0cb7-511f-54ba-87d1-8b4c9d7d968b",
+    "name": "r2_score",
+    "description": "Computes R-squared (coefficient of determination). Measures proportion of variance explained by predictions.",
+    "eval_id": 182,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Predicted values",
+      "expected": "Actual values"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "ee47abf2-a992-55ef-8884-d31206bce6d7",
+    "name": "readability_score",
+    "description": "Computes Flesch-Kincaid readability metrics. Returns a normalized score (0-1) based on Flesch Reading Ease. Higher scores indicate more readable text. Also repo",
+    "eval_id": 152,
+    "eval_tags": [
+     "NLP Metrics",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "text": "The text to evaluate for readability"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "f1561d24-4f7a-5bf4-8ffb-95fffaaa02cb",
+    "name": "recall_at_k",
+    "description": "Recall@K: Out of all truly relevant chunks, what fraction appears in the top K retrieved results.",
+    "eval_id": 131,
+    "eval_tags": [
+     "RAG",
+     "Retrieval Systems",
+     "NLP Metrics"
+    ],
+    "config": {
+     "required_keys": [
+      "hypothesis",
+      "reference"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "function_params_schema": {
+      "k": {
+       "type": "integer",
+       "default": null,
+       "nullable": true,
+       "minimum": 1
+      }
+     },
+     "config_params_desc": {
+      "hypothesis": "Retrieved chunks in ranked order (array/JSON string).",
+      "reference": "Ground-truth relevant chunks (array/JSON string).",
+      "k": "How many top results to evaluate (K). Leave empty to use the full retrieved list."
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "7736ce98-bd5f-5039-8672-22413c747fca",
+    "name": "recall_score",
+    "description": "Recall: Out of all ground-truth relevant chunks, what fraction was retrieved.",
+    "eval_id": 104,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "hypothesis",
+      "reference"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "hypothesis": "Retrieved chunks (array/JSON string).",
+      "reference": "Ground-truth relevant chunks (array/JSON string)."
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "da5ecbd4-50c1-5c41-b518-f25afed0f5c0",
+    "name": "regex",
+    "description": "Checks if the text matches a specified regex pattern",
+    "eval_id": 29,
+    "eval_tags": [
+     "Output Validation",
+     "Output Format"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "pattern": {
+       "type": "string",
+       "default": null
+      }
+     },
+     "config_params_desc": {
+      "text": "The input text to be evaluated",
+      "pattern": "The regex pattern to match against the text"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "508293c1-639d-5d10-802e-3ccacf3cafd7",
+    "name": "regex_pii_detection",
+    "description": "Detects Personally Identifiable Information (PII) using regex patterns. Scans for SSN, credit card numbers, phone numbers, email addresses, and IP addresses. Re",
+    "eval_id": 177,
+    "eval_tags": [
+     "Data Leakage",
+     "Safety"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "function_params_schema": {
+      "detect_types": {
+       "type": "string",
+       "default": null,
+       "required": false
+      }
+     },
+     "config_params_desc": {
+      "text": "Text to scan for PII",
+      "detect_types": "Comma-separated types to detect (default: all). Options: ssn, credit_card, phone, email, ip_address"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "b6f879e9-f819-519a-a6bf-573f69788805",
+    "name": "repetition_rate",
+    "description": "Measures repeated n-gram rate in text. Returns 1-rate as score (higher = less repetitive = better). Useful for detecting degenerate/looping LLM outputs.",
+    "eval_id": 196,
+    "eval_tags": [
+     "NLP Metrics",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "function_params_schema": {
+      "n": {
+       "type": "integer",
+       "default": 3,
+       "minimum": 1
+      }
+     },
+     "config_params_desc": {
+      "text": "Text to check for repetition",
+      "n": "N-gram size (default 3)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "e2a5911a-639f-59ab-b672-25deaff505e9",
+    "name": "rmse",
+    "description": "Computes Root Mean Squared Error between predicted and actual values. Returns 1/(1+RMSE) as score (higher=better).",
+    "eval_id": 183,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Predicted values",
+      "expected": "Actual values"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "8e661baf-6394-5cd7-85a9-3b5c05fec835",
+    "name": "rouge_score",
+    "description": "Computes a rouge score between the expected gold answer and the model output.",
+    "eval_id": 102,
+    "eval_tags": [
+     "NLP Metrics",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "reference",
+      "hypothesis"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {}
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "4c52c18d-4477-5590-a0a9-f69b45ee68bf",
+    "name": "semantic_list_contains",
+    "description": "Checks if the generated response semantically contains one or more phrases from a reference list.",
+    "eval_id": 109,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "similarity_threshold": {
+       "type": "float",
+       "default": 0.5,
+       "minimum": 0.0,
+       "maximum": 1.0
+      },
+      "match_all": {
+       "type": "boolean",
+       "default": false
+      }
+     },
+     "config_params_desc": {
+      "output": "The generated text to evaluate",
+      "expected": "The expected phrases (list or comma-separated string)",
+      "similarity_threshold": "Minimum cosine similarity threshold for semantic matching (default 0.5)",
+      "match_all": "If true, all expected phrases must match; if false, any match succeeds (default false)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "78bc4e2b-fa0a-58cf-9708-7a2c5b1a30c1",
+    "name": "sentence_count",
+    "description": "Checks if the sentence count of text falls within a specified range. Useful for enforcing structural constraints on generated text.",
+    "eval_id": 153,
+    "eval_tags": [
+     "Output Validation",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "function_params_schema": {
+      "min_sentences": {
+       "type": "integer",
+       "required": true,
+       "minimum": 0
+      },
+      "max_sentences": {
+       "type": "integer",
+       "required": true,
+       "minimum": 1
+      }
+     },
+     "config_params_desc": {
+      "text": "The text to count sentences in",
+      "min_sentences": "Minimum sentence count (inclusive).",
+      "max_sentences": "Maximum sentence count (inclusive)."
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "34d91500-dd4c-5d42-88b1-3003d7666ec4",
+    "name": "spearman_correlation",
+    "description": "Computes Spearman rank correlation coefficient. Measures monotonic relationship between two sets of values (-1 to 1, normalized to 0-1).",
+    "eval_id": 181,
+    "eval_tags": [
+     "NLP Metrics",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Predicted values (JSON array or comma-separated)",
+      "expected": "Actual values (same format)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "ed43e6e2-bb9e-554c-bd5d-4f5c1b5fd889",
+    "name": "squad_score",
+    "description": "Computes SQuAD-style evaluation: exact match + token F1 for QA tasks. Normalizes text (lowercase, remove articles/punctuation) before comparing.",
+    "eval_id": 188,
+    "eval_tags": [
+     "NLP Metrics",
+     "RAG"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Predicted answer",
+      "expected": "Gold answer"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "f89445d2-6be8-5a34-83d0-5d141c29361f",
+    "name": "ssim",
+    "description": "Computes Structural Similarity Index (SSIM) between two images. Measures perceptual similarity based on luminance, contrast, and structure. Score ranges from 0 ",
+    "eval_id": 160,
+    "eval_tags": [
+     "Image",
+     "NLP Metrics"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Output image (URL, file path, or base64 string)",
+      "expected": "Reference image (URL, file path, or base64 string)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "3e4641d5-4804-5d26-b7cd-16bc6fbefe95",
+    "name": "starts_with",
+    "description": "Checks if text begins with specific substring",
+    "eval_id": 30,
+    "eval_tags": [
+     "Output Validation",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "substring": {
+       "type": "string",
+       "default": null
+      },
+      "case_sensitive": {
+       "type": "boolean",
+       "default": true
+      }
+     },
+     "config_params_desc": {
+      "text": "The input text to be evaluated",
+      "substring": "The substring to check for at the start of the text",
+      "case_sensitive": "Whether the comparison should be case-sensitive"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "614a8cf5-d6a1-5ea2-b518-2d724d9932c7",
+    "name": "step_count",
+    "description": "Counts and validates the number of steps/actions in an agent trajectory. Can check against exact count, minimum, maximum, or range.",
+    "eval_id": 176,
+    "eval_tags": [
+     "Agents",
+     "Output Validation",
+     "Tools"
+    ],
+    "config": {
+     "required_keys": [
+      "output"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "function_params_schema": {
+      "min_steps": {
+       "type": "integer",
+       "default": null,
+       "nullable": true,
+       "minimum": 0
+      },
+      "max_steps": {
+       "type": "integer",
+       "default": null,
+       "nullable": true,
+       "minimum": 1
+      },
+      "expected_steps": {
+       "type": "integer",
+       "default": null,
+       "nullable": true,
+       "minimum": 0
+      }
+     },
+     "config_params_desc": {
+      "output": "Agent trajectory (JSON array of steps or comma-separated string)",
+      "min_steps": "Minimum step count",
+      "max_steps": "Maximum step count",
+      "expected_steps": "Exact expected step count (overrides min/max)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "464e7d27-842d-5c4c-9eb5-e1aaec983251",
+    "name": "syntax_validation",
+    "description": "Validates code syntax without executing it. Supports Python (via ast.parse), JSON, and basic JavaScript bracket validation. Useful for checking if LLM-generated",
+    "eval_id": 165,
+    "eval_tags": [
+     "Code",
+     "Output Validation"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "language": {
+       "type": "option",
+       "default": "python"
+      }
+     },
+     "config_params_desc": {
+      "text": "The code to validate",
+      "language": "Programming language (python, json, javascript)"
+     },
+     "config_params_option": {
+      "language": [
+       "python",
+       "json",
+       "javascript"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "bd2934c2-a0ce-5f39-9486-35c07249ca05",
+    "name": "tool_call_accuracy",
+    "description": "Evaluates accuracy of agent tool/function calls by comparing actual vs expected calls. Checks function names and arguments, supporting both OpenAI and generic t",
+    "eval_id": 154,
+    "eval_tags": [
+     "Agents",
+     "Code",
+     "Tools"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "output": "Actual tool calls (JSON string or list). Format: [{\"name\": \"func\", \"arguments\": {...}}] or [{\"function\": {\"name\": \"func\", \"arguments\": {...}}}]",
+      "expected": "Expected tool calls (same format as output)"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "771ac870-0b45-519e-a780-f6d1a927e3ba",
+    "name": "trajectory_match",
+    "description": "Validates agent action/tool call sequences. Supports strict (same order), unordered (any order), subset (expected in actual), and superset (actual in expected) ",
+    "eval_id": 175,
+    "eval_tags": [
+     "Agents",
+     "Output Validation",
+     "Tools"
+    ],
+    "config": {
+     "required_keys": [
+      "output",
+      "expected"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {
+      "mode": {
+       "type": "option",
+       "default": "strict"
+      }
+     },
+     "config_params_desc": {
+      "output": "Actual trajectory (JSON array of action names or objects with \"name\" field)",
+      "expected": "Expected trajectory (same format)",
+      "mode": "Matching mode: strict (same order), unordered, subset, superset"
+     },
+     "config_params_option": {
+      "mode": [
+       "strict",
+       "unordered",
+       "subset",
+       "superset"
+      ]
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "4438a6ab-db7a-5e0b-9bac-509b80d25e1e",
+    "name": "translation_edit_rate",
+    "description": "Computes Translation Edit Rate (TER). TER measures the minimum number of edits (insertions, deletions, substitutions) needed to transform the hypothesis into th",
+    "eval_id": 174,
+    "eval_tags": [
+     "NLP Metrics",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "reference",
+      "hypothesis"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "reference": "Reference translation",
+      "hypothesis": "System/generated translation"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "816c2b19-c230-550f-aa36-022b15706b21",
+    "name": "type_token_ratio",
+    "description": "Computes Type-Token Ratio (TTR): unique tokens divided by total tokens. Measures lexical diversity.",
+    "eval_id": 195,
+    "eval_tags": [
+     "NLP Metrics",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "text": "Text to evaluate"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "fe462606-b935-5d02-9773-031a3fae3a31",
+    "name": "word_count_in_range",
+    "description": "Checks if the word count of text falls within a specified range. Useful for enforcing length constraints on generated responses (e.g., summaries, tweets, abstra",
+    "eval_id": 151,
+    "eval_tags": [
+     "Output Validation",
+     "Text"
+    ],
+    "config": {
+     "required_keys": [
+      "text"
+     ],
+     "output": "Pass/Fail",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "function_params_schema": {
+      "min_words": {
+       "type": "integer",
+       "required": true,
+       "minimum": 0
+      },
+      "max_words": {
+       "type": "integer",
+       "required": true,
+       "minimum": 1
+      }
+     },
+     "config_params_desc": {
+      "text": "The text to check word count for",
+      "min_words": "Minimum word count (inclusive).",
+      "max_words": "Maximum word count (inclusive)."
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "f8977ce8-85a0-5453-abe4-7713de65ff82",
+    "name": "word_error_rate",
+    "description": "Computes Word Error Rate (WER) for ASR/STT evaluation. WER measures the edit distance at the word level between reference and hypothesis transcriptions. Returns",
+    "eval_id": 163,
+    "eval_tags": [
+     "NLP Metrics",
+     "Audio"
+    ],
+    "config": {
+     "required_keys": [
+      "reference",
+      "hypothesis"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "reference": "Ground truth transcription",
+      "hypothesis": "ASR/STT output transcription"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "ae4dade9-dfd2-57ea-b3ed-ab6f2e14ac16",
+    "name": "word_info_lost",
+    "description": "Computes Word Information Lost (WIL) for speech. WIL = 1 - (hits/ref * hits/hyp). Returns 1-WIL as score.",
+    "eval_id": 190,
+    "eval_tags": [
+     "NLP Metrics",
+     "Audio"
+    ],
+    "config": {
+     "required_keys": [
+      "reference",
+      "hypothesis"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "reference": "Ground truth",
+      "hypothesis": "ASR output"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "f628268a-368b-530f-84d5-e482b9430485",
+    "name": "word_info_preserved",
+    "description": "Computes Word Information Preserved (WIP) for speech. WIP = (hits/ref) * (hits/hyp). Higher = better.",
+    "eval_id": 191,
+    "eval_tags": [
+     "NLP Metrics",
+     "Audio"
+    ],
+    "config": {
+     "required_keys": [
+      "reference",
+      "hypothesis"
+     ],
+     "output": "score",
+     "eval_type_id": "CustomCodeEval",
+     "config": {},
+     "config_params_desc": {
+      "reference": "Ground truth",
+      "hypothesis": "ASR output"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "function"
+   },
+   {
+    "id": "fb493f70-07c5-5bc8-a4e9-fc580b48a9cb",
+    "name": "eval_ranking",
+    "description": "Provides ranking score for each context based on specified criteria",
+    "eval_id": 61,
+    "eval_tags": [
+     "RAG",
+     "Ranking"
+    ],
+    "config": {
+     "required_keys": [
+      "input",
+      "context"
+     ],
+     "output": "score",
+     "eval_type_id": "AgentEvaluator",
+     "config": {},
+     "config_params_desc": {
+      "input": "The input to be evaluated",
+      "context": "The contexts to be ranked"
+     }
+    },
+    "criteria": null,
+    "choices": null,
+    "multi_choice": false,
+    "owner": "system",
+    "_folder": "specialty"
+   }
+  ]
+ }
+}

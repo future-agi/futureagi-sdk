@@ -1,0 +1,6 @@
+/typescript/node_modules/
+/typescript/.next/
+/typescript/next-env.d.ts
+/typescript/tsconfig.tsbuildinfo
+/python/__pycache__/
+/python/.pytest_cache/

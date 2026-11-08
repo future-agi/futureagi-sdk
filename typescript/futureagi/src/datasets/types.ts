@@ -1,3 +1,4 @@
+import { legacyFields, columnFields, cellFields, datasetConfigFields, datasetTableFields } from '../_compat-fields';
 import { v4 as uuidv4 } from 'uuid';
 import { ModelProvider } from '../api/types';
 
@@ -70,30 +71,56 @@ export const DataTypeUtils = {
     }
 };
 
-// Column interface for dataset tables
+/** Dataset column. Legacy camelCase fields remain readable; prefer snake_case.
+ * Helpers and SDK responses warn once per alias when legacy spellings are used.
+ */
 export interface Column {
     id: string;
     name: string;
+    /** @deprecated Use data_type. SDK runtime paths warn once per alias per process. */
+    dataType?: DataTypeChoices;
     data_type: DataTypeChoices;
     source?: SourceChoices;
+    /** @deprecated Use source_id. SDK runtime paths warn once per alias per process. */
+    sourceId?: string;
     source_id?: string;
     metadata?: Record<string, any>;
+    /** @deprecated Use is_frozen. SDK runtime paths warn once per alias per process. */
+    isFrozen?: boolean;
     is_frozen?: boolean;
+    /** @deprecated Use is_visible. SDK runtime paths warn once per alias per process. */
+    isVisible?: boolean;
     is_visible?: boolean;
+    /** @deprecated Use eval_tags. SDK runtime paths warn once per alias per process. */
+    evalTags?: string[];
     eval_tags?: string[];
+    /** @deprecated Use average_score. SDK runtime paths warn once per alias per process. */
+    averageScore?: number;
     average_score?: number;
+    /** @deprecated Use order_index. SDK runtime paths warn once per alias per process. */
+    orderIndex?: number;
     order_index?: number;
 }
 
 // Cell interface for dataset tables
 export interface Cell {
+    /** @deprecated Use column_id. SDK runtime paths warn once per alias per process. */
+    columnId?: string;
     column_id?: string;
+    /** @deprecated Use row_id. SDK runtime paths warn once per alias per process. */
+    rowId?: string;
     row_id?: string;
+    /** @deprecated Use column_name. SDK runtime paths warn once per alias per process. */
+    columnName?: string;
     column_name?: string;
     value?: any;
+    /** @deprecated Use value_infos. SDK runtime paths warn once per alias per process. */
+    valueInfos?: Array<Record<string, any>>;
     value_infos?: Array<Record<string, any>>;
     metadata?: Record<string, any>;
     status?: string;
+    /** @deprecated Use failure_reason. SDK runtime paths warn once per alias per process. */
+    failureReason?: string;
     failure_reason?: string;
 }
 
@@ -108,7 +135,11 @@ export interface Row {
 export interface DatasetConfig {
     id?: string;
     name: string;
-    model_type?: ModelTypes.GENERATIVE_LLM;
+    /** @deprecated Use model_type. SDK runtime paths warn once per alias per process. */
+    modelType?: ModelTypes.GENERATIVE_LLM;
+    model_type?: ModelTypes;
+    /** @deprecated Use column_order. SDK runtime paths warn once per alias per process. */
+    columnOrder?: string[];
     column_order?: string[];
 }
 
@@ -117,6 +148,8 @@ export interface HuggingfaceDatasetConfig {
     name: string;
     subset?: string;
     split?: string;
+    /** @deprecated Use num_rows. SDK runtime paths warn once per alias per process. */
+    numRows?: number;
     num_rows?: number;
 }
 
@@ -126,22 +159,39 @@ export interface DatasetTable {
     columns: Column[];
     rows: Row[];
     metadata?: Record<string, any>;
+    /** @deprecated Use dataset_config. SDK runtime paths warn once per alias per process. */
+    datasetConfig?: DatasetConfig;
     dataset_config?: DatasetConfig;
 }
 
-// Column creation helper
-export function createColumn(options: {
-    name: string;
-    data_type: DataTypeChoices;
-    source?: SourceChoices;
-    source_id?: string;
-    metadata?: Record<string, any>;
-    is_frozen?: boolean;
-    is_visible?: boolean;
-    eval_tags?: string[];
-    average_score?: number;
-    order_index?: number;
-}): Column {
+/** Canonical 0.2.0 column, retained under its additional descriptive name. */
+export type CanonicalColumn = Column;
+/** Older camelCase column input; normalized results expose both spellings. */
+export type LegacyColumn = Omit<Column, 'dataType' | 'data_type'> & {
+    dataType: DataTypeChoices;
+    data_type?: DataTypeChoices;
+};
+export type LegacyDatasetTable = Omit<DatasetTable, 'columns'> & {
+    columns: LegacyColumn[];
+};
+/** Utilities accept canonical wire tables as well as older camelCase tables. */
+export type DatasetTableInput = Omit<DatasetTable, 'columns'> & {
+    columns: Array<Column | LegacyColumn>;
+};
+
+/** Inputs accept the published or canonical required data-type spelling. */
+export type ColumnInput = Omit<Column, 'id' | 'dataType' | 'data_type'> & (
+    { dataType: DataTypeChoices; data_type?: DataTypeChoices } |
+    { data_type: DataTypeChoices; dataType?: DataTypeChoices }
+);
+/** SDK column results expose both required data-type spellings. */
+export type ColumnResult = Column & LegacyColumn;
+/** Normalized SDK tables have both required column spellings. */
+export type DatasetTableResult = Omit<DatasetTable, 'columns'> & { columns: ColumnResult[] };
+
+/** Create a column from either spelling. Legacy inputs/access warn once per alias. */
+export function createColumn(input: ColumnInput): ColumnResult {
+    const options = legacyFields(input, columnFields);
     if (!options.name?.trim()) {
         throw new Error("Column name cannot be empty");
     }
@@ -149,7 +199,7 @@ export function createColumn(options: {
         throw new Error("Column name too long (max 255 characters)");
     }
 
-    return {
+    return legacyFields({
         id: uuidv4(),
         name: options.name.trim(),
         data_type: options.data_type,
@@ -161,25 +211,17 @@ export function createColumn(options: {
         eval_tags: options.eval_tags || [],
         average_score: options.average_score,
         order_index: options.order_index || 0,
-    };
+    }, columnFields) as ColumnResult;
 }
 
-// Cell creation helper
-export function createCell(options: {
-    column_id?: string;
-    row_id?: string;
-    column_name?: string;
-    value?: any;
-    value_infos?: Array<Record<string, any>>;
-    metadata?: Record<string, any>;
-    status?: string;
-    failure_reason?: string;
-}): Cell {
+/** Create a cell from either spelling. Legacy inputs/access warn once per alias. */
+export function createCell(input: Cell): Cell {
+    const options = legacyFields(input, cellFields);
     if (options.value != null && String(options.value).length > 65535) {
         throw new Error("Cell value too long (max 65535 characters)");
     }
 
-    return {
+    return legacyFields({
         column_id: options.column_id,
         row_id: options.row_id,
         column_name: options.column_name,
@@ -188,7 +230,7 @@ export function createCell(options: {
         metadata: options.metadata || {},
         status: options.status,
         failure_reason: options.failure_reason,
-    };
+    }, cellFields);
 }
 
 // Row creation helper
@@ -205,11 +247,14 @@ export function createRow(options: {
 
     const rowId = uuidv4();
     // Ensure each cell has row_id; generate column_id if missing
-    const updatedCells = options.cells.map(cell => ({
-        ...cell,
-        row_id: cell.row_id || rowId,
-        column_id: cell.column_id || uuidv4(),
-    }));
+    const updatedCells = options.cells.map(input => {
+        const cell = legacyFields(input, cellFields);
+        return legacyFields({
+            ...cell,
+            row_id: cell.row_id || rowId,
+            column_id: cell.column_id || uuidv4(),
+        }, cellFields);
+    });
 
     return {
         id: rowId,
@@ -218,19 +263,30 @@ export function createRow(options: {
     };
 }
 
-// Dataset table utilities
+function canonicalTable(input: DatasetTableInput): DatasetTableInput {
+    const table = legacyFields(input, datasetTableFields);
+    return {
+        ...table,
+        columns: table.columns.map(column => legacyFields(column, columnFields)),
+        rows: table.rows.map(row => ({ ...row, cells: row.cells.map(cell => legacyFields(cell, cellFields)) })),
+        ...(table.dataset_config ? { dataset_config: legacyFields(table.dataset_config, datasetConfigFields) } : {}),
+    };
+}
+
+/** Dataset utilities accept either spelling and warn once for each legacy input alias. */
 export const DatasetTableUtils = {
     /**
      * Convert dataset table to JSON format
      */
-    toJson(table: DatasetTable): string {
-        return JSON.stringify(table, null, 2);
+    toJson(table: DatasetTableInput): string {
+        return JSON.stringify(canonicalTable(table), null, 2);
     },
 
     /**
      * Convert dataset table to CSV format
      */
-    toCsv(table: DatasetTable): string {
+    toCsv(input: DatasetTableInput): string {
+        const table = canonicalTable(input);
         if (!table.columns.length || !table.rows.length) {
             return '';
         }
@@ -298,4 +354,4 @@ export type {
     DatasetConfig as DatasetConfigType,
     HuggingfaceDatasetConfig as HuggingfaceDatasetConfigType,
     DatasetTable as DatasetTableType,
-}; 
+};

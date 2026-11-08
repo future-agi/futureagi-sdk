@@ -1,0 +1,105 @@
+{
+ "about": "Reference for the gateway export paths and type mappings. Registration lives in typescript/futureagi/package.json with exactly these entries: plain import/require conditions, so ordinary consumers resolve every subpath without a custom condition. The gateway ships in candidates: the default build runs build:gateway, the files allowlist includes dist/gateway, and stage-package.cjs keeps the exports, mappings and optional React peer. Shipping is not live gateway qualification.",
+ "package": {
+  "exports": {
+   "./gateway": {
+    "import": {
+     "types": "./dist/gateway/esm/index.d.ts",
+     "default": "./dist/gateway/esm/index.js"
+    },
+    "require": {
+     "types": "./dist/gateway/cjs/index.d.ts",
+     "default": "./dist/gateway/cjs/index.js"
+    }
+   },
+   "./gateway/testing": {
+    "import": {
+     "types": "./dist/gateway/esm/testing.d.ts",
+     "default": "./dist/gateway/esm/testing.js"
+    },
+    "require": {
+     "types": "./dist/gateway/cjs/testing.d.ts",
+     "default": "./dist/gateway/cjs/testing.js"
+    }
+   },
+   "./gateway/express": {
+    "import": {
+     "types": "./dist/gateway/esm/express.d.ts",
+     "default": "./dist/gateway/esm/express.js"
+    },
+    "require": {
+     "types": "./dist/gateway/cjs/express.d.ts",
+     "default": "./dist/gateway/cjs/express.js"
+    }
+   },
+   "./gateway/nextjs": {
+    "import": {
+     "types": "./dist/gateway/esm/nextjs.d.ts",
+     "default": "./dist/gateway/esm/nextjs.js"
+    },
+    "require": {
+     "types": "./dist/gateway/cjs/nextjs.d.ts",
+     "default": "./dist/gateway/cjs/nextjs.js"
+    }
+   },
+   "./gateway/react": {
+    "import": {
+     "types": "./dist/gateway/esm/react/index.d.ts",
+     "default": "./dist/gateway/esm/react/index.js"
+    },
+    "require": {
+     "types": "./dist/gateway/cjs/react/index.d.ts",
+     "default": "./dist/gateway/cjs/react/index.js"
+    }
+   }
+  },
+  "typesVersions": {
+   "*": {
+    "gateway": [
+     "./dist/gateway/cjs/index.d.ts"
+    ],
+    "gateway/testing": [
+     "./dist/gateway/cjs/testing.d.ts"
+    ],
+    "gateway/express": [
+     "./dist/gateway/cjs/express.d.ts"
+    ],
+    "gateway/nextjs": [
+     "./dist/gateway/cjs/nextjs.d.ts"
+    ],
+    "gateway/react": [
+     "./dist/gateway/cjs/react/index.d.ts"
+    ]
+   }
+  },
+  "peerDependencies": {
+   "react": ">=17.0.0 <20"
+  },
+  "peerDependenciesMeta": {
+   "react": {
+    "optional": true
+   }
+  },
+  "devDependencies": {
+   "@testing-library/react": "14.3.1",
+   "@types/react": "18.3.12",
+   "esbuild": "0.25.5",
+   "jest-environment-jsdom": "29.7.0",
+   "react": "18.3.1",
+   "react-dom": "18.3.1"
+  },
+  "scripts": {
+   "build": "tsc --build tsconfig.json tsconfig.esm.json tsconfig.esnext.json && tsc-alias -p tsconfig.esm.json && pnpm run postbuild && pnpm run build:gateway",
+   "build:gateway": "node gateway-client/scripts/build.cjs",
+   "typecheck": "tsc --noEmit && tsc -p gateway-client/tsconfig.json && tsc -p gateway-client/tsconfig.typecheck.json",
+   "test": "node gateway-client/scripts/run-all-tests.cjs"
+  }
+ },
+ "notes": [
+  "run-all-tests.cjs runs both root and gateway Jest suites, followed by the parity node tests. Source tests do not enable a candidate surface.",
+  "The workspace and standalone pnpm locks and npm package lock are regenerated with the registered manifest. gateway-client retains its pinned private test toolchain.",
+  "react is the only peer and is optional; only ./gateway/react needs it. pack-checks.sh tests no peers, React 17, 18, 19 and an existing React 17/OpenAI 4 tree, without --legacy-peer-deps. Candidate staging keeps this peer.",
+  "typesVersions maps the gateway subpaths for moduleResolution node10; candidate staging keeps them beside the root and webhooks mappings.",
+  "ci/gateway-client.yml is installed identically under .github/workflows after applying test-only workflow policy: read-only permissions, no release or tag pushes, no persisted checkout credentials."
+ ]
+}

@@ -1,0 +1,1809 @@
+{
+  "swagger": "2.0",
+  "basePath": "/",
+  "info": {
+    "title": "Customer connector API",
+    "version": "v1"
+  },
+  "paths": {
+    "/integrations/connections/": {
+      "get": {
+        "operationId": "integrations_connections_list",
+        "description": "API endpoints for managing integration connections.\n\nPagination: page_number (0-based); page_size (page size).",
+        "parameters": [
+          {
+            "name": "page_number",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationConnectionListResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "integrations"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "post": {
+        "operationId": "integrations_connections_create",
+        "description": "API endpoints for managing integration connections.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IntegrationConnectionCreate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationConnectionDetailResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "integrations"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "parameters": []
+    },
+    "/integrations/connections/validate/": {
+      "post": {
+        "operationId": "integrations_connections_validate_credentials",
+        "description": "Validate platform credentials without creating a connection.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ValidateCredentials"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationValidationResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "integrations"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "parameters": []
+    },
+    "/integrations/connections/{connection_id}/slack/channels/": {
+      "get": {
+        "operationId": "integrations_connections_slack_channels_list",
+        "description": "\n\nPagination: cursor (opaque continuation token).",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "maxLength": 512
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SlackChannelsResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "integrations"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "parameters": [
+        {
+          "name": "connection_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/integrations/connections/{id}/": {
+      "get": {
+        "operationId": "integrations_connections_read",
+        "description": "API endpoints for managing integration connections.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationConnectionDetail"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "integrations"
+        ]
+      },
+      "put": {
+        "operationId": "integrations_connections_update",
+        "description": "API endpoints for managing integration connections.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IntegrationConnectionUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationConnectionDetailResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "integrations"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "patch": {
+        "operationId": "integrations_connections_partial_update",
+        "description": "API endpoints for managing integration connections.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IntegrationConnectionUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationConnectionDetailResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "integrations"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "delete": {
+        "operationId": "integrations_connections_delete",
+        "description": "API endpoints for managing integration connections.",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "integrations"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/integrations/connections/{id}/pause/": {
+      "post": {
+        "operationId": "integrations_connections_pause",
+        "description": "Pause syncing for this connection.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IntegrationEmptyRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationConnectionDetailResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "integrations"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/integrations/connections/{id}/resume/": {
+      "post": {
+        "operationId": "integrations_connections_resume",
+        "description": "Resume syncing for a paused connection.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IntegrationEmptyRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationConnectionDetailResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "integrations"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/integrations/connections/{id}/sync_now/": {
+      "post": {
+        "operationId": "integrations_connections_sync_now",
+        "description": "Trigger an immediate sync for this connection.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IntegrationEmptyRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationMessageResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "integrations"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/integrations/slack/install/": {
+      "post": {
+        "operationId": "integrations_slack_install_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SlackInstall"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SlackInstallResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "integrations"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "parameters": []
+    },
+    "/integrations/sync-logs/": {
+      "get": {
+        "operationId": "integrations_sync-logs_list",
+        "description": "Read-only viewset for sync logs.\n\nPagination: page_number (0-based); page_size (page size).",
+        "parameters": [
+          {
+            "name": "page_number",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1
+          },
+          {
+            "name": "connection_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SyncLogListResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "integrations"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "parameters": []
+    },
+    "/integrations/sync-logs/{id}/": {
+      "get": {
+        "operationId": "integrations_sync-logs_read",
+        "description": "Read-only viewset for sync logs.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SyncLog"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IntegrationErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "integrations"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "IntegrationConnectionCreate": {
+      "required": [
+        "platform"
+      ],
+      "type": "object",
+      "properties": {
+        "platform": {
+          "title": "Platform",
+          "type": "string",
+          "enum": [
+            "langfuse",
+            "datadog",
+            "posthog",
+            "pagerduty",
+            "mixpanel",
+            "cloud_storage",
+            "message_queue",
+            "linear",
+            "slack"
+          ]
+        },
+        "host_url": {
+          "title": "Host url",
+          "type": "string",
+          "format": "uri",
+          "default": "",
+          "maxLength": 500,
+          "minLength": 1
+        },
+        "public_key": {
+          "title": "Public key",
+          "type": "string",
+          "default": "",
+          "maxLength": 500,
+          "minLength": 1
+        },
+        "secret_key": {
+          "title": "Secret key",
+          "type": "string",
+          "default": "",
+          "maxLength": 500,
+          "minLength": 1
+        },
+        "ca_certificate": {
+          "title": "Ca certificate",
+          "type": "string",
+          "default": ""
+        },
+        "credentials": {
+          "title": "Credentials",
+          "type": "object",
+          "default": {}
+        },
+        "project_id": {
+          "title": "Project id",
+          "description": "Existing FutureAGI project ID. If null, a new project is created.",
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "new_project_name": {
+          "title": "New project name",
+          "description": "Name for the new project (used when project_id is null).",
+          "type": "string",
+          "default": ""
+        },
+        "backfill_option": {
+          "title": "Backfill option",
+          "type": "string",
+          "enum": [
+            "all",
+            "from_date",
+            "new_only"
+          ],
+          "default": "new_only"
+        },
+        "backfill_from_date": {
+          "title": "Backfill from date",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "backfill_to_date": {
+          "title": "Backfill to date",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "sync_interval_seconds": {
+          "title": "Sync interval seconds",
+          "type": "integer",
+          "default": 300,
+          "maximum": 1800,
+          "minimum": 60
+        },
+        "display_name": {
+          "title": "Display name",
+          "type": "string",
+          "default": ""
+        },
+        "external_project_name": {
+          "title": "External project name",
+          "type": "string",
+          "default": ""
+        },
+        "export_config": {
+          "title": "Export config",
+          "type": "object",
+          "default": {}
+        }
+      }
+    },
+    "IntegrationConnectionDetail": {
+      "required": [
+        "platform",
+        "display_name",
+        "host_url",
+        "external_project_name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "platform": {
+          "title": "Platform",
+          "type": "string",
+          "enum": [
+            "langfuse",
+            "datadog",
+            "posthog",
+            "pagerduty",
+            "mixpanel",
+            "cloud_storage",
+            "message_queue",
+            "linear",
+            "slack"
+          ]
+        },
+        "display_name": {
+          "title": "Display name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "host_url": {
+          "title": "Host url",
+          "type": "string",
+          "format": "uri",
+          "maxLength": 500,
+          "minLength": 1
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "enum": [
+            "active",
+            "paused",
+            "error",
+            "syncing",
+            "backfilling"
+          ]
+        },
+        "status_message": {
+          "title": "Status message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "external_project_name": {
+          "title": "External project name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "project": {
+          "title": "Project",
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "project_name": {
+          "title": "Project name",
+          "type": "string",
+          "readOnly": true
+        },
+        "public_key_display": {
+          "title": "Public key display",
+          "type": "string",
+          "readOnly": true
+        },
+        "secret_key_display": {
+          "title": "Secret key display",
+          "type": "string",
+          "readOnly": true
+        },
+        "last_synced_at": {
+          "title": "Last synced at",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "sync_cursor": {
+          "title": "Sync cursor",
+          "type": "object"
+        },
+        "sync_interval_seconds": {
+          "title": "Sync interval seconds",
+          "type": "integer",
+          "maximum": 1800,
+          "minimum": 60
+        },
+        "last_error_notified_at": {
+          "title": "Last error notified at",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "backfill_from": {
+          "title": "Backfill from",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "backfill_completed": {
+          "title": "Backfill completed",
+          "type": "boolean"
+        },
+        "backfill_progress": {
+          "title": "Backfill progress",
+          "type": "object"
+        },
+        "total_traces_synced": {
+          "title": "Total traces synced",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "total_spans_synced": {
+          "title": "Total spans synced",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "total_scores_synced": {
+          "title": "Total scores synced",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "created_by": {
+          "title": "Created by",
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        }
+      }
+    },
+    "IntegrationConnectionDetailResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/IntegrationConnectionDetail"
+        }
+      }
+    },
+    "IntegrationConnectionList": {
+      "required": [
+        "platform",
+        "display_name",
+        "host_url",
+        "external_project_name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "platform": {
+          "title": "Platform",
+          "type": "string",
+          "enum": [
+            "langfuse",
+            "datadog",
+            "posthog",
+            "pagerduty",
+            "mixpanel",
+            "cloud_storage",
+            "message_queue",
+            "linear",
+            "slack"
+          ]
+        },
+        "display_name": {
+          "title": "Display name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "host_url": {
+          "title": "Host url",
+          "type": "string",
+          "format": "uri",
+          "maxLength": 500,
+          "minLength": 1
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "enum": [
+            "active",
+            "paused",
+            "error",
+            "syncing",
+            "backfilling"
+          ]
+        },
+        "status_message": {
+          "title": "Status message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "external_project_name": {
+          "title": "External project name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "last_synced_at": {
+          "title": "Last synced at",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "total_traces_synced": {
+          "title": "Total traces synced",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "total_spans_synced": {
+          "title": "Total spans synced",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "total_scores_synced": {
+          "title": "Total scores synced",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "backfill_completed": {
+          "title": "Backfill completed",
+          "type": "boolean"
+        },
+        "backfill_progress": {
+          "title": "Backfill progress",
+          "type": "object"
+        },
+        "sync_interval_seconds": {
+          "title": "Sync interval seconds",
+          "type": "integer",
+          "maximum": 1800,
+          "minimum": 60
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    },
+    "IntegrationConnectionListResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/IntegrationConnectionListResult"
+        }
+      }
+    },
+    "IntegrationConnectionListResult": {
+      "required": [
+        "metadata",
+        "connections"
+      ],
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "$ref": "#/definitions/PaginationMetadata"
+        },
+        "connections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IntegrationConnectionList"
+          }
+        }
+      }
+    },
+    "IntegrationConnectionUpdate": {
+      "type": "object",
+      "properties": {
+        "display_name": {
+          "title": "Display name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "public_key": {
+          "title": "Public key",
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 1
+        },
+        "secret_key": {
+          "title": "Secret key",
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 1
+        },
+        "host_url": {
+          "title": "Host url",
+          "type": "string",
+          "format": "uri",
+          "maxLength": 500,
+          "minLength": 1
+        },
+        "ca_certificate": {
+          "title": "Ca certificate",
+          "type": "string"
+        },
+        "sync_interval_seconds": {
+          "title": "Sync interval seconds",
+          "type": "integer",
+          "maximum": 3600,
+          "minimum": 60
+        }
+      }
+    },
+    "IntegrationEmptyRequest": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "IntegrationErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "x-nullable": true
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string",
+          "x-nullable": true
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "title": "Details",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "IntegrationMessageResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/IntegrationMessageResult"
+        }
+      }
+    },
+    "IntegrationMessageResult": {
+      "required": [
+        "message"
+      ],
+      "type": "object",
+      "properties": {
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "IntegrationValidationProject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "x-nullable": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "x-nullable": true
+        }
+      }
+    },
+    "IntegrationValidationResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/IntegrationValidationResult"
+        }
+      }
+    },
+    "IntegrationValidationResult": {
+      "required": [
+        "valid"
+      ],
+      "type": "object",
+      "properties": {
+        "valid": {
+          "title": "Valid",
+          "type": "boolean"
+        },
+        "projects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IntegrationValidationProject"
+          }
+        },
+        "total_traces": {
+          "title": "Total traces",
+          "type": "integer",
+          "minimum": 0
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "viewer": {
+          "$ref": "#/definitions/IntegrationValidationViewer"
+        }
+      }
+    },
+    "IntegrationValidationViewer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "x-nullable": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "x-nullable": true
+        },
+        "email": {
+          "title": "Email",
+          "type": "string",
+          "format": "email",
+          "x-nullable": true
+        }
+      }
+    },
+    "ManagementAPIErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "x-nullable": true
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string",
+          "x-nullable": true
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "title": "Details",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "PaginationMetadata": {
+      "required": [
+        "total_count",
+        "current_page",
+        "page_size",
+        "total_pages"
+      ],
+      "type": "object",
+      "properties": {
+        "total_count": {
+          "title": "Total count",
+          "type": "integer"
+        },
+        "current_page": {
+          "title": "Current page",
+          "type": "integer"
+        },
+        "page_size": {
+          "title": "Page size",
+          "type": "integer"
+        },
+        "total_pages": {
+          "title": "Total pages",
+          "type": "integer"
+        },
+        "next_page": {
+          "title": "Next page",
+          "type": "integer",
+          "x-nullable": true
+        }
+      }
+    },
+    "SlackChannel": {
+      "required": [
+        "id",
+        "name",
+        "is_private",
+        "is_member"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "is_private": {
+          "title": "Is private",
+          "type": "boolean"
+        },
+        "is_member": {
+          "title": "Is member",
+          "type": "boolean"
+        }
+      }
+    },
+    "SlackChannelsResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/SlackChannelsResult"
+        }
+      }
+    },
+    "SlackChannelsResult": {
+      "required": [
+        "channels",
+        "next_cursor"
+      ],
+      "type": "object",
+      "properties": {
+        "channels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SlackChannel"
+          }
+        },
+        "next_cursor": {
+          "title": "Next cursor",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        }
+      }
+    },
+    "SlackInstall": {
+      "type": "object",
+      "properties": {
+        "connection_id": {
+          "title": "Connection id",
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "SlackInstallResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/SlackInstallResult"
+        }
+      }
+    },
+    "SlackInstallResult": {
+      "required": [
+        "authorization_url"
+      ],
+      "type": "object",
+      "properties": {
+        "authorization_url": {
+          "title": "Authorization url",
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        }
+      }
+    },
+    "SyncLog": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "connection": {
+          "title": "Connection",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "enum": [
+            "success",
+            "partial",
+            "failed",
+            "rate_limited",
+            "no_new_data"
+          ],
+          "readOnly": true
+        },
+        "started_at": {
+          "title": "Started at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "completed_at": {
+          "title": "Completed at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "traces_fetched": {
+          "title": "Traces fetched",
+          "type": "integer",
+          "readOnly": true
+        },
+        "traces_created": {
+          "title": "Traces created",
+          "type": "integer",
+          "readOnly": true
+        },
+        "traces_updated": {
+          "title": "Traces updated",
+          "type": "integer",
+          "readOnly": true
+        },
+        "spans_synced": {
+          "title": "Spans synced",
+          "type": "integer",
+          "readOnly": true
+        },
+        "scores_synced": {
+          "title": "Scores synced",
+          "type": "integer",
+          "readOnly": true
+        },
+        "error_message": {
+          "title": "Error message",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "error_details": {
+          "title": "Error details",
+          "type": "object",
+          "readOnly": true
+        },
+        "sync_from": {
+          "title": "Sync from",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "sync_to": {
+          "title": "Sync to",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true,
+          "x-nullable": true
+        }
+      }
+    },
+    "SyncLogListResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/SyncLogListResult"
+        }
+      }
+    },
+    "SyncLogListResult": {
+      "required": [
+        "metadata",
+        "sync_logs"
+      ],
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "$ref": "#/definitions/PaginationMetadata"
+        },
+        "sync_logs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SyncLog"
+          }
+        }
+      }
+    },
+    "ValidateCredentials": {
+      "required": [
+        "platform"
+      ],
+      "type": "object",
+      "properties": {
+        "platform": {
+          "title": "Platform",
+          "type": "string",
+          "enum": [
+            "langfuse",
+            "datadog",
+            "posthog",
+            "pagerduty",
+            "mixpanel",
+            "cloud_storage",
+            "message_queue",
+            "linear",
+            "slack"
+          ]
+        },
+        "host_url": {
+          "title": "Host url",
+          "type": "string",
+          "format": "uri",
+          "default": "",
+          "maxLength": 500,
+          "minLength": 1
+        },
+        "public_key": {
+          "title": "Public key",
+          "type": "string",
+          "default": "",
+          "maxLength": 500,
+          "minLength": 1
+        },
+        "secret_key": {
+          "title": "Secret key",
+          "type": "string",
+          "default": "",
+          "maxLength": 500,
+          "minLength": 1
+        },
+        "ca_certificate": {
+          "title": "Ca certificate",
+          "type": "string",
+          "default": ""
+        },
+        "credentials": {
+          "title": "Credentials",
+          "type": "object",
+          "default": {}
+        }
+      }
+    }
+  },
+  "x-sdk-pagination-dialects": "openapi/sdk/pagination-dialects.json"
+}

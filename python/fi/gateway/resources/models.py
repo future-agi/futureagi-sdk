@@ -34,7 +34,9 @@ class AsyncModels:
     async def list(self) -> ModelList:
         """List all available models. GET /v1/models."""
         opts = RequestOptions(method="GET", url="/v1/models")
-        return await self._client._get_base_client()._request_with_retry(opts, ModelList)
+        return await self._client._get_base_client()._request_with_retry(
+            opts, ModelList
+        )
 
     async def retrieve(self, model_id: str) -> Model:
         """Retrieve a single model. GET /v1/models/{model_id}."""

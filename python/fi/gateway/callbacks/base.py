@@ -1,97 +1,101 @@
-"""Callback handler base class and data types."""
+"""Released callback contracts and redaction helpers.
+
+The split transport passes CallbackRequest/CallbackResponse objects. Response
+objects additionally delegate parsed-model attributes for lane callback users.
+Exceptions raised by handlers are logged at DEBUG and never replace SDK results.
+"""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
 @dataclass
 class CallbackRequest:
-    """Request info passed to callbacks."""
     method: str
     url: str
     headers: dict[str, str]
     body: dict[str, Any] | None
+    timeout: Any = None
+    max_retries: int | None = None
 
 
 @dataclass
 class CallbackResponse:
-    """Response info passed to callbacks."""
     status_code: int
     headers: dict[str, str]
-    agentcc: Any = None  # AgentCCMetadata
+    agentcc: Any = None
     body: dict[str, Any] | None = None
+    _parsed: Any = field(default=None, repr=False, compare=False)
+
+    def __getattr__(self, name: str) -> Any:
+        parsed = self.__dict__.get("_parsed")
+        if parsed is None:
+            raise AttributeError(name)
+        return getattr(parsed, name)
 
 
 @dataclass
 class StreamInfo:
-    """Stream metadata passed to stream callbacks."""
-    agentcc: Any = None  # AgentCCMetadata
+    agentcc: Any = None
     chunk_count: int = 0
 
 
 class CallbackHandler:
-    """Abstract base for callback handlers.
-
-    Override any methods you need — all have no-op default implementations.
-    """
+    """Override any lifecycle hooks needed; all defaults are no-ops."""
 
     def on_request_start(self, request: CallbackRequest) -> None:
-        """Called before a request is sent."""
+        """Before sending the request."""
 
     def on_request_end(self, request: CallbackRequest, response: CallbackResponse) -> None:
-        """Called after a successful response."""
+        """After a successful non-streaming response."""
 
     def on_stream_start(self, request: CallbackRequest, stream: StreamInfo) -> None:
-        """Called when a streaming response starts."""
+        """After opening a streaming response."""
 
     def on_stream_chunk(self, request: CallbackRequest, chunk: Any) -> None:
-        """Called for each streaming chunk."""
+        """For each consumed chunk."""
 
     def on_stream_end(self, request: CallbackRequest, stream: StreamInfo, completion: Any) -> None:
-        """Called when a streaming response ends."""
+        """When a stream ends or is closed."""
 
     def on_error(self, request: CallbackRequest, error: Exception) -> None:
-        """Called when a request fails."""
+        """When a request fails permanently."""
 
     def on_retry(self, request: CallbackRequest, error: Exception, attempt: int, delay: float) -> None:
-        """Called before a retry attempt."""
+        """Before the next retry attempt."""
 
     def on_guardrail_warning(self, request: CallbackRequest, warning: Any) -> None:
-        """Called when a guardrail warning (246) is raised."""
+        """For a guardrail warning (246)."""
 
     def on_guardrail_block(self, request: CallbackRequest, error: Any) -> None:
-        """Called when a guardrail block (446) is raised."""
+        """For a guardrail block (446)."""
 
     def on_cache_hit(self, request: CallbackRequest, response: CallbackResponse, cache_type: str) -> None:
-        """Called when a cache hit is detected."""
+        """For a cache hit reported by the gateway."""
 
     def on_cost_update(self, request: CallbackRequest, cost: float, cumulative_cost: float) -> None:
-        """Called after every request when cost is tracked."""
+        """When a request reports a cost."""
 
     def on_budget_warning(self, request: CallbackRequest, current_spend: float, max_budget: float, percent_used: float) -> None:
-        """Called when spend exceeds warning threshold (default 80%)."""
+        """For a configured budget warning."""
 
     def on_fallback(self, request: CallbackRequest, original_model: str, fallback_model: str, reason: str) -> None:
-        """Called when a fallback provider/model is used."""
+        """For a fallback reported by the gateway."""
 
     def on_session_start(self, session: Any) -> None:
-        """Called when a session context manager enters."""
+        """When a session is entered."""
 
     def on_session_end(self, session: Any, total_cost: float, request_count: int, total_tokens: int) -> None:
-        """Called when a session context manager exits."""
+        """When a session exits."""
 
 
 REDACTED = "[REDACTED]"
-
-# Body keys other than `messages` that carry user or model text.
 _TEXT_KEYS = ("prompt", "input", "instructions")
 
 
 def _redact_message(message: Any) -> Any:
-    """One chat message with its text removed: the content, and the arguments of any tool
-    call (the model writes user data into those too)."""
     if not isinstance(message, dict):
         return message
     out = dict(message)
@@ -100,8 +104,8 @@ def _redact_message(message: Any) -> Any:
     if isinstance(out.get("tool_calls"), list):
         out["tool_calls"] = [
             {**call, "function": {**call["function"], "arguments": REDACTED}}
-            if isinstance(call, dict) and isinstance(call.get("function"), dict) and call["function"].get("arguments") is not None
-            else call
+            if isinstance(call, dict) and isinstance(call.get("function"), dict)
+            and call["function"].get("arguments") is not None else call
             for call in out["tool_calls"]
         ]
     if isinstance(out.get("function_call"), dict) and out["function_call"].get("arguments") is not None:
@@ -109,10 +113,27 @@ def _redact_message(message: Any) -> Any:
     return out
 
 
+def redact_credentials(value: Any) -> Any:
+    """Copy structured callback data without credential-bearing fields."""
+    credential_keys = {
+        "authorization", "proxy_authorization", "api_key", "x_api_key",
+        "virtual_key", "secret_key", "fi_api_key", "fi_secret_key",
+        "access_token", "refresh_token", "client_secret", "password",
+        "cookie", "set_cookie",
+    }
+    if isinstance(value, dict):
+        return {
+            key: REDACTED if str(key).lower().replace("-", "_") in credential_keys
+            else redact_credentials(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, (list, tuple)):
+        return type(value)(redact_credentials(item) for item in value)
+    return value
+
+
 def redact_body(body: Any) -> Any:
-    """A copy of a request body with every message text replaced by ``[REDACTED]``: chat
-    message content and tool-call arguments, and the `prompt` / `input` / `instructions`
-    of the other endpoints. Anything else (model, parameters, tool schemas) is kept."""
+    """Copy a body without message text, tool arguments, prompt/input/instructions."""
     if not isinstance(body, dict):
         return body
     out = dict(body)
@@ -125,11 +146,12 @@ def redact_body(body: Any) -> Any:
 
 
 def redact_callback_request(request: CallbackRequest) -> CallbackRequest:
-    """Return a copy of *request* with message content replaced by ``[REDACTED]``
-    (see `redact_body`). A request without a dict body is returned unchanged."""
     if not isinstance(request.body, dict):
         return request
     body = redact_body(request.body)
     if body == request.body:
-        return request  # nothing to redact: the same object, as before
-    return CallbackRequest(method=request.method, url=request.url, headers=request.headers, body=body)
+        return request
+    return CallbackRequest(
+        method=request.method, url=request.url, headers=request.headers, body=body,
+        timeout=request.timeout, max_retries=request.max_retries,
+    )

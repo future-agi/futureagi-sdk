@@ -1,6 +1,7 @@
 import { APIKeyAuth, ResponseHandler } from './auth';
 import { AUTH_ENVVAR_NAME, get_base_url } from '../utils/constants';
-import { ModelProvider, ApiKey, RequestConfig, HttpMethod } from './types';
+import { ModelProvider, HttpMethod } from './types';
+import type { ApiKey, RequestConfig } from './types';
 import { Routes } from '../utils/routes';
 import { AxiosResponse } from 'axios';
 
@@ -218,7 +219,10 @@ class ProviderAPIKeyClient extends APIKeyAuth {
 }
 
 /**
- * Singleton API Key Manager for managing FutureAGI credentials (fi_api_key, fi_secret_key)
+ * Process-scoped singleton with environment-derived credentials, never a per-tenant store.
+ * setProviderApiKey updates provider keys via the API for the shared account used by the whole
+ * process; credential isolation applies only to separate APIKeyAuth client instances.
+ * Behaviour is unchanged in 0.7.0; deprecation is planned for 0.7.x.
  */
 class APIKeyManager extends APIKeyAuth {
     private static _instance?: APIKeyManager;
@@ -294,7 +298,10 @@ class APIKeyManager extends APIKeyAuth {
      */
 
     /**
-     * Set a provider API key via FutureAGI API
+     * Set a provider key via the API for the shared account used by the whole process.
+     * This environment-derived singleton is never a per-tenant store; credential
+     * isolation applies only to separate APIKeyAuth client instances.
+     * Behaviour is unchanged in 0.7.0; deprecation is planned for 0.7.x.
      */
     async setProviderApiKey(provider: ModelProvider, key: string): Promise<void> {
         await ProviderAPIKeyClient.setApiKey({ provider, key }, {

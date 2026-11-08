@@ -1,0 +1,238 @@
+{
+ "hash_check": {
+  "ok": true,
+  "problems": []
+ },
+ "npm": {
+  "@agentcc/client@1.0.0": {
+   "expected_prefix": "81b5315b",
+   "file_count": 491,
+   "filename": "agentcc-client-1.0.0.tgz",
+   "integrity_computed": "sha512-dg0ngvbG/At2gtiPr3KhE1Cngx8TKXhvL3IabbODJ9DqebawTbh7WB+ytAHhJ6qBVJwqCAvRPM5hwdlQjONusg==",
+   "npm_pack_integrity": "sha512-dg0ngvbG/At2gtiPr3KhE1Cngx8TKXhvL3IabbODJ9DqebawTbh7WB+ytAHhJ6qBVJwqCAvRPM5hwdlQjONusg==",
+   "npm_pack_match": true,
+   "npm_pack_shasum": "81b5315b2c79c14d9dd6c1e49a82997c5944745e",
+   "prefix_match": true,
+   "registry_integrity": "sha512-dg0ngvbG/At2gtiPr3KhE1Cngx8TKXhvL3IabbODJ9DqebawTbh7WB+ytAHhJ6qBVJwqCAvRPM5hwdlQjONusg==",
+   "registry_match": true,
+   "registry_shasum": "81b5315b2c79c14d9dd6c1e49a82997c5944745e",
+   "sha1_computed": "81b5315b2c79c14d9dd6c1e49a82997c5944745e",
+   "source": "registry.npmjs.org"
+  },
+  "@agentcc/client@1.0.0 (packed from release-source)": {
+   "file_count": 491,
+   "filename": "agentcc-client-1.0.0.tgz",
+   "integrity_computed": "sha512-qxehHrFhCOWCTh05UXI4FgNk2eK2o7PZv4oWXt27+m+soV/lz9QivxOIGkLDx/pGHVijI/pQTuu8FPDNp3Q6Kw==",
+   "npm_pack_shasum": "27ac66e6f04ed7ca79fba1ff2905a3480c7871d7",
+   "sha1_computed": "27ac66e6f04ed7ca79fba1ff2905a3480c7871d7",
+   "source": "git release-source, built on this VM"
+  },
+  "@agentcc/client@1.0.1 (packed from client-patch-source)": {
+   "file_count": 493,
+   "filename": "agentcc-client-1.0.1.tgz",
+   "integrity_computed": "sha512-R2URY0yDu8Ao3/frxkg7fv90zRs9TPDuHqIQsKKoBKfFh2DDlT/XityH1A5nVvDxkajFn60KYcrxoZ75Y1YSbA==",
+   "npm_pack_shasum": "8df0ec15fa96a146dd590ecc6f8efc9c00db1808",
+   "sha1_computed": "8df0ec15fa96a146dd590ecc6f8efc9c00db1808",
+   "source": "git client-patch-source, built on this VM"
+  },
+  "@agentcc/langchain@1.0.0": {
+   "file_count": 19,
+   "filename": "agentcc-langchain-1.0.0.tgz",
+   "integrity_computed": "sha512-qmxItCb6UAHZbrb4LUehBMz3d0v0+Lcs5tW1o0Huy5a2OfrK+tPtd26FtL6LBqlZcRjmUBfDZEKx+XvwBMpTNQ==",
+   "npm_pack_integrity": "sha512-qmxItCb6UAHZbrb4LUehBMz3d0v0+Lcs5tW1o0Huy5a2OfrK+tPtd26FtL6LBqlZcRjmUBfDZEKx+XvwBMpTNQ==",
+   "npm_pack_match": true,
+   "npm_pack_shasum": "d2d976adda5b3899c4f715d19ae89443ef25d04a",
+   "registry_integrity": "sha512-qmxItCb6UAHZbrb4LUehBMz3d0v0+Lcs5tW1o0Huy5a2OfrK+tPtd26FtL6LBqlZcRjmUBfDZEKx+XvwBMpTNQ==",
+   "registry_match": true,
+   "registry_shasum": "d2d976adda5b3899c4f715d19ae89443ef25d04a",
+   "sha1_computed": "d2d976adda5b3899c4f715d19ae89443ef25d04a",
+   "source": "registry.npmjs.org"
+  },
+  "@agentcc/langchain@1.0.0 (packed from release-source)": {
+   "file_count": 19,
+   "filename": "agentcc-langchain-1.0.0.tgz",
+   "integrity_computed": "sha512-CtnjHfYmlpG5l8BKZpXEp47cHgB4H2RVQsJVByOlfG0lq0e4Qi/2MnX4xAXIz5fB0EzcS0whkzKUa8usanp5NQ==",
+   "npm_pack_shasum": "9584661d5972cd9f1fad05abc569eb75e26ece87",
+   "sha1_computed": "9584661d5972cd9f1fad05abc569eb75e26ece87",
+   "source": "git release-source, built on this VM"
+  },
+  "@agentcc/llamaindex@1.0.0": {
+   "file_count": 15,
+   "filename": "agentcc-llamaindex-1.0.0.tgz",
+   "integrity_computed": "sha512-zB/W4PC0bBTCjDYXJATaRVRkL+9yZ3SSPVYRfCMbKdp4V6LYBgJSDqbiC034Mvkh5MgQQJkFs4uQ9i0EkoCtbA==",
+   "npm_pack_integrity": "sha512-zB/W4PC0bBTCjDYXJATaRVRkL+9yZ3SSPVYRfCMbKdp4V6LYBgJSDqbiC034Mvkh5MgQQJkFs4uQ9i0EkoCtbA==",
+   "npm_pack_match": true,
+   "npm_pack_shasum": "8da01388ef09d99eacc3541539f0606d499353ff",
+   "registry_integrity": "sha512-zB/W4PC0bBTCjDYXJATaRVRkL+9yZ3SSPVYRfCMbKdp4V6LYBgJSDqbiC034Mvkh5MgQQJkFs4uQ9i0EkoCtbA==",
+   "registry_match": true,
+   "registry_shasum": "8da01388ef09d99eacc3541539f0606d499353ff",
+   "sha1_computed": "8da01388ef09d99eacc3541539f0606d499353ff",
+   "source": "registry.npmjs.org"
+  },
+  "@agentcc/llamaindex@1.0.0 (packed from release-source)": {
+   "file_count": 15,
+   "filename": "agentcc-llamaindex-1.0.0.tgz",
+   "integrity_computed": "sha512-OiX8Br4InMAU5TuhTnB5fbeqLrCUdWEnBUNV+yvq8BAc8M1PopZv4LhBBlIudX6GQ6WHN+8o39AYeyBIvnyEoQ==",
+   "npm_pack_shasum": "59c15d39ad5b1734fb0f07dd9b1a0005bc451f0c",
+   "sha1_computed": "59c15d39ad5b1734fb0f07dd9b1a0005bc451f0c",
+   "source": "git release-source, built on this VM"
+  },
+  "@agentcc/react@1.0.0": {
+   "file_count": 27,
+   "filename": "agentcc-react-1.0.0.tgz",
+   "integrity_computed": "sha512-kLov0gqmUi3TziE3PGXpsU4rB+GynKEF+XTwuQ5jCjQIsSdpOYqSiFkualm7NJFIPN8wzHiaIUphNmCV4sOZoA==",
+   "npm_pack_integrity": "sha512-kLov0gqmUi3TziE3PGXpsU4rB+GynKEF+XTwuQ5jCjQIsSdpOYqSiFkualm7NJFIPN8wzHiaIUphNmCV4sOZoA==",
+   "npm_pack_match": true,
+   "npm_pack_shasum": "74c11ab87519a77f1d1b78796a8cb36fd804c104",
+   "registry_integrity": "sha512-kLov0gqmUi3TziE3PGXpsU4rB+GynKEF+XTwuQ5jCjQIsSdpOYqSiFkualm7NJFIPN8wzHiaIUphNmCV4sOZoA==",
+   "registry_match": true,
+   "registry_shasum": "74c11ab87519a77f1d1b78796a8cb36fd804c104",
+   "sha1_computed": "74c11ab87519a77f1d1b78796a8cb36fd804c104",
+   "source": "registry.npmjs.org"
+  },
+  "@agentcc/react@1.0.0 (packed from release-source)": {
+   "file_count": 27,
+   "filename": "agentcc-react-1.0.0.tgz",
+   "integrity_computed": "sha512-QOYi+oHOGnFv7w3+05cJCWcl8ACgz3NHx56ql7Fg9kKsKhPUNrw5gHC5PoqMesVYAn+YdEZIC1HP4i1nC/u9bA==",
+   "npm_pack_shasum": "671369579d8008682aaf75f0af974db30496f23d",
+   "sha1_computed": "671369579d8008682aaf75f0af974db30496f23d",
+   "source": "git release-source, built on this VM"
+  },
+  "@agentcc/vercel@1.0.0": {
+   "file_count": 11,
+   "filename": "agentcc-vercel-1.0.0.tgz",
+   "integrity_computed": "sha512-EVAKWZpMHoGaeyU0RTPJ/nD7AIJgm75kRggp2SAYoXhHMtgJUgmXnAWdv65FOFh5i0jrTzeFbOqAW+ZTg/tZDA==",
+   "npm_pack_integrity": "sha512-EVAKWZpMHoGaeyU0RTPJ/nD7AIJgm75kRggp2SAYoXhHMtgJUgmXnAWdv65FOFh5i0jrTzeFbOqAW+ZTg/tZDA==",
+   "npm_pack_match": true,
+   "npm_pack_shasum": "df0e9f8ad2626ba56679d5f5bd79b14dc9da9b93",
+   "registry_integrity": "sha512-EVAKWZpMHoGaeyU0RTPJ/nD7AIJgm75kRggp2SAYoXhHMtgJUgmXnAWdv65FOFh5i0jrTzeFbOqAW+ZTg/tZDA==",
+   "registry_match": true,
+   "registry_shasum": "df0e9f8ad2626ba56679d5f5bd79b14dc9da9b93",
+   "sha1_computed": "df0e9f8ad2626ba56679d5f5bd79b14dc9da9b93",
+   "source": "registry.npmjs.org"
+  },
+  "@agentcc/vercel@1.0.0 (packed from release-source)": {
+   "file_count": 11,
+   "filename": "agentcc-vercel-1.0.0.tgz",
+   "integrity_computed": "sha512-bNWla4t33JfwuY7yng9dL5SDyAtH19mpwV+0XL3VODdRdkyIMKa6dMd3bzZuYv/EmNZCLUTI+l7Gfh7WOBvrZQ==",
+   "npm_pack_shasum": "a15d13b89d2702fc6c7540b396f0975eb0c723aa",
+   "sha1_computed": "a15d13b89d2702fc6c7540b396f0975eb0c723aa",
+   "source": "git release-source, built on this VM"
+  }
+ },
+ "published_vs_release_source_build": {
+  "@agentcc/client@1.0.0": {
+   "differ": [
+    "README.md",
+    "package.json"
+   ],
+   "identical": 489,
+   "only_left": [],
+   "only_right": [],
+   "text_diffs": {}
+  },
+  "@agentcc/langchain@1.0.0": {
+   "differ": [
+    "README.md",
+    "package.json"
+   ],
+   "identical": 17,
+   "only_left": [],
+   "only_right": [],
+   "text_diffs": {}
+  },
+  "@agentcc/llamaindex@1.0.0": {
+   "differ": [
+    "README.md",
+    "package.json"
+   ],
+   "identical": 13,
+   "only_left": [],
+   "only_right": [],
+   "text_diffs": {}
+  },
+  "@agentcc/react@1.0.0": {
+   "differ": [
+    "README.md",
+    "dist/provider.d.ts",
+    "dist/provider.d.ts.map",
+    "package.json"
+   ],
+   "identical": 23,
+   "only_left": [],
+   "only_right": [],
+   "text_diffs": {
+    "dist/provider.d.ts": [
+     "--- published/dist/provider.d.ts",
+     "+++ release-source-build/dist/provider.d.ts",
+     "@@ -27,3 +27,3 @@",
+     "  */",
+     "-export declare function AgentCCProvider({ client, children }: AgentCCProviderProps): import(\"react/jsx-runtime\").JSX.Element;",
+     "+export declare function AgentCCProvider({ client, children }: AgentCCProviderProps): import(\"react\").JSX.Element;",
+     " /**"
+    ],
+    "dist/provider.d.ts.map": [
+     "--- published/dist/provider.d.ts.map",
+     "+++ release-source-build/dist/provider.d.ts.map",
+     "@@ -1 +1 @@",
+     "-{\"version\":3,\"file\":\"provider.d.ts\",\"sourceRoot\":\"\",\"sources\":[\"../src/provider.tsx\"],\"names\":[],\"mappings\":\"AAIA,OAAO,EAA6B,KAAK,SAAS,EAAE,MAAM,OAAO,CAAC;AAClE,OAAO,KAAK,EAAE,OAAO,EAAE,MAAM,iBAAiB,CAAC;AAE/C,QAAA,MAAM,cAAc,yCAAsC,CAAC;AAE3D,MAAM,WAAW,oBAAoB;IACnC,mCAAmC;IACnC,MAAM,EAAE,OAAO,CAAC;IAChB,QAAQ,EAAE,SAAS,CAAC;CACrB;AAED;;;;;;;;;;;;;;;;;;GAkBG;AACH,wBAAgB,eAAe,CAAC,EAAE,MAAM,EAAE,QAAQ,EAAE,EAAE,oBAAoB,2CAIzE;AAED;;;GAGG;AACH,wBAAgB,gBAAgB,IAAI,OAAO,CAS1C;AAED,OAAO,EAAE,cAAc,EAAE,CAAC\"}",
+     "+{\"version\":3,\"file\":\"provider.d.ts\",\"sourceRoot\":\"\",\"sources\":[\"../src/provider.tsx\"],\"names\":[],\"mappings\":\"AAIA,OAAO,EAA6B,KAAK,SAAS,EAAE,MAAM,OAAO,CAAC;AAClE,OAAO,KAAK,EAAE,OAAO,EAAE,MAAM,iBAAiB,CAAC;AAE/C,QAAA,MAAM,cAAc,yCAAsC,CAAC;AAE3D,MAAM,WAAW,oBAAoB;IACnC,mCAAmC;IACnC,MAAM,EAAE,OAAO,CAAC;IAChB,QAAQ,EAAE,SAAS,CAAC;CACrB;AAED;;;;;;;;;;;;;;;;;;GAkBG;AACH,wBAAgB,eAAe,CAAC,EAAE,MAAM,EAAE,QAAQ,EAAE,EAAE,oBAAoB,+BAIzE;AAED;;;GAGG;AACH,wBAAgB,gBAAgB,IAAI,OAAO,CAS1C;AAED,OAAO,EAAE,cAAc,EAAE,CAAC\"}"
+    ]
+   }
+  },
+  "@agentcc/vercel@1.0.0": {
+   "differ": [
+    "README.md",
+    "package.json"
+   ],
+   "identical": 9,
+   "only_left": [],
+   "only_right": [],
+   "text_diffs": {}
+  }
+ },
+ "pypi_agentcc_1_0_0": {
+  "expected_prefix": "2eb341ee",
+  "prefix_match": true,
+  "registry_match": true,
+  "releases": {
+   "0.1.0": [
+    [
+     "agentcc-0.1.0-py3-none-any.whl",
+     "2026-04-09T12:11:14.285156Z"
+    ],
+    [
+     "agentcc-0.1.0.tar.gz",
+     "2026-04-09T12:11:16.234221Z"
+    ]
+   ],
+   "1.0.0": [
+    [
+     "agentcc-1.0.0-py3-none-any.whl",
+     "2026-04-22T11:23:47.491157Z"
+    ],
+    [
+     "agentcc-1.0.0.tar.gz",
+     "2026-04-22T11:23:49.499535Z"
+    ]
+   ]
+  },
+  "sha256_computed": "2eb341ee1ad626e663d6bb875a44145c425ea84d457d0e85dab1c1cd18fea803",
+  "sha256_registry": "2eb341ee1ad626e663d6bb875a44145c425ea84d457d0e85dab1c1cd18fea803",
+  "upload_time": "2026-04-22T11:23:47.491157Z",
+  "wheel": "agentcc-1.0.0-py3-none-any.whl",
+  "wheel_vs_release_source_src": {
+   "differ": [],
+   "identical": 70,
+   "only_left": [],
+   "only_right": []
+  }
+ },
+ "tools": [
+  "node v22.23.3",
+  "npm 10.9.9",
+  "Python 3.12.3",
+  "uv uv 0.11.28 (x86_64-unknown-linux-gnu)",
+  "Linux 7.0.0-1014-gcp x86_64"
+ ]
+}

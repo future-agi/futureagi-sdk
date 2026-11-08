@@ -1,0 +1,153 @@
+"""Tests for SDK utility features -- supports_*, to_response_format, thinking/reasoning params,
+return_raw_request, check_valid_key, privacy toggle, and lazy imports."""
+
+from __future__ import annotations
+
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+# ---------------------------------------------------------------------------
+# to_response_format
+# ---------------------------------------------------------------------------
+
+
+class TestToResponseFormat:
+    def test_pydantic_model(self) -> None:
+        from pydantic import BaseModel
+
+        from fi.gateway._structured import to_response_format
+
+        class Event(BaseModel):
+            name: str
+            date: str
+            attendees: int
+
+        result = to_response_format(Event)
+
+        assert result["type"] == "json_schema"
+        assert result["json_schema"]["name"] == "Event"
+        assert result["json_schema"]["strict"] is True
+        schema = result["json_schema"]["schema"]
+        assert "properties" in schema
+        assert "name" in schema["properties"]
+        assert "date" in schema["properties"]
+        assert "attendees" in schema["properties"]
+
+    def test_non_pydantic_raises_type_error(self) -> None:
+        from fi.gateway._structured import to_response_format
+
+        with pytest.raises(TypeError, match="Expected a Pydantic model class"):
+            to_response_format(dict)  # type: ignore[arg-type]
+
+    def test_non_class_raises_type_error(self) -> None:
+        from fi.gateway._structured import to_response_format
+
+        with pytest.raises(TypeError, match="Expected a Pydantic model class"):
+            to_response_format("not a class")  # type: ignore[arg-type]
+
+
+# ---------------------------------------------------------------------------
+# thinking / reasoning_effort / drop_params in body
+# ---------------------------------------------------------------------------
+
+
+class TestThinkingReasoningParams:
+    def test_thinking_in_body(self) -> None:
+        from fi.gateway.resources.chat.completions import _build_body_and_agentcc_params
+
+        thinking_config = {"type": "enabled", "budget_tokens": 4096}
+        body, _agentcc, _headers = _build_body_and_agentcc_params(
+            model="o1",
+            messages=[{"role": "user", "content": "Hello"}],
+            thinking=thinking_config,
+        )
+        assert body["thinking"] == thinking_config
+
+    def test_reasoning_effort_in_body(self) -> None:
+        from fi.gateway.resources.chat.completions import _build_body_and_agentcc_params
+
+        body, _agentcc, _headers = _build_body_and_agentcc_params(
+            model="o1",
+            messages=[{"role": "user", "content": "Hello"}],
+            reasoning_effort="high",
+        )
+        assert body["reasoning_effort"] == "high"
+
+    def test_drop_params_in_body(self) -> None:
+        from fi.gateway.resources.chat.completions import _build_body_and_agentcc_params
+
+        body, _agentcc, _headers = _build_body_and_agentcc_params(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": "Hello"}],
+            drop_params=True,
+        )
+        assert body["drop_params"] is True
+
+    def test_not_given_excluded(self) -> None:
+        from fi.gateway.resources.chat.completions import _build_body_and_agentcc_params
+
+        body, _agentcc, _headers = _build_body_and_agentcc_params(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": "Hello"}],
+        )
+        assert "thinking" not in body
+        assert "reasoning_effort" not in body
+        assert "drop_params" not in body
+
+
+# ---------------------------------------------------------------------------
+# check_valid_key
+# ---------------------------------------------------------------------------
+
+
+class TestCheckValidKey:
+    def test_returns_true_on_200(self) -> None:
+        from fi.gateway._utils import check_valid_key
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+
+        with patch("fi.gateway._utils.httpx.get", return_value=mock_response):
+            assert check_valid_key("sk-test", "https://api.agentcc.ai") is True
+
+    def test_returns_false_on_401(self) -> None:
+        from fi.gateway._utils import check_valid_key
+
+        mock_response = MagicMock()
+        mock_response.status_code = 401
+
+        with patch("fi.gateway._utils.httpx.get", return_value=mock_response):
+            assert check_valid_key("bad-key", "https://api.agentcc.ai") is False
+
+    def test_returns_false_on_exception(self) -> None:
+        from fi.gateway._utils import check_valid_key
+
+        with patch(
+            "fi.gateway._utils.httpx.get", side_effect=Exception("network error")
+        ):
+            assert check_valid_key("sk-test", "https://api.agentcc.ai") is False
+
+    def test_return_type_is_bool(self) -> None:
+        from fi.gateway._utils import check_valid_key
+
+        with patch("fi.gateway._utils.httpx.get", side_effect=Exception("timeout")):
+            result = check_valid_key("sk-test", "https://api.agentcc.ai")
+            assert isinstance(result, bool)
+
+
+# ---------------------------------------------------------------------------
+# Lazy imports from agentcc module
+# ---------------------------------------------------------------------------
+
+
+class TestLazyImports:
+    def test_to_response_format(self) -> None:
+        import fi.gateway as agentcc
+
+        assert callable(agentcc.to_response_format)
+
+    def test_check_valid_key(self) -> None:
+        import fi.gateway as agentcc
+
+        assert callable(agentcc.check_valid_key)

@@ -1,0 +1,102 @@
+{
+  "actions": [
+    "actions/checkout@v4",
+    "actions/setup-python@v5",
+    "actions/setup-node@v4",
+    "actions/setup-go@v5",
+    "actions/setup-java@v4",
+    "actions/upload-artifact@v4",
+    "pnpm/action-setup@v4"
+  ],
+  "audit": {
+    "release-sdks.yml": "Package tests and local builds only; all four publication jobs removed.",
+    "sdk-compliance.yml": "Language tests and local reusable compliance checks; no write permissions.",
+    "sdk-contract-check.yml": "Inspectible local compliance runner; pinned harness source, loopback mock API, report artifact only.",
+    "workflow-checks.yml": "Static policy regression tests and actionlint; no SDK credentials or publication.",
+    "gateway-client.yml": "Node 18/20/22 unit, typing and parity checks only; non-release pushes, no tag triggers, credential-free checkout and read-only permissions."
+  },
+  "pending_audits": [
+    "RL2251o items 2-5 remain refused by design: publish branch-action and repository_dispatch-reachable OIDC, plus promote/release-please credential and environment gaps. Separate workflow hardening must land before exception review and re-pinning.",
+    "Item 1 remains unexcepted: pr-title-lint has workflow-level pull-requests: read but no explicit jobs.lint.permissions mapping required by the security ruling. Automatic GITHUB_TOKEN is not categorically a W2 secret; no token exception is granted at this blob.",
+    "CI/E2E pins match committed 59c53052 bytes. Any workflow byte change requires review and a new blob pin; 664359b3 blobs are inventory only, never a historical-blob fallback.",
+    "The record field on every exception and the exact census test must be updated together for reviewed growth."
+  ],
+  "released_workflow_exceptions": [
+    {
+      "id": "ci-push",
+      "record": "RL2251m-W1-W6",
+      "workflow": ".github/workflows/ci.yml",
+      "blob": "fc8844a4891e96f435ed1bddf5d8fb2c53697425",
+      "kind": "trigger",
+      "location": "on.push",
+      "value": {"branches": ["dev", "main"]}
+    },
+    {
+      "id": "e2e-push",
+      "record": "RL2251m-W1-W6",
+      "workflow": ".github/workflows/e2e.yml",
+      "blob": "acdcd2fc899719e4094d2a62e7a1f5fd3a66112e",
+      "kind": "trigger",
+      "location": "on.push",
+      "value": {"branches": ["dev", "main"]}
+    },
+    {
+      "id": "e2e-schedule",
+      "record": "RL2251m-W1-W6",
+      "workflow": ".github/workflows/e2e.yml",
+      "blob": "acdcd2fc899719e4094d2a62e7a1f5fd3a66112e",
+      "kind": "trigger",
+      "location": "on.schedule",
+      "value": [{"cron": "17 3 * * *"}]
+    },
+    {
+      "id": "e2e-backend-ref",
+      "record": "RL2251m-W1-W6",
+      "workflow": ".github/workflows/e2e.yml",
+      "blob": "acdcd2fc899719e4094d2a62e7a1f5fd3a66112e",
+      "kind": "checkout_ref",
+      "location": "workflow.jobs.e2e.steps[2].uses",
+      "value": {
+        "repository": "future-agi/future-agi",
+        "ref": "${{ env.BACKEND_REF }}",
+        "source": "${{ inputs.backend-ref || 'main' }}"
+      }
+    },
+    {
+      "id": "publish-dispatch",
+      "record": "RL2251m-W1-W6",
+      "workflow": ".github/workflows/publish.yml",
+      "blob": "8764c921cb167ce29c54944baee46b186355b50b",
+      "kind": "trigger",
+      "location": "on.repository_dispatch",
+      "value": {"types": ["sdk-release-publish"]}
+    },
+    {
+      "id": "promote-push",
+      "record": "RL2251m-W1-W6",
+      "workflow": ".github/workflows/promote.yml",
+      "blob": "4dd63903e8404d464e3039fc9e8532dd9b4db079",
+      "kind": "trigger",
+      "location": "on.push",
+      "value": {"branches": ["dev"]}
+    },
+    {
+      "id": "release-name",
+      "record": "RL2251m-W1-W6",
+      "workflow": ".github/workflows/release-please.yml",
+      "blob": "2e5a92ce635a7c49da6fcb81fc9bda773b47898d",
+      "kind": "workflow_name",
+      "location": "workflow.name",
+      "value": "release-please"
+    },
+    {
+      "id": "pr-title-action",
+      "record": "RL2251m-W1-W6",
+      "workflow": ".github/workflows/pr-title-lint.yml",
+      "blob": "01db2c11caeef450ea14a715c65deb881788735d",
+      "kind": "action",
+      "location": "workflow.jobs.lint.steps[0].uses",
+      "value": "amannn/action-semantic-pull-request@e32d7e603df1aa1ba07e981f2a23455dee596825"
+    }
+  ]
+}

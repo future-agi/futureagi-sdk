@@ -1,0 +1,2066 @@
+{
+ "area": "mocks",
+ "cases": {
+  "mock.assertions[sync]": {
+   "requests": [],
+   "result": {
+    "cost.fail": {
+     "ok": null
+    },
+    "cost.ok": {
+     "ok": null
+    },
+    "guardrail.fail": {
+     "raised": {
+      "__exception__": "AssertionError",
+      "args": [
+       "Expected GuardrailBlockedError, got ValueError"
+      ],
+      "attrs": {},
+      "mro": [
+       "AssertionError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "Expected GuardrailBlockedError, got ValueError"
+       ],
+       "ok": true,
+       "str": "Expected GuardrailBlockedError, got ValueError",
+       "type": "AssertionError"
+      },
+      "repr": "AssertionError('Expected GuardrailBlockedError, got ValueError')",
+      "str": "Expected GuardrailBlockedError, got ValueError"
+     }
+    },
+    "guardrail.ok": {
+     "ok": null
+    },
+    "has_content.fail": {
+     "raised": {
+      "__exception__": "AssertionError",
+      "args": [
+       "Expected 'nope' in content, got: 'Hello!'"
+      ],
+      "attrs": {},
+      "mro": [
+       "AssertionError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "Expected 'nope' in content, got: 'Hello!'"
+       ],
+       "ok": true,
+       "str": "Expected 'nope' in content, got: 'Hello!'",
+       "type": "AssertionError"
+      },
+      "repr": "AssertionError(\"Expected 'nope' in content, got: 'Hello!'\")",
+      "str": "Expected 'nope' in content, got: 'Hello!'"
+     }
+    },
+    "has_content.ok": {
+     "ok": null
+    },
+    "metadata.fail": {
+     "raised": {
+      "__exception__": "AssertionError",
+      "args": [
+       "Expected provider=anthropic, got openai"
+      ],
+      "attrs": {},
+      "mro": [
+       "AssertionError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "Expected provider=anthropic, got openai"
+       ],
+       "ok": true,
+       "str": "Expected provider=anthropic, got openai",
+       "type": "AssertionError"
+      },
+      "repr": "AssertionError('Expected provider=anthropic, got openai')",
+      "str": "Expected provider=anthropic, got openai"
+     }
+    },
+    "metadata.ok": {
+     "ok": null
+    },
+    "stream_valid.empty": {
+     "raised": {
+      "__exception__": "AssertionError",
+      "args": [
+       "No chunks received"
+      ],
+      "attrs": {},
+      "mro": [
+       "AssertionError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "No chunks received"
+       ],
+       "ok": true,
+       "str": "No chunks received",
+       "type": "AssertionError"
+      },
+      "repr": "AssertionError('No chunks received')",
+      "str": "No chunks received"
+     }
+    },
+    "usage.fail": {
+     "ok": null
+    },
+    "usage.ok": {
+     "ok": null
+    },
+    "valid.fail": {
+     "raised": {
+      "__exception__": "AssertionError",
+      "args": [
+       "Response missing 'id'"
+      ],
+      "attrs": {},
+      "mro": [
+       "AssertionError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "Response missing 'id'"
+       ],
+       "ok": true,
+       "str": "Response missing 'id'",
+       "type": "AssertionError"
+      },
+      "repr": "AssertionError(\"Response missing 'id'\")",
+      "str": "Response missing 'id'"
+     }
+    },
+    "valid.ok": {
+     "ok": null
+    }
+   }
+  },
+  "mock.create_mock_client[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer sk-test-mock"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "mock.agentcc.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "mock.agentcc.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "custom": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": {
+        "cache_status": null,
+        "cost": null,
+        "fallback_used": false,
+        "guardrail_triggered": false,
+        "latency_ms": 0,
+        "model_used": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "request_id": "unknown",
+        "routing_strategy": null,
+        "timeout_ms": null,
+        "trace_id": "unknown"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Hello from parity",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-parity",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": "fp_parity",
+       "usage": {
+        "completion_tokens": 3,
+        "completion_tokens_details": null,
+        "prompt_tokens": 5,
+        "prompt_tokens_details": null,
+        "total_tokens": 8
+       }
+      }
+     }
+    },
+    "default": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": {
+        "cache_status": null,
+        "cost": null,
+        "fallback_used": false,
+        "guardrail_triggered": false,
+        "latency_ms": 0,
+        "model_used": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "request_id": "unknown",
+        "routing_strategy": null,
+        "timeout_ms": null,
+        "trace_id": "unknown"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Hello from parity",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-parity",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": "fp_parity",
+       "usage": {
+        "completion_tokens": 3,
+        "completion_tokens_details": null,
+        "prompt_tokens": 5,
+        "prompt_tokens_details": null,
+        "total_tokens": 8
+       }
+      }
+     }
+    },
+    "type": "AgentCC"
+   }
+  },
+  "mock.mock_client[sync]": {
+   "requests": [],
+   "result": {
+    "calls": [
+     {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o",
+      "temperature": 0
+     },
+     {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o"
+     },
+     {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o"
+     }
+    ],
+    "first": {
+     "__model__": "ChatCompletion",
+     "data": {
+      "agentcc": {
+       "cache_status": "hit",
+       "cost": 0.5,
+       "fallback_used": false,
+       "guardrail_triggered": false,
+       "latency_ms": 100,
+       "model_used": null,
+       "provider": "openai",
+       "ratelimit": null,
+       "request_id": "req-test-001",
+       "routing_strategy": null,
+       "timeout_ms": null,
+       "trace_id": "trace-test-001"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": "first",
+         "name": null,
+         "role": "assistant",
+         "tool_calls": null
+        }
+       }
+      ],
+      "created": 1700000000,
+      "id": "chatcmpl-test",
+      "model": "gpt-4o",
+      "object": "chat.completion",
+      "service_tier": null,
+      "system_fingerprint": null,
+      "usage": {
+       "completion_tokens": 20,
+       "completion_tokens_details": null,
+       "prompt_tokens": 10,
+       "prompt_tokens_details": null,
+       "total_tokens": 30
+      }
+     }
+    },
+    "scoped": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": {
+        "cache_status": null,
+        "cost": null,
+        "fallback_used": false,
+        "guardrail_triggered": false,
+        "latency_ms": 100,
+        "model_used": null,
+        "provider": "openai",
+        "ratelimit": null,
+        "request_id": "req-test-001",
+        "routing_strategy": null,
+        "timeout_ms": null,
+        "trace_id": "trace-test-001"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Hello!",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1700000000,
+       "id": "chatcmpl-test",
+       "model": "gpt-4o",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 20,
+        "completion_tokens_details": null,
+        "prompt_tokens": 10,
+        "prompt_tokens_details": null,
+        "total_tokens": 30
+       }
+      }
+     }
+    },
+    "second": {
+     "raised": {
+      "__exception__": "RateLimitError",
+      "args": [
+       "slow down"
+      ],
+      "attrs": {
+       "body": null,
+       "code": "rate",
+       "message": "slow down",
+       "param": null,
+       "ratelimit_limit": null,
+       "ratelimit_remaining": null,
+       "ratelimit_reset": null,
+       "request_id": null,
+       "status_code": 429,
+       "type": "error"
+      },
+      "mro": [
+       "RateLimitError",
+       "APIStatusError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "error": "TypeError",
+       "message": "RateLimitError.__init__() takes 1 positional argument but 2 were given",
+       "ok": false
+      },
+      "repr": "RateLimitError(status_code=429, message='slow down')",
+      "str": "Error code: 429 - slow down"
+     }
+    },
+    "third": {
+     "raised": {
+      "__exception__": "RateLimitError",
+      "args": [
+       "slow down"
+      ],
+      "attrs": {
+       "body": null,
+       "code": "rate",
+       "message": "slow down",
+       "param": null,
+       "ratelimit_limit": null,
+       "ratelimit_remaining": null,
+       "ratelimit_reset": null,
+       "request_id": null,
+       "status_code": 429,
+       "type": "error"
+      },
+      "mro": [
+       "RateLimitError",
+       "APIStatusError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "error": "TypeError",
+       "message": "RateLimitError.__init__() takes 1 positional argument but 2 were given",
+       "ok": false
+      },
+      "repr": "RateLimitError(status_code=429, message='slow down')",
+      "str": "Error code: 429 - slow down"
+     }
+    }
+   }
+  },
+  "mock.mock_response.stream[async]": {
+   "requests": [],
+   "result": {
+    "events": {
+     "error": null,
+     "items": [
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": "mocked",
+        "tool_call": null,
+        "type": "content",
+        "usage": null
+       }
+      },
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": " words",
+        "tool_call": null,
+        "type": "content",
+        "usage": null
+       }
+      },
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": " here",
+        "tool_call": null,
+        "type": "content",
+        "usage": null
+       }
+      },
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": null,
+        "tool_call": null,
+        "type": "usage",
+        "usage": {
+         "__model__": "Usage",
+         "data": {
+          "completion_tokens": 0,
+          "completion_tokens_details": null,
+          "prompt_tokens": 0,
+          "prompt_tokens_details": null,
+          "total_tokens": 0
+         }
+        }
+       }
+      },
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": null,
+        "tool_call": null,
+        "type": "done",
+        "usage": null
+       }
+      }
+     ]
+    },
+    "final": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": {
+        "cache_status": null,
+        "cost": null,
+        "fallback_used": false,
+        "guardrail_triggered": false,
+        "latency_ms": 0,
+        "model_used": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "request_id": "mock",
+        "routing_strategy": null,
+        "timeout_ms": null,
+        "trace_id": "mock"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "mocked words here",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 0,
+       "id": "chatcmpl-mock",
+       "model": "gpt-4o",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 0,
+        "completion_tokens_details": null,
+        "prompt_tokens": 0,
+        "prompt_tokens_details": null,
+        "total_tokens": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "mock.mock_response.stream[sync]": {
+   "requests": [],
+   "result": {
+    "events": {
+     "error": null,
+     "items": [
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": "mocked",
+        "tool_call": null,
+        "type": "content",
+        "usage": null
+       }
+      },
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": " words",
+        "tool_call": null,
+        "type": "content",
+        "usage": null
+       }
+      },
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": " here",
+        "tool_call": null,
+        "type": "content",
+        "usage": null
+       }
+      },
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": null,
+        "tool_call": null,
+        "type": "usage",
+        "usage": {
+         "__model__": "Usage",
+         "data": {
+          "completion_tokens": 0,
+          "completion_tokens_details": null,
+          "prompt_tokens": 0,
+          "prompt_tokens_details": null,
+          "total_tokens": 0
+         }
+        }
+       }
+      },
+      {
+       "__dataclass__": "StreamEvent",
+       "fields": {
+        "confidence": null,
+        "disclaimer_text": null,
+        "error": null,
+        "guardrail_name": null,
+        "index": 0,
+        "message": null,
+        "text": null,
+        "tool_call": null,
+        "type": "done",
+        "usage": null
+       }
+      }
+     ]
+    },
+    "final": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": {
+        "cache_status": null,
+        "cost": null,
+        "fallback_used": false,
+        "guardrail_triggered": false,
+        "latency_ms": 0,
+        "model_used": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "request_id": "mock",
+        "routing_strategy": null,
+        "timeout_ms": null,
+        "trace_id": "mock"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "mocked words here",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 0,
+       "id": "chatcmpl-mock",
+       "model": "gpt-4o",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": null,
+       "usage": {
+        "completion_tokens": 0,
+        "completion_tokens_details": null,
+        "prompt_tokens": 0,
+        "prompt_tokens_details": null,
+        "total_tokens": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "mock.mock_response[async]": {
+   "requests": [],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": null,
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "mocked words here",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 0,
+     "id": "chatcmpl-mock",
+     "model": "gpt-4o",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": null,
+     "usage": {
+      "completion_tokens": 0,
+      "completion_tokens_details": null,
+      "prompt_tokens": 0,
+      "prompt_tokens_details": null,
+      "total_tokens": 0
+     }
+    }
+   }
+  },
+  "mock.mock_response[sync]": {
+   "requests": [],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": null,
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "mocked words here",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 0,
+     "id": "chatcmpl-mock",
+     "model": "gpt-4o",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": null,
+     "usage": {
+      "completion_tokens": 0,
+      "completion_tokens_details": null,
+      "prompt_tokens": 0,
+      "prompt_tokens_details": null,
+      "total_tokens": 0
+     }
+    }
+   }
+  },
+  "mock.recorders[async]": {
+   "logs": [
+    [
+     "agentcc",
+     "DEBUG",
+     "Callback RequestRecorder.on_request_end raised an exception"
+    ]
+   ],
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "file": "[]",
+    "interactions": {
+     "ok": [
+      {
+       "__dataclass__": "Interaction",
+       "fields": {
+        "request": {
+         "messages": [
+          {
+           "content": "Say hello",
+           "role": "user"
+          }
+         ],
+         "model": "gpt-4o-mini"
+        },
+        "response": {}
+       }
+      }
+     ]
+    },
+    "loaded": {
+     "ok": [
+      {
+       "__dataclass__": "Interaction",
+       "fields": {
+        "request": {
+         "messages": [
+          {
+           "content": "Say hello",
+           "role": "user"
+          }
+         ],
+         "model": "gpt-4o-mini"
+        },
+        "response": {}
+       }
+      }
+     ]
+    },
+    "recording_result": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": {
+        "cache_status": null,
+        "cost": null,
+        "fallback_used": false,
+        "guardrail_triggered": false,
+        "latency_ms": 0,
+        "model_used": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "request_id": "unknown",
+        "routing_strategy": null,
+        "timeout_ms": null,
+        "trace_id": "unknown"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Hello from parity",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-parity",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": "fp_parity",
+       "usage": {
+        "completion_tokens": 3,
+        "completion_tokens_details": null,
+        "prompt_tokens": 5,
+        "prompt_tokens_details": null,
+        "total_tokens": 8
+       }
+      }
+     }
+    },
+    "recordings": []
+   }
+  },
+  "mock.recorders[sync]": {
+   "logs": [
+    [
+     "agentcc",
+     "DEBUG",
+     "Callback RequestRecorder.on_request_end raised an exception"
+    ]
+   ],
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "file": "[]",
+    "interactions": {
+     "ok": [
+      {
+       "__dataclass__": "Interaction",
+       "fields": {
+        "request": {
+         "messages": [
+          {
+           "content": "Say hello",
+           "role": "user"
+          }
+         ],
+         "model": "gpt-4o-mini"
+        },
+        "response": {
+         "agentcc": {
+          "cache_status": null,
+          "cost": null,
+          "fallback_used": false,
+          "guardrail_triggered": false,
+          "latency_ms": 0,
+          "model_used": null,
+          "provider": "unknown",
+          "ratelimit": null,
+          "request_id": "unknown",
+          "routing_strategy": null,
+          "timeout_ms": null,
+          "trace_id": "unknown"
+         },
+         "choices": [
+          {
+           "finish_reason": "stop",
+           "index": 0,
+           "logprobs": null,
+           "message": {
+            "content": {
+             "__truncated__": "str"
+            },
+            "name": {
+             "__truncated__": "NoneType"
+            },
+            "role": {
+             "__truncated__": "str"
+            },
+            "tool_calls": {
+             "__truncated__": "NoneType"
+            }
+           }
+          }
+         ],
+         "created": 1761177600,
+         "id": "chatcmpl-parity",
+         "model": "gpt-4o-mini",
+         "object": "chat.completion",
+         "service_tier": null,
+         "system_fingerprint": "fp_parity",
+         "usage": {
+          "completion_tokens": 3,
+          "completion_tokens_details": null,
+          "prompt_tokens": 5,
+          "prompt_tokens_details": null,
+          "total_tokens": 8
+         }
+        }
+       }
+      }
+     ]
+    },
+    "loaded": {
+     "ok": [
+      {
+       "__dataclass__": "Interaction",
+       "fields": {
+        "request": {
+         "messages": [
+          {
+           "content": "Say hello",
+           "role": "user"
+          }
+         ],
+         "model": "gpt-4o-mini"
+        },
+        "response": {
+         "agentcc": {
+          "cache_status": null,
+          "cost": null,
+          "fallback_used": false,
+          "guardrail_triggered": false,
+          "latency_ms": 0,
+          "model_used": null,
+          "provider": "unknown",
+          "ratelimit": null,
+          "request_id": "unknown",
+          "routing_strategy": null,
+          "timeout_ms": null,
+          "trace_id": "unknown"
+         },
+         "choices": [
+          {
+           "finish_reason": "stop",
+           "index": 0,
+           "logprobs": null,
+           "message": {
+            "content": {
+             "__truncated__": "str"
+            },
+            "name": {
+             "__truncated__": "NoneType"
+            },
+            "role": {
+             "__truncated__": "str"
+            },
+            "tool_calls": {
+             "__truncated__": "NoneType"
+            }
+           }
+          }
+         ],
+         "created": 1761177600,
+         "id": "chatcmpl-parity",
+         "model": "gpt-4o-mini",
+         "object": "chat.completion",
+         "service_tier": null,
+         "system_fingerprint": "fp_parity",
+         "usage": {
+          "completion_tokens": 3,
+          "completion_tokens_details": null,
+          "prompt_tokens": 5,
+          "prompt_tokens_details": null,
+          "total_tokens": 8
+         }
+        }
+       }
+      }
+     ]
+    },
+    "recording_result": {
+     "ok": {
+      "__model__": "ChatCompletion",
+      "data": {
+       "agentcc": {
+        "cache_status": null,
+        "cost": null,
+        "fallback_used": false,
+        "guardrail_triggered": false,
+        "latency_ms": 0,
+        "model_used": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "request_id": "unknown",
+        "routing_strategy": null,
+        "timeout_ms": null,
+        "trace_id": "unknown"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Hello from parity",
+          "name": null,
+          "role": "assistant",
+          "tool_calls": null
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-parity",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "service_tier": null,
+       "system_fingerprint": "fp_parity",
+       "usage": {
+        "completion_tokens": 3,
+        "completion_tokens_details": null,
+        "prompt_tokens": 5,
+        "prompt_tokens_details": null,
+        "total_tokens": 8
+       }
+      }
+     }
+    },
+    "recordings": []
+   }
+  },
+  "mock.values[sync]": {
+   "requests": [],
+   "result": {
+    "make_agentcc_metadata": {
+     "__model__": "AgentCCMetadata",
+     "data": {
+      "cache_status": "hit",
+      "cost": 0.2,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 100,
+      "model_used": null,
+      "provider": "openai",
+      "ratelimit": null,
+      "request_id": "req-test-001",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "trace-test-001"
+     }
+    },
+    "make_completion": {
+     "__model__": "ChatCompletion",
+     "data": {
+      "agentcc": {
+       "cache_status": null,
+       "cost": null,
+       "fallback_used": false,
+       "guardrail_triggered": false,
+       "latency_ms": 100,
+       "model_used": null,
+       "provider": "openai",
+       "ratelimit": null,
+       "request_id": "req-test-001",
+       "routing_strategy": null,
+       "timeout_ms": null,
+       "trace_id": "trace-test-001"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": null,
+         "name": null,
+         "role": "assistant",
+         "tool_calls": [
+          {
+           "function": {
+            "arguments": "{\"location\": \"NYC\"}",
+            "name": "get_weather"
+           },
+           "id": "call_001",
+           "type": "function"
+          }
+         ]
+        }
+       }
+      ],
+      "created": 1700000000,
+      "id": "chatcmpl-test",
+      "model": "gpt-4o",
+      "object": "chat.completion",
+      "service_tier": null,
+      "system_fingerprint": null,
+      "usage": {
+       "completion_tokens": 20,
+       "completion_tokens_details": null,
+       "prompt_tokens": 10,
+       "prompt_tokens_details": null,
+       "total_tokens": 30
+      }
+     }
+    },
+    "make_message": {
+     "__model__": "ChatCompletionMessage",
+     "data": {
+      "content": "Hello!",
+      "name": null,
+      "role": "assistant",
+      "tool_calls": null
+     }
+    },
+    "make_tool_call": {
+     "__model__": "ToolCall",
+     "data": {
+      "function": {
+       "arguments": "{\"location\": \"NYC\"}",
+       "name": "get_weather"
+      },
+      "id": "call_001",
+      "type": "function"
+     }
+    },
+    "make_usage": [
+     {
+      "__model__": "Usage",
+      "data": {
+       "completion_tokens": 20,
+       "completion_tokens_details": null,
+       "prompt_tokens": 10,
+       "prompt_tokens_details": null,
+       "total_tokens": 30
+      }
+     },
+     {
+      "__model__": "Usage",
+      "data": {
+       "completion_tokens": 2,
+       "completion_tokens_details": null,
+       "prompt_tokens": 1,
+       "prompt_tokens_details": null,
+       "total_tokens": 3
+      }
+     },
+     {
+      "__model__": "Usage",
+      "data": {
+       "completion_tokens": 2,
+       "completion_tokens_details": null,
+       "prompt_tokens": 1,
+       "prompt_tokens_details": null,
+       "total_tokens": 9
+      }
+     }
+    ],
+    "mock_completion.default": {
+     "__model__": "ChatCompletion",
+     "data": {
+      "agentcc": {
+       "cache_status": null,
+       "cost": null,
+       "fallback_used": false,
+       "guardrail_triggered": false,
+       "latency_ms": 100,
+       "model_used": null,
+       "provider": "openai",
+       "ratelimit": null,
+       "request_id": "req-test-001",
+       "routing_strategy": null,
+       "timeout_ms": null,
+       "trace_id": "trace-test-001"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": "Hello!",
+         "name": null,
+         "role": "assistant",
+         "tool_calls": null
+        }
+       }
+      ],
+      "created": 1700000000,
+      "id": "chatcmpl-test",
+      "model": "gpt-4o",
+      "object": "chat.completion",
+      "service_tier": null,
+      "system_fingerprint": null,
+      "usage": {
+       "completion_tokens": 20,
+       "completion_tokens_details": null,
+       "prompt_tokens": 10,
+       "prompt_tokens_details": null,
+       "total_tokens": 30
+      }
+     }
+    },
+    "mock_completion.kwargs": {
+     "__model__": "ChatCompletion",
+     "data": {
+      "agentcc": {
+       "cache_status": "miss",
+       "cost": 0.1,
+       "fallback_used": false,
+       "guardrail_triggered": false,
+       "latency_ms": 100,
+       "model_used": null,
+       "provider": "p",
+       "ratelimit": null,
+       "request_id": "req-test-001",
+       "routing_strategy": null,
+       "timeout_ms": null,
+       "trace_id": "trace-test-001"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": "x",
+         "name": null,
+         "role": "assistant",
+         "tool_calls": null
+        }
+       }
+      ],
+      "created": 1700000000,
+      "id": "custom",
+      "model": "m",
+      "object": "chat.completion",
+      "service_tier": null,
+      "system_fingerprint": null,
+      "usage": {
+       "completion_tokens": 20,
+       "completion_tokens_details": null,
+       "prompt_tokens": 10,
+       "prompt_tokens_details": null,
+       "total_tokens": 30
+      }
+     }
+    },
+    "mock_error.default": {
+     "__exception__": "InternalServerError",
+     "args": [
+      "Internal error"
+     ],
+     "attrs": {
+      "body": null,
+      "code": null,
+      "message": "Internal error",
+      "param": null,
+      "request_id": null,
+      "status_code": 500,
+      "type": "error"
+     },
+     "mro": [
+      "InternalServerError",
+      "APIStatusError",
+      "AgentCCError",
+      "Exception",
+      "BaseException",
+      "object"
+     ],
+     "pickle": {
+      "error": "TypeError",
+      "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+      "ok": false
+     },
+     "repr": "InternalServerError(status_code=500, message='Internal error')",
+     "str": "Error code: 500 - Internal error"
+    },
+    "mock_error.each": [
+     {
+      "__exception__": "BadRequestError",
+      "args": [
+       "m400"
+      ],
+      "attrs": {
+       "body": null,
+       "code": null,
+       "message": "m400",
+       "param": null,
+       "request_id": null,
+       "status_code": 400,
+       "type": "error"
+      },
+      "mro": [
+       "BadRequestError",
+       "APIStatusError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "error": "TypeError",
+       "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+       "ok": false
+      },
+      "repr": "BadRequestError(status_code=400, message='m400')",
+      "str": "Error code: 400 - m400"
+     },
+     {
+      "__exception__": "AuthenticationError",
+      "args": [
+       "m401"
+      ],
+      "attrs": {
+       "body": null,
+       "code": null,
+       "message": "m401",
+       "param": null,
+       "request_id": null,
+       "status_code": 401,
+       "type": "error"
+      },
+      "mro": [
+       "AuthenticationError",
+       "APIStatusError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "error": "TypeError",
+       "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+       "ok": false
+      },
+      "repr": "AuthenticationError(status_code=401, message='m401')",
+      "str": "Error code: 401 - m401"
+     },
+     {
+      "__exception__": "PermissionDeniedError",
+      "args": [
+       "m403"
+      ],
+      "attrs": {
+       "body": null,
+       "code": null,
+       "message": "m403",
+       "param": null,
+       "request_id": null,
+       "status_code": 403,
+       "type": "error"
+      },
+      "mro": [
+       "PermissionDeniedError",
+       "APIStatusError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "error": "TypeError",
+       "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+       "ok": false
+      },
+      "repr": "PermissionDeniedError(status_code=403, message='m403')",
+      "str": "Error code: 403 - m403"
+     },
+     {
+      "__exception__": "NotFoundError",
+      "args": [
+       "m404"
+      ],
+      "attrs": {
+       "body": null,
+       "code": null,
+       "message": "m404",
+       "param": null,
+       "request_id": null,
+       "status_code": 404,
+       "type": "error"
+      },
+      "mro": [
+       "NotFoundError",
+       "APIStatusError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "error": "TypeError",
+       "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+       "ok": false
+      },
+      "repr": "NotFoundError(status_code=404, message='m404')",
+      "str": "Error code: 404 - m404"
+     },
+     {
+      "__exception__": "UnprocessableEntityError",
+      "args": [
+       "m422"
+      ],
+      "attrs": {
+       "body": null,
+       "code": null,
+       "message": "m422",
+       "param": null,
+       "request_id": null,
+       "status_code": 422,
+       "type": "error"
+      },
+      "mro": [
+       "UnprocessableEntityError",
+       "APIStatusError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "error": "TypeError",
+       "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+       "ok": false
+      },
+      "repr": "UnprocessableEntityError(status_code=422, message='m422')",
+      "str": "Error code: 422 - m422"
+     },
+     {
+      "__exception__": "RateLimitError",
+      "args": [
+       "m429"
+      ],
+      "attrs": {
+       "body": null,
+       "code": null,
+       "message": "m429",
+       "param": null,
+       "ratelimit_limit": null,
+       "ratelimit_remaining": null,
+       "ratelimit_reset": null,
+       "request_id": null,
+       "status_code": 429,
+       "type": "error"
+      },
+      "mro": [
+       "RateLimitError",
+       "APIStatusError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "error": "TypeError",
+       "message": "RateLimitError.__init__() takes 1 positional argument but 2 were given",
+       "ok": false
+      },
+      "repr": "RateLimitError(status_code=429, message='m429')",
+      "str": "Error code: 429 - m429"
+     },
+     {
+      "__exception__": "GuardrailBlockedError",
+      "args": [
+       "m446"
+      ],
+      "attrs": {
+       "body": null,
+       "code": null,
+       "guardrail_action": null,
+       "guardrail_confidence": null,
+       "guardrail_message": null,
+       "guardrail_name": null,
+       "message": "m446",
+       "param": null,
+       "request_id": null,
+       "status_code": 446,
+       "type": "error"
+      },
+      "mro": [
+       "GuardrailBlockedError",
+       "APIStatusError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "error": "TypeError",
+       "message": "GuardrailBlockedError.__init__() takes 1 positional argument but 2 were given",
+       "ok": false
+      },
+      "repr": "GuardrailBlockedError(status_code=446, message='m446')",
+      "str": "Error code: 446 - m446"
+     },
+     {
+      "__exception__": "InternalServerError",
+      "args": [
+       "m500"
+      ],
+      "attrs": {
+       "body": null,
+       "code": null,
+       "message": "m500",
+       "param": null,
+       "request_id": null,
+       "status_code": 500,
+       "type": "error"
+      },
+      "mro": [
+       "InternalServerError",
+       "APIStatusError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "error": "TypeError",
+       "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+       "ok": false
+      },
+      "repr": "InternalServerError(status_code=500, message='m500')",
+      "str": "Error code: 500 - m500"
+     },
+     {
+      "__exception__": "BadGatewayError",
+      "args": [
+       "m502"
+      ],
+      "attrs": {
+       "body": null,
+       "code": null,
+       "message": "m502",
+       "param": null,
+       "request_id": null,
+       "status_code": 502,
+       "type": "error"
+      },
+      "mro": [
+       "BadGatewayError",
+       "APIStatusError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "error": "TypeError",
+       "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+       "ok": false
+      },
+      "repr": "BadGatewayError(status_code=502, message='m502')",
+      "str": "Error code: 502 - m502"
+     },
+     {
+      "__exception__": "ServiceUnavailableError",
+      "args": [
+       "m503"
+      ],
+      "attrs": {
+       "body": null,
+       "code": null,
+       "message": "m503",
+       "param": null,
+       "request_id": null,
+       "status_code": 503,
+       "type": "error"
+      },
+      "mro": [
+       "ServiceUnavailableError",
+       "APIStatusError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "error": "TypeError",
+       "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+       "ok": false
+      },
+      "repr": "ServiceUnavailableError(status_code=503, message='m503')",
+      "str": "Error code: 503 - m503"
+     },
+     {
+      "__exception__": "GatewayTimeoutError",
+      "args": [
+       "m504"
+      ],
+      "attrs": {
+       "body": null,
+       "code": null,
+       "message": "m504",
+       "param": null,
+       "request_id": null,
+       "status_code": 504,
+       "type": "error"
+      },
+      "mro": [
+       "GatewayTimeoutError",
+       "APIStatusError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "error": "TypeError",
+       "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+       "ok": false
+      },
+      "repr": "GatewayTimeoutError(status_code=504, message='m504')",
+      "str": "Error code: 504 - m504"
+     },
+     {
+      "__exception__": "APIStatusError",
+      "args": [
+       "m418"
+      ],
+      "attrs": {
+       "body": null,
+       "code": null,
+       "message": "m418",
+       "param": null,
+       "request_id": null,
+       "status_code": 418,
+       "type": "error"
+      },
+      "mro": [
+       "APIStatusError",
+       "AgentCCError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "error": "TypeError",
+       "message": "APIStatusError.__init__() missing 1 required keyword-only argument: 'status_code'",
+       "ok": false
+      },
+      "repr": "APIStatusError(status_code=418, message='m418')",
+      "str": "Error code: 418 - m418"
+     }
+    ]
+   }
+  }
+ },
+ "format": 1
+}

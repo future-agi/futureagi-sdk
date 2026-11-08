@@ -1,0 +1,265 @@
+[
+  {
+    "idempotent": false,
+    "method": "GET",
+    "name": "gateway.config.get_active",
+    "operation_id": "agentcc_org-configs_active",
+    "path": "/agentcc/org-configs/active/",
+    "path_params": [],
+    "query": [
+      "limit",
+      "page"
+    ],
+    "retry_class": "http-idempotent",
+    "summary": "Read the active configuration, or null if none exists. Pagination: none. limit and page are accepted but ignored; the server does not paginate this response."
+  },
+  {
+    "body_arg": "patch",
+    "fixed_path": {
+      "id": "default"
+    },
+    "idempotent": false,
+    "method": "POST",
+    "name": "gateway.config.update",
+    "operation_id": "agentcc_gateways_update_config",
+    "path": "/agentcc/gateways/{id}/update-config/",
+    "path_params": [
+      "id"
+    ],
+    "query": [],
+    "retry_class": "unsafe",
+    "summary": "Apply an RFC 7386 merge patch per section; null deletes a key. Server warnings are surfaced."
+  },
+  {
+    "body_arg": "sections",
+    "idempotent": false,
+    "method": "POST",
+    "name": "gateway.config.create_version",
+    "operation_id": "agentcc_org-configs_create",
+    "path": "/agentcc/org-configs/",
+    "path_params": [],
+    "query": [],
+    "retry_class": "unsafe",
+    "summary": "Create and activate a replacement configuration; omitted sections reset to server defaults and are not copied from the active version. Use config.update for a merge patch."
+  },
+  {
+    "idempotent": false,
+    "method": "GET",
+    "name": "gateway.config.versions.list",
+    "operation_id": "agentcc_org-configs_list",
+    "page": true,
+    "path": "/agentcc/org-configs/",
+    "path_params": [],
+    "query": [
+      "limit",
+      "page"
+    ],
+    "retry_class": "http-idempotent",
+    "summary": "Iterate configuration versions using DRF pagination. Pagination: none. limit and page are accepted but ignored; the server does not paginate this response."
+  },
+  {
+    "idempotent": false,
+    "method": "GET",
+    "name": "gateway.config.versions.get",
+    "operation_id": "agentcc_org-configs_read",
+    "path": "/agentcc/org-configs/{id}/",
+    "path_params": [
+      "id"
+    ],
+    "query": [],
+    "retry_class": "http-idempotent",
+    "summary": "Read a configuration version."
+  },
+  {
+    "extra_query": [
+      "compare_to"
+    ],
+    "idempotent": false,
+    "method": "GET",
+    "name": "gateway.config.versions.diff",
+    "operation_id": "agentcc_org-configs_diff",
+    "path": "/agentcc/org-configs/{id}/diff/",
+    "path_params": [
+      "id"
+    ],
+    "query": [
+      "compare_to"
+    ],
+    "retry_class": "http-idempotent",
+    "summary": "Compare this version with compare_to; secret sections remain masked."
+  },
+  {
+    "idempotent": false,
+    "method": "POST",
+    "name": "gateway.config.versions.activate",
+    "operation_id": "agentcc_org-configs_activate",
+    "path": "/agentcc/org-configs/{id}/activate/",
+    "path_params": [
+      "id"
+    ],
+    "query": [],
+    "retry_class": "unsafe",
+    "summary": "Roll back by activating a configuration version; server warnings are surfaced."
+  },
+  {
+    "idempotent": false,
+    "method": "GET",
+    "name": "gateway.keys.list",
+    "operation_id": "agentcc_api-keys_list",
+    "page": true,
+    "path": "/agentcc/api-keys/",
+    "path_params": [],
+    "query": [
+      "limit",
+      "page"
+    ],
+    "retry_class": "http-idempotent",
+    "summary": "List personal gateway key metadata. This requires the person-owned key backend. Pagination: none. limit and page are accepted but ignored; the server does not paginate this response."
+  },
+  {
+    "idempotent": false,
+    "method": "GET",
+    "name": "gateway.keys.get",
+    "operation_id": "agentcc_api-keys_read",
+    "path": "/agentcc/api-keys/{id}/",
+    "path_params": [
+      "id"
+    ],
+    "query": [],
+    "retry_class": "http-idempotent",
+    "summary": "Read personal gateway key metadata, never its secret."
+  },
+  {
+    "body_arg": "patch",
+    "idempotent": false,
+    "method": "PATCH",
+    "name": "gateway.keys.update",
+    "operation_id": "agentcc_api-keys_partial_update",
+    "path": "/agentcc/api-keys/{id}/",
+    "path_params": [
+      "id"
+    ],
+    "query": [],
+    "retry_class": "unsafe",
+    "summary": "Update a personal gateway key. Ownership and unsupported limits cannot be changed."
+  },
+  {
+    "idempotent": false,
+    "method": "POST",
+    "name": "gateway.keys.revoke",
+    "operation_id": "agentcc_api-keys_revoke",
+    "path": "/agentcc/api-keys/{id}/revoke/",
+    "path_params": [
+      "id"
+    ],
+    "query": [],
+    "retry_class": "unsafe",
+    "summary": "Revoke a personal gateway key."
+  },
+  {
+    "idempotent": false,
+    "method": "DELETE",
+    "name": "gateway.keys.delete",
+    "operation_id": "agentcc_api-keys_delete",
+    "path": "/agentcc/api-keys/{id}/",
+    "path_params": [
+      "id"
+    ],
+    "query": [],
+    "retry_class": "http-idempotent",
+    "summary": "Delete a personal gateway key."
+  },
+  {
+    "idempotent": false,
+    "method": "GET",
+    "name": "gateway.provider_credentials.list",
+    "operation_id": "agentcc_provider-credentials_list",
+    "page": true,
+    "path": "/agentcc/provider-credentials/",
+    "path_params": [],
+    "query": [
+      "limit",
+      "page"
+    ],
+    "retry_class": "http-idempotent",
+    "summary": "List provider credentials with values masked. Pagination: none. limit and page are accepted but ignored; the server does not paginate this response."
+  },
+  {
+    "idempotent": false,
+    "method": "GET",
+    "name": "gateway.provider_credentials.get",
+    "operation_id": "agentcc_provider-credentials_read",
+    "path": "/agentcc/provider-credentials/{id}/",
+    "path_params": [
+      "id"
+    ],
+    "query": [],
+    "retry_class": "http-idempotent",
+    "summary": "Read provider credential metadata with values masked."
+  },
+  {
+    "body_arg": "body",
+    "idempotent": false,
+    "method": "POST",
+    "name": "gateway.provider_credentials.create",
+    "operation_id": "agentcc_provider-credentials_create",
+    "path": "/agentcc/provider-credentials/",
+    "path_params": [],
+    "query": [],
+    "retry_class": "unsafe",
+    "summary": "Store a provider credential explicitly; the response is masked. Write typing awaits a recorded contract override."
+  },
+  {
+    "body_arg": "patch",
+    "idempotent": false,
+    "method": "PATCH",
+    "name": "gateway.provider_credentials.update",
+    "operation_id": "agentcc_provider-credentials_partial_update",
+    "path": "/agentcc/provider-credentials/{id}/",
+    "path_params": [
+      "id"
+    ],
+    "query": [],
+    "retry_class": "unsafe",
+    "summary": "Update provider credential metadata; use rotate to replace the credential."
+  },
+  {
+    "body_arg": "body",
+    "idempotent": false,
+    "method": "POST",
+    "name": "gateway.provider_credentials.rotate",
+    "operation_id": "agentcc_provider-credentials_rotate",
+    "path": "/agentcc/provider-credentials/{id}/rotate/",
+    "path_params": [
+      "id"
+    ],
+    "query": [],
+    "retry_class": "unsafe",
+    "summary": "Replace stored provider credentials; the response is masked."
+  },
+  {
+    "idempotent": false,
+    "method": "DELETE",
+    "name": "gateway.provider_credentials.delete",
+    "operation_id": "agentcc_provider-credentials_delete",
+    "path": "/agentcc/provider-credentials/{id}/",
+    "path_params": [
+      "id"
+    ],
+    "query": [],
+    "retry_class": "http-idempotent",
+    "summary": "Delete a provider credential."
+  },
+  {
+    "body_arg": "body",
+    "idempotent": false,
+    "method": "POST",
+    "name": "gateway.provider_credentials.fetch_models",
+    "operation_id": "agentcc_provider-credentials_fetch_models",
+    "path": "/agentcc/provider-credentials/fetch_models/",
+    "path_params": [],
+    "query": [],
+    "retry_class": "unsafe",
+    "summary": "Fetch provider models through the control plane; this may contact the configured provider."
+  }
+]

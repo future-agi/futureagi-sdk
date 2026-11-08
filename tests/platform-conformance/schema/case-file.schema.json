@@ -1,0 +1,479 @@
+{
+  "$id": "https://futureagi.com/schemas/platform-conformance/case-file/v1",
+  "title": "A file of language-neutral SDK conformance cases",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "family",
+    "cases"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "sdk-conformance-cases/v1"
+    },
+    "family": {
+      "enum": [
+        "sandboxes",
+        "runs",
+        "platform",
+        "deployments",
+        "cross"
+      ]
+    },
+    "about": {
+      "type": "string"
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/case"
+      }
+    }
+  },
+  "$defs": {
+    "op": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "path"
+      ],
+      "properties": {
+        "method": {
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^/"
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "op"
+      ],
+      "properties": {
+        "op": {
+          "$ref": "#/$defs/op"
+        },
+        "as": {
+          "enum": [
+            "caller",
+            "resource-owner"
+          ]
+        },
+        "params": {
+          "type": [
+            "object",
+            "array"
+          ]
+        },
+        "query": {
+          "type": "object"
+        },
+        "headers": {
+          "type": "object"
+        },
+        "body": {},
+        "idempotencyKey": {
+          "type": "string"
+        },
+        "expectStatus": {
+          "type": [
+            "integer",
+            "array"
+          ]
+        },
+        "capture": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "stream": {
+          "$ref": "#/$defs/stream"
+        },
+        "waitFor": {
+          "type": "object"
+        },
+        "expect": {
+          "$ref": "#/$defs/expect"
+        },
+        "rawBody": {
+          "type": "string"
+        }
+      }
+    },
+    "stream": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "sse-get",
+            "sse-post"
+          ]
+        },
+        "maxEvents": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxMs": {
+          "type": "integer",
+          "minimum": 100
+        },
+        "until": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lastEventId": {
+          "type": "string"
+        }
+      }
+    },
+    "expect": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "type": [
+            "integer",
+            "array"
+          ]
+        },
+        "code": {
+          "type": [
+            "string",
+            "array"
+          ]
+        },
+        "codePresent": {
+          "type": "boolean"
+        },
+        "errorClass": {
+          "type": [
+            "string",
+            "array"
+          ]
+        },
+        "contract": {
+          "type": "boolean"
+        },
+        "knownDrift": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "owner",
+            "reason",
+            "messages"
+          ],
+          "properties": {
+            "owner": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            },
+            "messages": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "fields": {
+          "type": "object"
+        },
+        "events": {
+          "type": "object"
+        },
+        "retryAfter": {
+          "type": "boolean"
+        },
+        "noLeak": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "sdk",
+        "op",
+        "tenant",
+        "modes",
+        "tags",
+        "expect"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 8
+        },
+        "sdk": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "family",
+            "method"
+          ],
+          "properties": {
+            "family": {
+              "enum": [
+                "sandboxes",
+                "runs",
+                "platform",
+                "deployments",
+                "client"
+              ]
+            },
+            "method": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*)*$"
+            }
+          }
+        },
+        "op": {
+          "$ref": "#/$defs/op"
+        },
+        "offManifest": {
+          "type": "boolean"
+        },
+        "tenant": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "org",
+            "role"
+          ],
+          "properties": {
+            "org": {
+              "enum": [
+                "A",
+                "B"
+              ]
+            },
+            "role": {
+              "enum": [
+                "owner",
+                "admin",
+                "member",
+                "viewer",
+                "revoked",
+                "anonymous"
+              ]
+            },
+            "resourceOrg": {
+              "enum": [
+                "A",
+                "B"
+              ]
+            },
+            "scopeOrg": {
+              "description": "Send `org`'s credential with this org's scope selectors (x-omega-org/x-omega-workspace to EE, x-organization-id/x-workspace-id through the gateway): the forged-selector attack",
+              "enum": [
+                "A",
+                "B"
+              ]
+            }
+          }
+        },
+        "modes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "ee-key",
+              "fa-session",
+              "fi-keypair",
+              "none"
+            ]
+          }
+        },
+        "runners": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "http",
+              "ts",
+              "py",
+              "fake"
+            ]
+          }
+        },
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "deterministic",
+              "live-model",
+              "chaos",
+              "failure",
+              "must-exist",
+              "slow",
+              "mutating",
+              "rollout"
+            ]
+          }
+        },
+        "needs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "setup": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        },
+        "call": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "params": {
+              "type": [
+                "object",
+                "array"
+              ]
+            },
+            "query": {
+              "type": "object"
+            },
+            "headers": {
+              "type": "object"
+            },
+            "body": {},
+            "rawBody": {
+              "type": "string"
+            },
+            "contentType": {
+              "type": "string"
+            },
+            "bodyInvalidOnPurpose": {
+              "type": "boolean"
+            },
+            "idempotencyKey": {
+              "type": "string"
+            },
+            "stream": {
+              "$ref": "#/$defs/stream"
+            },
+            "omitScopeHeaders": {
+              "type": "boolean"
+            },
+            "noIdempotencyKey": {
+              "type": "boolean"
+            },
+            "timeoutMs": {
+              "type": "integer",
+              "minimum": 100
+            }
+          }
+        },
+        "args": {
+          "type": "object"
+        },
+        "repeat": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "expect": {
+          "$ref": "#/$defs/expect"
+        },
+        "expectByMode": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/expect"
+          }
+        },
+        "capture": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "cleanup": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        },
+        "chaos": {
+          "type": "object"
+        },
+        "rollout": {
+          "type": "object"
+        },
+        "fixture": {
+          "type": "object"
+        },
+        "client": {
+          "type": "object"
+        },
+        "expectedFailure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "owner",
+            "reason"
+          ],
+          "properties": {
+            "owner": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            },
+            "modes": {
+              "type": "array"
+            }
+          }
+        },
+        "plannedIn": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "verify": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        },
+        "measuredBy": {
+          "type": "string",
+          "pattern": "^rig/[a-z0-9-]+\\.mjs$"
+        }
+      }
+    }
+  }
+}

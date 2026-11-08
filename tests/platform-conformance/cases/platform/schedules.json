@@ -1,0 +1,333 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "platform",
+  "about": "Schedules.",
+  "cases": [
+    {
+      "id": "platform.schedules.list",
+      "title": "List schedules",
+      "sdk": {
+        "family": "platform",
+        "method": "schedules.list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/schedules"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "schedules": "array"
+        }
+      }
+    },
+    {
+      "id": "platform.schedules.create-get-delete",
+      "title": "Create a disabled schedule, read it, delete it",
+      "sdk": {
+        "family": "platform",
+        "method": "schedules.create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/schedules"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "call": {
+        "body": {
+          "prompt": "conformance schedule ${run.short}",
+          "cadence": {
+            "kind": "interval",
+            "ms": 86400000
+          },
+          "enabled": false
+        }
+      },
+      "expect": {
+        "status": [
+          200,
+          201
+        ],
+        "contract": true,
+        "fields": {
+          "schedule.id": "string"
+        }
+      },
+      "capture": {
+        "sch": "schedule.id"
+      },
+      "verify": [
+        {
+          "op": {
+            "method": "GET",
+            "path": "/workspace/schedules/{schedule}"
+          },
+          "params": {
+            "schedule": "${cap.sch}"
+          },
+          "as": "caller",
+          "expectStatus": 200
+        },
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/schedules/{schedule}"
+          },
+          "params": {
+            "schedule": "${cap.sch}"
+          },
+          "as": "caller",
+          "expectStatus": 200
+        }
+      ]
+    },
+    {
+      "id": "platform.schedules.create.bad-cadence",
+      "title": "A cadence under one second is a typed 400",
+      "sdk": {
+        "family": "platform",
+        "method": "schedules.create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/schedules"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "body": {
+          "prompt": "x",
+          "cadence": {
+            "kind": "interval",
+            "ms": 5
+          }
+        },
+        "bodyInvalidOnPurpose": true
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "platform.schedules.get.cross-tenant",
+      "title": "Org B cannot read org A's schedule",
+      "sdk": {
+        "family": "platform",
+        "method": "schedules.get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/schedules/{schedule}"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "schedule"
+      ],
+      "call": {
+        "params": {
+          "schedule": "${res.schedule}"
+        }
+      },
+      "repeat": 5,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "platform.schedules.update",
+      "title": "Disable a schedule",
+      "sdk": {
+        "family": "platform",
+        "method": "schedules.update"
+      },
+      "op": {
+        "method": "PATCH",
+        "path": "/workspace/schedules/{schedule}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "schedule"
+      ],
+      "call": {
+        "params": {
+          "schedule": "${res.schedule}"
+        },
+        "body": {
+          "enabled": false
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "platform.schedules.run",
+      "title": "Run a schedule now (model-start), idempotently",
+      "sdk": {
+        "family": "platform",
+        "method": "schedules.runNow"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/schedules/{schedule}/run"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "schedule"
+      ],
+      "call": {
+        "params": {
+          "schedule": "${res.schedule}"
+        },
+        "body": {}
+      },
+      "expect": {
+        "status": [
+          200,
+          202
+        ],
+        "contract": true
+      }
+    },
+    {
+      "id": "platform.schedules.delete",
+      "title": "Delete a schedule",
+      "sdk": {
+        "family": "platform",
+        "method": "schedules.delete"
+      },
+      "op": {
+        "method": "DELETE",
+        "path": "/workspace/schedules/{schedule}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/schedules"
+          },
+          "body": {
+            "prompt": "conformance delete ${run.short}",
+            "cadence": {
+              "kind": "interval",
+              "ms": 86400000
+            },
+            "enabled": false
+          },
+          "capture": {
+            "sch": "schedule.id"
+          },
+          "expectStatus": [
+            200,
+            201
+          ]
+        }
+      ],
+      "call": {
+        "params": {
+          "schedule": "${cap.sch}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "deleted": {
+            "equals": true
+          }
+        }
+      }
+    }
+  ]
+}

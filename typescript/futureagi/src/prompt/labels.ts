@@ -1,7 +1,9 @@
 import type { AxiosResponse } from 'axios';
 import type { Prompt } from './client';
-import { APIKeyAuth, APIKeyAuthConfig } from '../api/auth';
-import { HttpMethod, RequestConfig } from '../api/types';
+import { APIKeyAuth } from '../api/auth';
+import type { APIKeyAuthConfig } from '../api/auth';
+import { HttpMethod } from '../api/types';
+import type { RequestConfig } from '../api/types';
 import { Routes } from '../utils/routes';
 import { SDKException } from '../utils/errors';
 
@@ -257,5 +259,4 @@ export async function removeLabelFromTemplateVersion(
     await client.close();
   }
 }
-
 

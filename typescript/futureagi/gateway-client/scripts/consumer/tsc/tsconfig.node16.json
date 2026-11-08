@@ -1,0 +1,1 @@
+{ "compilerOptions": { "module": "node16", "moduleResolution": "node16", "target": "ES2022", "lib": ["ES2022", "DOM"], "types": ["node"], "strict": true, "noEmit": true, "skipLibCheck": false }, "files": ["consumer.mts", "consumer.cts"] }

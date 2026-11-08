@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from urllib.parse import urlencode as _urlencode
 
 from fi.gateway._agentcc_params import (
     build_extra_headers,
@@ -12,6 +13,15 @@ from fi.gateway._agentcc_params import (
 from fi.gateway._base_client import RequestOptions
 from fi.gateway._constants import NOT_GIVEN
 from fi.gateway.types.files import FileDeleted, FileList, FileObject
+
+
+def _list_url(purpose: str | None) -> str:
+    """``/v1/files``, with ``purpose`` as one encoded query value (agentcc 1.x put it in
+    the URL as given, so ``&`` or ``=`` in it added or changed parameters)."""
+    if purpose is None:
+        return "/v1/files"
+    return "/v1/files?" + _urlencode({"purpose": purpose})
+
 
 
 class Files:
@@ -36,15 +46,18 @@ class Files:
         timeout: Any = NOT_GIVEN,
     ) -> FileObject:
         agentcc_params = collect_agentcc_params(
-            session_id=session_id, trace_id=trace_id,
+            session_id=session_id,
+            trace_id=trace_id,
             request_metadata=request_metadata,
         )
 
         extra_hdrs = build_extra_headers(
-            extra_headers=extra_headers, properties=properties,
-            user_id=user_id, request_id=request_id,
+            extra_headers=extra_headers,
+            properties=properties,
+            user_id=user_id,
+            request_id=request_id,
         )
-        extra_hdrs = merge_session_headers(self._client, extra_hdrs)
+        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params)
 
         from fi.gateway._utils import parse_timeout
 
@@ -54,8 +67,8 @@ class Files:
             headers=extra_hdrs,
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        opts.body = {"purpose": purpose}
         opts.files = {"file": file}
+        opts.form = {"purpose": purpose}
         return self._client._get_base_client()._request_with_retry(opts, FileObject, agentcc_params)
 
     def list(
@@ -67,13 +80,9 @@ class Files:
     ) -> FileList:
         from fi.gateway._utils import parse_timeout
 
-        url = "/v1/files"
-        if purpose is not None:
-            url = f"/v1/files?purpose={purpose}"
-
         opts = RequestOptions(
             method="GET",
-            url=url,
+            url=_list_url(purpose),
             headers=extra_headers or {},
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
@@ -153,15 +162,18 @@ class AsyncFiles:
         timeout: Any = NOT_GIVEN,
     ) -> FileObject:
         agentcc_params = collect_agentcc_params(
-            session_id=session_id, trace_id=trace_id,
+            session_id=session_id,
+            trace_id=trace_id,
             request_metadata=request_metadata,
         )
 
         extra_hdrs = build_extra_headers(
-            extra_headers=extra_headers, properties=properties,
-            user_id=user_id, request_id=request_id,
+            extra_headers=extra_headers,
+            properties=properties,
+            user_id=user_id,
+            request_id=request_id,
         )
-        extra_hdrs = merge_session_headers(self._client, extra_hdrs)
+        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params)
 
         from fi.gateway._utils import parse_timeout
 
@@ -171,8 +183,8 @@ class AsyncFiles:
             headers=extra_hdrs,
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        opts.body = {"purpose": purpose}
         opts.files = {"file": file}
+        opts.form = {"purpose": purpose}
         return await self._client._get_base_client()._request_with_retry(opts, FileObject, agentcc_params)
 
     async def list(
@@ -184,13 +196,9 @@ class AsyncFiles:
     ) -> FileList:
         from fi.gateway._utils import parse_timeout
 
-        url = "/v1/files"
-        if purpose is not None:
-            url = f"/v1/files?purpose={purpose}"
-
         opts = RequestOptions(
             method="GET",
-            url=url,
+            url=_list_url(purpose),
             headers=extra_headers or {},
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
@@ -211,7 +219,9 @@ class AsyncFiles:
             headers=extra_headers or {},
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        return await self._client._get_base_client()._request_with_retry(opts, FileObject)
+        return await self._client._get_base_client()._request_with_retry(
+            opts, FileObject
+        )
 
     async def content(
         self,
@@ -245,4 +255,6 @@ class AsyncFiles:
             headers=extra_headers or {},
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        return await self._client._get_base_client()._request_with_retry(opts, FileDeleted)
+        return await self._client._get_base_client()._request_with_retry(
+            opts, FileDeleted
+        )

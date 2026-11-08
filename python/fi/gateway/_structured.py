@@ -47,7 +47,7 @@ def to_response_format(model_class: type) -> dict[str, Any]:
         "type": "json_schema",
         "json_schema": {
             "name": model_class.__name__,
-            "schema": strict_schema(schema),
+            "schema": _strict_schema(schema),
             "strict": True,
         },
     }
@@ -76,7 +76,7 @@ _SCHEMA_LISTS = ("anyOf", "oneOf", "allOf", "prefixItems")
 _SCHEMA_NODES = ("items", "additionalProperties", "not", "if", "then", "else", "contains", "propertyNames", "unevaluatedProperties", "unevaluatedItems")
 
 
-def strict_schema(schema: Any) -> Any:
+def _strict_schema(schema: Any) -> Any:
     """A JSON Schema in the form OpenAI's strict structured output accepts.
 
     Pydantic's schema is not that form: strict mode needs ``additionalProperties: false`` on
@@ -86,7 +86,7 @@ def strict_schema(schema: Any) -> Any:
     ``$defs`` get the same treatment.
     """
     if isinstance(schema, list):
-        return [strict_schema(item) for item in schema]
+        return [_strict_schema(item) for item in schema]
     if not isinstance(schema, dict):
         return schema
     # Walk schema nodes only. The maps under `properties` / `$defs` are keyed by the user's
@@ -97,11 +97,11 @@ def strict_schema(schema: Any) -> Any:
         if key == "default":
             continue
         if key in _NAMED_SCHEMAS and isinstance(value, dict):
-            out[key] = {name: strict_schema(sub) for name, sub in value.items()}
+            out[key] = {name: _strict_schema(sub) for name, sub in value.items()}
         elif key in _SCHEMA_LISTS and isinstance(value, list):
-            out[key] = [strict_schema(sub) for sub in value]
+            out[key] = [_strict_schema(sub) for sub in value]
         elif key in _SCHEMA_NODES and isinstance(value, (dict, list)):
-            out[key] = strict_schema(value)
+            out[key] = _strict_schema(value)
         else:
             out[key] = value
     props = out.get("properties")
@@ -111,6 +111,15 @@ def strict_schema(schema: Any) -> Any:
         out["required"] = list(out["properties"])
         out["additionalProperties"] = False
     return out
+
+
+from fi.gateway._deprecation import deprecated
+
+
+@deprecated
+def strict_schema(schema: Any) -> Any:
+    """Released strict-schema conversion; keeps input untouched and schema names intact."""
+    return _strict_schema(schema)
 
 
 def validate_json_response(response_text: str, schema: dict[str, Any]) -> bool:
@@ -131,7 +140,7 @@ def validate_json_response(response_text: str, schema: dict[str, Any]) -> bool:
     except ImportError:
         raise ImportError(
             "jsonschema is required for JSON validation. "
-            "Install with: pip install agentcc[validation]"
+            "Install with: pip install jsonschema (a dependency of futureagi)"
         ) from None
     try:
         data = json.loads(response_text)

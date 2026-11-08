@@ -1,12 +1,14 @@
 import { AxiosResponse } from 'axios';
 import {
   APIKeyAuth,
-  APIKeyAuthConfig,
   ResponseHandler,
 } from '../api/auth';
-import { HttpMethod, RequestConfig } from '../api/types';
+import type { APIKeyAuthConfig } from '../api/auth';
+import { HttpMethod } from '../api/types';
+import type { RequestConfig } from '../api/types';
 import { Routes } from '../utils/routes';
-import { ModelConfig, PromptTemplate, MessageBase, Variables } from './types';
+import { ModelConfig, PromptTemplate, MessageBase } from './types';
+import type { Variables } from './types';
 import { PromptLabels, setDefaultVersion as labelsSetDefaultVersion, getTemplateLabels as labelsGetTemplateLabels, assignLabelToTemplateVersion as labelsAssign, removeLabelFromTemplateVersion as labelsRemove } from './labels';
 import {
   InvalidAuthError,
@@ -90,6 +92,7 @@ class PromptResponseHandler extends ResponseHandler<
 
   public static _parseSuccess(response: AxiosResponse): any {
     const { data } = response;
+    const payload = data?.result ?? data;
     const url = response.config.url ?? '';
     const method = response.config.method?.toUpperCase() ?? 'GET';
 
@@ -102,20 +105,23 @@ class PromptResponseHandler extends ResponseHandler<
       throw new SDKException(`No template found with the given name: ${name}`);
     }
 
-    // GET template by ID endpoint 
-    if (method === HttpMethod.GET && !url.endsWith('/')) {
+    // GET template by ID endpoint.
+    if (method === HttpMethod.GET && url.includes('/prompt-templates/') && !url.includes('prompt-labels')) {
       // Heuristic: treat as single-template retrieval by ID
-      return this._toPromptTemplate(data);
+      return this._toPromptTemplate(payload);
     }
 
     // GET template by name endpoint – keep parity with Python SDK behaviour
-    if (method === HttpMethod.GET && url.includes(Routes.get_template_by_name)) {
-      return this._toPromptTemplate(data);
+    if (
+      method === HttpMethod.GET &&
+      (url.includes(Routes.get_template_by_name) || url.includes(Routes.prompt_label_get_by_name))
+    ) {
+      return this._toPromptTemplate(payload);
     }
 
     // POST create template endpoint returns { result: {...} }
     if (method === HttpMethod.POST && url.endsWith(Routes.create_template)) {
-      return data.result ?? data;
+      return payload;
     }
 
     // Fallback to raw payload
@@ -331,35 +337,74 @@ export class Prompt extends APIKeyAuth {
   }
 
   /**
+   * Generate prompt text from requirements and update the last message.
+   */
+  async generate(requirements: string): Promise<Prompt> {
+    if (!this.template) {
+      throw new SDKException('No template configured');
+    }
+
+    const response = await this.request(
+      {
+        method: HttpMethod.POST,
+        url: `${this.baseUrl}/${Routes.generate_prompt}`,
+        json: { statement: requirements },
+      } as RequestConfig,
+      PromptResponseHandler,
+    ) as Record<string, any>;
+
+    if (this.template.messages.length === 0) {
+      this.template.messages.push(new MessageBase('user', response?.result?.prompt ?? response?.prompt ?? ''));
+    } else {
+      this.template.messages[this.template.messages.length - 1].content = response?.result?.prompt ?? response?.prompt ?? '';
+    }
+
+    return this;
+  }
+
+  /**
+   * Improve the current prompt text from requirements and update the last message.
+   */
+  async improve(requirements: string): Promise<Prompt> {
+    if (!this.template) {
+      throw new SDKException('No template configured');
+    }
+
+    const existingPrompt = this.template.messages.length
+      ? this.template.messages[this.template.messages.length - 1].content
+      : '';
+
+    const response = await this.request(
+      {
+        method: HttpMethod.POST,
+        url: `${this.baseUrl}/${Routes.improve_prompt}`,
+        json: {
+          existing_prompt: existingPrompt,
+          improvement_requirements: requirements,
+        },
+      } as RequestConfig,
+      PromptResponseHandler,
+    ) as Record<string, any>;
+
+    if (this.template.messages.length === 0) {
+      this.template.messages.push(new MessageBase('user', response?.result?.prompt ?? response?.prompt ?? ''));
+    } else {
+      this.template.messages[this.template.messages.length - 1].content = response?.result?.prompt ?? response?.prompt ?? '';
+    }
+
+    return this;
+  }
+
+  /**
    * Create a new draft prompt template.
    */
-  async open(): Promise<Prompt> {
+  async create(options: { label?: string } = {}): Promise<Prompt> {
     if (!this.template) {
       throw new SDKException('template must be set');
     }
 
-    // If template already has an ID it's already created – just return the client.
     if (this.template.id) {
-      return this;
-    }
-
-    // Attempt to fetch existing template by name; propagate any errors.
-    if (this.template.name) {
-      try {
-        const remote = await Prompt.getTemplateByName(this.template.name, {
-          fiApiKey: this.fiApiKey,
-          fiSecretKey: this.fiSecretKey,
-          fiBaseUrl: this.baseUrl,
-        });
-
-        // Found existing template – adopt it and return immediately
-        this.template = remote;
-        return this;
-      } catch (err) {
-        // In production, treat any error during lookup as "not found" and proceed to create
-        // This handles cases where the lookup endpoint is unstable but create works
-        // Template truly does not exist – proceed to create below
-      }
+      throw new TemplateAlreadyExists(this.template.name ?? '<unknown>');
     }
 
     // Transform messages into backend-friendly format
@@ -405,8 +450,40 @@ export class Prompt extends APIKeyAuth {
     this.template.id = response.id;
     this.template.name = response.name;
     this.template.version = response.template_version ?? response.created_version ?? 'v1';
+    if (options.label != null) {
+      this._pendingLabel = options.label;
+    }
 
     return this;
+  }
+
+  /**
+   * Open an existing template by name if it exists; otherwise create a new draft.
+   */
+  async open(): Promise<Prompt> {
+    if (!this.template) {
+      throw new SDKException('template must be set');
+    }
+
+    if (this.template.id) {
+      return this;
+    }
+
+    if (this.template.name) {
+      try {
+        const remote = await Prompt.getTemplateByName(this.template.name, {
+          fiApiKey: this.fiApiKey,
+          fiSecretKey: this.fiSecretKey,
+          fiBaseUrl: this.baseUrl,
+        });
+        this.template = remote;
+        return this;
+      } catch {
+        // Missing remote template falls through to draft creation.
+      }
+    }
+
+    return this.create();
   }
 
   private async _createNewDraft(): Promise<void> {

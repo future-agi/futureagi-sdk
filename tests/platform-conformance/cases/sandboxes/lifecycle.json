@@ -1,0 +1,1259 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "sandboxes",
+  "about": "Sandbox lifecycle, settings and role floors.",
+  "cases": [
+    {
+      "id": "sandboxes.list.ok",
+      "title": "List the workspace's sandboxes",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "sandboxes": "array"
+        }
+      }
+    },
+    {
+      "id": "sandboxes.create.ok",
+      "title": "Create a sandbox; the answer names it and its state",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "call": {
+        "body": {
+          "name": "conf-create-${run.short}"
+        }
+      },
+      "args": {
+        "name": "conf-create-${run.short}"
+      },
+      "expect": {
+        "status": 201,
+        "contract": true,
+        "fields": {
+          "sandbox.id": "string",
+          "sandbox.state": "string"
+        }
+      },
+      "capture": {
+        "sbx": "sandbox.id"
+      },
+      "cleanup": [
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/sandboxes/{sandbox}"
+          },
+          "params": {
+            "sandbox": "${cap.sbx}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "sandboxes.create.member",
+      "title": "A member can create a sandbox (route floor: member)",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "member"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "call": {
+        "body": {
+          "name": "conf-member-${run.short}"
+        }
+      },
+      "expect": {
+        "status": 201
+      },
+      "capture": {
+        "sbx": "sandbox.id"
+      },
+      "cleanup": [
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/sandboxes/{sandbox}"
+          },
+          "params": {
+            "sandbox": "${cap.sbx}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "sandboxes.create.viewer-refused",
+      "title": "A read-only (viewer) credential cannot create a sandbox",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "viewer"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "body": {
+          "name": "conf-viewer-${run.short}"
+        }
+      },
+      "expect": {
+        "status": 403,
+        "errorClass": "PermissionDeniedError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.list.viewer",
+      "title": "A read-only (viewer) credential can still read the workspace's sandboxes",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "viewer"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "sandboxes": "array"
+        }
+      }
+    },
+    {
+      "id": "sandboxes.create.bad-size",
+      "title": "An unknown size is a typed 400, and nothing is created",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "body": {
+          "size": "huge"
+        },
+        "bodyInvalidOnPurpose": true
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.create.unknown-field",
+      "title": "An unknown body field is a typed 400 (requests are strict)",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "body": {
+          "name": "conf-x",
+          "colour": "blue"
+        },
+        "bodyInvalidOnPurpose": true
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.create.malformed-json",
+      "title": "A body that is not JSON is a typed 400",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "rawBody": "{\"name\": "
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.list.revoked-key",
+      "title": "A revoked credential is refused with 401",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "revoked"
+      },
+      "modes": [
+        "ee-key",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "expect": {
+        "status": 401,
+        "errorClass": "AuthenticationError"
+      }
+    },
+    {
+      "id": "sandboxes.list.no-scope-headers",
+      "title": "A key alone selects its org and workspace (no x-omega-org/x-omega-workspace sent)",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "call": {
+        "omitScopeHeaders": true
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "sandboxes.get.ok",
+      "title": "Get one sandbox by id",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "getInfo"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes/{sandbox}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "sandbox.id": {
+            "equals": "${res.sandbox}"
+          }
+        }
+      }
+    },
+    {
+      "id": "sandboxes.get.cross-tenant",
+      "title": "Org B's credential on org A's sandbox id answers 404, every time",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "getInfo"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes/{sandbox}"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        }
+      },
+      "repeat": 20,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.get.forged-scope",
+      "title": "Org B's key with org A's scope selectors cannot read org A's sandbox, every time",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "getInfo"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes/{sandbox}"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A",
+        "scopeOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        }
+      },
+      "repeat": 20,
+      "expect": {
+        "status": [
+          401,
+          403,
+          404
+        ]
+      },
+      "expectByMode": {
+        "ee-key": {
+          "status": 403,
+          "code": "workspace_scope_denied",
+          "errorClass": "PermissionDeniedError"
+        }
+      }
+    },
+    {
+      "id": "sandboxes.list.forged-scope",
+      "title": "Org B's key with org A's scope selectors cannot list org A's sandboxes",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A",
+        "scopeOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "repeat": 5,
+      "expect": {
+        "status": [
+          401,
+          403,
+          404
+        ]
+      },
+      "expectByMode": {
+        "ee-key": {
+          "status": 403,
+          "code": "workspace_scope_denied",
+          "errorClass": "PermissionDeniedError"
+        }
+      }
+    },
+    {
+      "id": "sandboxes.get.forged-scope.error-class",
+      "title": "A forged scope selector is a permission error, not an authentication error",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "getInfo"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes/{sandbox}"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A",
+        "scopeOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        }
+      },
+      "expect": {
+        "status": 403,
+        "errorClass": "PermissionDeniedError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.get.unknown-id",
+      "title": "A well-formed sandbox id that does not exist answers 404",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "getInfo"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes/{sandbox}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "sbx_000000000000000000000000"
+        }
+      },
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.update.ok",
+      "title": "Rename a sandbox and extend its idle TTL",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "update"
+      },
+      "op": {
+        "method": "PATCH",
+        "path": "/workspace/sandboxes/{sandbox}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        },
+        "body": {
+          "name": "conf-renamed-${run.short}",
+          "idleTtlSeconds": 900
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "sandboxes.update.bad-ttl",
+      "title": "An idle TTL under 60 s is a typed 400",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "update"
+      },
+      "op": {
+        "method": "PATCH",
+        "path": "/workspace/sandboxes/{sandbox}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        },
+        "body": {
+          "idleTtlSeconds": 5
+        },
+        "bodyInvalidOnPurpose": true
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.update.cross-tenant",
+      "title": "Org B cannot rename org A's sandbox",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "update"
+      },
+      "op": {
+        "method": "PATCH",
+        "path": "/workspace/sandboxes/{sandbox}"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        },
+        "body": {
+          "name": "conf-hijack"
+        }
+      },
+      "repeat": 5,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.kill.cross-tenant",
+      "title": "Org B cannot destroy org A's sandbox, and it is still there afterwards",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "kill"
+      },
+      "op": {
+        "method": "DELETE",
+        "path": "/workspace/sandboxes/{sandbox}"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        }
+      },
+      "repeat": 5,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      },
+      "verify": [
+        {
+          "op": {
+            "method": "GET",
+            "path": "/workspace/sandboxes/{sandbox}"
+          },
+          "params": {
+            "sandbox": "${res.sandbox}"
+          },
+          "expectStatus": 200
+        }
+      ]
+    },
+    {
+      "id": "sandboxes.kill.ok",
+      "title": "Destroy a sandbox",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "kill"
+      },
+      "op": {
+        "method": "DELETE",
+        "path": "/workspace/sandboxes/{sandbox}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating",
+        "slow"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/sandboxes"
+          },
+          "body": {
+            "name": "conf-${run.short}"
+          },
+          "capture": {
+            "sbx": "sandbox.id"
+          },
+          "expectStatus": 201,
+          "waitFor": {
+            "op": {
+              "method": "GET",
+              "path": "/workspace/sandboxes/{sandbox}"
+            },
+            "params": {
+              "sandbox": "${cap.sbx}"
+            },
+            "field": "sandbox.state",
+            "in": [
+              "active"
+            ],
+            "timeoutMs": 240000
+          }
+        }
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${cap.sbx}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      },
+      "verify": [
+        {
+          "op": {
+            "method": "GET",
+            "path": "/workspace/sandboxes/{sandbox}"
+          },
+          "params": {
+            "sandbox": "${cap.sbx}"
+          },
+          "expectStatus": [
+            404,
+            200
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sandboxes.kill.repeat-is-404",
+      "title": "Destroying a destroyed sandbox is safe to repeat (200 again, or 404): a retried kill never fails",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "kill"
+      },
+      "op": {
+        "method": "DELETE",
+        "path": "/workspace/sandboxes/{sandbox}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating",
+        "slow"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/sandboxes"
+          },
+          "body": {
+            "name": "conf-${run.short}"
+          },
+          "capture": {
+            "sbx": "sandbox.id"
+          },
+          "expectStatus": 201,
+          "waitFor": {
+            "op": {
+              "method": "GET",
+              "path": "/workspace/sandboxes/{sandbox}"
+            },
+            "params": {
+              "sandbox": "${cap.sbx}"
+            },
+            "field": "sandbox.state",
+            "in": [
+              "active"
+            ],
+            "timeoutMs": 240000
+          }
+        },
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/sandboxes/{sandbox}"
+          },
+          "params": {
+            "sandbox": "${cap.sbx}"
+          },
+          "expectStatus": 200
+        }
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${cap.sbx}"
+        }
+      },
+      "expect": {
+        "status": [
+          200,
+          404
+        ]
+      }
+    },
+    {
+      "id": "sandboxes.hibernate.ok",
+      "title": "Hibernate a running sandbox",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "hibernate"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/hibernate"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating",
+        "slow"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/sandboxes"
+          },
+          "body": {
+            "name": "conf-${run.short}"
+          },
+          "capture": {
+            "sbx": "sandbox.id"
+          },
+          "expectStatus": 201,
+          "waitFor": {
+            "op": {
+              "method": "GET",
+              "path": "/workspace/sandboxes/{sandbox}"
+            },
+            "params": {
+              "sandbox": "${cap.sbx}"
+            },
+            "field": "sandbox.state",
+            "in": [
+              "active"
+            ],
+            "timeoutMs": 240000
+          }
+        }
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${cap.sbx}"
+        },
+        "body": {}
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      },
+      "cleanup": [
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/sandboxes/{sandbox}"
+          },
+          "params": {
+            "sandbox": "${cap.sbx}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "sandboxes.resume.ok",
+      "title": "Resume a hibernated sandbox",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "resume"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/resume"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating",
+        "slow"
+      ],
+      "setup": [
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/sandboxes"
+          },
+          "body": {
+            "name": "conf-${run.short}"
+          },
+          "capture": {
+            "sbx": "sandbox.id"
+          },
+          "expectStatus": 201,
+          "waitFor": {
+            "op": {
+              "method": "GET",
+              "path": "/workspace/sandboxes/{sandbox}"
+            },
+            "params": {
+              "sandbox": "${cap.sbx}"
+            },
+            "field": "sandbox.state",
+            "in": [
+              "active"
+            ],
+            "timeoutMs": 240000
+          }
+        },
+        {
+          "op": {
+            "method": "POST",
+            "path": "/workspace/sandboxes/{sandbox}/hibernate"
+          },
+          "params": {
+            "sandbox": "${cap.sbx}"
+          },
+          "body": {},
+          "expectStatus": 200
+        }
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${cap.sbx}"
+        },
+        "body": {}
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      },
+      "cleanup": [
+        {
+          "op": {
+            "method": "DELETE",
+            "path": "/workspace/sandboxes/{sandbox}"
+          },
+          "params": {
+            "sandbox": "${cap.sbx}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "sandboxes.hibernate.cross-tenant",
+      "title": "Org B cannot hibernate org A's sandbox",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "hibernate"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/sandboxes/{sandbox}/hibernate"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        },
+        "body": {}
+      },
+      "repeat": 3,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "sandboxes.activity.ok",
+      "title": "Read a sandbox's activity feed",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "activity.list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes/{sandbox}/activity"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "sandbox"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "${res.sandbox}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "activity": "array"
+        }
+      }
+    },
+    {
+      "id": "sandboxes.settings.get.ok",
+      "title": "Read the workspace's sandbox settings",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "settings.get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes/settings"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "sandboxes.get.malformed-id",
+      "title": "A malformed sandbox id is refused with a typed error, never a 5xx",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "getInfo"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes/{sandbox}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "params": {
+          "sandbox": "sbx-conformance-missing"
+        }
+      },
+      "expect": {
+        "status": [
+          400,
+          403,
+          404
+        ],
+        "codePresent": true
+      }
+    }
+  ]
+}

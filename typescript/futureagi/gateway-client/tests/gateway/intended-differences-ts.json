@@ -1,0 +1,59 @@
+{
+ "format": 1,
+ "about": "The TypeScript client's intended differences from @agentcc/client 1.0.1 that tests/fixtures/gateway/intended-differences.json does not list yet. Each has its test, the 1.0.1 golden cases it changes (tests/fixtures/gateway/golden/ts-client-1.0.1-esm), or 'none' when no recorded case reaches it, and status 'landed': tested here, reviewer record pending. Comparator match rules are written when the comparison of a TypeScript recording of this client against the goldens runs; this file names the cases to expect. intended-differences-ts.test.ts fails when a named test is gone or an id is already in the shared file.",
+ "differences": [
+  {
+   "id": "D-06b",
+   "lang": "ts",
+   "status": "landed",
+   "summary": "One metadata rule: a request sends one x-agentcc-metadata JSON header, the client's metadata, then the session's, then the request's request_metadata, merged key by key with the later layer winning (shallow). 1.0.1 replaced: request_metadata dropped the client's metadata, and the client's metadata overwrote a session's. Raw headers stay raw (x-agentcc-metadata in extra_headers, in any spelling, is sent as given in place of the merge; withOptions({ metadata }) sets the new client's metadata). x-agentcc-metadata is one header in every spelling, at every layer (defaultHeaders, the merged metadata, a request's own headers, the callback view): a later layer replaces every earlier spelling and the header goes out once, as x-agentcc-metadata. 1.0.1 kept two spellings as two keys, which fetch joined with ', ' into a value that is not JSON; other header names keep that 1.0.1 merge.",
+   "golden_cases": {
+    "header_merge.l6_over_l4": "requests[0] x-agentcc-metadata: 1.0.1 {\"b\":2}; now {\"a\":1,\"b\":2}"
+   },
+   "golden_note": "The one-header-in-every-spelling rule changes no recorded case: every recorded x-agentcc-metadata is set lowercase, and recordings lowercase header names.",
+   "migration": "request_metadata now adds to the client's and the session's metadata instead of replacing it, and a session's keys win over the client's. To send exactly one object for a request, pass it as extra_headers: { \"x-agentcc-metadata\": JSON.stringify(obj) } (any spelling of the name), which replaces the merged value.",
+   "tests": [
+    {"file": "tests/gateway/request-metadata.test.ts", "title": "client + request: both keys are sent, the request's value wins on a shared key"},
+    {"file": "tests/gateway/request-metadata.test.ts", "title": "client + session: the session's value wins on a shared key"},
+    {"file": "tests/gateway/request-metadata.test.ts", "title": "all three layers: one header, in layer order, the latest layer winning each shared key"},
+    {"file": "tests/gateway/request-metadata.test.ts", "title": "an x-agentcc-metadata in extra_headers, in any spelling, is the one header sent: as given, in place of the merge"},
+    {"file": "tests/gateway/request-metadata.test.ts", "title": "on a real HTTP server, a mixed-case raw header in extra_headers arrives once, as given"},
+    {"file": "tests/gateway/request-metadata.test.ts", "title": "a callback sees the one raw x-agentcc-metadata the wire gets, for any spelling in extra_headers"},
+    {"file": "tests/gateway/request-metadata.test.ts", "title": "a defaultHeaders x-agentcc-metadata in another spelling is one header: alone it is sent, under metadata the merge replaces it"}
+   ]
+  },
+  {
+   "id": "D-11b",
+   "lang": "ts",
+   "status": "landed",
+   "summary": "ChunkAccumulator.getFinalCompletion() takes finish_reason from the last chunk that has choices, so the gateway's trailing usage chunk (empty choices) no longer turns tool_calls or length into stop.",
+   "golden_cases": {"resource.chat.stream.tools": "final finish_reason: 1.0.1 stop, now tool_calls (the case's stream from responses.json chunks.tool_calls ends on a usage chunk with empty choices after the tool_calls chunk); the streams of sse-malformed.json, stream-error-frames.json and stream-cases-extra.json carry only finish_reason stop or null, which both versions report as stop"},
+   "tests": [
+    {"file": "tests/gateway/stream-usage-once.test.ts", "title": "tool_calls survives a trailing usage chunk and a trailing empty chunk"},
+    {"file": "tests/gateway/stream-usage-once.test.ts", "title": "length survives the recorded trailing usage chunks"}
+   ]
+  },
+  {
+   "id": "D-14b",
+   "lang": "ts",
+   "status": "landed",
+   "summary": "createHeaders({ apiKey }) raises AgentCCError when apiKey equals FI_API_KEY or FI_SECRET_KEY from the environment, like every other entry point. 1.0.1 built 'Authorization: Bearer <key>' from any key.",
+   "golden_cases": "none: no recorded case sets the Future AGI key pair",
+   "tests": [
+    {"file": "tests/gateway/create-headers-guard.test.ts", "title": "an apiKey equal to FI_API_KEY raises AgentCCError and names the variable, never the value"},
+    {"file": "tests/gateway/create-headers-guard.test.ts", "title": "an apiKey equal to FI_SECRET_KEY raises AgentCCError"}
+   ]
+  },
+  {
+   "id": "D-16b",
+   "lang": "ts",
+   "status": "landed",
+   "summary": "StreamManager.events() yields one usage event per stream, at the first chunk that carries usage; the gateway at live-gateway-source sends the usage again on a second trailing chunk with empty choices, which 1.0.1 reported as a second usage event. The done event's completion and getFinalCompletion() keep the last usage carried (D-11).",
+   "golden_cases": "none: the recorded fixture (stream-fixture-source) carries one usage chunk; the gateway at live-gateway-source sends two",
+   "tests": [
+    {"file": "tests/gateway/stream-usage-once.test.ts", "title": "the recorded gateway stream (usage sent twice) yields one usage event, then done"},
+    {"file": "tests/gateway/stream-usage-once.test.ts", "title": "adding up the usage events counts the tokens once"}
+   ]
+  }
+ ]
+}

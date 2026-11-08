@@ -1,0 +1,3451 @@
+{
+ "area": "config",
+ "cases": {
+  "config.empty[sync]": {
+   "requests": [],
+   "result": {
+    "to_dict": {},
+    "to_headers": {}
+   }
+  },
+  "config.legacy_pydantic.cache.custom[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "GatewayConfig(routing=None, fallback=None, retry=None, cache=CacheConfig(enabled=True, mode='semantic', ttl='5m', namespace='prod', semantic_threshold=0.5, force_refresh=True), guardrails=None, conditional_routes=None)",
+    "to_headers": {
+     "x-agentcc-cache-force-refresh": "true",
+     "x-agentcc-cache-namespace": "prod",
+     "x-agentcc-cache-ttl": "5m",
+     "x-agentcc-config": "{\"cache\":{\"enabled\":true,\"mode\":\"semantic\",\"ttl\":\"5m\",\"namespace\":\"prod\",\"semantic_threshold\":0.5,\"force_refresh\":true}}"
+    },
+    "to_json": "{\"cache\":{\"enabled\":true,\"mode\":\"semantic\",\"ttl\":\"5m\",\"namespace\":\"prod\",\"semantic_threshold\":0.5,\"force_refresh\":true}}"
+   }
+  },
+  "config.legacy_pydantic.cache.defaults[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "GatewayConfig(routing=None, fallback=None, retry=None, cache=CacheConfig(enabled=True, mode='exact', ttl='1h', namespace='default', semantic_threshold=0.92, force_refresh=False), guardrails=None, conditional_routes=None)",
+    "to_headers": {
+     "x-agentcc-config": "{\"cache\":{\"enabled\":true,\"mode\":\"exact\",\"ttl\":\"1h\",\"namespace\":\"default\",\"semantic_threshold\":0.92,\"force_refresh\":false}}"
+    },
+    "to_json": "{\"cache\":{\"enabled\":true,\"mode\":\"exact\",\"ttl\":\"1h\",\"namespace\":\"default\",\"semantic_threshold\":0.92,\"force_refresh\":false}}"
+   }
+  },
+  "config.legacy_pydantic.cache.disabled[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "GatewayConfig(routing=None, fallback=None, retry=None, cache=CacheConfig(enabled=False, mode='exact', ttl='1h', namespace='default', semantic_threshold=0.92, force_refresh=False), guardrails=None, conditional_routes=None)",
+    "to_headers": {
+     "x-agentcc-cache-enabled": "false",
+     "x-agentcc-config": "{\"cache\":{\"enabled\":false,\"mode\":\"exact\",\"ttl\":\"1h\",\"namespace\":\"default\",\"semantic_threshold\":0.92,\"force_refresh\":false}}"
+    },
+    "to_json": "{\"cache\":{\"enabled\":false,\"mode\":\"exact\",\"ttl\":\"1h\",\"namespace\":\"default\",\"semantic_threshold\":0.92,\"force_refresh\":false}}"
+   }
+  },
+  "config.legacy_pydantic.conditional_routes.empty[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "GatewayConfig(routing=None, fallback=None, retry=None, cache=None, guardrails=None, conditional_routes=[])",
+    "to_headers": {},
+    "to_json": "{\"conditional_routes\":[]}"
+   }
+  },
+  "config.legacy_pydantic.conditional_routes[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "GatewayConfig(routing=None, fallback=None, retry=None, cache=None, guardrails=None, conditional_routes=[ConditionalRoute(condition=RouteCondition(field='metadata.tier', operator='$eq', value='gold'), target=Target(provider='openai', model='gpt-4o', weight=None, virtual_key=None))])",
+    "to_headers": {
+     "x-agentcc-config": "{\"conditional_routes\":[{\"condition\":{\"field\":\"metadata.tier\",\"operator\":\"$eq\",\"value\":\"gold\"},\"target\":{\"provider\":\"openai\",\"model\":\"gpt-4o\"}}]}"
+    },
+    "to_json": "{\"conditional_routes\":[{\"condition\":{\"field\":\"metadata.tier\",\"operator\":\"$eq\",\"value\":\"gold\"},\"target\":{\"provider\":\"openai\",\"model\":\"gpt-4o\"}}]}"
+   }
+  },
+  "config.legacy_pydantic.empty[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "GatewayConfig(routing=None, fallback=None, retry=None, cache=None, guardrails=None, conditional_routes=None)",
+    "to_headers": {},
+    "to_json": "{}"
+   }
+  },
+  "config.legacy_pydantic.fallback[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "GatewayConfig(routing=None, fallback=FallbackStrategy(targets=[Target(provider='anthropic', model=None, weight=None, virtual_key=None)], on_status_codes=[429, 500, 502, 503, 504]), retry=None, cache=None, guardrails=None, conditional_routes=None)",
+    "to_headers": {
+     "x-agentcc-config": "{\"fallback\":{\"targets\":[{\"provider\":\"anthropic\"}],\"on_status_codes\":[429,500,502,503,504]}}"
+    },
+    "to_json": "{\"fallback\":{\"targets\":[{\"provider\":\"anthropic\"}],\"on_status_codes\":[429,500,502,503,504]}}"
+   }
+  },
+  "config.legacy_pydantic.guardrails[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "GatewayConfig(routing=None, fallback=None, retry=None, cache=None, guardrails=GuardrailConfig(pre=[GuardrailRule(name='pii', action='block', threshold=0.8)], post=[GuardrailRule(name='toxicity', action='warn', threshold=0.5)]), conditional_routes=None)",
+    "to_headers": {
+     "x-agentcc-config": "{\"guardrails\":{\"pre\":[{\"name\":\"pii\",\"action\":\"block\",\"threshold\":0.8}],\"post\":[{\"name\":\"toxicity\",\"action\":\"warn\",\"threshold\":0.5}]}}"
+    },
+    "to_json": "{\"guardrails\":{\"pre\":[{\"name\":\"pii\",\"action\":\"block\",\"threshold\":0.8}],\"post\":[{\"name\":\"toxicity\",\"action\":\"warn\",\"threshold\":0.5}]}}"
+   }
+  },
+  "config.legacy_pydantic.invalid[sync]": {
+   "requests": [],
+   "result": {
+    "fallback_no_targets": {
+     "raised": {
+      "__exception__": "ValidationError",
+      "args": [],
+      "attrs": {},
+      "mro": [
+       "ValidationError",
+       "ValueError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "FallbackStrategy",
+        [
+         {
+          "__object__": "PyLineError",
+          "repr": "<builtins.PyLineError object at 0x?>"
+         }
+        ],
+        "python",
+        false
+       ],
+       "ok": true,
+       "str": "1 validation error for FallbackStrategy\ntargets\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.10/v/too_short",
+       "type": "ValidationError"
+      },
+      "repr": "1 validation error for FallbackStrategy\ntargets\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.10/v/too_short",
+      "str": "1 validation error for FallbackStrategy\ntargets\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.10/v/too_short"
+     }
+    },
+    "no_targets": {
+     "raised": {
+      "__exception__": "ValidationError",
+      "args": [],
+      "attrs": {},
+      "mro": [
+       "ValidationError",
+       "ValueError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "LoadBalanceStrategy",
+        [
+         {
+          "__object__": "PyLineError",
+          "repr": "<builtins.PyLineError object at 0x?>"
+         }
+        ],
+        "python",
+        false
+       ],
+       "ok": true,
+       "str": "1 validation error for LoadBalanceStrategy\ntargets\n  Value error, At least one target is required [type=value_error, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error",
+       "type": "ValidationError"
+      },
+      "repr": "1 validation error for LoadBalanceStrategy\ntargets\n  Value error, At least one target is required [type=value_error, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error",
+      "str": "1 validation error for LoadBalanceStrategy\ntargets\n  Value error, At least one target is required [type=value_error, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error"
+     }
+    },
+    "retry_too_many": {
+     "raised": {
+      "__exception__": "ValidationError",
+      "args": [],
+      "attrs": {},
+      "mro": [
+       "ValidationError",
+       "ValueError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "RetryConfig",
+        [
+         {
+          "__object__": "PyLineError",
+          "repr": "<builtins.PyLineError object at 0x?>"
+         }
+        ],
+        "python",
+        false
+       ],
+       "ok": true,
+       "str": "1 validation error for RetryConfig\nmax_retries\n  Input should be less than or equal to 10 [type=less_than_equal, input_value=11, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/less_than_equal",
+       "type": "ValidationError"
+      },
+      "repr": "1 validation error for RetryConfig\nmax_retries\n  Input should be less than or equal to 10 [type=less_than_equal, input_value=11, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/less_than_equal",
+      "str": "1 validation error for RetryConfig\nmax_retries\n  Input should be less than or equal to 10 [type=less_than_equal, input_value=11, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/less_than_equal"
+     }
+    },
+    "threshold_out_of_range": {
+     "raised": {
+      "__exception__": "ValidationError",
+      "args": [],
+      "attrs": {},
+      "mro": [
+       "ValidationError",
+       "ValueError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "CacheConfig",
+        [
+         {
+          "__object__": "PyLineError",
+          "repr": "<builtins.PyLineError object at 0x?>"
+         }
+        ],
+        "python",
+        false
+       ],
+       "ok": true,
+       "str": "1 validation error for CacheConfig\nsemantic_threshold\n  Input should be less than or equal to 1 [type=less_than_equal, input_value=2, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/less_than_equal",
+       "type": "ValidationError"
+      },
+      "repr": "1 validation error for CacheConfig\nsemantic_threshold\n  Input should be less than or equal to 1 [type=less_than_equal, input_value=2, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/less_than_equal",
+      "str": "1 validation error for CacheConfig\nsemantic_threshold\n  Input should be less than or equal to 1 [type=less_than_equal, input_value=2, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/less_than_equal"
+     }
+    },
+    "unknown_action": {
+     "raised": {
+      "__exception__": "ValidationError",
+      "args": [],
+      "attrs": {},
+      "mro": [
+       "ValidationError",
+       "ValueError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "GuardrailRule",
+        [
+         {
+          "__object__": "PyLineError",
+          "repr": "<builtins.PyLineError object at 0x?>"
+         }
+        ],
+        "python",
+        false
+       ],
+       "ok": true,
+       "str": "1 validation error for GuardrailRule\naction\n  Input should be 'block', 'warn', 'log' or 'mask' [type=literal_error, input_value='drop', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/literal_error",
+       "type": "ValidationError"
+      },
+      "repr": "1 validation error for GuardrailRule\naction\n  Input should be 'block', 'warn', 'log' or 'mask' [type=literal_error, input_value='drop', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/literal_error",
+      "str": "1 validation error for GuardrailRule\naction\n  Input should be 'block', 'warn', 'log' or 'mask' [type=literal_error, input_value='drop', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/literal_error"
+     }
+    },
+    "unknown_operator": {
+     "raised": {
+      "__exception__": "ValidationError",
+      "args": [],
+      "attrs": {},
+      "mro": [
+       "ValidationError",
+       "ValueError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "RouteCondition",
+        [
+         {
+          "__object__": "PyLineError",
+          "repr": "<builtins.PyLineError object at 0x?>"
+         }
+        ],
+        "python",
+        false
+       ],
+       "ok": true,
+       "str": "1 validation error for RouteCondition\noperator\n  Input should be '$eq', '$ne', '$in', '$nin', '$regex', '$gt', '$lt', '$gte', '$lte' or '$exists' [type=literal_error, input_value='eq', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/literal_error",
+       "type": "ValidationError"
+      },
+      "repr": "1 validation error for RouteCondition\noperator\n  Input should be '$eq', '$ne', '$in', '$nin', '$regex', '$gt', '$lt', '$gte', '$lte' or '$exists' [type=literal_error, input_value='eq', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/literal_error",
+      "str": "1 validation error for RouteCondition\noperator\n  Input should be '$eq', '$ne', '$in', '$nin', '$regex', '$gt', '$lt', '$gte', '$lte' or '$exists' [type=literal_error, input_value='eq', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/literal_error"
+     }
+    },
+    "weight_missing": {
+     "raised": {
+      "__exception__": "ValidationError",
+      "args": [],
+      "attrs": {},
+      "mro": [
+       "ValidationError",
+       "ValueError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "LoadBalanceStrategy",
+        [
+         {
+          "__object__": "PyLineError",
+          "repr": "<builtins.PyLineError object at 0x?>"
+         }
+        ],
+        "python",
+        false
+       ],
+       "ok": true,
+       "str": "1 validation error for LoadBalanceStrategy\n  Value error, All targets must have 'weight' set when mode is 'weighted' [type=value_error, input_value={'mode': 'weighted', 'tar...one, virtual_key=None)]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error",
+       "type": "ValidationError"
+      },
+      "repr": "1 validation error for LoadBalanceStrategy\n  Value error, All targets must have 'weight' set when mode is 'weighted' [type=value_error, input_value={'mode': 'weighted', 'tar...one, virtual_key=None)]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error",
+      "str": "1 validation error for LoadBalanceStrategy\n  Value error, All targets must have 'weight' set when mode is 'weighted' [type=value_error, input_value={'mode': 'weighted', 'tar...one, virtual_key=None)]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error"
+     }
+    },
+    "weights_do_not_sum": {
+     "raised": {
+      "__exception__": "ValidationError",
+      "args": [],
+      "attrs": {},
+      "mro": [
+       "ValidationError",
+       "ValueError",
+       "Exception",
+       "BaseException",
+       "object"
+      ],
+      "pickle": {
+       "args": [
+        "LoadBalanceStrategy",
+        [
+         {
+          "__object__": "PyLineError",
+          "repr": "<builtins.PyLineError object at 0x?>"
+         }
+        ],
+        "python",
+        false
+       ],
+       "ok": true,
+       "str": "1 validation error for LoadBalanceStrategy\n  Value error, Weights must sum to 1.0 (\u00b10.01), got 0.3 [type=value_error, input_value={'mode': 'weighted', 'tar...0.3, virtual_key=None)]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error",
+       "type": "ValidationError"
+      },
+      "repr": "1 validation error for LoadBalanceStrategy\n  Value error, Weights must sum to 1.0 (\u00b10.01), got 0.3 [type=value_error, input_value={'mode': 'weighted', 'tar...0.3, virtual_key=None)]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error",
+      "str": "1 validation error for LoadBalanceStrategy\n  Value error, Weights must sum to 1.0 (\u00b10.01), got 0.3 [type=value_error, input_value={'mode': 'weighted', 'tar...0.3, virtual_key=None)]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error"
+     }
+    }
+   }
+  },
+  "config.legacy_pydantic.retry[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "GatewayConfig(routing=None, fallback=None, retry=RetryConfig(max_retries=3, retry_on_status=[429, 500, 502, 503], backoff_factor=0.5, backoff_max=30.0, backoff_jitter=0.25, respect_retry_after=True), cache=None, guardrails=None, conditional_routes=None)",
+    "to_headers": {
+     "x-agentcc-config": "{\"retry\":{\"max_retries\":3,\"retry_on_status\":[429,500,502,503],\"backoff_factor\":0.5,\"backoff_max\":30.0,\"backoff_jitter\":0.25,\"respect_retry_after\":true}}"
+    },
+    "to_json": "{\"retry\":{\"max_retries\":3,\"retry_on_status\":[429,500,502,503],\"backoff_factor\":0.5,\"backoff_max\":30.0,\"backoff_jitter\":0.25,\"respect_retry_after\":true}}"
+   }
+  },
+  "config.legacy_pydantic.routing.weighted[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "GatewayConfig(routing=LoadBalanceStrategy(mode='weighted', targets=[Target(provider='openai', model=None, weight=0.5, virtual_key='vk-a'), Target(provider='anthropic', model=None, weight=0.5, virtual_key=None)]), fallback=None, retry=None, cache=None, guardrails=None, conditional_routes=None)",
+    "to_headers": {
+     "x-agentcc-config": "{\"routing\":{\"mode\":\"weighted\",\"targets\":[{\"provider\":\"openai\",\"weight\":0.5,\"virtual_key\":\"vk-a\"},{\"provider\":\"anthropic\",\"weight\":0.5}]}}"
+    },
+    "to_json": "{\"routing\":{\"mode\":\"weighted\",\"targets\":[{\"provider\":\"openai\",\"weight\":0.5,\"virtual_key\":\"vk-a\"},{\"provider\":\"anthropic\",\"weight\":0.5}]}}"
+   }
+  },
+  "config.legacy_pydantic.routing[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "GatewayConfig(routing=LoadBalanceStrategy(mode='round-robin', targets=[Target(provider='openai', model='gpt-4o', weight=None, virtual_key=None)]), fallback=None, retry=None, cache=None, guardrails=None, conditional_routes=None)",
+    "to_headers": {
+     "x-agentcc-config": "{\"routing\":{\"mode\":\"round-robin\",\"targets\":[{\"provider\":\"openai\",\"model\":\"gpt-4o\"}]}}"
+    },
+    "to_json": "{\"routing\":{\"mode\":\"round-robin\",\"targets\":[{\"provider\":\"openai\",\"model\":\"gpt-4o\"}]}}"
+   }
+  },
+  "config.legacy_pydantic.schemas[sync]": {
+   "requests": [],
+   "result": {
+    "CacheConfig": {
+     "description": "Caching configuration sent to the gateway.",
+     "properties": {
+      "enabled": {
+       "default": true,
+       "title": "Enabled",
+       "type": "boolean"
+      },
+      "force_refresh": {
+       "default": false,
+       "title": "Force Refresh",
+       "type": "boolean"
+      },
+      "mode": {
+       "default": "exact",
+       "enum": [
+        "exact",
+        "semantic"
+       ],
+       "title": "Mode",
+       "type": "string"
+      },
+      "namespace": {
+       "default": "default",
+       "title": "Namespace",
+       "type": "string"
+      },
+      "semantic_threshold": {
+       "default": 0.92,
+       "maximum": 1.0,
+       "minimum": 0.0,
+       "title": "Semantic Threshold",
+       "type": "number"
+      },
+      "ttl": {
+       "default": "1h",
+       "title": "Ttl",
+       "type": "string"
+      }
+     },
+     "title": "CacheConfig",
+     "type": "object"
+    },
+    "ConditionalRoute": {
+     "$defs": {
+      "RouteCondition": {
+       "description": "A single condition for conditional routing.",
+       "properties": {
+        "field": {
+         "title": "Field",
+         "type": "string"
+        },
+        "operator": {
+         "enum": [
+          "$eq",
+          "$ne",
+          "$in",
+          "$nin",
+          "$regex",
+          "$gt",
+          "$lt",
+          "$gte",
+          "$lte",
+          "$exists"
+         ],
+         "title": "Operator",
+         "type": "string"
+        },
+        "value": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "integer"
+          },
+          {
+           "type": "number"
+          },
+          {
+           "type": "boolean"
+          },
+          {
+           "items": {
+            "type": {
+             "__truncated__": "str"
+            }
+           },
+           "type": "array"
+          }
+         ],
+         "title": "Value"
+        }
+       },
+       "required": [
+        "field",
+        "operator",
+        "value"
+       ],
+       "title": "RouteCondition",
+       "type": "object"
+      },
+      "Target": {
+       "description": "A single routing target (provider + optional model).",
+       "properties": {
+        "model": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Model"
+        },
+        "provider": {
+         "title": "Provider",
+         "type": "string"
+        },
+        "virtual_key": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Virtual Key"
+        },
+        "weight": {
+         "anyOf": [
+          {
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Weight"
+        }
+       },
+       "required": [
+        "provider"
+       ],
+       "title": "Target",
+       "type": "object"
+      }
+     },
+     "description": "A target selected when a condition matches.",
+     "properties": {
+      "condition": {
+       "$ref": "#/$defs/RouteCondition"
+      },
+      "target": {
+       "$ref": "#/$defs/Target"
+      }
+     },
+     "required": [
+      "condition",
+      "target"
+     ],
+     "title": "ConditionalRoute",
+     "type": "object"
+    },
+    "FallbackStrategy": {
+     "$defs": {
+      "Target": {
+       "description": "A single routing target (provider + optional model).",
+       "properties": {
+        "model": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Model"
+        },
+        "provider": {
+         "title": "Provider",
+         "type": "string"
+        },
+        "virtual_key": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Virtual Key"
+        },
+        "weight": {
+         "anyOf": [
+          {
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Weight"
+        }
+       },
+       "required": [
+        "provider"
+       ],
+       "title": "Target",
+       "type": "object"
+      }
+     },
+     "description": "Ordered list of fallback targets.",
+     "properties": {
+      "on_status_codes": {
+       "default": [
+        429,
+        500,
+        502,
+        503,
+        504
+       ],
+       "items": {
+        "type": "integer"
+       },
+       "title": "On Status Codes",
+       "type": "array"
+      },
+      "targets": {
+       "items": {
+        "$ref": "#/$defs/Target"
+       },
+       "minItems": 1,
+       "title": "Targets",
+       "type": "array"
+      }
+     },
+     "required": [
+      "targets"
+     ],
+     "title": "FallbackStrategy",
+     "type": "object"
+    },
+    "GatewayConfig": {
+     "$defs": {
+      "CacheConfig": {
+       "description": "Caching configuration sent to the gateway.",
+       "properties": {
+        "enabled": {
+         "default": true,
+         "title": "Enabled",
+         "type": "boolean"
+        },
+        "force_refresh": {
+         "default": false,
+         "title": "Force Refresh",
+         "type": "boolean"
+        },
+        "mode": {
+         "default": "exact",
+         "enum": [
+          "exact",
+          "semantic"
+         ],
+         "title": "Mode",
+         "type": "string"
+        },
+        "namespace": {
+         "default": "default",
+         "title": "Namespace",
+         "type": "string"
+        },
+        "semantic_threshold": {
+         "default": 0.92,
+         "maximum": 1.0,
+         "minimum": 0.0,
+         "title": "Semantic Threshold",
+         "type": "number"
+        },
+        "ttl": {
+         "default": "1h",
+         "title": "Ttl",
+         "type": "string"
+        }
+       },
+       "title": "CacheConfig",
+       "type": "object"
+      },
+      "ConditionalRoute": {
+       "description": "A target selected when a condition matches.",
+       "properties": {
+        "condition": {
+         "$ref": "#/$defs/RouteCondition"
+        },
+        "target": {
+         "$ref": "#/$defs/Target"
+        }
+       },
+       "required": [
+        "condition",
+        "target"
+       ],
+       "title": "ConditionalRoute",
+       "type": "object"
+      },
+      "FallbackStrategy": {
+       "description": "Ordered list of fallback targets.",
+       "properties": {
+        "on_status_codes": {
+         "default": [
+          429,
+          500,
+          502,
+          503,
+          504
+         ],
+         "items": {
+          "type": "integer"
+         },
+         "title": "On Status Codes",
+         "type": "array"
+        },
+        "targets": {
+         "items": {
+          "$ref": "#/$defs/Target"
+         },
+         "minItems": 1,
+         "title": "Targets",
+         "type": "array"
+        }
+       },
+       "required": [
+        "targets"
+       ],
+       "title": "FallbackStrategy",
+       "type": "object"
+      },
+      "GuardrailConfig": {
+       "description": "Pre- and post-request guardrail rules.",
+       "properties": {
+        "post": {
+         "items": {
+          "$ref": "#/$defs/GuardrailRule"
+         },
+         "title": "Post",
+         "type": "array"
+        },
+        "pre": {
+         "items": {
+          "$ref": "#/$defs/GuardrailRule"
+         },
+         "title": "Pre",
+         "type": "array"
+        }
+       },
+       "title": "GuardrailConfig",
+       "type": "object"
+      },
+      "GuardrailRule": {
+       "description": "A single guardrail rule.",
+       "properties": {
+        "action": {
+         "default": "block",
+         "enum": [
+          "block",
+          "warn",
+          "log",
+          "mask"
+         ],
+         "title": "Action",
+         "type": "string"
+        },
+        "name": {
+         "title": "Name",
+         "type": "string"
+        },
+        "threshold": {
+         "default": 0.8,
+         "maximum": 1.0,
+         "minimum": 0.0,
+         "title": "Threshold",
+         "type": "number"
+        }
+       },
+       "required": [
+        "name"
+       ],
+       "title": "GuardrailRule",
+       "type": "object"
+      },
+      "LoadBalanceStrategy": {
+       "description": "Load-balance strategy across multiple targets.",
+       "properties": {
+        "mode": {
+         "enum": [
+          "round-robin",
+          "weighted",
+          "least-latency",
+          "cost-optimized"
+         ],
+         "title": "Mode",
+         "type": "string"
+        },
+        "targets": {
+         "items": {
+          "$ref": "#/$defs/Target"
+         },
+         "title": "Targets",
+         "type": "array"
+        }
+       },
+       "required": [
+        "mode",
+        "targets"
+       ],
+       "title": "LoadBalanceStrategy",
+       "type": "object"
+      },
+      "RetryConfig": {
+       "description": "Client-side retry configuration sent to the gateway.",
+       "properties": {
+        "backoff_factor": {
+         "default": 0.5,
+         "title": "Backoff Factor",
+         "type": "number"
+        },
+        "backoff_jitter": {
+         "default": 0.25,
+         "title": "Backoff Jitter",
+         "type": "number"
+        },
+        "backoff_max": {
+         "default": 30.0,
+         "title": "Backoff Max",
+         "type": "number"
+        },
+        "max_retries": {
+         "default": 2,
+         "maximum": 10,
+         "minimum": 0,
+         "title": "Max Retries",
+         "type": "integer"
+        },
+        "respect_retry_after": {
+         "default": true,
+         "title": "Respect Retry After",
+         "type": "boolean"
+        },
+        "retry_on_status": {
+         "default": [
+          429,
+          500,
+          502,
+          503
+         ],
+         "items": {
+          "type": "integer"
+         },
+         "title": "Retry On Status",
+         "type": "array"
+        }
+       },
+       "title": "RetryConfig",
+       "type": "object"
+      },
+      "RouteCondition": {
+       "description": "A single condition for conditional routing.",
+       "properties": {
+        "field": {
+         "title": "Field",
+         "type": "string"
+        },
+        "operator": {
+         "enum": [
+          "$eq",
+          "$ne",
+          "$in",
+          "$nin",
+          "$regex",
+          "$gt",
+          "$lt",
+          "$gte",
+          "$lte",
+          "$exists"
+         ],
+         "title": "Operator",
+         "type": "string"
+        },
+        "value": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "integer"
+          },
+          {
+           "type": "number"
+          },
+          {
+           "type": "boolean"
+          },
+          {
+           "items": {
+            "type": {
+             "__truncated__": "str"
+            }
+           },
+           "type": "array"
+          }
+         ],
+         "title": "Value"
+        }
+       },
+       "required": [
+        "field",
+        "operator",
+        "value"
+       ],
+       "title": "RouteCondition",
+       "type": "object"
+      },
+      "Target": {
+       "description": "A single routing target (provider + optional model).",
+       "properties": {
+        "model": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Model"
+        },
+        "provider": {
+         "title": "Provider",
+         "type": "string"
+        },
+        "virtual_key": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Virtual Key"
+        },
+        "weight": {
+         "anyOf": [
+          {
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Weight"
+        }
+       },
+       "required": [
+        "provider"
+       ],
+       "title": "Target",
+       "type": "object"
+      }
+     },
+     "description": "Top-level gateway configuration object (Pydantic version).\n\nFor the lightweight dataclass version, use ``agentcc.GatewayConfig``\n(from ``_gateway_config.py``).",
+     "properties": {
+      "cache": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/CacheConfig"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "conditional_routes": {
+       "anyOf": [
+        {
+         "items": {
+          "$ref": "#/$defs/ConditionalRoute"
+         },
+         "type": "array"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Conditional Routes"
+      },
+      "fallback": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/FallbackStrategy"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "guardrails": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/GuardrailConfig"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "retry": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/RetryConfig"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      },
+      "routing": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/LoadBalanceStrategy"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null
+      }
+     },
+     "title": "GatewayConfig",
+     "type": "object"
+    },
+    "GuardrailConfig": {
+     "$defs": {
+      "GuardrailRule": {
+       "description": "A single guardrail rule.",
+       "properties": {
+        "action": {
+         "default": "block",
+         "enum": [
+          "block",
+          "warn",
+          "log",
+          "mask"
+         ],
+         "title": "Action",
+         "type": "string"
+        },
+        "name": {
+         "title": "Name",
+         "type": "string"
+        },
+        "threshold": {
+         "default": 0.8,
+         "maximum": 1.0,
+         "minimum": 0.0,
+         "title": "Threshold",
+         "type": "number"
+        }
+       },
+       "required": [
+        "name"
+       ],
+       "title": "GuardrailRule",
+       "type": "object"
+      }
+     },
+     "description": "Pre- and post-request guardrail rules.",
+     "properties": {
+      "post": {
+       "items": {
+        "$ref": "#/$defs/GuardrailRule"
+       },
+       "title": "Post",
+       "type": "array"
+      },
+      "pre": {
+       "items": {
+        "$ref": "#/$defs/GuardrailRule"
+       },
+       "title": "Pre",
+       "type": "array"
+      }
+     },
+     "title": "GuardrailConfig",
+     "type": "object"
+    },
+    "GuardrailRule": {
+     "description": "A single guardrail rule.",
+     "properties": {
+      "action": {
+       "default": "block",
+       "enum": [
+        "block",
+        "warn",
+        "log",
+        "mask"
+       ],
+       "title": "Action",
+       "type": "string"
+      },
+      "name": {
+       "title": "Name",
+       "type": "string"
+      },
+      "threshold": {
+       "default": 0.8,
+       "maximum": 1.0,
+       "minimum": 0.0,
+       "title": "Threshold",
+       "type": "number"
+      }
+     },
+     "required": [
+      "name"
+     ],
+     "title": "GuardrailRule",
+     "type": "object"
+    },
+    "LoadBalanceStrategy": {
+     "$defs": {
+      "Target": {
+       "description": "A single routing target (provider + optional model).",
+       "properties": {
+        "model": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Model"
+        },
+        "provider": {
+         "title": "Provider",
+         "type": "string"
+        },
+        "virtual_key": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Virtual Key"
+        },
+        "weight": {
+         "anyOf": [
+          {
+           "type": "number"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "title": "Weight"
+        }
+       },
+       "required": [
+        "provider"
+       ],
+       "title": "Target",
+       "type": "object"
+      }
+     },
+     "description": "Load-balance strategy across multiple targets.",
+     "properties": {
+      "mode": {
+       "enum": [
+        "round-robin",
+        "weighted",
+        "least-latency",
+        "cost-optimized"
+       ],
+       "title": "Mode",
+       "type": "string"
+      },
+      "targets": {
+       "items": {
+        "$ref": "#/$defs/Target"
+       },
+       "title": "Targets",
+       "type": "array"
+      }
+     },
+     "required": [
+      "mode",
+      "targets"
+     ],
+     "title": "LoadBalanceStrategy",
+     "type": "object"
+    },
+    "RetryConfig": {
+     "description": "Client-side retry configuration sent to the gateway.",
+     "properties": {
+      "backoff_factor": {
+       "default": 0.5,
+       "title": "Backoff Factor",
+       "type": "number"
+      },
+      "backoff_jitter": {
+       "default": 0.25,
+       "title": "Backoff Jitter",
+       "type": "number"
+      },
+      "backoff_max": {
+       "default": 30.0,
+       "title": "Backoff Max",
+       "type": "number"
+      },
+      "max_retries": {
+       "default": 2,
+       "maximum": 10,
+       "minimum": 0,
+       "title": "Max Retries",
+       "type": "integer"
+      },
+      "respect_retry_after": {
+       "default": true,
+       "title": "Respect Retry After",
+       "type": "boolean"
+      },
+      "retry_on_status": {
+       "default": [
+        429,
+        500,
+        502,
+        503
+       ],
+       "items": {
+        "type": "integer"
+       },
+       "title": "Retry On Status",
+       "type": "array"
+      }
+     },
+     "title": "RetryConfig",
+     "type": "object"
+    },
+    "RouteCondition": {
+     "description": "A single condition for conditional routing.",
+     "properties": {
+      "field": {
+       "title": "Field",
+       "type": "string"
+      },
+      "operator": {
+       "enum": [
+        "$eq",
+        "$ne",
+        "$in",
+        "$nin",
+        "$regex",
+        "$gt",
+        "$lt",
+        "$gte",
+        "$lte",
+        "$exists"
+       ],
+       "title": "Operator",
+       "type": "string"
+      },
+      "value": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "integer"
+        },
+        {
+         "type": "number"
+        },
+        {
+         "type": "boolean"
+        },
+        {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        }
+       ],
+       "title": "Value"
+      }
+     },
+     "required": [
+      "field",
+      "operator",
+      "value"
+     ],
+     "title": "RouteCondition",
+     "type": "object"
+    },
+    "Target": {
+     "description": "A single routing target (provider + optional model).",
+     "properties": {
+      "model": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Model"
+      },
+      "provider": {
+       "title": "Provider",
+       "type": "string"
+      },
+      "virtual_key": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Virtual Key"
+      },
+      "weight": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Weight"
+      }
+     },
+     "required": [
+      "provider"
+     ],
+     "title": "Target",
+     "type": "object"
+    }
+   }
+  },
+  "config.legacy_pydantic.submodules[sync]": {
+   "requests": [],
+   "result": {
+    "config_all": [
+     "CacheConfig",
+     "ConditionalRoute",
+     "ConditionalRoutingConfig",
+     "DataclassCacheConfig",
+     "DataclassGatewayConfig",
+     "DataclassGuardrailConfig",
+     "DataclassRetryConfig",
+     "FallbackConfig",
+     "FallbackStrategy",
+     "FallbackTarget",
+     "GatewayConfig",
+     "GuardrailCheck",
+     "GuardrailConfig",
+     "GuardrailRule",
+     "LoadBalanceConfig",
+     "LoadBalanceStrategy",
+     "LoadBalanceTarget",
+     "RetryConfig",
+     "RouteCondition",
+     "RoutingCondition",
+     "Target",
+     "TimeoutConfig",
+     "TrafficMirrorConfig",
+     "create_headers"
+    ],
+    "submodules": {
+     "caching": {
+      "all": [
+       "CacheConfig"
+      ],
+      "same_objects": true
+     },
+     "fallback": {
+      "all": [
+       "FallbackStrategy",
+       "Target"
+      ],
+      "same_objects": true
+     },
+     "guardrails": {
+      "all": [
+       "GuardrailConfig",
+       "GuardrailRule"
+      ],
+      "same_objects": true
+     },
+     "retry": {
+      "all": [
+       "RetryConfig"
+      ],
+      "same_objects": true
+     },
+     "routing": {
+      "all": [
+       "LoadBalanceStrategy",
+       "Target"
+      ],
+      "same_objects": true
+     }
+    }
+   }
+  },
+  "config.legacy_pydantic.wire[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-cache-enabled",
+       "false"
+      ],
+      [
+       "x-agentcc-cache-ttl",
+       "10m"
+      ],
+      [
+       "x-agentcc-config",
+       "{\"routing\":{\"mode\":\"round-robin\",\"targets\":[{\"provider\":\"openai\"}]},\"cache\":{\"enabled\":false,\"mode\":\"exact\",\"ttl\":\"10m\",\"namespace\":\"default\",\"semantic_threshold\":0.92,\"force_refresh\":false}}"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "config.legacy_pydantic.wire[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-cache-enabled",
+       "false"
+      ],
+      [
+       "x-agentcc-cache-ttl",
+       "10m"
+      ],
+      [
+       "x-agentcc-config",
+       "{\"routing\":{\"mode\":\"round-robin\",\"targets\":[{\"provider\":\"openai\"}]},\"cache\":{\"enabled\":false,\"mode\":\"exact\",\"ttl\":\"10m\",\"namespace\":\"default\",\"semantic_threshold\":0.92,\"force_refresh\":false}}"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "config.section.cache.defaults[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "CacheConfig(enabled=True, strategy='exact', ttl=None, namespace=None, force_refresh=False, semantic_threshold=None, cache_by_model=True, ignore_keys=None)",
+    "to_dict": {
+     "cache": {
+      "cache_by_model": true,
+      "enabled": true,
+      "force_refresh": false,
+      "strategy": "exact"
+     }
+    },
+    "to_headers": {
+     "x-agentcc-config": "{\"cache\":{\"enabled\":true,\"strategy\":\"exact\",\"force_refresh\":false,\"cache_by_model\":true}}"
+    }
+   }
+  },
+  "config.section.cache[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "CacheConfig(enabled=True, strategy='exact', ttl=300, namespace='prod', force_refresh=True, semantic_threshold=0.9, cache_by_model=True, ignore_keys=['user'])",
+    "to_dict": {
+     "cache": {
+      "cache_by_model": true,
+      "enabled": true,
+      "force_refresh": true,
+      "ignore_keys": [
+       "user"
+      ],
+      "namespace": "prod",
+      "semantic_threshold": 0.9,
+      "strategy": "exact",
+      "ttl": 300
+     }
+    },
+    "to_headers": {
+     "x-agentcc-cache-force-refresh": "true",
+     "x-agentcc-cache-namespace": "prod",
+     "x-agentcc-cache-ttl": "300",
+     "x-agentcc-config": "{\"cache\":{\"enabled\":true,\"strategy\":\"exact\",\"ttl\":300,\"namespace\":\"prod\",\"force_refresh\":true,\"semantic_threshold\":0.9,\"cache_by_model\":true,\"ignore_keys\":[\"user\"]}}"
+    }
+   }
+  },
+  "config.section.fallback.default_codes[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "FallbackConfig(targets=[], on_status_codes=[429, 500, 502, 503, 504])",
+    "to_dict": {
+     "fallback": {
+      "on_status_codes": [
+       429,
+       500,
+       502,
+       503,
+       504
+      ],
+      "targets": []
+     }
+    },
+    "to_headers": {
+     "x-agentcc-config": "{\"fallback\":{\"targets\":[],\"on_status_codes\":[429,500,502,503,504]}}"
+    }
+   }
+  },
+  "config.section.fallback[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "FallbackConfig(targets=[FallbackTarget(model='gpt-4o-mini', provider='openai', override_params={'temperature': 0})], on_status_codes=[429, 500, 502, 503, 504])",
+    "to_dict": {
+     "fallback": {
+      "on_status_codes": [
+       429,
+       500,
+       502,
+       503,
+       504
+      ],
+      "targets": [
+       {
+        "model": "gpt-4o-mini",
+        "override_params": {
+         "temperature": 0
+        },
+        "provider": "openai"
+       }
+      ]
+     }
+    },
+    "to_headers": {
+     "x-agentcc-config": "{\"fallback\":{\"targets\":[{\"model\":\"gpt-4o-mini\",\"provider\":\"openai\",\"override_params\":{\"temperature\":0}}],\"on_status_codes\":[429,500,502,503,504]}}"
+    }
+   }
+  },
+  "config.section.guardrails.checks[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "GuardrailConfig(input_guardrails=None, output_guardrails=None, deny=True, async_mode=False, sequential=False, checks=[GuardrailCheck(name='pii', enabled=True, action='warn', confidence_threshold=0.5, config={'k': 1})], pipeline_mode='sequential', fail_open=True, timeout_ms=250)",
+    "to_dict": {
+     "guardrails": {
+      "async_mode": false,
+      "checks": [
+       {
+        "action": "warn",
+        "confidence_threshold": 0.5,
+        "config": {
+         "k": 1
+        },
+        "enabled": true,
+        "name": "pii"
+       }
+      ],
+      "deny": true,
+      "fail_open": true,
+      "pipeline_mode": "sequential",
+      "sequential": false,
+      "timeout_ms": 250
+     }
+    },
+    "to_headers": {
+     "x-agentcc-config": "{\"guardrails\":{\"deny\":true,\"async_mode\":false,\"sequential\":false,\"checks\":[{\"name\":\"pii\",\"enabled\":true,\"action\":\"warn\",\"confidence_threshold\":0.5,\"config\":{\"k\":1}}],\"pipeline_mode\":\"sequential\",\"fail_open\":true,\"timeout_ms\":250}}"
+    }
+   }
+  },
+  "config.section.guardrails.ids[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "GuardrailConfig(input_guardrails=['pii'], output_guardrails=['toxicity', 'secrets'], deny=True, async_mode=False, sequential=False, checks=None, pipeline_mode=None, fail_open=False, timeout_ms=None)",
+    "to_dict": {
+     "guardrails": {
+      "async_mode": false,
+      "deny": true,
+      "fail_open": false,
+      "input_guardrails": [
+       "pii"
+      ],
+      "output_guardrails": [
+       "toxicity",
+       "secrets"
+      ],
+      "sequential": false
+     }
+    },
+    "to_headers": {
+     "x-agentcc-config": "{\"guardrails\":{\"input_guardrails\":[\"pii\"],\"output_guardrails\":[\"toxicity\",\"secrets\"],\"deny\":true,\"async_mode\":false,\"sequential\":false,\"fail_open\":false}}",
+     "x-agentcc-guardrail-policy": "pii,toxicity,secrets"
+    }
+   }
+  },
+  "config.section.load_balance[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "LoadBalanceConfig(strategy='weighted', targets=[LoadBalanceTarget(model='a', provider=None, weight=2.0, virtual_key='vk-a'), LoadBalanceTarget(model='b', provider=None, weight=1.0, virtual_key=None)])",
+    "to_dict": {
+     "load_balance": {
+      "strategy": "weighted",
+      "targets": [
+       {
+        "model": "a",
+        "virtual_key": "vk-a",
+        "weight": 2.0
+       },
+       {
+        "model": "b",
+        "weight": 1.0
+       }
+      ]
+     }
+    },
+    "to_headers": {
+     "x-agentcc-config": "{\"load_balance\":{\"strategy\":\"weighted\",\"targets\":[{\"model\":\"a\",\"weight\":2.0,\"virtual_key\":\"vk-a\"},{\"model\":\"b\",\"weight\":1.0}]}}"
+    }
+   }
+  },
+  "config.section.mirror[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "TrafficMirrorConfig(enabled=True, target_model='shadow', target_provider='openai', sample_rate=0.25)",
+    "to_dict": {
+     "mirror": {
+      "enabled": true,
+      "sample_rate": 0.25,
+      "target_model": "shadow",
+      "target_provider": "openai"
+     }
+    },
+    "to_headers": {
+     "x-agentcc-config": "{\"mirror\":{\"enabled\":true,\"target_model\":\"shadow\",\"target_provider\":\"openai\",\"sample_rate\":0.25}}"
+    }
+   }
+  },
+  "config.section.retry.defaults[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "RetryConfig(max_retries=2, on_status_codes=[429, 500, 502, 503], backoff_factor=0.5, backoff_max=30.0, backoff_jitter=0.25, respect_retry_after=True, max_retry_wait=60.0)",
+    "to_dict": {
+     "retry": {
+      "backoff_factor": 0.5,
+      "backoff_jitter": 0.25,
+      "backoff_max": 30.0,
+      "max_retries": 2,
+      "max_retry_wait": 60.0,
+      "on_status_codes": [
+       429,
+       500,
+       502,
+       503
+      ],
+      "respect_retry_after": true
+     }
+    },
+    "to_headers": {
+     "x-agentcc-config": "{\"retry\":{\"max_retries\":2,\"on_status_codes\":[429,500,502,503],\"backoff_factor\":0.5,\"backoff_max\":30.0,\"backoff_jitter\":0.25,\"respect_retry_after\":true,\"max_retry_wait\":60.0}}"
+    }
+   }
+  },
+  "config.section.retry[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "RetryConfig(max_retries=3, on_status_codes=[429], backoff_factor=0.5, backoff_max=30.0, backoff_jitter=0.25, respect_retry_after=True, max_retry_wait=60.0)",
+    "to_dict": {
+     "retry": {
+      "backoff_factor": 0.5,
+      "backoff_jitter": 0.25,
+      "backoff_max": 30.0,
+      "max_retries": 3,
+      "max_retry_wait": 60.0,
+      "on_status_codes": [
+       429
+      ],
+      "respect_retry_after": true
+     }
+    },
+    "to_headers": {
+     "x-agentcc-config": "{\"retry\":{\"max_retries\":3,\"on_status_codes\":[429],\"backoff_factor\":0.5,\"backoff_max\":30.0,\"backoff_jitter\":0.25,\"respect_retry_after\":true,\"max_retry_wait\":60.0}}"
+    }
+   }
+  },
+  "config.section.routing[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "ConditionalRoutingConfig(conditions=[RoutingCondition(field='metadata.tier', operator='$eq', value='gold', target='gpt-4o')], default_target='gpt-4o-mini')",
+    "to_dict": {
+     "routing": {
+      "conditions": [
+       {
+        "field": "metadata.tier",
+        "operator": "$eq",
+        "target": "gpt-4o",
+        "value": "gold"
+       }
+      ],
+      "default_target": "gpt-4o-mini"
+     }
+    },
+    "to_headers": {
+     "x-agentcc-config": "{\"routing\":{\"conditions\":[{\"field\":\"metadata.tier\",\"operator\":\"$eq\",\"value\":\"gold\",\"target\":\"gpt-4o\"}],\"default_target\":\"gpt-4o-mini\"}}"
+    }
+   }
+  },
+  "config.section.timeout.total_fraction[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "TimeoutConfig(connect=None, read=None, write=None, pool=None, total=0.0015)",
+    "to_dict": {
+     "timeout": {
+      "total": 0.0015
+     }
+    },
+    "to_headers": {
+     "x-agentcc-config": "{\"timeout\":{\"total\":0.0015}}",
+     "x-agentcc-request-timeout": "1"
+    }
+   }
+  },
+  "config.section.timeout[sync]": {
+   "requests": [],
+   "result": {
+    "repr": "TimeoutConfig(connect=1.0, read=2.5, write=None, pool=None, total=10.0)",
+    "to_dict": {
+     "timeout": {
+      "connect": 1.0,
+      "read": 2.5,
+      "total": 10.0
+     }
+    },
+    "to_headers": {
+     "x-agentcc-config": "{\"timeout\":{\"connect\":1.0,\"read\":2.5,\"total\":10.0}}",
+     "x-agentcc-request-timeout": "10000"
+    }
+   }
+  },
+  "config.wire.all[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-cache-force-refresh",
+       "true"
+      ],
+      [
+       "x-agentcc-cache-namespace",
+       "prod"
+      ],
+      [
+       "x-agentcc-cache-ttl",
+       "300"
+      ],
+      [
+       "x-agentcc-config",
+       "{\"fallback\":{\"targets\":[{\"model\":\"gpt-4o-mini\",\"provider\":\"openai\",\"override_params\":{\"temperature\":0}}],\"on_status_codes\":[429,500,502,503,504]},\"load_balance\":{\"strategy\":\"weighted\",\"targets\":[{\"model\":\"a\",\"weight\":2.0,\"virtual_key\":\"vk-a\"},{\"model\":\"b\",\"weight\":1.0}]},\"cache\":{\"enabled\":true,\"strategy\":\"exact\",\"ttl\":300,\"namespace\":\"prod\",\"force_refresh\":true,\"semantic_threshold\":0.9,\"cache_by_model\":true,\"ignore_keys\":[\"user\"]},\"guardrails\":{\"input_guardrails\":[\"pii\"],\"output_guardrails\":[\"toxicity\",\"secrets\"],\"deny\":true,\"async_mode\":false,\"sequential\":false,\"fail_open\":false},\"routing\":{\"conditions\":[{\"field\":\"metadata.tier\",\"operator\":\"$eq\",\"value\":\"gold\",\"target\":\"gpt-4o\"}],\"default_target\":\"gpt-4o-mini\"},\"mirror\":{\"enabled\":true,\"target_model\":\"shadow\",\"target_provider\":\"openai\",\"sample_rate\":0.25},\"retry\":{\"max_retries\":3,\"on_status_codes\":[429],\"backoff_factor\":0.5,\"backoff_max\":30.0,\"backoff_jitter\":0.25,\"respect_retry_after\":true,\"max_retry_wait\":60.0},\"timeout\":{\"connect\":1.0,\"read\":2.5,\"total\":10.0}}"
+      ],
+      [
+       "x-agentcc-guardrail-policy",
+       "pii,toxicity,secrets"
+      ],
+      [
+       "x-agentcc-request-timeout",
+       "10000"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "config.wire.all[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-cache-force-refresh",
+       "true"
+      ],
+      [
+       "x-agentcc-cache-namespace",
+       "prod"
+      ],
+      [
+       "x-agentcc-cache-ttl",
+       "300"
+      ],
+      [
+       "x-agentcc-config",
+       "{\"fallback\":{\"targets\":[{\"model\":\"gpt-4o-mini\",\"provider\":\"openai\",\"override_params\":{\"temperature\":0}}],\"on_status_codes\":[429,500,502,503,504]},\"load_balance\":{\"strategy\":\"weighted\",\"targets\":[{\"model\":\"a\",\"weight\":2.0,\"virtual_key\":\"vk-a\"},{\"model\":\"b\",\"weight\":1.0}]},\"cache\":{\"enabled\":true,\"strategy\":\"exact\",\"ttl\":300,\"namespace\":\"prod\",\"force_refresh\":true,\"semantic_threshold\":0.9,\"cache_by_model\":true,\"ignore_keys\":[\"user\"]},\"guardrails\":{\"input_guardrails\":[\"pii\"],\"output_guardrails\":[\"toxicity\",\"secrets\"],\"deny\":true,\"async_mode\":false,\"sequential\":false,\"fail_open\":false},\"routing\":{\"conditions\":[{\"field\":\"metadata.tier\",\"operator\":\"$eq\",\"value\":\"gold\",\"target\":\"gpt-4o\"}],\"default_target\":\"gpt-4o-mini\"},\"mirror\":{\"enabled\":true,\"target_model\":\"shadow\",\"target_provider\":\"openai\",\"sample_rate\":0.25},\"retry\":{\"max_retries\":3,\"on_status_codes\":[429],\"backoff_factor\":0.5,\"backoff_max\":30.0,\"backoff_jitter\":0.25,\"respect_retry_after\":true,\"max_retry_wait\":60.0},\"timeout\":{\"connect\":1.0,\"read\":2.5,\"total\":10.0}}"
+      ],
+      [
+       "x-agentcc-guardrail-policy",
+       "pii,toxicity,secrets"
+      ],
+      [
+       "x-agentcc-request-timeout",
+       "10000"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "config.wire.cache[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-cache-force-refresh",
+       "true"
+      ],
+      [
+       "x-agentcc-cache-namespace",
+       "prod"
+      ],
+      [
+       "x-agentcc-cache-ttl",
+       "300"
+      ],
+      [
+       "x-agentcc-config",
+       "{\"cache\":{\"enabled\":true,\"strategy\":\"exact\",\"ttl\":300,\"namespace\":\"prod\",\"force_refresh\":true,\"semantic_threshold\":0.9,\"cache_by_model\":true,\"ignore_keys\":[\"user\"]}}"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "config.wire.cache[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-cache-force-refresh",
+       "true"
+      ],
+      [
+       "x-agentcc-cache-namespace",
+       "prod"
+      ],
+      [
+       "x-agentcc-cache-ttl",
+       "300"
+      ],
+      [
+       "x-agentcc-config",
+       "{\"cache\":{\"enabled\":true,\"strategy\":\"exact\",\"ttl\":300,\"namespace\":\"prod\",\"force_refresh\":true,\"semantic_threshold\":0.9,\"cache_by_model\":true,\"ignore_keys\":[\"user\"]}}"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "config.wire.fallback[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-config",
+       "{\"fallback\":{\"targets\":[{\"model\":\"gpt-4o-mini\",\"provider\":\"openai\",\"override_params\":{\"temperature\":0}}],\"on_status_codes\":[429,500,502,503,504]}}"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "config.wire.fallback[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-config",
+       "{\"fallback\":{\"targets\":[{\"model\":\"gpt-4o-mini\",\"provider\":\"openai\",\"override_params\":{\"temperature\":0}}],\"on_status_codes\":[429,500,502,503,504]}}"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "config.wire.guardrails.ids[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-config",
+       "{\"guardrails\":{\"input_guardrails\":[\"pii\"],\"output_guardrails\":[\"toxicity\",\"secrets\"],\"deny\":true,\"async_mode\":false,\"sequential\":false,\"fail_open\":false}}"
+      ],
+      [
+       "x-agentcc-guardrail-policy",
+       "pii,toxicity,secrets"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "config.wire.guardrails.ids[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-config",
+       "{\"guardrails\":{\"input_guardrails\":[\"pii\"],\"output_guardrails\":[\"toxicity\",\"secrets\"],\"deny\":true,\"async_mode\":false,\"sequential\":false,\"fail_open\":false}}"
+      ],
+      [
+       "x-agentcc-guardrail-policy",
+       "pii,toxicity,secrets"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "config.wire.timeout[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-config",
+       "{\"timeout\":{\"connect\":1.0,\"read\":2.5,\"total\":10.0}}"
+      ],
+      [
+       "x-agentcc-request-timeout",
+       "10000"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "config.wire.timeout[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-config",
+       "{\"timeout\":{\"connect\":1.0,\"read\":2.5,\"total\":10.0}}"
+      ],
+      [
+       "x-agentcc-request-timeout",
+       "10000"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "__model__": "ChatCompletion",
+    "data": {
+     "agentcc": {
+      "cache_status": null,
+      "cost": null,
+      "fallback_used": false,
+      "guardrail_triggered": false,
+      "latency_ms": 0,
+      "model_used": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "request_id": "unknown",
+      "routing_strategy": null,
+      "timeout_ms": null,
+      "trace_id": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "name": null,
+        "role": "assistant",
+        "tool_calls": null
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "service_tier": null,
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "completion_tokens_details": null,
+      "prompt_tokens": 5,
+      "prompt_tokens_details": null,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "create_headers.api_key[sync]": {
+   "requests": [],
+   "result": {
+    "Authorization": "Bearer parity-gateway-key"
+   }
+  },
+  "create_headers.cache_force_refresh[sync]": {
+   "requests": [],
+   "result": {
+    "x-agentcc-cache-force-refresh": "true"
+   }
+  },
+  "create_headers.cache_namespace[sync]": {
+   "requests": [],
+   "result": {
+    "x-agentcc-cache-namespace": "ns"
+   }
+  },
+  "create_headers.cache_ttl[sync]": {
+   "requests": [],
+   "result": {
+    "x-agentcc-cache-ttl": "60"
+   }
+  },
+  "create_headers.combined[sync]": {
+   "requests": [],
+   "result": {
+    "Authorization": "Bearer parity-gateway-key",
+    "x-agentcc-cache-force-refresh": "true",
+    "x-agentcc-cache-namespace": "ns",
+    "x-agentcc-cache-ttl": "60",
+    "x-agentcc-guardrail-policy": "strict",
+    "x-agentcc-metadata": "{\"k\":\"v\",\"n\":1}",
+    "x-agentcc-property-team": "a",
+    "x-agentcc-request-id": "r",
+    "x-agentcc-session-id": "s",
+    "x-agentcc-session-name": "flow",
+    "x-agentcc-session-path": "/a/b",
+    "x-agentcc-trace-id": "t",
+    "x-agentcc-user-id": "u"
+   }
+  },
+  "create_headers.config_overlap[sync]": {
+   "requests": [],
+   "result": {
+    "x-agentcc-cache-ttl": "5",
+    "x-agentcc-config": "{\"cache\":{\"enabled\":true,\"strategy\":\"exact\",\"ttl\":5,\"force_refresh\":false,\"cache_by_model\":true},\"guardrails\":{\"input_guardrails\":[\"pii\"],\"deny\":true,\"async_mode\":false,\"sequential\":false,\"fail_open\":false}}",
+    "x-agentcc-guardrail-policy": "pii"
+   }
+  },
+  "create_headers.guardrail_policy[sync]": {
+   "requests": [],
+   "result": {
+    "x-agentcc-guardrail-policy": "strict"
+   }
+  },
+  "create_headers.metadata[sync]": {
+   "requests": [],
+   "result": {
+    "x-agentcc-metadata": "{\"k\":\"v\",\"n\":1}"
+   }
+  },
+  "create_headers.none[sync]": {
+   "requests": [],
+   "result": {}
+  },
+  "create_headers.properties[sync]": {
+   "requests": [],
+   "result": {
+    "x-agentcc-property-team": "a"
+   }
+  },
+  "create_headers.request_id[sync]": {
+   "requests": [],
+   "result": {
+    "x-agentcc-request-id": "r"
+   }
+  },
+  "create_headers.session_id[sync]": {
+   "requests": [],
+   "result": {
+    "x-agentcc-session-id": "s"
+   }
+  },
+  "create_headers.session_name[sync]": {
+   "requests": [],
+   "result": {
+    "x-agentcc-session-name": "flow"
+   }
+  },
+  "create_headers.session_path[sync]": {
+   "requests": [],
+   "result": {
+    "x-agentcc-session-path": "/a/b"
+   }
+  },
+  "create_headers.trace_id[sync]": {
+   "requests": [],
+   "result": {
+    "x-agentcc-trace-id": "t"
+   }
+  },
+  "create_headers.user_id[sync]": {
+   "requests": [],
+   "result": {
+    "x-agentcc-user-id": "u"
+   }
+  },
+  "session.pure[sync]": {
+   "requests": [],
+   "result": {
+    "auto_id": "00000000000040008000000000000002",
+    "repr": "Session(session_id='00000000000040008000000000000001', name='flow', path='/', metadata={'k': 'v', 'n': 2})",
+    "states": [
+     {
+      "x-agentcc-metadata-k": "v",
+      "x-agentcc-metadata-n": "2",
+      "x-agentcc-session-id": "00000000000040008000000000000001",
+      "x-agentcc-session-name": "flow"
+     },
+     {
+      "x-agentcc-metadata-k": "v",
+      "x-agentcc-metadata-n": "2",
+      "x-agentcc-session-id": "00000000000040008000000000000001",
+      "x-agentcc-session-name": "flow",
+      "x-agentcc-session-path": "/search/summarize"
+     },
+     {
+      "x-agentcc-metadata-k": "v",
+      "x-agentcc-metadata-n": "2",
+      "x-agentcc-session-id": "00000000000040008000000000000001",
+      "x-agentcc-session-name": "flow"
+     }
+    ],
+    "totals": [
+     0.75,
+     2,
+     10
+    ]
+   }
+  },
+  "session.wire[async]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-metadata-cart",
+       "c1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-session-id",
+       "00000000000040008000000000000001"
+      ],
+      [
+       "x-agentcc-session-name",
+       "checkout"
+      ],
+      [
+       "x-agentcc-session-path",
+       "/pay"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "first_cost": 0.01,
+    "session_after": {
+     "cost": 0.0,
+     "count": 0
+    },
+    "session_id": "00000000000040008000000000000001"
+   }
+  },
+  "session.wire[sync]": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "<httpx default>"
+      ],
+      [
+       "accept-encoding",
+       "<httpx default>"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "connection",
+       "<httpx default>"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "host",
+       "gateway.example.test"
+      ],
+      [
+       "user-agent",
+       "agentcc-python/0.1.0"
+      ],
+      [
+       "x-agentcc-metadata-cart",
+       "c1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-session-id",
+       "00000000000040008000000000000001"
+      ],
+      [
+       "x-agentcc-session-name",
+       "checkout"
+      ],
+      [
+       "x-agentcc-session-path",
+       "/pay"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout": {
+      "connect": 600.0,
+      "pool": 600.0,
+      "read": 600.0,
+      "write": 600.0
+     }
+    }
+   ],
+   "result": {
+    "first_cost": 0.01,
+    "session_after": {
+     "cost": 0.0,
+     "count": 0
+    },
+    "session_id": "00000000000040008000000000000001"
+   }
+  }
+ },
+ "format": 1
+}

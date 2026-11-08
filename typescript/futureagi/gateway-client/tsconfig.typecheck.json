@@ -1,0 +1,16 @@
+{
+  "//": "Typechecks the sources with every test this port wrote (tests/gateway/**, tests/react/route-mode.test.ts), and stream-error.test.ts (the one 1.0.1 test file its own CI typechecked). The other ported 1.0.1 test files run as 1.0.1 ran them, transpiled only: Vitest never typechecks, and fixing their types would change the bodies the name check vouches for.",
+  "extends": "./tsconfig.test.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "tests/stream-error.test.ts",
+    "tests/environment.test.ts",
+    "tests/gateway/**/*.ts",
+    "tests/gateway/**/*.tsx",
+    "tests/port/**/*.ts",
+    "tests/react/route-mode.test.ts"
+  ]
+}

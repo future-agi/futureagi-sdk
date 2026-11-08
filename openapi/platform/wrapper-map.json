@@ -1,0 +1,1764 @@
+{
+  "about": "One public path per platform method, in both languages. Each contract operation is either wrapped (methods with py and ts paths, the owning handle, arguments and any rename) or unwrapped with a reason. py_args: positional names, then \"*\", then keywords. ts_args: positional names, then options.<key>. Arguments here are the contract's path and query parameters plus the SDK's own (idempotency_key, wait, timeout, callbacks); each namespace adds its request-body keywords when its methods are written. \"internal\" names query parameters the wrapper fills itself. scripts/platform/wrapper_map.py and python/tests/platform/test_gates_wrapper_map.py enforce the rules.",
+  "contract_sha256": "8e391c6c54f6eec68270e11b753ffaa85f965e21dad0aaea04239da73557ab11",
+  "not_offered": {
+    "deployments": {
+      "status": "NOT-OFFERED",
+      "owner": "deployments",
+      "reason": "Hosted project deployments are disabled; descriptors retain the design, not a public namespace"
+    },
+    "platform.capabilities": {
+      "status": "NOT-OFFERED",
+      "owner": "client-core",
+      "reason": "The capability descriptor is integrated but the public workspace capability accessor is not registered"
+    }
+  },
+  "handles": {
+    "Deployment": "a deployed project bundle with a URL",
+    "Run": "one multi-turn conversation with an agent"
+  },
+  "families": {
+    "sandboxes": {
+      "unwrapped": "The entire Sandbox namespace is not offered in this SDK release, including network policy operations in the pinned contract.",
+      "until": "if-needed",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "deployments": {
+      "availability": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED",
+        "reason": "Hosted project deployments are disabled for this release. Operation descriptors below retain the contract design only; no namespace, handle, CLI command or package subpath is offered."
+      }
+    },
+    "connectors": {
+      "unwrapped": "This legacy scoped table omits connectors; the current pinned facade is covered by openapi/connectors/wrapper-map.json",
+      "wrapper_map": "openapi/connectors/wrapper-map.json",
+      "until": "later"
+    },
+    "hub": {
+      "unwrapped": "the Hub registry commands stay with the Omega toolchain; client.hub comes in a later release",
+      "until": "later"
+    }
+  },
+  "operations": {
+    "platform.triggers.list": {
+      "unwrapped": "Signed trigger management is outside the 57-operation SDK release scope; an advertised release switch does not admit this surface.",
+      "until": "if-needed",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.triggers.create": {
+      "unwrapped": "Signed trigger management is outside the 57-operation SDK release scope; an advertised release switch does not admit this surface.",
+      "until": "if-needed",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.triggers.get": {
+      "unwrapped": "Signed trigger management is outside the 57-operation SDK release scope; an advertised release switch does not admit this surface.",
+      "until": "if-needed",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.triggers.remove": {
+      "unwrapped": "Signed trigger management is outside the 57-operation SDK release scope; an advertised release switch does not admit this surface.",
+      "until": "if-needed",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.triggers.rotate": {
+      "unwrapped": "Signed trigger management is outside the 57-operation SDK release scope; an advertised release switch does not admit this surface.",
+      "until": "if-needed",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.triggers.receipts": {
+      "unwrapped": "Signed trigger receipts are outside the 57-operation SDK release scope; no trigger accessor is offered.",
+      "until": "if-needed",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.triggers.deliver": {
+      "unwrapped": "Signed trigger delivery is outside the 57-operation SDK release scope; no trigger delivery client is offered.",
+      "until": "if-needed",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.toolPolicy.workspace.get": {
+      "unwrapped": "Human-only workspace tool policy inspection belongs in the Console, not the SDK.",
+      "until": "never",
+      "authority": "Pinned customer contract: x-omega-human-only.",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.toolPolicy.workspace.update": {
+      "unwrapped": "Human-only workspace tool policy changes belong in the Console, not the SDK.",
+      "until": "never",
+      "authority": "Pinned customer contract: x-omega-human-only.",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.toolPolicy.organization.get": {
+      "unwrapped": "Human-only organization tool policy inspection belongs in the Console, not the SDK.",
+      "until": "never",
+      "authority": "Pinned customer contract: x-omega-human-only.",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.toolPolicy.organization.update": {
+      "unwrapped": "Human-only organization tool policy changes belong in the Console, not the SDK.",
+      "until": "never",
+      "authority": "Pinned customer contract: x-omega-human-only.",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.otlp.get": {
+      "unwrapped": "OTLP configuration is outside the 57-operation SDK release scope; the release switch does not register an SDK namespace.",
+      "until": "if-needed",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.otlp.update": {
+      "unwrapped": "Human-only OTLP configuration changes belong in the Console, not the SDK.",
+      "until": "never",
+      "authority": "Pinned customer contract: x-omega-human-only.",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.otlp.test": {
+      "unwrapped": "Human-only OTLP connection tests belong in the Console, not the SDK.",
+      "until": "never",
+      "authority": "Pinned customer contract: x-omega-human-only.",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "platform.observeSettings.get": {
+      "unwrapped": "observe settings is a separate optional agents surface, not offered by the run namespace",
+      "until": "later",
+      "authority": "Platform SDK admission policy: observe settings requires separate agents-surface qualification."
+    },
+    "platform.observeSettings.update": {
+      "unwrapped": "human-only: capture settings are changed by an owner or admin in the Console",
+      "until": "never",
+      "authority": "Pinned customer contract: x-omega-human-only."
+    },
+    "platform.agents.lessons": {
+      "unwrapped": "learning APIs are excluded from this release; reading lessons is not a run operation",
+      "until": "later",
+      "authority": "Platform SDK admission policy: learning APIs are excluded at launch."
+    },
+    "platform.agents.revertLesson": {
+      "unwrapped": "human-only: a person reverts their lesson in the Console",
+      "until": "never",
+      "authority": "Pinned customer contract: x-omega-human-only."
+    },
+    "platform.agents.pauseLearning": {
+      "unwrapped": "human-only: a person changes their learning preference in the Console",
+      "until": "never",
+      "authority": "Pinned customer contract: x-omega-human-only."
+    },
+    "deployments.create": {
+      "operation_id": "createWorkspaceDeployment",
+      "body": {
+        "kind": "bundle",
+        "schema": "CreateWorkspaceDeploymentRequest"
+      },
+      "response": "CreateWorkspaceDeploymentResponse",
+      "methods": [
+        {
+          "py": "client.deployments.create",
+          "ts": "client.deployments.create",
+          "handle": null,
+          "returns": "Deployment",
+          "py_args": [
+            "*",
+            "idempotency_key",
+            "wait"
+          ],
+          "ts_args": [
+            "options.idempotencyKey",
+            "options.wait"
+          ]
+        }
+      ]
+    },
+    "deployments.delete": {
+      "operation_id": "deleteWorkspaceDeployment",
+      "response": "DeleteWorkspaceDeploymentResponse",
+      "methods": [
+        {
+          "py": "client.deployments.delete",
+          "ts": "client.deployments.delete",
+          "handle": null,
+          "py_args": [
+            "deployment_id"
+          ],
+          "ts_args": [
+            "deploymentId"
+          ]
+        }
+      ]
+    },
+    "deployments.get": {
+      "operation_id": "getWorkspaceDeployment",
+      "response": "GetWorkspaceDeploymentResponse",
+      "methods": [
+        {
+          "py": "client.deployments.get",
+          "ts": "client.deployments.get",
+          "handle": null,
+          "returns": "Deployment",
+          "py_args": [
+            "deployment_id"
+          ],
+          "ts_args": [
+            "deploymentId"
+          ]
+        },
+        {
+          "py": "Deployment.refresh",
+          "ts": "Deployment.refresh",
+          "handle": "Deployment",
+          "py_args": [],
+          "ts_args": []
+        },
+        {
+          "py": "Deployment.wait",
+          "ts": "Deployment.wait",
+          "handle": "Deployment",
+          "py_args": [
+            "*",
+            "timeout"
+          ],
+          "ts_args": [
+            "options.timeout"
+          ]
+        }
+      ]
+    },
+    "deployments.health": {
+      "operation_id": "getWorkspaceDeploymentHealth",
+      "response": "GetWorkspaceDeploymentHealthResponse",
+      "methods": [
+        {
+          "py": "client.deployments.health",
+          "ts": "client.deployments.health",
+          "handle": null,
+          "py_args": [
+            "deployment_id"
+          ],
+          "ts_args": [
+            "deploymentId"
+          ]
+        }
+      ]
+    },
+    "deployments.list": {
+      "operation_id": "listWorkspaceDeployments",
+      "response": "ListWorkspaceDeploymentsResponse",
+      "methods": [
+        {
+          "py": "client.deployments.list",
+          "ts": "client.deployments.list",
+          "handle": null,
+          "returns": "Page[Deployment]",
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "deployments.logs": {
+      "operation_id": "streamWorkspaceDeploymentLogs",
+      "response": "stream",
+      "methods": [
+        {
+          "py": "client.deployments.logs",
+          "ts": "client.deployments.logs",
+          "handle": null,
+          "py_args": [
+            "deployment_id",
+            "*",
+            "source",
+            "revision",
+            "after",
+            "tail",
+            "follow"
+          ],
+          "ts_args": [
+            "deploymentId",
+            "options.source",
+            "options.revision",
+            "options.after",
+            "options.tail",
+            "options.follow"
+          ]
+        }
+      ]
+    },
+    "deployments.rollback": {
+      "operation_id": "rollbackWorkspaceDeployment",
+      "body": {
+        "kind": "json",
+        "schema": "RollbackWorkspaceDeploymentRequest"
+      },
+      "response": "RollbackWorkspaceDeploymentResponse",
+      "methods": [
+        {
+          "py": "client.deployments.rollback",
+          "ts": "client.deployments.rollback",
+          "handle": null,
+          "returns": "Deployment",
+          "py_args": [
+            "deployment_id",
+            "revision",
+            "*",
+            "idempotency_key"
+          ],
+          "ts_args": [
+            "deploymentId",
+            "revision",
+            "options.idempotencyKey"
+          ]
+        }
+      ]
+    },
+    "deployments.rotateAccessToken": {
+      "operation_id": "rotateWorkspaceDeploymentAccessToken",
+      "response": "RotateWorkspaceDeploymentAccessTokenResponse",
+      "methods": [
+        {
+          "py": "client.deployments.rotate_access_token",
+          "ts": "client.deployments.rotateAccessToken",
+          "handle": null,
+          "py_args": [
+            "deployment_id",
+            "*",
+            "idempotency_key"
+          ],
+          "ts_args": [
+            "deploymentId",
+            "options.idempotencyKey"
+          ]
+        }
+      ]
+    },
+    "platform.agentTeams.create": {
+      "unwrapped": "teams, skills, audit and ratings come in a later release",
+      "until": "later"
+    },
+    "platform.agentTeams.delete": {
+      "unwrapped": "teams, skills, audit and ratings come in a later release",
+      "until": "later"
+    },
+    "platform.agentTeams.list": {
+      "unwrapped": "teams, skills, audit and ratings come in a later release",
+      "until": "later"
+    },
+    "platform.agentTeams.update": {
+      "unwrapped": "teams, skills, audit and ratings come in a later release",
+      "until": "later"
+    },
+    "platform.agents.control": {
+      "unwrapped": "agent control, tools, models, sharing and archives come in a later release",
+      "until": "later"
+    },
+    "platform.agents.create": {
+      "operation_id": "createWorkforceAgent",
+      "body": {
+        "kind": "json",
+        "schema": "CreateWorkforceAgentRequest"
+      },
+      "response": "CreateWorkforceAgentResponse",
+      "methods": [
+        {
+          "py": "client.agents.create",
+          "ts": "client.agents.create",
+          "handle": null,
+          "py_args": [
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "options.body"
+          ]
+        }
+      ]
+    },
+    "platform.agents.deployments": {
+      "operation_id": "listWorkforceAgentDeployments",
+      "rename": {
+        "from": "agents.deployments",
+        "to": "agents.releases",
+        "why": "an agent version made live is a release; deployment means a project bundle with a URL"
+      },
+      "response": "ListWorkforceAgentDeploymentsResponse",
+      "methods": [
+        {
+          "py": "client.agents.releases",
+          "ts": "client.agents.releases",
+          "handle": null,
+          "py_args": [
+            "agent_id"
+          ],
+          "ts_args": [
+            "agentId"
+          ]
+        }
+      ]
+    },
+    "platform.agents.draft": {
+      "operation_id": "draftWorkforceAgent",
+      "body": {
+        "kind": "json",
+        "schema": "DraftWorkforceAgentRequest"
+      },
+      "response": "DraftWorkforceAgentResponse",
+      "methods": [
+        {
+          "py": "client.agents.draft",
+          "ts": "client.agents.draft",
+          "handle": null,
+          "py_args": [
+            "*",
+            "body",
+            "idempotency_key"
+          ],
+          "ts_args": [
+            "options.body",
+            "options.idempotencyKey"
+          ]
+        }
+      ]
+    },
+    "platform.agents.export": {
+      "unwrapped": "agent control, tools, models, sharing and archives come in a later release",
+      "until": "later"
+    },
+    "platform.agents.get": {
+      "operation_id": "getWorkforceAgent",
+      "response": "GetWorkforceAgentResponse",
+      "methods": [
+        {
+          "py": "client.agents.get",
+          "ts": "client.agents.get",
+          "handle": null,
+          "py_args": [
+            "agent_id"
+          ],
+          "ts_args": [
+            "agentId"
+          ]
+        }
+      ]
+    },
+    "platform.agents.getRun": {
+      "unwrapped": "the same data is on client.agents.runs.list(agent_id=...) and Run.identity; a live check that workforce run records map one-to-one to runs by conversation id comes first, and a call is added only if they do not",
+      "until": "if-needed"
+    },
+    "platform.agents.import": {
+      "unwrapped": "agent control, tools, models, sharing and archives come in a later release",
+      "until": "later"
+    },
+    "platform.agents.models": {
+      "unwrapped": "agent control, tools, models, sharing and archives come in a later release",
+      "until": "later"
+    },
+    "platform.agents.previewImport": {
+      "unwrapped": "agent control, tools, models, sharing and archives come in a later release",
+      "until": "later"
+    },
+    "platform.agents.retire": {
+      "operation_id": "retireWorkforceAgent",
+      "response": "OmegaWorkforceRetirement",
+      "methods": [
+        {
+          "py": "client.agents.retire",
+          "ts": "client.agents.retire",
+          "handle": null,
+          "py_args": [
+            "agent_id"
+          ],
+          "ts_args": [
+            "agentId"
+          ]
+        }
+      ]
+    },
+    "platform.agents.revisions": {
+      "operation_id": "listWorkforceAgentRevisions",
+      "response": "ListWorkforceAgentRevisionsResponse",
+      "methods": [
+        {
+          "py": "client.agents.revisions",
+          "ts": "client.agents.revisions",
+          "handle": null,
+          "py_args": [
+            "agent_id"
+          ],
+          "ts_args": [
+            "agentId"
+          ]
+        }
+      ]
+    },
+    "platform.agents.rollbackDeployment": {
+      "operation_id": "rollbackWorkforceAgentDeployment",
+      "rename": {
+        "from": "agents.rollbackDeployment",
+        "to": "agents.rollback_release",
+        "why": "the release noun, as for agents.deployments"
+      },
+      "body": {
+        "kind": "json",
+        "schema": "RollbackWorkforceAgentDeploymentRequest"
+      },
+      "response": "RollbackWorkforceAgentDeploymentResponse",
+      "methods": [
+        {
+          "py": "client.agents.rollback_release",
+          "ts": "client.agents.rollbackRelease",
+          "handle": null,
+          "py_args": [
+            "agent_id",
+            "version",
+            "*",
+            "body",
+            "idempotency_key"
+          ],
+          "ts_args": [
+            "agentId",
+            "version",
+            "options.body",
+            "options.idempotencyKey"
+          ]
+        }
+      ]
+    },
+    "platform.agents.rollbackRevision": {
+      "operation_id": "rollbackWorkforceAgentRevision",
+      "body": {
+        "kind": "json",
+        "schema": "RollbackWorkforceAgentRevisionRequest"
+      },
+      "response": "RollbackWorkforceAgentRevisionResponse",
+      "methods": [
+        {
+          "py": "client.agents.rollback_revision",
+          "ts": "client.agents.rollbackRevision",
+          "handle": null,
+          "py_args": [
+            "agent_id",
+            "version",
+            "*",
+            "body",
+            "idempotency_key"
+          ],
+          "ts_args": [
+            "agentId",
+            "version",
+            "options.body",
+            "options.idempotencyKey"
+          ]
+        }
+      ]
+    },
+    "platform.agents.roster": {
+      "operation_id": "listWorkforce",
+      "rename": {
+        "from": "agents.roster",
+        "to": "agents.list",
+        "why": "the roster is the agent list; list is the verb every namespace uses"
+      },
+      "response": "ListWorkforceResponse",
+      "methods": [
+        {
+          "py": "client.agents.list",
+          "ts": "client.agents.list",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "platform.agents.runIdentity": {
+      "unwrapped": "the same data is on client.agents.runs.list(agent_id=...) and Run.identity; a live check that workforce run records map one-to-one to runs by conversation id comes first, and a call is added only if they do not",
+      "until": "if-needed"
+    },
+    "platform.agents.runs": {
+      "unwrapped": "the same data is on client.agents.runs.list(agent_id=...) and Run.identity; a live check that workforce run records map one-to-one to runs by conversation id comes first, and a call is added only if they do not",
+      "until": "if-needed"
+    },
+    "platform.agents.sharingCandidates": {
+      "unwrapped": "agent control, tools, models, sharing and archives come in a later release",
+      "until": "later"
+    },
+    "platform.agents.tools": {
+      "unwrapped": "agent control, tools, models, sharing and archives come in a later release",
+      "until": "later"
+    },
+    "platform.agents.update": {
+      "operation_id": "updateWorkforceAgent",
+      "body": {
+        "kind": "json",
+        "schema": "UpdateWorkforceAgentRequest"
+      },
+      "response": "UpdateWorkforceAgentResponse",
+      "methods": [
+        {
+          "py": "client.agents.update",
+          "ts": "client.agents.update",
+          "handle": null,
+          "py_args": [
+            "agent_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "agentId",
+            "options.body"
+          ]
+        }
+      ]
+    },
+    "platform.approvals.decide": {
+      "unwrapped": "human-only: a person decides it in the Console; the SDK never wraps it",
+      "until": "never"
+    },
+    "platform.approvals.list": {
+      "operation_id": "omegaGetWorkspaceApprovals",
+      "response": "OmegaGetWorkspaceApprovalsResponse",
+      "methods": [
+        {
+          "py": "client.agents.runs.list_approvals",
+          "ts": "client.agents.runs.listApprovals",
+          "handle": null,
+          "py_args": [
+            "*",
+            "conversation_id",
+            "state",
+            "limit",
+            "cursor"
+          ],
+          "ts_args": [
+            "options.conversationId",
+            "options.state",
+            "options.limit",
+            "options.cursor"
+          ]
+        }
+      ],
+      "rename": {
+        "from": "approvals.list",
+        "to": "runs.list_approvals",
+        "why": "read pending approvals beside the run collection; decisions remain human-only"
+      }
+    },
+    "platform.audit.integrity": {
+      "unwrapped": "teams, skills, audit and ratings come in a later release",
+      "until": "later"
+    },
+    "platform.audit.list": {
+      "unwrapped": "teams, skills, audit and ratings come in a later release",
+      "until": "later"
+    },
+    "platform.capabilities.get": {
+      "operation_id": "getWorkspaceCapabilities",
+      "rename": {
+        "from": "capabilities.get",
+        "to": "workspace.capabilities",
+        "why": "one read of what the workspace may use; it lives on client.workspace"
+      },
+      "response": "GetWorkspaceCapabilitiesResponse",
+      "methods": [
+        {
+          "py": "client.workspace.capabilities",
+          "ts": "client.workspace.capabilities",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "platform.credentials.bindings": {
+      "operation_id": "listWorkspaceCredentialBindings",
+      "response": "ListWorkspaceCredentialBindingsResponse",
+      "methods": [
+        {
+          "py": "client.credentials.bindings",
+          "ts": "client.credentials.bindings",
+          "handle": null,
+          "py_args": [
+            "credential_id"
+          ],
+          "ts_args": [
+            "credentialId"
+          ]
+        }
+      ]
+    },
+    "platform.credentials.create": {
+      "unwrapped": "human-only: a person decides it in the Console; the SDK never wraps it",
+      "until": "never"
+    },
+    "platform.credentials.get": {
+      "operation_id": "getWorkspaceCredential",
+      "response": "GetWorkspaceCredentialResponse",
+      "methods": [
+        {
+          "py": "client.credentials.get",
+          "ts": "client.credentials.get",
+          "handle": null,
+          "py_args": [
+            "credential_id"
+          ],
+          "ts_args": [
+            "credentialId"
+          ]
+        }
+      ]
+    },
+    "platform.credentials.list": {
+      "operation_id": "listWorkspaceCredentials",
+      "response": "ListWorkspaceCredentialsResponse",
+      "methods": [
+        {
+          "py": "client.credentials.list",
+          "ts": "client.credentials.list",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "platform.credentials.revoke": {
+      "unwrapped": "human-only: a person decides it in the Console; the SDK never wraps it",
+      "until": "never"
+    },
+    "platform.credentials.rotate": {
+      "unwrapped": "human-only: a person decides it in the Console; the SDK never wraps it",
+      "until": "never"
+    },
+    "platform.environments.control": {
+      "operation_id": "controlWorkspaceEnvironmentProfile",
+      "body": {
+        "kind": "json",
+        "schema": "ControlWorkspaceEnvironmentProfileRequest"
+      },
+      "response": "ControlWorkspaceEnvironmentProfileResponse",
+      "methods": [
+        {
+          "py": "client.environments.control",
+          "ts": "client.environments.control",
+          "handle": null,
+          "py_args": [
+            "environment_id",
+            "*",
+            "body",
+            "idempotency_key"
+          ],
+          "ts_args": [
+            "environmentId",
+            "options.body",
+            "options.idempotencyKey"
+          ]
+        }
+      ]
+    },
+    "platform.environments.create": {
+      "operation_id": "createWorkspaceEnvironmentProfile",
+      "body": {
+        "kind": "json",
+        "schema": "CreateWorkspaceEnvironmentProfileRequest"
+      },
+      "response": "CreateWorkspaceEnvironmentProfileResponse",
+      "methods": [
+        {
+          "py": "client.environments.create",
+          "ts": "client.environments.create",
+          "handle": null,
+          "py_args": [
+            "*",
+            "body",
+            "idempotency_key"
+          ],
+          "ts_args": [
+            "options.body",
+            "options.idempotencyKey"
+          ]
+        }
+      ]
+    },
+    "platform.environments.get": {
+      "operation_id": "getWorkspaceEnvironmentProfile",
+      "response": "GetWorkspaceEnvironmentProfileResponse",
+      "methods": [
+        {
+          "py": "client.environments.get",
+          "ts": "client.environments.get",
+          "handle": null,
+          "py_args": [
+            "environment_id"
+          ],
+          "ts_args": [
+            "environmentId"
+          ]
+        }
+      ]
+    },
+    "platform.environments.getRevision": {
+      "operation_id": "getWorkspaceEnvironmentProfileRevision",
+      "response": "GetWorkspaceEnvironmentProfileRevisionResponse",
+      "methods": [
+        {
+          "py": "client.environments.get_revision",
+          "ts": "client.environments.getRevision",
+          "handle": null,
+          "py_args": [
+            "environment_id",
+            "revision"
+          ],
+          "ts_args": [
+            "environmentId",
+            "revision"
+          ]
+        }
+      ]
+    },
+    "platform.environments.list": {
+      "operation_id": "listWorkspaceEnvironmentProfiles",
+      "response": "ListWorkspaceEnvironmentProfilesResponse",
+      "methods": [
+        {
+          "py": "client.environments.list",
+          "ts": "client.environments.list",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "platform.environments.revise": {
+      "operation_id": "reviseWorkspaceEnvironmentProfile",
+      "body": {
+        "kind": "json",
+        "schema": "ReviseWorkspaceEnvironmentProfileRequest"
+      },
+      "response": "ReviseWorkspaceEnvironmentProfileResponse",
+      "methods": [
+        {
+          "py": "client.environments.revise",
+          "ts": "client.environments.revise",
+          "handle": null,
+          "py_args": [
+            "environment_id",
+            "*",
+            "body",
+            "idempotency_key"
+          ],
+          "ts_args": [
+            "environmentId",
+            "options.body",
+            "options.idempotencyKey"
+          ]
+        }
+      ]
+    },
+    "platform.environments.revisions": {
+      "operation_id": "listWorkspaceEnvironmentProfileRevisions",
+      "response": "ListWorkspaceEnvironmentProfileRevisionsResponse",
+      "methods": [
+        {
+          "py": "client.environments.revisions",
+          "ts": "client.environments.revisions",
+          "handle": null,
+          "py_args": [
+            "environment_id"
+          ],
+          "ts_args": [
+            "environmentId"
+          ]
+        }
+      ]
+    },
+    "platform.ratings.summary": {
+      "operation_id": "getWorkspaceRatingsSummary",
+      "response": "GetWorkspaceRatingsSummaryResponse",
+      "methods": [
+        {
+          "py": "client.agents.ratings.summary",
+          "ts": "client.agents.ratings.summary",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "platform.ratings.trajectory": {
+      "operation_id": "getWorkspaceRatingsTrajectory",
+      "response": "GetWorkspaceRatingsTrajectoryResponse",
+      "methods": [
+        {
+          "py": "client.agents.ratings.trajectory",
+          "ts": "client.agents.ratings.trajectory",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "platform.schedules.create": {
+      "operation_id": "createWorkspaceSchedule",
+      "body": {
+        "kind": "json",
+        "schema": "CreateWorkspaceScheduleRequest"
+      },
+      "response": "CreateWorkspaceScheduleResponse",
+      "methods": [
+        {
+          "py": "client.agents.schedules.create",
+          "ts": "client.agents.schedules.create",
+          "handle": null,
+          "py_args": [
+            "*",
+            "body",
+            "idempotency_key"
+          ],
+          "ts_args": [
+            "options.body",
+            "options.idempotencyKey"
+          ]
+        }
+      ]
+    },
+    "platform.schedules.delete": {
+      "operation_id": "deleteWorkspaceSchedule",
+      "response": "DeleteWorkspaceScheduleResponse",
+      "methods": [
+        {
+          "py": "client.agents.schedules.delete",
+          "ts": "client.agents.schedules.delete",
+          "handle": null,
+          "py_args": [
+            "schedule_id"
+          ],
+          "ts_args": [
+            "scheduleId"
+          ]
+        }
+      ]
+    },
+    "platform.schedules.get": {
+      "operation_id": "getWorkspaceSchedule",
+      "response": "GetWorkspaceScheduleResponse",
+      "methods": [
+        {
+          "py": "client.agents.schedules.get",
+          "ts": "client.agents.schedules.get",
+          "handle": null,
+          "py_args": [
+            "schedule_id"
+          ],
+          "ts_args": [
+            "scheduleId"
+          ]
+        }
+      ]
+    },
+    "platform.schedules.list": {
+      "operation_id": "listWorkspaceSchedules",
+      "response": "ListWorkspaceSchedulesResponse",
+      "methods": [
+        {
+          "py": "client.agents.schedules.list",
+          "ts": "client.agents.schedules.list",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "platform.schedules.runNow": {
+      "operation_id": "runWorkspaceSchedule",
+      "body": {
+        "kind": "json",
+        "schema": "RunWorkspaceScheduleRequest"
+      },
+      "response": "RunWorkspaceScheduleResponse",
+      "methods": [
+        {
+          "py": "client.agents.schedules.run_now",
+          "ts": "client.agents.schedules.runNow",
+          "handle": null,
+          "py_args": [
+            "schedule_id",
+            "*",
+            "body",
+            "idempotency_key"
+          ],
+          "ts_args": [
+            "scheduleId",
+            "options.body",
+            "options.idempotencyKey"
+          ]
+        }
+      ]
+    },
+    "platform.schedules.update": {
+      "operation_id": "updateWorkspaceSchedule",
+      "body": {
+        "kind": "json",
+        "schema": "UpdateWorkspaceScheduleRequest"
+      },
+      "response": "UpdateWorkspaceScheduleResponse",
+      "methods": [
+        {
+          "py": "client.agents.schedules.update",
+          "ts": "client.agents.schedules.update",
+          "handle": null,
+          "py_args": [
+            "schedule_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "scheduleId",
+            "options.body"
+          ]
+        }
+      ]
+    },
+    "platform.skills.archive": {
+      "unwrapped": "teams, skills, audit and ratings come in a later release",
+      "until": "later"
+    },
+    "platform.skills.create": {
+      "unwrapped": "teams, skills, audit and ratings come in a later release",
+      "until": "later"
+    },
+    "platform.skills.get": {
+      "unwrapped": "teams, skills, audit and ratings come in a later release",
+      "until": "later"
+    },
+    "platform.skills.getRevision": {
+      "unwrapped": "teams, skills, audit and ratings come in a later release",
+      "until": "later"
+    },
+    "platform.skills.list": {
+      "unwrapped": "teams, skills, audit and ratings come in a later release",
+      "until": "later"
+    },
+    "platform.skills.revisions": {
+      "unwrapped": "teams, skills, audit and ratings come in a later release",
+      "until": "later"
+    },
+    "platform.skills.update": {
+      "unwrapped": "teams, skills, audit and ratings come in a later release",
+      "until": "later"
+    },
+    "runs.approvals": {
+      "operation_id": "omegaGetWorkspaceConversationsByIdApprovals",
+      "response": "OmegaGetWorkspaceConversationsByIdApprovalsResponse",
+      "methods": [
+        {
+          "py": "Run.approvals",
+          "ts": "Run.approvals",
+          "handle": "Run",
+          "py_args": [],
+          "ts_args": []
+        },
+        {
+          "py": "Run.wait_for_approval",
+          "ts": "Run.waitForApproval",
+          "handle": "Run",
+          "py_args": [
+            "*",
+            "timeout"
+          ],
+          "ts_args": [
+            "options.timeout"
+          ]
+        }
+      ]
+    },
+    "runs.cancel": {
+      "operation_id": "omegaPostWorkspaceConversationsByIdCancel",
+      "response": "OmegaRunCancelResult",
+      "methods": [
+        {
+          "py": "Run.cancel",
+          "ts": "Run.cancel",
+          "handle": "Run",
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "runs.continue": {
+      "operation_id": "continueWorkspaceConversation",
+      "rename": {
+        "from": "continue",
+        "to": "resume",
+        "why": "pairs with interrupt(); continue is a Python keyword"
+      },
+      "response": "ContinueWorkspaceConversationResponse",
+      "methods": [
+        {
+          "py": "Run.resume",
+          "ts": "Run.resume",
+          "handle": "Run",
+          "py_args": [
+            "*",
+            "idempotency_key"
+          ],
+          "ts_args": [
+            "options.idempotencyKey"
+          ]
+        }
+      ]
+    },
+    "runs.controlStatus": {
+      "operation_id": "omegaGetWorkspaceConversationsByIdControlStatus",
+      "response": "OmegaRunControlStatus",
+      "methods": [
+        {
+          "py": "Run.control_status",
+          "ts": "Run.controlStatus",
+          "handle": "Run",
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "runs.create": {
+      "operation_id": "omegaPostWorkspaceConversations",
+      "body": {
+        "kind": "json",
+        "schema": "OmegaPostWorkspaceConversationsRequest"
+      },
+      "response": "OmegaPostWorkspaceConversationsResponse",
+      "methods": [
+        {
+          "py": "client.agents.runs.create",
+          "ts": "client.agents.runs.create",
+          "handle": null,
+          "returns": "Run",
+          "py_args": [
+            "*",
+            "input",
+            "title",
+            "mode",
+            "agent_id",
+            "agent_session_id",
+            "model_id",
+            "message_mode",
+            "attachments",
+            "metadata",
+            "idempotency_key",
+            "wait",
+            "timeout"
+          ],
+          "ts_args": [
+            "options.input",
+            "options.title",
+            "options.mode",
+            "options.agentId",
+            "options.agentSessionId",
+            "options.modelId",
+            "options.messageMode",
+            "options.attachments",
+            "options.metadata",
+            "options.idempotencyKey",
+            "options.wait",
+            "options.timeout"
+          ]
+        }
+      ]
+    },
+    "runs.delete": {
+      "operation_id": "omegaDeleteWorkspaceConversationsById",
+      "response": "OmegaDeleteWorkspaceConversationsByIdResponse",
+      "methods": [
+        {
+          "py": "client.agents.runs.delete",
+          "ts": "client.agents.runs.delete",
+          "handle": null,
+          "py_args": [
+            "run_id"
+          ],
+          "ts_args": [
+            "runId"
+          ]
+        }
+      ]
+    },
+    "runs.events": {
+      "operation_id": "omegaGetWorkspaceConversationsByIdEvents",
+      "response": "stream",
+      "internal": [
+        "transport",
+        "wait"
+      ],
+      "methods": [
+        {
+          "py": "Run.events",
+          "ts": "Run.events",
+          "handle": "Run",
+          "py_args": [
+            "*",
+            "after",
+            "bounds"
+          ],
+          "ts_args": [
+            "options.after",
+            "options.bounds"
+          ]
+        }
+      ]
+    },
+    "runs.evidence": {
+      "operation_id": "omegaGetWorkspaceConversationsByIdEvidence",
+      "response": "OmegaGetWorkspaceConversationsByIdEvidenceResponse",
+      "methods": [
+        {
+          "py": "Run.evidence",
+          "ts": "Run.evidence",
+          "handle": "Run",
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "runs.fork": {
+      "operation_id": "forkWorkspaceConversation",
+      "body": {
+        "kind": "json",
+        "schema": "ForkWorkspaceConversationRequest"
+      },
+      "response": "ForkWorkspaceConversationResponse",
+      "methods": [
+        {
+          "py": "Run.fork",
+          "ts": "Run.fork",
+          "handle": "Run",
+          "py_args": [
+            "*",
+            "up_to_message_id",
+            "idempotency_key"
+          ],
+          "ts_args": [
+            "options.upToMessageId",
+            "options.idempotencyKey"
+          ],
+          "returns": "Run"
+        }
+      ]
+    },
+    "runs.get": {
+      "operation_id": "omegaGetWorkspaceConversationsById",
+      "response": "OmegaGetWorkspaceConversationsByIdResponse",
+      "methods": [
+        {
+          "py": "client.agents.runs.get",
+          "ts": "client.agents.runs.get",
+          "handle": null,
+          "returns": "Run",
+          "py_args": [
+            "run_id"
+          ],
+          "ts_args": [
+            "runId"
+          ]
+        },
+        {
+          "py": "Run.refresh",
+          "ts": "Run.refresh",
+          "handle": "Run",
+          "py_args": [],
+          "ts_args": []
+        },
+        {
+          "py": "Run.wait",
+          "ts": "Run.wait",
+          "handle": "Run",
+          "py_args": [
+            "*",
+            "timeout"
+          ],
+          "ts_args": [
+            "options.timeout"
+          ]
+        },
+        {
+          "py": "Run.identity",
+          "ts": "Run.identity",
+          "handle": "Run",
+          "returns": "property",
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "runs.interrupt": {
+      "operation_id": "interruptWorkspaceConversation",
+      "response": "InterruptWorkspaceConversationResponse",
+      "methods": [
+        {
+          "py": "Run.interrupt",
+          "ts": "Run.interrupt",
+          "handle": "Run",
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "runs.list": {
+      "operation_id": "omegaGetWorkspaceConversations",
+      "response": "OmegaGetWorkspaceConversationsResponse",
+      "methods": [
+        {
+          "py": "client.agents.runs.list",
+          "ts": "client.agents.runs.list",
+          "handle": null,
+          "returns": "Page[Run]",
+          "py_args": [
+            "*",
+            "limit",
+            "cursor",
+            "agent_id",
+            "status",
+            "agent_version",
+            "deployment_version",
+            "channel_id",
+            "provider_event_id",
+            "external_correlation_id"
+          ],
+          "ts_args": [
+            "options.limit",
+            "options.cursor",
+            "options.agentId",
+            "options.status",
+            "options.agentVersion",
+            "options.deploymentVersion",
+            "options.channelId",
+            "options.providerEventId",
+            "options.externalCorrelationId"
+          ]
+        }
+      ]
+    },
+    "runs.observations": {
+      "operation_id": "getWorkspaceConversationObservations",
+      "response": "GetWorkspaceConversationObservationsResponse",
+      "methods": [
+        {
+          "py": "Run.observations",
+          "ts": "Run.observations",
+          "handle": "Run",
+          "py_args": [
+            "*",
+            "task_id",
+            "kind",
+            "limit"
+          ],
+          "ts_args": [
+            "options.taskId",
+            "options.kind",
+            "options.limit"
+          ]
+        }
+      ]
+    },
+    "runs.proofPack": {
+      "operation_id": "omegaGetWorkspaceConversationsByIdProofPack",
+      "response": "OmegaGetWorkspaceConversationsByIdProofPackResponse",
+      "methods": [
+        {
+          "py": "Run.proof_pack",
+          "ts": "Run.proofPack",
+          "handle": "Run",
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "runs.rating.get": {
+      "operation_id": "getConversationRatings",
+      "response": "GetConversationRatingsResponse",
+      "methods": [
+        {
+          "py": "Run.rating.get",
+          "ts": "Run.rating.get",
+          "handle": "Run",
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "runs.rating.set": {
+      "operation_id": "recordConversationRating",
+      "body": {
+        "kind": "json",
+        "schema": "RecordConversationRatingRequest"
+      },
+      "response": "RecordConversationRatingResponse",
+      "methods": [
+        {
+          "py": "Run.rating.set",
+          "ts": "Run.rating.set",
+          "handle": "Run",
+          "py_args": [
+            "*",
+            "rating",
+            "message_id"
+          ],
+          "ts_args": [
+            "options.rating",
+            "options.messageId"
+          ]
+        }
+      ]
+    },
+    "runs.retry": {
+      "operation_id": "retryWorkspaceConversation",
+      "body": {
+        "kind": "json",
+        "schema": "RetryWorkspaceConversationRequest"
+      },
+      "response": "RetryWorkspaceConversationResponse",
+      "methods": [
+        {
+          "py": "Run.retry",
+          "ts": "Run.retry",
+          "handle": "Run",
+          "py_args": [
+            "*",
+            "reason",
+            "category",
+            "actor",
+            "idempotency_key"
+          ],
+          "ts_args": [
+            "options.reason",
+            "options.category",
+            "options.actor",
+            "options.idempotencyKey"
+          ]
+        }
+      ]
+    },
+    "runs.send": {
+      "operation_id": "omegaPostWorkspaceConversationsByIdMessages",
+      "body": {
+        "kind": "json",
+        "schema": "OmegaPostWorkspaceConversationsByIdMessagesRequest"
+      },
+      "response": "OmegaPostWorkspaceConversationsByIdMessagesResponse",
+      "methods": [
+        {
+          "py": "Run.send",
+          "ts": "Run.send",
+          "handle": "Run",
+          "py_args": [
+            "*",
+            "input",
+            "model_id",
+            "mode",
+            "attachments",
+            "idempotency_key"
+          ],
+          "ts_args": [
+            "options.input",
+            "options.modelId",
+            "options.mode",
+            "options.attachments",
+            "options.idempotencyKey"
+          ]
+        }
+      ]
+    },
+    "runs.tree": {
+      "operation_id": "getWorkspaceConversationTaskTree",
+      "response": "GetWorkspaceConversationTaskTreeResponse",
+      "methods": [
+        {
+          "py": "Run.tree",
+          "ts": "Run.tree",
+          "handle": "Run",
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "sandboxes.activity.list": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.commands.cancel": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.commands.run": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.create": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.files.download": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.files.list": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.files.makeDir": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.files.read": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.files.remove": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.files.rename": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.files.upload": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.files.write": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.getInfo": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.hibernate": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.kill": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.list": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.resume": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.settings.get": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.settings.update": {
+      "unwrapped": "human-only: a person decides it in the Console; the SDK never wraps it",
+      "until": "never",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.snapshots.create": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.snapshots.list": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.snapshots.restore": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    },
+    "sandboxes.update": {
+      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
+      "until": "later",
+      "languages": {
+        "py": "NOT-OFFERED",
+        "ts": "NOT-OFFERED"
+      }
+    }
+  },
+  "composite_methods": [
+    {
+      "py": "client.agents.code.validate",
+      "py_async": "client.agents.code.validate",
+      "ts": null,
+      "ts_status": "NOT-OFFERED",
+      "reason": "The portable-definition TypeScript facade is not offered in this preview; no implementation or acceptance is claimed.",
+      "operations": []
+    },
+    {
+      "py": "client.agents.code.plan",
+      "py_async": "client.agents.code.plan",
+      "ts": null,
+      "ts_status": "NOT-OFFERED",
+      "reason": "The portable-definition TypeScript facade is not offered in this preview; no implementation or acceptance is claimed.",
+      "operations": [
+        "platform.agents.roster",
+        "platform.agents.get"
+      ]
+    },
+    {
+      "py": "client.agents.code.apply",
+      "py_async": "client.agents.code.apply",
+      "ts": null,
+      "ts_status": "NOT-OFFERED",
+      "reason": "The portable-definition TypeScript facade is not offered in this preview; no implementation or acceptance is claimed.",
+      "operations": [
+        "platform.agents.roster",
+        "platform.agents.get",
+        "platform.agents.create",
+        "platform.agents.update"
+      ]
+    },
+    {
+      "py": "client.agents.code.export",
+      "py_async": "client.agents.code.export",
+      "ts": null,
+      "ts_status": "NOT-OFFERED",
+      "reason": "The portable-definition TypeScript facade is not offered in this preview; no implementation or acceptance is claimed.",
+      "operations": [
+        "platform.agents.get"
+      ]
+    },
+    {
+      "py": "client.agents.code.import_definition",
+      "py_async": "client.agents.code.import_definition",
+      "ts": null,
+      "ts_status": "NOT-OFFERED",
+      "reason": "The portable-definition TypeScript facade is not offered in this preview; no implementation or acceptance is claimed.",
+      "operations": [
+        "platform.agents.roster",
+        "platform.agents.get",
+        "platform.agents.create",
+        "platform.agents.update"
+      ]
+    }
+  ]
+}

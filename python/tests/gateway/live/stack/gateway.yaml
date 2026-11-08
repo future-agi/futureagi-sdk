@@ -1,0 +1,130 @@
+# agentcc-gateway config for the live suites (gateway pinned at
+# live-gateway-source). The gateway expands ${VAR} from its environment at load
+# (internal/config/config.go Load: os.ExpandEnv); run-wire-suite.sh sets every
+# variable below to a value made on the VM for this run. No provider key
+# exists here: both providers are the local mock upstream.
+server:
+  port: 8090
+  host: "127.0.0.1"
+  default_request_timeout: 30s
+  max_request_timeout: 60s
+
+providers:
+  # The default provider for every model the suites ask for.
+  mock-a:
+    base_url: "${MOCK_URL}"
+    api_key: "${MOCK_UPSTREAM_KEY}"
+    api_format: "openai"
+    default_timeout: 30s
+    headers:
+      x-mock-provider: "mock-a"
+    models:
+      - gpt-4o-mini
+      - mock-slow
+      - mock-fails # always 503 (mock_upstream.py); org-fallback's chain sends it on to gpt-4o-mini
+      - text-embedding-3-small
+      - dall-e-3
+      - tts-1
+      - whisper-1
+  # Reached only through the conditional route below: the D-06 effect proof
+  # (metadata sent as JSON x-agentcc-metadata routes here; per-key
+  # x-agentcc-metadata-<k> headers do not).
+  mock-b:
+    base_url: "${MOCK_URL}"
+    api_key: "${MOCK_UPSTREAM_KEY}"
+    api_format: "openai"
+    default_timeout: 30s
+    headers:
+      x-mock-provider: "mock-b"
+    models:
+      - mock-b-only
+
+# Virtual keys only, made by run-wire-suite.sh for this run. A key minted through
+# POST /-/keys is type byok: it may use only its org's own providers, never this
+# file's (handlers.go resolveProviderFor). An org provider would serve it only on a
+# private address with AGENTCC_ALLOW_PRIVATE_PROVIDER_URLS=true and enabled: true in
+# its entry; a loopback provider URL is refused in every case, and the mock is on
+# loopback. So the suites' keys are registered here as type internal, the type
+# AGENTCC_INTERNAL_API_KEY seeds (config.go). run-wire-suite.sh also mints a byok key with
+# the admin token (AGENTCC_ADMIN_TOKEN) and the suites record its answer.
+auth:
+  enabled: true
+  keys:
+    - name: "live-plain"
+      key: "${GW_LIVE_KEY_PLAIN}"
+      owner: "live-owner"
+      key_type: "internal"
+      metadata:
+        org_id: "org-live" # the org config run-wire-suite.sh PUTs turns the cache on (opt-in per org)
+    - name: "live-override" # D-05 and the guardrail_policy effect
+      key: "${GW_LIVE_KEY_OVERRIDE}"
+      owner: "live-owner"
+      key_type: "internal"
+      metadata:
+        org_id: "org-live"
+        allow_policy_override: "true"
+    - name: "live-fallback" # its org's config turns failover and a model fallback chain on
+      key: "${GW_LIVE_KEY_FALLBACK}"
+      owner: "live-owner"
+      key_type: "internal"
+      metadata:
+        org_id: "org-fallback"
+
+routing:
+  # Only mock-routed has routing targets, so only its answers carry the router's
+  # strategy (x-agentcc-routing-strategy); every other model resolves to its one provider.
+  targets:
+    mock-routed:
+      - provider: mock-a
+      - provider: mock-b
+  model_timeouts:
+    mock-slow: 2s # the deadline cut of a stalled stream (upstream_timeout_cut_after_content)
+  conditional_routes:
+    - name: "tier-gold-to-mock-b"
+      priority: 10
+      condition:
+        field: "metadata.tier"
+        # The loader runs os.ExpandEnv over the whole file (config.go loadFromFile),
+        # which turns a literal $eq into "" ("leaf condition requires an op");
+        # run-wire-suite.sh sets GW_OP_EQ='$eq'.
+        op: "${GW_OP_EQ}"
+        value: "gold"
+      action:
+        provider: "mock-b"
+
+cache:
+  enabled: true
+  default_ttl: 5m
+  max_entries: 1000
+
+cost_tracking:
+  enabled: true
+  custom_pricing:
+    gpt-4o-mini:
+      input_per_mtok: 1000.0
+      output_per_mtok: 2000.0
+
+guardrails:
+  enabled: true
+  fail_open: false
+  default_timeout: 5s
+  rules:
+    - name: "keyword-blocklist"
+      stage: "post"
+      mode: "sync"
+      action: "block"
+      threshold: 0.5
+      config:
+        words: ["${MOCK_BLOCK_WORD}"]
+  streaming:
+    enabled: true
+    check_interval: 64 # characters; the mock's scenarios cross it on purpose
+    failure_action: "stop"
+
+# Default allow and expose lists (middleware/cors.go): the browser CORS case
+# measures exactly those.
+cors:
+  enabled: true
+
+logging:
+  level: info

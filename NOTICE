@@ -5,3 +5,9 @@ This product is part of the Future AGI open-source ecosystem
 (https://github.com/future-agi/future-agi) and is licensed under the Apache
 License, Version 2.0 (the "License"). See the LICENSE file for the full
 license text, or obtain a copy at http://www.apache.org/licenses/LICENSE-2.0.
+
+The fi.evals package (python/fi/evals) is derived from ai-evaluation 1.1.0
+(https://pypi.org/project/ai-evaluation/), Copyright (c) Future AGI, Inc.,
+licensed under the Apache License, Version 2.0. Its files are kept as
+published; the few that differ are listed, with the reason, in
+python/tests/evals/fixtures/upstream-ai-evaluation-1.1.0.json.

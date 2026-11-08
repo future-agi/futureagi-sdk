@@ -1,0 +1,68 @@
+{
+ "about": "The parity case catalog: each bullet of the parity case list (the cases both recorders run), the case-id prefixes that cover it in each language, and what every golden must contain. python/tests/gateway/parity/test_parity_catalog.py fails if a bullet has no case in a golden that can run it, if a required item is missing, or if a recorded case belongs to no bullet.",
+ "goldens": {
+  "py-agentcc-1.0.0": {"lang": "py", "source": "PyPI agentcc 1.0.0 wheel (sha256 2eb341ee1ad626e663d6bb875a44145c425ea84d457d0e85dab1c1cd18fea803)", "runs_cases": true},
+  "ts-client-1.0.0-esm": {"lang": "ts", "source": "npm @agentcc/client 1.0.0 (shasum 81b5315b2c79c14d9dd6c1e49a82997c5944745e), import()", "runs_cases": true},
+  "ts-client-1.0.0-cjs": {"lang": "ts", "source": "npm @agentcc/client 1.0.0, require(): every load fails (D-01d / D-13), so no case runs", "runs_cases": false},
+  "ts-client-1.0.1-esm": {"lang": "ts", "source": "@agentcc/client 1.0.1 packed from agent-command-center-sdk client-patch-source, import()", "runs_cases": true},
+  "ts-client-1.0.1-cjs": {"lang": "ts", "source": "@agentcc/client 1.0.1 packed from client-patch-source, require()", "runs_cases": true},
+  "ts-integrations-1.0.0-esm": {"lang": "ts-integrations", "source": "npm @agentcc/{client,langchain,llamaindex,react,vercel} 1.0.0, import()", "runs_cases": true},
+  "ts-integrations-1.0.0-cjs": {"lang": "ts-integrations", "source": "the same five packages, require()", "runs_cases": true}
+ },
+ "bullets": [
+  {"id": "resources", "text": "every resource method: method, path, query, body or multipart, and every header", "py": ["resource."], "ts": ["resource."]},
+  {"id": "params", "text": "each per-request parameter alone and combined (plus client options and with_options)", "py": ["param.", "client_option.", "with_options."], "ts": ["param.", "client_option.", "with_options."]},
+  {"id": "header_merge", "text": "a same-header collision at each of the 7 merge levels", "py": ["header_merge."], "ts": ["header_merge."]},
+  {"id": "config", "text": "GatewayConfig, create_headers, Session", "py": ["config.", "create_headers.", "session."], "ts": ["config.", "create_headers.", "session."]},
+  {"id": "response_headers", "text": "every x-agentcc-* and x-ratelimit-* response header", "py": ["response_header."], "ts": ["response_header."]},
+  {"id": "statuses", "text": "statuses 246, 400, 401, 403, 404, 408, 413, 422, 429, 446, 500, 502, 503, 504, with envelope variants", "py": ["status."], "ts": ["status."]},
+  {"id": "retry", "text": "Retry-After values, attempt counts and recorded sleeps", "py": ["retry."], "ts": ["retry."]},
+  {"id": "timeouts", "text": "timeouts", "py": ["timeout."], "ts": ["timeout."]},
+  {"id": "stream_fixture", "text": "the 6 stream-error fixture cases (stream-error-frames.json, provenance stream-fixture-source)", "py": ["stream.fixture."], "ts": ["stream.fixture."]},
+  {"id": "stream_extra", "text": "4 new stream cases: cache-hit JSON to stream:true, event: error on /v1/responses, late error after finish_reason, guardrail-header open (TS 1.x has no /v1/responses resource, so TS records 3)", "py": ["stream.extra."], "ts": ["stream.extra."]},
+  {"id": "sse", "text": "malformed SSE, events(), final usage", "py": ["stream.malformed.", "stream.text_plain_200", "stream.responses."], "ts": ["stream.malformed.", "stream.text_plain_200", "stream.abort"]},
+  {"id": "utilities", "text": "every pure utility (S bucket: compared in the shim repo)", "py": ["utility."], "ts": ["utility."]},
+  {"id": "mocks", "text": "testing mocks", "py": ["mock."], "ts": ["mock."]},
+  {"id": "env_matrix", "text": "the env matrix including FI_* / OPENAI_* isolation", "py": ["env."], "ts": ["env."]},
+  {"id": "surface", "text": "the public surface: __all__ and export key sets, inspect.signature, MRO, error str / repr / args / pickle, model_json_schema(), normalised .d.ts (TS export keys and .d.ts live in each golden's index.json)", "py": ["surface."], "ts": ["surface."]},
+  {"id": "express_nextjs", "text": "./express agentccMiddleware and ./nextjs createAgentCCClient / streamResponse", "py": [], "ts": ["integration.express", "integration.nextjs."]},
+  {"id": "integrations", "text": "TS integrations through an injected fetch: @agentcc/langchain, @agentcc/llamaindex, @agentcc/vercel, @agentcc/react", "py": [], "ts-integrations": ["integration."]}
+ ],
+ "required": {
+  "py-agentcc-1.0.0": {
+   "statuses_x_envelopes": true,
+   "stream_fixture_names": true,
+   "stream_extra_names": ["cache_hit_json_to_stream", "responses_event_error", "late_error_after_finish_reason", "guardrail_header_open"],
+   "modes": ["sync", "async"]
+  },
+  "ts-client-1.0.0-esm": {"statuses_x_envelopes": true, "stream_fixture_names": true, "stream_extra_names": ["cache_hit_json_to_stream", "late_error_after_finish_reason", "guardrail_header_open"]},
+  "ts-client-1.0.1-esm": {"statuses_x_envelopes": true, "stream_fixture_names": true, "stream_extra_names": ["cache_hit_json_to_stream", "late_error_after_finish_reason", "guardrail_header_open"]},
+  "ts-client-1.0.1-cjs": {"statuses_x_envelopes": true, "stream_fixture_names": true, "stream_extra_names": ["cache_hit_json_to_stream", "late_error_after_finish_reason", "guardrail_header_open"]},
+  "ts-integrations-1.0.0-esm": {"case_ids": ["integration.langchain", "integration.llamaindex", "integration.vercel.defaults", "integration.vercel.key_env_only", "integration.vercel.explicit", "integration.react.chat", "integration.react.completion", "integration.react.object"]}
+ },
+ "comparisons": {
+  "about": "The comparisons a label may name (python/tests/gateway/parity/labels.py, gateway-client/tests/parity/labels.mjs). A new recording is judged only against the baselines listed for it: Python against py-agentcc-1.0.0; a TypeScript client against ts-client-1.0.1 in the same module format (the 1.0.0 to 1.0.1 step is D-01, proven between the two fixed goldens); TypeScript integrations against ts-integrations-1.0.0 in the same format. A label whose new side is a golden compares two fixed goldens, so its --new must be that golden byte for byte.",
+  "new_recordings": {
+   "e-new-py": ["py-agentcc-1.0.0"],
+   "e-shim-py": ["py-agentcc-1.0.0"],
+   "e-new-ts-esm": ["ts-client-1.0.1-esm", "ts-integrations-1.0.0-esm"],
+   "e-new-ts-cjs": ["ts-client-1.0.1-cjs", "ts-integrations-1.0.0-cjs"],
+   "e-shim-ts-esm": ["ts-client-1.0.1-esm", "ts-integrations-1.0.0-esm"],
+   "e-shim-ts-cjs": ["ts-client-1.0.1-cjs", "ts-integrations-1.0.0-cjs"]
+  }
+ },
+ "twins": {
+  "about": "Areas whose rules hold in both languages (D-07 and D-14: key and base-URL resolution), so each language records the other's case ids. python/tests/gateway/parity/test_parity_twins.py compares the mode-stripped Python ids with every TypeScript client golden's ids under the prefix and fails on any id one side lacks, unless a language-only prefix below names it with its reason.",
+  "env_matrix": {
+   "prefix": "env.",
+   "py_only": {"env.async.": "the async client: TypeScript has one client"},
+   "ts_only": {}
+  }
+ },
+ "outside_this_recorder": [
+  {"item": "E-STOCK (stock openai through openai_kwargs() / openaiOptions())", "owner": "the live wire suites (python/tests/gateway/live, gateway-client/tests/live), which need the stock-SDK helpers of both ports and a live gateway at live-gateway-source"},
+  {"item": "E-SHIM and the shim-only checks (68 module paths both import orders, typing-fixture diagnostics, mixed install, pip --python-version 3.9, frozen-code grep)", "owner": "the agentcc 2.0 shim repository, recorded with this same recorder against the 2.0 shims"},
+  {"item": "D-18 browser construction and CORS", "owner": "the TypeScript port's jsdom unit and a real-browser case"},
+  {"item": "pyright / mypy reveal_type on the installed wheel", "owner": "the Python port (typing proof) and the agentcc 2.0 shim (E-OLD vs E-SHIM diagnostics)"}
+ ]
+}

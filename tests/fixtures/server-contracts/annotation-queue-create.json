@@ -1,0 +1,317 @@
+{
+  "about": "Fields of POST /model-hub/annotation-queues/ (AnnotationQueueSerializer), what AnnotationQueueViewSet saves on create, and the request of POST /model-hub/annotation-queues/get-or-create-default/, parsed from the backend source. Written by scripts/snapshot-annotation-queue-contract.py; do not edit by hand.",
+  "source": {
+    "repository": "https://github.com/future-agi/future-agi",
+    "sha256": "80a1301e17b88e90b84ea65de49712cf593665e340745b1c6a01eac04cb6d2db",
+    "files": [
+      {
+        "path": "futureagi/model_hub/serializers/annotation_queues.py",
+        "sha256": "6d07da3ffecee914d46c38ac8fdd124c57a9912745f546d203978241883ef9c2"
+      },
+      {
+        "path": "futureagi/model_hub/models/annotation_queues.py",
+        "sha256": "62ad665b2b2a5b47b0bdb21e9ea332b666a60991cb903d1a6c755d8d709481d1"
+      },
+      {
+        "path": "futureagi/tfc/utils/base_model.py",
+        "sha256": "4faf30558a757ea5a2888a81daea432fb0aeaef52494aba2612d10f90e409ba3"
+      },
+      {
+        "path": "futureagi/model_hub/views/annotation_queues.py",
+        "sha256": "49c20cb76946a7273dc434edee3f0406e2531dce105c887398756e5a109e7e6c"
+      }
+    ]
+  },
+  "refresh": "git -C <future-agi checkout> fetch origin dev && python3 scripts/snapshot-annotation-queue-contract.py --backend <future-agi checkout> --ref origin/dev",
+  "endpoint": {
+    "method": "POST",
+    "path": "/model-hub/annotation-queues/"
+  },
+  "serializer": {
+    "class": "AnnotationQueueSerializer",
+    "bases": [
+      "ModelSerializer"
+    ],
+    "meta_fields": [
+      "id",
+      "name",
+      "description",
+      "instructions",
+      "status",
+      "assignment_strategy",
+      "annotations_required",
+      "reservation_timeout_minutes",
+      "requires_review",
+      "auto_assign",
+      "organization",
+      "project",
+      "dataset",
+      "agent_definition",
+      "is_default",
+      "labels",
+      "annotators",
+      "label_ids",
+      "annotator_ids",
+      "annotator_roles",
+      "label_count",
+      "annotator_count",
+      "item_count",
+      "completed_count",
+      "created_by",
+      "created_by_name",
+      "viewer_role",
+      "viewer_roles",
+      "deleted",
+      "created_at"
+    ],
+    "read_only_fields": [
+      "organization",
+      "created_by",
+      "status",
+      "project",
+      "dataset",
+      "agent_definition",
+      "is_default"
+    ],
+    "declared_fields": {
+      "labels": {
+        "field": "QueueLabelNestedSerializer",
+        "many": true,
+        "read_only": true
+      },
+      "annotators": {
+        "field": "QueueAnnotatorNestedSerializer",
+        "many": true,
+        "read_only": true
+      },
+      "label_ids": {
+        "field": "ListField",
+        "child": "UUIDField",
+        "write_only": true,
+        "required": true,
+        "min_length": 1
+      },
+      "annotator_ids": {
+        "field": "ListField",
+        "child": "UUIDField",
+        "write_only": true,
+        "required": false,
+        "has_default": true
+      },
+      "annotator_roles": {
+        "field": "DictField",
+        "child": "JSONField",
+        "write_only": true,
+        "required": false,
+        "has_default": true
+      },
+      "label_count": {
+        "field": "IntegerField",
+        "read_only": true,
+        "required": false
+      },
+      "annotator_count": {
+        "field": "IntegerField",
+        "read_only": true,
+        "required": false
+      },
+      "item_count": {
+        "field": "IntegerField",
+        "read_only": true,
+        "required": false
+      },
+      "completed_count": {
+        "field": "IntegerField",
+        "read_only": true,
+        "required": false
+      },
+      "created_by_name": {
+        "field": "CharField",
+        "read_only": true,
+        "has_default": true,
+        "allow_null": true
+      },
+      "viewer_role": {
+        "field": "SerializerMethodField"
+      },
+      "viewer_roles": {
+        "field": "SerializerMethodField"
+      },
+      "deleted": {
+        "field": "BooleanField",
+        "read_only": true
+      }
+    },
+    "scope_ids_read": {
+      "validate_name": [
+        "agent_definition_id",
+        "dataset_id",
+        "project_id"
+      ]
+    }
+  },
+  "model_fields": {
+    "id": {
+      "field": "UUIDField",
+      "primary_key": true,
+      "has_default": true,
+      "editable": false
+    },
+    "name": {
+      "field": "CharField"
+    },
+    "description": {
+      "field": "TextField",
+      "null": true,
+      "blank": true
+    },
+    "instructions": {
+      "field": "TextField",
+      "null": true,
+      "blank": true
+    },
+    "status": {
+      "field": "CharField",
+      "has_default": true
+    },
+    "assignment_strategy": {
+      "field": "CharField",
+      "has_default": true
+    },
+    "annotations_required": {
+      "field": "IntegerField",
+      "has_default": true
+    },
+    "reservation_timeout_minutes": {
+      "field": "IntegerField",
+      "has_default": true
+    },
+    "requires_review": {
+      "field": "BooleanField",
+      "has_default": true
+    },
+    "auto_assign": {
+      "field": "BooleanField",
+      "has_default": true
+    },
+    "organization": {
+      "field": "ForeignKey"
+    },
+    "project": {
+      "field": "ForeignKey",
+      "null": true,
+      "blank": true
+    },
+    "dataset": {
+      "field": "ForeignKey",
+      "null": true,
+      "blank": true
+    },
+    "agent_definition": {
+      "field": "ForeignKey",
+      "null": true,
+      "blank": true
+    },
+    "is_default": {
+      "field": "BooleanField",
+      "has_default": true
+    },
+    "created_by": {
+      "field": "ForeignKey",
+      "null": true,
+      "blank": true
+    },
+    "created_at": {
+      "field": "DateTimeField",
+      "auto_now_add": true,
+      "inherited": true
+    }
+  },
+  "create": {
+    "writable": [
+      "name",
+      "description",
+      "instructions",
+      "assignment_strategy",
+      "annotations_required",
+      "reservation_timeout_minutes",
+      "requires_review",
+      "auto_assign",
+      "label_ids",
+      "annotator_ids",
+      "annotator_roles"
+    ],
+    "required": [
+      "name",
+      "label_ids"
+    ],
+    "read_only": [
+      "id",
+      "status",
+      "organization",
+      "project",
+      "dataset",
+      "agent_definition",
+      "is_default",
+      "labels",
+      "annotators",
+      "label_count",
+      "annotator_count",
+      "item_count",
+      "completed_count",
+      "created_by",
+      "created_by_name",
+      "viewer_role",
+      "viewer_roles",
+      "deleted",
+      "created_at"
+    ],
+    "write_only": [
+      "label_ids",
+      "annotator_ids",
+      "annotator_roles"
+    ]
+  },
+  "view": {
+    "class": "AnnotationQueueViewSet",
+    "serializer_class": "AnnotationQueueSerializer",
+    "perform_create_saves": [
+      "organization",
+      "workspace",
+      "created_by"
+    ],
+    "scope_ids_read": {}
+  },
+  "get_or_create_default": {
+    "view_method": "get_or_create_default",
+    "methods": [
+      "POST"
+    ],
+    "path": "/model-hub/annotation-queues/get-or-create-default/",
+    "request_serializer": {
+      "class": "QueueDefaultRequestSerializer",
+      "bases": [
+        "StrictInputSerializer"
+      ],
+      "declared_fields": {
+        "project_id": {
+          "field": "UUIDField",
+          "required": false
+        },
+        "dataset_id": {
+          "field": "UUIDField",
+          "required": false
+        },
+        "agent_definition_id": {
+          "field": "UUIDField",
+          "required": false
+        }
+      },
+      "exactly_one_of": [
+        "project_id",
+        "dataset_id",
+        "agent_definition_id"
+      ]
+    }
+  }
+}

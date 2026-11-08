@@ -1,0 +1,10 @@
+{
+  "name": "@future-agi/sdk-gateway-live-stock",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The stock openai-node SDK the live wire suite points at agentcc-gateway through openaiOptions(). Test-only, never published; openai 4.104.0 is the version gateway-client/scripts/pack-checks.sh's install matrix uses.",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "openai": "4.104.0"
+  }
+}

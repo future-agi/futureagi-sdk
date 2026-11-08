@@ -17,6 +17,7 @@ from ._errors import (
     APIError,
     AuthenticationError,
     BadRequestError,
+    BillingUnavailableError,
     ConflictError,
     FutureAGIError,
     InternalServerError,
@@ -27,11 +28,13 @@ from ._errors import (
     ResponseShapeWarning,
     ResponseValidationError,
     UnprocessableEntityError,
+    WrongRegionError,
 )
 from ._pagination import AsyncPager, Page, SyncPager
 from ._resource import Resource, ResourceSet
 from ._stability import BetaWarning
 from ._transport import NOT_GIVEN, FileInput, NotGiven, RequestOptions
+from .managed_credits import AutoReload, GatewayCredits, ManagedCreditSummary
 
 __all__ = [
     "APIConnectionError",
@@ -39,13 +42,17 @@ __all__ = [
     "AsyncClient",
     "AsyncPager",
     "AuthenticationError",
+    "AutoReload",
     "BadRequestError",
     "BetaWarning",
+    "BillingUnavailableError",
     "Client",
     "ConflictError",
     "FileInput",
     "FutureAGIError",
+    "GatewayCredits",
     "InternalServerError",
+    "ManagedCreditSummary",
     "NOT_GIVEN",
     "NotGiven",
     "NotFoundError",
@@ -60,5 +67,6 @@ __all__ = [
     "ResponseValidationError",
     "SyncPager",
     "UnprocessableEntityError",
+    "WrongRegionError",
     "models",
 ]

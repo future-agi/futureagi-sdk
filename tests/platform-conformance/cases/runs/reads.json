@@ -1,0 +1,755 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "runs",
+  "about": "Runs (conversations): reads, events (SSE replay, resume, long-poll) and cross-tenant refusals.",
+  "cases": [
+    {
+      "id": "runs.list.ok",
+      "title": "List conversations (runs)",
+      "sdk": {
+        "family": "runs",
+        "method": "list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "conversations": "array"
+        }
+      }
+    },
+    {
+      "id": "runs.list.page",
+      "title": "A page of one conversation, with a cursor when there are more",
+      "sdk": {
+        "family": "runs",
+        "method": "list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "query": {
+          "limit": 1
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "runs.get.ok",
+      "title": "Get one run with its messages",
+      "sdk": {
+        "family": "runs",
+        "method": "get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "conversation.id": {
+            "equals": "${res.conversation}"
+          },
+          "messages": "array"
+        }
+      }
+    },
+    {
+      "id": "runs.get.cross-tenant",
+      "title": "Org B's credential on org A's run answers 404, every time",
+      "sdk": {
+        "family": "runs",
+        "method": "get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        }
+      },
+      "repeat": 20,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "runs.get.forged-scope",
+      "title": "Org B's key with org A's scope selectors cannot read org A's run",
+      "sdk": {
+        "family": "runs",
+        "method": "get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A",
+        "scopeOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        }
+      },
+      "repeat": 5,
+      "expect": {
+        "status": [
+          401,
+          403,
+          404
+        ]
+      },
+      "expectByMode": {
+        "ee-key": {
+          "status": 403,
+          "code": "workspace_scope_denied",
+          "errorClass": "PermissionDeniedError"
+        }
+      }
+    },
+    {
+      "id": "runs.list.forged-scope",
+      "title": "Org B's key with org A's scope selectors cannot list org A's runs",
+      "sdk": {
+        "family": "runs",
+        "method": "list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A",
+        "scopeOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "repeat": 5,
+      "expect": {
+        "status": [
+          401,
+          403,
+          404
+        ]
+      },
+      "expectByMode": {
+        "ee-key": {
+          "status": 403,
+          "code": "workspace_scope_denied",
+          "errorClass": "PermissionDeniedError"
+        }
+      }
+    },
+    {
+      "id": "runs.get.unknown-id",
+      "title": "A run id that does not exist answers 404",
+      "sdk": {
+        "family": "runs",
+        "method": "get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "params": {
+          "id": "conv-conformance-missing"
+        }
+      },
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "runs.events.replay",
+      "title": "Read a finished run's durable events from the start to done",
+      "sdk": {
+        "family": "runs",
+        "method": "events"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}/events"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        },
+        "stream": {
+          "kind": "sse-get",
+          "maxMs": 20000,
+          "until": [
+            "done"
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "events": {
+          "include": [
+            "done"
+          ],
+          "minCount": 2
+        }
+      }
+    },
+    {
+      "id": "runs.events.resume",
+      "title": "Resume after a sequence with Last-Event-ID: nothing at or before it comes back",
+      "sdk": {
+        "family": "runs",
+        "method": "events"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}/events"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        },
+        "headers": {
+          "last-event-id": "1"
+        },
+        "stream": {
+          "kind": "sse-get",
+          "maxMs": 20000,
+          "until": [
+            "done"
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "events": {
+          "afterSeq": 1
+        }
+      }
+    },
+    {
+      "id": "runs.events.poll",
+      "title": "The long-poll transport answers JSON for edge callers",
+      "sdk": {
+        "family": "runs",
+        "method": "events"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}/events"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        },
+        "query": {
+          "transport": "poll",
+          "wait": 1000
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": false
+      }
+    },
+    {
+      "id": "runs.events.cross-tenant",
+      "title": "Org B cannot open org A's event stream",
+      "sdk": {
+        "family": "runs",
+        "method": "events"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}/events"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        },
+        "stream": {
+          "kind": "sse-get",
+          "maxMs": 5000
+        }
+      },
+      "repeat": 5,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "runs.tree.ok",
+      "title": "Read a run's task tree",
+      "sdk": {
+        "family": "runs",
+        "method": "tree"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}/tree"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "runs.observations.ok",
+      "title": "Read a run's observations",
+      "sdk": {
+        "family": "runs",
+        "method": "observations"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}/observations"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "runs.approvals.ok",
+      "title": "Read a run's approvals",
+      "sdk": {
+        "family": "runs",
+        "method": "approvals"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}/approvals"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "runs.proof-pack.ok",
+      "title": "Read a run's proof pack",
+      "sdk": {
+        "family": "runs",
+        "method": "proofPack"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}/proof-pack"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "runs.evidence.ok",
+      "title": "Read a run's evidence",
+      "sdk": {
+        "family": "runs",
+        "method": "evidence"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}/evidence"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "runs.control-status.ok",
+      "title": "Read a run's control status",
+      "sdk": {
+        "family": "runs",
+        "method": "controlStatus"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}/control-status"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "runs.rating.ok",
+      "title": "Read a run's ratings",
+      "sdk": {
+        "family": "runs",
+        "method": "rating.get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}/rating"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "runs.proof-pack.cross-tenant",
+      "title": "Org B cannot read org A's proof pack",
+      "sdk": {
+        "family": "runs",
+        "method": "proofPack"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/conversations/{id}/proof-pack"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "conversation"
+      ],
+      "call": {
+        "params": {
+          "id": "${res.conversation}"
+        }
+      },
+      "repeat": 5,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    }
+  ]
+}

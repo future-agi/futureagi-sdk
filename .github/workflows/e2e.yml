@@ -62,12 +62,14 @@ jobs:
       matrix:
         include:
           # The floor and a current interpreter; TypeScript rides along once.
-          - python: "3.9"
+          - python: "3.10"
             typescript: false
           - python: "3.12"
             typescript: true
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Pick the backend image tag
         env:
@@ -89,6 +91,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: future-agi/future-agi
+          persist-credentials: false
           ref: ${{ env.BACKEND_REF }}
           path: future-agi
           sparse-checkout: |
@@ -126,7 +129,7 @@ jobs:
       - name: Install the Python SDK
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ./python pytest pyyaml
+          python -m pip install -e ./python "pytest>=8.3.3,<9" "pytest-asyncio>=0.24,<0.25" respx pyyaml
 
       - name: Sign up an account and write .env.local
         run: python sdkgen/local_api_key.py --signup --base-url "$FI_BASE_URL" --label "gh${{ github.run_id }}"
@@ -138,6 +141,7 @@ jobs:
         if: matrix.typescript
         with:
           version: 8.15.0
+          package_json_file: typescript/futureagi/package.json
       - uses: actions/setup-node@v4
         if: matrix.typescript
         with:
@@ -148,10 +152,15 @@ jobs:
         if: matrix.typescript
         working-directory: typescript/futureagi
         run: pnpm install --ignore-workspace --frozen-lockfile --ignore-scripts
-      - name: TypeScript live suite
+      - name: TypeScript released platform live suite
         if: matrix.typescript
         working-directory: typescript/futureagi
         run: pnpm run test:live
+      - name: TypeScript facade live smoke
+        if: matrix.typescript
+        working-directory: typescript/futureagi
+        # The facade script requires env vars; parse the signup file without sourcing it.
+        run: node --env-file=../../.env.local --import tsx tests/live/smoke.ts
 
       - name: Dump the stack on failure
         if: failure()

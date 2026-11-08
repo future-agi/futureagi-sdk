@@ -37,16 +37,26 @@ class AgentCCMetadata(BaseModel):
     routing_strategy: str | None = None
     timeout_ms: int | None = None
     ratelimit: RateLimitInfo | None = None
+    config_ignored: list[str] | None = None
+    """``x-agentcc-config-ignored``: the GatewayConfig sections and cache fields the
+    gateway did not apply, sorted (``["cache.strategy", "fallback"]``); ``None`` if absent."""
+    client_request_id: str | None = None
+    """``x-agentcc-client-request-id``: the ``request_id=`` you sent, echoed back.
+    ``request_id`` is always the gateway's own id."""
     http_response: Any = Field(default=None, exclude=True)
 
     @classmethod
-    def from_headers(cls, headers: Mapping[str, str], *, http_response: Any = None) -> AgentCCMetadata:
+    def from_headers(
+        cls, headers: Mapping[str, str], *, http_response: Any = None
+    ) -> AgentCCMetadata:
         """Parse ``x-agentcc-*`` response headers into a :class:`AgentCCMetadata` instance."""
         from fi.gateway._constants import (
             HEADER_RATELIMIT_LIMIT,
             HEADER_RATELIMIT_REMAINING,
             HEADER_RATELIMIT_RESET,
             HEADER_RESPONSE_CACHE,
+            HEADER_RESPONSE_CLIENT_REQUEST_ID,
+            HEADER_RESPONSE_CONFIG_IGNORED,
             HEADER_RESPONSE_COST,
             HEADER_RESPONSE_FALLBACK_USED,
             HEADER_RESPONSE_GUARDRAIL_TRIGGERED,
@@ -65,7 +75,9 @@ class AgentCCMetadata(BaseModel):
         rl_reset = _int_or_none(headers.get(HEADER_RATELIMIT_RESET))
         ratelimit: RateLimitInfo | None = None
         if rl_limit is not None or rl_remaining is not None or rl_reset is not None:
-            ratelimit = RateLimitInfo(limit=rl_limit, remaining=rl_remaining, reset=rl_reset)
+            ratelimit = RateLimitInfo(
+                limit=rl_limit, remaining=rl_remaining, reset=rl_reset
+            )
 
         return cls(
             request_id=headers.get(HEADER_RESPONSE_REQUEST_ID, "unknown"),
@@ -75,11 +87,17 @@ class AgentCCMetadata(BaseModel):
             cost=_float_or_none(headers.get(HEADER_RESPONSE_COST)),
             cache_status=headers.get(HEADER_RESPONSE_CACHE),
             model_used=headers.get(HEADER_RESPONSE_MODEL_USED),
-            guardrail_triggered=headers.get(HEADER_RESPONSE_GUARDRAIL_TRIGGERED, "").lower() == "true",
-            fallback_used=headers.get(HEADER_RESPONSE_FALLBACK_USED, "").lower() == "true",
+            guardrail_triggered=headers.get(
+                HEADER_RESPONSE_GUARDRAIL_TRIGGERED, ""
+            ).lower()
+            == "true",
+            fallback_used=headers.get(HEADER_RESPONSE_FALLBACK_USED, "").lower()
+            == "true",
             routing_strategy=headers.get(HEADER_RESPONSE_ROUTING_STRATEGY),
             timeout_ms=_int_or_none(headers.get(HEADER_RESPONSE_TIMEOUT)),
             ratelimit=ratelimit,
+            config_ignored=_csv_or_none(headers.get(HEADER_RESPONSE_CONFIG_IGNORED)),
+            client_request_id=headers.get(HEADER_RESPONSE_CLIENT_REQUEST_ID),
             http_response=http_response,
         )
 
@@ -100,3 +118,9 @@ def _float_or_none(val: str | None) -> float | None:
         return float(val)
     except (ValueError, TypeError):
         return None
+
+
+def _csv_or_none(val: str | None) -> list[str] | None:
+    if val is None:
+        return None
+    return [part.strip() for part in val.split(",") if part.strip()]

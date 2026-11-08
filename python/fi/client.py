@@ -4,14 +4,16 @@ from typing import Dict, List, Optional, Union
 from requests import Response
 
 from fi.api.auth import APIKeyAuth, ResponseHandler
+# Published 0.6.13 imports remain aliases of their canonical definitions.
 from fi.api.types import HttpMethod, RequestConfig
+from fi.utils.routes import Routes
+from fi.errors import PlatformNotConfiguredError
 from fi.utils.constants import (
     MAX_FUTURE_YEARS_FROM_CURRENT_TIME,
     MAX_PAST_YEARS_FROM_CURRENT_TIME,
 )
 from fi.utils.errors import InvalidSupportedType, InvalidValueType, MissingRequiredKey
 from fi.utils.logging import logger
-from fi.utils.routes import Routes
 from fi.utils.types import Environments, ModelTypes
 from fi.utils.utils import is_timestamp_in_range
 
@@ -49,7 +51,7 @@ class ClientResponseHandler(ResponseHandler[Dict, None]):
 
 
 class Client(APIKeyAuth):
-    """Client for logging model predictions and conversations"""
+    """Legacy model-logging client; ``log`` is unsupported on the current platform."""
 
     def __init__(
         self,
@@ -264,55 +266,23 @@ class Client(APIKeyAuth):
         tags: Optional[Dict[str, Union[str, bool, float, int]]] = None,
         timeout: Optional[int] = None,
     ) -> Response:
-        """Log model predictions and conversations
+        """Unsupported on the current platform; retained for source compatibility.
 
-        Args:
-            model_id: Model identifier
-            model_type: Type of model (GENERATIVE_LLM or GENERATIVE_IMAGE)
-            environment: Deployment environment
-            model_version: Optional model version identifier
-            prediction_timestamp: Optional timestamp of prediction
-            conversation: Optional conversation data containing chat_history or chat_graph
-            tags: Optional tags for the log entry
-            timeout: Optional timeout value for the request
-
-        Returns:
-            Response object containing the logging result
-
-        Raises:
-            InvalidValueType: If parameter types are invalid
-            InvalidSupportedType: If model type is not supported
-            MissingRequiredKey: If required conversation keys are missing
-            ValueError: If timestamp is invalid
-            Exception: If the API request fails
+        The Future AGI platform removed ``POST /sdk/api/v1/log/model/`` before
+        version 1.56.1. No replacement accepts its model-log payload.
+        Use traceAI instrumentation to emit traces and
+        ``client.tracing`` on a ``FutureAGIClient`` to query stored traces; neither
+        is a drop-in model-log replacement. Raises
+        ``fi.errors.PlatformNotConfiguredError`` locally, before validating a
+        payload or making any HTTP request.
         """
-        self._validate_params(
-            model_id=model_id,
-            model_type=model_type,
-            environment=environment,
-            model_version=model_version,
-            prediction_timestamp=prediction_timestamp,
-            conversation=conversation,
-            tags=tags,
+        raise PlatformNotConfiguredError(
+            "Client.log is unsupported on the current platform: "
+            "POST /sdk/api/v1/log/model/ was removed before Future AGI platform 1.56.1; "
+            "there is no replacement accepting the legacy model-log payload. "
+            "Use traceAI instrumentation (https://github.com/future-agi/traceAI) to emit traces "
+            "and client.tracing on a FutureAGIClient to query stored traces; "
+            "these are not drop-in model-log replacements.",
+            code="unsupported_operation",
+            operation="Client.log",
         )
-
-        payload = {
-            "model_id": model_id,
-            "model_type": model_type.value,
-            "environment": environment.value,
-            "model_version": model_version,
-            "prediction_timestamp": prediction_timestamp,
-            "conversation": conversation,
-            "tags": tags,
-        }
-
-        response = self.request(
-            config=RequestConfig(
-                method=HttpMethod.POST,
-                json=payload,
-                url=f"{self._base_url}/{Routes.log_model.value}",
-                timeout=timeout,
-            ),
-            response_handler=ClientResponseHandler,
-        )
-        return response

@@ -94,26 +94,41 @@ class Responses:
         **kwargs: Any,
     ) -> ResponseObject | Any:
         body = _build_response_body(
-            model=model, input=input, instructions=instructions,
-            tools=tools, tool_choice=tool_choice, temperature=temperature,
-            top_p=top_p, max_output_tokens=max_output_tokens,
-            previous_response_id=previous_response_id, store=store,
-            metadata=metadata, stream=stream, extra_body=extra_body, **kwargs,
+            model=model,
+            input=input,
+            instructions=instructions,
+            tools=tools,
+            tool_choice=tool_choice,
+            temperature=temperature,
+            top_p=top_p,
+            max_output_tokens=max_output_tokens,
+            previous_response_id=previous_response_id,
+            store=store,
+            metadata=metadata,
+            stream=stream,
+            extra_body=extra_body,
+            **kwargs,
         )
 
         agentcc_params = collect_agentcc_params(
-            session_id=session_id, trace_id=trace_id,
-            request_metadata=request_metadata, request_timeout=request_timeout,
-            cache_ttl=cache_ttl, cache_namespace=cache_namespace,
-            cache_force_refresh=cache_force_refresh, cache_control=cache_control,
+            session_id=session_id,
+            trace_id=trace_id,
+            request_metadata=request_metadata,
+            request_timeout=request_timeout,
+            cache_ttl=cache_ttl,
+            cache_namespace=cache_namespace,
+            cache_force_refresh=cache_force_refresh,
+            cache_control=cache_control,
             guardrail_policy=guardrail_policy,
         )
 
         extra_hdrs = build_extra_headers(
-            extra_headers=extra_headers, properties=properties,
-            user_id=user_id, request_id=request_id,
+            extra_headers=extra_headers,
+            properties=properties,
+            user_id=user_id,
+            request_id=request_id,
         )
-        extra_hdrs = merge_session_headers(self._client, extra_hdrs)
+        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params)
 
         from fi.gateway._utils import parse_timeout
 
@@ -126,9 +141,11 @@ class Responses:
         )
 
         if stream:
-            return self._client._get_base_client()._open_stream(opts, agentcc_params, ResponseStreamEvent)  # Responses events, not chat chunks
+            return self._client._get_base_client()._open_stream(opts, agentcc_params, ResponseStreamEvent)
 
-        return self._client._get_base_client()._request_with_retry(opts, ResponseObject, agentcc_params)
+        return self._client._get_base_client()._request_with_retry(
+            opts, ResponseObject, agentcc_params
+        )
 
     def retrieve(
         self,
@@ -205,26 +222,41 @@ class AsyncResponses:
         **kwargs: Any,
     ) -> ResponseObject | Any:
         body = _build_response_body(
-            model=model, input=input, instructions=instructions,
-            tools=tools, tool_choice=tool_choice, temperature=temperature,
-            top_p=top_p, max_output_tokens=max_output_tokens,
-            previous_response_id=previous_response_id, store=store,
-            metadata=metadata, stream=stream, extra_body=extra_body, **kwargs,
+            model=model,
+            input=input,
+            instructions=instructions,
+            tools=tools,
+            tool_choice=tool_choice,
+            temperature=temperature,
+            top_p=top_p,
+            max_output_tokens=max_output_tokens,
+            previous_response_id=previous_response_id,
+            store=store,
+            metadata=metadata,
+            stream=stream,
+            extra_body=extra_body,
+            **kwargs,
         )
 
         agentcc_params = collect_agentcc_params(
-            session_id=session_id, trace_id=trace_id,
-            request_metadata=request_metadata, request_timeout=request_timeout,
-            cache_ttl=cache_ttl, cache_namespace=cache_namespace,
-            cache_force_refresh=cache_force_refresh, cache_control=cache_control,
+            session_id=session_id,
+            trace_id=trace_id,
+            request_metadata=request_metadata,
+            request_timeout=request_timeout,
+            cache_ttl=cache_ttl,
+            cache_namespace=cache_namespace,
+            cache_force_refresh=cache_force_refresh,
+            cache_control=cache_control,
             guardrail_policy=guardrail_policy,
         )
 
         extra_hdrs = build_extra_headers(
-            extra_headers=extra_headers, properties=properties,
-            user_id=user_id, request_id=request_id,
+            extra_headers=extra_headers,
+            properties=properties,
+            user_id=user_id,
+            request_id=request_id,
         )
-        extra_hdrs = merge_session_headers(self._client, extra_hdrs)
+        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params)
 
         from fi.gateway._utils import parse_timeout
 
@@ -237,12 +269,11 @@ class AsyncResponses:
         )
 
         if stream:
-            from fi.gateway._streaming import AsyncStream
+            return await self._client._get_base_client()._open_stream(opts, agentcc_params, ResponseStreamEvent)
 
-            response = await self._client._get_base_client()._stream_request(opts, agentcc_params)
-            return AsyncStream(response, ResponseStreamEvent)
-
-        return await self._client._get_base_client()._request_with_retry(opts, ResponseObject, agentcc_params)
+        return await self._client._get_base_client()._request_with_retry(
+            opts, ResponseObject, agentcc_params
+        )
 
     async def retrieve(
         self,
@@ -259,7 +290,9 @@ class AsyncResponses:
             headers=extra_headers or {},
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        return await self._client._get_base_client()._request_with_retry(opts, ResponseObject)
+        return await self._client._get_base_client()._request_with_retry(
+            opts, ResponseObject
+        )
 
     async def delete(
         self,

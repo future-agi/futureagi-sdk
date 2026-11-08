@@ -1,0 +1,19 @@
+[tool.poetry]
+# Source compatibility fixture only. Webhooks ship in futureagi, never separately.
+package-mode = false
+name = "futureagi-webhooks"
+version = "0.1.0"
+description = "Verify Future AGI webhook requests (Standard Webhooks v1) with only the Python standard library."
+authors = ["Future AGI <no-reply@futureagi.com>"]
+readme = "README.md"
+license = "Apache-2.0"
+packages = [
+    { include = "futureagi_webhooks" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

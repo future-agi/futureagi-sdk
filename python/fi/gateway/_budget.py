@@ -18,6 +18,10 @@ _WINDOW_UNIT_SECONDS: dict[str, float] = {
 }
 
 
+from fi.gateway._deprecation import deprecated
+
+
+@deprecated
 @dataclass
 class BudgetManager:
     """Per-user and global budget management.

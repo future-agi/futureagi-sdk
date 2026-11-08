@@ -1,0 +1,3103 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Customer connector API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/workspace/credentials": {
+      "get": {
+        "tags": [
+          "Workspace Credentials"
+        ],
+        "summary": "List workspace credential metadata",
+        "operationId": "listWorkspaceCredentials",
+        "responses": {
+          "200": {
+            "description": "Credential metadata without secret material",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListWorkspaceCredentialsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired, or invalid Omega credential",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "unauthenticated"
+            ]
+          },
+          "403": {
+            "description": "The authenticated principal is not permitted to use this resource",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "entitlement_denied",
+              "scope_denied",
+              "unauthorized_approver"
+            ]
+          },
+          "500": {
+            "description": "Workspace credential metadata could not be listed",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "internal"
+            ]
+          },
+          "default": {
+            "$ref": "#/components/responses/OmegaError"
+          }
+        },
+        "x-omega-sdk": {
+          "family": "platform",
+          "method": "credentials.list"
+        },
+        "x-omega-rate-class": "read",
+        "x-omega-timeout-class": "read",
+        "x-omega-body-class": "none",
+        "x-omega-min-role": "member",
+        "x-omega-pagination": {
+          "style": "single-page",
+          "itemsField": "credentials"
+        }
+      },
+      "post": {
+        "tags": [
+          "Workspace Credentials"
+        ],
+        "summary": "Create a workspace credential",
+        "description": "The secret is write-only and is never returned. This secret-submission operation must not be transport-retried.",
+        "operationId": "createWorkspaceCredential",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKeyRequired"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Strict credential create body. The secret is write-only.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWorkspaceCredentialRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Idempotent replay of the original credential create",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateWorkspaceCredentialResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Credential created without secret material",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateWorkspaceCredentialResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Credential body is malformed",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "validation"
+            ]
+          },
+          "401": {
+            "description": "Missing, expired, or invalid Omega credential",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "unauthenticated"
+            ]
+          },
+          "403": {
+            "description": "The authenticated principal is not permitted to use this resource",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "entitlement_denied",
+              "scope_denied",
+              "unauthorized_approver"
+            ]
+          },
+          "409": {
+            "description": "The mutation conflicts with current state or an identical request is already in flight",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "conflict"
+            ]
+          },
+          "500": {
+            "description": "Workspace credential could not be created",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "internal"
+            ]
+          },
+          "default": {
+            "$ref": "#/components/responses/OmegaError"
+          }
+        },
+        "x-omega-sdk": {
+          "family": "platform",
+          "method": "credentials.create"
+        },
+        "x-omega-rate-class": "write",
+        "x-omega-timeout-class": "write",
+        "x-omega-body-class": "json",
+        "x-omega-min-role": "admin",
+        "x-omega-idempotent": true,
+        "x-omega-idempotency": {
+          "durable": false,
+          "keyRequired": true
+        },
+        "x-omega-human-only": true
+      }
+    },
+    "/workspace/credentials/{credentialId}": {
+      "get": {
+        "tags": [
+          "Workspace Credentials"
+        ],
+        "summary": "Get workspace credential metadata",
+        "operationId": "getWorkspaceCredential",
+        "parameters": [
+          {
+            "name": "credentialId",
+            "in": "path",
+            "required": true,
+            "description": "Workspace credential id.",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Credential metadata without secret material",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetWorkspaceCredentialResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired, or invalid Omega credential",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "unauthenticated"
+            ]
+          },
+          "403": {
+            "description": "The authenticated principal is not permitted to use this resource",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "entitlement_denied",
+              "scope_denied",
+              "unauthorized_approver"
+            ]
+          },
+          "404": {
+            "description": "Credential was not found or is not owned by the caller",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "not_found"
+            ]
+          },
+          "500": {
+            "description": "Workspace credential metadata could not be read",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "internal"
+            ]
+          },
+          "default": {
+            "$ref": "#/components/responses/OmegaError"
+          }
+        },
+        "x-omega-sdk": {
+          "family": "platform",
+          "method": "credentials.get"
+        },
+        "x-omega-rate-class": "read",
+        "x-omega-timeout-class": "read",
+        "x-omega-body-class": "none",
+        "x-omega-min-role": "member"
+      },
+      "delete": {
+        "tags": [
+          "Workspace Credentials"
+        ],
+        "summary": "Destroy a workspace credential",
+        "operationId": "deleteWorkspaceCredential",
+        "parameters": [
+          {
+            "name": "credentialId",
+            "in": "path",
+            "required": true,
+            "description": "Workspace credential id.",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKeyRequired"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Credential destroyed",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteWorkspaceCredentialResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Credential idempotency key is malformed",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "validation"
+            ]
+          },
+          "401": {
+            "description": "Missing, expired, or invalid Omega credential",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "unauthenticated"
+            ]
+          },
+          "403": {
+            "description": "The authenticated principal is not permitted to use this resource",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "entitlement_denied",
+              "scope_denied",
+              "unauthorized_approver"
+            ]
+          },
+          "404": {
+            "description": "Credential was not found or is not owned by the caller",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "not_found"
+            ]
+          },
+          "409": {
+            "description": "The mutation conflicts with current state or an identical request is already in flight",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "conflict"
+            ]
+          },
+          "500": {
+            "description": "Workspace credential could not be destroyed",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "internal"
+            ]
+          },
+          "default": {
+            "$ref": "#/components/responses/OmegaError"
+          }
+        },
+        "x-omega-sdk": {
+          "family": "platform",
+          "method": "credentials.revoke"
+        },
+        "x-omega-rate-class": "write",
+        "x-omega-timeout-class": "write",
+        "x-omega-body-class": "none",
+        "x-omega-min-role": "admin",
+        "x-omega-idempotent": true,
+        "x-omega-idempotency": {
+          "durable": false,
+          "keyRequired": true
+        },
+        "x-omega-human-only": true
+      }
+    },
+    "/workspace/credentials/{credentialId}/bindings": {
+      "get": {
+        "tags": [
+          "Workspace Credentials"
+        ],
+        "summary": "List workspace credential bindings",
+        "operationId": "listWorkspaceCredentialBindings",
+        "parameters": [
+          {
+            "name": "credentialId",
+            "in": "path",
+            "required": true,
+            "description": "Workspace credential id.",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Credential bindings without secret material",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListWorkspaceCredentialBindingsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired, or invalid Omega credential",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "unauthenticated"
+            ]
+          },
+          "403": {
+            "description": "The authenticated principal is not permitted to use this resource",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "entitlement_denied",
+              "scope_denied",
+              "unauthorized_approver"
+            ]
+          },
+          "404": {
+            "description": "Credential was not found or is not owned by the caller",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "not_found"
+            ]
+          },
+          "500": {
+            "description": "Workspace credential bindings could not be listed",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "internal"
+            ]
+          },
+          "default": {
+            "$ref": "#/components/responses/OmegaError"
+          }
+        },
+        "x-omega-sdk": {
+          "family": "platform",
+          "method": "credentials.bindings"
+        },
+        "x-omega-rate-class": "read",
+        "x-omega-timeout-class": "read",
+        "x-omega-body-class": "none",
+        "x-omega-min-role": "member"
+      }
+    },
+    "/workspace/credentials/{credentialId}/rotate": {
+      "post": {
+        "tags": [
+          "Workspace Credentials"
+        ],
+        "summary": "Rotate a workspace credential",
+        "description": "The replacement secret is write-only and is never returned. This secret-submission operation must not be transport-retried.",
+        "operationId": "rotateWorkspaceCredential",
+        "parameters": [
+          {
+            "name": "credentialId",
+            "in": "path",
+            "required": true,
+            "description": "Workspace credential id.",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKeyRequired"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Strict credential rotate body. The secret is write-only.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RotateWorkspaceCredentialRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rotated credential metadata without secret material",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RotateWorkspaceCredentialResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Credential rotate body is malformed",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "validation"
+            ]
+          },
+          "401": {
+            "description": "Missing, expired, or invalid Omega credential",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "unauthenticated"
+            ]
+          },
+          "403": {
+            "description": "The authenticated principal is not permitted to use this resource",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "entitlement_denied",
+              "scope_denied",
+              "unauthorized_approver"
+            ]
+          },
+          "404": {
+            "description": "Credential was not found or is not owned by the caller",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "not_found"
+            ]
+          },
+          "409": {
+            "description": "The mutation conflicts with current state or an identical request is already in flight",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "conflict"
+            ]
+          },
+          "500": {
+            "description": "Workspace credential could not be rotated",
+            "headers": {
+              "X-Omega-Request-Id": {
+                "description": "Unique id for this HTTP exchange.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^req_[0-9a-f]{32}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaError"
+                }
+              }
+            },
+            "x-omega-error-codes": [
+              "internal"
+            ]
+          },
+          "default": {
+            "$ref": "#/components/responses/OmegaError"
+          }
+        },
+        "x-omega-sdk": {
+          "family": "platform",
+          "method": "credentials.rotate"
+        },
+        "x-omega-rate-class": "write",
+        "x-omega-timeout-class": "write",
+        "x-omega-body-class": "json",
+        "x-omega-min-role": "admin",
+        "x-omega-idempotent": true,
+        "x-omega-idempotency": {
+          "durable": false,
+          "keyRequired": true
+        },
+        "x-omega-human-only": true
+      }
+    },
+    "/workspace/integrations": {
+      "get": {
+        "operationId": "listWorkspaceIntegrations",
+        "tags": [
+          "Workspace Integrations"
+        ],
+        "summary": "The apps this workspace can connect, and its connections",
+        "responses": {
+          "200": {
+            "description": "The catalog.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaIntegrationCatalog"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/OmegaError"
+          }
+        },
+        "x-omega-sdk": {
+          "family": "connectors",
+          "method": "catalog"
+        },
+        "x-omega-rate-class": "read",
+        "x-omega-timeout-class": "read",
+        "x-omega-body-class": "none",
+        "x-omega-min-role": "member"
+      }
+    },
+    "/workspace/integrations/oauth/complete": {
+      "post": {
+        "operationId": "completeWorkspaceIntegrationOAuth",
+        "tags": [
+          "Workspace Integrations"
+        ],
+        "summary": "Finish an app sign-in with the provider's code and state",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteWorkspaceIntegrationOAuthRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The connection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaIntegrationConnectionResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/OmegaError"
+          }
+        },
+        "x-omega-sdk": {
+          "family": "connectors",
+          "method": "completeOAuth"
+        },
+        "x-omega-rate-class": "write",
+        "x-omega-timeout-class": "write",
+        "x-omega-body-class": "json",
+        "x-omega-min-role": "member",
+        "x-omega-idempotent": false,
+        "x-omega-idempotency": {}
+      }
+    },
+    "/workspace/integrations/custom-mcp": {
+      "post": {
+        "operationId": "addWorkspaceCustomMcp",
+        "tags": [
+          "Workspace Integrations"
+        ],
+        "summary": "Add a Custom MCP server, or add your own token to a per-person one",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddWorkspaceCustomMcpRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Your token was added to an existing per-person connection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaIntegrationConnectionResult"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "A new connection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaIntegrationConnectionResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/OmegaError"
+          }
+        },
+        "x-omega-sdk": {
+          "family": "connectors",
+          "method": "addCustomMcp"
+        },
+        "x-omega-rate-class": "write",
+        "x-omega-timeout-class": "write",
+        "x-omega-body-class": "json",
+        "x-omega-min-role": "member",
+        "x-omega-idempotent": false,
+        "x-omega-idempotency": {}
+      }
+    },
+    "/workspace/integrations/apps/{appId}/connect": {
+      "post": {
+        "operationId": "connectWorkspaceIntegrationApp",
+        "tags": [
+          "Workspace Integrations"
+        ],
+        "summary": "Start connecting an app (returns the provider's sign-in URL)",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "description": "An app from the catalog.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectWorkspaceIntegrationAppRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Send the person to authorizeUrl.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaIntegrationConnectStart"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/OmegaError"
+          }
+        },
+        "x-omega-sdk": {
+          "family": "connectors",
+          "method": "connect"
+        },
+        "x-omega-rate-class": "write",
+        "x-omega-timeout-class": "write",
+        "x-omega-body-class": "json",
+        "x-omega-min-role": "member",
+        "x-omega-idempotent": false,
+        "x-omega-idempotency": {}
+      }
+    },
+    "/workspace/integrations/connections/{connectionId}": {
+      "get": {
+        "operationId": "getWorkspaceIntegrationConnection",
+        "tags": [
+          "Workspace Integrations"
+        ],
+        "summary": "One connection",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "description": "A connection of this workspace; another workspace's answers 404.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The connection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaIntegrationConnectionResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/OmegaError"
+          }
+        },
+        "x-omega-sdk": {
+          "family": "connectors",
+          "method": "get"
+        },
+        "x-omega-rate-class": "read",
+        "x-omega-timeout-class": "read",
+        "x-omega-body-class": "none",
+        "x-omega-min-role": "member"
+      },
+      "delete": {
+        "operationId": "deleteWorkspaceIntegrationConnection",
+        "tags": [
+          "Workspace Integrations"
+        ],
+        "summary": "Remove a connection, or only your own account on it",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "description": "A connection of this workspace; another workspace's answers 404.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "mine",
+            "in": "query",
+            "required": false,
+            "description": "`1` removes only the caller's own account.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "What was removed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaIntegrationRemoval"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/OmegaError"
+          }
+        },
+        "x-omega-sdk": {
+          "family": "connectors",
+          "method": "disconnect"
+        },
+        "x-omega-rate-class": "write",
+        "x-omega-timeout-class": "write",
+        "x-omega-body-class": "none",
+        "x-omega-min-role": "member",
+        "x-omega-idempotent": false,
+        "x-omega-idempotency": {}
+      }
+    },
+    "/workspace/integrations/connections/{connectionId}/tools": {
+      "post": {
+        "operationId": "refreshWorkspaceIntegrationTools",
+        "tags": [
+          "Workspace Integrations"
+        ],
+        "summary": "Ask the server for its tools again",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "description": "A connection of this workspace; another workspace's answers 404.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The tools it lists now.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaIntegrationTools"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/OmegaError"
+          }
+        },
+        "x-omega-sdk": {
+          "family": "connectors",
+          "method": "refreshTools"
+        },
+        "x-omega-rate-class": "write",
+        "x-omega-timeout-class": "write",
+        "x-omega-body-class": "json",
+        "x-omega-min-role": "member",
+        "x-omega-idempotent": false,
+        "x-omega-idempotency": {}
+      }
+    },
+    "/workspace/integrations/connections/{connectionId}/agents/{agentId}": {
+      "put": {
+        "operationId": "attachWorkspaceIntegrationAgent",
+        "tags": [
+          "Workspace Integrations"
+        ],
+        "summary": "Attach a connection to an agent, or change its Auto / Ask / Deny choices",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "description": "A connection of this workspace; another workspace's answers 404.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "description": "An agent of this workspace.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachWorkspaceIntegrationAgentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The connection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaIntegrationConnectionResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/OmegaError"
+          }
+        },
+        "x-omega-sdk": {
+          "family": "connectors",
+          "method": "attach"
+        },
+        "x-omega-rate-class": "write",
+        "x-omega-timeout-class": "write",
+        "x-omega-body-class": "json",
+        "x-omega-min-role": "member",
+        "x-omega-idempotent": false,
+        "x-omega-idempotency": {}
+      },
+      "delete": {
+        "operationId": "detachWorkspaceIntegrationAgent",
+        "tags": [
+          "Workspace Integrations"
+        ],
+        "summary": "Detach a connection from an agent",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "description": "A connection of this workspace; another workspace's answers 404.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "description": "An agent of this workspace.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The connection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OmegaIntegrationConnectionResult"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/OmegaError"
+          }
+        },
+        "x-omega-sdk": {
+          "family": "connectors",
+          "method": "detach"
+        },
+        "x-omega-rate-class": "write",
+        "x-omega-timeout-class": "write",
+        "x-omega-body-class": "none",
+        "x-omega-min-role": "member",
+        "x-omega-idempotent": false,
+        "x-omega-idempotency": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "IdempotencyKeyRequired": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "description": "One value per logical call, reused on every retry of it. The server answers a repeat with the first outcome (see x-omega-idempotency on the operation for where it is kept and for how long).",
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
+    "responses": {
+      "OmegaError": {
+        "description": "An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.",
+        "headers": {
+          "x-request-id": {
+            "description": "The gateway's request id; quote it to support.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "Retry-After": {
+            "description": "Seconds to wait, when waiting resolves the refusal.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/OmegaError"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "AddWorkspaceCustomMcpRequest": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "name",
+              "url"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "token": {
+                "type": "string",
+                "x-omega-secret": true,
+                "writeOnly": true
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "agent",
+                  "user"
+                ]
+              }
+            },
+            "additionalProperties": true
+          },
+          {
+            "type": "object",
+            "required": [
+              "connectionId",
+              "token"
+            ],
+            "properties": {
+              "connectionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "token": {
+                "type": "string",
+                "x-omega-secret": true,
+                "writeOnly": true
+              }
+            },
+            "additionalProperties": true
+          }
+        ],
+        "title": "AddWorkspaceCustomMcpRequest"
+      },
+      "AttachWorkspaceIntegrationAgentRequest": {
+        "type": "object",
+        "properties": {
+          "defaultPosture": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "ask",
+              "deny"
+            ]
+          },
+          "tools": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "ask",
+                "deny"
+              ]
+            }
+          }
+        },
+        "additionalProperties": true,
+        "title": "AttachWorkspaceIntegrationAgentRequest"
+      },
+      "CompleteWorkspaceIntegrationOAuthRequest": {
+        "type": "object",
+        "required": [
+          "state"
+        ],
+        "properties": {
+          "state": {
+            "type": "string",
+            "x-omega-secret": true,
+            "writeOnly": true
+          },
+          "code": {
+            "type": "string",
+            "x-omega-secret": true,
+            "writeOnly": true
+          },
+          "error": {
+            "type": "string",
+            "maxLength": 64
+          }
+        },
+        "additionalProperties": true,
+        "title": "CompleteWorkspaceIntegrationOAuthRequest"
+      },
+      "ConnectWorkspaceIntegrationAppRequest": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "agent",
+              "user"
+            ],
+            "default": "agent"
+          },
+          "agentId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Attach to this agent once connected."
+          },
+          "connectionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Connect your own account on this per-person connection."
+          }
+        },
+        "additionalProperties": false,
+        "title": "ConnectWorkspaceIntegrationAppRequest"
+      },
+      "CreateWorkspaceCredentialRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "kind",
+          "secret"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "api_key",
+              "oauth_token",
+              "generic"
+            ]
+          },
+          "secret": {
+            "type": "string",
+            "minLength": 1,
+            "writeOnly": true,
+            "x-omega-secret": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "title": "CreateWorkspaceCredentialRequest"
+      },
+      "CreateWorkspaceCredentialResponse": {
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "credential"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "enum": [
+              "omega-workspace-credentials/v1"
+            ]
+          },
+          "credential": {
+            "type": "object",
+            "required": [
+              "credentialId",
+              "name",
+              "kind",
+              "status",
+              "version",
+              "createdAt",
+              "updatedAt",
+              "bindingCount"
+            ],
+            "properties": {
+              "credentialId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "api_key",
+                  "oauth_token",
+                  "generic"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "superseded",
+                  "revoked",
+                  "destroyed"
+                ]
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "expiresAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "lastUsedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "bindingCount": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false
+          },
+          "request_id": {
+            "type": "string",
+            "pattern": "^req_[0-9a-f]{32}$",
+            "description": "Unique id for this HTTP exchange."
+          },
+          "receipt": {
+            "type": "object",
+            "required": [
+              "auditEntryId",
+              "recordedAt"
+            ],
+            "properties": {
+              "auditEntryId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "hash": {
+                "type": "string",
+                "minLength": 1
+              },
+              "previousHash": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "recordedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false,
+        "title": "CreateWorkspaceCredentialResponse"
+      },
+      "DeleteWorkspaceCredentialResponse": {
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "deleted",
+          "credentialId"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "enum": [
+              "omega-workspace-credentials/v1"
+            ]
+          },
+          "deleted": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "credentialId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request_id": {
+            "type": "string",
+            "pattern": "^req_[0-9a-f]{32}$",
+            "description": "Unique id for this HTTP exchange."
+          },
+          "receipt": {
+            "type": "object",
+            "required": [
+              "auditEntryId",
+              "recordedAt"
+            ],
+            "properties": {
+              "auditEntryId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "hash": {
+                "type": "string",
+                "minLength": 1
+              },
+              "previousHash": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "recordedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false,
+        "title": "DeleteWorkspaceCredentialResponse"
+      },
+      "GetWorkspaceCredentialResponse": {
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "credential"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "enum": [
+              "omega-workspace-credentials/v1"
+            ]
+          },
+          "credential": {
+            "type": "object",
+            "required": [
+              "credentialId",
+              "name",
+              "kind",
+              "status",
+              "version",
+              "createdAt",
+              "updatedAt",
+              "bindingCount"
+            ],
+            "properties": {
+              "credentialId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "api_key",
+                  "oauth_token",
+                  "generic"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "superseded",
+                  "revoked",
+                  "destroyed"
+                ]
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "expiresAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "lastUsedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "bindingCount": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false
+          },
+          "request_id": {
+            "type": "string",
+            "pattern": "^req_[0-9a-f]{32}$",
+            "description": "Unique id for this HTTP exchange."
+          },
+          "receipt": {
+            "type": "object",
+            "required": [
+              "auditEntryId",
+              "recordedAt"
+            ],
+            "properties": {
+              "auditEntryId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "hash": {
+                "type": "string",
+                "minLength": 1
+              },
+              "previousHash": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "recordedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false,
+        "title": "GetWorkspaceCredentialResponse"
+      },
+      "ListWorkspaceCredentialBindingsResponse": {
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "bindings"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "enum": [
+              "omega-workspace-credentials/v1"
+            ]
+          },
+          "bindings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "bindingId",
+                "credentialId",
+                "targetKind",
+                "targetId",
+                "surface",
+                "createdAt"
+              ],
+              "properties": {
+                "bindingId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "credentialId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "targetKind": {
+                  "type": "string",
+                  "enum": [
+                    "agent",
+                    "environment",
+                    "connector",
+                    "routine"
+                  ]
+                },
+                "targetId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "surface": {
+                  "type": "string",
+                  "enum": [
+                    "mcp",
+                    "http",
+                    "sandbox"
+                  ]
+                },
+                "connectorId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "toolId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "endpointOrigin": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "httpMethods": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "GET",
+                      "POST",
+                      "PUT",
+                      "PATCH",
+                      "DELETE",
+                      "HEAD",
+                      "OPTIONS"
+                    ]
+                  }
+                },
+                "injectionName": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "request_id": {
+            "type": "string",
+            "pattern": "^req_[0-9a-f]{32}$",
+            "description": "Unique id for this HTTP exchange."
+          },
+          "receipt": {
+            "type": "object",
+            "required": [
+              "auditEntryId",
+              "recordedAt"
+            ],
+            "properties": {
+              "auditEntryId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "hash": {
+                "type": "string",
+                "minLength": 1
+              },
+              "previousHash": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "recordedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false,
+        "title": "ListWorkspaceCredentialBindingsResponse"
+      },
+      "ListWorkspaceCredentialsResponse": {
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "credentials"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "enum": [
+              "omega-workspace-credentials/v1"
+            ]
+          },
+          "credentials": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "credentialId",
+                "name",
+                "kind",
+                "status",
+                "version",
+                "createdAt",
+                "updatedAt",
+                "bindingCount"
+              ],
+              "properties": {
+                "credentialId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "api_key",
+                    "oauth_token",
+                    "generic"
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "active",
+                    "superseded",
+                    "revoked",
+                    "destroyed"
+                  ]
+                },
+                "version": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "expiresAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "lastUsedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "bindingCount": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "request_id": {
+            "type": "string",
+            "pattern": "^req_[0-9a-f]{32}$",
+            "description": "Unique id for this HTTP exchange."
+          },
+          "receipt": {
+            "type": "object",
+            "required": [
+              "auditEntryId",
+              "recordedAt"
+            ],
+            "properties": {
+              "auditEntryId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "hash": {
+                "type": "string",
+                "minLength": 1
+              },
+              "previousHash": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "recordedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false,
+        "title": "ListWorkspaceCredentialsResponse"
+      },
+      "OmegaEeError": {
+        "title": "OmegaEeError",
+        "description": "A refusal by Omega EE. Read `code`; `error` repeats it in the nested legacy form.",
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "retryAfterSeconds": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "request_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "EE's correlation id; resolves to the audit entry."
+          },
+          "schemaVersion": {
+            "type": "string"
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/OmegaNestedError"
+              }
+            ]
+          }
+        },
+        "anyOf": [
+          {
+            "required": [
+              "code"
+            ]
+          },
+          {
+            "required": [
+              "error"
+            ]
+          }
+        ],
+        "additionalProperties": true
+      },
+      "OmegaError": {
+        "title": "OmegaError",
+        "description": "Customer error body, mapped to a typed SDK error with code, message, requestId and retryAfterSeconds.",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/OmegaGatewayError"
+          },
+          {
+            "$ref": "#/components/schemas/OmegaEeError"
+          },
+          {
+            "$ref": "#/components/schemas/OmegaHubError"
+          }
+        ]
+      },
+      "OmegaGatewayError": {
+        "title": "OmegaGatewayError",
+        "description": "A refusal by the Future AGI gateway before the request reached Omega EE.",
+        "type": "object",
+        "required": [
+          "error",
+          "requestId"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Stable code, e.g. omega_rate_limited, product_not_admitted, product_paused."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Stable sub-code; never token or request material."
+          },
+          "rateClass": {
+            "type": "string",
+            "description": "On 429: the rate class that refused (read, write, model-start, session-exchange)."
+          },
+          "retryAfterSeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Also sent as the Retry-After header."
+          },
+          "requestId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The gateway's trace id; also the x-request-id header."
+          }
+        },
+        "additionalProperties": true
+      },
+      "OmegaHubError": {
+        "title": "OmegaHubError",
+        "description": "A refusal by the Omega Hub. `error.fix` says what to do.",
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/OmegaNestedError"
+          }
+        },
+        "additionalProperties": true
+      },
+      "OmegaIntegrationCatalog": {
+        "title": "OmegaIntegrationCatalog",
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "apps",
+          "connections",
+          "canManage",
+          "oauthReady",
+          "paused"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "enum": [
+              "omega-workspace-integrations/v1"
+            ]
+          },
+          "apps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "name",
+                "description",
+                "category",
+                "group",
+                "connections",
+                "verified"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string",
+                  "enum": [
+                    "productivity",
+                    "developer",
+                    "communication",
+                    "data",
+                    "research"
+                  ]
+                },
+                "group": {
+                  "type": "string",
+                  "enum": [
+                    "google",
+                    "microsoft",
+                    "other"
+                  ]
+                },
+                "connections": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "verified": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "connections": {
+            "type": "array",
+            "items": {
+              "title": "OmegaIntegrationConnection",
+              "type": "object",
+              "required": [
+                "id",
+                "kind",
+                "name",
+                "mode",
+                "signIn",
+                "server",
+                "connectedBy",
+                "connectedByYou",
+                "connectorId",
+                "status",
+                "tools",
+                "attachments",
+                "createdAt",
+                "updatedAt"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "app",
+                    "custom_mcp"
+                  ]
+                },
+                "appId": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string",
+                  "enum": [
+                    "productivity",
+                    "developer",
+                    "communication",
+                    "data",
+                    "research"
+                  ]
+                },
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "agent",
+                    "user"
+                  ],
+                  "description": "agent: one account for everyone; user: each person's own."
+                },
+                "signIn": {
+                  "type": "string",
+                  "enum": [
+                    "account",
+                    "token",
+                    "none"
+                  ]
+                },
+                "server": {
+                  "type": "string",
+                  "description": "The MCP server address (origin and path)."
+                },
+                "connectedBy": {
+                  "type": "string"
+                },
+                "connectedByYou": {
+                  "type": "boolean"
+                },
+                "connectedByName": {
+                  "type": "string"
+                },
+                "connectorId": {
+                  "type": "string",
+                  "description": "Non-secret connector id (joins an approval's tool name to this connection)."
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "connected",
+                    "expired",
+                    "refused",
+                    "not_allowed"
+                  ]
+                },
+                "notAllowedReason": {
+                  "type": "string",
+                  "enum": [
+                    "not_public",
+                    "own_platform_host",
+                    "future_agi_platform_host"
+                  ],
+                  "description": "Only with status not_allowed, why: not_public (not a public https:// address this deployment accepts), own_platform_host (a custom MCP server at this platform's own host: this deployment's origin, or a host its operator lists) or future_agi_platform_host (a custom MCP server at a Future AGI host, on Future AGI's hosted platform). For the last two nothing is sent to it, and only disconnecting helps."
+                },
+                "expiresAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "yourAccount": {
+                  "type": "string",
+                  "enum": [
+                    "connected",
+                    "missing",
+                    "refused"
+                  ]
+                },
+                "people": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "tools": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "name"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "attachments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "agentId",
+                      "defaultPosture",
+                      "tools",
+                      "attachedAt"
+                    ],
+                    "properties": {
+                      "agentId": {
+                        "type": "string"
+                      },
+                      "agentName": {
+                        "type": "string"
+                      },
+                      "defaultPosture": {
+                        "type": "string",
+                        "enum": [
+                          "auto",
+                          "ask",
+                          "deny"
+                        ]
+                      },
+                      "tools": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string",
+                          "enum": [
+                            "auto",
+                            "ask",
+                            "deny"
+                          ]
+                        }
+                      },
+                      "attachedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "verifiedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "oauthReady": {
+            "type": "boolean",
+            "description": "False when the server has no OAuth redirect; apps is then empty."
+          },
+          "paused": {
+            "type": "boolean",
+            "description": "True while the connector store is fail-closed: every change is refused."
+          },
+          "request_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "receipt": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      },
+      "OmegaIntegrationConnectStart": {
+        "title": "OmegaIntegrationConnectStart",
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "authorizeUrl"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "enum": [
+              "omega-workspace-integrations/v1"
+            ]
+          },
+          "authorizeUrl": {
+            "type": "string",
+            "format": "uri",
+            "x-omega-secret": true
+          },
+          "request_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "receipt": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      },
+      "OmegaIntegrationConnectionResult": {
+        "title": "OmegaIntegrationConnectionResult",
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "connection"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "enum": [
+              "omega-workspace-integrations/v1"
+            ]
+          },
+          "connection": {
+            "title": "OmegaIntegrationConnection",
+            "type": "object",
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "mode",
+              "signIn",
+              "server",
+              "connectedBy",
+              "connectedByYou",
+              "connectorId",
+              "status",
+              "tools",
+              "attachments",
+              "createdAt",
+              "updatedAt"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "app",
+                  "custom_mcp"
+                ]
+              },
+              "appId": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string",
+                "enum": [
+                  "productivity",
+                  "developer",
+                  "communication",
+                  "data",
+                  "research"
+                ]
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "agent",
+                  "user"
+                ],
+                "description": "agent: one account for everyone; user: each person's own."
+              },
+              "signIn": {
+                "type": "string",
+                "enum": [
+                  "account",
+                  "token",
+                  "none"
+                ]
+              },
+              "server": {
+                "type": "string",
+                "description": "The MCP server address (origin and path)."
+              },
+              "connectedBy": {
+                "type": "string"
+              },
+              "connectedByYou": {
+                "type": "boolean"
+              },
+              "connectedByName": {
+                "type": "string"
+              },
+              "connectorId": {
+                "type": "string",
+                "description": "Non-secret connector id (joins an approval's tool name to this connection)."
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "connected",
+                  "expired",
+                  "refused",
+                  "not_allowed"
+                ]
+              },
+              "notAllowedReason": {
+                "type": "string",
+                "enum": [
+                  "not_public",
+                  "own_platform_host",
+                  "future_agi_platform_host"
+                ],
+                "description": "Only with status not_allowed, why: not_public (not a public https:// address this deployment accepts), own_platform_host (a custom MCP server at this platform's own host: this deployment's origin, or a host its operator lists) or future_agi_platform_host (a custom MCP server at a Future AGI host, on Future AGI's hosted platform). For the last two nothing is sent to it, and only disconnecting helps."
+              },
+              "expiresAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "yourAccount": {
+                "type": "string",
+                "enum": [
+                  "connected",
+                  "missing",
+                  "refused"
+                ]
+              },
+              "people": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "tools": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "name"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              },
+              "attachments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "agentId",
+                    "defaultPosture",
+                    "tools",
+                    "attachedAt"
+                  ],
+                  "properties": {
+                    "agentId": {
+                      "type": "string"
+                    },
+                    "agentName": {
+                      "type": "string"
+                    },
+                    "defaultPosture": {
+                      "type": "string",
+                      "enum": [
+                        "auto",
+                        "ask",
+                        "deny"
+                      ]
+                    },
+                    "tools": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string",
+                        "enum": [
+                          "auto",
+                          "ask",
+                          "deny"
+                        ]
+                      }
+                    },
+                    "attachedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "verifiedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "additionalProperties": true
+          },
+          "request_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "receipt": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      },
+      "OmegaIntegrationRemoval": {
+        "title": "OmegaIntegrationRemoval",
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "removed"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "enum": [
+              "omega-workspace-integrations/v1"
+            ]
+          },
+          "removed": {
+            "type": "string",
+            "enum": [
+              "connection",
+              "account"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "receipt": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      },
+      "OmegaIntegrationTools": {
+        "title": "OmegaIntegrationTools",
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "tools"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "enum": [
+              "omega-workspace-integrations/v1"
+            ]
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "request_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "receipt": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      },
+      "OmegaNestedError": {
+        "title": "OmegaNestedError",
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "fix": {
+            "type": "string",
+            "description": "Hub only: what to do about it."
+          }
+        },
+        "additionalProperties": true
+      },
+      "RotateWorkspaceCredentialRequest": {
+        "type": "object",
+        "required": [
+          "secret"
+        ],
+        "properties": {
+          "secret": {
+            "type": "string",
+            "minLength": 1,
+            "writeOnly": true,
+            "x-omega-secret": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "title": "RotateWorkspaceCredentialRequest"
+      },
+      "RotateWorkspaceCredentialResponse": {
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "credential"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "enum": [
+              "omega-workspace-credentials/v1"
+            ]
+          },
+          "credential": {
+            "type": "object",
+            "required": [
+              "credentialId",
+              "name",
+              "kind",
+              "status",
+              "version",
+              "createdAt",
+              "updatedAt",
+              "bindingCount"
+            ],
+            "properties": {
+              "credentialId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "api_key",
+                  "oauth_token",
+                  "generic"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "superseded",
+                  "revoked",
+                  "destroyed"
+                ]
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "expiresAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "lastUsedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "bindingCount": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false
+          },
+          "request_id": {
+            "type": "string",
+            "pattern": "^req_[0-9a-f]{32}$",
+            "description": "Unique id for this HTTP exchange."
+          },
+          "receipt": {
+            "type": "object",
+            "required": [
+              "auditEntryId",
+              "recordedAt"
+            ],
+            "properties": {
+              "auditEntryId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "hash": {
+                "type": "string",
+                "minLength": 1
+              },
+              "previousHash": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "recordedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false,
+        "title": "RotateWorkspaceCredentialResponse"
+      }
+    }
+  }
+}

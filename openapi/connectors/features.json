@@ -1,0 +1,7 @@
+{
+  "mcp_core": true,
+  "oauth_connect": true,
+  "data_integrations": true,
+  "slack_channels": true,
+  "credential_reads": true
+}

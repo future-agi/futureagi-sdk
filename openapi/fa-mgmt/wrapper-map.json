@@ -1,0 +1,271 @@
+{
+  "operations": [
+    {
+      "arguments": [],
+      "fixed_path": {},
+      "operation_id": "agentcc_org-configs_active",
+      "python": "gateway.config.get_active",
+      "python_async": "gateway.config.get_active",
+      "query": [
+        "limit",
+        "page"
+      ],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.config.getActive"
+    },
+    {
+      "arguments": [
+        "patch"
+      ],
+      "fixed_path": {
+        "id": "default"
+      },
+      "operation_id": "agentcc_gateways_update_config",
+      "python": "gateway.config.update",
+      "python_async": "gateway.config.update",
+      "query": [],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.config.update"
+    },
+    {
+      "arguments": [
+        "sections"
+      ],
+      "fixed_path": {},
+      "operation_id": "agentcc_org-configs_create",
+      "python": "gateway.config.create_version",
+      "python_async": "gateway.config.create_version",
+      "query": [],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.config.createVersion"
+    },
+    {
+      "arguments": [],
+      "fixed_path": {},
+      "operation_id": "agentcc_org-configs_list",
+      "python": "gateway.config.versions.list",
+      "python_async": "gateway.config.versions.list",
+      "query": [
+        "limit",
+        "page"
+      ],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.config.versions.list"
+    },
+    {
+      "arguments": [
+        "id"
+      ],
+      "fixed_path": {},
+      "operation_id": "agentcc_org-configs_read",
+      "python": "gateway.config.versions.get",
+      "python_async": "gateway.config.versions.get",
+      "query": [],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.config.versions.get"
+    },
+    {
+      "arguments": [
+        "id"
+      ],
+      "fixed_path": {},
+      "operation_id": "agentcc_org-configs_diff",
+      "python": "gateway.config.versions.diff",
+      "python_async": "gateway.config.versions.diff",
+      "query": [
+        "compare_to"
+      ],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.config.versions.diff"
+    },
+    {
+      "arguments": [
+        "id"
+      ],
+      "fixed_path": {},
+      "operation_id": "agentcc_org-configs_activate",
+      "python": "gateway.config.versions.activate",
+      "python_async": "gateway.config.versions.activate",
+      "query": [],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.config.versions.activate"
+    },
+    {
+      "arguments": [],
+      "fixed_path": {},
+      "operation_id": "agentcc_api-keys_list",
+      "python": "gateway.keys.list",
+      "python_async": "gateway.keys.list",
+      "query": [
+        "limit",
+        "page"
+      ],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.keys.list"
+    },
+    {
+      "arguments": [
+        "id"
+      ],
+      "fixed_path": {},
+      "operation_id": "agentcc_api-keys_read",
+      "python": "gateway.keys.get",
+      "python_async": "gateway.keys.get",
+      "query": [],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.keys.get"
+    },
+    {
+      "arguments": [
+        "id",
+        "patch"
+      ],
+      "fixed_path": {},
+      "operation_id": "agentcc_api-keys_partial_update",
+      "python": "gateway.keys.update",
+      "python_async": "gateway.keys.update",
+      "query": [],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.keys.update"
+    },
+    {
+      "arguments": [
+        "id"
+      ],
+      "fixed_path": {},
+      "operation_id": "agentcc_api-keys_revoke",
+      "python": "gateway.keys.revoke",
+      "python_async": "gateway.keys.revoke",
+      "query": [],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.keys.revoke"
+    },
+    {
+      "arguments": [
+        "id"
+      ],
+      "fixed_path": {},
+      "operation_id": "agentcc_api-keys_delete",
+      "python": "gateway.keys.delete",
+      "python_async": "gateway.keys.delete",
+      "query": [],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.keys.delete"
+    },
+    {
+      "arguments": [],
+      "fixed_path": {},
+      "operation_id": "agentcc_provider-credentials_list",
+      "python": "gateway.provider_credentials.list",
+      "python_async": "gateway.provider_credentials.list",
+      "query": [
+        "limit",
+        "page"
+      ],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.providerCredentials.list"
+    },
+    {
+      "arguments": [
+        "id"
+      ],
+      "fixed_path": {},
+      "operation_id": "agentcc_provider-credentials_read",
+      "python": "gateway.provider_credentials.get",
+      "python_async": "gateway.provider_credentials.get",
+      "query": [],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.providerCredentials.get"
+    },
+    {
+      "arguments": [
+        "body"
+      ],
+      "fixed_path": {},
+      "operation_id": "agentcc_provider-credentials_create",
+      "python": "gateway.provider_credentials.create",
+      "python_async": "gateway.provider_credentials.create",
+      "query": [],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.providerCredentials.create"
+    },
+    {
+      "arguments": [
+        "id",
+        "patch"
+      ],
+      "fixed_path": {},
+      "operation_id": "agentcc_provider-credentials_partial_update",
+      "python": "gateway.provider_credentials.update",
+      "python_async": "gateway.provider_credentials.update",
+      "query": [],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.providerCredentials.update"
+    },
+    {
+      "arguments": [
+        "id",
+        "body"
+      ],
+      "fixed_path": {},
+      "operation_id": "agentcc_provider-credentials_rotate",
+      "python": "gateway.provider_credentials.rotate",
+      "python_async": "gateway.provider_credentials.rotate",
+      "query": [],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.providerCredentials.rotate"
+    },
+    {
+      "arguments": [
+        "id"
+      ],
+      "fixed_path": {},
+      "operation_id": "agentcc_provider-credentials_delete",
+      "python": "gateway.provider_credentials.delete",
+      "python_async": "gateway.provider_credentials.delete",
+      "query": [],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.providerCredentials.delete"
+    },
+    {
+      "arguments": [
+        "body"
+      ],
+      "fixed_path": {},
+      "operation_id": "agentcc_provider-credentials_fetch_models",
+      "python": "gateway.provider_credentials.fetch_models",
+      "python_async": "gateway.provider_credentials.fetch_models",
+      "query": [],
+      "status": "PROVISIONAL",
+      "typescript": "gateway.providerCredentials.fetchModels"
+    },
+    {
+      "operation_id": "agentcc_api-keys_create",
+      "python": "NOT-OFFERED",
+      "python_async": "NOT-OFFERED",
+      "reason": "Personal keys are created only by the person from an interactive session; API-key-authenticated creation is forbidden.",
+      "typescript": "NOT-OFFERED"
+    },
+    {
+      "operation_id": "agentcc_api-keys_sync",
+      "python": "NOT-OFFERED",
+      "python_async": "NOT-OFFERED",
+      "reason": "No automatic key minting or organization keys.",
+      "typescript": "NOT-OFFERED"
+    }
+  ],
+  "pending_recordings": [
+    {
+      "operation_id": "agentcc_provider-credentials_create",
+      "reason": "Swagger declares the read serializer for the write body. A real control-plane capture is required before a typed write override is accepted."
+    },
+    {
+      "operation_id": "agentcc_org-configs_active",
+      "reason": "Swagger describes a page; the backend action returns one active version or null. Capture required for response model certification."
+    },
+    {
+      "operation_id": "agentcc_org-configs_diff",
+      "reason": "The backend accepts compare_to, which Swagger omits. Capture required for contract certification."
+    }
+  ]
+}
