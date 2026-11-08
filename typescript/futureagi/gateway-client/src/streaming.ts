@@ -7,21 +7,34 @@ import type { ChatCompletion, ChatCompletionMessage } from "./types/chat/chat-co
 import type { AgentCCMetadata, Usage } from "./types/shared.js";
 import { parseAgentCCMetadata } from "./types/shared.js";
 import type { StreamEvent } from "./stream-events.js";
-import { parseSSE } from "./sse.js";
-import { chunkFromCompletion, streamErrorFromEvent } from "./stream-frames.js";
+import { parseSSE, readStreamText } from "./sse.js";
+import { streamAdapterErrorFromEvent } from "./stream-adapter.js";
+import { chunkFromCompletion, isConsumableChunk, streamErrorFromEvent } from "./stream-frames.js";
+import { abortError, getResponseCancellation, RequestCancellation } from "./request-cancellation.js";
 
 // ---------------------------------------------------------------------------
 // Stream class — async iterable over ChatCompletionChunk
 // ---------------------------------------------------------------------------
 
+// Let wrappers check the stream's own cancellation state without adding a
+// public method or duplicating state that could miss direct Stream.abort().
+let throwIfStreamAborted: (stream: Stream) => void;
+
 export class Stream implements AsyncIterable<ChatCompletionChunk> {
+  static {
+    throwIfStreamAborted = (stream) => stream._throwIfAborted();
+  }
+
   private _response: Response;
   private _agentcc: AgentCCMetadata;
   private _done = false;
+  private readonly _controller = new AbortController();
+  private readonly _cancellation: RequestCancellation | undefined;
   readonly gatewayEvidence: GatewayEvidence;
 
   constructor(response: Response) {
     this._response = response;
+    this._cancellation = getResponseCancellation(response);
     this.gatewayEvidence = getGatewayEvidence(response);
     this._agentcc = parseAgentCCMetadata(response.headers);
   }
@@ -37,14 +50,30 @@ export class Stream implements AsyncIterable<ChatCompletionChunk> {
   }
 
   async *[Symbol.asyncIterator](): AsyncGenerator<ChatCompletionChunk> {
+    this._throwIfAborted();
     // Re-consumption is local misuse, not a failed response body read.
     if (this._done) throw errorAtExit(new StreamError("Stream already consumed", { gatewayEvidence: this.gatewayEvidence }));
     this._done = true;
     try {
-      yield* this._iterate();
+      // Validate once, before any public consumer or accumulator sees the
+      // decoded chunk. Gateway error frames have already taken precedence.
+      for await (const chunk of this._iterate()) {
+        this._throwIfAborted();
+        if (!isConsumableChunk(chunk)) throw this._bodyError("Invalid stream chunk shape");
+        yield chunk;
+      }
+      this._throwIfAborted();
     } catch (error) {
+      this._throwIfAborted();
       throw errorAtExit(error, this.gatewayEvidence, hasScrubbedResponse(this._response));
+    } finally {
+      this._cancellation?.dispose();
     }
+  }
+
+  private _throwIfAborted(): void {
+    if (this._controller.signal.aborted) throw abortError();
+    this._cancellation?.throwIfAborted();
   }
 
   private async *_iterate(): AsyncGenerator<ChatCompletionChunk> {
@@ -55,12 +84,12 @@ export class Stream implements AsyncIterable<ChatCompletionChunk> {
     // is one whole completion: yield it as one real chunk.
     const ct = this._response.headers.get("content-type") || "";
     if (ct.includes("application/json")) {
-      yield this._jsonAnswerChunk(await this._response.text());
+      yield this._jsonAnswerChunk(await readStreamText(body, this._cancellation?.signal ?? this._controller.signal));
       return;
     }
 
     let gatewayError: StreamError | null = null;
-    for await (const event of parseSSE(body)) {
+    for await (const event of parseSSE(body, this._cancellation?.signal ?? this._controller.signal)) {
       if (!event.data) continue;
       if (event.data === "[DONE]") return;
 
@@ -79,6 +108,10 @@ export class Stream implements AsyncIterable<ChatCompletionChunk> {
       // a metadata chunk and [DONE]. Stop there: nothing after it is answer.
       gatewayError = streamErrorFromEvent(data, this.gatewayEvidence);
       if (gatewayError) break;
+      // App-route SDK framing is a separate protocol. A genuine gateway error
+      // always wins, including when a payload also claims SDK-error origin.
+      const adapterError = streamAdapterErrorFromEvent(this._response, event.event, data, this.gatewayEvidence);
+      if (adapterError) throw adapterError;
 
       const chunk = data as ChatCompletionChunk;
       chunk.agentcc = this._agentcc;
@@ -87,7 +120,7 @@ export class Stream implements AsyncIterable<ChatCompletionChunk> {
 
     if (gatewayError) {
       // Release the connection: the frames after the error are not read.
-      this.abort();
+      this._response.body?.cancel().catch(() => {});
       throw gatewayError;
     }
   }
@@ -115,9 +148,13 @@ export class Stream implements AsyncIterable<ChatCompletionChunk> {
     return chunk;
   }
 
-  /** Cancel the stream early. */
+  /** Cancel the underlying request, even while its body is reader-locked.
+   * Pending iteration rejects with AbortError, without retry guidance. */
   abort(): void {
+    this._controller.abort(abortError());
+    this._cancellation?.abort();
     this._response.body?.cancel().catch(() => {});
+    this._cancellation?.dispose();
     this._done = true;
   }
 }
@@ -235,20 +272,26 @@ export class StreamManager implements AsyncIterable<ChatCompletionChunk> {
 
   /** Iterate over raw chunks. */
   async *[Symbol.asyncIterator](): AsyncGenerator<ChatCompletionChunk> {
+    throwIfStreamAborted(this._stream);
     if (this._consumed) throw new StreamError("StreamManager already consumed");
     this._consumed = true;
 
     for await (const chunk of this._stream) {
+      throwIfStreamAborted(this._stream);
       this._accumulator.add(chunk);
       yield chunk;
     }
+    throwIfStreamAborted(this._stream);
   }
 
   /** Iterate over just the text content deltas. */
   async *textStream(): AsyncGenerator<string> {
     for await (const chunk of this) {
       const content = chunk.choices?.[0]?.delta?.content;
-      if (content) yield content;
+      if (content) {
+        throwIfStreamAborted(this._stream);
+        yield content;
+      }
     }
   }
 
@@ -269,6 +312,7 @@ export class StreamManager implements AsyncIterable<ChatCompletionChunk> {
       // Content deltas
       const content = chunk.choices?.[0]?.delta?.content;
       if (content) {
+        throwIfStreamAborted(this._stream);
         yield { type: "content", text: content };
       }
 
@@ -276,6 +320,7 @@ export class StreamManager implements AsyncIterable<ChatCompletionChunk> {
       const toolCalls = chunk.choices?.[0]?.delta?.tool_calls;
       if (toolCalls) {
         for (const tc of toolCalls) {
+          throwIfStreamAborted(this._stream);
           yield {
             type: "tool_call",
             index: tc.index,
@@ -291,6 +336,7 @@ export class StreamManager implements AsyncIterable<ChatCompletionChunk> {
       // choices; a consumer that adds up usage events must not count it
       // twice. The final completion's usage is the last one carried.
       if (chunk.usage && !usageSeen) {
+        throwIfStreamAborted(this._stream);
         usageSeen = true;
         yield { type: "usage", usage: chunk.usage };
       }
@@ -301,6 +347,7 @@ export class StreamManager implements AsyncIterable<ChatCompletionChunk> {
     // "stop" or "tool_calls", so a guardrail error the gateway sends after it
     // reached only consumers that kept reading past done, and a stream that
     // ended on "length" never yielded done.
+    throwIfStreamAborted(this._stream);
     yield { type: "done", completion: this._accumulator.getFinalCompletion() };
   }
 

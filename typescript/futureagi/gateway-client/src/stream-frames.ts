@@ -54,6 +54,35 @@ function isObject(value: unknown): value is Json {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/** @internal Validate the structures consumers traverse or coerce before yielding.
+ * Optional/null deltas and empty usage-only choices keep their existing meaning;
+ * unrelated fields and whole-completion normalization are deliberately unchanged.
+ */
+export function isConsumableChunk(value: unknown): boolean {
+  if (!isObject(value) || !Array.isArray(value.choices)) return false;
+  for (const choice of value.choices) {
+    if (!isObject(choice)) return false;
+    const delta = choice.delta;
+    if (delta == null) continue;
+    if (!isObject(delta)) return false;
+    if (delta.content != null && typeof delta.content !== "string") return false;
+    const toolCalls = delta.tool_calls;
+    if (toolCalls == null) continue;
+    if (!Array.isArray(toolCalls)) return false;
+    for (const call of toolCalls) {
+      if (!isObject(call)) return false;
+      // Final assembly sorts by index and concatenates function fragments.
+      if (call.index != null && typeof call.index !== "number") return false;
+      const fn = call.function;
+      if (fn == null) continue;
+      if (!isObject(fn)) return false;
+      if (fn.name != null && typeof fn.name !== "string") return false;
+      if (fn.arguments != null && typeof fn.arguments !== "string") return false;
+    }
+  }
+  return true;
+}
+
 function toolCallDeltas(toolCalls: unknown): ToolCallDelta[] | undefined {
   if (!Array.isArray(toolCalls) || toolCalls.length === 0) return undefined;
   return toolCalls.map((call, index) => {

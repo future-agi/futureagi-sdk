@@ -16,6 +16,7 @@ import { assignHeaders, setMetadataHeader } from "./metadata-header.js";
 import { parseGatewayEvidence } from "./gateway-evidence.js";
 import { UNCONFIRMED_DISPATCH_REMEDY } from "./refusal-policy.js";
 import { failedBeforeSend } from "./transport-dispatch.js";
+import { abortError, throwIfAborted } from "./request-cancellation.js";
 
 /** What a client contributes to every request's headers. */
 export interface HeaderSources {
@@ -122,8 +123,18 @@ export function retryDelay(attempt: number, headers?: Headers): number {
   return Math.min((base + jitter) * 1000, 8_000);
 }
 
-export function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+export function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  throwIfAborted(signal);
+  return new Promise((resolve, reject) => {
+    const finish = () => { signal?.removeEventListener("abort", abort); resolve(); };
+    const timer = setTimeout(finish, ms);
+    const abort = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", abort);
+      reject(abortError());
+    };
+    signal?.addEventListener("abort", abort, { once: true });
+  });
 }
 
 /** Preserve public error classes without retaining credential-bearing transport

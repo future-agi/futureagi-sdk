@@ -6,7 +6,7 @@ import { ambiguousMetadata, unpricedMetadata } from "./refusal-metadata.js";
 import { safeDiagnosticHeaders } from "./redact.js";
 import { AgentCCError } from "./error-base.js";
 export { AgentCCError } from "./error-base.js";
-export { ResponseBodyError, StreamError, responseBodyError, streamBodyError, streamFrameError, errorAtExit } from "./body-errors.js";
+export { ResponseBodyError, StreamError, responseBodyError, streamBodyError, streamFrameError, sdkBodyFailureEvidence, errorAtExit } from "./body-errors.js";
 export type { StreamErrorOptions } from "./body-errors.js";
 
 /**

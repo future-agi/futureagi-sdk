@@ -29,6 +29,7 @@ import { buildHeaders, buildUrl, checkStructuredOutput, connectionError, retryDe
 import { callbackRequest, firePostRequestCallbacks, fireStatusErrorCallbacks } from "./request-callbacks.js";
 import { markScrubbedResponse } from "./redact.js";
 import { fetchWithScrub, requestInit } from "./request-transport.js";
+import { abortError, RequestCancellation, setResponseCancellation, throwIfAborted } from "./request-cancellation.js";
 
 export type { RequestOptions, ClientOptions, WithResponseResult } from "./client-options.js";
 import type { RequestOptions, ClientOptions, WithResponseResult } from "./client-options.js";
@@ -161,9 +162,11 @@ export class BaseClient {
     let refusalMax = Infinity;
 
     for (let attempt = 0; attempt <= maxForAttempt; attempt++) {
+      throwIfAborted(options.signal);
       try {
         return await this._doRequest<T>(options);
       } catch (caught) {
+        throwIfAborted(options.signal);
         const err = errorAtExit(caught);
         lastError = err;
         // A missing response is not proof of a pre-send failure. This safety
@@ -224,7 +227,7 @@ export class BaseClient {
           );
         }
 
-        await sleep(delay);
+        await sleep(delay, options.signal);
       }
     }
 
@@ -235,35 +238,58 @@ export class BaseClient {
     options: RequestOptions,
   ): Promise<WithResponseResult<T>> {
     const effectiveOptions = this.prepareRequest(options, "send");
+    throwIfAborted(effectiveOptions.signal);
 
     // Callback: onRequestStart
     if (this._callbacks.length > 0) {
       const cbReq = this._buildCallbackRequest(effectiveOptions);
       await invokeCallbacks(this._callbacks, "onRequestStart", cbReq);
     }
+    throwIfAborted(effectiveOptions.signal);
 
     const url = this._buildUrl(
       effectiveOptions.path,
       effectiveOptions.query,
     );
     const headers = this._buildHeaders(effectiveOptions);
-    const init = requestInit(effectiveOptions, headers, this._timeout);
+    const init = requestInit(effectiveOptions, headers);
 
-    let response: Response;
+    const cancellation = new RequestCancellation(effectiveOptions.timeout ?? this._timeout, effectiveOptions.signal);
+    init.signal = cancellation.signal;
+    let bodyHandedOff = false;
     try {
-      response = await fetchWithScrub(() => this._fetch(url, init), headers);
-    } catch (err: unknown) {
-      const connError = errorAtExit(connectionError(err, effectiveOptions.path, url));
-
-      // Callback: onError
-      if (this._callbacks.length > 0) {
-        const cbReq = this._buildCallbackRequest(effectiveOptions);
-        await invokeCallbacks(this._callbacks, "onError", cbReq, connError);
+      let response: Response;
+      try {
+        response = await fetchWithScrub(() => {
+          cancellation.throwIfAborted();
+          return this._fetch(url, init);
+        }, headers);
+        cancellation.throwIfAborted();
+      } catch (err: unknown) {
+        const connError = cancellation.explicitlyAborted ? abortError()
+          : errorAtExit(connectionError(err, effectiveOptions.path, url));
+        if (this._callbacks.length > 0) {
+          const cbReq = this._buildCallbackRequest(effectiveOptions);
+          await invokeCallbacks(this._callbacks, "onError", cbReq, connError);
+        }
+        throw connError;
       }
-
-      throw connError;
+      const result = await this._readResponse<T>(response, effectiveOptions, cancellation);
+      cancellation.throwIfAborted();
+      bodyHandedOff = !!(effectiveOptions.stream || effectiveOptions.raw);
+      if (bodyHandedOff) setResponseCancellation(response, cancellation);
+      return result;
+    } finally {
+      // Parsed attempts end here; Stream owns cleanup for handed-off bodies.
+      if (!bodyHandedOff) cancellation.dispose();
     }
+  }
 
+  private async _readResponse<T>(
+    response: Response,
+    effectiveOptions: RequestOptions,
+    cancellation: RequestCancellation,
+  ): Promise<WithResponseResult<T>> {
     markScrubbedResponse(response);
     const gatewayEvidence = captureGatewayEvidence(response, this._evidenceOptions);
     // Track cost
@@ -300,19 +326,20 @@ export class BaseClient {
           gatewayEvidence,
         };
       }
-      throw await this._statusError(response, effectiveOptions);
+      throw await this._statusError(response, effectiveOptions, cancellation);
     }
 
     // JSON responses
     if (!response.ok && response.status !== 246) {
-      throw await this._statusError(response, effectiveOptions);
+      throw await this._statusError(response, effectiveOptions, cancellation);
     }
 
     let json: unknown;
     try {
       json = await response.json();
+      cancellation.throwIfAborted();
     } catch {
-      const error = errorAtExit(responseBodyError(gatewayEvidence));
+      const error = cancellation.explicitlyAborted ? abortError() : errorAtExit(responseBodyError(gatewayEvidence));
       if (this._callbacks.length > 0) {
         await invokeCallbacks(this._callbacks, "onError", this._buildCallbackRequest(effectiveOptions), error);
       }
@@ -366,8 +393,10 @@ export class BaseClient {
   }
 
   /** The APIStatusError for an error answer, after its callbacks fire. */
-  private async _statusError(response: Response, options: RequestOptions): Promise<APIStatusError> {
-    const statusError = errorAtExit(APIStatusError.from(response.status, await safeJson(response), response.headers));
+  private async _statusError(response: Response, options: RequestOptions, cancellation: RequestCancellation): Promise<APIStatusError> {
+    const body = await safeJson(response);
+    cancellation.throwIfAborted();
+    const statusError = errorAtExit(APIStatusError.from(response.status, body, response.headers));
     if (this._callbacks.length > 0) {
       await fireStatusErrorCallbacks(this._callbacks, this._buildCallbackRequest(options), statusError);
     }
