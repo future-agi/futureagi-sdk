@@ -51,7 +51,7 @@ class ReadOnlyContextBackend(BackendProtocol):
         runtime = ToolRuntime(
             state={
                 "files": {
-                    "/" + path: create_file_data(
+                    f"/{path}": create_file_data(
                         text, created_at="1980-01-01T00:00:00Z"
                     )
                     for path, text in snapshot.files.items()
