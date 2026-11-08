@@ -50,6 +50,14 @@ describe("CI runs the parity node tests", () => {
     expect(existsSync(join(ROOT, "ci", "gateway-client.yml"))).toBe(true);
   });
 
+  it("root CI forwards Jest flags through pnpm's explicit script runner", () => {
+    const yml = read(REPO, ".github", "workflows", "ci.yml");
+    const job = yml.slice(yml.indexOf("\n  typescript:\n"), yml.indexOf("\n  packages:\n"));
+    expect(job).toMatch(/^\s+run: pnpm run test --runInBand\s*$/m);
+    const manifest = JSON.parse(read(ROOT, "..", "package.json"));
+    expect(manifest.scripts.test).toBe("node gateway-client/scripts/run-all-tests.cjs");
+  });
+
   it("run-all-tests.cjs runs them after both jest runs and fails when they fail", () => {
     const js = read(ROOT, "scripts", "run-all-tests.cjs");
     expect(js).toContain('["compare.test.mjs", "hygiene.test.mjs"].map((f) => join("gateway-client", "tests", "parity", f))');

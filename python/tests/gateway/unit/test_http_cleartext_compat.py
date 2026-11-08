@@ -20,8 +20,10 @@ async def test_cleartext_sends_and_warns_once_per_client(origin, asynchronous, m
 
     monkeypatch.setattr(socket, "getaddrinfo", no_dns)
     requests = []
+    wire_headers = []
 
     def handle(request):
+        wire_headers.append(dict(request.headers))
         requests.append(request)
         return httpx.Response(200, json={"object": "list", "data": []})
 
@@ -47,7 +49,9 @@ async def test_cleartext_sends_and_warns_once_per_client(origin, asynchronous, m
         assert caught[0].category is AgentCCDeprecationWarning
         assert str(caught[0].message) == expected
     assert len(requests) == 4
-    assert all(request.headers["authorization"] == "Bearer synthetic-key" for request in requests)
+    assert len(wire_headers) == 4
+    assert all(headers["authorization"] == "Bearer synthetic-key" for headers in wire_headers)
+    assert all(request.headers["authorization"] == "[REDACTED]" for request in requests)
 
 
 @pytest.mark.parametrize("origin", ["https://gateway.test", "http://localhost:8000", "http://127.0.0.2", "http://[::1]"])

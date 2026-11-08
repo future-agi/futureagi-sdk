@@ -1,13 +1,15 @@
 """Fail-closed workflow checks with exact, byte-bound release exceptions.
 
-Reviewed trigger/action/source exceptions do not authorize credentials or
-publication. W2/W3 blockers stay blocked, including in released workflows.
+Trigger/action/source exceptions do not authorize credentials or publication.
+Separately reviewed release workflows bind the complete diagnostic census to
+both Git blob and source SHA-256; every edit requires renewed review.
 This is a static regression gate, not a sandbox for arbitrary application code.
-New actions and reusable workflows need review. Runtime permissions must remain
-read-only even when a step is disabled or a workflow is manually triggered.
+New actions and reusable workflows need review. Outside the exact reviewed
+workflow records, runtime permissions remain read-only even when a step is
+disabled or a workflow is manually triggered.
 
 Command rules are a blocklist for the usual publish, tag and deploy tools; a
-raw HTTP client is not matched. The backstop is credentials: read-only token
+raw HTTP client is not matched. The default backstop is credentials: read-only token
 permissions, no `secrets` or GitHub token in any expression, no credential-named
 workflow input, and no credential-named variable, action input or shell
 assignment taken from an expression. A person who runs a script with their own
@@ -102,9 +104,13 @@ RELEASED_WORKFLOWS = {
     ".github/workflows/publish.yml", ".github/workflows/promote.yml",
     ".github/workflows/release-please.yml", ".github/workflows/pr-title-lint.yml",
 }
-EXCEPTION_KINDS = {"trigger", "action", "checkout_ref", "workflow_name"}
-# No credential, permission, command, workflow_run or checkout-persistence
-# escape hatch. Blocked released workflows must be fixed before admission.
+EXCEPTION_KINDS = {"trigger", "action", "checkout_ref", "workflow_name", "reviewed_workflow"}
+REVIEWED_WORKFLOWS = {
+    ".github/workflows/publish.yml", ".github/workflows/release-please.yml",
+    ".github/workflows/promote.yml", ".github/workflows/pr-title-lint.yml",
+}
+# No general credential, permission, command or event escape hatch. The four
+# reviewed workflows require their entire exact-byte diagnostic census.
 EXCEPTABLE_EVENTS = {"push", "schedule", "repository_dispatch"}
 ACTION_REF = re.compile(r"(?:[0-9a-f]{40}|v[0-9]+(?:\.[0-9]+)*(?:-[A-Za-z0-9.-]+)?)")
 
@@ -130,6 +136,8 @@ class ReleasedExceptions:
                            for k in fields - {"value"})
                     or entry["workflow"] not in RELEASED_WORKFLOWS
                     or entry["kind"] not in EXCEPTION_KINDS
+                    or (entry["kind"] == "reviewed_workflow"
+                        and entry["workflow"] not in REVIEWED_WORKFLOWS)
                     or not re.fullmatch(r"[0-9a-f]{40}", entry["blob"])):
                 fail("exceptions", "invalid exact released-workflow exception")
                 continue
@@ -302,6 +310,11 @@ def check_workflow(text, filename, actions, local_workflows, exceptions=()):
         walk(document, "workflow")
     except RecursionError:
         fail("workflow", "YAML nesting exceeds the policy limit")
+    # The second content hash prevents a blob-only re-pin from admitting an
+    # edited workflow with superficially identical policy diagnostics.
+    reviewed = {"source_sha256": hashlib.sha256(raw).hexdigest(), "diagnostics": list(errors)}
+    if grants.allows("reviewed_workflow", "workflow", reviewed):
+        errors.clear()
     grants.finish()
     return errors
 

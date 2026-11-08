@@ -12,7 +12,14 @@ describe("evaluation release policy", () => {
     for (const mapping of Object.values(manifest.typesVersions ?? {})) {
       expect(Object.keys(mapping as object).filter((key) => key.startsWith("evals"))).toEqual([]);
     }
-    expect(manifest.files).toEqual(expect.arrayContaining(["!dist/**/evals/**", "!dist/**/evals.*"]));
+    // Exclude the deferred top-level runner, not the shipped platform resource.
+    for (const output of ["esm", "src", "esnext"]) {
+      expect(manifest.files).toEqual(expect.arrayContaining([
+        `!dist/${output}/evals/**`, `!dist/${output}/evals.*`,
+      ]));
+    }
+    expect(manifest.files).not.toContain("!dist/**/evals/**");
+    expect(manifest.files).not.toContain("!dist/**/evals.*");
   });
 
   it("has no retired evaluation dependency in either workspace or any lockfile", () => {

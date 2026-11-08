@@ -19,13 +19,14 @@ CONFIG = json.loads(Path(__file__).with_name("workflow-policy.json").read_text()
 ACTIONS = CONFIG.get("actions", []) if isinstance(CONFIG, dict) else []
 ENTRIES = CONFIG.get("released_workflow_exceptions", []) if isinstance(CONFIG, dict) else []
 RECORD = "RL2251m-W1-W6"
+REVIEW_RECORD = 'reviewed-release-and-promotion-workflows-2026-11-07'
 PINS = {
-    # Runner/comments and installed-wheel reference checks only; grants unchanged.
-    "ci": "2b0e03223558af6db7a3cf688c08e50527abd732",
+    # Explicit pnpm run forwards the existing Jest argument; grants unchanged.
+    "ci": "5af3ad0dc77532cba22325afa39e6595977b3622",
     "e2e": "cba54bac7b19da39a12e8175dee35cbc05cac28c",
-    "publish": "8764c921cb167ce29c54944baee46b186355b50b",
+    "publish": "5768525321a738d9b1ccd4f7a7c3761bc767e834",
     "promote": "4dd63903e8404d464e3039fc9e8532dd9b4db079",
-    "release-please": "2e5a92ce635a7c49da6fcb81fc9bda773b47898d",
+    "release-please": "bd03fe5c7d6a48b91b0570acec35a327d78cb2c4",
     "pr-title-lint": "01db2c11caeef450ea14a715c65deb881788735d",
 }
 # Independent census: changing JSON alone cannot expand authority. Growth must
@@ -44,9 +45,13 @@ CASES = [
     ("pr-title-action", "pr-title-lint", "action", "workflow.jobs.lint.steps[0].uses",
      "amannn/action-semantic-pull-request@e32d7e603df1aa1ba07e981f2a23455dee596825"),
 ]
-EXPECTED = [{"id": id_, "record": RECORD, "workflow": f".github/workflows/{name}.yml",
+EXPECTED = [{"id": id_, "record": RECORD if name in ("ci", "e2e") else REVIEW_RECORD,
+             "workflow": f".github/workflows/{name}.yml",
              "blob": PINS[name], "kind": kind, "location": location, "value": value}
             for id_, name, kind, location, value in CASES]
+# Independent, reviewed census: never derive expected grants from the policy file.
+REVIEWED_CASES = json.loads(Path(__file__).with_name("reviewed-workflow-census.json").read_text())
+EXPECTED.extend(REVIEWED_CASES)
 
 
 def blob(raw):
@@ -167,8 +172,8 @@ class ReleasedWorkflowPolicyTests(unittest.TestCase):
         return entry, document, raw, repin(ENTRIES, path, raw)
 
     def current_fixture(self, name):
-        # RL2251o items 1-5 remain refused at these exact current bytes. These
-        # controls must be reviewed, not silently re-pinned, after hardening.
+        # Keep the original refusal controls when the separately reviewed
+        # exact-byte admission is absent; credentials are not globally allowed.
         pin = PINS.get(name)
         self.assertIsInstance(pin, str)
         path = f".github/workflows/{name}.yml"
@@ -176,7 +181,7 @@ class ReleasedWorkflowPolicyTests(unittest.TestCase):
         self.assertEqual(blob(raw), pin, "current-blob refusal needs renewed review")
         document = yaml.load(raw, Loader=policy.WorkflowLoader)
         self.assertIsInstance(document, dict)
-        return path, document, check(raw, path)
+        return path, document, check(raw, path, [e for e in ENTRIES if e["kind"] != "reviewed_workflow"])
 
     def assert_refused(self, errors, path, location, diagnostic):
         self.assertIn(f"{path}:{location}: {diagnostic}", errors)
@@ -202,7 +207,8 @@ class ReleasedWorkflowPolicyTests(unittest.TestCase):
         for name in ("publish", "promote", "release-please", "pr-title-lint"):
             path = f".github/workflows/{name}.yml"
             with self.subTest(workflow=path):
-                self.assertTrue(check((ROOT / path).read_bytes(), path))
+                self.assertTrue(check((ROOT / path).read_bytes(), path,
+                                      [e for e in ENTRIES if e["kind"] != "reviewed_workflow"]))
 
     def test_item1_requires_explicit_lint_job_permissions_at_current_blob(self):
         path, document, errors = self.current_fixture("pr-title-lint")
@@ -272,6 +278,24 @@ class ReleasedWorkflowPolicyTests(unittest.TestCase):
         self.assert_refused(errors, path, "workflow.jobs.release.steps[5].with.token",
                             "credential-named value may not come from an expression")
 
+    def test_reviewed_workflows_pass_only_with_their_exact_records(self):
+        for row in REVIEWED_CASES:
+            path = row["workflow"]
+            raw = (ROOT / path).read_bytes()
+            with self.subTest(workflow=path):
+                self.assertEqual(blob(raw), row["blob"])
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), row["value"]["source_sha256"])
+                self.assertEqual(check(raw, path), [])
+                without = [e for e in ENTRIES if e["id"] != row["id"]]
+                self.assertTrue(check(raw, path, without))
+                changed = raw + b"# changed bytes require review\n"
+                self.assertTrue(check(changed, path))
+                self.assertTrue(check(changed, path, repin(ENTRIES, path, changed)))
+                self.assertTrue(check(raw, ".github/workflows/unlisted.yml"))
+                altered = deepcopy(ENTRIES)
+                next(e for e in altered if e["id"] == row["id"])["value"]["diagnostics"].append("unexpected")
+                self.assertTrue(check(raw, path, altered))
+
     def test_git_blob_id_hashes_original_bytes(self):
         implementation = getattr(policy, "git_blob_id", None)
         self.assertTrue(callable(implementation), "raw-byte Git blob hashing is required")
@@ -322,7 +346,8 @@ class ReleasedWorkflowPolicyTests(unittest.TestCase):
             document = {"on": {"workflow_dispatch": None}, "permissions": {"contents": "read"},
                         "jobs": {"lint": {"runs-on": "ubuntu-latest", "steps": [{"uses": action}]}}}
             raw = serialize(document)
-            entry = dict(EXPECTED[-1], blob=blob(raw), value=action)
+            entry = dict(next(e for e in EXPECTED if e["id"] == "pr-title-action"),
+                         blob=blob(raw), value=action)
             errors = check(raw, path, [entry], [*ACTIONS, action])
             self.assertTrue(any("W2_BLOCKER" in error for error in errors), errors)
 

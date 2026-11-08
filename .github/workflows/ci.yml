@@ -114,7 +114,7 @@ jobs:
         run: pnpm run typecheck
       - name: Unit tests (root, platform, gateway and parity)
         # Do not forward a platform-only filter to the gateway Jest runner.
-        run: pnpm test --runInBand
+        run: pnpm run test --runInBand
       - name: Build (CJS, ESM, ESNext)
         run: pnpm run build
 

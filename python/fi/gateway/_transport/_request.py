@@ -13,7 +13,7 @@ from fi.gateway._constants import (
     HEADER_SDK_VERSION, HEADER_USER_AGENT, NOT_GIVEN, __version__,
 )
 from fi.gateway._env import guard_fi_key_pair
-from fi.gateway._http_security import reject_credential_query, validate_destination
+from fi.gateway._http_security import reject_credential_query, validate_destination, validate_header_values
 from fi.gateway._utils import serialize_agentcc_param
 
 
@@ -88,6 +88,7 @@ class RequestBuilder:
             composed_names.update(name.lower() for name in agentcc_params.get("_client_header_names", ()))
             headers.update(session_headers)
         headers.update(options.headers)
+        validate_header_values(headers, composed_names)
         for name, value in headers.items():
             if name.lower() in {"authorization", "x-api-key"}:
                 guard_fi_key_pair(value)

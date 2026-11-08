@@ -228,7 +228,9 @@ test.each([{ base: US, id: "https" }, { base: "http://token-ignored-platform-h6.
     expect(outcome).toEqual({ ok: true });
     selectedOnce(seen, base);
     expect(seen[0]!.headers.has("authorization")).toBe(false);
-    expect(JSON.stringify(Array.from(seen[0]!.headers.entries()))).not.toContain(TOKEN);
+    const headers: [string, string][] = [];
+    seen[0]!.headers.forEach((value, name) => headers.push([name, value]));
+    expect(JSON.stringify(headers)).not.toContain(TOKEN);
   },
 );
 
