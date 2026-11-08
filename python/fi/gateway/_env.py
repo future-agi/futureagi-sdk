@@ -12,6 +12,7 @@ import logging
 import os
 
 from fi.gateway._exceptions import AgentCCError
+from fi.gateway._secrets import _Secret
 
 logger = logging.getLogger("fi.gateway")
 KEY_ENV = ("FI_GATEWAY_API_KEY", "AGENTCC_API_KEY")
@@ -22,31 +23,38 @@ _KEY_PAGE = "the Keys page of the Agent Command Center in the Future AGI Console
 
 def from_env(names: tuple[str, ...]) -> str:
     """Return the first nonempty variable, logging names on conflicts."""
-    present = [(name, os.environ.get(name) or "") for name in names]
-    present = [(name, value) for name, value in present if value]
-    if not present:
-        return ""
-    if len({value for _, value in present}) > 1:
-        logger.warning(
-            "%s are set to different values; using %s",
-            ", ".join(name for name, _ in present), present[0][0],
-        )
-    return present[0][1]
+    try:
+        present = [(name, os.environ.get(name) or "") for name in names]
+        present = [(name, value) for name, value in present if value]
+        if not present:
+            return ""
+        if len({value for _, value in present}) > 1:
+            logger.warning(
+                "%s are set to different values; using %s",
+                ", ".join(name for name, _ in present), present[0][0],
+            )
+        return present[0][1]
+    finally:
+        present = None
 
 
 def _bare(key: str) -> str:
-    key = key.strip()
-    if key[:7].lower() == "bearer ":
-        key = key[7:].strip()
-    return key
+    try:
+        key = key.strip()
+        if key[:7].lower() == "bearer ":
+            key = key[7:].strip()
+        return key
+    finally:
+        key = None
 
 
-def guard_fi_key_pair(api_key: str) -> None:
+def guard_fi_key_pair(api_key: str | _Secret[str]) -> None:
     """Refuse either platform key, including whitespace/Bearer variants."""
-    bare = _bare(api_key)
+    api_key = _Secret.hold(api_key)
+    bare = _Secret(_bare(api_key.get()))
     for name in FI_KEY_PAIR:
-        value = os.environ.get(name)
-        if value and _bare(value) and bare == _bare(value):
+        value = _Secret(os.environ.get(name))
+        if value.get() and _bare(value.get()) and bare.get() == _bare(value.get()):
             raise AgentCCError(
                 f"The gateway key equals {name} from the environment. fi.gateway "
                 "authenticates with a gateway virtual key and never sends the Future AGI "
@@ -72,21 +80,23 @@ def resolve_wrapper_settings(
     from fi.gateway._constants import AGENTCC_GATEWAY_URL
     from fi.gateway._http_security import validate_destination
 
+    api_key = _Secret.hold(api_key)
     origin = clean_base_url(base_url or env_base_url() or AGENTCC_GATEWAY_URL)
     validate_destination(origin, origin, warn_cleartext=False)
-    return api_key or env_api_key() or None, origin
+    return api_key.get() or env_api_key() or None, origin
 
 
 def resolve_api_key(api_key: str | None) -> str:
-    resolved = api_key or env_api_key()
-    if not resolved:
+    api_key = _Secret.hold(api_key)
+    resolved = _Secret(api_key.get() or env_api_key())
+    if not resolved.get():
         raise AgentCCError(
             "api_key is required: pass api_key= or set FI_GATEWAY_API_KEY "
             "(AGENTCC_API_KEY is still read). It is a gateway virtual key from "
             f"{_KEY_PAGE}, not your FI_API_KEY."
         )
     guard_fi_key_pair(resolved)
-    return resolved
+    return resolved.get()
 
 
 def normalize_base_url(base_url: str) -> str:

@@ -22,19 +22,23 @@ def validate_header_values(headers: dict[str, Any], owned_names: set[str]) -> No
     obs-text. Field values cannot contain control bytes other than an internal
     tab, or start/end with optional whitespace. Do not normalize valid values.
     """
-    for name, value in headers.items():
-        if name.lower() not in owned_names:
-            continue
-        if isinstance(value, str):
-            valid = (value.isascii() and value == value.strip(" \t")
-                     and all(char == "\t" or 32 <= ord(char) < 127 for char in value))
-        elif isinstance(value, bytes):
-            valid = (value == value.strip(b" \t")
-                     and all(char == 9 or 32 <= char != 127 for char in value))
-        else:
-            valid = False
-        if not valid:
-            raise AgentCCError(f"Invalid HTTP header value for {name.lower()}.")
+    try:
+        for name, value in headers.items():
+            if name.lower() not in owned_names:
+                continue
+            if isinstance(value, str):
+                valid = (value.isascii() and value == value.strip(" \t")
+                         and all(char == "\t" or 32 <= ord(char) < 127 for char in value))
+            elif isinstance(value, bytes):
+                valid = (value == value.strip(b" \t")
+                         and all(char == 9 or 32 <= char != 127 for char in value))
+            else:
+                valid = False
+            if not valid:
+                raise AgentCCError(f"Invalid HTTP header value for {name.lower()}.")
+    finally:
+        # Release only SDK frame aliases; keep caller mappings and errors intact.
+        headers = value = None
 
 
 def reject_credential_query(query: Any, *, where: str = "default_query") -> None:

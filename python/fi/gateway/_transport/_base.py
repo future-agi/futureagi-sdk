@@ -24,6 +24,7 @@ from fi.gateway._gateway_evidence import GatewayEvidence
 from fi.gateway._transport._pool import HttpPool
 from fi.gateway._transport._callbacks import CallbackLifecycle
 from fi.gateway._utils import parse_timeout
+from fi.gateway._secrets import _Secret
 
 logger = logging.getLogger("fi.gateway")
 
@@ -113,36 +114,39 @@ def send_arguments(options: RequestOptions, headers: dict[str, str]) -> dict[str
     A multipart send drops the JSON ``Content-Type`` from *headers* (any spelling), so
     httpx sets the form's own with its boundary.
     """
-    if not _uses_form(options):
-        return {"json": options.body}
-    for name in [k for k in headers if k.lower() == "content-type"]:
-        del headers[name]
-    data = options.form
-    if data is None:
-        import json
+    try:
+        if not _uses_form(options):
+            return {"json": options.body}
+        for name in [k for k in headers if k.lower() == "content-type"]:
+            del headers[name]
+        data = options.form
+        if data is None:
+            import json
 
-        # Published multipart descriptors retain their unencoded body for callbacks.
-        data = {
-            key: value if isinstance(value, str) else json.dumps(value)
-            if isinstance(value, (list, dict)) else str(value)
-            for key, value in (options.body or {}).items()
-        }
-    return {"files": options.files, "data": data}
+            # Published multipart descriptors retain their unencoded body for callbacks.
+            data = {
+                key: value if isinstance(value, str) else json.dumps(value)
+                if isinstance(value, (list, dict)) else str(value)
+                for key, value in (options.body or {}).items()
+            }
+        return {"files": options.files, "data": data}
+    finally:
+        headers = None
 
 
 class BaseClient(RequestBuilder, CallbackLifecycle, ABC):
     """Shared logic for sync and async clients."""
 
-    _api_key: str
+    _api_key: _Secret[str]
     _base_url: str
     _timeout: httpx.Timeout
     _max_retries: int
     _retry_config: RetryConfig
-    _default_headers: dict[str, str]
+    _default_headers: _Secret[dict[str, str] | None]
     _default_query: dict[str, str]
     _session_id: str | None
     _metadata: dict[str, Any] | None
-    _config: Any  # GatewayConfig | None
+    _config: _Secret[Any]  # GatewayConfig | None
     _callbacks: list[Any]
     _retry_policy: Any  # RetryPolicy | None
 
@@ -175,6 +179,9 @@ class BaseClient(RequestBuilder, CallbackLifecycle, ABC):
         client's ``with_options()`` copies; without one the transport has its own,
         holding ``http_client`` if given.
         """
+        api_key = _Secret.hold(api_key)
+        default_headers = _Secret.hold(default_headers)
+        config = _Secret.hold(config)
         super().__init__(
             api_key=api_key, base_url=base_url, default_headers=default_headers,
             default_query=default_query, session_id=session_id,
@@ -214,15 +221,18 @@ class BaseClient(RequestBuilder, CallbackLifecycle, ABC):
         ``request()`` policy and its own default headers still apply) and an upload hands
         ``files=``/``data=``. Only raw inspection pre-encodes a body.
         """
-        headers, composed_names = self._build_headers_with_names(options, params)
-        if stream and options.form is None:
-            body: dict[str, Any] = {"json": options.body}
-        else:
-            body = send_arguments(options, headers)
-        return {
-            "method": options.method, "url": self._build_url(options.url),
-            "headers": headers, **body,
-        }, composed_names
+        try:
+            headers, composed_names = self._build_headers_with_names(options, params)
+            if stream and options.form is None:
+                body: dict[str, Any] = {"json": options.body}
+            else:
+                body = send_arguments(options, headers)
+            return {
+                "method": options.method, "url": self._build_url(options.url),
+                "headers": headers, **body,
+            }, composed_names
+        finally:
+            headers = None
 
     def _should_retry(self, status_code: int, attempt: int, max_retries: int) -> bool:
         # When a retry_policy is set, use per-status-code retry limits

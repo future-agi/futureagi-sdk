@@ -24,12 +24,15 @@ DEFAULT_GATEWAY_URL = "https://gateway.futureagi.com"
 def _resolve(api_key: str | None, base_url: str | None) -> tuple[str | None, str]:
     import warnings
 
-    warnings.warn(
-        "Gateway and AsyncGateway are deprecated released compatibility adapters; "
-        "AgentCC and AsyncAgentCC require an explicit gateway origin.",
-        DeprecationWarning, stacklevel=3,
-    )
-    return resolve_wrapper_settings(api_key, base_url)
+    try:
+        warnings.warn(
+            "Gateway and AsyncGateway are deprecated released compatibility adapters; "
+            "AgentCC and AsyncAgentCC require an explicit gateway origin.",
+            DeprecationWarning, stacklevel=3,
+        )
+        return resolve_wrapper_settings(api_key, base_url)
+    finally:
+        api_key = None
 
 
 class Gateway(AgentCC):
@@ -47,13 +50,19 @@ class Gateway(AgentCC):
     """
 
     def __init__(self, *, api_key: str | None = None, base_url: str | None = None, **kwargs: Any) -> None:
-        api_key, base_url = _resolve(api_key, base_url)
-        super().__init__(api_key=api_key, base_url=base_url, **kwargs)
+        try:
+            api_key, base_url = _resolve(api_key, base_url)
+            super().__init__(api_key=api_key, base_url=base_url, **kwargs)
+        finally:
+            api_key, kwargs = None, {}
 
 
 class AsyncGateway(AsyncAgentCC):
     """Async version of :class:`Gateway`."""
 
     def __init__(self, *, api_key: str | None = None, base_url: str | None = None, **kwargs: Any) -> None:
-        api_key, base_url = _resolve(api_key, base_url)
-        super().__init__(api_key=api_key, base_url=base_url, **kwargs)
+        try:
+            api_key, base_url = _resolve(api_key, base_url)
+            super().__init__(api_key=api_key, base_url=base_url, **kwargs)
+        finally:
+            api_key, kwargs = None, {}
