@@ -63,7 +63,10 @@ describe("live smoke after simulation withdrawal", () => {
     expect(result.error).toBeUndefined();
     expect({ status: result.status, stderr: result.stderr }).toEqual({
       status: 0,
-      stderr: "",
+      stderr:
+        "futureagi: sending credentials (API keys or a Bearer token) in cleartext over HTTP to http://sdk-smoke.invalid. " +
+        "Plain-HTTP keys origins are deprecated and will be refused in a future minor; use HTTPS. " +
+        "Bearer HTTP requires allowInsecureHttp or FI_ALLOW_INSECURE_HTTP=1.\n",
     });
     expect(JSON.parse(result.stdout)).toEqual({
       ok: true,

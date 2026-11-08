@@ -113,7 +113,7 @@ export function foldEach<T>(rows: readonly T[], sandbox: (row: T) => boolean) {
     for (const row of rows) {
       const skipped = sandbox(row);
       const title = `${name} ${JSON.stringify(row)}${skipped ? ` [${NOT_APPLICABLE_AT_FOLD}]` : ''}`;
-      (skipped && SANDBOX_ABSENT ? test.skip : test)(title, () => body(row));
+      (skipped && SANDBOX_ABSENT ? test.skip : test)(title, async () => { await body(row); });
     }
   };
 }
