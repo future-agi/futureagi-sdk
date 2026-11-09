@@ -276,6 +276,50 @@ def test_delete_batch_resolves_all_names_before_one_request(clients):
     assert client.kb is None
 
 
+@pytest.mark.parametrize(
+    "names",
+    [[], ["product_docs_archive"], ["PRODUCT_DOCS"], ["product_docs", "product_docs"]],
+    ids=["missing", "substring", "different_case", "ambiguous"],
+)
+def test_cached_update_rejects_nonunique_current_name(clients, names):
+    cached = _config("product_docs")
+    with patch.object(KnowledgeBase, "list_kbs", return_value=[cached]):
+        client = clients("product_docs")
+    candidates = [_config(name, kb_id) for name, kb_id in zip(names, [EXACT_ID, OTHER_ID])]
+
+    with (
+        patch.object(client, "list_kbs", return_value=candidates) as lookup,
+        patch("requests.patch", return_value=_response("PATCH", {})) as update,
+    ):
+        with pytest.raises(SDKException, match="product_docs"):
+            client.update_kb("product_docs", new_name="renamed")
+
+    lookup.assert_called_once_with("product_docs")
+    update.assert_not_called()
+    assert client.kb is cached
+    assert (str(cached.id), cached.name) == (EXACT_ID, "product_docs")
+
+
+def test_cached_update_selects_current_owner_of_reused_name(clients):
+    cached = _config("product_docs")
+    with patch.object(KnowledgeBase, "list_kbs", return_value=[cached]):
+        client = clients("product_docs")
+    current = _config("product_docs", OTHER_ID)
+
+    with (
+        patch.object(
+            client, "list_kbs", return_value=[_config("product_docs_archive"), current]
+        ) as lookup,
+        patch("requests.patch", return_value=_response("PATCH", {"name": "renamed"})) as update,
+    ):
+        assert client.update_kb("product_docs", new_name="renamed") is client
+
+    assert update.call_args.kwargs["json"] == {"kb_id": OTHER_ID, "name": "renamed"}
+    lookup.assert_called_once_with("product_docs")
+    assert client.kb is current
+    assert (str(cached.id), cached.name) == (EXACT_ID, "product_docs")
+
+
 def test_cached_id_deletion_without_names_still_uses_cached_target(clients):
     client = clients()
     client.kb = _config("product_docs")
