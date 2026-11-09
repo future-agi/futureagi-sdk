@@ -201,3 +201,90 @@ def test_write_configuration_preserves_supported_settings(backend, operation):
     }}))
     fetched = backend.fetch(version=client.template.version)
     assert fetched.template.model_configuration == config
+
+
+@pytest.mark.parametrize("as_model", [False, True])
+def test_compile_fidelity_preserves_multimodal_content(backend, as_model):
+    content = [
+        {"type": "text", "text": "Hello {{ name }}; {{missing}}"},
+        {"type": "image_url", "image_url": {"url": "https://images.example.test/{{image}}.png"}},
+    ]
+    message = MessageBase(role="user", content=content) if as_model else {"role": "user", "content": content}
+    client = Prompt(template=PromptTemplate(id=TEMPLATE_ID, name=NAME, messages=[message]), **AUTH)
+    backend.clients.append(client)
+    before = client.template.model_dump()
+    compiled = client.compile(name="reader", image="sample")
+    assert compiled == [{"role": "user", "content": [
+        {"type": "text", "text": "Hello reader; {{missing}}"},
+        {"type": "image_url", "image_url": {"url": "https://images.example.test/sample.png"}},
+    ]}]
+    compiled[0]["content"][1]["image_url"]["url"] = "local edit"
+    assert client.template.model_dump() == before
+
+
+def test_compile_fidelity_preserves_tool_message_metadata(backend):
+    messages = [
+        {"role": "assistant", "content": None, "tool_calls": [
+            {"id": "call-1", "type": "function", "function": {"name": "lookup", "arguments": "{}"}}
+        ]},
+        {"role": "tool", "content": "Result: {{value}}", "tool_call_id": "call-1", "name": "lookup"},
+    ]
+    client = Prompt(template=PromptTemplate(id=TEMPLATE_ID, name=NAME, messages=messages), **AUTH)
+    backend.clients.append(client)
+    compiled = client.compile(value="found")
+    expected = copy.deepcopy(messages)
+    expected[1]["content"] = "Result: found"
+    assert compiled == expected
+    compiled[0]["tool_calls"][0]["function"]["name"] = "local edit"
+    assert client.compile(value="found") == expected
+
+
+def test_compile_fidelity_preserves_placeholder_messages_and_inputs(backend):
+    client = Prompt(template=PromptTemplate(id=TEMPLATE_ID, name=NAME, messages=[
+        {"type": "placeholder", "name": "history"},
+    ]), **AUTH)
+    backend.clients.append(client)
+    history = [{"role": "tool", "content": [{"type": "text", "text": "{{value}}"}],
+                "tool_call_id": "call-1"}]
+    before = copy.deepcopy(history)
+    compiled = client.compile(history=history, value="found")
+    assert compiled == [{"role": "tool", "content": [{"type": "text", "text": "found"}],
+                         "tool_call_id": "call-1"}]
+    compiled[0]["content"][0]["text"] = "local edit"
+    assert history == before
+    unresolved = client.compile()
+    unresolved[0]["name"] = "local edit"
+    assert client.compile() == [{"type": "placeholder", "name": "history"}]
+
+
+def test_compile_fidelity_survives_text_write_and_fetch(backend):
+    client = Prompt(template=PromptTemplate(id=TEMPLATE_ID, name=NAME, messages=[
+        MessageBase(role="user", content="Hello {{name}}"),
+    ]), **AUTH)
+    backend.clients.append(client)
+    client.template.id = None
+    backend.replies.append((201, {"result": {"id": TEMPLATE_ID, "name": NAME, "template_version": "v1"}}))
+    client.create()
+    stored = backend.calls[-1]["json"]["prompt_config"]
+    backend.replies.append((200, {"result": {"id": TEMPLATE_ID, "name": NAME,
+                                            "version": "v1", "prompt_config": stored}}))
+    fetched = backend.fetch(version="v1")
+    assert fetched.compile(name="reader") == [
+        {"role": "system", "content": [{"type": "text", "text": ""}]},
+        {"role": "user", "content": [{"type": "text", "text": "Hello reader"}]},
+    ]
+
+
+def test_compile_fidelity_keeps_string_messages_and_validates_placeholders(backend):
+    from fi.prompt.types import UserMessage
+
+    client = Prompt(template=PromptTemplate(id=TEMPLATE_ID, name=NAME, messages=[
+        UserMessage(content="Hello {{ name }}; {{missing}}"),
+        {"type": "placeholder", "name": "history"},
+    ]), **AUTH)
+    backend.clients.append(client)
+    assert client.compile(name="reader", history=[]) == [
+        {"role": "user", "content": "Hello reader; {{missing}}"},
+    ]
+    with pytest.raises(ValueError, match="role.*content"):
+        client.compile(history=[{"role": "user"}])
