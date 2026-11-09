@@ -3,7 +3,7 @@
 import json
 
 import pytest
-from requests import HTTPError, Response
+from requests import ConnectionError, HTTPError, Response
 from requests.adapters import HTTPAdapter
 from requests_futures.sessions import FuturesSession
 
@@ -21,6 +21,8 @@ def redirect_transport(monkeypatch, replies, header="X-Workspace-Id"):
                       "headers": dict(request.headers)})
         assert replies, "Unexpected offline adapter request"
         kind, payload = replies.pop(0)
+        if kind == "connection-error":
+            raise ConnectionError("Synthetic transport failure", request=request)
         response = Response()
         response.request = request
         response.url = request.url
@@ -137,6 +139,74 @@ def test_redirect_scope_does_not_reread_environment_after_response(backend, monk
     monkeypatch.setenv("FI_EXTRA_HEADERS", "X-Workspace-Id=synthetic-workspace-b")
     assert backend.fetch(version="v1").compile() == first.compile()
     assert len(calls) == 2
+
+
+def test_redirected_transport_failure_does_not_use_unconfirmed_stale_scope(backend, monkeypatch):
+    backend.cache._ttl_sec = -1
+    backend.replies.append((200, {"result": snapshot("Default workspace stale")}))
+    backend.fetch(version="v1")
+    replies = [("redirect", None), ("connection-error", None)] * 3
+    calls = redirect_transport(monkeypatch, replies)
+    with pytest.raises(ConnectionError, match="Synthetic transport failure"):
+        backend.fetch(version="v1")
+    assert len(calls) == 6
+    assert calls[-1]["headers"]["X-Workspace-Id"] == "synthetic-workspace-b"
+
+
+@pytest.mark.parametrize("by_name", [False, True])
+def test_redirected_failed_delete_preserves_both_identities(backend, monkeypatch, by_name):
+    backend.replies.append((200, {"result": snapshot("Default workspace published")}))
+    default = backend.fetch(version="v1")
+    monkeypatch.setenv("FI_EXTRA_HEADERS", "X-Workspace-Id=synthetic-workspace-b")
+    backend.replies.append((200, {"result": snapshot("Workspace B published")}))
+    backend.fetch(version="v1")
+    keys = set(backend.cache._store)
+    monkeypatch.delenv("FI_EXTRA_HEADERS")
+    replies = ([(200, {"result": snapshot()})] if by_name else []) + [
+        ("redirect", None), (503, {"message": "Synthetic unavailable"}),
+    ]
+    calls = redirect_transport(monkeypatch, replies)
+    with pytest.raises(HTTPError):
+        Prompt.delete_template_by_name(NAME, **AUTH) if by_name else default.delete()
+    assert set(backend.cache._store) == keys
+    assert default.template is not None
+    assert len(calls) == (3 if by_name else 2)
+    assert calls[-1]["headers"]["X-Workspace-Id"] == "synthetic-workspace-b"
+
+
+def test_multiple_redirects_use_all_final_identity_headers(backend, monkeypatch):
+    calls = []
+
+    def send(adapter, request, **kwargs):
+        calls.append(request)
+        response = Response()
+        response.request = request
+        response.url = request.url
+        if len(calls) <= 2:
+            extra = "X-Workspace-Id=synthetic-workspace-b"
+            if len(calls) == 2:
+                extra += ";X-Region=synthetic-region"
+            monkeypatch.setenv("FI_EXTRA_HEADERS", extra)
+            response.status_code = 307
+            response.headers["Location"] = request.url + "&redirected=1"
+            response._content = b""
+        else:
+            response.status_code = 200
+            response._content = json.dumps({"result": snapshot("Final workspace")}).encode()
+        return response
+
+    monkeypatch.setattr(FuturesSession, "request", _REAL_FUTURES_REQUEST)
+    monkeypatch.setattr(HTTPAdapter, "send", send)
+    first = backend.fetch(version="v1")
+    assert len(calls) == 3
+    assert "X-Workspace-Id" not in calls[0].headers
+    assert "X-Region" not in calls[1].headers
+    assert calls[2].headers["X-Region"] == "synthetic-region"
+    assert backend.fetch(version="v1").compile() == first.compile()
+    assert len(calls) == 3
+    keys = repr(list(backend.cache._store))
+    assert "synthetic-workspace-b" not in keys
+    assert "synthetic-region" not in keys
 
 
 @pytest.mark.parametrize("status", [302, 307])

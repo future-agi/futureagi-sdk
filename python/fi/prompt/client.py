@@ -24,7 +24,23 @@ class _PromptRequestScope:
     def __init__(self, client):
         self.client = client
         self.value = None
+        self.header_names = set()
         self._token = _active_cache_scope.set(self)
+
+    def observe_response(self, response):
+        if not response.history:
+            return
+        initial = {name.lower(): value for name, value in response.history[0].request.headers.items()}
+        final = {name.lower(): value for name, value in response.request.headers.items()}
+        # Keep explicitly resolved headers and changes made by redirects, not
+        # unchanged transport defaults (User-Agent, Content-Length, etc.). This
+        # preserves the same key as a direct request under the final identity.
+        names = self.header_names | {
+            name for name, value in final.items() if initial.get(name) != value
+        }
+        self.value = prompt_cache.scope_for(
+            self.client, headers={name: value for name, value in final.items() if name in names},
+        )
 
     def close(self):
         _active_cache_scope.reset(self._token)
@@ -38,7 +54,35 @@ class _PromptAPIKeyAuth(APIKeyAuth):
             # HttpClient sends this resolved map, which may now include headers
             # added after the cache lookup. Never retain their raw values here.
             scope.value = prompt_cache.scope_for(self, headers=headers)
+            scope.header_names = {name.lower() for name in headers}
         return headers
+
+    def request(self, config, response_handler=None):
+        scope = _active_cache_scope.get()
+        if scope is None or scope.client is not self:
+            return super().request(config, response_handler=response_handler)
+
+        received = False
+
+        class ScopedResponseHandler:
+            @staticmethod
+            def parse(response):
+                nonlocal received
+                # HttpClient invokes this back on the caller's thread, after
+                # Requests has followed every redirect and before HTTP errors
+                # or response parsing can trigger stale-cache fallback.
+                scope.observe_response(response)
+                received = True
+                return response_handler.parse(response=response) if response_handler else response
+
+        try:
+            return super().request(config, response_handler=ScopedResponseHandler)
+        except Exception:
+            if not received:
+                # A failed transport may have followed redirects without a final
+                # response. Do not fall back to an unconfirmed earlier identity.
+                scope.value = None
+            raise
 
 
 def _model_config_to_wire(config: ModelConfig) -> Dict:
