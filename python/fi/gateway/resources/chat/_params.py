@@ -239,6 +239,9 @@ def _prepare(
     """The POST /v1/chat/completions request and its AgentCC header params."""
     from fi.gateway._utils import parse_timeout
 
+    # Keep the disabled default omitted while preserving explicit call overrides.
+    if args.get("drop_params", NOT_GIVEN) is NOT_GIVEN and getattr(client, "_drop_params", False):
+        args = {**args, "drop_params": True}
     body, agentcc_params, extra_hdrs = _build_body_and_agentcc_params(**args)
     if getattr(client, "_modify_params", False):
         from fi.gateway._param_modifier import modify_params_for_provider
