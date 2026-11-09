@@ -226,7 +226,12 @@ operations:
     returns: {template_id: string, prompt_config: 'object[]', variable_names: object, evaluation_configs: 'object[]', placeholders: object}
     note: "contract documents the request serializer as the response; the server answers with the execution receipt (run_template in prompt_template.py)"
   surfaces:
-    sdk: {}
+    sdk:
+      docs:
+        example: {version: v1, is_run: prompt}
+        parameter_notes:
+          version: Supply an existing configured version, or a nonempty `prompt_config`.
+          is_run: Set to `"prompt"` to start execution rather than only saving configuration.
     mcp: {name: run_prompt, group: prompts, access: write, open_world: true}
 
 - id: prompts.run_status
@@ -234,7 +239,9 @@ operations:
     that version, otherwise the API chooses the default/latest version.
   operation: {method: GET, path: '/model-hub/prompt-templates/{id}/get-run-status/'}
   surfaces:
-    sdk: {}
+    sdk:
+      docs:
+        example: {template_version: v1}
     mcp: {name: get_prompt_run, group: prompts, access: read}
 
 - id: evals.templates.list

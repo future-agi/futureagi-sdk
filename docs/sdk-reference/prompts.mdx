@@ -727,11 +727,18 @@ Run a configured prompt version by supplying version and is_run="prompt". Option
 <CodeGroup>
 
 ```python Python
-result = client.prompts.run("your-id")
+result = client.prompts.run(
+    "your-id",
+    version="v1",
+    is_run="prompt",
+)
 ```
 
 ```typescript TypeScript
-const result = await client.prompts.run("your-id");
+const result = await client.prompts.run("your-id", {
+  version: "v1",
+  is_run: "prompt",
+});
 ```
 
 </CodeGroup>
@@ -783,13 +790,17 @@ export interface PromptsRunParams {
   A UUID string identifying this prompt template.
 </ParamField>
 <ParamField body="name" type="string" optional />
-<ParamField body="version" type="string" optional />
+<ParamField body="version" type="string" optional>
+  Supply an existing configured version, or a nonempty `prompt_config`.
+</ParamField>
 <ParamField body="prompt_config" type="object[]" optional />
 <ParamField body="variable_names" type="object" optional />
 <ParamField body="placeholders" type="any JSON value" optional />
 <ParamField body="evaluation_configs" type="any JSON value[]" optional />
 <ParamField body="source" type="string" optional />
-<ParamField body="is_run" type="any JSON value" optional />
+<ParamField body="is_run" type="any JSON value" optional>
+  Set to `"prompt"` to start execution rather than only saving configuration.
+</ParamField>
 <ParamField body="is_sdk" type="boolean" optional />
 <ParamField body="run_index" type="integer" optional />
 
@@ -808,11 +819,11 @@ Read workbench prompt execution status and outputs. Supply template_version matc
 <CodeGroup>
 
 ```python Python
-result = client.prompts.run_status("your-id")
+result = client.prompts.run_status("your-id", template_version="v1")
 ```
 
 ```typescript TypeScript
-const result = await client.prompts.runStatus("your-id");
+const result = await client.prompts.runStatus("your-id", { template_version: "v1" });
 ```
 
 </CodeGroup>
