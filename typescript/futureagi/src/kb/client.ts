@@ -22,6 +22,7 @@ import { AxiosResponse } from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import axios from 'axios';
+import FormData from 'form-data';
 
 /**
  * Response handler for Knowledge Base operations
@@ -105,6 +106,8 @@ class KBResponseHandler extends ResponseHandler<
  */
 export class KnowledgeBase extends APIKeyAuth {
     public kb?: KnowledgeBaseConfig;
+    /** Await named construction, or use KnowledgeBase.open() for a ready instance. */
+    public readonly ready: Promise<void>;
     private _validFilePaths: string[] = [];
 
     constructor(kbName?: string, options: KnowledgeBaseOptions = {}) {
@@ -117,17 +120,23 @@ export class KnowledgeBase extends APIKeyAuth {
 
         this.kb = undefined;
 
-        if (kbName) {
-            // Resolve name → id at construction time
-            this._getKbFromName(kbName)
-                .then(foundKb => {
-                    this.kb = foundKb;
-                })
-                .catch(() => {
-                    throw new SDKException(
-                        `Knowledge Base with name '${kbName}' not found. Please create it first.`
-                    );
-                });
+        this.ready = kbName
+            ? this._getKbFromName(kbName).then(foundKb => { this.kb = foundKb; })
+            : Promise.resolve();
+        // Observe failures even when legacy callers do not await readiness.
+        // Keep the original promise rejected so callers can catch the actual cause.
+        void this.ready.catch(() => {});
+    }
+
+    /** Resolve an existing name and return a ready-to-use client. */
+    static async open(kbName: string, options: KnowledgeBaseOptions = {}): Promise<KnowledgeBase> {
+        const instance = new KnowledgeBase(kbName, options);
+        try {
+            await instance.ready;
+            return instance;
+        } catch (error) {
+            await instance.close();
+            throw error;
         }
     }
 
@@ -143,6 +152,7 @@ export class KnowledgeBase extends APIKeyAuth {
         newName?: string;
         filePaths?: string | string[];
     }): Promise<KnowledgeBase> {
+        await this.ready;
         try {
             // Resolve target KB by name if needed
             if (!this.kb || this.kb.name !== kbName) {
@@ -180,25 +190,12 @@ export class KnowledgeBase extends APIKeyAuth {
                 kb_id: this.kb.id
             };
 
-            // Prepare files map for multipart upload (key uniqueness: file0, file1, ...)
-            const files: Record<string, any> = {};
-            this._validFilePaths.forEach((filePath, idx) => {
-                const fileName = path.basename(filePath);
-                const fileExt = path.extname(filePath).slice(1).toLowerCase() as SupportedFileType;
-
-                // Validate supported types again (defensive)
-                if (!SUPPORTED_FILE_TYPES.includes(fileExt)) {
-                    throw new UnsupportedFileType(fileExt, fileName);
-                }
-
-                files[`file${idx}`] = fs.createReadStream(filePath);
-            });
+            const upload = this._prepareUpload(bodyFields, filePaths ? this._validFilePaths : []);
 
             const response = await this.request({
                 method: HttpMethod.PATCH,
                 url,
-                data: bodyFields,
-                files,
+                ...upload,
                 timeout: 300_000 // 5-min timeout similar to Python
             } as RequestConfig, KBResponseHandler) as KnowledgeBaseUpdateResponse;
 
@@ -238,6 +235,7 @@ export class KnowledgeBase extends APIKeyAuth {
         kbName: string;
         fileNames: string[];
     }): Promise<KnowledgeBase> {
+        await this.ready;
         try {
             if (!this.kb || this.kb.name !== kbName) {
                 this.kb = await this._getKbFromName(kbName);
@@ -285,6 +283,7 @@ export class KnowledgeBase extends APIKeyAuth {
         kbNames?: string | string[];
         kbIds?: string | string[];
     } = {}): Promise<KnowledgeBase> {
+        await this.ready;
         try {
             const resolvedIds: string[] = [];
 
@@ -359,6 +358,7 @@ export class KnowledgeBase extends APIKeyAuth {
         name?: string,
         filePaths: string | string[] = []
     ): Promise<KnowledgeBase> {
+        await this.ready;
         try {
 
             const finalKbName = name || (this.kb?.name) || "Unnamed KB";
@@ -367,29 +367,16 @@ export class KnowledgeBase extends APIKeyAuth {
             // Prepare fields
             const bodyFields: Record<string, any> = { name: finalKbName };
 
-            // Handle optional files
-            const files: Record<string, any> = {};
             const hasFilePaths = Array.isArray(filePaths) ? filePaths.length > 0 : Boolean(filePaths);
             if (hasFilePaths) {
                 await this._checkFilePaths(filePaths);
-
-                this._validFilePaths.forEach((filePath, idx) => {
-                    const fileName = path.basename(filePath);
-                    const fileExt = path.extname(filePath).slice(1).toLowerCase() as SupportedFileType;
-
-                    if (!SUPPORTED_FILE_TYPES.includes(fileExt)) {
-                        throw new UnsupportedFileType(fileExt, fileName);
-                    }
-
-                    files[`file${idx}`] = fs.createReadStream(filePath);
-                });
             }
+            const upload = this._prepareUpload(bodyFields, hasFilePaths ? this._validFilePaths : []);
 
             const response = await this.request({
                 method: HttpMethod.POST,
                 url,
-                data: bodyFields,
-                files: Object.keys(files).length > 0 ? files : undefined,
+                ...upload,
                 timeout: 300_000
             } as RequestConfig, KBResponseHandler) as KnowledgeBaseCreateResponse & { kb_id: string; kb_name: string };
 
@@ -455,12 +442,31 @@ export class KnowledgeBase extends APIKeyAuth {
             params: { search: kbName }
         } as RequestConfig, KBResponseHandler) as KnowledgeBaseListResponse & { result: { table_data: KnowledgeBaseConfig[] } };
 
-        const data = response.result.table_data;
-        if (!data || data.length === 0) {
+        const data = response.result.table_data?.filter(item => item.name === kbName) || [];
+        if (data.length === 0) {
             throw new SDKException(`Knowledge Base with name '${kbName}' not found.`);
+        }
+        if (data.length > 1) {
+            throw new SDKException(`Multiple Knowledge Bases with name '${kbName}' found.`);
         }
 
         return legacyFields(data[0], kbConfigFields);
+    }
+
+    /** Build repeated file parts without losing streams or their multipart boundary. */
+    private _prepareUpload(fields: Record<string, any>, filePaths: string[]): Pick<RequestConfig, 'data' | 'headers'> {
+        if (filePaths.length === 0) return { data: fields };
+        // Validate every extension before opening any one-shot streams.
+        for (const filePath of filePaths) {
+            const fileExt = path.extname(filePath).slice(1).toLowerCase() as SupportedFileType;
+            if (!SUPPORTED_FILE_TYPES.includes(fileExt)) {
+                throw new UnsupportedFileType(fileExt, path.basename(filePath));
+            }
+        }
+        const form = new FormData();
+        for (const [name, value] of Object.entries(fields)) form.append(name, value);
+        for (const filePath of filePaths) form.append('file', fs.createReadStream(filePath));
+        return { data: form, headers: form.getHeaders() };
     }
 
     /**

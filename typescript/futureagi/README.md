@@ -288,6 +288,29 @@ const list = await kb.listKbs();
 console.log(`You now have ${list.length} knowledge-bases!`);
 ```
 
+For an existing knowledge base with the legacy client, await name resolution so
+lookup failures can be caught normally:
+
+```ts
+import { KnowledgeBase } from "@future-agi/sdk";
+
+try {
+  const kb = await KnowledgeBase.open("docs");
+  try {
+    console.log("Knowledge base ready:", kb.kb);
+  } finally {
+    await kb.close();
+  }
+} catch (error) {
+  console.error("Could not open the knowledge base:", error);
+}
+```
+
+Existing `new KnowledgeBase("docs", options)` calls remain supported; await
+`kb.ready` before reading `kb.kb`. Mutations await readiness automatically, and
+lookup failures retain their original error rather than becoming an unhandled
+rejection. Use `new KnowledgeBase(undefined, options)` when creating a new KB.
+
 ## API overview
 
 ```ts
