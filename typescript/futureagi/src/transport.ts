@@ -25,6 +25,7 @@
  */
 
 import { checkHttpSecurity } from "./_core/http-security";
+import { mapResponseBodyReads, withResponseDeadline } from "./_core/response-body";
 
 export const DEFAULT_TIMEOUT_MS = 30_000;
 export const MAX_SLEEP_MS = 30_000;
@@ -50,6 +51,8 @@ export type TransportOptions = {
   sleep?: (ms: number) => Promise<void>;
   resolveCredentials: () => Credentials;
   retryPolicy?: RetryPolicy;
+  /** Keep the attempt deadline for SDK-owned buffered body reads; raw streams are handed off. */
+  responseBodyTimeout?: boolean;
 };
 
 export function shouldRetry(method: string, status: number, retryClass?: RetryClass): boolean {
@@ -134,6 +137,7 @@ export function resilientFetch(options: TransportOptions): typeof fetch {
     if (!original.headers.has("X-Secret-Key")) original.headers.set("X-Secret-Key", creds.secretKey);
     for (let attempt = 0; ; attempt++) {
       const controller = new AbortController();
+      const deadline = Date.now() + timeoutMs;
       const timer = setTimeout(() => controller.abort(new Error(`request timed out after ${timeoutMs} ms`)), timeoutMs);
       const request = new Request(original.clone(), { signal: controller.signal });
       let response: Response;
@@ -147,9 +151,20 @@ export function resilientFetch(options: TransportOptions): typeof fetch {
         continue;
       }
       clearTimeout(timer);
-      if (attempt >= retries || !shouldRetry(original.method, response.status, retryClass)) return response;
+      if (attempt >= retries || !shouldRetry(original.method, response.status, retryClass)) {
+        // No timer survives an unused Response or a raw streaming handoff. Buffered readers
+        // re-arm only the remaining attempt budget, never a fresh timeout after headers.
+        return options.responseBodyTimeout
+          ? mapResponseBodyReads(response, (consume) => withResponseDeadline(consume, controller, deadline, timeoutMs))
+          : response;
+      }
       const delay = Math.min(retryAfterMs(response) ?? base * 2 ** attempt, MAX_SLEEP_MS);
-      await response.body?.cancel().catch(() => undefined);
+      const discard = async () => { await response.body?.cancel().catch(() => undefined); };
+      if (options.responseBodyTimeout) {
+        await withResponseDeadline(discard, controller, deadline, timeoutMs);
+      } else {
+        await discard();
+      }
       await sleep(delay);
     }
   };

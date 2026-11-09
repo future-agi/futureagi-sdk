@@ -31,6 +31,7 @@ import { KnowledgeBasesClient } from "./knowledge-bases";
 import { PromptsClient } from "./prompts";
 import { ScoresClient, type AnnotationLabelsClient } from "./scores";
 import { apiError, connectionError, isWrongRegionResponse } from "./_core/error-map";
+import { mapResponseBodyReads } from "./_core/response-body";
 import { managementOrigin, scrubManagementValue } from "./_core/fa-management";
 import { Gateway as ManagementGateway } from "./generated/fa-management/gateway";
 import { MANAGEMENT_OPERATIONS } from "./generated/fa-management/policy";
@@ -291,6 +292,7 @@ export class FutureAGIClient {
         fetch: options.fetch,
         timeoutMs: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
         retries: options.retries,
+        responseBodyTimeout: true,
         resolveCredentials: () => requireAuth(options),
       }), extra),
       headers: { ...options.headers },
@@ -317,6 +319,14 @@ export class FutureAGIClient {
     this.optimizations = new Optimizations(this.generatedClient, catalogHeaders);
     this.models = new Models(this.generatedClient, catalogHeaders);
     this.workspaces = new Workspaces(this.generatedClient, catalogHeaders);
+    this.generatedClient.interceptors.response.use((response, request) => mapResponseBodyReads(response, async (consume) => {
+      try {
+        return await consume();
+      } catch (error) {
+        // The body failed before parsing; preserve its cause even when headers said 200.
+        throw connectionError(error, { origin: new URL(request.url).origin });
+      }
+    }));
     this.generatedClient.interceptors.error.use((error, response, request) => typedError(error, response, request, baseUrl));
   }
 
