@@ -179,13 +179,17 @@ export class HttpClient {
         );
     }
 
-    /** follow-redirects' options for the next hop: the extra headers stay under the base URL and are
-     * stripped anywhere else (follow-redirects keeps custom headers on every host). */
+    /** Refuse off-origin redirects carrying API credentials. Extra headers stay under the base URL
+     * and are stripped elsewhere (follow-redirects keeps custom headers on every host). */
     private _guardRedirect(options: Record<string, any>): void {
         const port = options.port ? `:${options.port}` : '';
         const href = options.href || `${options.protocol}//${options.hostname}${port}${options.path || '/'}`;
         const headers: Record<string, unknown> = options.headers || (options.headers = {});
         const present = new Set(Object.keys(headers).map((k) => k.toLowerCase()));
+        if ((present.has('x-api-key') || present.has('x-secret-key')) &&
+            !isPlatformUrl(href, new URL(this._baseUrl).origin)) {
+            throw new Error('Refusing authenticated redirect to a different origin');
+        }
         if (isPlatformUrl(href, this._baseUrl)) {
             for (const [name, value] of Object.entries(this._extraHeaders.forUrl(href))) {
                 if (!present.has(name.toLowerCase())) headers[name] = value;

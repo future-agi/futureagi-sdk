@@ -36,8 +36,8 @@ export function get_base_url(): string {
     return process.env.FI_BASE_URL || "https://api.futureagi.com";
 }
 
-// Session settings
-export const DEFAULT_TIMEOUT = 200;
+// Session settings (Axios timeout is measured in milliseconds)
+export const DEFAULT_TIMEOUT = 30_000;
 export const DEFAULT_MAX_WORKERS = 8;
 export const DEFAULT_MAX_QUEUE = 5000;
 export const PAGE_SIZE = 100;
