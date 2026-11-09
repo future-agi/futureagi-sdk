@@ -89,7 +89,7 @@ describe('legacy multipart retry safety', () => {
         const error = await request.then(() => undefined, failure => failure);
 
         expect(uploaded?.includes(contents)).toBe(true);
-        expect(uploaded?.toString()).toContain('name="file0"; filename="notes.txt"');
+        expect(uploaded?.toString()).toContain('name="file"; filename="notes.txt"');
         expect(uploaded?.toString()).toContain(`name="name"\r\n\r\n${operation === 'create' ? 'docs' : 'renamed'}\r\n`);
         if (operation === 'update') {
             expect(uploaded?.toString()).toContain('name="kb_id"\r\n\r\nsynthetic-kb\r\n');

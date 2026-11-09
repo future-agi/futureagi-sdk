@@ -88,7 +88,7 @@ describe('legacy knowledge-base multipart uploads', () => {
         expect(adapter).toHaveBeenCalledTimes(1);
         const { config, body } = requests[0];
         for (const [index, bytes] of [text, binary].entries()) {
-            expect(body.toString('latin1')).toContain(`name="file${index}"; filename="${path.basename(files[index])}"`);
+            expect(body.toString('latin1')).toContain(`name="file"; filename="${path.basename(files[index])}"`);
             expect(body.includes(Buffer.concat([Buffer.from('\r\n\r\n'), bytes, Buffer.from('\r\n')]))).toBe(true);
         }
         for (const [name, value] of Object.entries(fields)) {
