@@ -101,7 +101,10 @@ export class DatasetResponseHandler extends ResponseHandler {
         const url = response.config.url || '';
 
         if (url.includes(Routes.dataset_names)) {
-            const datasets = data.result?.datasets;
+            const requestedName = response.config.params?.search_text;
+            const datasets = typeof requestedName === 'string'
+                ? data.result?.datasets?.filter((dataset: { name: string }) => dataset.name === requestedName)
+                : data.result?.datasets;
             if (!datasets || datasets.length === 0) {
                 throw new DatasetNotFoundError("No dataset found matching the criteria.");
             }

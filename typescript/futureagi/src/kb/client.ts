@@ -455,9 +455,12 @@ export class KnowledgeBase extends APIKeyAuth {
             params: { search: kbName }
         } as RequestConfig, KBResponseHandler) as KnowledgeBaseListResponse & { result: { table_data: KnowledgeBaseConfig[] } };
 
-        const data = response.result.table_data;
-        if (!data || data.length === 0) {
+        const data = response.result.table_data?.filter(item => item.name === kbName) || [];
+        if (data.length === 0) {
             throw new SDKException(`Knowledge Base with name '${kbName}' not found.`);
+        }
+        if (data.length > 1) {
+            throw new SDKException(`Multiple Knowledge Bases with name '${kbName}' found.`);
         }
 
         return legacyFields(data[0], kbConfigFields);
