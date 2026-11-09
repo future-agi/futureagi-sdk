@@ -500,7 +500,10 @@ with Webhooks() as wh:                    # FI_API_KEY / FI_SECRET_KEY, or `futu
     )
     store_secret(ep.secret)               # returned once; a lost secret means rotate_secret()
     result = wh.endpoints.test(ep.id, event_type="prompt.label.changed")   # sent by the delivery worker
-    print(result.status_code, result.outcome)
+    if result.settled:
+        print(result.status_code, result.outcome)
+    else:
+        print("Test delivery pending:", result.delivery_id)
     failed = wh.deliveries.list(endpoint=ep.id, status="failed", since="24h")
     wh.deliveries.redeliver_many(endpoint=ep.id, status="failed", since="24h")
     rotation = wh.endpoints.rotate_secret(ep.id, overlap="24h")            # the old secret works for 24 h more
