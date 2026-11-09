@@ -121,3 +121,37 @@ def test_cache_identity_keeps_same_identity_cache_hits(backend):
     second = backend.fetch(version="v1")
     assert first.compile() == second.compile()
     assert len(backend.calls) == 1
+
+
+@pytest.mark.parametrize("edit_cached_hit", [False, True])
+@pytest.mark.parametrize("stale", [False, True])
+def test_snapshot_isolated_from_unsaved_edits(backend, edit_cached_hit, stale):
+    backend.replies.append((200, {"result": snapshot()}))
+    first = backend.fetch(version="v1")
+    if edit_cached_hit:
+        first = backend.fetch(version="v1")
+    first.template.messages[0]["content"] = "Unpublished edit"
+    first.template.metadata["nested"] = {"draft": True}
+    if stale:
+        for item in backend.cache._store.values():
+            item.expiry = 0
+        backend.replies.append((503, {"message": "Temporarily unavailable"}))
+    again = backend.fetch(version="v1")
+    assert again.compile() == [{"role": "user", "content": "Published prompt"}]
+    assert again.template.metadata == {}
+    assert again.template is not first.template
+    assert len(backend.calls) == (2 if stale else 1)
+
+
+def test_snapshot_version_stays_published_after_new_draft(backend):
+    backend.replies.extend([
+        (200, {"result": snapshot()}),
+        (200, {"results": [{"template_version": "v1", "is_draft": False}]}),
+        (201, {"result": [{"template_version": "v2"}]}),
+    ])
+    first = backend.fetch(version="v1")
+    assert first.create_new_version() is first
+    assert first.template.version == "v2"
+    original = backend.fetch(version="v1")
+    assert original.template.version == "v1"
+    assert len(backend.calls) == 3
