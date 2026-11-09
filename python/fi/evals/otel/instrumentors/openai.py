@@ -98,30 +98,52 @@ class _StreamWrapper:
         self._capture_content = capture_content
         self._content_parts = []
         self._usage = {"input_tokens": 0, "output_tokens": 0}
+        self._finalized = False
 
     def __getattr__(self, name):
         return getattr(self._stream, name)
 
     def __enter__(self):
-        self._stream.__enter__()
-        return self
+        try:
+            self._stream.__enter__()
+            return self
+        except BaseException as exc:
+            self._finalize(exc)
+            raise
 
     def __exit__(self, exc_type, exc_value, traceback):
-        return self._stream.__exit__(exc_type, exc_value, traceback)
+        try:
+            return self._stream.__exit__(exc_type, exc_value, traceback)
+        except BaseException as exc:
+            self._finalize(exc)
+            raise
+        finally:
+            self._finalize(exc_value)
 
     def close(self):
-        return self._stream.close()
+        try:
+            return self._stream.close()
+        except BaseException as exc:
+            self._finalize(exc)
+            raise
+        finally:
+            self._finalize()
 
     def __iter__(self):
         return self
 
     def __next__(self):
+        if self._finalized:
+            raise StopIteration
         try:
             chunk = next(self._stream)
             self._process_chunk(chunk)
             return chunk
         except StopIteration:
             self._finalize()
+            raise
+        except BaseException as exc:
+            self._finalize(exc)
             raise
 
     def _process_chunk(self, chunk):
@@ -135,28 +157,38 @@ class _StreamWrapper:
             self._usage["input_tokens"] = chunk.usage.prompt_tokens
             self._usage["output_tokens"] = chunk.usage.completion_tokens
 
-    def _finalize(self):
-        """Finalize the stream and update span."""
-        if self._capture_content and self._content_parts:
-            content = "".join(self._content_parts)
-            self._span.set_attribute(
-                GenAIAttributes.completion_content(0),
-                content[:10000]
-            )
+    def _finalize(self, error=None):
+        """Capture terminal telemetry and end the owned span exactly once."""
+        if self._finalized:
+            return
+        self._finalized = True
+        try:
+            if self._capture_content and self._content_parts:
+                content = "".join(self._content_parts)
+                self._span.set_attribute(
+                    GenAIAttributes.completion_content(0),
+                    content[:10000]
+                )
 
-        if self._usage["input_tokens"]:
-            self._span.set_attribute(
-                GenAIAttributes.USAGE_INPUT_TOKENS,
-                self._usage["input_tokens"]
-            )
-        if self._usage["output_tokens"]:
-            self._span.set_attribute(
-                GenAIAttributes.USAGE_OUTPUT_TOKENS,
-                self._usage["output_tokens"]
-            )
+            if self._usage["input_tokens"]:
+                self._span.set_attribute(
+                    GenAIAttributes.USAGE_INPUT_TOKENS,
+                    self._usage["input_tokens"]
+                )
+            if self._usage["output_tokens"]:
+                self._span.set_attribute(
+                    GenAIAttributes.USAGE_OUTPUT_TOKENS,
+                    self._usage["output_tokens"]
+                )
 
-        if OTEL_AVAILABLE:
-            self._span.set_status(Status(StatusCode.OK))
+            if OTEL_AVAILABLE:
+                if error is not None:
+                    self._span.set_status(Status(StatusCode.ERROR, str(error)))
+                    self._span.record_exception(error)
+                else:
+                    self._span.set_status(Status(StatusCode.OK))
+        finally:
+            self._span.end()
 
 
 class _AsyncStreamWrapper:
@@ -168,30 +200,52 @@ class _AsyncStreamWrapper:
         self._capture_content = capture_content
         self._content_parts = []
         self._usage = {"input_tokens": 0, "output_tokens": 0}
+        self._finalized = False
 
     def __getattr__(self, name):
         return getattr(self._stream, name)
 
     async def __aenter__(self):
-        await self._stream.__aenter__()
-        return self
+        try:
+            await self._stream.__aenter__()
+            return self
+        except BaseException as exc:
+            self._finalize(exc)
+            raise
 
     async def __aexit__(self, exc_type, exc_value, traceback):
-        return await self._stream.__aexit__(exc_type, exc_value, traceback)
+        try:
+            return await self._stream.__aexit__(exc_type, exc_value, traceback)
+        except BaseException as exc:
+            self._finalize(exc)
+            raise
+        finally:
+            self._finalize(exc_value)
 
     async def close(self):
-        return await self._stream.close()
+        try:
+            return await self._stream.close()
+        except BaseException as exc:
+            self._finalize(exc)
+            raise
+        finally:
+            self._finalize()
 
     def __aiter__(self):
         return self
 
     async def __anext__(self):
+        if self._finalized:
+            raise StopAsyncIteration
         try:
             chunk = await self._stream.__anext__()
             self._process_chunk(chunk)
             return chunk
         except StopAsyncIteration:
             self._finalize()
+            raise
+        except BaseException as exc:
+            self._finalize(exc)
             raise
 
     def _process_chunk(self, chunk):
@@ -205,28 +259,38 @@ class _AsyncStreamWrapper:
             self._usage["input_tokens"] = chunk.usage.prompt_tokens
             self._usage["output_tokens"] = chunk.usage.completion_tokens
 
-    def _finalize(self):
-        """Finalize the stream and update span."""
-        if self._capture_content and self._content_parts:
-            content = "".join(self._content_parts)
-            self._span.set_attribute(
-                GenAIAttributes.completion_content(0),
-                content[:10000]
-            )
+    def _finalize(self, error=None):
+        """Capture terminal telemetry and end the owned span exactly once."""
+        if self._finalized:
+            return
+        self._finalized = True
+        try:
+            if self._capture_content and self._content_parts:
+                content = "".join(self._content_parts)
+                self._span.set_attribute(
+                    GenAIAttributes.completion_content(0),
+                    content[:10000]
+                )
 
-        if self._usage["input_tokens"]:
-            self._span.set_attribute(
-                GenAIAttributes.USAGE_INPUT_TOKENS,
-                self._usage["input_tokens"]
-            )
-        if self._usage["output_tokens"]:
-            self._span.set_attribute(
-                GenAIAttributes.USAGE_OUTPUT_TOKENS,
-                self._usage["output_tokens"]
-            )
+            if self._usage["input_tokens"]:
+                self._span.set_attribute(
+                    GenAIAttributes.USAGE_INPUT_TOKENS,
+                    self._usage["input_tokens"]
+                )
+            if self._usage["output_tokens"]:
+                self._span.set_attribute(
+                    GenAIAttributes.USAGE_OUTPUT_TOKENS,
+                    self._usage["output_tokens"]
+                )
 
-        if OTEL_AVAILABLE:
-            self._span.set_status(Status(StatusCode.OK))
+            if OTEL_AVAILABLE:
+                if error is not None:
+                    self._span.set_status(Status(StatusCode.ERROR, str(error)))
+                    self._span.record_exception(error)
+                else:
+                    self._span.set_status(Status(StatusCode.OK))
+        finally:
+            self._span.end()
 
 
 __all__ = ["OpenAIInstrumentor"]
