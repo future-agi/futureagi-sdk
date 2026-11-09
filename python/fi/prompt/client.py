@@ -1,3 +1,4 @@
+import copy
 import time
 import threading
 from typing import Dict, Optional
@@ -11,6 +12,13 @@ from fi.utils.logging import logger
 from fi.utils.routes import Routes
 from fi.prompt.cache import prompt_cache
 from fi.prompt.label_management import LabelManagementMixin
+
+
+def _model_config_to_wire(config: ModelConfig) -> Dict:
+    """Preserve every model setting while using the backend's model key."""
+    payload = config.model_dump()
+    payload["model"] = payload.pop("model_name")
+    return payload
 
 
 class SimpleJsonResponseHandler(ResponseHandler[Dict, Dict]):
@@ -353,14 +361,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             "prompt_config": [
                 {
                     "messages": messages,
-                    "configuration": {
-                        "model": self.template.model_configuration.model_name,
-                        "temperature": self.template.model_configuration.temperature,
-                        "max_tokens": self.template.model_configuration.max_tokens,
-                        "top_p": self.template.model_configuration.top_p,
-                        "frequency_penalty": self.template.model_configuration.frequency_penalty,
-                        "presence_penalty": self.template.model_configuration.presence_penalty,
-                    },
+                    "configuration": _model_config_to_wire(self.template.model_configuration),
                     "placeholders": list(placeholders.keys()),
                 }
             ],
@@ -405,14 +406,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
 
         messages, placeholders = self._prepare_messages_and_placeholders()
 
-        model_config = {
-            "model": self.template.model_configuration.model_name,
-            "temperature": self.template.model_configuration.temperature,
-            "max_tokens": self.template.model_configuration.max_tokens,
-            "top_p": self.template.model_configuration.top_p,
-            "frequency_penalty": self.template.model_configuration.frequency_penalty,
-            "presence_penalty": self.template.model_configuration.presence_penalty,
-        }
+        model_config = _model_config_to_wire(self.template.model_configuration)
 
         draft_entry = {
             "prompt_config": [
@@ -454,12 +448,15 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         if not self.template or not self.template.id:
             raise ValueError("Template ID missing; cannot delete.")
 
+        headers = self._platform_headers(self._base_url + "/", dict(self._default_headers))
+        scope = prompt_cache.scope_for(self, headers=headers)
         response = self.request(
             config=RequestConfig(
                 method=HttpMethod.DELETE,
                 url=self._base_url
                 + "/"
                 + Routes.delete_template.value.format(template_id=self.template.id),
+                headers=headers,
             ),
             response_handler=None,
         )
@@ -470,7 +467,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
 
         if self.template.name:
             try:
-                prompt_cache.invalidate_template(self.template.name)
+                prompt_cache.invalidate_scoped_template(self.template.name, scope=scope)
             except Exception:
                 logger.warning("Prompt cache invalidation failed after delete()", exc_info=True)
 
@@ -496,11 +493,14 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         )
 
         try:
+            headers = client._platform_headers(client._base_url + "/", dict(client._default_headers))
+            scope = prompt_cache.scope_for(client, headers=headers)
             tmpl: PromptTemplate = client.request(
                 config=RequestConfig(
                     method=HttpMethod.GET,
                     url=client._base_url + "/" + Routes.get_template_by_name.value,
                     params={"name": name},
+                    headers=headers,
                 ),
                 response_handler=PromptResponseHandler,
             )
@@ -511,6 +511,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                     url=client._base_url
                     + "/"
                     + Routes.delete_template.value.format(template_id=tmpl.id),
+                    headers=headers,
                 ),
                 response_handler=None,
             )
@@ -518,7 +519,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             if not 200 <= response.status_code < 300:
                 raise SDKException(f"Template deletion did not succeed (HTTP {response.status_code}).")
             try:
-                prompt_cache.invalidate_template(name)
+                prompt_cache.invalidate_scoped_template(name, scope=scope)
             except Exception:
                 logger.warning("Prompt cache invalidation failed after delete_template_by_name()", exc_info=True)
             return True
@@ -619,28 +620,33 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         'production' label, and if that fails, it will fall back to the server's
         default version resolution (e.g., the latest committed version).
         """
-        cache_key = prompt_cache.make_key(name, version=version, label=label)
-
-        fresh = prompt_cache.get(cache_key)
-        if fresh is not None:
-            return cls(
-                template=fresh,
-                fi_api_key=fi_api_key,
-                fi_secret_key=fi_secret_key,
-                fi_base_url=fi_base_url,
-            )
-
-        stale = prompt_cache.get_stale(cache_key)
-        # Note: Async refresh logic is not applied here to simplify the fallback flow.
-        # If stale data is present, it will be used only if the live fetch fails.
-
         client = APIKeyAuth(
             fi_api_key=fi_api_key,
             fi_secret_key=fi_secret_key,
             fi_base_url=fi_base_url,
         )
-
+        stale = None
         try:
+            headers = client._platform_headers(client._base_url + "/", dict(client._default_headers))
+            cache_key = prompt_cache.make_scoped_key(
+                name, scope=prompt_cache.scope_for(client, headers=headers),
+                version=version, label=label,
+            )
+            # Use the same resolved credentials/origin for the returned client.
+            fi_api_key, fi_secret_key, fi_base_url = (
+                client._fi_api_key, client._fi_secret_key, client._base_url
+            )
+            fresh = prompt_cache.get(cache_key)
+            if fresh is not None:
+                return cls(
+                    template=fresh,
+                    fi_api_key=fi_api_key,
+                    fi_secret_key=fi_secret_key,
+                    fi_base_url=fi_base_url,
+                )
+
+            # Stale fallback is available only within the resolved identity.
+            stale = prompt_cache.get_stale(cache_key)
             template = None
             # If a specific version or label is provided, use the direct endpoint. No fallback.
             if version or label:
@@ -657,6 +663,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                         + "/"
                         + Routes.prompt_label_get_by_name.value,
                         params=params,
+                        headers=headers,
                     ),
                     response_handler=PromptResponseHandler,
                 )
@@ -671,6 +678,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                             + "/"
                             + Routes.prompt_label_get_by_name.value,
                             params=params,
+                            headers=headers,
                         ),
                         response_handler=PromptResponseHandler,
                     )
@@ -687,11 +695,12 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                             + "/"
                             + Routes.get_template_by_name.value,
                             params=fallback_params,
+                            headers=headers,
                         ),
                         response_handler=PromptResponseHandler,
                     )
 
-            prompt_cache.set(cache_key, template)
+            prompt_cache.set(cache_key, template, snapshot=True)
             return cls(
                 template=template,
                 fi_api_key=fi_api_key,
@@ -824,14 +833,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         # Prepare messages and configuration just like in _create_new_draft
         messages, placeholders = self._prepare_messages_and_placeholders()
 
-        model_cfg = {
-            "model": self.template.model_configuration.model_name,
-            "temperature": self.template.model_configuration.temperature,
-            "max_tokens": self.template.model_configuration.max_tokens,
-            "top_p": self.template.model_configuration.top_p,
-            "frequency_penalty": self.template.model_configuration.frequency_penalty,
-            "presence_penalty": self.template.model_configuration.presence_penalty,
-        }
+        model_cfg = _model_config_to_wire(self.template.model_configuration)
 
         body = {
             "is_run": "draft",  # purely save changes
@@ -879,6 +881,29 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
 
             return re.sub(r"\{\{\s*(\w+)\s*\}\}", _repl, text)
 
+        def _render_content(value):
+            if isinstance(value, str):
+                return _substitute_vars(value)
+            if isinstance(value, list):
+                return [_render_content(part) for part in value]
+            if isinstance(value, dict):
+                return {key: _render_content(part) for key, part in value.items()}
+            return copy.deepcopy(value)
+
+        def _compile_message(message) -> dict:
+            if isinstance(message, dict):
+                result = copy.deepcopy(message)
+            elif hasattr(message, "model_dump"):
+                # variable_names is SDK bookkeeping, not a provider message field.
+                result = message.model_dump(exclude={"variable_names"})
+            else:
+                result = {"role": getattr(message, "role", None),
+                          "content": getattr(message, "content", None)}
+            if result.get("role") is None:
+                raise ValueError("Message object missing 'role' attribute")
+            result["content"] = _render_content(result.get("content"))
+            return result
+
         compiled: list[dict] = []
 
         for msg in self.template.messages:
@@ -889,27 +914,16 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                     # Insert each provided chat message
                     for ph_msg in kwargs[ph_name]:
                         if isinstance(ph_msg, dict) and "role" in ph_msg and "content" in ph_msg:
-                            compiled.append({
-                                "role": ph_msg["role"],
-                                "content": _substitute_vars(str(ph_msg["content"])),
-                            })
+                            compiled.append(_compile_message(ph_msg))
                         else:
                             raise ValueError(
                                 f"Each chat message for placeholder '{ph_name}' must include 'role' and 'content'."
                             )
                 else:
-                    # Placeholder unresolved – keep as-is
-                    compiled.append(msg)
+                    # Keep unresolved placeholders without sharing mutable data.
+                    compiled.append(copy.deepcopy(msg))
             else:
-                # Handle MessageBase or raw dict with role/content
-                role = getattr(msg, "role", msg.get("role") if isinstance(msg, dict) else None)
-                content = getattr(msg, "content", msg.get("content") if isinstance(msg, dict) else None)
-                if role is None:
-                    raise ValueError("Message object missing 'role' attribute")
-                compiled.append({
-                    "role": role,
-                    "content": _substitute_vars(str(content)),
-                })
+                compiled.append(_compile_message(msg))
 
         return compiled
 
