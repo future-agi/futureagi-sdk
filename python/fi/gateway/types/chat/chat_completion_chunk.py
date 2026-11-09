@@ -24,6 +24,7 @@ class ToolCallDelta(BaseModel):
 class Delta(BaseModel):
     role: str | None = None
     content: str | None = None
+    refusal: str | None = None
     tool_calls: list[ToolCallDelta] | None = None
 
 
