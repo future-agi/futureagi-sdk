@@ -340,10 +340,18 @@ class DatasetTable(BaseModel):
     def to_csv(self, file_path: str) -> str:
         """Convert dataset table to CSV string"""
         df = self.to_df()
-        if file_path and os.path.exists(file_path):
-            df.to_csv(file_path, mode="a", index=False)
-        elif file_path and not os.path.exists(file_path):
-            df.to_csv(file_path, index=False)
+        if file_path:
+            append = os.path.exists(file_path) and os.path.getsize(file_path) > 0
+            if append:
+                try:
+                    columns = pd.read_csv(file_path, nrows=0).columns
+                except pd.errors.EmptyDataError:
+                    append = False
+                else:
+                    if set(columns) != set(df.columns):
+                        raise ValueError("Cannot append CSV pages with different columns")
+                    df = df.loc[:, columns]
+            df.to_csv(file_path, mode="a" if append else "w", header=not append, index=False)
         return file_path
 
     def to_excel(self, file_path: str) -> str:

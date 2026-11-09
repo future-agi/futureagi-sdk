@@ -173,7 +173,7 @@ class DatasetResponseHandler(ResponseHandler[DatasetConfig, DatasetTable]):
             row_id = cls._get(row, "row_id", "rowId")
             order = row.pop("order", 0)
             for column_id, value in row.items():
-                if column_id in {"row_id", "rowId"}:
+                if column_id in {"row_id", "rowId", "row_meta", "rowMeta"}:
                     continue
                 cells.append(
                     Cell(
@@ -871,7 +871,7 @@ class Dataset(APIKeyAuth):
     ) -> DatasetConfig:
         """Create dataset from Hugging Face"""
         data = {
-            "new_dataset_name": config.name,
+            "name": config.name,
             "huggingface_dataset_name": hf_config.name,
             "model_type": config.model_type.value,
         }
@@ -909,17 +909,24 @@ class Dataset(APIKeyAuth):
                     config=RequestConfig(method=HttpMethod.GET, url=url, params=params, timeout=DEFAULT_API_TIMEOUT),
                     response_handler=DatasetResponseHandler,
                 )
-                dataset_table.to_file(file_path)
+                if params["current_page_index"] == 0 and file_path.endswith(".csv"):
+                    dataset_table.to_df().to_csv(file_path, index=False)
+                else:
+                    dataset_table.to_file(file_path)
                 params["current_page_index"] += 1
-                total_pages = (
-                    dataset_table.metadata.get("total_pages")
-                    or dataset_table.metadata.get("totalPages")
-                )
-                if (
-                    total_pages == params["current_page_index"]
-                ):
-                    pbar.update(1)
+                metadata = dataset_table.metadata or {}
+                total_pages = metadata.get("total_pages", metadata.get("totalPages"))
+                has_more = metadata.get("has_more", metadata.get("hasMore"))
+                pbar.update(1)
+                if has_more is False:
                     break
+                if isinstance(total_pages, int) and not isinstance(total_pages, bool) and total_pages >= 0:
+                    if params["current_page_index"] >= total_pages:
+                        break
+                elif not dataset_table.rows:
+                    break
+                else:
+                    raise DatasetError("Invalid dataset pagination metadata: expected a non-negative total_pages count.")
 
         if load_to_pandas:
             if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
@@ -1084,13 +1091,7 @@ class Dataset(APIKeyAuth):
         excluded_datasets: Optional[List[str]] = None,
         **kwargs,
     ) -> "Dataset":
-        """Get dataset configuration with caching"""
-        cache_key = f"{dataset_name}_{str(excluded_datasets)}"
-        
-        cached_instance = cls._dataset_instance_cache.get(cache_key)
-        if cached_instance:
-            return cached_instance
-
+        """Look up a dataset using a fresh client with the caller's current options."""
         request_instance = cls._get_instance(**kwargs)
         
         params = {"search_text": dataset_name}
@@ -1117,10 +1118,8 @@ class Dataset(APIKeyAuth):
         if not isinstance(fetched_dataset_config, DatasetConfig):
             raise DatasetError(f"API did not return a valid DatasetConfig for '{dataset_name}'. Got: {type(fetched_dataset_config)}")
 
-        instance_to_cache = cls(dataset_config=fetched_dataset_config, **kwargs)
-
-        cls._dataset_instance_cache.put(cache_key, instance_to_cache)
-        return instance_to_cache
+        request_instance.dataset_config = fetched_dataset_config
+        return request_instance
 
     @classmethod
     def add_dataset_columns(
