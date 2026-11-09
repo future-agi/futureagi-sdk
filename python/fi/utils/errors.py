@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
+from enum import Enum, unique
 from typing import Optional, Union, List
 
 from .constants import (
@@ -7,7 +8,31 @@ from .constants import (
     MAX_NUMBER_OF_EMBEDDINGS,
     SECRET_KEY_ENVVAR_NAME,
 )
-from .types import Environments, ModelTypes
+
+
+# Define the shared enums here so importing errors never loads dataframe helpers.
+# fi.utils.types re-exports them; retain that public module path for existing pickles.
+class ModelTypes(Enum):
+    """Model types for dataset"""
+
+    __module__ = "fi.utils.types"
+
+    GENERATIVE_LLM = "GenerativeLLM"
+    GENERATIVE_IMAGE = "GenerativeImage"
+
+    @classmethod
+    def get_choices(cls):
+        return [(tag.value, tag.name.replace("_", " ").title()) for tag in cls]
+
+
+@unique
+class Environments(Enum):
+    __module__ = "fi.utils.types"
+
+    TRAINING = 1
+    VALIDATION = 2
+    PRODUCTION = 3
+    CORPUS = 4
 
 
 # SDKException lives in fi._sdk_exception (no fi.utils import there).

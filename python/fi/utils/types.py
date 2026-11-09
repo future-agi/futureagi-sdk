@@ -1,4 +1,3 @@
-from enum import Enum, unique
 from typing import List, NamedTuple, Optional, Sequence, Type, TypeVar, Union
 
 import numpy as np
@@ -8,26 +7,8 @@ from fi.utils.constants import (
     MAX_RAW_DATA_CHARACTERS,
     MAX_RAW_DATA_CHARACTERS_TRUNCATION,
 )
+from fi.utils.errors import Environments, ModelTypes  # Re-export the public enum classes.
 from fi.utils.logging import get_truncation_warning_message, logger
-
-
-class ModelTypes(Enum):
-    """Model types for dataset"""
-
-    GENERATIVE_LLM = "GenerativeLLM"
-    GENERATIVE_IMAGE = "GenerativeImage"
-
-    @classmethod
-    def get_choices(cls):
-        return [(tag.value, tag.name.replace("_", " ").title()) for tag in cls]
-
-
-@unique
-class Environments(Enum):
-    TRAINING = 1
-    VALIDATION = 2
-    PRODUCTION = 3
-    CORPUS = 4
 
 
 class Embedding(NamedTuple):
