@@ -212,3 +212,63 @@ def test_table_csv_append_rejects_different_columns(tmp_path):
     with pytest.raises(ValueError, match="columns"):
         table([1], {}).to_csv(str(path))
     assert path.read_text() == "different\noriginal\n"
+
+
+def table_response(row_metadata, camel=False):
+    response = Response()
+    response.status_code = 200
+    response.url = f"{BASE_URL}/model-hub/develops/{DATASET_ID}/get-dataset-table/"
+    row = {
+        "rowId" if camel else "row_id": str(UUID(int=100)),
+        "order": 7,
+        str(COLUMN_ID): {"cellValue" if camel else "cell_value": 42},
+        "rowMeta" if camel else "row_meta": row_metadata,
+    }
+    response._content = json.dumps({"result": {
+        "column_config": [{"id": str(COLUMN_ID), "name": "number", "data_type": "integer",
+                           "origin_type": "OTHERS", "is_frozen": False, "is_visible": True}],
+        "table": [row], "metadata": {"total_pages": 1},
+    }}).encode()
+    return response
+
+
+@pytest.mark.parametrize("row_metadata", [
+    {"split_ids": []}, {"split_ids": [str(UUID(int=10))]},
+    {"source": {"type": "import", "name": "synthetic-source"}},
+    {"split_ids": [], "source": {"type": "import"}},
+])
+@pytest.mark.parametrize("camel", [False, True])
+def test_parser_ignores_reserved_row_metadata(row_metadata, camel):
+    parsed = DatasetResponseHandler.parse(table_response(row_metadata, camel))
+    assert len(parsed.rows) == 1
+    assert parsed.rows[0].order == 7
+    assert len(parsed.rows[0].cells) == 1
+    assert parsed.rows[0].cells[0].column_id == COLUMN_ID
+    assert parsed.rows[0].cells[0].value == 42
+    assert parsed.to_df().to_dict("list") == {"number": [42]}
+
+
+@pytest.mark.parametrize("operation", ["download", "get_column_id", "add_evaluation"])
+def test_row_metadata_does_not_block_dataset_operations(tmp_path, operation):
+    client = Dataset(dataset_config=dataset_config(), session=Mock())
+    calls = []
+
+    def request(config, response_handler):
+        calls.append(config)
+        if config.url.endswith("get-evals/"):
+            return [{"name": "quality", "eval_id": 0, "id": str(UUID(int=20)),
+                     "config": {"required_keys": ["output"]}}]
+        if config.method == HttpMethod.POST:
+            assert config.json["config"]["mapping"] == {"output": str(COLUMN_ID)}
+            return {"result": "created"}
+        return response_handler.parse(table_response({"split_ids": [], "source": {"type": "import"}}))
+
+    client.request = Mock(side_effect=request)
+    if operation == "download":
+        frame = client.download(str(tmp_path / "metadata.csv"), load_to_pandas=True)
+        assert frame["number"].tolist() == [42]
+    elif operation == "get_column_id":
+        assert client.get_column_id("number") == str(COLUMN_ID)
+    else:
+        assert client.add_evaluation("score", "quality", {"output": "number"}, "synthetic-model") is client
+        assert calls[-1].method == HttpMethod.POST
