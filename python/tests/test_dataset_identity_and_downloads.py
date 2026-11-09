@@ -99,8 +99,9 @@ def test_delete_by_name_uses_the_requested_account(monkeypatch):
         return {"result": "deleted"}
 
     monkeypatch.setattr(Dataset, "request", request)
-    first = Dataset.get_dataset_config("shared", fi_api_key="synthetic-a", session=Mock())
-    Dataset.delete_dataset("shared", fi_api_key="synthetic-b",
+    first = Dataset.get_dataset_config("shared", fi_api_key="synthetic-a",
+                                       fi_secret_key="synthetic-secret-a", session=Mock())
+    Dataset.delete_dataset("shared", fi_api_key="synthetic-b", fi_secret_key="synthetic-secret-b",
                            fi_base_url="https://other-datasets.invalid", session=Mock())
     key, base, deletion = calls[-1]
     assert key == "synthetic-b"
