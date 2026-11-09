@@ -38,7 +38,20 @@ class KBResponseHandler(ResponseHandler[Dict, KnowledgeBaseConfig]):
     @classmethod
     def _handle_error(cls, response) -> None:
         if response.status_code == 403:
-            raise InvalidAuthError()
+            guidance = "Check your workspace permissions or ask an administrator."
+            try:
+                data = response.json()
+            except ValueError:
+                data = None
+            if isinstance(data, dict):
+                for field in ("detail", "message", "result"):
+                    value = data.get(field)
+                    if isinstance(value, str) and value.strip():
+                        guidance = " ".join(value.split())
+                        if len(guidance) > 512:
+                            guidance = guidance[:512] + "..."
+                        break
+            raise InvalidAuthError(f"Access denied (403). {guidance}")
         elif response.status_code == 429:
             # Too many requests / quota exceeded – backend typically returns JSON with the reason.
             try:
