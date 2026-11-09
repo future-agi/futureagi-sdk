@@ -170,8 +170,9 @@ def test_engine_registry_getattr_uses_evaluator_instance_headers(monkeypatch):
     )
     monkeypatch.setattr(engine, "_resolve_template_class", lambda name: None)
 
-    def evaluate(*, eval_templates, inputs, model_name):
+    def evaluate(*, eval_templates, inputs, model_name, eval_config=None, _raise_on_error=False):
         assert eval_templates == "synthetic_auth_probe"
+        assert eval_config is None
         assert inputs == {"output": "synthetic-output"}
         return SimpleNamespace(eval_results=[SimpleNamespace(output=1, reason="synthetic")])
 
