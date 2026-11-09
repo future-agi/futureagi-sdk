@@ -291,12 +291,14 @@ class TuringEngine(Engine):
                 eval_templates=eval_arg,
                 inputs=mapped_inputs,
                 model_name=model,
+                _raise_on_error=True,
             )
             return _extract_result(eval_name, batch, (time.perf_counter() - start) * 1000)
         except Exception as exc:
             return EvalResult(
                 eval_name=eval_name,
                 status="failed",
+                reason=str(exc),
                 error=str(exc),
                 latency_ms=(time.perf_counter() - start) * 1000,
             )
