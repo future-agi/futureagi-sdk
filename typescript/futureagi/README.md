@@ -27,7 +27,7 @@ generative-AI models – all from code.
 ## Features
 
 • 📊 **Datasets** – create, mutate, download & evaluate tabular datasets.  
-• 📜 **Prompt templates** – full CRUD, versioning and execution of
+• 📜 **Prompt templates** – full CRUD, versioning and local compilation of
 templates (including OpenAI-style chat messages & variables).  
 • 📚 **Knowledge-bases** – upload files, list and delete KB assets.  
 • ⚙️ **Utilities** – bounded executors, helper constants and strong
@@ -161,6 +161,23 @@ const ds = await Dataset.open("my-dataset", {
 
 ## Quick-start
 
+After installing the SDK and setting the environment variables above, you can run
+an individual TypeScript example with `tsx`:
+
+```bash
+npm install --save-dev tsx
+```
+
+Save the example as `quickstart.mts` (an ES module, so top-level `await` works),
+then run it from your project directory:
+
+```bash
+npx tsx quickstart.mts
+```
+
+The examples are independent. Use new dataset, prompt and knowledge-base names
+when creating resources, and supply any local files named by the example.
+
 ### Run a deterministic evaluation over REST
 
 Use the evaluation REST API from TypeScript. Set `FI_BASE_URL` to your API
@@ -230,62 +247,72 @@ The classes below (`Dataset`, `Prompt`, `KnowledgeBase`, ...) keep working uncha
 ### 1. Create a dataset & add rows
 
 ```ts
-import { Dataset, DataTypeChoices } from "@future-agi/sdk";
+import { Dataset, DataTypeChoices, createColumn } from "@future-agi/sdk";
 
 async function main() {
-  // Open (or create) a dataset
   const ds = await Dataset.open("translations", { createIfMissing: true });
 
-  // Add two columns
-  await ds.addColumns([
-    { name: "prompt", dataType: DataTypeChoices.TEXT },
-    { name: "answer", dataType: DataTypeChoices.TEXT },
-  ]);
+  // Keep the generated column IDs so row cells reference the columns we add.
+  const promptColumn = createColumn({ name: "prompt", data_type: DataTypeChoices.TEXT });
+  const answerColumn = createColumn({ name: "answer", data_type: DataTypeChoices.TEXT });
+  await ds.addColumns([promptColumn, answerColumn]);
 
-  // Add a couple of rows
   await ds.addRows([
-    { prompt: "Translate “Hello World” to French", answer: "Bonjour le monde" },
-    { prompt: "Translate “Good night”  to German", answer: "Gute Nacht" },
+    { cells: [
+      { column_id: promptColumn.id, value: "Translate “Hello World” to French" },
+      { column_id: answerColumn.id, value: "Bonjour le monde" },
+    ] },
+    { cells: [
+      { column_id: promptColumn.id, value: "Translate “Good night” to German" },
+      { column_id: answerColumn.id, value: "Gute Nacht" },
+    ] },
   ]);
 
   console.log("Dataset ready:", ds.getConfig());
 }
+
+await main();
 ```
 
-### 2. Create & execute a prompt template
+### 2. Create & compile a prompt template
 
 ```ts
-import { Prompt, MessageBase, ModelConfig } from "@future-agi/sdk";
+import { Prompt, PromptTemplate, ModelConfig } from "@future-agi/sdk";
 
-const prompt = new Prompt();
+const prompt = new Prompt(new PromptTemplate({
+  name: "translator",
+  messages: [
+    { role: "system", content: "You are a translator." },
+    { role: "user", content: "Translate {{text}} to French." },
+  ],
+  variable_names: { text: ["Good morning"] },
+  model_configuration: new ModelConfig({ model_name: "gpt-4o-mini" }),
+}));
 
-await prompt.createNewVersion({
-  template: {
-    name: "translator",
-    messages: [
-      { role: "system", content: "You are a translator." } as MessageBase,
-      { role: "user", content: "Translate {{text}} to French." } as MessageBase,
-    ],
-    variable_names: { text: "string" },
-    model_configuration: new ModelConfig({ model_name: "gpt-3.5-turbo" }),
-  },
-});
-
-// Run the template with variables
-const result = await prompt.template?.run({ text: "Good morning" });
-console.log(result);
+await prompt.create();
+const messages = prompt.compile({ text: "Good morning" });
+console.log(messages);
 ```
+
+`create()` saves the initial draft. `compile()` substitutes variables locally and
+returns messages; it does not execute a model or generate a translation.
 
 ### 3. Build a knowledge base
 
+Use the released platform client for file uploads. Supply an existing file in
+one of the supported formats: PDF, DOCX, TXT or RTF (not Markdown). For this
+example, create `notes.txt` in your project directory with the text you want to
+upload; paths are relative to the directory where you run the command.
+
 ```ts
-import { KnowledgeBase } from "@future-agi/sdk";
+import { Client } from "@future-agi/sdk";
 
-const kb = new KnowledgeBase();
-await kb.createKb("docs", ["./README.md", "./whitepaper.pdf"]);
-
-const list = await kb.listKbs();
-console.log(`You now have ${list.length} knowledge-bases!`);
+const client = new Client();
+const kb = await client.fileKnowledgeBases.create({
+  name: "docs",
+  file: ["./notes.txt"],
+});
+console.log("Knowledge base created:", kb);
 ```
 
 ## API overview
@@ -369,11 +396,14 @@ try {
 
 Common subclasses include:
 
-- `InvalidAuthError` – wrong or missing credentials.
+- `MissingAuthError` – missing API key or secret when constructing a legacy helper.
+- `InvalidAuthError` – credentials rejected by a legacy prompt or knowledge-base
+  call; legacy dataset calls use `DatasetAuthError`.
 - `DatasetNotFoundError` – dataset name not found.
-- `DatasetRateLimitError` – quota exceeded in a legacy dataset call.
-- Root `RateLimitError` – quota exceeded in a facade call; released platform calls
-  use `platform.RateLimitError` instead.
+- `DatasetRateLimitError` (also exported as root `RateLimitError`) – quota exceeded
+  in a legacy dataset call.
+- `CoreRateLimitError` – quota exceeded in a facade call through `FutureAGIClient`.
+  Released platform calls through `Client` use `platform.RateLimitError` instead.
 
 ## Extra headers on every platform request (`FI_EXTRA_HEADERS`)
 
