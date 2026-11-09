@@ -3,8 +3,9 @@ import time
 import warnings
 from abc import ABC, abstractmethod
 from typing import Dict, Generic, Optional, TypeVar, Union
+from urllib.parse import urljoin, urlsplit
 
-from requests import Response
+from requests import Response, sessions
 from requests_futures.sessions import FuturesSession
 
 from fi._extra_headers import ExtraHeaders, ExtraHeadersError, ExtraHeadersInput, on_platform
@@ -25,6 +26,8 @@ from fi.utils.utils import ApiKeyName
 
 T = TypeVar("T")
 U = TypeVar("U")
+_SDK_AUTH_HEADERS = ("x-api-key", "x-secret-key")
+_AUTH_HEADERS = (*_SDK_AUTH_HEADERS, "authorization", "proxy-authorization")
 
 
 class ResponseHandler(Generic[T, U], ABC):
@@ -86,13 +89,23 @@ class HttpClient:
         return headers
 
     def _direct_kwargs(self, request_kwargs: Dict) -> Dict:
-        """``requests.<method>(**kwargs)`` arguments for a one-off call (file uploads) with the extra
-        headers for its URL. When any was added, redirects are not followed, so they never reach
-        another host."""
+        """Arguments for a one-off call (file uploads), including its platform headers.
+
+        Credential-bearing calls follow only same-origin redirects, using requests' method/body
+        rules. Disable unguarded following and let a response hook resolve the permitted hops.
+        """
         headers = dict(request_kwargs.get("headers") or {})
         before = len(headers)
         request_kwargs["headers"] = self._platform_headers(request_kwargs["url"], headers)
-        if len(headers) > before:
+        if len(headers) > before or any(name.lower() in _AUTH_HEADERS for name in headers):
+            if request_kwargs.get("allow_redirects", True):
+                extra = getattr(self, "_extra_headers", None) or ExtraHeaders(request_kwargs["url"])
+                hooks = dict(request_kwargs.get("hooks") or {})
+                response_hooks = hooks.get("response") or []
+                if callable(response_hooks):
+                    response_hooks = [response_hooks]
+                hooks["response"] = [*response_hooks, _direct_redirects(extra)]
+                request_kwargs["hooks"] = hooks
             request_kwargs["allow_redirects"] = False
         return request_kwargs
 
@@ -144,17 +157,63 @@ class HttpClient:
         self._session.close()
 
 
+def _redirect_origin(url: str) -> tuple:
+    """Compare scheme, hostname and effective port, independent of the base path."""
+    parts = urlsplit(url)
+    port = parts.port
+    if port is None:
+        port = 443 if parts.scheme == "https" else 80
+    return parts.scheme, parts.hostname, port
+
+
+def _direct_redirects(extra: ExtraHeaders):
+    """Follow safe one-off redirects without changing the legacy upload call sites."""
+    def follow(response, **kwargs):
+        if not response.is_redirect:
+            return response
+        with sessions.Session() as session:
+            original_target = session.get_redirect_target
+
+            def same_origin_target(current):
+                target = original_target(current)
+                if target and _redirect_origin(urljoin(current.url, target)) == _redirect_origin(extra.base_url):
+                    return target
+                return None
+
+            session.get_redirect_target = same_origin_target
+            _guard_redirects(session, extra)
+            request = response.request.copy()
+            # Keep caller hooks on each hop, but do not recursively resolve redirects ourselves.
+            request.hooks = {**request.hooks, "response": [
+                hook for hook in request.hooks.get("response", []) if hook is not follow
+            ]}
+            history = list(session.resolve_redirects(response, request, **kwargs))
+            if history:
+                history.insert(0, response)
+                response = history.pop()
+                response.history = history
+            return response
+
+    return follow
+
+
 def _guard_redirects(session, extra: ExtraHeaders) -> None:
-    """On a redirect ``requests`` keeps custom headers for any host and drops ``Proxy-Authorization``
-    even on the same host. So: a redirect off the base URL loses every extra header, and one that
-    stays under it gets them back."""
+    """Strip authentication headers when a redirect leaves the configured origin.
+
+    ``requests`` keeps custom headers across origins and drops ``Proxy-Authorization`` even on
+    the same host. Extra headers retain their stricter base-path scope and are restored only there.
+    """
     original = getattr(session, "rebuild_auth", None)
     if original is None:
         return
 
     def rebuild_auth(prepared_request, response):
         original(prepared_request, response)
-        if on_platform(prepared_request.url, extra.base_url):
+        same_origin = _redirect_origin(prepared_request.url) == _redirect_origin(extra.base_url)
+        if not same_origin:
+            for name in _AUTH_HEADERS:
+                prepared_request.headers.pop(name, None)
+        if same_origin and on_platform(prepared_request.url, extra.base_url):
             extra.apply(prepared_request.headers, prepared_request.url)
             return
         try:
