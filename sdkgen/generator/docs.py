@@ -178,7 +178,11 @@ def _model_link(name: str, homes: dict[str, str], here: str | None) -> str:
 # --------------------------------------------------------------------------- #
 
 
-def _example_value(p: Param, lang: str, definitions: dict) -> str:
+def _example_value(op: Op, p: Param, lang: str, definitions: dict) -> str:
+    examples = op.surfaces["sdk"].get("docs", {}).get("example", {})
+    if p.name in examples:
+        # Catalog examples here are string selectors, shared by both languages.
+        return json.dumps(examples[p.name])
     return _example_for(p.name, p.schema or {}, lang, definitions, depth=0)
 
 
@@ -239,10 +243,12 @@ def real_description(name: str, description: str | None) -> str:
 
 def _example_params(op: Op) -> list[Param]:
     page_params = {op.pagination["page_param"]} if op.pagination else set()
+    examples = op.surfaces["sdk"].get("docs", {}).get("example", {})
     return [
         p
         for p in op.params
-        if p.location != "path" and p.name not in page_params and p.required
+        if p.location != "path" and p.name not in page_params
+        and (p.required or p.name in examples)
     ]
 
 
@@ -250,7 +256,7 @@ def python_example(op: Op, definitions: dict) -> str:
     call = f"client.{dotted(op.namespace, 'python')}.{op.method_name}"
     args = [_placeholder(p) for p in op.params_in("path")]
     args += [
-        f"{py.arg_name(p)}={_example_value(p, 'python', definitions)}"
+        f"{py.arg_name(p)}={_example_value(op, p, 'python', definitions)}"
         for p in _example_params(op)
     ]
     if len(args) > 2:
@@ -266,7 +272,7 @@ def typescript_example(op: Op, definitions: dict) -> str:
     call = f"client.{dotted(op.namespace, 'typescript')}.{ts.ts_method(op)}"
     args = [_placeholder(p) for p in op.params_in("path")]
     fields = [
-        f"{ts.prop_key(p.name)}: {_example_value(p, 'typescript', definitions)}"
+        f"{ts.prop_key(p.name)}: {_example_value(op, p, 'typescript', definitions)}"
         for p in _example_params(op)
     ]
     if len(fields) > 1:
@@ -336,14 +342,14 @@ def _returns(op: Op, homes: dict[str, str]) -> str:
     return f"{item}."
 
 
-def _param_field(p: Param) -> str:
+def _param_field(p: Param, *, required: bool = False, note: str = "") -> str:
     kind = {"path": "path", "query": "query", "body": "body"}[p.location]
     attrs = [f'{kind}="{p.name}"', f'type="{doc_type(p.schema, for_input=True)}"']
-    attrs.append("required" if p.required else "optional")
+    attrs.append("required" if p.required or required else "optional")
     schema = p.schema or {}
     if "enum" in schema:
         attrs.append(f"enum={{{json.dumps([str(v) for v in schema['enum']])}}}")
-    text = md(real_description(p.name, p.description))
+    text = md(" ".join(filter(None, [real_description(p.name, p.description), note])))
     if p.location == "path" and not text:
         text = f"Positional argument `{py.arg_name(p)}`."
     if not text:
@@ -418,7 +424,15 @@ def _method_section(op: Op, homes: dict[str, str], definitions: dict) -> str:
     )
     out.append("#### Parameters\n\n")
     if params:
-        out.append("".join(_param_field(p) for p in params))
+        # Document server requirements without tightening existing SDK signatures.
+        settings = op.surfaces["sdk"].get("docs", {})
+        out.append("".join(
+            _param_field(
+                p, required=p.name in settings.get("required", []),
+                note=settings.get("parameter_notes", {}).get(p.name, ""),
+            )
+            for p in params
+        ))
     else:
         out.append("This method takes no parameters beyond the per-call `options`.\n")
     if op.pagination:

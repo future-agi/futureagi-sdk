@@ -226,7 +226,12 @@ operations:
     returns: {template_id: string, prompt_config: 'object[]', variable_names: object, evaluation_configs: 'object[]', placeholders: object}
     note: "contract documents the request serializer as the response; the server answers with the execution receipt (run_template in prompt_template.py)"
   surfaces:
-    sdk: {}
+    sdk:
+      docs:
+        example: {version: v1, is_run: prompt}
+        parameter_notes:
+          version: Supply an existing configured version, or a nonempty `prompt_config`.
+          is_run: Set to `"prompt"` to start execution rather than only saving configuration.
     mcp: {name: run_prompt, group: prompts, access: write, open_world: true}
 
 - id: prompts.run_status
@@ -234,7 +239,9 @@ operations:
     that version, otherwise the API chooses the default/latest version.
   operation: {method: GET, path: '/model-hub/prompt-templates/{id}/get-run-status/'}
   surfaces:
-    sdk: {}
+    sdk:
+      docs:
+        example: {template_version: v1}
     mcp: {name: get_prompt_run, group: prompts, access: read}
 
 - id: evals.templates.list
@@ -1107,7 +1114,12 @@ operations:
   description: Fetch a prompt template by name; the default version unless `version` is given.
   operation: {method: GET, path: /model-hub/prompt-templates/get-template-by-name/}
   contract_fix: {untyped: true, note: "contract says a DRF page; server returns one template version"}
-  surfaces: {sdk: {}, mcp: false}
+  surfaces:
+    sdk:
+      docs:
+        example: {name: customer_support}
+        required: [name]
+    mcp: false
 
 - id: prompts.history
   description: List past prompt executions, optionally for one template.
@@ -1134,7 +1146,15 @@ operations:
     query: {name: string, label: string, version: string}
     untyped: true
     note: "contract says a DRF page with only paging params; server takes name/label/version and returns one template version"
-  surfaces: {sdk: {}, mcp: false}
+  surfaces:
+    sdk:
+      docs:
+        example: {name: customer_support, label: production}
+        required: [name]
+        parameter_notes:
+          label: Required unless `version` is supplied.
+          version: Required unless `label` is supplied.
+    mcp: false
 
 - id: prompts.labels.for_template
   description: List the labels assigned to a prompt template's versions.
@@ -1143,7 +1163,14 @@ operations:
     query: {template_id: string, template_name: string}
     untyped: true
     note: "contract says a DRF page with only paging params; server takes template_id or template_name"
-  surfaces: {sdk: {}, mcp: false}
+  surfaces:
+    sdk:
+      docs:
+        example: {template_name: customer_support}
+        parameter_notes:
+          template_id: Required unless `template_name` is supplied.
+          template_name: Required unless `template_id` is supplied.
+    mcp: false
 
 - id: prompts.labels.assign
   description: Assign a label to one version of a prompt template.

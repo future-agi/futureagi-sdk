@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import asyncio
 import email.utils
+import math
 import threading
 import time
 from typing import Any, Callable, Generator, Mapping, Optional
@@ -60,14 +61,16 @@ def retry_after_seconds(response: httpx.Response) -> Optional[float]:
     if not value:
         return None
     try:
-        return max(0.0, float(value))
+        seconds = float(value)
     except ValueError:
         pass
+    else:
+        return max(0.0, seconds) if math.isfinite(seconds) else None
     try:
         when = email.utils.parsedate_to_datetime(value)
-    except (TypeError, ValueError):
+        return max(0.0, when.timestamp() - time.time())
+    except (TypeError, ValueError, OverflowError):
         return None
-    return max(0.0, when.timestamp() - time.time())
 
 
 RETRY_EXTENSION = "fi.retry"
@@ -126,8 +129,8 @@ def should_retry_error(method: str, exc: BaseException, retry_class: Optional[st
 
 def backoff_s(attempt: int, response: Optional[httpx.Response], base: float) -> float:
     hinted = retry_after_seconds(response) if response is not None else None
-    delay = hinted if hinted is not None else base * (2**attempt)
-    return min(delay, MAX_SLEEP_S)
+    # A server hint is a minimum wait, not locally generated exponential backoff.
+    return hinted if hinted is not None else min(base * (2**attempt), MAX_SLEEP_S)
 
 
 class RetryingTransport(httpx.BaseTransport):

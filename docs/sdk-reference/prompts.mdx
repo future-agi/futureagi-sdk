@@ -432,11 +432,11 @@ Fetch a prompt template by name; the default version unless `version` is given.
 <CodeGroup>
 
 ```python Python
-result = client.prompts.get_by_name()
+result = client.prompts.get_by_name(name="customer_support")
 ```
 
 ```typescript TypeScript
-const result = await client.prompts.getByName();
+const result = await client.prompts.getByName({ name: "customer_support" });
 ```
 
 </CodeGroup>
@@ -480,7 +480,7 @@ export interface PromptsGetByNameParams {
 
 #### Parameters
 
-<ParamField query="name" type="string" optional />
+<ParamField query="name" type="string" required />
 <ParamField query="version" type="string" optional />
 <ParamField query="created_at" type="string" optional />
 <ParamField query="search" type="string" optional>
@@ -727,11 +727,18 @@ Run a configured prompt version by supplying version and is_run="prompt". Option
 <CodeGroup>
 
 ```python Python
-result = client.prompts.run("your-id")
+result = client.prompts.run(
+    "your-id",
+    version="v1",
+    is_run="prompt",
+)
 ```
 
 ```typescript TypeScript
-const result = await client.prompts.run("your-id");
+const result = await client.prompts.run("your-id", {
+  version: "v1",
+  is_run: "prompt",
+});
 ```
 
 </CodeGroup>
@@ -783,13 +790,17 @@ export interface PromptsRunParams {
   A UUID string identifying this prompt template.
 </ParamField>
 <ParamField body="name" type="string" optional />
-<ParamField body="version" type="string" optional />
+<ParamField body="version" type="string" optional>
+  Supply an existing configured version, or a nonempty `prompt_config`.
+</ParamField>
 <ParamField body="prompt_config" type="object[]" optional />
 <ParamField body="variable_names" type="object" optional />
 <ParamField body="placeholders" type="any JSON value" optional />
 <ParamField body="evaluation_configs" type="any JSON value[]" optional />
 <ParamField body="source" type="string" optional />
-<ParamField body="is_run" type="any JSON value" optional />
+<ParamField body="is_run" type="any JSON value" optional>
+  Set to `"prompt"` to start execution rather than only saving configuration.
+</ParamField>
 <ParamField body="is_sdk" type="boolean" optional />
 <ParamField body="run_index" type="integer" optional />
 
@@ -808,11 +819,11 @@ Read workbench prompt execution status and outputs. Supply template_version matc
 <CodeGroup>
 
 ```python Python
-result = client.prompts.run_status("your-id")
+result = client.prompts.run_status("your-id", template_version="v1")
 ```
 
 ```typescript TypeScript
-const result = await client.prompts.runStatus("your-id");
+const result = await client.prompts.runStatus("your-id", { template_version: "v1" });
 ```
 
 </CodeGroup>
@@ -1046,11 +1057,11 @@ List the labels assigned to a prompt template's versions.
 <CodeGroup>
 
 ```python Python
-result = client.prompts.labels.for_template()
+result = client.prompts.labels.for_template(template_name="customer_support")
 ```
 
 ```typescript TypeScript
-const result = await client.prompts.labels.forTemplate();
+const result = await client.prompts.labels.forTemplate({ template_name: "customer_support" });
 ```
 
 </CodeGroup>
@@ -1092,8 +1103,12 @@ export interface PromptsLabelsForTemplateParams {
 <ParamField query="limit" type="integer" optional>
   Number of results to return per page.
 </ParamField>
-<ParamField query="template_id" type="string" optional />
-<ParamField query="template_name" type="string" optional />
+<ParamField query="template_id" type="string" optional>
+  Required unless `template_name` is supplied.
+</ParamField>
+<ParamField query="template_name" type="string" optional>
+  Required unless `template_id` is supplied.
+</ParamField>
 
 #### Returns
 
@@ -1108,11 +1123,14 @@ Fetch the prompt template version a label points to, by template name and label 
 <CodeGroup>
 
 ```python Python
-result = client.prompts.labels.get_template()
+result = client.prompts.labels.get_template(name="customer_support", label="production")
 ```
 
 ```typescript TypeScript
-const result = await client.prompts.labels.getTemplate();
+const result = await client.prompts.labels.getTemplate({
+  name: "customer_support",
+  label: "production",
+});
 ```
 
 </CodeGroup>
@@ -1156,9 +1174,13 @@ export interface PromptsLabelsGetTemplateParams {
 <ParamField query="limit" type="integer" optional>
   Number of results to return per page.
 </ParamField>
-<ParamField query="name" type="string" optional />
-<ParamField query="label" type="string" optional />
-<ParamField query="version" type="string" optional />
+<ParamField query="name" type="string" required />
+<ParamField query="label" type="string" optional>
+  Required unless `version` is supplied.
+</ParamField>
+<ParamField query="version" type="string" optional>
+  Required unless `label` is supplied.
+</ParamField>
 
 #### Returns
 
