@@ -911,15 +911,19 @@ class Dataset(APIKeyAuth):
                 )
                 dataset_table.to_file(file_path)
                 params["current_page_index"] += 1
-                total_pages = (
-                    dataset_table.metadata.get("total_pages")
-                    or dataset_table.metadata.get("totalPages")
-                )
-                if (
-                    total_pages == params["current_page_index"]
-                ):
-                    pbar.update(1)
+                metadata = dataset_table.metadata or {}
+                total_pages = metadata.get("total_pages", metadata.get("totalPages"))
+                has_more = metadata.get("has_more", metadata.get("hasMore"))
+                pbar.update(1)
+                if has_more is False:
                     break
+                if isinstance(total_pages, int) and not isinstance(total_pages, bool) and total_pages >= 0:
+                    if params["current_page_index"] >= total_pages:
+                        break
+                elif not dataset_table.rows:
+                    break
+                else:
+                    raise DatasetError("Invalid dataset pagination metadata: expected a non-negative total_pages count.")
 
         if load_to_pandas:
             if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
