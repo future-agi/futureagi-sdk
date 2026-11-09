@@ -871,7 +871,7 @@ class Dataset(APIKeyAuth):
     ) -> DatasetConfig:
         """Create dataset from Hugging Face"""
         data = {
-            "new_dataset_name": config.name,
+            "name": config.name,
             "huggingface_dataset_name": hf_config.name,
             "model_type": config.model_type.value,
         }
