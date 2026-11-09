@@ -28,7 +28,8 @@ from typing import Any, Iterable
 
 import httpx
 
-from fi.gateway._constants import CREDENTIAL_HEADER_NAMES, is_credential_name
+from fi.gateway._constants import is_credential_name
+from fi.gateway._transport._scrub_arguments import scrub_argument_headers
 from fi.gateway.callbacks.base import REDACTED
 
 DEPTH_CAP = 12

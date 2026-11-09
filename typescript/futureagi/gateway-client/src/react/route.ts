@@ -6,6 +6,7 @@
 
 import { APIStatusError } from "../errors.js";
 import { Stream } from "../streaming.js";
+import { acceptStreamAdapterResponse } from "../stream-adapter.js";
 import { markScrubbedResponse, scrubCredentialHeaders } from "../redact.js";
 import type { RouteOptions } from "./types.js";
 
@@ -45,7 +46,7 @@ export async function routeStream(route: RouteOptions, body: Record<string, unkn
   }
   markScrubbedResponse(response);
   if (!response.ok) throw APIStatusError.from(response.status, await errorBody(response), response.headers);
-  return new Stream(response);
+  return new Stream(acceptStreamAdapterResponse(response));
 }
 
 /** The text a route streams for `body`, joined. */

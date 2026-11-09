@@ -183,6 +183,10 @@ test('candidate entry graphs resolve entirely inside the packed tarball', () => 
     const files = readArchive(join(out, tarballs[0]));
     const packed = JSON.parse(files.get('package/package.json'));
     assert.ok(!('scripts' in packed) && !('devDependencies' in packed));
+    assert.deepEqual([...files.keys()].filter((name) =>
+      /(?:^|\/)(?:__fixtures__|__tests__)(?:\/|$)/.test(name) ||
+      /\.(?:test|spec)\.[^/]*$|\.tsbuildinfo$/.test(name)), [],
+    'The packed archive must not contain compiled fixtures or other test-only outputs');
     assert.ok(![...files.keys()].some((name) => /^package\/dist\/(esm|src|esnext)\/evals(?:[/.]|$)/.test(name)),
       'The deferred evaluation runner must stay absent');
     const graph = checkGraph(files, packed);

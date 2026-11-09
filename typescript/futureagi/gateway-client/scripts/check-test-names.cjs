@@ -114,4 +114,5 @@ const summary = {
 };
 if (summary.accounted !== total) problems.push(`accounted ${summary.accounted} of ${total} 1.0.1 tests`);
 process.stdout.write(JSON.stringify({ summary, added: addedNames, problems }, null, 1) + "\n");
-process.exit(problems.length ? 1 : 0);
+// Let pending pipe writes drain before Node exits naturally.
+process.exitCode = problems.length ? 1 : 0;

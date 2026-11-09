@@ -18,14 +18,21 @@ export interface SSEEvent {
  */
 export async function* parseSSE(
   stream: ReadableStream<Uint8Array>,
+  signal?: AbortSignal,
 ): AsyncGenerator<SSEEvent> {
   const reader = stream.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
+  const cancel = () => { reader.cancel().catch(() => {}); };
+  const checkAbort = () => { if (signal?.aborted) throw signal.reason; };
+  signal?.addEventListener("abort", cancel, { once: true });
 
   try {
+    if (signal?.aborted) cancel();
+    checkAbort();
+    const decoder = new TextDecoder();
+    let buffer = "";
     while (true) {
       const { done, value } = await reader.read();
+      checkAbort();
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
 
@@ -35,6 +42,7 @@ export async function* parseSSE(
       buffer = parts.pop()!;
 
       for (const part of parts) {
+        checkAbort();
         const event = parseSSEBlock(part);
         if (event) yield event;
       }
@@ -46,6 +54,30 @@ export async function* parseSSE(
       if (event) yield event;
     }
   } finally {
+    signal?.removeEventListener("abort", cancel);
+    reader.releaseLock();
+  }
+}
+
+/** Read a JSON stream answer with an owned, cancellable reader as well. */
+export async function readStreamText(stream: ReadableStream<Uint8Array>, signal: AbortSignal): Promise<string> {
+  const reader = stream.getReader();
+  const cancel = () => { reader.cancel().catch(() => {}); };
+  signal.addEventListener("abort", cancel, { once: true });
+  try {
+    if (signal.aborted) { cancel(); throw signal.reason; }
+    const decoder = new TextDecoder();
+    const parts: string[] = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (signal.aborted) throw signal.reason;
+      if (done) break;
+      parts.push(decoder.decode(value, { stream: true }));
+    }
+    parts.push(decoder.decode());
+    return parts.join("");
+  } finally {
+    signal.removeEventListener("abort", cancel);
     reader.releaseLock();
   }
 }

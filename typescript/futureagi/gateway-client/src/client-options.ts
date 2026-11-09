@@ -24,6 +24,9 @@ export interface RequestOptions {
    */
   metadata?: Record<string, unknown>;
   timeout?: number;
+  /** Cancel this request, including its response body. Explicit cancellation is
+   * terminal (AbortError), never retried, and does not disable the timeout. */
+  signal?: AbortSignal;
   maxRetries?: number;
   /** If true, return the raw Response instead of parsing JSON. */
   raw?: boolean;

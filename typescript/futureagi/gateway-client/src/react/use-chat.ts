@@ -130,7 +130,8 @@ function useChat(client: AgentCC | null, options: UseAgentCCChatOptions): UseAge
 
         if (onFinish) onFinish(assistantMsg);
       } catch (err) {
-        if ((err as Error).name === "AbortError") return;
+        // stop() aborts the request; the read it cuts short is not an error.
+        if (controller.signal.aborted || (err as Error).name === "AbortError") return;
         const error = err instanceof Error ? err : new Error(String(err));
         setError(error);
         if (onError) onError(error);

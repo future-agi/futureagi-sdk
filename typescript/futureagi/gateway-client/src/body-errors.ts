@@ -3,6 +3,7 @@ import type { ErrorBody } from "./errors.js";
 import { parseGatewayEvidence } from "./gateway-evidence.js";
 import type { GatewayEvidence } from "./gateway-evidence.js";
 import { UNCONFIRMED_DISPATCH_REMEDY } from "./refusal-policy.js";
+import { hasOrigin, markOrigin, originStore } from "./origin-store.js";
 
 /**
  * A final response arrived, but its successful JSON body could not be read or
@@ -83,28 +84,31 @@ export class StreamError extends AgentCCError {
 
 // Only these internal factories establish origin. Public constructors, class
 // membership, bodyReadFailure and evidence identity cannot populate these sets.
-const sdkBodyFailures = new WeakSet<ResponseBodyError | StreamError>();
-const sdkStreamFrames = new WeakSet<StreamError>();
+// They are the process-wide registries every copy of the package shares, so an
+// error one copy raised is recognised by another (see origin-store.ts).
+const sdkBodyFailures = originStore.bodyFailures;
+const sdkStreamFrames = originStore.streamFrames;
 
 /** @internal Construct a terminal failure of an SDK-owned successful body read. */
 export function responseBodyError(evidence: GatewayEvidence): ResponseBodyError {
-  const error = new ResponseBodyError(evidence);
-  sdkBodyFailures.add(error);
-  return error;
+  return markOrigin(sdkBodyFailures, new ResponseBodyError(evidence));
 }
 
 /** @internal Construct a body/read/decode failure, not a gateway error frame. */
 export function streamBodyError(message: string, evidence: GatewayEvidence): StreamError {
-  const error = new StreamError(message, { gatewayEvidence: evidence });
-  sdkBodyFailures.add(error);
-  return error;
+  return markOrigin(sdkBodyFailures, new StreamError(message, { gatewayEvidence: evidence }));
+}
+
+/** @internal Adapter serialization may inspect origin, never infer it from a
+ * public class, flag or wire field. Only the allowlisted owner crosses the wire.
+ */
+export function sdkBodyFailureEvidence(error: unknown): GatewayEvidence | null {
+  return hasOrigin(sdkBodyFailures, error) ? (error as StreamError | ResponseBodyError).gatewayEvidence : null;
 }
 
 /** @internal Only decoded gateway frames use this factory. */
 export function streamFrameError(message: string, options: StreamErrorOptions = {}): StreamError {
-  const error = new StreamError(message, options);
-  sdkStreamFrames.add(error);
-  return error;
+  return markOrigin(sdkStreamFrames, new StreamError(message, options));
 }
 
 /** @internal The common outgoing-error boundary for requests and SDK readers.
@@ -114,14 +118,14 @@ export function streamFrameError(message: string, options: StreamErrorOptions = 
 export function errorAtExit<T>(error: T): T;
 export function errorAtExit(error: unknown, streamEvidence: GatewayEvidence, retainReaderCause?: boolean): unknown;
 export function errorAtExit(error: unknown, streamEvidence?: GatewayEvidence, retainReaderCause = false): unknown {
-  if (streamEvidence && !sdkBodyFailures.has(error as StreamError) && !sdkStreamFrames.has(error as StreamError)) {
+  if (streamEvidence && !hasOrigin(sdkBodyFailures, error) && !hasOrigin(sdkStreamFrames, error)) {
     const wrapped = streamBodyError("Failed to read stream body", streamEvidence);
     // Preserve normalized reader errors after the transport has scrubbed its
     // sent headers. Generic reader failures keep the existing cause-free shape.
     if (retainReaderCause && error instanceof StreamError) Object.defineProperty(wrapped, "cause", { value: error, configurable: true });
     error = wrapped;
   }
-  if (sdkBodyFailures.has(error as StreamError)) {
+  if (hasOrigin(sdkBodyFailures, error)) {
     const failure = error as ResponseBodyError | StreamError;
     const guidance = bodyFailureGuidance(failure.message, failure.gatewayEvidence);
     failure.message = guidance.message;

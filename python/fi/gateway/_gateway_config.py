@@ -147,16 +147,28 @@ class TimeoutConfig:
 
 
 def _to_serializable(obj: Any) -> Any:
-    if hasattr(obj, "__dataclass_fields__"):
-        return {
-            k: _to_serializable(getattr(obj, k))
-            for k in obj.__dataclass_fields__ if getattr(obj, k) is not None
-        }
-    if isinstance(obj, list):
-        return [_to_serializable(item) for item in obj]
-    if isinstance(obj, dict):
-        return {k: _to_serializable(v) for k, v in obj.items()}
-    return obj
+    try:
+        # Explicit loops keep partial output and recursive aliases in this frame,
+        # where they can be dropped without touching caller-owned configuration.
+        if hasattr(obj, "__dataclass_fields__"):
+            result = {}
+            for k in obj.__dataclass_fields__:
+                if getattr(obj, k) is not None:
+                    result[k] = _to_serializable(getattr(obj, k))
+            return result
+        if isinstance(obj, list):
+            result = []
+            for item in obj:
+                result.append(_to_serializable(item))
+            return result
+        if isinstance(obj, dict):
+            result = {}
+            for k, item in obj.items():
+                result[k] = _to_serializable(item)
+            return result
+        return obj
+    finally:
+        obj = result = item = None
 
 
 @deprecated_options("fallback", "load_balance", "guardrails", "routing", "mirror", "retry", positional=True)
@@ -174,54 +186,60 @@ class GatewayConfig:
     timeout: TimeoutConfig | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return _to_serializable(self)
+        try:
+            return _to_serializable(self)
+        finally:
+            self = None
 
     def to_headers(self) -> dict[str, str]:
-        ignored = [
-            name for name in ("fallback", "load_balance", "guardrails", "routing", "mirror", "retry")
-            if getattr(self, name) is not None
-        ]
-        if self.cache is not None:
-            defaults = CacheConfig()
-            ignored.extend(
-                f"cache.{name}" for name in
-                ("enabled", "strategy", "semantic_threshold", "cache_by_model", "ignore_keys")
-                if getattr(self.cache, name) != getattr(defaults, name)
-            )
-        if self.timeout is not None:
-            ignored.extend(
-                f"timeout.{name}" for name in ("connect", "read", "write", "pool")
-                if getattr(self.timeout, name) is not None
-            )
-        if ignored:
-            warnings.warn(
-                "Deprecated gateway config adapter: legacy fields are serialized "
-                "as released, but backend support is not guaranteed: "
-                + ", ".join(ignored)
-                + ". Check response config_ignored; configure unsupported features "
-                "on the gateway instead.",
-                DeprecationWarning, stacklevel=2,
-            )
-        headers: dict[str, str] = {}
-        config_dict = self.to_dict()
-        if not config_dict:
+        try:
+            ignored = [
+                name for name in ("fallback", "load_balance", "guardrails", "routing", "mirror", "retry")
+                if getattr(self, name) is not None
+            ]
+            if self.cache is not None:
+                defaults = CacheConfig()
+                ignored.extend(
+                    f"cache.{name}" for name in
+                    ("enabled", "strategy", "semantic_threshold", "cache_by_model", "ignore_keys")
+                    if getattr(self.cache, name) != getattr(defaults, name)
+                )
+            if self.timeout is not None:
+                ignored.extend(
+                    f"timeout.{name}" for name in ("connect", "read", "write", "pool")
+                    if getattr(self.timeout, name) is not None
+                )
+            if ignored:
+                warnings.warn(
+                    "Deprecated gateway config adapter: legacy fields are serialized "
+                    "as released, but backend support is not guaranteed: "
+                    + ", ".join(ignored)
+                    + ". Check response config_ignored; configure unsupported features "
+                    "on the gateway instead.",
+                    DeprecationWarning, stacklevel=2,
+                )
+            headers: dict[str, str] = {}
+            config_dict = self.to_dict()
+            if not config_dict:
+                return headers
+            headers["x-agentcc-config"] = json.dumps(config_dict, separators=(",", ":"))
+            if self.cache is not None:
+                if self.cache.ttl is not None:
+                    headers["x-agentcc-cache-ttl"] = str(self.cache.ttl)
+                if self.cache.namespace is not None:
+                    headers["x-agentcc-cache-namespace"] = self.cache.namespace
+                if self.cache.force_refresh:
+                    headers["x-agentcc-cache-force-refresh"] = "true"
+            if self.guardrails is not None:
+                policies = list(self.guardrails.input_guardrails or [])
+                policies.extend(self.guardrails.output_guardrails or [])
+                if policies:
+                    headers["x-agentcc-guardrail-policy"] = ",".join(policies)
+            if self.timeout is not None and self.timeout.total is not None:
+                headers["x-agentcc-request-timeout"] = str(int(self.timeout.total * 1000))
             return headers
-        headers["x-agentcc-config"] = json.dumps(config_dict, separators=(",", ":"))
-        if self.cache is not None:
-            if self.cache.ttl is not None:
-                headers["x-agentcc-cache-ttl"] = str(self.cache.ttl)
-            if self.cache.namespace is not None:
-                headers["x-agentcc-cache-namespace"] = self.cache.namespace
-            if self.cache.force_refresh:
-                headers["x-agentcc-cache-force-refresh"] = "true"
-        if self.guardrails is not None:
-            policies = list(self.guardrails.input_guardrails or [])
-            policies.extend(self.guardrails.output_guardrails or [])
-            if policies:
-                headers["x-agentcc-guardrail-policy"] = ",".join(policies)
-        if self.timeout is not None and self.timeout.total is not None:
-            headers["x-agentcc-request-timeout"] = str(int(self.timeout.total * 1000))
-        return headers
+        finally:
+            self = headers = config_dict = None
 
 
 def create_headers(
@@ -244,31 +262,34 @@ def create_headers(
 
     Only gateway virtual keys are allowed; platform FI key pair values are refused.
     """
-    headers: dict[str, str] = {}
-    if api_key is not None:
-        from fi.gateway._env import guard_fi_key_pair
+    try:
+        headers: dict[str, str] = {}
+        if api_key is not None:
+            from fi.gateway._env import guard_fi_key_pair
 
-        guard_fi_key_pair(api_key)
-        headers["Authorization"] = f"Bearer {api_key}"
-    for name, value in (
-        ("x-agentcc-trace-id", trace_id), ("x-agentcc-session-id", session_id),
-        ("x-agentcc-session-name", session_name), ("x-agentcc-session-path", session_path),
-        ("x-agentcc-user-id", user_id), ("x-agentcc-request-id", request_id),
-        ("x-agentcc-cache-namespace", cache_namespace),
-    ):
-        if value is not None:
-            headers[name] = value
-    if metadata is not None:
-        headers["x-agentcc-metadata"] = json.dumps(metadata, separators=(",", ":"))
-    if cache_ttl is not None:
-        headers["x-agentcc-cache-ttl"] = str(cache_ttl)
-    if cache_force_refresh:
-        headers["x-agentcc-cache-force-refresh"] = "true"
-    if guardrail_policy is not None:
-        headers[HEADER_GUARDRAIL_POLICY] = guardrail_policy
-    if properties is not None:
-        for key, value in properties.items():
-            headers[f"x-agentcc-property-{key}"] = value
-    if config is not None:
-        headers.update(config.to_headers())
-    return headers
+            guard_fi_key_pair(api_key)
+            headers["Authorization"] = f"Bearer {api_key}"
+        for name, value in (
+            ("x-agentcc-trace-id", trace_id), ("x-agentcc-session-id", session_id),
+            ("x-agentcc-session-name", session_name), ("x-agentcc-session-path", session_path),
+            ("x-agentcc-user-id", user_id), ("x-agentcc-request-id", request_id),
+            ("x-agentcc-cache-namespace", cache_namespace),
+        ):
+            if value is not None:
+                headers[name] = value
+        if metadata is not None:
+            headers["x-agentcc-metadata"] = json.dumps(metadata, separators=(",", ":"))
+        if cache_ttl is not None:
+            headers["x-agentcc-cache-ttl"] = str(cache_ttl)
+        if cache_force_refresh:
+            headers["x-agentcc-cache-force-refresh"] = "true"
+        if guardrail_policy is not None:
+            headers[HEADER_GUARDRAIL_POLICY] = guardrail_policy
+        if properties is not None:
+            for key, value in properties.items():
+                headers[f"x-agentcc-property-{key}"] = value
+        if config is not None:
+            headers.update(config.to_headers())
+        return headers
+    finally:
+        api_key = config = headers = None

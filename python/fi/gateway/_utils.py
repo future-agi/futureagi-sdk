@@ -62,18 +62,24 @@ def return_raw_request(
     """
     from fi.gateway._env import resolve_wrapper_settings
     from fi.gateway._transport._request import RequestBuilder
+    from fi.gateway._secrets import _Secret
     from fi.gateway.resources.chat._params import _prepare
 
-    key, origin = resolve_wrapper_settings(api_key, base_url)
-    builder = RequestBuilder(api_key=key or "[REDACTED]", base_url=origin)
-    options, params = _prepare(builder, {"model": model, "messages": messages, **kwargs})
-    request = builder._build_request(options, params)
-    return {
-        "method": request.method, "url": str(request.url),
-        "headers": {k.decode("ascii"): v.decode("latin-1") for k, v in request.headers.raw},
-        "body": options.body,
-        "body_bytes": request.content,
-    }
+    api_key = _Secret.hold(api_key)
+    try:
+        key, origin = resolve_wrapper_settings(api_key.get(), base_url)
+        key = _Secret(key or "[REDACTED]")
+        builder = RequestBuilder(api_key=key, base_url=origin)
+        options, params = _prepare(builder, {"model": model, "messages": messages, **kwargs})
+        request = builder._build_request(options, params)
+        return {
+            "method": request.method, "url": str(request.url),
+            "headers": {k.decode("ascii"): v.decode("latin-1") for k, v in request.headers.raw},
+            "body": options.body,
+            "body_bytes": request.content,
+        }
+    finally:
+        key = request = None
 
 
 def _utility_exchange(send: Callable[..., httpx.Response], url: str, **kwargs: Any) -> httpx.Response:

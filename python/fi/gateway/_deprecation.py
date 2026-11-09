@@ -33,13 +33,19 @@ def deprecated(api: _T) -> _T:
     if inspect.iscoroutinefunction(target):
         @wraps(target)
         async def wrapped(*args: Any, **kwargs: Any) -> Any:
-            warn()
-            return await target(*args, **kwargs)
+            try:
+                warn()
+                return await target(*args, **kwargs)
+            finally:
+                args, kwargs = (), {}
     else:
         @wraps(target)
         def wrapped(*args: Any, **kwargs: Any) -> Any:
-            warn()
-            return target(*args, **kwargs)
+            try:
+                warn()
+                return target(*args, **kwargs)
+            finally:
+                args, kwargs = (), {}
     if isinstance(api, type):
         api.__init__ = wrapped
         return api
@@ -53,15 +59,19 @@ def deprecated_options(*names: str, positional: bool = False) -> Callable[[_T], 
 
         @wraps(original)
         def init(self: Any, *args: Any, **kwargs: Any) -> None:
-            supplied = [name for name in names if name in kwargs]
-            if positional and args:
-                supplied.append("positional arguments")
-            if supplied:
-                warnings.warn(
-                    "Deprecated gateway compatibility options: " + ", ".join(supplied),
-                    DeprecationWarning, stacklevel=2,
-                )
-            original(self, *args, **kwargs)
+            try:
+                supplied = [name for name in names if name in kwargs]
+                if positional and args:
+                    supplied.append("positional arguments")
+                if supplied:
+                    warnings.warn(
+                        "Deprecated gateway compatibility options: " + ", ".join(supplied),
+                        DeprecationWarning, stacklevel=2,
+                    )
+                original(self, *args, **kwargs)
+            finally:
+                # Rebind only our aliases; never mutate caller arguments/frames.
+                self, args, kwargs = None, (), {}
 
         cls.__init__ = init
         return cls

@@ -5,7 +5,7 @@
 import { AgentCC } from "./client.js";
 import type { ClientOptions } from "./base-client.js";
 import type { StreamManager } from "./streaming.js";
-import { StreamError } from "./errors.js";
+import { acceptStreamAdapterResponse, adapterEvidence, streamAdapterErrorEvent, streamAdapterHeaders } from "./stream-adapter.js";
 
 // ---------------------------------------------------------------------------
 // Singleton client
@@ -77,6 +77,8 @@ export function streamResponse(
   opts?: { headers?: Record<string, string> },
 ): Response {
   const encoder = new TextEncoder();
+  // A StreamManager carries its owning evidence; any other iterable has none.
+  const evidence = adapterEvidence(stream);
 
   const readable = new ReadableStream({
     async start(controller) {
@@ -87,28 +89,14 @@ export function streamResponse(
         }
         controller.enqueue(encoder.encode("data: [DONE]\n\n"));
       } catch (err) {
-        // A gateway error (a guardrail block) keeps its type and code, so
-        // the browser can tell it from a broken connection.
-        const error: Record<string, string> = { message: (err as Error).message };
-        if (err instanceof StreamError) {
-          if (err.type) error.type = err.type;
-          if (err.code) error.code = err.code;
-          if (err.param) error.param = err.param;
-        }
-        const errorData = `data: ${JSON.stringify({ error })}\n\n`;
-        controller.enqueue(encoder.encode(errorData));
+        controller.enqueue(encoder.encode(streamAdapterErrorEvent(err)));
       } finally {
         controller.close();
       }
     },
   });
 
-  return new Response(readable, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-      ...opts?.headers,
-    },
-  });
+  return acceptStreamAdapterResponse(new Response(readable, {
+    headers: streamAdapterHeaders(evidence, opts?.headers),
+  }));
 }

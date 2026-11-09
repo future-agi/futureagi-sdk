@@ -21,8 +21,9 @@ from fi.gateway._transport._response import (
     ResponseCapture, body_decode_error, aclose_response, safe_response, protect_stream_cleanup,
 )
 from fi.gateway._transport._scrub import (
-    bind_stream_scrubber, composed_credential_values, scrub_reachable, scrub_sent_request,
+    bind_stream_scrubber, composed_credential_values, scrub_argument_headers, scrub_reachable, scrub_sent_request,
 )
+from fi.gateway._secrets import _Secret
 from fi.gateway._transport._base import (
     BaseClient,
     RequestOptions,
@@ -61,13 +62,18 @@ class AsyncBaseClient(BaseClient):
         self, options: RequestOptions, agentcc_params: Any, *, streaming: bool,
     ) -> httpx.Response:
         arguments, composed_names = self._request_arguments(options, agentcc_params, stream=streaming)
+        try:
+            timeout = options.timeout or self._timeout
+            client = self._ensure_client()
+            capture = ResponseCapture()
+        except BaseException:
+            # Preparation failures precede exchange cleanup; keep their identity.
+            arguments = None
+            raise
         if streaming:
             # Late error graphs retain names only, never the client's key state.
             options._stream_composed_names = composed_names
-        credentials = composed_credential_values(arguments["headers"], composed_names)
-        timeout = options.timeout or self._timeout
-        client = self._ensure_client()
-        capture = ResponseCapture()
+        credentials = _Secret(composed_credential_values(arguments["headers"], composed_names))
         failure = None
         request = response = error = None
         try:
@@ -95,13 +101,14 @@ class AsyncBaseClient(BaseClient):
                 await response.aread()
         except httpx.TransportError as exc:
             failure = _transport_error(exc, capture.evidence, capture.status, capture.response,
-                                       credential_values=credentials)
+                                       credential_values=credentials.get())
         except (httpx.RequestError, json.JSONDecodeError, UnicodeDecodeError) as exc:
             if capture.response is not None and capture.status is not None and capture.status >= 400:
                 failure = APIStatusError.from_response(safe_response(capture.response))
             else:
                 failure = body_decode_error(exc, capture.evidence)
         finally:
+            scrub_argument_headers(arguments["headers"], composed_names)
             if error is not None or failure is not None or not streaming or (capture.status is not None and (
                 capture.status == 246 or capture.status >= 400
             )):
@@ -112,7 +119,7 @@ class AsyncBaseClient(BaseClient):
             raise failure
         self._check_status(response)
         if streaming:
-            bind_stream_scrubber(response, credentials, composed_names)
+            bind_stream_scrubber(response, credentials.get(), composed_names)
         return response
 
     async def _request(

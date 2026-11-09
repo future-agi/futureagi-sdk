@@ -6,7 +6,8 @@
 // ---------------------------------------------------------------------------
 
 import { VERSION } from "./constants.js";
-import { AgentCCError, APIConnectionError, APITimeoutError } from "./errors.js";
+import { AgentCCError, APIConnectionError, APITimeoutError, APIStatusError } from "./errors.js";
+import type { RetryPolicy } from "./retry-policy.js";
 import type { GatewayConfig } from "./gateway-config.js";
 import { gatewayConfigToHeaders } from "./gateway-config.js";
 import type { TraceContextManager } from "./trace-context.js";
@@ -16,6 +17,7 @@ import { assignHeaders, setMetadataHeader } from "./metadata-header.js";
 import { parseGatewayEvidence } from "./gateway-evidence.js";
 import { UNCONFIRMED_DISPATCH_REMEDY } from "./refusal-policy.js";
 import { failedBeforeSend } from "./transport-dispatch.js";
+import { abortError, throwIfAborted } from "./request-cancellation.js";
 
 /** What a client contributes to every request's headers. */
 export interface HeaderSources {
@@ -104,6 +106,21 @@ export function buildHeaders(src: HeaderSources, options: RequestOptions): Recor
   return headers;
 }
 
+/** Choose the existing error-specific retry budget after dispatch/refusal guards. */
+export function retryLimit(error: unknown, once: boolean, policy: RetryPolicy | undefined, current: number): number {
+  if (policy) {
+    if (error instanceof APITimeoutError) return policy.getRetriesForTimeout();
+    if (error instanceof APIConnectionError) return policy.getRetriesForConnectionError();
+    if (error instanceof APIStatusError) {
+      // Conditional 402 and idempotency-in-progress use the 429-equivalent limit.
+      return policy.getRetriesForStatus(once || error.statusCode === 409 ? 429 : error.statusCode);
+    }
+  } else if (error instanceof APITimeoutError || error instanceof APIConnectionError || error instanceof APIStatusError) {
+    return current;
+  }
+  throw error;
+}
+
 /** The delay before retry `attempt`: Retry-After (capped at 60 s), else exponential backoff with jitter (capped at 8 s). */
 export function retryDelay(attempt: number, headers?: Headers): number {
   // Respect Retry-After header
@@ -122,8 +139,18 @@ export function retryDelay(attempt: number, headers?: Headers): number {
   return Math.min((base + jitter) * 1000, 8_000);
 }
 
-export function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+export function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  throwIfAborted(signal);
+  return new Promise((resolve, reject) => {
+    const finish = () => { signal?.removeEventListener("abort", abort); resolve(); };
+    const timer = setTimeout(finish, ms);
+    const abort = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", abort);
+      reject(abortError());
+    };
+    signal?.addEventListener("abort", abort, { once: true });
+  });
 }
 
 /** Preserve public error classes without retaining credential-bearing transport

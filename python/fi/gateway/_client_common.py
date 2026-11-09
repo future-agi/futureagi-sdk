@@ -133,6 +133,7 @@ def derived_options(
     per-request ``trace_id=`` still wins). agentcc 1.x dropped both (D-15).
     """
     from fi.gateway._constants import HEADER_TRACE_ID, NOT_GIVEN
+    from fi.gateway._secrets import _Secret
     from fi.gateway._http_security import reject_credential_query
 
     reject_credential_query(extra_query, where="extra_query")
@@ -140,24 +141,25 @@ def derived_options(
     def pick(value: Any, current: Any) -> Any:
         return current if value is NOT_GIVEN else value
 
-    headers = dict(client._default_headers or {})
-    headers.update(extra_headers or {})
+    headers = _Secret(dict(client._default_headers.get() or {}))
+    headers.get().update(extra_headers or {})
     if trace_id is not NOT_GIVEN and trace_id is not None:
-        headers[HEADER_TRACE_ID] = str(trace_id)
+        headers.get()[HEADER_TRACE_ID] = str(trace_id)
     query = dict(client._default_query or {})
     query.update(extra_query or {})
     return {
-        "api_key": client._api_key,
+        # type(client) may be a caller subclass with a public constructor.
+        "api_key": client._api_key.get(),
         "base_url": client._base_url,
         "timeout": pick(timeout, client._timeout),
         "max_retries": pick(max_retries, client._max_retries),
-        "default_headers": headers or None,
+        "default_headers": headers.get() or None,
         "default_query": query or None,
         "session_id": pick(session_id, client._session_id),
         "metadata": pick(metadata, client._metadata),
         "metadata_mode": client._metadata_mode,
         "audio_upload_mode": client._audio_upload_mode,
-        "config": client._config,
+        "config": client._config.get(),
         "callbacks": client._callbacks,
         "callback_mode": client._callback_mode,
         "expanded_callback_events": client._expanded_callback_events,

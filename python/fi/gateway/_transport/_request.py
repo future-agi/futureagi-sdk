@@ -14,6 +14,7 @@ from fi.gateway._constants import (
 )
 from fi.gateway._env import guard_fi_key_pair
 from fi.gateway._http_security import reject_credential_query, validate_destination, validate_header_values
+from fi.gateway._secrets import _Secret
 from fi.gateway._utils import serialize_agentcc_param
 
 
@@ -32,20 +33,25 @@ class RequestBuilder:
         session_id: str | None = None, metadata: dict[str, Any] | None = None,
         config: Any = None, metadata_mode: str = "replace",
     ) -> None:
+        api_key = _Secret.hold(api_key)
+        default_headers = _Secret.hold(default_headers)
+        config = _Secret.hold(config)
         self._api_key = api_key
         self._base_url = base_url.rstrip("/")
         self._warned_http_origins: set[tuple[str, str, int]] = set()
         self._http_warning_lock = threading.Lock()
         validate_destination(self._base_url, self._base_url, warn_cleartext=False)
         reject_credential_query(default_query)
-        self._default_headers = default_headers or {}
+        self._default_headers = _Secret(
+            (default_headers.get() if isinstance(default_headers, _Secret) else default_headers) or {}
+        )
         self._default_query = default_query or {}
         self._session_id = session_id
         self._metadata = metadata
         if metadata_mode not in {"replace", "merge"}:
             raise ValueError("metadata_mode must be 'replace' or 'merge'")
         self._metadata_mode = metadata_mode
-        self._config = config
+        self._config = _Secret.hold(config)
 
     def _build_headers(
         self, options: Any, agentcc_params: dict[str, Any] | None = None,
@@ -57,48 +63,53 @@ class RequestBuilder:
         self, options: Any, agentcc_params: dict[str, Any] | None = None,
     ) -> tuple[dict[str, str], frozenset[str]]:
         """Return the released merge and its exchange-local client header names."""
-        guard_fi_key_pair(self._api_key)
-        headers: dict[str, str] = {
-            HEADER_USER_AGENT: f"agentcc-python/{__version__}",
-            HEADER_CONTENT_TYPE: "application/json",
-            HEADER_SDK_VERSION: __version__,
-            HEADER_API_KEY: f"Bearer {self._api_key}",
-        }
-        composed_names = {HEADER_API_KEY.lower(), *(name.lower() for name in self._default_headers)}
-        headers.update(self._default_headers)
-        if self._session_id is not None:
-            composed_names.add(AGENTCC_PARAM_TO_HEADER["session_id"].lower())
-            headers[AGENTCC_PARAM_TO_HEADER["session_id"]] = self._session_id
-        if self._metadata is not None:
-            composed_names.add(AGENTCC_PARAM_TO_HEADER["request_metadata"].lower())
-            headers[AGENTCC_PARAM_TO_HEADER["request_metadata"]] = serialize_agentcc_param(
-                "request_metadata", self._metadata,
-            )
-        if self._config is not None and hasattr(self._config, "to_headers"):
-            config_headers = self._config.to_headers()
-            composed_names.update(name.lower() for name in config_headers)
-            headers.update(config_headers)
-        if agentcc_params:
-            for key, value in agentcc_params.items():
-                if value is NOT_GIVEN or value is None:
-                    continue
-                name = AGENTCC_PARAM_TO_HEADER.get(key)
-                if name:
-                    if key == "request_metadata" and self._metadata_mode == "merge":
-                        value = _layer_metadata(self._metadata, value)
-                    headers[name] = serialize_agentcc_param(key, value)
-            # These internal entries originate in the client's active session,
-            # not the caller's per-call agentcc parameters.
-            session_headers = agentcc_params.get("_session_headers", {})
-            composed_names.update(name.lower() for name in session_headers)
-            composed_names.update(name.lower() for name in agentcc_params.get("_client_header_names", ()))
-            headers.update(session_headers)
-        headers.update(options.headers)
-        validate_header_values(headers, composed_names)
-        for name, value in headers.items():
-            if name.lower() in {"authorization", "x-api-key"}:
-                guard_fi_key_pair(value)
-        return headers, frozenset(composed_names)
+        try:
+            guard_fi_key_pair(self._api_key)
+            headers: dict[str, str] = {
+                HEADER_USER_AGENT: f"agentcc-python/{__version__}",
+                HEADER_CONTENT_TYPE: "application/json",
+                HEADER_SDK_VERSION: __version__,
+                HEADER_API_KEY: f"Bearer {self._api_key.get()}",
+            }
+            composed_names = {HEADER_API_KEY.lower(), *(name.lower() for name in (self._default_headers.get() or {}))}
+            headers.update(self._default_headers.get() or {})
+            if self._session_id is not None:
+                composed_names.add(AGENTCC_PARAM_TO_HEADER["session_id"].lower())
+                headers[AGENTCC_PARAM_TO_HEADER["session_id"]] = self._session_id
+            if self._metadata is not None:
+                composed_names.add(AGENTCC_PARAM_TO_HEADER["request_metadata"].lower())
+                headers[AGENTCC_PARAM_TO_HEADER["request_metadata"]] = serialize_agentcc_param(
+                    "request_metadata", self._metadata,
+                )
+            if self._config.get() is not None and hasattr(self._config.get(), "to_headers"):
+                config_headers = self._config.get().to_headers()
+                composed_names.update(name.lower() for name in config_headers)
+                headers.update(config_headers)
+            if agentcc_params:
+                for key, value in agentcc_params.items():
+                    if value is NOT_GIVEN or value is None:
+                        continue
+                    name = AGENTCC_PARAM_TO_HEADER.get(key)
+                    if name:
+                        if key == "request_metadata" and self._metadata_mode == "merge":
+                            value = _layer_metadata(self._metadata, value)
+                        headers[name] = serialize_agentcc_param(key, value)
+                # These internal entries originate in the client's active session,
+                # not the caller's per-call agentcc parameters.
+                session_headers = agentcc_params.get("_session_headers", {})
+                composed_names.update(name.lower() for name in session_headers)
+                composed_names.update(name.lower() for name in agentcc_params.get("_client_header_names", ()))
+                headers.update(session_headers)
+            headers.update(options.headers)
+            validate_header_values(headers, composed_names)
+            for name, value in headers.items():
+                if name.lower() in {"authorization", "x-api-key"}:
+                    guard_fi_key_pair(value)
+            return headers, frozenset(composed_names)
+        finally:
+            # Drop only this frame's aliases, including warning-as-error paths.
+            # Returned headers and caller-owned config/defaults remain unchanged.
+            headers = config_headers = session_headers = value = None
 
     def _build_url(self, path: str) -> str:
         """Validate the destination and merge default queries; never resolve DNS."""
@@ -124,16 +135,19 @@ class RequestBuilder:
         creation and of optional compression packages. Caller headers still win.
         Multipart remains on the transport's streaming files/data path.
         """
-        if _uses_form(options):
-            raise TypeError("Raw JSON request construction does not accept file uploads")
-        if headers is None:
-            headers = self._build_headers(options, params)
-        wire_headers = httpx.Headers({
-            "Accept": "*/*", "Accept-Encoding": "gzip, deflate",
-            "Connection": "keep-alive",
-        })
-        wire_headers.update(headers)
-        return httpx.Request(
-            method=options.method, url=self._build_url(options.url),
-            headers=wire_headers, json=options.body,
-        )
+        try:
+            if _uses_form(options):
+                raise TypeError("Raw JSON request construction does not accept file uploads")
+            if headers is None:
+                headers = self._build_headers(options, params)
+            wire_headers = httpx.Headers({
+                "Accept": "*/*", "Accept-Encoding": "gzip, deflate",
+                "Connection": "keep-alive",
+            })
+            wire_headers.update(headers)
+            return httpx.Request(
+                method=options.method, url=self._build_url(options.url),
+                headers=wire_headers, json=options.body,
+            )
+        finally:
+            headers = wire_headers = None

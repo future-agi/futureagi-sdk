@@ -2,12 +2,12 @@ import type { RequestOptions } from "./client-options.js";
 import { scrubCredentialHeaders } from "./redact.js";
 
 /** Construct the attempt before entering the transport-error boundary. */
-export function requestInit(options: RequestOptions, headers: Record<string, string>, timeout: number): RequestInit {
+export function requestInit(options: RequestOptions, headers: Record<string, string>, timeout?: number): RequestInit {
   const isFormData = options.body instanceof FormData;
   const init: RequestInit = {
     method: options.method,
     headers,
-    signal: AbortSignal.timeout(options.timeout ?? timeout),
+    ...(timeout === undefined ? {} : { signal: AbortSignal.timeout(options.timeout ?? timeout) }),
   };
 
   if (options.body && options.method !== "GET") {

@@ -64,6 +64,47 @@ environment:
 
 **Gateway client:** for model calls through the Agent Command Center gateway, use `@future-agi/sdk/gateway` (with `/gateway/testing`, `/gateway/express`, `/gateway/nextjs`, and `/gateway/react`, which needs React 17–19), the `@agentcc/client` 1.0 client (and `@agentcc/react` as `/gateway/react`) ported into this package under the same names with some intended behaviour changes, and keep the standalone `@agentcc/client` package only for helpers that were not ported, such as the budget, batch and token utilities.
 
+### Cancel a gateway request
+
+The gateway client's low-level `request`, `requestWithResponse`, `requestRaw`
+and `requestStream` methods accept an optional per-request `signal`. It is
+combined with the request timeout, not used in place of it. Cancellation before
+send, while awaiting headers, or while reading an SDK-owned body rejects with
+an error whose `name` is `AbortError`; it is never retried and carries no
+body-failure retry guidance. Custom abort reasons are not copied into SDK errors.
+
+```ts
+import { AgentCC, Stream } from "@future-agi/sdk/gateway";
+
+const client = new AgentCC();
+const controller = new AbortController();
+const response = await client.requestStream({
+  method: "POST",
+  path: "/v1/chat/completions",
+  body: { model: "your-model", messages: [], stream: true },
+  signal: controller.signal,
+  timeout: 30_000,
+});
+const stream = new Stream(response);
+// In your application's stop handler, call controller.abort() or stream.abort().
+try {
+  for await (const chunk of stream) {
+    console.log(chunk.choices[0]?.delta.content ?? "");
+  }
+} catch (error) {
+  if (!(error instanceof Error) || error.name !== "AbortError") throw error;
+}
+```
+
+`Stream.abort()` and `StreamManager.abort()` also cancel the underlying SDK
+fetch while an iterator holds the body lock. Pending iteration rejects with
+`AbortError`, and no further chunks are delivered. This stops the in-flight
+request; it cannot undo work already completed or charges already incurred.
+Resource methods such as `chat.completions.create` keep their existing parameter
+shape; use the low-level request methods for the per-request signal, or abort
+the returned stream/manager. For raw responses, body consumption remains
+caller-owned and native fetch cancellation errors apply.
+
 ## Observe queries
 
 Use `client.tracing` on `FutureAGIClient` for projects, sessions, users, spans,

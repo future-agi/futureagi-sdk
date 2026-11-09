@@ -46,6 +46,11 @@ function check(run: ReturnType<typeof passingRun>) {
 }
 
 describe("original test-name registration", () => {
+  it.each([0, 1])("drains large piped JSON before exiting with status %i", async (code) => {
+    const { checkPipedDiagnostics } = require("./check-test-names-pipe.cjs");
+    await checkPipedDiagnostics(code);
+  }, 30000);
+
   it("accepts intentional one-key tests in new files without baseline entries", () => {
     const run = passingRun();
     for (const file of ["onekey-parity.test.ts", "onekey-refusals.test.ts"]) {

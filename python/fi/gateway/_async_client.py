@@ -8,7 +8,8 @@ from typing_extensions import Self as _Self
 
 from fi.gateway._client_common import ClientState, CostLedger, derived_options, resource_property
 from fi.gateway._constants import DEFAULT_MAX_RETRIES, NOT_GIVEN
-from fi.gateway._env import resolve_api_key, resolve_base_url
+from fi.gateway._env import resolve_base_url
+from fi.gateway._secrets import _Secret, client_key
 from fi.gateway._http_security import reject_credential_query
 from fi.gateway._session import SessionContext
 from fi.gateway._transport._pool import HttpPool
@@ -84,19 +85,23 @@ class AsyncAgentCC(ClientState):
         metadata_mode: str = "replace",
         audio_upload_mode: str = "published",
     ) -> None:
+        # Keep constructor aliases opaque even when validation raises.
+        api_key = _Secret.hold(api_key)
+        default_headers = _Secret.hold(default_headers)
+        config = _Secret.hold(config)
         reject_credential_query(default_query)
-        self._api_key = resolve_api_key(api_key)
+        self._api_key = client_key(api_key)
         self._base_url = resolve_base_url(base_url)
 
         self._timeout = timeout
         self._max_retries = max_retries
-        self._default_headers = default_headers
+        self._default_headers = _Secret.hold(default_headers)
         self._default_query = default_query
         self._session_id = session_id
         self._metadata = metadata
         self._init_metadata_mode(metadata_mode)
         self._init_audio_upload_mode(audio_upload_mode)
-        self._config = config
+        self._config = _Secret.hold(config)
         self._callbacks = callbacks
         self._init_callback_options(callback_mode, expanded_callback_events)
         self._http_client = http_client
@@ -312,6 +317,5 @@ class AsyncAgentCC(ClientState):
         await self.aclose()
 
     def __repr__(self) -> str:
-        key = self._api_key
-        key_preview = f"{key[:10]}...{key[-4:]}" if len(key) > 14 else "***"
+        key_preview = self._api_key.key_preview()
         return f"AsyncAgentCC(base_url={self._base_url!r}, api_key={key_preview!r})"
