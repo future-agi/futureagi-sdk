@@ -123,3 +123,44 @@ def test_by_name_raises_not_found_when_only_fuzzy_matches_exist():
 
     with pytest.raises(DatasetNotFoundError):
         DatasetResponseHandler._parse_dataset_names(data, resp)
+
+
+@pytest.mark.parametrize("by_name", [True, False])
+def test_legacy_rows_serialize_only_the_write_contract(by_name):
+    from types import SimpleNamespace
+
+    from fi.datasets.dataset import Dataset
+    from fi.datasets.types import Cell, DatasetConfig, Row
+
+    client = Dataset.__new__(Dataset)
+    client.dataset_config = DatasetConfig(id=UUID_FOO, name="fixture", model_type="GenerativeLLM")
+    client._base_url = "http://api.test"
+    table = SimpleNamespace(columns=[SimpleNamespace(id=UUID_FOOBAR, name="answer")])
+    client.request_with_retry = MagicMock(return_value=table)
+    cell = Cell(column_id=UUID_FOOBAR, column_name="answer" if by_name else None,
+                value=False, metadata={"read_only": True})
+    row = Row(cells=[cell])
+    before = row.model_dump()
+    assert client.add_rows([row]) is client
+    assert client.request_with_retry.call_count == (1 if by_name else 2)
+    payload = client.request_with_retry.call_args.kwargs["config"].json
+    assert payload == {"rows": [{"id": str(row.id), "order": 0,
+                                 "cells": [{"column_name": "answer", "value": False}]}]}
+    assert row.model_dump() == before
+
+
+def test_legacy_unknown_column_id_cannot_post_partial_rows():
+    from types import SimpleNamespace
+
+    from fi.datasets.dataset import Dataset
+    from fi.datasets.types import Cell, DatasetConfig, Row
+    from fi.utils.errors import DatasetValidationError
+
+    client = Dataset.__new__(Dataset)
+    client.dataset_config = DatasetConfig(id=UUID_FOO, name="fixture", model_type="GenerativeLLM")
+    client._base_url = "http://api.test"
+    client.request_with_retry = MagicMock(return_value=SimpleNamespace(columns=[]))
+    with pytest.raises(DatasetValidationError, match="unknown column"):
+        client.add_rows([Row(cells=[Cell(column_id=UUID_FOOBAR, value="test")])])
+    assert client.request_with_retry.call_count == 1
+    assert client.request_with_retry.call_args.kwargs["config"].method == HttpMethod.GET

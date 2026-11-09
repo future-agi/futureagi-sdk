@@ -502,14 +502,14 @@ describe('Dataset', () => {
             ];
 
             (dataset as any)._datasetConfig = config;
-            mockRequest.mockResolvedValue({});
+            mockRequest.mockResolvedValueOnce({ columns: [{ id: 'col-1', name: 'question' }] }).mockResolvedValue({});
 
             const result = await dataset.addRows(rows);
             expect(result).toBe(dataset);
             expect(mockRequest).toHaveBeenCalledWith(
                 expect.objectContaining({
                     method: 'POST',
-                    json: { rows: expect.any(Array) },
+                    json: { rows: [{ id: rows[0]!.id, order: 0, cells: [{ column_name: 'question', value: 'test' }] }] },
                 }),
                 DatasetResponseHandler
             );
@@ -525,6 +525,26 @@ describe('Dataset', () => {
             ];
 
             await expect(dataset.addRows(rows)).rejects.toThrow(DatasetError);
+        });
+
+        test('named cells omit read-side fields without fetching metadata', async () => {
+            (dataset as any)._datasetConfig = { id: 'dataset-123', name: 'test-dataset' };
+            const rows = [createRow({ cells: [createCell({ column_name: 'answer', value: false, metadata: { source: 'read' } })] })];
+            const before = JSON.stringify(rows);
+            mockRequest.mockResolvedValue({});
+            await dataset.addRows(rows);
+            expect(mockRequest).toHaveBeenCalledTimes(1);
+            expect(mockRequest.mock.calls[0][0].json.rows[0].cells).toEqual([{ column_name: 'answer', value: false }]);
+            expect(JSON.stringify(rows)).toBe(before);
+        });
+
+        test('an unknown column ID fails before posting any rows', async () => {
+            (dataset as any)._datasetConfig = { id: 'dataset-123', name: 'test-dataset' };
+            mockRequest.mockResolvedValue({ columns: [] });
+            await expect(dataset.addRows([createRow({ cells: [createCell({ column_id: 'missing', value: 'test' })] })]))
+                .rejects.toThrow(DatasetValidationError);
+            expect(mockRequest).toHaveBeenCalledTimes(1);
+            expect(mockRequest.mock.calls[0][0].method).toBe('GET');
         });
 
         test('should throw error for empty rows array', async () => {

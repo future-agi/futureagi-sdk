@@ -818,7 +818,7 @@ export class Dataset extends APIKeyAuth {
         const formData = new FormData();
         formData.append('file', fs.createReadStream(filePath));
         formData.append('new_dataset_name', config.name);
-        formData.append('model_type', config.model_type);
+        formData.append('model_type', config.model_type ?? ModelTypes.GENERATIVE_LLM);
 
         const response = await this.request<DatasetConfig>(
             {
@@ -934,12 +934,33 @@ export class Dataset extends APIKeyAuth {
             throw new DatasetError("Dataset ID is required to add rows.");
         }
 
+        // Cell objects also carry read-side metadata. The write contract accepts
+        // only column_name/value; resolve legacy ID-only inputs once per batch.
+        const names = new Map<string, string>();
+        if (rows.some(row => row.cells.some(cell => !cell.column_name))) {
+            const table = await this.request<DatasetTable>({
+                method: HttpMethod.GET,
+                url: `${this._baseUrl}/${Routes.dataset_table.replace('{dataset_id}', this._datasetConfig.id)}`,
+                params: { page_size: 1, current_page_index: 0 },
+                timeout: DEFAULT_API_TIMEOUT,
+            }, DatasetResponseHandler) as DatasetTable;
+            for (const column of table.columns) names.set(column.id, column.name);
+        }
+        const serializedRows = rows.map(row => ({
+            id: row.id,
+            order: row.order,
+            cells: row.cells.map(cell => {
+                const columnName = cell.column_name || names.get(cell.column_id || '');
+                if (!columnName) throw new DatasetValidationError('Row cell references an unknown column.');
+                return { column_name: columnName, value: cell.value };
+            }),
+        }));
         const url = `${this._baseUrl}/${Routes.dataset_add_rows.replace('{dataset_id}', this._datasetConfig.id)}`;
         await this.request(
             {
                 method: HttpMethod.POST,
                 url,
-                json: { rows },
+                json: { rows: serializedRows },
                 timeout: DEFAULT_API_TIMEOUT,
             },
             DatasetResponseHandler

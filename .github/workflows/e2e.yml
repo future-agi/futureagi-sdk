@@ -160,7 +160,13 @@ jobs:
       - name: TypeScript live suite
         if: matrix.typescript
         working-directory: typescript/futureagi
-        run: pnpm run test:live
+        # Both the generated platform client and the legacy dataset client must
+        # see the disposable account before Jest collects their live suites.
+        run: |
+          set -a
+          source ../../.env.local
+          set +a
+          pnpm test -- --runInBand
 
       - name: Dump the stack on failure
         if: failure()

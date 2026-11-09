@@ -46,3 +46,7 @@ def test_live_workflow_enables_consumption_and_runs_full_platform_suite():
     assert '-f "$RUNNER_TEMP/sdk-context.yml"' in boot
     run = next(step["run"] for step in job["steps"] if step.get("name") == "Python live suite (every catalog operation)")
     assert run == "PYTHONPATH=python flock /tmp/ctxhub-pytest.lock python -m pytest -q python/tests/platform"
+    typescript = next(step["run"] for step in job["steps"] if step.get("name") == "TypeScript live suite")
+    assert "set -a" in typescript and "source ../../.env.local" in typescript
+    assert "pnpm test -- --runInBand" in typescript
+    assert "test:live" not in typescript and "testPathPattern" not in typescript

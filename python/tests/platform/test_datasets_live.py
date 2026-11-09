@@ -73,6 +73,20 @@ def test_add_columns_and_rows_then_read_table(client, dataset):
     assert len(table.table) == 2
 
 
+def test_legacy_dataset_rows_accept_names_and_ids(client, dataset):
+    from fi.datasets.dataset import Dataset
+    from fi.datasets.types import Cell, DatasetConfig, Row
+
+    client.datasets.columns.add(dataset.dataset_id, new_columns_data=[{"name": "answer", "data_type": "text"}])
+    column_id = client.datasets.get(dataset.dataset_id).column_config[0].id
+    legacy = Dataset(dataset_config=DatasetConfig(id=dataset.dataset_id, name=dataset.dataset_name, model_type="GenerativeLLM"))
+    assert legacy.add_rows([{"cells": [{"column_name": "answer", "value": "named value"}]}]) is legacy
+    assert legacy.add_rows([Row(cells=[Cell(column_id=column_id, value="ID value")])]) is legacy
+    table = client.datasets.get(dataset.dataset_id)
+    assert len(table.table) == 2
+    assert "named value" in table.model_dump_json() and "ID value" in table.model_dump_json()
+
+
 def test_rows_add_is_marked_beta(client, dataset, monkeypatch):
     from fi.platform import _stability
 

@@ -964,7 +964,29 @@ class Dataset(APIKeyAuth):
         if not all(isinstance(row, Row) for row in rows):
             raise DatasetValidationError("Each item in rows list must be a Row object for _add_rows.")
 
-        serialized_rows = [row.to_dict() for row in rows]
+        # Read-side Cell metadata is not accepted by the row-write contract.
+        # Resolve legacy ID-only cells with one metadata read per batch.
+        names = {}
+        if any(not cell.column_name for row in rows for cell in row.cells):
+            table = self.request_with_retry(
+                config=RequestConfig(
+                    method=HttpMethod.GET,
+                    url=f"{self._base_url}/{Routes.dataset_table.value.format(dataset_id=str(self.dataset_config.id))}",
+                    params={"page_size": 1, "current_page_index": 0},
+                    timeout=DEFAULT_API_TIMEOUT,
+                ),
+                response_handler=DatasetResponseHandler,
+            )
+            names = {str(column.id): column.name for column in table.columns}
+        serialized_rows = []
+        for row in rows:
+            cells = []
+            for cell in row.cells:
+                name = cell.column_name or names.get(str(cell.column_id))
+                if not name:
+                    raise DatasetValidationError("Row cell references an unknown column.")
+                cells.append({"column_name": name, "value": cell.value})
+            serialized_rows.append({"id": str(row.id), "order": row.order, "cells": cells})
 
         url = f"{self._base_url}/{Routes.dataset_add_rows.value.format(dataset_id=str(self.dataset_config.id))}"
         payload = {"rows": serialized_rows}

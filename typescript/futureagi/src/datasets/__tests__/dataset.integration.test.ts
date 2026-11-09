@@ -2,7 +2,7 @@ import { Dataset, DatasetConfig, DataTypeChoices, createColumn, createRow, creat
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { ModelTypes } from '../types';
+import { DatasetTable } from '../types';
 
 // Integration tests for the Dataset module
 // These tests make real API calls and require a running FutureAGI backend
@@ -13,6 +13,8 @@ const describeIf = (condition: boolean) => (condition ? describe : describe.skip
 const areEnvVarsSet = !!(process.env.FI_API_KEY && process.env.FI_SECRET_KEY && process.env.FI_BASE_URL);
 
 describeIf(areEnvVarsSet)('Dataset Integration Tests', () => {
+    // Declare before tests are registered; setting this in beforeAll is too late.
+    jest.setTimeout(30000);
     let dataset: Dataset;
     const datasetName = `test-dataset-${uuidv4()}`;
     const datasetConfig: DatasetConfig = {
@@ -20,9 +22,6 @@ describeIf(areEnvVarsSet)('Dataset Integration Tests', () => {
     };
 
     beforeAll(() => {
-        // Increase timeout for integration tests
-        jest.setTimeout(30000); // 30 seconds
-
         dataset = new Dataset({
             fiApiKey: process.env.FI_API_KEY,
             fiSecretKey: process.env.FI_SECRET_KEY,
@@ -84,9 +83,10 @@ describeIf(areEnvVarsSet)('Dataset Integration Tests', () => {
 
     test('should download the dataset to a file', async () => {
         const filePath = path.join(__dirname, `${datasetName}.csv`);
-        const resultPath = await dataset.download(filePath, false);
+        const result = await dataset.download(filePath, false);
 
-        expect(resultPath).toBe(filePath);
+        // Disk downloads preserve the documented chainable Dataset return.
+        expect(result === dataset).toBe(true);
         expect(fs.existsSync(filePath)).toBe(true);
 
         // Verify content
@@ -121,10 +121,17 @@ describeIf(areEnvVarsSet)('Dataset Integration Tests', () => {
             const createdConfig = fileDataset.getConfig();
             expect(createdConfig.id).toBeDefined();
 
-            // Download to verify
-            const downloadedContent = await fileDataset.download(undefined, true) as any;
+            // File ingestion is asynchronous. Poll the real rows, not merely
+            // the accepted create response, and keep a bounded failure deadline.
+            const deadline = Date.now() + 20000;
+            let downloadedContent = await fileDataset.download(undefined, true) as DatasetTable;
+            while (downloadedContent.rows.length === 0 && Date.now() < deadline) {
+                await new Promise(resolve => setTimeout(resolve, 250));
+                downloadedContent = await fileDataset.download(undefined, true) as DatasetTable;
+            }
             expect(downloadedContent.columns).toHaveLength(2);
             expect(downloadedContent.rows).toHaveLength(1);
+            expect(downloadedContent.rows[0]!.cells.map(cell => cell.value).sort()).toEqual(['value1', 'value2']);
             
         } finally {
             // Clean up
