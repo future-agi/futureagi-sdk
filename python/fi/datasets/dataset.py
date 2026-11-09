@@ -173,7 +173,7 @@ class DatasetResponseHandler(ResponseHandler[DatasetConfig, DatasetTable]):
             row_id = cls._get(row, "row_id", "rowId")
             order = row.pop("order", 0)
             for column_id, value in row.items():
-                if column_id in {"row_id", "rowId"}:
+                if column_id in {"row_id", "rowId", "row_meta", "rowMeta"}:
                     continue
                 cells.append(
                     Cell(
