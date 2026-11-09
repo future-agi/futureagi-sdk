@@ -176,6 +176,10 @@ class _EvaluatorEvaluateMethods:
                     response: BatchRunResult = future.result(timeout=timeout or self._default_timeout)
                     all_results.extend(response.eval_results)
                 except TimeoutError as exc:
+                    if kwargs.get("_raise_on_error") is True:
+                        raise TimeoutError(
+                            f"Evaluation timed out after {timeout or self._default_timeout}s"
+                        ) from exc
                     input_case = future_to_input[future]
                     logging.error(
                         "Evaluation %s timed out after %ss; error type: %s",
@@ -191,6 +195,8 @@ class _EvaluatorEvaluateMethods:
                         )
                     )
                 except Exception as exc:
+                    if kwargs.get("_raise_on_error") is True:
+                        raise
                     input_case = future_to_input[future]
                     logging.error(
                         "Evaluation %s failed; error type: %s",

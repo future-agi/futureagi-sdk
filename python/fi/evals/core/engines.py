@@ -253,7 +253,6 @@ class TuringEngine(Engine):
         prompt: Optional[str] = None,
         config: Optional[Dict[str, Any]] = None,
     ) -> EvalResult:
-        _ = config  # unused — template config comes from the template class
         if prompt:
             return EvalResult(
                 eval_name=eval_name or "custom_prompt",
@@ -291,12 +290,15 @@ class TuringEngine(Engine):
                 eval_templates=eval_arg,
                 inputs=mapped_inputs,
                 model_name=model,
+                eval_config=config,
+                _raise_on_error=True,
             )
             return _extract_result(eval_name, batch, (time.perf_counter() - start) * 1000)
         except Exception as exc:
             return EvalResult(
                 eval_name=eval_name,
                 status="failed",
+                reason=str(exc),
                 error=str(exc),
                 latency_ms=(time.perf_counter() - start) * 1000,
             )
