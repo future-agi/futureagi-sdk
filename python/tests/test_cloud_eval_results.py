@@ -181,3 +181,121 @@ def test_async_submit_single_input_keeps_waitable_handle(evaluator):
     submission, refresh = evaluator.request.call_args_list
     assert submission.kwargs["config"].json["is_async"] is True
     assert refresh.kwargs["config"].params == {"eval_id": "exec-1"}
+
+
+def test_cloud_completed_null_output_is_not_a_request_failure(evaluator):
+    evaluator.request.return_value = BatchRunResult(eval_results=[
+        EvalResult(name="tone", output=None, reason="No score", eval_id="eval-1"),
+    ])
+
+    batch = cloud_evaluate(["tone"])
+
+    assert batch.success_rate == 1.0
+    assert batch.results[0].status == "completed"
+    assert batch.results[0].error is None
+    assert batch.results[0].score is None
+
+
+def test_legacy_evaluate_keeps_failure_placeholder_by_default(evaluator):
+    evaluator.request.side_effect = HTTPError("503 Service Unavailable")
+
+    result = evaluator.evaluate("tone", {"output": "hello"}, model_name="turing_flash")
+
+    assert result.eval_results[0].output is None
+    assert result.eval_results[0].reason == "503 Service Unavailable"
+
+
+def execution_response(execution_id, status="completed"):
+    response = Mock()
+    response.json.return_value = {
+        "status": True,
+        "result": {
+            "eval_status": status,
+            "result": {"name": "tone", "output": "Passed", "eval_id": execution_id}
+            if status == "completed" else None,
+            "error_message": "Evaluation unavailable" if status == "failed" else None,
+        },
+    }
+    return response
+
+
+@pytest.mark.parametrize("separate_groups", [False, True])
+def test_async_submit_explicit_batch_keeps_every_execution(evaluator, separate_groups):
+    response = async_response(["exec-1", "exec-2"])
+    if separate_groups:
+        response.json.return_value["result"] = [
+            {"evaluations": [{"eval_id": "exec-1"}]},
+            {"evaluations": [{"eval_id": "exec-2"}]},
+        ]
+    evaluator.request.side_effect = [
+        response,
+        execution_response("exec-1"),
+        execution_response("exec-2", "processing"),
+        execution_response("exec-2"),
+    ]
+    inputs = {"output": ["hello", "goodbye"]}
+
+    handle = evaluator.submit("tone", inputs, model_name="turing_flash", batch=True)
+
+    assert handle.ids == ["exec-1", "exec-2"]
+    assert [execution.id for execution in handle.executions] == handle.ids
+    assert handle.status == "pending"
+    assert handle.refresh() is handle
+    assert handle.status == "processing"
+    assert not handle.is_done()
+    assert handle.wait(poll_interval=0, timeout=1) is handle
+    assert handle.status == "completed"
+    assert [result.eval_id for result in handle.result] == handle.ids
+    assert inputs == {"output": ["hello", "goodbye"]}
+    assert "batch" not in evaluator.request.call_args_list[0].kwargs["config"].json
+    assert [call.kwargs["config"].params for call in evaluator.request.call_args_list[1:]] == [
+        {"eval_id": "exec-1"}, {"eval_id": "exec-2"}, {"eval_id": "exec-2"},
+    ]
+
+
+@pytest.mark.parametrize("failed_id", ["exec-1", "exec-2"])
+@pytest.mark.parametrize("raise_on_failure", [False, True])
+def test_async_batch_wait_tracks_all_jobs_before_reporting_failure(evaluator, failed_id, raise_on_failure):
+    from fi.evals.execution import ExecutionError
+
+    evaluator.request.side_effect = [
+        async_response(["exec-1", "exec-2"]),
+        execution_response("exec-1", "failed" if failed_id == "exec-1" else "completed"),
+        execution_response("exec-2", "processing"),
+        execution_response("exec-2", "failed" if failed_id == "exec-2" else "completed"),
+    ]
+    handle = evaluator.submit(
+        "tone", {"output": ["hello", "goodbye"]}, model_name="turing_flash", batch=True,
+    )
+
+    handle.refresh()
+    assert not handle.is_done()
+    assert handle.status == "processing"
+    if raise_on_failure:
+        with pytest.raises(ExecutionError, match=failed_id):
+            handle.wait(poll_interval=0, timeout=1)
+    else:
+        assert handle.wait(poll_interval=0, timeout=1, raise_on_failure=False) is handle
+    assert handle.status == "failed"
+    assert len(handle.result) == 2
+    assert failed_id in handle.error_message
+    assert all(execution.is_done() for execution in handle.executions)
+    assert evaluator.request.call_count == 4
+
+
+def test_async_submit_keeps_unexpected_extra_execution_ids(evaluator):
+    evaluator.request.return_value = async_response(["exec-1", "exec-2"])
+
+    handle = evaluator.submit("tone", {"output": "hello"}, model_name="turing_flash")
+
+    assert handle.ids == ["exec-1", "exec-2"]
+
+
+def test_async_explicit_one_item_batch_still_has_batch_handle(evaluator):
+    evaluator.request.side_effect = [async_response(["exec-1"]), execution_response("exec-1")]
+
+    handle = evaluator.submit("tone", {"output": ["hello"]}, model_name="turing_flash", batch=True)
+
+    assert handle.ids == ["exec-1"]
+    assert handle.wait(poll_interval=0, timeout=1) is handle
+    assert [result.eval_id for result in handle.result] == ["exec-1"]
