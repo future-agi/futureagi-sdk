@@ -980,7 +980,7 @@ export class Dataset extends APIKeyAuth {
             {
                 method: HttpMethod.GET,
                 url,
-                params: { page_size: 500, current_page_index: pageIndex },
+                params: { page_size: 1000, current_page_index: pageIndex },
                 timeout: DEFAULT_API_TIMEOUT,
             },
             DatasetResponseHandler
