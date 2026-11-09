@@ -22,6 +22,7 @@ import { AxiosResponse } from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import axios from 'axios';
+import FormData from 'form-data';
 
 /**
  * Response handler for Knowledge Base operations
@@ -189,25 +190,12 @@ export class KnowledgeBase extends APIKeyAuth {
                 kb_id: this.kb.id
             };
 
-            // Prepare files map for multipart upload (key uniqueness: file0, file1, ...)
-            const files: Record<string, any> = {};
-            this._validFilePaths.forEach((filePath, idx) => {
-                const fileName = path.basename(filePath);
-                const fileExt = path.extname(filePath).slice(1).toLowerCase() as SupportedFileType;
-
-                // Validate supported types again (defensive)
-                if (!SUPPORTED_FILE_TYPES.includes(fileExt)) {
-                    throw new UnsupportedFileType(fileExt, fileName);
-                }
-
-                files[`file${idx}`] = fs.createReadStream(filePath);
-            });
+            const upload = this._prepareUpload(bodyFields, filePaths ? this._validFilePaths : []);
 
             const response = await this.request({
                 method: HttpMethod.PATCH,
                 url,
-                data: bodyFields,
-                files,
+                ...upload,
                 timeout: 300_000 // 5-min timeout similar to Python
             } as RequestConfig, KBResponseHandler) as KnowledgeBaseUpdateResponse;
 
@@ -379,29 +367,16 @@ export class KnowledgeBase extends APIKeyAuth {
             // Prepare fields
             const bodyFields: Record<string, any> = { name: finalKbName };
 
-            // Handle optional files
-            const files: Record<string, any> = {};
             const hasFilePaths = Array.isArray(filePaths) ? filePaths.length > 0 : Boolean(filePaths);
             if (hasFilePaths) {
                 await this._checkFilePaths(filePaths);
-
-                this._validFilePaths.forEach((filePath, idx) => {
-                    const fileName = path.basename(filePath);
-                    const fileExt = path.extname(filePath).slice(1).toLowerCase() as SupportedFileType;
-
-                    if (!SUPPORTED_FILE_TYPES.includes(fileExt)) {
-                        throw new UnsupportedFileType(fileExt, fileName);
-                    }
-
-                    files[`file${idx}`] = fs.createReadStream(filePath);
-                });
             }
+            const upload = this._prepareUpload(bodyFields, hasFilePaths ? this._validFilePaths : []);
 
             const response = await this.request({
                 method: HttpMethod.POST,
                 url,
-                data: bodyFields,
-                files: Object.keys(files).length > 0 ? files : undefined,
+                ...upload,
                 timeout: 300_000
             } as RequestConfig, KBResponseHandler) as KnowledgeBaseCreateResponse & { kb_id: string; kb_name: string };
 
@@ -476,6 +451,22 @@ export class KnowledgeBase extends APIKeyAuth {
         }
 
         return legacyFields(data[0], kbConfigFields);
+    }
+
+    /** Build repeated file parts without losing streams or their multipart boundary. */
+    private _prepareUpload(fields: Record<string, any>, filePaths: string[]): Pick<RequestConfig, 'data' | 'headers'> {
+        if (filePaths.length === 0) return { data: fields };
+        // Validate every extension before opening any one-shot streams.
+        for (const filePath of filePaths) {
+            const fileExt = path.extname(filePath).slice(1).toLowerCase() as SupportedFileType;
+            if (!SUPPORTED_FILE_TYPES.includes(fileExt)) {
+                throw new UnsupportedFileType(fileExt, path.basename(filePath));
+            }
+        }
+        const form = new FormData();
+        for (const [name, value] of Object.entries(fields)) form.append(name, value);
+        for (const filePath of filePaths) form.append('file', fs.createReadStream(filePath));
+        return { data: form, headers: form.getHeaders() };
     }
 
     /**
