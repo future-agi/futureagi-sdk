@@ -130,7 +130,11 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
         if response.status_code == 400:
             try:
                 detail = response.json()
-                error_code = detail.get("error_code") if isinstance(detail, dict) else None
+                error_code = (
+                    detail.get("code") or detail.get("error_code")
+                    if isinstance(detail, dict)
+                    else None
+                )
             except Exception:
                 error_code = None
 
@@ -252,6 +256,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
 
         # Label requested during draft create; will be assigned on commit
         self._pending_label: Optional[str] = None
+        self._last_generation_id: Optional[str] = None
 
         if template and not template.id:
             try:
@@ -265,7 +270,12 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             self.template = template
 
     def generate(self, requirements: str) -> "Prompt":
-        """Generate a prompt and return self for chaining"""
+        """Submit a generation job and return self for chaining.
+
+        Queued responses leave messages unchanged; ``last_generation_id``
+        identifies the submitted job. Legacy immediate prompt results still
+        update the last message.
+        """
         if not self.template:
             raise ValueError("No template configured")
         response = self.request(
@@ -276,11 +286,15 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             ),
             response_handler=PromptResponseHandler,
         )
-        self.template.messages[-1].content = response["result"]["prompt"]
+        self._apply_generation_response(response)
         return self
 
     def improve(self, requirements: str) -> "Prompt":
-        """Improve prompt and return self for chaining"""
+        """Submit an improvement job and return self for chaining.
+
+        As with ``generate()``, queued responses expose ``last_generation_id``
+        without replacing the current messages.
+        """
         if not self.template:
             raise ValueError("No template configured")
 
@@ -299,8 +313,22 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             ),
             response_handler=PromptResponseHandler,
         )
-        self.template.messages[-1].content = improved_response["result"]["prompt"]
+        self._apply_generation_response(improved_response)
         return self
+
+    @property
+    def last_generation_id(self) -> Optional[str]:
+        """Job ID from the latest successful generate/improve response, if present."""
+        return self._last_generation_id
+
+    def _apply_generation_response(self, response) -> None:
+        result = response.get("result", response) if isinstance(response, dict) else None
+        self._last_generation_id = (
+            result.get("generation_id") if isinstance(result, dict) else None
+        )
+        # Retain support for older backends returning an immediate prompt.
+        if isinstance(result, dict) and "prompt" in result and self.template.messages:
+            self.template.messages[-1].content = result["prompt"]
 
     def create(self, *, label: Optional[str] = None) -> "Prompt":
         """Create a draft prompt template and return self for chaining.
@@ -420,13 +448,13 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
     def delete(self) -> bool:
         """Delete the current template (requires `self.template.id`).
 
-        Returns True when deletion succeeds. If the template has no `id`, a
-        ValueError is raised.
+        Returns True on HTTP 2xx. HTTP errors leave the template and cache
+        unchanged. If the template has no `id`, a ValueError is raised.
         """
         if not self.template or not self.template.id:
             raise ValueError("Template ID missing; cannot delete.")
 
-        self.request(
+        response = self.request(
             config=RequestConfig(
                 method=HttpMethod.DELETE,
                 url=self._base_url
@@ -435,6 +463,16 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             ),
             response_handler=None,
         )
+
+        response.raise_for_status()
+        if not 200 <= response.status_code < 300:
+            raise SDKException(f"Template deletion did not succeed (HTTP {response.status_code}).")
+
+        if self.template.name:
+            try:
+                prompt_cache.invalidate_template(self.template.name)
+            except Exception:
+                logger.warning("Prompt cache invalidation failed after delete()", exc_info=True)
 
         # Clear local reference so user knows it's gone.
         self.template = None
@@ -448,7 +486,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         fi_secret_key: Optional[str] = None,
         fi_base_url: Optional[str] = None,
     ) -> bool:
-        """Delete a template by its exact name.
+        """Delete a template by its exact name, preserving cache on HTTP failure.
         """
 
         client = APIKeyAuth(
@@ -461,13 +499,13 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             tmpl: PromptTemplate = client.request(
                 config=RequestConfig(
                     method=HttpMethod.GET,
-                    url=client._base_url + "/" + Routes.prompt_label_get_by_name.value,
+                    url=client._base_url + "/" + Routes.get_template_by_name.value,
                     params={"name": name},
                 ),
                 response_handler=PromptResponseHandler,
             )
 
-            client.request(
+            response = client.request(
                 config=RequestConfig(
                     method=HttpMethod.DELETE,
                     url=client._base_url
@@ -476,6 +514,13 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                 ),
                 response_handler=None,
             )
+            response.raise_for_status()
+            if not 200 <= response.status_code < 300:
+                raise SDKException(f"Template deletion did not succeed (HTTP {response.status_code}).")
+            try:
+                prompt_cache.invalidate_template(name)
+            except Exception:
+                logger.warning("Prompt cache invalidation failed after delete_template_by_name()", exc_info=True)
             return True
         finally:
             client.close()
@@ -486,7 +531,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         response = self.request(
             config=RequestConfig(
                 method=HttpMethod.GET,
-                url=self._base_url + "/" + Routes.prompt_label_get_by_name.value,
+                url=self._base_url + "/" + Routes.get_template_by_name.value,
                 params={"name": name},
             ),
             response_handler=PromptResponseHandler,

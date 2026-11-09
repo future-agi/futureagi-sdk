@@ -161,6 +161,20 @@ class PromptCache:
             for k in to_delete:
                 del self._store[k]
 
+    def invalidate_template(self, name: str):
+        """Remove one template's exact key and version/label selector keys."""
+        selector_prefixes = (f"{name}|v:", f"{name}|label:")
+        with self._lock:
+            # Valid template names can contain selector syntax, so keys alone
+            # cannot distinguish a selector from a different template's name.
+            to_delete = [
+                key for key, item in self._store.items()
+                if item.value.name == name
+                and (key == name or key.startswith(selector_prefixes))
+            ]
+            for key in to_delete:
+                del self._store[key]
+
     # -------------------------- refresh management ---------------------
 
     def refresh_async(self, key: str, fetch_fn: Callable[[], "PromptTemplate"]):
