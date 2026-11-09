@@ -130,7 +130,7 @@ def test_snapshot_isolated_from_unsaved_edits(backend, edit_cached_hit, stale):
     first = backend.fetch(version="v1")
     if edit_cached_hit:
         first = backend.fetch(version="v1")
-    first.template.messages[0]["content"] = "Unpublished edit"
+    first.template.messages[0].content = "Unpublished edit"
     first.template.metadata["nested"] = {"draft": True}
     if stale:
         for item in backend.cache._store.values():
