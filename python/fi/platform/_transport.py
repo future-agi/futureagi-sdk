@@ -17,6 +17,7 @@ from pydantic import TypeAdapter, ValidationError
 
 # Share the lane's graded HTTP policy and its one-notice-per-origin budget.
 from fi._core.http_security import check_http_security
+from fi._http import retry_after_seconds
 
 from ._errors import (
     APIConnectionError,
@@ -289,12 +290,9 @@ def _check_page(op: Operation, data: Any, strict: bool) -> Any:
 
 
 def _backoff(attempt: int, response: httpx.Response | None) -> float:
-    retry_after = response.headers.get("retry-after") if response is not None else None
-    if retry_after:
-        try:
-            return min(float(retry_after), 30.0)
-        except ValueError:
-            pass
+    retry_after = retry_after_seconds(response) if response is not None else None
+    if retry_after is not None:
+        return retry_after
     return min(0.5 * 2**attempt, 8.0) * (0.75 + random.random() / 2)
 
 
