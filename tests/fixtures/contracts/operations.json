@@ -10,7 +10,7 @@
     "openapi/sdk/release-gate-source.json": "sha256:1369a570d95f87e3c3bd5977ee56cd2def4da6d77d805d8d5935bb0cc7920d72",
     "openapi/sdk/trial-stability-source.json": "sha256:ebbc31a3e53e7439e23b42e062eb01e4a41ad53a7deb6cf3b7ce361bb1f3d6c6",
     "openapi/sdk/metadata-slices-source.json": "sha256:929e6f1c8236a755f010e73e6c79b9c2f00f0e35648de4d91677051c3568db5a",
-    "openapi/sdk/generated/futureagi-sdk.openapi.json": "sha256:a5464b552a1d80987f3c96f0284682c87abf3477f7254331e48386c92f4297e8",
+    "openapi/sdk/generated/futureagi-sdk.openapi.json": "sha256:f0306a3c164fe44224e53b9be8800838e316cbcd8e621467ad4e679206c87f8d",
     "openapi/sdk/wrapper-map.json": "sha256:34e0b367198a2ea9b4bf47d8b0360a29f8ef24e1cd7900ba054478f282576de8",
     "openapi/catalog/source.json": "sha256:ea7da84e38b1585dd357f800346a08c7e503e5d16fb6ad603fd4a8be9d1f599c",
     "openapi/catalog/models-source.json": "sha256:d266800a7ae0376cc23b53138c2683756f6af455b29a0f9fd0413ba33e6ea60c",
@@ -7619,13 +7619,15 @@
       "path_params": [],
       "idempotent": false,
       "retry": "unsafe",
-      "content_type": "application/json",
+      "content_type": "multipart/form-data",
       "stream": null,
       "pagination": null,
       "operation_id": "createDatasetFromLocalFile",
       "namespace": "datasets",
       "success_status": 200,
-      "request_example": {},
+      "request_example": {
+        "file": "fixture"
+      },
       "response_example": {
         "status": true,
         "result": {

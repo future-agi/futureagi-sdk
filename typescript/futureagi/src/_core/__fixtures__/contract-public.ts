@@ -31,6 +31,9 @@ function valueFor(name: string, row: Case): any {
   if (row.query_example && snake in row.query_example) return row.query_example[snake];
   if (name === "body") {
     if (row.name === "prompts.create") return { name: "fixture", prompt_config: [{ messages: [] }] };
+    if (row.content_type === "multipart/form-data") {
+      return { ...row.request_example, file: new Blob(["fixture"], { type: "text/plain" }) };
+    }
     return row.request_example ?? {};
   }
   if (["query", "params"].includes(name)) return row.query_example ?? {};
