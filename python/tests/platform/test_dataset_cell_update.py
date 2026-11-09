@@ -6,11 +6,9 @@ import asyncio
 import copy
 import json
 
+import fi.platform as fp
 import httpx
 import pytest
-
-import fi.platform as fp
-
 
 BASE = "https://sdk.invalid"
 DATASET_ID = "dataset-1"
@@ -104,8 +102,9 @@ def test_async_explicit_new_value_is_sent_including_clear_values(new_value, via_
 
 
 def test_catalog_regeneration_preserves_cell_update_safety_and_examples():
-    from ._generator_support import CATALOG, CONTRACT, ROOT, generate, pygen, tsgen
     from sdkgen.generator import docs
+
+    from ._generator_support import CATALOG, CONTRACT, ROOT, generate, pygen, tsgen
 
     spec = copy.deepcopy(CONTRACT)
     op = next(
