@@ -46,8 +46,13 @@ print(" ", "".join(c.choices[0].delta.content or "" for c in gw.chat.completions
 print("\nTool call")
 tools = [{"type": "function", "function": {"name": "get_weather", "parameters": {
     "type": "object", "properties": {"city": {"type": "string"}}, "required": ["city"]}}}]
-call = gw.chat.completions.create(model=MODEL, messages=[{"role": "user", "content": "Weather in Paris?"}], tools=tools).choices[0].message.tool_calls[0]
-print(f"  {call.function.name}({json.loads(call.function.arguments)})")
+message = gw.chat.completions.create(model=MODEL, messages=[{"role": "user", "content": "Weather in Paris?"}], tools=tools).choices[0].message
+# Automatic tool selection can return a normal answer instead of a tool call.
+if message.tool_calls:
+    call = message.tool_calls[0]
+    print(f"  {call.function.name}({json.loads(call.function.arguments)})")
+else:
+    print(" ", message.content or getattr(message, "refusal", None) or "No tool call returned.")
 
 print("\nA session groups calls (visible under Agent Command Center > Sessions)")
 with gw.session(name="example", session_id=f"example-{uuid.uuid4().hex[:6]}") as session:
