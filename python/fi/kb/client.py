@@ -158,9 +158,11 @@ class KnowledgeBase(APIKeyAuth):
                         f"Knowledge Base named '{kb_name}' not found when attempting to update."
                     )
 
+            valid_file_paths: List[str] = []
             if file_paths:
                 try:
                     self._check_file_paths(file_paths)
+                    valid_file_paths = list(self._valid_file_paths)
                 except (FileNotFoundException, UnsupportedFileType) as e: 
                     raise SDKException("Knowledge Base update failed due to a file processing issue.", cause=e)
                 except SDKException as e:
@@ -178,8 +180,8 @@ class KnowledgeBase(APIKeyAuth):
             files = []
             
             try:
-                if self._valid_file_paths:
-                    for file_path in self._valid_file_paths:
+                if valid_file_paths:
+                    for file_path in valid_file_paths:
                         file_name = os.path.basename(file_path)
                         file_ext = file_path.split('.')[-1].lower()
                         
@@ -321,13 +323,10 @@ class KnowledgeBase(APIKeyAuth):
                     if isinstance(kb_names, str)
                     else kb_names  # assume list
                 )
+                # Resolve every name before dispatching any deletion.
                 for name in names_list:
-                    try:
-                        kb_conf = self._get_kb_from_name(name)
-                        resolved_ids.append(str(kb_conf.id))
-                    except SDKException:
-                        # If a name isn't found we skip & warn later
-                        continue
+                    kb_conf = self._get_kb_from_name(name)
+                    resolved_ids.append(str(kb_conf.id))
 
                 if not resolved_ids:
                     raise SDKException(
@@ -552,16 +551,10 @@ class KnowledgeBase(APIKeyAuth):
         return content_types.get(file_ext, "application/octet-stream")
 
     def _get_kb_from_name(self, kb_name):
-        """
-        Validates the given file paths or directory path.
-        
-        Args:
-            kb_name (str): Name of the Knowledge Base
-        
-        Returns:
-            Knowledge BaseConfig: Knowledge Base Config object 
-        """
-        matches = self.list_kbs(kb_name)
+        """Resolve a unique, exact Knowledge Base name from search results."""
+        matches = [kb for kb in self.list_kbs(kb_name) if kb.name == kb_name]
         if not matches:
             raise SDKException(f"Knowledge Base with name '{kb_name}' not found.")
+        if len(matches) > 1:
+            raise SDKException(f"Multiple Knowledge Bases with name '{kb_name}' found.")
         return matches[0]
