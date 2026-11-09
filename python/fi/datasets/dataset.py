@@ -934,7 +934,7 @@ class Dataset(APIKeyAuth):
                     raise DatasetError(f"Error reading CSV file '{file_path}' with pandas: {e}")
             elif file_path.endswith(".json"):
                 try:
-                    return pd.read_json(file_path, lines=True)
+                    return pd.read_json(file_path, orient="records")
                 except pd.errors.EmptyDataError:
                     return pd.DataFrame()
                 except ValueError as e: 
