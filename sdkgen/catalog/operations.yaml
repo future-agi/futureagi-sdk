@@ -154,8 +154,12 @@ operations:
 
 - id: datasets.cells.update
   description: Set the value of a single dataset cell. Use this to correct one value; add_dataset_rows only appends and cannot edit an existing
-    row.
+    row. Pass new_value explicitly; omission is rejected. To clear a cell deliberately, pass None in Python or null in TypeScript;
+    an explicit empty string also clears the cell.
   operation: {method: POST, path: '/model-hub/develops/{dataset_id}/update_cell_value/'}
+  contract_fix:
+    body_required: [row_id, column_id, new_value]
+    note: "require an explicit replacement in the SDK because the server clears the cell when new_value is omitted"
   surfaces:
     sdk: {}
     mcp: {name: update_dataset_cell, group: datasets, access: write}

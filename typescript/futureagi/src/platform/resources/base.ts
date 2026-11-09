@@ -544,7 +544,7 @@ export interface DatasetsCellsUpdateParams {
   /** Column id */
   column_id: string;
   /** New value */
-  new_value?: string | null;
+  new_value: string | null;
 }
 
 export interface DatasetsColumnsAddParams {
@@ -1808,12 +1808,19 @@ export class DashboardsWidgetsResource extends Resource {
 export class DatasetsCellsResource extends Resource {
 
   /**
-   * Set the value of a single dataset cell. Use this to correct one value; add_dataset_rows only appends and cannot edit an existing row.
+   * Set the value of a single dataset cell. Use this to correct one value; add_dataset_rows only appends and cannot edit an existing row. Pass new_value explicitly; omission is rejected. To clear a cell deliberately, pass None in Python or null in TypeScript; an explicit empty string also clears the cell.
    *
    * POST /model-hub/develops/{dataset_id}/update_cell_value/
    */
   update(datasetId: string, params: DatasetsCellsUpdateParams, options?: RequestOptions): Promise<string> {
-    return this._t.call<string>(ops.OP_DATASETS_CELLS_UPDATE, { path: { dataset_id: datasetId }, query: {}, body: { row_id: params.row_id, column_id: params.column_id, new_value: params.new_value } }, options);
+    if (params?.new_value === undefined) {
+      return Promise.reject(new TypeError("new_value is required; pass null explicitly to clear it"));
+    }
+    const body: Record<string, unknown> = { row_id: params.row_id, column_id: params.column_id, new_value: params.new_value, ...(options?.extraBody ?? {}) };
+    if (body.new_value === undefined) {
+      return Promise.reject(new TypeError("new_value is required; pass null explicitly to clear it"));
+    }
+    return this._t.call<string>(ops.OP_DATASETS_CELLS_UPDATE, { path: { dataset_id: datasetId }, query: {}, body }, { ...options, extraBody: undefined });
   }
 }
 

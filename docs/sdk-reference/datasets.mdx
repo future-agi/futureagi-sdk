@@ -466,7 +466,7 @@ TypeScript: `client.datasets.cells`.
 
 ### datasets.cells.update
 
-Set the value of a single dataset cell. Use this to correct one value; add_dataset_rows only appends and cannot edit an existing row.
+Set the value of a single dataset cell. Use this to correct one value; add_dataset_rows only appends and cannot edit an existing row. Pass new_value explicitly; omission is rejected. To clear a cell deliberately, pass None in Python or null in TypeScript; an explicit empty string also clears the cell.
 
 <ApiEndpoint method="POST" path="/model-hub/develops/{dataset_id}/update_cell_value/" />
 
@@ -479,6 +479,7 @@ result = client.datasets.cells.update(
     "your-dataset-id",
     row_id="your-row-id",
     column_id="your-column-id",
+    new_value="your-new-value",
 )
 ```
 
@@ -486,6 +487,32 @@ result = client.datasets.cells.update(
 const result = await client.datasets.cells.update("your-dataset-id", {
   row_id: "your-row-id",
   column_id: "your-column-id",
+  new_value: "your-new-value",
+});
+```
+
+</CodeGroup>
+
+#### Clear a cell deliberately
+
+The API clears a cell when `new_value` is omitted, `null`, or `""`. To prevent accidental clearing, these SDK methods reject an omitted replacement (Python `NOT_GIVEN` or TypeScript `undefined`), including body overrides. Use Python `None` or TypeScript `null` explicitly as below; an explicit empty string also clears the cell.
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.cells.update(
+    "your-dataset-id",
+    row_id="your-row-id",
+    column_id="your-column-id",
+    new_value=None,
+)
+```
+
+```typescript TypeScript
+const result = await client.datasets.cells.update("your-dataset-id", {
+  row_id: "your-row-id",
+  column_id: "your-column-id",
+  new_value: null,
 });
 ```
 
@@ -499,7 +526,7 @@ client.datasets.cells.update(
     *,
     row_id: str,
     column_id: str,
-    new_value: str | None | NotGiven = NOT_GIVEN,
+    new_value: str | None,
     extra_query: dict[str, Any] | None = None,
     extra_body: dict[str, Any] | None = None,
     options: RequestOptions | None = None,
@@ -512,7 +539,7 @@ client.datasets.cells.update(datasetId: string, params: DatasetsCellsUpdateParam
 export interface DatasetsCellsUpdateParams {
   row_id: string;
   column_id: string;
-  new_value?: string | null;
+  new_value: string | null;
 }
 ```
 
@@ -525,7 +552,7 @@ export interface DatasetsCellsUpdateParams {
 </ParamField>
 <ParamField body="row_id" type="string" required />
 <ParamField body="column_id" type="string" required />
-<ParamField body="new_value" type="string" optional />
+<ParamField body="new_value" type="string" required />
 
 #### Returns
 
