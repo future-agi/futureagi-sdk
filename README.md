@@ -134,20 +134,20 @@ columns = [
 # Add data
 rows = [
     Row(order=1, cells=[
-            Cell(column_name="user_query", value="What is machine learning?"),
+        Cell(column_name="user_query", value="What is machine learning?"),
         Cell(column_name="ai_response", value="Machine learning is a subset of AI..."),
         Cell(column_name="quality_score", value=9),
     ]),
     Row(order=2, cells=[
-            Cell(column_name="user_query", value="Explain quantum computing"),
+        Cell(column_name="user_query", value="Explain quantum computing"),
         Cell(column_name="ai_response", value="Quantum computing uses quantum bits..."),
         Cell(column_name="quality_score", value=8),
     ]),
 ]
 
 # Push data and run evaluations
-    dataset = dataset.add_columns(columns=columns)
-    dataset = dataset.add_rows(rows=rows)
+dataset = dataset.add_columns(columns=columns)
+dataset = dataset.add_rows(rows=rows)
 
 # Add automated evaluation
 dataset.add_evaluation(
@@ -202,6 +202,14 @@ print(compiled)
 
 **A/B Testing Example:**
 
+Install the optional provider client with `pip install openai`; the base
+`futureagi` installation does not include it. Set `OPENAI_API_KEY` to your
+OpenAI API key, separately from `FI_API_KEY` and `FI_SECRET_KEY`.
+
+Before running, assign `variant-a` and `variant-b` to committed versions of
+`customer_support`, both accepting `customer_name` and `issue_type`. The
+`Production` label in the preceding example does not create these variant labels.
+
 ```python
 import random
 from openai import OpenAI
@@ -216,7 +224,7 @@ selected = random.choice([variant_a, variant_b])
 compiled = selected.compile(customer_name="Alice", issue_type="refund")
 
 # Send to your LLM provider
-openai = OpenAI(api_key="your_openai_key")
+openai = OpenAI()  # Reads OPENAI_API_KEY
 response = openai.chat.completions.create(model="gpt-4o", messages=compiled)
 print(f"Using variant: {selected.template.name}")
 print(f"Response: {response.choices[0].message.content}")
@@ -224,7 +232,10 @@ print(f"Response: {response.choices[0].message.content}")
 
 ### 📚 Knowledge Base (RAG)
 
-Manage documents for retrieval-augmented generation:
+Manage documents for retrieval-augmented generation. Supply existing local files
+in the supported formats: PDF, DOCX, TXT or RTF. The example expects `manual.pdf`,
+`faq.txt`, `guide.docx` and `updates.pdf` in the current directory; Markdown is not
+supported. It deletes the example knowledge base at the end.
 
 ```python
 from fi.kb import KnowledgeBase

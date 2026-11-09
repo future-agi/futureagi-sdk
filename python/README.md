@@ -177,6 +177,7 @@ dataset = dataset.add_rows(rows=rows)
 dataset.add_evaluation(
     name="factual_accuracy",
     eval_template="is_factually_consistent",
+    model="gpt-4o-mini",
     required_keys_to_column_names={
         "input": "user_query",
         "output": "ai_response",
@@ -193,7 +194,7 @@ print("✓ Dataset created with automated evaluations")
 Version control and A/B test your prompts:
 
 ```python
-from fi.prompt import Prompt, PromptTemplate, ModelConfig, MessageBase
+from fi.prompt import Prompt, PromptTemplate, ModelConfig
 
 # Create a versioned prompt template
 template = PromptTemplate(
@@ -208,41 +209,52 @@ template = PromptTemplate(
 
 # Create and version the template
 client = Prompt(template)
-await client.open()  # Draft v1
-await client.commitCurrentVersion("Initial version", set_as_default=True)
+client.create()  # Create draft v1
+client.commit_current_version("Initial version", set_default=True)
 
 # Assign deployment labels
-await client.labels().assign("Production", "v1")
+client.assign_label("Production", version="v1")
 
 # Compile with variables
-compiled = client.compile({"customer_name": "Bob", "issue_type": "refund"})
+compiled = client.compile(customer_name="Bob", issue_type="refund")
 print(compiled)
 ```
 
 **A/B Testing Example:**
 
+Install the optional provider client with `pip install openai`; the base
+`futureagi` installation does not include it. Set `OPENAI_API_KEY` to your
+OpenAI API key, separately from `FI_API_KEY` and `FI_SECRET_KEY`.
+
+Before running, assign `variant-a` and `variant-b` to committed versions of
+`customer_support`, both accepting `customer_name` and `issue_type`. The
+`Production` label in the preceding example does not create these variant labels.
+
 ```python
-import OpenAI from "openai"
+import random
+from openai import OpenAI
 from fi.prompt import Prompt
 
-# Fetch different variants
-variant_a = await Prompt.getTemplateByName("customer_support", label="variant-a")
-variant_b = await Prompt.getTemplateByName("customer_support", label="variant-b")
+# Fetch different variants (returns Prompt instances)
+variant_a = Prompt.get_template_by_name("customer_support", label="variant-a")
+variant_b = Prompt.get_template_by_name("customer_support", label="variant-b")
 
 # Randomly select and use
-import random
 selected = random.choice([variant_a, variant_b])
-client = Prompt(selected)
-compiled = client.compile({"customer_name": "Alice", "issue_type": "refund"})
+compiled = selected.compile(customer_name="Alice", issue_type="refund")
 
 # Send to your LLM provider
-openai = OpenAI(api_key="your_key")
+openai = OpenAI()  # Reads OPENAI_API_KEY
 response = openai.chat.completions.create(model="gpt-4o", messages=compiled)
+print(response.choices[0].message.content)
 ```
 
 ### 📚 Knowledge Base (RAG)
 
-Manage documents for retrieval-augmented generation:
+Manage documents for retrieval-augmented generation. Supply existing local files
+in the supported formats: PDF, DOCX, TXT or RTF. The example expects `manual.pdf`,
+`faq.txt`, `guide.docx` and `updates.pdf` in the current directory; Markdown is not
+supported. It deletes the example knowledge base at the end.
 
 ```python
 from fi.kb import KnowledgeBase
@@ -256,20 +268,20 @@ kb_client = KnowledgeBase(
 # Create a knowledge base with documents
 kb = kb_client.create_kb(
     name="product_docs",
-    file_paths=["manual.pdf", "faq.txt", "guide.md"]
+    file_paths=["manual.pdf", "faq.txt", "guide.docx"]
 )
 
 print(f"✓ Knowledge base created: {kb.kb.name}")
-print(f"  Files uploaded: {len(kb.kb.file_names)}")
+print(f"  Files uploaded: {len(kb.kb.files)}")
 
 # Update with more files
 updated_kb = kb_client.update_kb(
-    kb_id=kb.kb.id,
+    kb_name=kb.kb.name,
     file_paths=["updates.pdf"]
 )
 
 # Delete specific files
-kb_client.delete_files_from_kb(file_ids=["file_id_here"])
+kb_client.delete_files_from_kb(file_names=["updates.pdf"])
 
 # Clean up
 kb_client.delete_kb(kb_ids=[kb.kb.id])
@@ -440,11 +452,16 @@ ends. `fi.webhooks` verifies them and manages endpoints; `futureagi-py webhooks`
 
 ### Verify a request (receivers)
 
+Django integration fragment: install Django with `pip install django` and use an
+existing configured Django application. Set `FI_WEBHOOK_SECRET` to the endpoint
+signing secret and register `hook` in your application's URL configuration.
+
 ```python
 import os
+from django.http import HttpResponse
 from fi.webhooks import verify, WebhookVerificationError
 
-def hook(request):                       # Django; Flask: request.get_data(); FastAPI: await request.body()
+def hook(request):                       # Django request
     try:
         event = verify(body=request.body, headers=request.headers, secret=os.environ["FI_WEBHOOK_SECRET"])
     except WebhookVerificationError as err:  # err.reason: missing_headers, timestamp_too_old, no_matching_signature, ...
@@ -466,6 +483,12 @@ def hook(request):                       # Django; Flask: request.get_data(); Fa
 
 ### Manage endpoints from code
 
+Integration fragment: before running, define `store_secret(secret: str)` using
+your application's secret-storage implementation. This callback is application
+code, not an SDK export. It must persist the current signing secret for this
+endpoint and update the receiver's `FI_WEBHOOK_SECRET`. Replace the example URL
+with your deployed receiver URL.
+
 ```python
 from fi.webhooks import Webhooks
 
@@ -481,6 +504,7 @@ with Webhooks() as wh:                    # FI_API_KEY / FI_SECRET_KEY, or `futu
     failed = wh.deliveries.list(endpoint=ep.id, status="failed", since="24h")
     wh.deliveries.redeliver_many(endpoint=ep.id, status="failed", since="24h")
     rotation = wh.endpoints.rotate_secret(ep.id, overlap="24h")            # the old secret works for 24 h more
+    store_secret(rotation.secret)
 ```
 
 `AsyncWebhooks` has the same methods, awaited. Results are dicts of the API's JSON with attribute access
