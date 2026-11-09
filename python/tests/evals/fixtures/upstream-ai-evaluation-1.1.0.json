@@ -155,6 +155,7 @@
   "fi/evals/metrics/function_calling/_metrics_function_call_accuracy_metric_name.py": "implementation extracted from fi/evals/metrics/function_calling/metrics.py; public names remain available there",
   "fi/evals/metrics/function_calling/_metrics_function_call_exact_match_metric_name.py": "implementation extracted from fi/evals/metrics/function_calling/metrics.py; public names remain available there",
   "fi/evals/metrics/function_calling/_metrics_parameter_validation_metric_name.py": "implementation extracted from fi/evals/metrics/function_calling/metrics.py; public names remain available there",
+  "fi/evals/otel/_content_export.py": "added: applies configured tracing content controls to the spans exporters receive",
   "fi/evals/otel/_conventions_attributes.py": "implementation extracted from fi/evals/otel/conventions.py; public names remain available there",
   "fi/evals/otel/instrumentors/_anthropic___anthropic_async_stream_wrapper_aiter.py": "implementation extracted from fi/evals/otel/instrumentors/anthropic.py; public names remain available there",
   "fi/evals/otel/instrumentors/_anthropic___anthropic_stream_wrapper_iter.py": "implementation extracted from fi/evals/otel/instrumentors/anthropic.py; public names remain available there",
