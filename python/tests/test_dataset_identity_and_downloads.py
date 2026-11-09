@@ -272,3 +272,39 @@ def test_row_metadata_does_not_block_dataset_operations(tmp_path, operation):
     else:
         assert client.add_evaluation("score", "quality", {"output": "number"}, "synthetic-model") is client
         assert calls[-1].method == HttpMethod.POST
+
+
+@pytest.mark.parametrize("source,optional", [
+    (HuggingfaceDatasetConfig(name="synthetic/data"),
+     {"huggingface_dataset_split": "train", "huggingface_dataset_config": "default"}),
+    (HuggingfaceDatasetConfig(name="synthetic/data", subset="subset", split="test", num_rows=10),
+     {"huggingface_dataset_split": "test", "huggingface_dataset_config": "subset", "num_rows": 10}),
+    (HuggingfaceDatasetConfig(name="synthetic/data", subset=None, split=None), {}),
+])
+def test_huggingface_create_sends_the_supported_name_field(monkeypatch, source, optional):
+    posts = []
+
+    def request(client, config, response_handler):
+        if config.method == HttpMethod.GET:
+            raise DatasetNotFoundError("Synthetic dataset does not exist yet")
+        assert config.method == HttpMethod.POST
+        assert config.url == f"{BASE_URL}/model-hub/develops/create-dataset-from-huggingface/"
+        posts.append(config)
+        assert config.data == {
+            "name": "imported", "huggingface_dataset_name": "synthetic/data",
+            "model_type": "GenerativeLLM", **optional,
+        }
+        response = Response()
+        response.status_code = 200
+        response.url = config.url
+        response._content = json.dumps({"result": {
+            "dataset_id": str(DATASET_ID), "dataset_name": "imported",
+            "dataset_model_type": "GenerativeLLM",
+        }}).encode()
+        return response_handler.parse(response)
+
+    monkeypatch.setattr(Dataset, "request", request)
+    created = Dataset.create_dataset(dataset_config("imported", None), source=source, session=Mock())
+    assert created.dataset_config.id == DATASET_ID
+    assert created.dataset_config.name == "imported"
+    assert len(posts) == 1
