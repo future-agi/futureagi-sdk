@@ -178,6 +178,7 @@ def example_1_basic_dataset_lifecycle():
             
     except Exception as e:
         print(f"✗ Error in basic lifecycle: {e}")
+        raise
     finally:
         # Step 10: Delete dataset
         try:
@@ -185,6 +186,7 @@ def example_1_basic_dataset_lifecycle():
             print("✓ Dataset deleted successfully")
         except Exception as e:
             print(f"✗ Error deleting dataset: {e}")
+            raise
 
 
 def example_2_create_from_file():
@@ -253,6 +255,7 @@ def example_2_create_from_file():
         # Cleanup on error
         if os.path.exists(sample_file):
             os.remove(sample_file)
+        raise
 
 
 def example_3_create_from_huggingface():
@@ -299,6 +302,7 @@ def example_3_create_from_huggingface():
         
     except Exception as e:
         print(f"✗ Error creating from Hugging Face: {e}")
+        raise
 
 
 def example_4_prompt_columns_and_evaluation():
@@ -387,6 +391,7 @@ def example_4_prompt_columns_and_evaluation():
         dataset = dataset.add_evaluation(
             name="response_length_check",
             eval_template="LengthGreaterThan",
+            model="gpt-4o-mini",
             required_keys_to_column_names={
                 "text": "ai_response"
             },
@@ -402,12 +407,10 @@ def example_4_prompt_columns_and_evaluation():
         
     except Exception as e:
         print(f"✗ Error in prompt/evaluation example: {e}")
+        raise
     finally:
-        try:
-            dataset.delete()
-            print("✓ Dataset deleted")
-        except:
-            pass
+        dataset.delete()
+        print("✓ Dataset deleted")
 
 
 def example_5_optimization():
@@ -435,8 +438,7 @@ def example_5_optimization():
         if dataset.dataset_config:
             print(f"✓ Dataset created: {dataset.dataset_config.name}")
         else:
-            print("✗ Failed to create dataset - no configuration returned")
-            return
+            raise DatasetError("Dataset creation returned no configuration.")
         
         # Add columns using proper type casting
         columns: List[Column] = [
@@ -500,6 +502,7 @@ def example_5_optimization():
         dataset = dataset.add_evaluation(
             name="response_quality_check",
             eval_template="LengthGreaterThan",
+            model="gpt-4o-mini",
             required_keys_to_column_names={
                 "text": "optimized_response"
             },
@@ -520,6 +523,7 @@ def example_5_optimization():
             print(f"Available evaluations: {len(eval_stats) if isinstance(eval_stats, list) else 'Unknown'}")
         except Exception as e:
             print(f"Could not get evaluation stats: {e}")
+            raise
         
         # Setup optimization with corrected payload format
         print("Setting up optimization...")
@@ -571,12 +575,15 @@ def example_5_optimization():
     except DatasetError as e:
         print(f"✗ Dataset Error in optimization example: {e}")
         print("  This might be due to missing evaluations or incorrect column references")
+        raise
     except DatasetValidationError as e:
         print(f"✗ Validation Error in optimization example: {e}")
         print("  Check that all required fields are properly formatted")
+        raise
     except Exception as e:
         print(f"✗ Unexpected error in optimization example: {e}")
         print(f"  Error type: {type(e).__name__}")
+        raise
     finally:
         try:
             if dataset and dataset.dataset_config:
@@ -584,6 +591,7 @@ def example_5_optimization():
                 print("✓ Dataset deleted successfully")
         except Exception as cleanup_error:
             print(f"✗ Error during cleanup: {cleanup_error}")
+            raise
 
 
 def example_6_class_methods():
@@ -664,6 +672,7 @@ def example_6_class_methods():
         
     except Exception as e:
         print(f"✗ Error in class methods example: {e}")
+        raise
 
 
 def example_7_error_handling():
@@ -720,11 +729,8 @@ def example_7_error_handling():
             
         def __exit__(self, exc_type, exc_val, exc_tb):
             if self.dataset and self.dataset.dataset_config:
-                try:
-                    self.dataset.delete()
-                    print("✓ Dataset cleaned up automatically")
-                except:
-                    pass
+                self.dataset.delete()
+                print("✓ Dataset cleaned up automatically")
     
     # Use context manager for automatic cleanup
     try:
@@ -737,10 +743,11 @@ def example_7_error_handling():
             # Dataset will be automatically deleted when exiting context
     except Exception as e:
         print(f"✗ Error in context manager example: {e}")
+        raise
 
 
-def main():
-    """Run all examples"""
+def main() -> int:
+    """Run examples, stopping with a nonzero status on unexpected failures."""
     print("FutureAGI Dataset SDK - Comprehensive Usage Examples")
     print("=" * 60)
     
@@ -766,13 +773,16 @@ def main():
         print("- Handle errors appropriately for robust applications")
         print("- Use class methods for simple one-off operations")
         print("- Use instance methods for complex chained operations")
+        return 0
         
     except MissingAuthError as e:
         print(f"\n✗ Authentication Error: {e}")
         print("Please set your FI_API_KEY and FI_SECRET_KEY environment variables")
+        return 1
     except Exception as e:
         print(f"\n✗ Unexpected error: {e}")
+        return 1
 
 
 if __name__ == "__main__":
-    main() 
+    raise SystemExit(main())
