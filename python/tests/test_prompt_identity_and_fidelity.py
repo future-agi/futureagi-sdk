@@ -123,6 +123,114 @@ def test_cache_identity_keeps_same_identity_cache_hits(backend):
     assert len(backend.calls) == 1
 
 
+@pytest.mark.parametrize("by_name", [False, True])
+@pytest.mark.parametrize("identity", ["origin", "api_key", "secret_key", "workspace"])
+def test_cache_identity_delete_preserves_other_identity(backend, monkeypatch, by_name, identity):
+    changed = {
+        "origin": {"fi_base_url": "https://another.example.test"},
+        "api_key": {"fi_api_key": "synthetic-other-key"},
+        "secret_key": {"fi_secret_key": "synthetic-other-secret"},
+        "workspace": {},
+    }[identity]
+    if identity == "workspace":
+        monkeypatch.setenv("FI_EXTRA_HEADERS", "X-Workspace-Id=synthetic-workspace-b")
+    backend.replies.append((200, {"result": snapshot("Account B")}))
+    backend.fetch(version="v1", **changed)
+    if identity == "workspace":
+        monkeypatch.setenv("FI_EXTRA_HEADERS", "X-Workspace-Id=synthetic-workspace-a")
+    if by_name:
+        backend.replies.append((200, {"result": snapshot("Account A")}))
+    backend.replies.append((204, None))
+    if by_name:
+        assert Prompt.delete_template_by_name(NAME, **AUTH) is True
+    else:
+        client = Prompt(template=PromptTemplate(id=TEMPLATE_ID, name=NAME), **AUTH)
+        backend.clients.append(client)
+        assert client.delete() is True
+    calls_before_lookup = len(backend.calls)
+    if identity == "workspace":
+        monkeypatch.setenv("FI_EXTRA_HEADERS", "X-Workspace-Id=synthetic-workspace-b")
+    backend.replies.append((503, {"message": "Temporarily unavailable"}))
+    found = backend.fetch(version="v1", **changed)
+    assert found.compile() == [{"role": "user", "content": "Account B"}]
+    assert len(backend.calls) == calls_before_lookup
+
+
+@pytest.mark.parametrize("by_name", [False, True])
+@pytest.mark.parametrize("stale", [False, True])
+def test_cache_identity_delete_evicts_own_selectors(backend, by_name, stale):
+    selectors = [{"version": "v1"}, {"label": "production"}, {}]
+    for selector in selectors:
+        backend.replies.append((200, {"result": snapshot()}))
+        backend.fetch(**selector)
+    if stale:
+        for item in backend.cache._store.values():
+            item.expiry = 0
+    if by_name:
+        backend.replies.append((200, {"result": snapshot()}))
+    backend.replies.append((204, None))
+    assert (Prompt.delete_template_by_name(NAME, **AUTH) if by_name
+            else backend.clients[0].delete()) is True
+    for selector in selectors:
+        backend.replies.append((503, {"message": "Temporarily unavailable"}))
+        with pytest.raises(HTTPError):
+            backend.fetch(**selector)
+
+
+@pytest.mark.parametrize("identity", ["origin", "workspace"])
+@pytest.mark.parametrize("stale", [False, True])
+def test_cache_identity_resolves_live_environment(backend, monkeypatch, identity, stale):
+    setting, first, second, kwargs = (
+        ("FI_BASE_URL", BASE_URL, "https://another.example.test", {"fi_base_url": None})
+        if identity == "origin" else
+        ("FI_EXTRA_HEADERS", "X-Workspace-Id=synthetic-workspace-a",
+         "X-Workspace-Id=synthetic-workspace-b", {})
+    )
+    monkeypatch.setenv(setting, first)
+    if stale:
+        backend.cache._ttl_sec = -1
+    backend.replies.append((200, {"result": snapshot("Account A")}))
+    backend.fetch(version="v1", **kwargs)
+    monkeypatch.setenv(setting, second)
+    if stale:
+        backend.replies.append((503, {"message": "Temporarily unavailable"}))
+        with pytest.raises(HTTPError):
+            backend.fetch(version="v1", **kwargs)
+    else:
+        backend.replies.append((200, {"result": snapshot("Account B")}))
+        assert backend.fetch(version="v1", **kwargs).compile() == [
+            {"role": "user", "content": "Account B"},
+        ]
+    assert len(backend.calls) == 2
+
+
+@pytest.mark.parametrize("stale", [False, True])
+def test_cache_identity_never_uses_unscoped_entries(backend, stale):
+    template = PromptTemplate(id=TEMPLATE_ID, name=NAME, messages=[
+        MessageBase(role="user", content="Identity-free data"),
+    ])
+    backend.cache.set(backend.cache.make_key(NAME, version="v1"), template,
+                      ttl_sec=-1 if stale else 300)
+    backend.replies.append((503, {"message": "Temporarily unavailable"}))
+    with pytest.raises(HTTPError):
+        backend.fetch(version="v1")
+    assert len(backend.calls) == 1
+
+
+def test_cache_identity_normalizes_headers_and_hides_values(backend, monkeypatch):
+    monkeypatch.setenv("FI_EXTRA_HEADERS", "X-Workspace-Id=synthetic-workspace;X-Region=synthetic-region")
+    backend.replies.append((200, {"result": snapshot()}))
+    first = backend.fetch(version="v1")
+    monkeypatch.setenv("FI_EXTRA_HEADERS", "x-region=synthetic-region;x-workspace-id=synthetic-workspace")
+    second = backend.fetch(version="v1", fi_base_url=BASE_URL + "/")
+    assert first.compile() == second.compile()
+    assert len(backend.calls) == 1
+    keys = repr(list(backend.cache._store))
+    assert all(value not in keys for value in [
+        AUTH["fi_api_key"], AUTH["fi_secret_key"], "synthetic-workspace", "synthetic-region",
+    ])
+
+
 @pytest.mark.parametrize("edit_cached_hit", [False, True])
 @pytest.mark.parametrize("stale", [False, True])
 def test_snapshot_isolated_from_unsaved_edits(backend, edit_cached_hit, stale):
