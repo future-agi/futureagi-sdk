@@ -206,13 +206,18 @@ class _OpenAIInstrumentorInstrumentMethods:
         )
         tracer = self.get_tracer()
 
-        with tracer.start_as_current_span(span_name, attributes=attributes) as span:
+        stream_owns_span = False
+        with tracer.start_as_current_span(
+            span_name, attributes=attributes, end_on_exit=False,
+            record_exception=False, set_status_on_exception=False,
+        ) as span:
             try:
                 response = original(self_arg, *args, **kwargs)
 
                 if stream and self._capture_streaming:
-                    # Wrap streaming response
-                    return self._wrap_stream_response(response, span)
+                    wrapped = self._wrap_stream_response(response, span)
+                    stream_owns_span = True
+                    return wrapped
 
                 # Extract response data
                 self._extract_response_data(response, span)
@@ -222,11 +227,14 @@ class _OpenAIInstrumentorInstrumentMethods:
 
                 return response
 
-            except Exception as e:
+            except BaseException as e:
                 if OTEL_AVAILABLE:
                     span.set_status(Status(StatusCode.ERROR, str(e)))
                     span.record_exception(e)
                 raise
+            finally:
+                if not stream_owns_span:
+                    span.end()
 
 
     async def _trace_async(
@@ -245,13 +253,18 @@ class _OpenAIInstrumentorInstrumentMethods:
         )
         tracer = self.get_tracer()
 
-        with tracer.start_as_current_span(span_name, attributes=attributes) as span:
+        stream_owns_span = False
+        with tracer.start_as_current_span(
+            span_name, attributes=attributes, end_on_exit=False,
+            record_exception=False, set_status_on_exception=False,
+        ) as span:
             try:
                 response = await original(self_arg, *args, **kwargs)
 
                 if stream and self._capture_streaming:
-                    # Wrap async streaming response
-                    return self._wrap_async_stream_response(response, span)
+                    wrapped = self._wrap_async_stream_response(response, span)
+                    stream_owns_span = True
+                    return wrapped
 
                 self._extract_response_data(response, span)
 
@@ -260,8 +273,11 @@ class _OpenAIInstrumentorInstrumentMethods:
 
                 return response
 
-            except Exception as e:
+            except BaseException as e:
                 if OTEL_AVAILABLE:
                     span.set_status(Status(StatusCode.ERROR, str(e)))
                     span.record_exception(e)
                 raise
+            finally:
+                if not stream_owns_span:
+                    span.end()

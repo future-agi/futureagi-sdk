@@ -149,16 +149,23 @@
   },
   {
    "id": "log-privacy",
-   "area": "logging",
-   "ai_evaluation": "Evaluator log lines could carry evaluated content: a timed-out or failed evaluation logged the whole input case and the exception text, a non-200 configuration response logged the response body, a missing fi-instrumentation-otel package logged a traceback, and span enrichment logged scores and exception text.",
-   "futureagi": "Those log lines carry only operational context: the evaluation or template name, the timeout, the status code and the exception class name. Missing-instrumentation messages are logged as errors without a traceback. Return values, raised exceptions, retries and timeouts are unchanged.",
-   "docs": "No change to examples. Code or log processing that read inputs, response bodies, scores or exception text out of these log messages no longer finds them there.",
+   "area": "logging and trace completion",
+   "ai_evaluation": "Evaluator log lines could carry evaluated content: a timed-out or failed evaluation logged the whole input case and the exception text, a non-200 configuration response logged the response body, a missing fi-instrumentation-otel package logged a traceback, and span enrichment logged scores and exception text. OpenAI streaming spans ended on response creation, before completion content, usage and iteration failures were captured.",
+   "futureagi": "Those log lines carry only operational context: the evaluation or template name, the timeout, the status code and the exception class name. Missing-instrumentation messages are logged as errors without a traceback. Return values, raised exceptions, retries and timeouts are unchanged. Captured OpenAI streams own their spans until exhaustion, close, context exit or failure, including cancellation; terminal content, received usage and error status are recorded before exactly one span end. Context entry and cleanup failures also finalize the span, and provider exceptions and context-manager results are preserved.",
+   "docs": "Code or log processing that read inputs, response bodies, scores or exception text out of evaluator log messages no longer finds them there. Consume or explicitly close an instrumented OpenAI stream, preferably with its sync or async context manager, to finish its trace; token usage is captured only when the provider supplies it. Non-streaming calls and capture_streaming=False retain their response and span lifecycles.",
    "tests": [
     "tests/evals/test_evaluator_log_privacy.py::test_request_failure_logs_no_inputs_or_exception_text",
     "tests/evals/test_evaluator_log_privacy.py::test_mapping_failure_logs_only_exception_type",
     "tests/evals/test_evaluator_log_privacy.py::test_configuration_warning_omits_response_body",
     "tests/evals/test_evaluator_log_privacy.py::test_registry_failure_inside_evaluate_omits_exception_text",
-    "tests/evals/test_evaluator_log_privacy.py::test_real_auto_enrichment_never_logs_evaluation_output"
+    "tests/evals/test_evaluator_log_privacy.py::test_real_auto_enrichment_never_logs_evaluation_output",
+    "tests/evals/test_openai_stream_spans.py::test_sync_span_captures_stream_content_usage_and_failures",
+    "tests/evals/test_openai_stream_spans.py::test_async_span_captures_stream_content_usage_and_failures",
+    "tests/evals/test_openai_stream_spans.py::test_sync_span_remains_open_after_stream_creation",
+    "tests/evals/test_openai_stream_spans.py::test_async_span_remains_open_after_stream_creation",
+    "tests/evals/test_openai_stream_finalization.py::test_early_release_finishes_once",
+    "tests/evals/test_openai_stream_finalization.py::test_failures_finalize_and_propagate",
+    "tests/evals/test_openai_stream_finalization.py::test_unwrapped_response_and_parent_context_are_preserved"
    ],
    "source_contract": {
     "fi/evals/evaluator.py:Evaluator.evaluate": {
@@ -168,6 +175,46 @@
     "fi/evals/evaluator.py:Evaluator._configure_evaluations": {
      "upstream_ast_sha256": "29c6b61989a256c7c7a4b7155c6d48e7cf88df174a6d1386f1a12f3d831dfdf7",
      "ast_sha256": "6a9d3221a3860687c872a3b8f2c7bfadc6c6415f8515b53078ab5734a7737d21"
+    },
+    "fi/evals/otel/instrumentors/openai.py:OpenAIInstrumentor._trace_sync": {
+     "upstream_ast_sha256": "8a11506151a146ec814297615629b1c74a2ef8aa63605c57cd0bb4598e345103",
+     "ast_sha256": "04c2fdf9e931cb535b01890389f5a07bc03efb60c726e8f76b4c4850ef33db54",
+     "reason": "Transfer span ownership to a successfully wrapped sync stream; otherwise record failures and end the span before returning."
+    },
+    "fi/evals/otel/instrumentors/openai.py:OpenAIInstrumentor._trace_async": {
+     "upstream_ast_sha256": "23ec430fbb006679549743ccca6b28261b986203e6ec7e9f214811be2cdba69f",
+     "ast_sha256": "bd42da21c4417709d2f7410a15fc77d30f3c573435abc0aa905cfb6032c75019",
+     "reason": "Transfer span ownership to a successfully wrapped async stream; creation failures and cancellation end the span before propagating."
+    },
+    "fi/evals/otel/instrumentors/openai.py:_StreamWrapper.__init__": {
+     "upstream_ast_sha256": "c2a6266d4d241021cfa2898c40b09af75ed39fb62ff640c23125f966e5d152c1",
+     "ast_sha256": "5e3e12770c367a8b32c1a4fbbd4c32f73b60273d2b5fcfedda96b4016680cd53",
+     "reason": "Track terminal ownership so sync stream release, failure and exhaustion cannot end a span twice."
+    },
+    "fi/evals/otel/instrumentors/openai.py:_StreamWrapper.__next__": {
+     "upstream_ast_sha256": "8bfa4fca80a0f0324d4d4cbcdb7eed9b9b333638fde008fc0de3c012e11a4578",
+     "ast_sha256": "e30f3a201b0bf9d0951938445597194cb25cf94bdb12783e6c83da49d1ff9dfa",
+     "reason": "Finalize on iteration failure as well as exhaustion, propagate the original failure and stop consuming a finalized stream."
+    },
+    "fi/evals/otel/instrumentors/openai.py:_StreamWrapper._finalize": {
+     "upstream_ast_sha256": "6db3c1c6e71abda9327c13902ae570c4e60363bd16ea8d5ac9d54abd3b2cda21",
+     "ast_sha256": "845bf2295c196e32b92cb1ffbb51af784224a3e37a066c59e2deec29f6088dbd",
+     "reason": "Record partial completion, received usage and an optional terminal error before ending the owned span exactly once."
+    },
+    "fi/evals/otel/instrumentors/openai.py:_AsyncStreamWrapper.__init__": {
+     "upstream_ast_sha256": "c2a6266d4d241021cfa2898c40b09af75ed39fb62ff640c23125f966e5d152c1",
+     "ast_sha256": "5e3e12770c367a8b32c1a4fbbd4c32f73b60273d2b5fcfedda96b4016680cd53",
+     "reason": "Track terminal ownership so async stream release, failure and exhaustion cannot end a span twice."
+    },
+    "fi/evals/otel/instrumentors/openai.py:_AsyncStreamWrapper.__anext__": {
+     "upstream_ast_sha256": "b555ddc54c6ada273b74b717f6a206a285cab2321f09e73396ed726b236d83e1",
+     "ast_sha256": "99aade85155fca7e00fde935877eed5d599f3784f228e2f205bb3fa47a362065",
+     "reason": "Finalize on iteration failure or cancellation as well as exhaustion without suppressing the original exception."
+    },
+    "fi/evals/otel/instrumentors/openai.py:_AsyncStreamWrapper._finalize": {
+     "upstream_ast_sha256": "6db3c1c6e71abda9327c13902ae570c4e60363bd16ea8d5ac9d54abd3b2cda21",
+     "ast_sha256": "845bf2295c196e32b92cb1ffbb51af784224a3e37a066c59e2deec29f6088dbd",
+     "reason": "Record partial completion, received usage and an optional terminal error before ending the owned span exactly once."
     }
    }
   }
