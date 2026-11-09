@@ -155,3 +155,49 @@ def test_snapshot_version_stays_published_after_new_draft(backend):
     original = backend.fetch(version="v1")
     assert original.template.version == "v1"
     assert len(backend.calls) == 3
+
+
+@pytest.mark.parametrize("operation", ["create", "create_new_version", "save_current_draft"])
+def test_write_configuration_preserves_supported_settings(backend, operation):
+    config = ModelConfig(
+        model_name="test-model", temperature=0, max_tokens=42, top_p=0.5,
+        frequency_penalty=0.25, presence_penalty=-0.5,
+        response_format={"type": "json_object"}, tool_choice="required",
+        tools=[{"type": "function", "function": {
+            "name": "lookup", "parameters": {"type": "object", "properties": {}}
+        }}],
+    )
+    template = PromptTemplate(
+        id=TEMPLATE_ID, name=NAME, version="v1", model_configuration=config,
+        messages=[MessageBase(role="user", content="Hello")],
+    )
+    client = Prompt(template=template, **AUTH)
+    backend.clients.append(client)
+    if operation == "create":
+        client.template.id = None
+        backend.replies.append((201, {"result": {"id": TEMPLATE_ID, "name": NAME,
+                                                "template_version": "v1"}}))
+    elif operation == "create_new_version":
+        backend.replies.extend([
+            (200, {"results": [{"template_version": "v1", "is_draft": False}]}),
+            (201, {"result": [{"template_version": "v2"}]}),
+        ])
+    else:
+        backend.replies.extend([
+            (200, {"results": [{"template_version": "v1", "is_draft": True}]}),
+            (200, {"status": True}),
+        ])
+    getattr(client, operation)()
+    write = backend.calls[-1]["json"]
+    entry = write["new_prompts"][0] if operation == "create_new_version" else write
+    wire_config = entry["prompt_config"][0]["configuration"]
+    expected = config.model_dump()
+    expected["model"] = expected.pop("model_name")
+    assert wire_config == expected
+
+    backend.replies.append((200, {"result": {
+        "id": TEMPLATE_ID, "name": NAME, "version": client.template.version,
+        "prompt_config": entry["prompt_config"],
+    }}))
+    fetched = backend.fetch(version=client.template.version)
+    assert fetched.template.model_configuration == config
