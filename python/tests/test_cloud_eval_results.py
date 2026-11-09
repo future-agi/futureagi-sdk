@@ -132,3 +132,52 @@ def test_cloud_config_defaults_keep_existing_payload(evaluator, config):
     assert result.status == "completed"
     evaluator.request.assert_called_once()
     assert "config" not in evaluator.request.call_args.kwargs["config"].json
+
+
+def async_response(execution_ids):
+    response = Mock()
+    response.json.return_value = {
+        "status": True,
+        "result": [{"evaluations": [
+            {"name": "tone", "output_type": "Pass/Fail", "eval_id": execution_id}
+            for execution_id in execution_ids
+        ]}],
+    }
+    return response
+
+
+def test_async_submit_rejects_batch_before_scheduling(evaluator):
+    # A single Execution cannot track this response's two independent jobs.
+    # Reject batched inputs before scheduling until a batch API is supported.
+    evaluator.request.return_value = async_response(["exec-1", "exec-2"])
+
+    with pytest.raises(ValueError, match="batch|single|list"):
+        evaluator.submit(
+            "tone", {"output": ["hello", "goodbye"]}, model_name="turing_flash",
+        )
+
+    evaluator.request.assert_not_called()
+
+
+def test_async_submit_single_input_keeps_waitable_handle(evaluator):
+    completed = Mock()
+    completed.json.return_value = {
+        "status": True,
+        "result": {
+            "eval_status": "completed",
+            "result": {"name": "tone", "output": "Passed", "eval_id": "exec-1"},
+        },
+    }
+    evaluator.request.side_effect = [async_response(["exec-1"]), completed]
+
+    handle = evaluator.submit("tone", {"output": "hello"}, model_name="turing_flash")
+
+    assert handle.id == "exec-1"
+    assert handle.status == "pending"
+    assert handle.wait(poll_interval=0, timeout=1) is handle
+    assert handle.status == "completed"
+    assert handle.result.eval_id == "exec-1"
+    assert evaluator.request.call_count == 2
+    submission, refresh = evaluator.request.call_args_list
+    assert submission.kwargs["config"].json["is_async"] is True
+    assert refresh.kwargs["config"].params == {"eval_id": "exec-1"}
