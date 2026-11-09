@@ -7,7 +7,6 @@ from email.utils import formatdate
 
 import httpx
 import pytest
-
 from fi import _http
 from fi.platform import AsyncClient, Client
 from fi.platform import _transport as platform_transport

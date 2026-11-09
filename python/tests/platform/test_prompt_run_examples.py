@@ -6,7 +6,6 @@ import json
 import re
 
 import httpx
-
 from fi.platform import Client
 
 from .test_prompt_lookup_examples import example

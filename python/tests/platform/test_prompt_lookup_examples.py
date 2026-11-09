@@ -8,7 +8,6 @@ from pathlib import Path
 
 import httpx
 import pytest
-
 from fi.platform import Client
 
 REFERENCE = Path(__file__).resolve().parents[3] / "docs/sdk-reference/prompts.mdx"
