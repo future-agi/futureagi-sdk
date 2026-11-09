@@ -19,6 +19,7 @@ from .adapters.codex import (
 )
 from .adapters.codex import (
     Profile,
+    check_skill_content,
     check_skill_frontmatter,
     check_supporting_path,
     managed_block,
@@ -204,6 +205,8 @@ def _projected(
     }
     for path, content in bundle.files.items():
         if path.startswith("skills/"):
+            if path.endswith("/SKILL.md"):
+                check_skill_content(content, profile)
             outputs[profile.skills_directory + "/" + path[len("skills/") :]] = (
                 content,
                 path,

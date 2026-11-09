@@ -75,7 +75,12 @@ def test_changed_modules_and_tests_are_in_the_lint_and_typescript_gates():
         "python/consumer/context_consumer.py",
     ):
         assert path in lint
-    assert "src/__tests__/r3_l10" in commands(jobs["typescript"])
+    # Every client suite must run, not only the new platform/snapshot clients.
+    assert "pnpm test -- --runInBand" in commands(jobs["typescript"])
+    package = yaml.safe_load(
+        (ROOT / "typescript/futureagi/package.json").read_text()
+    )
+    assert not package["jest"].get("testPathIgnorePatterns")
 
 
 def test_installed_package_gate_exercises_cli_action_and_public_types():

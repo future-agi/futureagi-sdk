@@ -52,10 +52,9 @@ env:
 jobs:
   e2e:
     name: e2e (python ${{ matrix.python }}${{ matrix.typescript && ', typescript' || '' }})
-    # ubuntu-latest became Ubuntu 26.04 on 2026-11-06 and actions/setup-python has no
-    # 3.9 build for it ("The version '3.9' ... was not found for Ubuntu 26.04"). Pin the
-    # jobs that run the 3.9 floor to 24.04 until the floor moves to 3.10.
-    runs-on: ubuntu-24.04
+    # Ephemeral labelled GCP runner, Ubuntu 24.04 for the Python 3.9 floor.
+    # Same placement contract as CI; never a shared/local test runner.
+    runs-on: [self-hosted, linux, x64, context-sdk-gcp]
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -68,6 +67,7 @@ jobs:
             typescript: true
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/require-sdk-test-vm
 
       - name: Pick the backend image tag
         env:
@@ -104,8 +104,17 @@ jobs:
         env:
           FUTURE_AGI_VERSION: ${{ env.BACKEND_VERSION }}
         run: |
+          # Exercise the opt-in consumption facade on this disposable backend.
+          # An unsupported release fails the live suite; no catalog exclusions.
+          cat > "$RUNNER_TEMP/sdk-context.yml" <<'YAML'
+          services:
+            app:
+              environment:
+                SKILLS_CONTEXT_CONSUMPTION_ENABLED: "true"
+          YAML
           docker compose --env-file e2e/stack/standalone-e2e.env \
             -f docker-compose.yml -f e2e/stack/docker-compose.standalone-e2e.yml \
+            -f "$RUNNER_TEMP/sdk-context.yml" \
             -p futureagi-e2e-standalone \
             up -d --wait --wait-timeout 1500 app postgres clickhouse mock-llm
           # A first boot migrates an empty database before the API answers.
@@ -132,7 +141,7 @@ jobs:
         run: python sdkgen/local_api_key.py --signup --base-url "$FI_BASE_URL" --label "gh${{ github.run_id }}"
 
       - name: Python live suite (every catalog operation)
-        run: PYTHONPATH=python pytest -q python/tests/platform
+        run: PYTHONPATH=python flock /tmp/ctxhub-pytest.lock python -m pytest -q python/tests/platform
 
       - uses: pnpm/action-setup@v4
         if: matrix.typescript

@@ -489,6 +489,160 @@ def test_dashboards_lifecycle(client):
         client.dashboards.get(dashboard.id)
 
 
+def _publish_context_fixture(client, name, files):
+    """Author a real context through HTTP; authoring is not yet catalogued."""
+    base = "/model-hub/skills/contexts/"
+    options = fi.RequestOptions(headers={"Idempotency-Key": str(uuid.uuid4())})
+    created = client.request("POST", base, body={
+        "name": name, "description": "SDK live consumption fixture", "tags": [], "files": files,
+    }, options=options)
+    root = base + created["context_id"] + "/draft/"
+    draft = client.request("GET", root)
+    review = client.request("POST", root + "head-review/", body={"revision": draft["revision"]})
+    acknowledgment = {
+        "revision": draft["revision"], "expected_digest": draft["digest"],
+        "expected_head_version": review["expected_head_version"],
+        "review_fingerprint": review["review_fingerprint"],
+    }
+    accepted = client.request("POST", root + "acknowledge-head/", body=acknowledgment)
+    published = client.request("POST", root + "publish/", body={
+        **acknowledgment, "revision": accepted["revision"], "base_version": draft["base_version"],
+        "review_fingerprint": accepted["review_fingerprint"],
+        "note": "SDK live lifecycle", "acknowledge_warnings": True,
+    }, options=fi.RequestOptions(headers={"Idempotency-Key": str(uuid.uuid4())}))
+    return created["context_id"], published["version"]
+
+
+def test_skills_catalog_lifecycle(client):
+    name = _name("skill")
+    text = f"---\nname: {name}\ndescription: Use for SDK lifecycle validation.\n---\nRead the approved policy.\n"
+    published = client.skills.publish(
+        files=[{"path": "SKILL.md", "content": text}], labels=[], tags=["sdk-live"], acknowledge_warnings=True,
+    )
+    skill_id, version = published.skill.id, published.version
+    assert skill_id in [item.id for item in client.skills.list(search=name)]
+    assert client.skills.update_tags(skill_id, tags=["sdk-updated"]).tags == ["sdk-updated"]
+    label = client.skills.set_label(
+        skill_id, "sdk-live", version=version["number"], expected_release_revision=published.release_revision,
+    )
+    assert label.version_id == version["id"]
+    resolved = client.skills.resolve(name=name, label="sdk-live")
+    assert (resolved.skill_id, resolved.version_id, resolved.digest) == (skill_id, version["id"], version["digest"])
+    assert client.skills.read_file(skill_id, resolved.version, path="SKILL.md").text == text
+
+
+@pytest.mark.parametrize("kind", ["skill", "agent_context"])
+def test_scoped_consumption_lifecycle(client, kind):
+    """Real issuance, paged immutable reads, label movement, and revocation.
+
+    No mocked transport or blanket error allowance: a missing facade fails this
+    suite, rather than letting the completeness check report false coverage.
+    """
+    import hashlib
+    import os
+    from datetime import datetime, timedelta, timezone
+
+    name = _name("consume")
+    entrypoint = "SKILL.md" if kind == "skill" else "AGENTS.md"
+    text = "Read the approved café policy before responding.\n"
+    if kind == "skill":
+        text = f"---\nname: {name}\ndescription: Use for SDK consumption validation.\n---\n" + text
+    files = [{"path": entrypoint, "content": text}, {"path": "references/policy.md", "content": "Approved policy.\n"}]
+    if kind == "skill":
+        published = client.skills.publish(files=files, labels=["sdk-live"], acknowledge_warnings=True)
+        resource_id, version = published.skill.id, published.version
+    else:
+        resource_id, version = _publish_context_fixture(client, name, files)
+    issue_args = {
+        "purpose": "consume",
+        "grants": [{"kind": kind, "resource_id": resource_id,
+                    "labels": ["sdk-live"] if kind == "skill" else [], "version_ids": [version["id"]]}],
+        "binding_ids": [],
+        "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
+        "idempotency_key": str(uuid.uuid4()),
+    }
+    issued = client.context_credentials.issue(**issue_args)
+    revoked = False
+    try:
+        assert issued.secret_available and issued.secret
+        replay = client.context_credentials.issue(**issue_args)
+        assert replay.id == issued.id and replay.secret is None and not replay.secret_available
+        metadata = next(item for item in client.context_credentials.list(page_size=1) if item.id == issued.id)
+        assert metadata.purpose == "consume" and metadata.grants[0].resource_id == resource_id
+        assert "secret" not in metadata.model_dump()
+        with fi.Client(base_url=os.environ["FI_BASE_URL"], auth=fi.ContextAuth(issued.secret),
+                       strict_responses=True, max_retries=0) as scoped:
+            resource = scoped.skill_consumption if kind == "skill" else scoped.contexts
+            resolved = resource.resolve(name=name, **({"label": "sdk-live"} if kind == "skill" else {"version": version["number"]}))
+            assert (resolved.resource_id, resolved.version_id, resolved.digest) == (resource_id, version["id"], version["digest"])
+            assert resolved.resolution_id and resolved.resolution_expires_at
+            if kind == "skill":
+                newer = client.skills.publish(
+                    files=[{**files[0], "content": text + "New policy revision.\n"}, files[1]],
+                    labels=[], acknowledge_warnings=True,
+                )
+                client.skills.set_label(resource_id, "sdk-live", version=newer.version["number"],
+                                        expected_release_revision=newer.release_revision)
+                assert resource.resolve(name=name, label="sdk-live").version_id == newer.version["id"]
+            # Continuation uses the original lease and version, never re-resolves a label.
+            seen = []
+            offset = 0
+            while True:
+                page = resource.manifest(resource_id, resolved.version, resolution_id=resolved.resolution_id,
+                                         file_offset=offset, file_limit=1)
+                assert (page.version_id, page.digest, page.resolution_id) == (resolved.version_id, resolved.digest, resolved.resolution_id)
+                seen.extend(page.files)
+                if page.next_file_offset is None:
+                    break
+                assert offset < page.next_file_offset < page.file_count
+                offset = page.next_file_offset
+            assert len(seen) == resolved.file_count
+            assert len({file.path for file in seen}) == len(seen)
+            chunks, offset = [], 0
+            while True:
+                chunk = resource.read_file(resource_id, resolved.version, path=entrypoint,
+                                           resolution_id=resolved.resolution_id, offset=offset, max_bytes=16)
+                assert (chunk.version_id, chunk.digest) == (resolved.version_id, resolved.digest)
+                chunks.append(chunk.text)
+                if chunk.eof:
+                    break
+                assert offset < chunk.next_offset <= len(text)
+                offset = chunk.next_offset
+            assert "".join(chunks) == text
+            entry = next(file for file in seen if file.path == entrypoint)
+            assert entry.sha256 == hashlib.sha256(text.encode()).hexdigest()
+            assert entry.size_bytes == len(text.encode())
+            access = resource.check_access(resource_id, resolved.version, resolution_id=resolved.resolution_id)
+            assert access.allowed and access.version_id == resolved.version_id and access.digest == resolved.digest
+            # Consumption credentials cannot enumerate the broader library.
+            with pytest.raises(fi.APIError) as denied:
+                scoped.skills.list().first_page()
+            assert denied.value.status_code in (401, 403)
+            client.context_credentials.revoke(issued.id)
+            revoked = True
+            for continuation in (
+                lambda: resource.resolve(name=name, version=resolved.version),
+                lambda: resource.manifest(resource_id, resolved.version, resolution_id=resolved.resolution_id),
+                lambda: resource.read_file(resource_id, resolved.version, path=entrypoint, resolution_id=resolved.resolution_id),
+                lambda: resource.check_access(resource_id, resolved.version, resolution_id=resolved.resolution_id),
+            ):
+                with pytest.raises(fi.APIError) as revoked_error:
+                    continuation()
+                assert revoked_error.value.status_code in (401, 403)
+    finally:
+        if not revoked:
+            client.context_credentials.revoke(issued.id)
+
+
+def test_context_catalog_operations_succeeded(client, record_calls):
+    """The new lifecycle slice requires success, not just recorded HTTP errors."""
+    prefixes = ("contexts.", "skill_consumption.", "context_credentials.", "skills.")
+    operations = [entry["id"] for entry in yaml.safe_load(CATALOG.read_text())["operations"]
+                  if entry["id"].startswith(prefixes) and entry["surfaces"].get("sdk") is not False]
+    missing = [operation for operation in operations if "ok" not in record_calls.get(operation, [])]
+    assert not missing, f"context/skill operations without a successful real-backend call: {missing}"
+
+
 # --------------------------------------------------------------------------- #
 
 

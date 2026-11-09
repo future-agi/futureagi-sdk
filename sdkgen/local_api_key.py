@@ -9,10 +9,10 @@ Two ways in, same endpoints the UI uses:
     # a fresh account on a throwaway stack (CI, the monorepo's E2E stack)
     python sdkgen/local_api_key.py --signup --base-url http://localhost:8100
 
---signup follows e2e/lib/provisioning.ts in the monorepo: POST /accounts/signup/,
-POST /accounts/token/, GET /accounts/user-info/ until the default workspace exists,
-GET /accounts/keys/ for the organization's system key. The login path calls
-POST /accounts/token/ and POST /accounts/key/generate_secret_key/ instead.
+--signup calls POST /accounts/signup/, POST /accounts/token/, and
+GET /accounts/user-info/ until the default workspace exists. Both paths then
+POST /accounts/key/generate_secret_key/ for a human-owned user key, which can
+exercise private context authoring and scoped credential administration.
 
 The tests read .env.local (python/tests/platform/conftest.py, src/platform/__tests__/live.test.ts).
 """
@@ -73,13 +73,15 @@ def signup_keys(http: httpx.Client, label: str) -> dict:
             sys.exit(f"no default workspace for {email} after 60s: {body}")
         time.sleep(1)
 
-    keys = http.get(
-        "/accounts/keys/",
+    # Private context authoring/credential administration require a human-owned
+    # user key, not the signup organization's broad system key.
+    keys = http.post(
+        "/accounts/key/generate_secret_key/",
+        json={"key_name": f"sdk-live-{run_id}"},
         headers={**headers, "X-Organization-Id": organization_id, "X-Workspace-Id": workspace_id},
     )
     keys.raise_for_status()
-    data = keys.json()["data"]
-    return {"api_key": data["api_key"], "secret_key": data["secret_key"], "masked_api_key": data["api_key"][:6] + "…", "email": email}
+    return {**keys.json()["result"], "email": email, "workspace_id": workspace_id}
 
 
 def main() -> int:
@@ -102,7 +104,10 @@ def main() -> int:
             result = login_keys(http, args.email, password)
 
     env = Path(args.output)
-    env.write_text(f"FI_BASE_URL={args.base_url}\nFI_API_KEY={result['api_key']}\nFI_SECRET_KEY={result['secret_key']}\n")
+    content = f"FI_BASE_URL={args.base_url}\nFI_API_KEY={result['api_key']}\nFI_SECRET_KEY={result['secret_key']}\n"
+    if result.get("workspace_id"):
+        content += f"FI_WORKSPACE_ID={result['workspace_id']}\n"
+    env.write_text(content)
     env.chmod(0o600)
     who = f" as {result['email']}" if "email" in result else ""
     print(f"wrote {env} (key {result['masked_api_key']}){who}")

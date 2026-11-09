@@ -124,10 +124,8 @@ jobs:
         run: pnpm install --ignore-workspace --frozen-lockfile --ignore-scripts
       - name: Type check
         run: pnpm run typecheck
-      - name: Unit tests (platform and snapshot clients)
-        # src/kb and src/annotations carry jest suites that fail on dev as
-        # well (pre-existing); they are not part of the gate until fixed.
-        run: pnpm test -- src/platform src/__tests__/r3_l10 --runInBand
+      - name: Unit tests (all SDK clients)
+        run: pnpm test -- --runInBand
       - name: Build (CJS, ESM, ESNext)
         run: pnpm run build
 

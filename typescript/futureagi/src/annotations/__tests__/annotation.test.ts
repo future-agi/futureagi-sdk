@@ -2,8 +2,9 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { Annotation } from '../annotation';
 import { AnnotationRecord, BulkAnnotationResponse } from '../types';
 
-// Mock the auth and request functionality
-jest.mock('../../api/auth');
+import { InvalidAuthError } from '../../utils/errors';
+
+// Keep real constructor/auth configuration; mock only HTTP requests below.
 
 describe('Annotation', () => {
   let annotationClient: Annotation;
@@ -51,6 +52,7 @@ describe('Annotation', () => {
       mockRequest
         .mockResolvedValueOnce({ data: mockProjects }) // listProjects
         .mockResolvedValueOnce({ data: { result: mockLabels } }) // getLabels
+        .mockResolvedValueOnce({ data: mockProjects }) // resolve project for second annotation
         .mockResolvedValueOnce({ data: mockLabels }) // getLabels again for second annotation
         .mockResolvedValueOnce({ data: { result: mockResponse } }); // logAnnotations
 
@@ -68,10 +70,10 @@ describe('Annotation', () => {
       });
 
       expect(result).toEqual(mockResponse);
-      expect(mockRequest).toHaveBeenCalledTimes(4);
+      expect(mockRequest).toHaveBeenCalledTimes(5);
       
       // Verify the final request to bulk annotation endpoint
-      const finalCall = mockRequest.mock.calls[3];
+      const finalCall = mockRequest.mock.calls[4];
       expect(finalCall[0].url).toContain('tracer/bulk-annotation/');
       expect(finalCall[0].data.records).toHaveLength(1);
       expect(finalCall[0].data.records[0]).toEqual({
@@ -102,6 +104,7 @@ describe('Annotation', () => {
       mockRequest
         .mockResolvedValueOnce({ data: mockProjects })
         .mockResolvedValueOnce({ data: { result: mockLabels } })
+        .mockResolvedValueOnce({ data: mockProjects })
         .mockResolvedValueOnce({ data: { result: mockLabels } })
         .mockResolvedValueOnce({
           data: {
@@ -135,7 +138,7 @@ describe('Annotation', () => {
       expect(result.annotations_created).toBe(2);
       
       // Verify backend format
-      const finalCall = mockRequest.mock.calls[3];
+      const finalCall = mockRequest.mock.calls[4];
       expect(finalCall[0].data.records).toHaveLength(2);
     });
 
@@ -148,14 +151,13 @@ describe('Annotation', () => {
         { id: 'bool-label', name: 'helpful', type: 'thumbs_up_down' },
       ];
 
-      mockRequest
-        .mockResolvedValueOnce({ data: [{ id: 'proj-1', name: 'Test' }] })
-        .mockResolvedValueOnce({ data: mockLabels })
-        .mockResolvedValueOnce({ data: mockLabels })
-        .mockResolvedValueOnce({ data: mockLabels })
-        .mockResolvedValueOnce({ data: mockLabels })
-        .mockResolvedValueOnce({ data: mockLabels })
-        .mockResolvedValueOnce({
+      // Each annotation resolves its project and project-scoped label.
+      for (const _label of mockLabels) {
+        mockRequest
+          .mockResolvedValueOnce({ data: [{ id: 'proj-1', name: 'Test' }] })
+          .mockResolvedValueOnce({ data: mockLabels });
+      }
+      mockRequest.mockResolvedValueOnce({
           data: {
             message: 'Success',
             annotations_created: 5,
@@ -180,7 +182,8 @@ describe('Annotation', () => {
 
       await annotationClient.logAnnotations(records, { projectName: 'Test' });
 
-      const finalCall = mockRequest.mock.calls[6];
+      expect(mockRequest).toHaveBeenCalledTimes(11);
+      const finalCall = mockRequest.mock.calls[10];
       const backendRecord = finalCall[0].data.records[0];
       
       expect(backendRecord.annotations).toHaveLength(5);
@@ -352,7 +355,7 @@ describe('Annotation', () => {
       
       mockRequest.mockRejectedValueOnce(authError);
 
-      await expect(annotationClient.getLabels()).rejects.toThrow('Invalid authentication');
+      await expect(annotationClient.getLabels()).rejects.toThrow(InvalidAuthError);
     });
 
     it('should handle general API errors', async () => {

@@ -564,7 +564,10 @@ describe('Dataset', () => {
                         name: 'my_prompt',
                         config: expect.objectContaining({
                             model: 'gpt-3.5-turbo',
-                            messages: options.messages,
+                            messages: [{
+                                role: 'user',
+                                content: [{ type: 'text', text: 'Hello' }],
+                            }],
                         }),
                     }),
                 }),

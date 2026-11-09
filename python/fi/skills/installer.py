@@ -16,7 +16,11 @@ if TYPE_CHECKING:
 
 from pydantic import Field, model_validator
 
-from fi.context.adapters.codex import check_skill_frontmatter, check_supporting_path
+from fi.context.adapters.codex import (
+    check_skill_content,
+    check_skill_frontmatter,
+    check_supporting_path,
+)
 from fi.context.journal import (
     SKILLS_OWNERSHIP,
     Authorization,
@@ -283,6 +287,7 @@ def plan_install_skill(
     bundle = SkillBundle.model_validate(bundle.model_dump())
     bundle.lease.require_live()
     host = get_profile(profile)
+    check_skill_content(bundle.files["SKILL.md"], host)
     if not allow_preview:
         raise InstallationError(
             "profile_unverified",

@@ -115,9 +115,6 @@
       "**/?(*.)+(spec|test).ts",
       "**/?(*.)+(integration.test).ts"
     ],
-    "testPathIgnorePatterns": [
-      "<rootDir>/src/datasets/__tests__"
-    ],
     "collectCoverageFrom": [
       "src/**/*.ts",
       "!src/**/*.d.ts",

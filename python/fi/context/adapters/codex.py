@@ -162,6 +162,22 @@ def check_skill_frontmatter(raw: bytes) -> None:
         )
 
 
+def check_skill_content(raw: bytes, profile: Profile) -> None:
+    """Validate the complete skill against the destination's text-only policy.
+
+    Preview opt-in qualifies discovery only, never executable host extensions.
+    Inspect raw text, including code fences: Markdown is not an execution boundary
+    for the host's shell-substitution preprocessing.
+    """
+    check_skill_frontmatter(raw)
+    if profile.id == "claude-code" and re.search(r"!\s*`", raw.decode("utf-8")):
+        raise InstallationError(
+            "runtime_incompatible",
+            "Dynamic shell substitutions require manual integration; the Claude Code profile is text-only.",
+            7,
+        )
+
+
 def project_entrypoint(
     raw: bytes, source_paths: set[str], generation: str, skills_directory: str
 ) -> bytes:
@@ -178,6 +194,19 @@ def project_entrypoint(
             "Source instructions contain reserved ownership markers.",
             7,
         )
+    relocated_paths = source_paths - {"AGENTS.md"}
+
+    def reject_literal_references(content: str) -> None:
+        # Do not parse commands or guess rewrites. Even a reference embedded in
+        # prose/JSON must not silently bind to an unrelated project-local file.
+        decoded = unquote(content)
+        if any(path in decoded for path in relocated_paths):
+            raise InstallationError(
+                "runtime_incompatible",
+                "A literal reference to relocated files requires manual integration.",
+                7,
+            )
+
     result: list[str] = []
     fence: str | None = None
     for line in text.splitlines(keepends=True):
@@ -185,16 +214,12 @@ def project_entrypoint(
         if stripped.startswith(("```", "~~~")):
             marker = stripped[:3]
             fence = None if fence == marker else marker if fence is None else fence
+            reject_literal_references(line)
             result.append(line)
             continue
         if fence is not None:
             # Relocating a literal path in executable examples would change semantics.
-            if any(path != "AGENTS.md" and path in line for path in source_paths):
-                raise InstallationError(
-                    "runtime_incompatible",
-                    "A fenced example references relocated files; review manual integration.",
-                    7,
-                )
+            reject_literal_references(line)
             result.append(line)
             continue
         if re.search(r"^\s*\[[^\]]+\]:", line) or "<a " in line or "<img " in line:
@@ -206,13 +231,7 @@ def project_entrypoint(
         pieces = re.split(r"(`+[^`]*`+)", line)
         for index, piece in enumerate(pieces):
             if piece.startswith("`"):
-                literal = piece.strip("`")
-                if literal in source_paths and literal != "AGENTS.md":
-                    raise InstallationError(
-                        "runtime_incompatible",
-                        "A code path requires manual relocation.",
-                        7,
-                    )
+                reject_literal_references(piece)
                 continue
 
             def rewrite(match: re.Match[str]) -> str:
@@ -248,6 +267,7 @@ def project_entrypoint(
                     "Complex Markdown links require manual integration.",
                     7,
                 )
+            reject_literal_references(simple.sub("", piece))
             pieces[index] = simple.sub(rewrite, piece)
         result.append("".join(pieces))
     return "".join(result).encode("utf-8")
