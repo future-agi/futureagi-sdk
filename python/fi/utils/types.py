@@ -1,3 +1,4 @@
+from enum import Enum, unique  # noqa: F401 - published names of fi.utils.types
 from typing import List, NamedTuple, Optional, Sequence, Type, TypeVar, Union
 
 import numpy as np
