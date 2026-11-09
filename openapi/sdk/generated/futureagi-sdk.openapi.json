@@ -10372,7 +10372,7 @@
         "description": "",
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "$ref": "#/components/schemas/CreateDatasetFromLocalFileRequest"
               }
@@ -39387,8 +39387,7 @@
           "file": {
             "title": "File",
             "type": "string",
-            "readOnly": true,
-            "format": "uri"
+            "format": "binary"
           },
           "new_dataset_name": {
             "title": "New dataset name",
@@ -39402,7 +39401,10 @@
             "title": "Source",
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "file"
+        ]
       },
       "LocalFileDatasetCreateStartedResult": {
         "required": [

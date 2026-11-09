@@ -3189,7 +3189,10 @@
           "model-hub"
         ],
         "x-runtime-request-validation": true,
-        "x-runtime-response-validation": true
+        "x-runtime-response-validation": true,
+        "consumes": [
+          "multipart/form-data"
+        ]
       }
     },
     "/model-hub/develops/create-empty-dataset/": {
@@ -14583,8 +14586,7 @@
         "file": {
           "title": "File",
           "type": "string",
-          "readOnly": true,
-          "format": "uri"
+          "format": "binary"
         },
         "new_dataset_name": {
           "title": "New dataset name",
@@ -14598,7 +14600,10 @@
           "title": "Source",
           "type": "string"
         }
-      }
+      },
+      "required": [
+        "file"
+      ]
     },
     "CreateEmptyDatasetRequest": {
       "required": [
