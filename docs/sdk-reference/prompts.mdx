@@ -432,11 +432,11 @@ Fetch a prompt template by name; the default version unless `version` is given.
 <CodeGroup>
 
 ```python Python
-result = client.prompts.get_by_name()
+result = client.prompts.get_by_name(name="customer_support")
 ```
 
 ```typescript TypeScript
-const result = await client.prompts.getByName();
+const result = await client.prompts.getByName({ name: "customer_support" });
 ```
 
 </CodeGroup>
@@ -480,7 +480,7 @@ export interface PromptsGetByNameParams {
 
 #### Parameters
 
-<ParamField query="name" type="string" optional />
+<ParamField query="name" type="string" required />
 <ParamField query="version" type="string" optional />
 <ParamField query="created_at" type="string" optional />
 <ParamField query="search" type="string" optional>
@@ -1046,11 +1046,11 @@ List the labels assigned to a prompt template's versions.
 <CodeGroup>
 
 ```python Python
-result = client.prompts.labels.for_template()
+result = client.prompts.labels.for_template(template_name="customer_support")
 ```
 
 ```typescript TypeScript
-const result = await client.prompts.labels.forTemplate();
+const result = await client.prompts.labels.forTemplate({ template_name: "customer_support" });
 ```
 
 </CodeGroup>
@@ -1092,8 +1092,12 @@ export interface PromptsLabelsForTemplateParams {
 <ParamField query="limit" type="integer" optional>
   Number of results to return per page.
 </ParamField>
-<ParamField query="template_id" type="string" optional />
-<ParamField query="template_name" type="string" optional />
+<ParamField query="template_id" type="string" optional>
+  Required unless `template_name` is supplied.
+</ParamField>
+<ParamField query="template_name" type="string" optional>
+  Required unless `template_id` is supplied.
+</ParamField>
 
 #### Returns
 
@@ -1108,11 +1112,14 @@ Fetch the prompt template version a label points to, by template name and label 
 <CodeGroup>
 
 ```python Python
-result = client.prompts.labels.get_template()
+result = client.prompts.labels.get_template(name="customer_support", label="production")
 ```
 
 ```typescript TypeScript
-const result = await client.prompts.labels.getTemplate();
+const result = await client.prompts.labels.getTemplate({
+  name: "customer_support",
+  label: "production",
+});
 ```
 
 </CodeGroup>
@@ -1156,9 +1163,13 @@ export interface PromptsLabelsGetTemplateParams {
 <ParamField query="limit" type="integer" optional>
   Number of results to return per page.
 </ParamField>
-<ParamField query="name" type="string" optional />
-<ParamField query="label" type="string" optional />
-<ParamField query="version" type="string" optional />
+<ParamField query="name" type="string" required />
+<ParamField query="label" type="string" optional>
+  Required unless `version` is supplied.
+</ParamField>
+<ParamField query="version" type="string" optional>
+  Required unless `label` is supplied.
+</ParamField>
 
 #### Returns
 
