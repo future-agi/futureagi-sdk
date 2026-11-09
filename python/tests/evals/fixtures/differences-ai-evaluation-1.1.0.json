@@ -79,7 +79,7 @@
    "id": "success-status",
    "area": "responses",
    "ai_evaluation": "`fi.api.auth.ResponseHandler.parse` treated every status other than 200 as an error. Unified cloud evaluations treated caught request failures as completed evaluations and ignored per-call config. Async submit kept only the first returned execution ID. Execution.wait slept and polled before checking its deadline and accepted late terminal results.",
-   "futureagi": "The shared `ResponseHandler.parse` treats every 2xx status as a success and calls `_parse_success` for it. Unified cloud evaluations report request failures with failed status and error details; batch success_rate counts only completed requests, and per-call config reaches the request. Legacy Evaluator.evaluate calls keep their default failure placeholders. Async submit preserves every returned execution ID and requires batch=True for list-valued inputs, rejecting them before scheduling otherwise. A batch handle waits until all jobs are terminal and reports failure if any job failed; scalar single-ID calls keep their existing Execution handle. Execution.wait caps sleeps, evaluator polling HTTP/future timeouts and retry delays to a shared monotonic deadline, rejects late results and never starts a poll after expiration. Manual refresh and requests outside wait retain their existing timeouts and retries.",
+   "futureagi": "The shared `ResponseHandler.parse` treats every 2xx status as a success and calls `_parse_success` for it. Unified cloud evaluations report request failures with failed status and error details; batch success_rate counts only completed requests, and per-call config reaches the request. Legacy Evaluator.evaluate calls keep their default failure placeholders. Async submit preserves every returned execution ID and requires batch=True for list-valued inputs, rejecting them before scheduling otherwise. A batch handle waits until all jobs are terminal and reports failure if any job failed; scalar single-ID calls keep their existing Execution handle. Execution.wait caps sleeps, bounded executor admission, evaluator polling HTTP/future timeouts and retry delays to a shared monotonic deadline, rejects late results and checks expiry again before queued polls reach the HTTP transport. Manual refresh and requests outside wait retain their existing timeouts and retries.",
    "docs": "A custom `ResponseHandler` subclass now sees 201 to 299 as successes. Check unified evaluation status/error rather than treating a failed request as a completed score. Per-call cloud config overrides now reach the request as config.params instead of being silently ignored. Use Evaluator.submit(..., batch=True) for list-valued inputs, handle.ids for all server IDs, handle.executions for individual handles, and handle.wait() for the complete batch. The batch result is an ordered list; its aggregate id is not resumable, so pass individual ids to get_execution. wait(timeout=...) now raises TimeoutError at expiration rather than returning a late completion; timing out does not cancel the backend evaluation, and cancellation of an in-flight polling future is best-effort. Custom synchronous refresh callbacks need their own I/O timeouts and are checked for expiration on return.",
    "tests": [
     "tests/evals/test_differences.py::test_any_2xx_status_is_a_success",
@@ -101,7 +101,11 @@
     "tests/test_execution_wait_deadline.py::test_retry_recomputes_remaining_budget",
     "tests/test_execution_wait_deadline.py::test_manual_refresh_restores_default_timeout_and_retry_policy",
     "tests/test_execution_wait_deadline.py::test_batch_polls_share_one_deadline",
-    "tests/test_execution_wait_deadline.py::test_batch_does_not_dispatch_next_poll_at_deadline"
+    "tests/test_execution_wait_deadline.py::test_batch_does_not_dispatch_next_poll_at_deadline",
+    "tests/test_execution_wait_executor.py::test_saturated_executor_does_not_extend_wait",
+    "tests/test_execution_wait_executor.py::test_capacity_available_before_deadline_allows_poll",
+    "tests/test_execution_wait_executor.py::test_expired_poll_never_dispatches_and_releases_capacity",
+    "tests/test_execution_wait_executor.py::test_executor_without_deadline_still_blocks_and_forwards_keywords"
    ],
    "source_contract": {
     "fi/evals/evaluator.py:Evaluator.submit": {

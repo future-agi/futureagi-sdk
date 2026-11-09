@@ -12,6 +12,7 @@ class _EvaluatorSubmitMethods:
         import time
 
         from fi.evals.execution import _WAIT_DEADLINE, _remaining_wait
+        from fi.utils.executor import _SUBMIT_DEADLINE
         from fi.utils.routes import Routes
 
         deadline = _WAIT_DEADLINE.get()
@@ -28,16 +29,20 @@ class _EvaluatorSubmitMethods:
             remaining = _remaining_wait(deadline)
             future = None
             try:
-                future = self._session.request(
-                    method=config.method.value,
-                    url=config.url,
-                    headers=headers,
-                    params=config.params or {},
-                    json=config.json or {},
-                    data=config.data or {},
-                    files=config.files or {},
-                    timeout=min(request_timeout, remaining),
-                )
+                token = _SUBMIT_DEADLINE.set(deadline)
+                try:
+                    future = self._session.request(
+                        method=config.method.value,
+                        url=config.url,
+                        headers=headers,
+                        params=config.params or {},
+                        json=config.json or {},
+                        data=config.data or {},
+                        files=config.files or {},
+                        timeout=min(request_timeout, remaining),
+                    )
+                finally:
+                    _SUBMIT_DEADLINE.reset(token)
                 response = future.result(timeout=_remaining_wait(deadline))
                 break
             except Exception:
