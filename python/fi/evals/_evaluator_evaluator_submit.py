@@ -24,6 +24,12 @@ class _EvaluatorSubmitMethods:
         handle immediately. Use ``handle.wait()`` or
         :py:meth:`get_execution` to poll for completion.
 
+        List-valued inputs require ``batch=True``. This returns a batch handle
+        with every server ID in ``handle.ids`` and individually resumable handles
+        in ``handle.executions``; ``wait()`` waits for all jobs and ``result`` is
+        an ordered list. Without that opt-in, batch inputs are rejected before
+        submission. Multiple IDs in any response are always retained together.
+
         This is the non-blocking equivalent of :py:meth:`evaluate` —
         internally it always sets ``is_async=True`` so the backend records
         the evaluation and starts a worker without holding the HTTP
@@ -42,6 +48,10 @@ class _EvaluatorSubmitMethods:
             if inspect.isclass(t) and issubclass(t, EvalTemplate):
                 return t.eval_name
             return None
+
+        batch = kwargs.get("batch") is True
+        if not batch and isinstance(inputs, dict) and any(isinstance(value, list) for value in inputs.values()):
+            raise ValueError("List-valued batch inputs require batch=True; otherwise submit single inputs")
 
         eval_name = _extract_name(
             eval_templates[0] if isinstance(eval_templates, list) else eval_templates
@@ -88,21 +98,22 @@ class _EvaluatorSubmitMethods:
             raise RuntimeError(
                 f"Async submit did not return a result list (response: {body})"
             )
-        evaluations = results[0].get("evaluations") or []
-        first_eval = evaluations[0] if evaluations else {}
-        execution_id = first_eval.get("eval_id")
-        if not execution_id:
+        evaluations = [evaluation for result in results for evaluation in (result.get("evaluations") or [])]
+        if not evaluations or any(not evaluation.get("eval_id") for evaluation in evaluations):
             raise RuntimeError(
-                f"Async submit did not return an eval_id (response: {body})"
+                f"Async submit did not return an eval_id for every evaluation (response: {body})"
             )
 
-        handle = Execution(
-            id=str(execution_id),
-            kind="eval",
-            status="pending",
-        )
-        handle._refresher = lambda eid=execution_id: self._refresh_eval_execution(eid)
-        return handle
+        handles = []
+        for evaluation in evaluations:
+            execution_id = str(evaluation["eval_id"])
+            handle = Execution(id=execution_id, kind="eval", status="pending")
+            handle._refresher = lambda eid=execution_id: self._refresh_eval_execution(eid)
+            handles.append(handle)
+        if batch or len(handles) > 1:
+            from fi.evals.core._batch_execution import BatchExecution
+            return BatchExecution(handles)
+        return handles[0]
 
 
     def get_execution(self, execution_id: str) -> Execution:
