@@ -7,6 +7,53 @@ from fi.evals.evaluator import (Any, Dict, EvalTemplate, Execution, Optional, Un
 class _EvaluatorSubmitMethods:
     __slots__ = ()
 
+    def request(self, config, response_handler=None):
+        """Bound only execution polling inside wait; other requests stay unchanged."""
+        import time
+
+        from fi.evals.execution import _WAIT_DEADLINE, _remaining_wait
+        from fi.utils.routes import Routes
+
+        deadline = _WAIT_DEADLINE.get()
+        if (deadline is None or config.method.value != "GET"
+                or config.url != f"{self._base_url}/{Routes.get_eval_result.value}"):
+            return super().request(config, response_handler)
+
+        headers = self._platform_headers(
+            config.url, {**self._default_headers, **(config.headers or {})}
+        )
+        request_timeout = config.timeout or self._default_timeout
+        response = None
+        for attempt in range(config.retry_attempts):
+            remaining = _remaining_wait(deadline)
+            future = None
+            try:
+                future = self._session.request(
+                    method=config.method.value,
+                    url=config.url,
+                    headers=headers,
+                    params=config.params or {},
+                    json=config.json or {},
+                    data=config.data or {},
+                    files=config.files or {},
+                    timeout=min(request_timeout, remaining),
+                )
+                response = future.result(timeout=_remaining_wait(deadline))
+                break
+            except Exception:
+                # Cancellation is best-effort: a running HTTP request may finish
+                # later, but wait must not keep blocking on its response.
+                if future is not None:
+                    future.cancel()
+                remaining = _remaining_wait(deadline)
+                if attempt == config.retry_attempts - 1:
+                    raise
+                time.sleep(min(config.retry_delay, remaining))
+        _remaining_wait(deadline)
+        if response_handler:
+            return response_handler.parse(response=response)
+        return response
+
     def submit(
         self,
         eval_templates: Union[str, type[EvalTemplate]],
