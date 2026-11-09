@@ -8,7 +8,7 @@
  "deviations": {
   "fi/evals/core/prompt_generator.py": "route the optional LiteLLM import through the typed dependency guard, preserving completion arguments and missing transitive dependency errors",
   "fi/evals/llm/providers/litellm.py": "route the optional LiteLLM import through the shared typed dependency guard, preserving provider behavior and missing transitive dependency errors",
-  "fi/evals/guardrails/README.md": "a documentation example spelled so it does not look like a credential (the scanned string is built at run time); installation names futureagi, not the retired package",
+  "fi/evals/guardrails/README.md": "a documentation example spelled so it does not look like a credential (the scanned string is built at run time); installation names futureagi, not the retired package; discovery and gateway examples import only exported names, including the model and aggregation enums they use",
   "fi/evals/metrics/code_security/detectors/secrets.py": "a docstring example value replaced by a placeholder; no code changes",
   "fi/evals/feedback/store.py": "missing dependency guidance installs chromadb directly, not a retired distribution",
   "fi/evals/metrics/hallucination/nli.py": "NLI repair guidance installs transformers and torch directly",

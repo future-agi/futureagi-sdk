@@ -45,7 +45,7 @@ else:
 ## Discover Available Backends
 
 ```python
-from fi.evals.guardrails import Guardrails, discover_backends, get_backend_details
+from fi.evals.guardrails import Guardrails
 
 # Quick discovery
 available = Guardrails.discover_backends()
@@ -217,7 +217,7 @@ The `GuardrailsGateway` provides a simpler, more ergonomic interface with factor
 ### Factory Methods
 
 ```python
-from fi.evals.guardrails import GuardrailsGateway, Gateway
+from fi.evals.guardrails import GuardrailsGateway, GuardrailModel, AggregationStrategy
 
 # Auto-discover best available backend
 gateway = GuardrailsGateway.auto()
