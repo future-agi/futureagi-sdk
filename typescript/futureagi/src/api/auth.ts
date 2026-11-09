@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig, AxiosError } from 'axios';
+import NodeFormData from 'form-data';
 import { BoundedExecutor } from '../utils/executor';
 import { 
     MissingAuthError, 
@@ -216,7 +217,9 @@ export class HttpClient {
 
         // Handle file uploads
         if (config.files && Object.keys(config.files).length > 0) {
-            const formData = new FormData();
+            // Native FormData stringifies Node streams instead of uploading their bytes.
+            const hasStreams = Object.values(config.files).some(file => typeof file?.pipe === 'function');
+            const formData = hasStreams ? new NodeFormData() : new FormData();
             Object.entries(config.files).forEach(([key, file]) => {
                 formData.append(key, file);
             });
@@ -228,11 +231,17 @@ export class HttpClient {
             requestConfig.data = formData;
             requestConfig.headers = {
                 ...requestConfig.headers,
-                'Content-Type': 'multipart/form-data',
+                ...(formData instanceof NodeFormData
+                    ? formData.getHeaders()
+                    : { 'Content-Type': 'multipart/form-data' }),
             };
         }
 
-        const retryAttempts = config.retry_attempts || this._defaultRetryAttempts;
+        // Node multipart bodies contain one-shot streams. Retrying an exhausted form can
+        // hang until the upload timeout; surface the first failure without retry backoff.
+        const retryAttempts = requestConfig.data instanceof NodeFormData
+            ? 1
+            : (config.retry_attempts || this._defaultRetryAttempts);
         const retryDelay = config.retry_delay || this._defaultRetryDelay;
 
         // Execute request with bounded concurrency

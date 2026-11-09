@@ -136,18 +136,19 @@ class MissingAuthError extends SDKException {
         super(undefined, cause);
         this.missingApiKey = !fiApiKey;
         this.missingSecretKey = !fiSecretKey;
+        this.message = this.getMessage();
     }
 
     public getMessage(): string {
         const missing: string[] = [];
         if (this.missingApiKey) {
-            missing.push("'fi_api_key'");
+            missing.push("'fiApiKey'");
         }
         if (this.missingSecretKey) {
-            missing.push("'fi_secret_key'");
+            missing.push("'fiSecretKey'");
         }
 
-        return `FI Client could not obtain credentials. You can pass your fi_api_key and fi_secret_key ` +
+        return `FI Client could not obtain credentials. You can pass your fiApiKey and fiSecretKey ` +
                `directly to the FI Client, or you can set environment variables which will be read if the ` +
                `keys are not directly passed. ` +
                `To set the environment variables use the following variable names: \n` +
