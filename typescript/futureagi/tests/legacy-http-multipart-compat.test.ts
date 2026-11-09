@@ -15,7 +15,9 @@ it.each(['blob', 'text'])('preserves native multipart %s inputs without Node str
         }
         expect(config.data.get('name')).toBe('docs');
         const bytes = Buffer.from(await new Response(config.data).arrayBuffer());
-        expect(bytes.includes(Buffer.from(contents))).toBe(true);
+        // Native FormData normalizes text-field line endings, but preserves Blob bytes.
+        const serializedContents = kind === 'text' ? contents.replace(/\n/g, '\r\n') : contents;
+        expect(bytes.includes(Buffer.from(serializedContents))).toBe(true);
         return { status: 200, statusText: 'OK', headers: {}, config, data: {} };
     });
     axios.defaults.adapter = adapter;
