@@ -909,7 +909,10 @@ class Dataset(APIKeyAuth):
                     config=RequestConfig(method=HttpMethod.GET, url=url, params=params, timeout=DEFAULT_API_TIMEOUT),
                     response_handler=DatasetResponseHandler,
                 )
-                dataset_table.to_file(file_path)
+                if params["current_page_index"] == 0 and file_path.endswith(".csv"):
+                    dataset_table.to_df().to_csv(file_path, index=False)
+                else:
+                    dataset_table.to_file(file_path)
                 params["current_page_index"] += 1
                 metadata = dataset_table.metadata or {}
                 total_pages = metadata.get("total_pages", metadata.get("totalPages"))
