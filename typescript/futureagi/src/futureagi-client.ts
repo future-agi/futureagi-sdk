@@ -292,6 +292,7 @@ export class FutureAGIClient {
         fetch: options.fetch,
         timeoutMs: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
         retries: options.retries,
+        responseBodyTimeout: true,
         resolveCredentials: () => requireAuth(options),
       }), extra),
       headers: { ...options.headers },

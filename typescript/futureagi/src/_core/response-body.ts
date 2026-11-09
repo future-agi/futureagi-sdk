@@ -1,3 +1,31 @@
+/** Bound one read by the attempt's original deadline, including native abort errors. */
+export async function withResponseDeadline<T>(
+  consume: () => Promise<T>,
+  controller: AbortController,
+  deadline: number,
+  timeoutMs: number,
+): Promise<T> {
+  const { signal } = controller;
+  const abort = () => controller.abort(new Error(`request timed out after ${timeoutMs} ms`));
+  if (Date.now() >= deadline && !signal.aborted) abort();
+  if (signal.aborted) throw signal.reason;
+  let onAbort!: () => void;
+  const aborted = new Promise<never>((_, reject) => {
+    onAbort = () => reject(signal.reason);
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
+  const timer = setTimeout(abort, Math.max(0, deadline - Date.now()));
+  try {
+    return await Promise.race([consume(), aborted]);
+  } catch (error) {
+    // Native fetch can reject the body with a generic AbortError, not the supplied reason.
+    throw signal.aborted ? signal.reason : error;
+  } finally {
+    clearTimeout(timer);
+    signal.removeEventListener("abort", onAbort);
+  }
+}
+
 /** Wrap buffered body reads without replacing the Response or taking ownership of its stream. */
 export function mapResponseBodyReads(
   response: Response,
