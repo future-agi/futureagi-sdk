@@ -976,15 +976,31 @@ export class Dataset extends APIKeyAuth {
         }
 
         const url = `${this._baseUrl}/${Routes.dataset_table.replace('{dataset_id}', this._datasetConfig.id)}`;
-        const datasetTable = await this.request<DatasetTable>(
+        const readPage = (pageIndex: number) => this.request<DatasetTable>(
             {
                 method: HttpMethod.GET,
                 url,
-                params: { page_size: 1000, current_page_index: 0 },
+                params: { page_size: 500, current_page_index: pageIndex },
                 timeout: DEFAULT_API_TIMEOUT,
             },
             DatasetResponseHandler
-        ) as DatasetTable;
+        ) as Promise<DatasetTable>;
+
+        let pageIndex = 0;
+        const datasetTable = await readPage(pageIndex);
+        while (datasetTable.metadata?.has_more === true) {
+            const nextIndex = datasetTable.metadata.next_page_index;
+            if (!Number.isSafeInteger(nextIndex) || nextIndex <= pageIndex) {
+                throw new DatasetError('Dataset download received an invalid next page index.');
+            }
+            const page = await readPage(nextIndex);
+            datasetTable.rows.push(...page.rows);
+            datasetTable.metadata = page.metadata;
+            pageIndex = nextIndex;
+        }
+        if (datasetTable.metadata?.query_complete === false) {
+            throw new DatasetError('Dataset download is incomplete. Please retry the export.');
+        }
 
         if (loadToMemory) {
             return datasetTable;
