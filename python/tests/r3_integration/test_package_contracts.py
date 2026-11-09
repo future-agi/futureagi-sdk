@@ -20,6 +20,14 @@ def commands(job):
     return "\n".join(step.get("run", "") for step in job["steps"])
 
 
+def test_leaf_constructor_union_annotations_remain_importable_on_python39():
+    from fi.skills import AsyncSkillsClient, SkillsClient
+
+    # PEP 604 runtime unions cannot be evaluated by the supported Python 3.9.
+    for client in (SkillsClient, AsyncSkillsClient):
+        assert isinstance(client.__init__.__annotations__["source"], str)
+
+
 def test_optional_backend_is_pinned_and_scoped_to_qualified_interpreter():
     requirements = [Requirement(raw) for raw in requires("futureagi") or []]
     backend = next(item for item in requirements if item.name == "deepagents")

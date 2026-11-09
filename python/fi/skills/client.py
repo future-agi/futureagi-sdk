@@ -1,5 +1,7 @@
 """Verified leaf reads through the isolated F12 consumption facade."""
 
+from __future__ import annotations
+
 from fi.context.client import (
     AsyncSnapshotClient,
     AsyncSnapshotSource,
