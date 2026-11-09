@@ -1,8 +1,8 @@
-import { APIKeyAuth, APIKeyAuthConfig } from '../src/api/auth';
-import { Dataset } from '../src/datasets/dataset';
-import { KnowledgeBase } from '../src/kb/client';
-import { Prompt } from '../src/prompt/client';
-import { MissingAuthError, SDKException } from '../src/utils/errors';
+import { APIKeyAuth, APIKeyAuthConfig } from '../api/auth';
+import { Dataset } from '../datasets/dataset';
+import { KnowledgeBase } from '../kb/client';
+import { Prompt } from '../prompt/client';
+import { MissingAuthError, SDKException } from '../utils/errors';
 
 const cases = [
     { label: 'both keys', fiApiKey: undefined, fiSecretKey: undefined, missing: "'fiApiKey', 'fiSecretKey'" },

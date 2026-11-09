@@ -3,10 +3,10 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { Readable, Writable } from 'stream';
-import { HttpClient } from '../src/api/auth';
-import { HttpMethod } from '../src/api/types';
-import { KnowledgeBase } from '../src/kb/client';
-import { SDKException, ServiceUnavailableError } from '../src/utils/errors';
+import { HttpClient } from '../api/auth';
+import { HttpMethod } from '../api/types';
+import { KnowledgeBase } from '../kb/client';
+import { SDKException, ServiceUnavailableError } from '../utils/errors';
 
 /** Consume the upload just as a transport would, without opening a connection. */
 async function consumeBody(body: any): Promise<Buffer> {

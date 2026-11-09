@@ -3,9 +3,9 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { Writable } from 'stream';
-import { KnowledgeBase } from '../src/kb/client';
-import { HttpClient } from '../src/api/auth';
-import { HttpMethod } from '../src/api/types';
+import { KnowledgeBase } from '../kb/client';
+import { HttpClient } from '../api/auth';
+import { HttpMethod } from '../api/types';
 
 /** Serialize the real request body without opening an HTTP connection. */
 async function serializeBody(body: any): Promise<Buffer> {

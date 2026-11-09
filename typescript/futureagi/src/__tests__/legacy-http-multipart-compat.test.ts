@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { HttpClient } from '../src/api/auth';
-import { HttpMethod } from '../src/api/types';
+import { HttpClient } from '../api/auth';
+import { HttpMethod } from '../api/types';
 
 it.each(['blob', 'text'])('preserves native multipart %s inputs without Node streams', async kind => {
     const originalAdapter = axios.defaults.adapter;
