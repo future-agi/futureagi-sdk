@@ -1007,27 +1007,18 @@ class Dataset(APIKeyAuth):
         response_handler: type[ResponseHandler], 
         max_retries: int = 3
     ) -> Any:
-        retries = 0
-        last_exception: Optional[Exception] = None
+        """Delegate retries to the method-aware transport with one attempt budget.
 
-        while retries < max_retries:
-            try:
-                return self.request(config=config, response_handler=response_handler)
-            except (ConnectionError, Timeout) as e:
-                # Transport-level only. 5xx/parse errors must not re-send a
-                # non-idempotent POST (would duplicate server-side writes).
-                last_exception = e
-                retries += 1
-                if retries >= max_retries:
-                    break
-                wait_time = 2 ** retries
-                logging.warning(f"Request failed with {type(e).__name__}. Retrying request to {config.url} after {wait_time}s (attempt {retries}/{max_retries}). Error: {e}")
-                time.sleep(wait_time)
-   
-        if last_exception is not None:
-            raise last_exception # type: ignore
-        else:
+        ``max_retries`` caps the total attempts, including the initial request,
+        without increasing ``config.retry_attempts`` or mutating the caller's config.
+        POST and PATCH transport failures propagate without replay.
+        """
+        if max_retries <= 0:
             raise DatasetError(f"Request failed after {max_retries} retries, but no specific exception was captured.")
+        request_config = config.model_copy(update={
+            "retry_attempts": min(config.retry_attempts, max_retries),
+        })
+        return self.request(config=request_config, response_handler=response_handler)
 
     # Class methods for simple operations
     @classmethod
