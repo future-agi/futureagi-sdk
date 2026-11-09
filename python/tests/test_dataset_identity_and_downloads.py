@@ -174,3 +174,41 @@ def test_download_rejects_nonempty_pages_without_a_finite_page_count(tmp_path, m
     with pytest.raises(DatasetError, match="pagination"):
         client.download(str(tmp_path / "invalid.csv"))
     assert seen == [0]
+
+
+@pytest.mark.parametrize("existing", [None, "", "obsolete\nold-row\n"])
+@pytest.mark.parametrize("reverse_columns", [False, True])
+def test_multipage_csv_has_one_header_and_only_dataset_rows(tmp_path, existing, reverse_columns):
+    path = tmp_path / "rows.csv"
+    if existing is not None:
+        path.write_text(existing)
+    client, seen = download_client([
+        table(range(100), {"total_pages": 2}),
+        table([100], {"total_pages": 2}, reverse_columns=reverse_columns),
+    ])
+    frame = client.download(str(path), load_to_pandas=True)
+    assert len(frame) == 101
+    assert frame["number"].tolist() == list(range(101))
+    assert frame["enabled"].tolist() == [bool(i % 2) for i in range(101)]
+    assert pd.api.types.is_integer_dtype(frame["number"])
+    assert pd.api.types.is_bool_dtype(frame["enabled"])
+    assert path.read_text().splitlines().count("number,enabled") == 1
+    assert seen == [0, 1]
+
+
+def test_table_csv_append_keeps_header_order(tmp_path):
+    path = tmp_path / "append.csv"
+    path.touch()
+    table([1], {}).to_csv(str(path))
+    table([2], {}, reverse_columns=True).to_csv(str(path))
+    frame = pd.read_csv(path)
+    assert list(frame.columns) == ["number", "enabled"]
+    assert frame.to_dict("list") == {"number": [1, 2], "enabled": [True, False]}
+
+
+def test_table_csv_append_rejects_different_columns(tmp_path):
+    path = tmp_path / "append.csv"
+    path.write_text("different\noriginal\n")
+    with pytest.raises(ValueError, match="columns"):
+        table([1], {}).to_csv(str(path))
+    assert path.read_text() == "different\noriginal\n"
