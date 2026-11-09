@@ -1,3 +1,4 @@
+import copy
 import time
 import threading
 from typing import Dict, Optional
@@ -865,6 +866,29 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
 
             return re.sub(r"\{\{\s*(\w+)\s*\}\}", _repl, text)
 
+        def _render_content(value):
+            if isinstance(value, str):
+                return _substitute_vars(value)
+            if isinstance(value, list):
+                return [_render_content(part) for part in value]
+            if isinstance(value, dict):
+                return {key: _render_content(part) for key, part in value.items()}
+            return copy.deepcopy(value)
+
+        def _compile_message(message) -> dict:
+            if isinstance(message, dict):
+                result = copy.deepcopy(message)
+            elif hasattr(message, "model_dump"):
+                # variable_names is SDK bookkeeping, not a provider message field.
+                result = message.model_dump(exclude={"variable_names"})
+            else:
+                result = {"role": getattr(message, "role", None),
+                          "content": getattr(message, "content", None)}
+            if result.get("role") is None:
+                raise ValueError("Message object missing 'role' attribute")
+            result["content"] = _render_content(result.get("content"))
+            return result
+
         compiled: list[dict] = []
 
         for msg in self.template.messages:
@@ -875,27 +899,16 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                     # Insert each provided chat message
                     for ph_msg in kwargs[ph_name]:
                         if isinstance(ph_msg, dict) and "role" in ph_msg and "content" in ph_msg:
-                            compiled.append({
-                                "role": ph_msg["role"],
-                                "content": _substitute_vars(str(ph_msg["content"])),
-                            })
+                            compiled.append(_compile_message(ph_msg))
                         else:
                             raise ValueError(
                                 f"Each chat message for placeholder '{ph_name}' must include 'role' and 'content'."
                             )
                 else:
-                    # Placeholder unresolved – keep as-is
-                    compiled.append(msg)
+                    # Keep unresolved placeholders without sharing mutable data.
+                    compiled.append(copy.deepcopy(msg))
             else:
-                # Handle MessageBase or raw dict with role/content
-                role = getattr(msg, "role", msg.get("role") if isinstance(msg, dict) else None)
-                content = getattr(msg, "content", msg.get("content") if isinstance(msg, dict) else None)
-                if role is None:
-                    raise ValueError("Message object missing 'role' attribute")
-                compiled.append({
-                    "role": role,
-                    "content": _substitute_vars(str(content)),
-                })
+                compiled.append(_compile_message(msg))
 
         return compiled
 
