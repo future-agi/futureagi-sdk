@@ -73,5 +73,6 @@ class ChatCompletionMessage(BaseModel):
 
     role: str
     content: str | None = None
+    refusal: str | None = None
     tool_calls: list[ToolCall] | None = None
     name: str | None = None

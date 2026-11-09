@@ -66,6 +66,7 @@ def _cache_hit_chunk(body: dict[str, Any]) -> ChatCompletionChunk:
         msg = choice_data.get("message", {})
         delta = Delta(
             role=msg.get("role"), content=msg.get("content"),
+            refusal=msg.get("refusal"),
             tool_calls=[
                 ToolCallDelta(
                     index=i, id=tc.get("id"), type=tc.get("type"),

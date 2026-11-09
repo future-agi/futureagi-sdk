@@ -25,6 +25,7 @@ class _AccumulatedToolCall:
 @dataclass
 class _AccumulatedChoice:
     content_parts: list[str] = field(default_factory=list)
+    refusal_parts: list[str] = field(default_factory=list)
     tool_calls: dict[int, _AccumulatedToolCall] = field(default_factory=dict)
     finish_reason: str | None = None
     role: str | None = None
@@ -60,6 +61,9 @@ class ChunkAccumulator:
 
             if choice.delta.content is not None:
                 acc.content_parts.append(choice.delta.content)
+
+            if choice.delta.refusal is not None:
+                acc.refusal_parts.append(choice.delta.refusal)
 
             if choice.delta.tool_calls:
                 for tc_delta in choice.delta.tool_calls:
@@ -108,6 +112,7 @@ class ChunkAccumulator:
             message = ChatCompletionMessage(
                 role=acc.role or "assistant",
                 content=content,
+                refusal="".join(acc.refusal_parts) if acc.refusal_parts else None,
                 tool_calls=tool_calls_list,
             )
             choices.append(
