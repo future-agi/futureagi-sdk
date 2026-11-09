@@ -107,14 +107,16 @@ class Fixture {
   }
   page(offset = 0): Record<string, unknown> {
     return {
-      [this.kind === "agent_context" ? "context_id" : "skill_id"]: RESOURCE,
+      resource_id: RESOURCE,
+      kind: this.kind,
       name: "fixture",
       version: 7,
       version_id: VERSION,
       digest: this.digest,
       requested: { label: "production" },
-      entrypoint: "AGENTS.md",
-      descriptor_path: ".futureagi/context.json",
+      entrypoint: this.kind === "agent_context" ? "AGENTS.md" : "SKILL.md",
+      descriptor_path:
+        this.kind === "agent_context" ? ".futureagi/context.json" : null,
       resolution_id: LEASE,
       resolution_expires_at: this.expiry,
       files: this.metadata
@@ -141,7 +143,7 @@ class Fixture {
       next_offset: end < chars.length ? end : null,
       eof: end === chars.length,
       text: chars.slice(offset, end).join(""),
-      context_id: RESOURCE,
+      resource_id: RESOURCE,
       version_id: VERSION,
       digest: this.digest,
     };
@@ -244,7 +246,7 @@ test.each([
   ["files", []],
   ["file_count", true],
   ["version", true],
-  ["context_id", "../../escape"],
+  ["resource_id", "../../escape"],
   ["resolution_id", "bad\nheader"],
   ["resolution_expires_at", "2026-01-01T00:00:00"],
   ["entrypoint", "SKILL.md"],

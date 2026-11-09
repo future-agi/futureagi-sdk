@@ -61,9 +61,11 @@ def main(argv: list[str] | None = None) -> int:
     src.add_argument("--ref", help="branch or tag of future-agi/future-agi (default: the pinned backend release)")
     src.add_argument("--tools", type=Path, help="a local tools.generated.json")
     args = ap.parse_args(argv)
-    if args.tools:
-        tools = json.loads(args.tools.read_text())
-        where = str(args.tools)
+    pinned_tools = ROOT / "sdkgen/contracts/mcp-tools.json"
+    if args.tools or (not args.ref and pinned_tools.exists()):
+        source = args.tools or pinned_tools
+        tools = json.loads(source.read_text())
+        where = str(source)
     else:
         ref = args.ref or BACKEND_VERSION.read_text().strip()
         where = f"future-agi/future-agi@{ref}"

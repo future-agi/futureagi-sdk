@@ -23,6 +23,7 @@ from .._transport import (
     NotGiven,
     RequestOptions,
     SyncTransport,
+    operation_options,
 )
 
 
@@ -579,14 +580,14 @@ class EvalsTemplatesResource(Resource):
 
     _t: SyncTransport
 
-    def create(self, *, name: str | None | NotGiven = NOT_GIVEN, is_draft: bool | None | NotGiven = NOT_GIVEN, eval_type: Literal['llm', 'code', 'agent'] | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None | NotGiven = NOT_GIVEN, pass_threshold: float | None | NotGiven = NOT_GIVEN, choice_scores: Dict[str, Any] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, code: str | None | NotGiven = NOT_GIVEN, code_language: Literal['python', 'javascript'] | None | NotGiven = NOT_GIVEN, messages: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, few_shot_examples: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, mode: Literal['auto', 'agent', 'quick'] | None | NotGiven = NOT_GIVEN, tools: Dict[str, Any] | None | NotGiven = NOT_GIVEN, knowledge_bases: List[str] | None | NotGiven = NOT_GIVEN, data_injection: Dict[str, Any] | None | NotGiven = NOT_GIVEN, summary: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer_enabled: bool | None | NotGiven = NOT_GIVEN, template_format: Literal['mustache', 'jinja'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateCreateResponseResult:
+    def create(self, *, jev_mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, multi_choice: bool | None | NotGiven = NOT_GIVEN, input_data_types: Dict[str, Any] | None | NotGiven = NOT_GIVEN, name: str | None | NotGiven = NOT_GIVEN, is_draft: bool | None | NotGiven = NOT_GIVEN, eval_type: Literal['llm', 'code', 'agent'] | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None | NotGiven = NOT_GIVEN, pass_threshold: float | None | NotGiven = NOT_GIVEN, choice_scores: Dict[str, Any] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, code: str | None | NotGiven = NOT_GIVEN, code_language: Literal['python', 'javascript'] | None | NotGiven = NOT_GIVEN, messages: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, few_shot_examples: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, mode: Literal['auto', 'agent', 'quick'] | None | NotGiven = NOT_GIVEN, tools: Dict[str, Any] | None | NotGiven = NOT_GIVEN, knowledge_bases: List[str] | None | NotGiven = NOT_GIVEN, data_injection: Dict[str, Any] | None | NotGiven = NOT_GIVEN, summary: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer_enabled: bool | None | NotGiven = NOT_GIVEN, template_format: Literal['mustache', 'jinja'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateCreateResponseResult:
         """Create an evaluation template.
 
         POST /model-hub/eval-templates/create-v2/
         """
         path = None
         query = {**(extra_query or {})}
-        body = {'name': name, 'is_draft': is_draft, 'eval_type': eval_type, 'instructions': instructions, 'model': model, 'output_type': output_type, 'pass_threshold': pass_threshold, 'choice_scores': choice_scores, 'description': description, 'tags': tags, 'check_internet': check_internet, 'code': code, 'code_language': code_language, 'messages': messages, 'few_shot_examples': few_shot_examples, 'mode': mode, 'tools': tools, 'knowledge_bases': knowledge_bases, 'data_injection': data_injection, 'summary': summary, 'error_localizer_enabled': error_localizer_enabled, 'template_format': template_format, **(extra_body or {})}
+        body = {'jev_mapping': jev_mapping, 'multi_choice': multi_choice, 'input_data_types': input_data_types, 'name': name, 'is_draft': is_draft, 'eval_type': eval_type, 'instructions': instructions, 'model': model, 'output_type': output_type, 'pass_threshold': pass_threshold, 'choice_scores': choice_scores, 'description': description, 'tags': tags, 'check_internet': check_internet, 'code': code, 'code_language': code_language, 'messages': messages, 'few_shot_examples': few_shot_examples, 'mode': mode, 'tools': tools, 'knowledge_bases': knowledge_bases, 'data_injection': data_injection, 'summary': summary, 'error_localizer_enabled': error_localizer_enabled, 'template_format': template_format, **(extra_body or {})}
         return self._t.call(_ops.OP_EVALS_TEMPLATES_CREATE, path=path, query=query, body=body, model=models.EvalTemplateCreateResponseResult, options=options)
 
     def get(self, template_id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateDetailResponseResult:
@@ -609,14 +610,14 @@ class EvalsTemplatesResource(Resource):
         body = {'page': page, 'page_size': page_size, 'search': search, 'owner_filter': owner_filter, 'filters': filters, 'sort_by': sort_by, 'sort_order': sort_order, **(extra_body or {})}
         return self._t.call(_ops.OP_EVALS_TEMPLATES_LIST, path=path, query=query, body=body, model=models.EvalTemplateListResponseResult, options=options)
 
-    def update(self, template_id: str, *, name: str | None | NotGiven = NOT_GIVEN, eval_type: Literal['llm', 'code', 'agent'] | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None | NotGiven = NOT_GIVEN, pass_threshold: float | None | NotGiven = NOT_GIVEN, choice_scores: Dict[str, Any] | None | NotGiven = NOT_GIVEN, multi_choice: bool | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, code: str | None | NotGiven = NOT_GIVEN, code_language: Literal['python', 'javascript'] | None | NotGiven = NOT_GIVEN, messages: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, few_shot_examples: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, mode: Literal['auto', 'agent', 'quick'] | None | NotGiven = NOT_GIVEN, tools: Dict[str, Any] | None | NotGiven = NOT_GIVEN, knowledge_bases: List[str] | None | NotGiven = NOT_GIVEN, data_injection: Dict[str, Any] | None | NotGiven = NOT_GIVEN, summary: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer_enabled: bool | None | NotGiven = NOT_GIVEN, publish: bool | None | NotGiven = NOT_GIVEN, template_format: Literal['mustache', 'jinja'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateUpdateResponseResult:
+    def update(self, template_id: str, *, jev_mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, input_data_types: Dict[str, Any] | None | NotGiven = NOT_GIVEN, name: str | None | NotGiven = NOT_GIVEN, eval_type: Literal['llm', 'code', 'agent'] | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None | NotGiven = NOT_GIVEN, pass_threshold: float | None | NotGiven = NOT_GIVEN, choice_scores: Dict[str, Any] | None | NotGiven = NOT_GIVEN, multi_choice: bool | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, code: str | None | NotGiven = NOT_GIVEN, code_language: Literal['python', 'javascript'] | None | NotGiven = NOT_GIVEN, messages: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, few_shot_examples: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, mode: Literal['auto', 'agent', 'quick'] | None | NotGiven = NOT_GIVEN, tools: Dict[str, Any] | None | NotGiven = NOT_GIVEN, knowledge_bases: List[str] | None | NotGiven = NOT_GIVEN, data_injection: Dict[str, Any] | None | NotGiven = NOT_GIVEN, summary: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer_enabled: bool | None | NotGiven = NOT_GIVEN, publish: bool | None | NotGiven = NOT_GIVEN, template_format: Literal['mustache', 'jinja'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateUpdateResponseResult:
         """Update an existing evaluation template.
 
         PUT /model-hub/eval-templates/{template_id}/update/
         """
         path = {'template_id': template_id}
         query = {**(extra_query or {})}
-        body = {'name': name, 'eval_type': eval_type, 'instructions': instructions, 'model': model, 'output_type': output_type, 'pass_threshold': pass_threshold, 'choice_scores': choice_scores, 'multi_choice': multi_choice, 'description': description, 'tags': tags, 'check_internet': check_internet, 'code': code, 'code_language': code_language, 'messages': messages, 'few_shot_examples': few_shot_examples, 'mode': mode, 'tools': tools, 'knowledge_bases': knowledge_bases, 'data_injection': data_injection, 'summary': summary, 'error_localizer_enabled': error_localizer_enabled, 'publish': publish, 'template_format': template_format, **(extra_body or {})}
+        body = {'jev_mapping': jev_mapping, 'input_data_types': input_data_types, 'name': name, 'eval_type': eval_type, 'instructions': instructions, 'model': model, 'output_type': output_type, 'pass_threshold': pass_threshold, 'choice_scores': choice_scores, 'multi_choice': multi_choice, 'description': description, 'tags': tags, 'check_internet': check_internet, 'code': code, 'code_language': code_language, 'messages': messages, 'few_shot_examples': few_shot_examples, 'mode': mode, 'tools': tools, 'knowledge_bases': knowledge_bases, 'data_injection': data_injection, 'summary': summary, 'error_localizer_enabled': error_localizer_enabled, 'publish': publish, 'template_format': template_format, **(extra_body or {})}
         return self._t.call(_ops.OP_EVALS_TEMPLATES_UPDATE, path=path, query=query, body=body, model=models.EvalTemplateUpdateResponseResult, options=options)
 
 
@@ -1159,6 +1160,112 @@ class AnnotationsResource(Resource):
         return self._t.call(_ops.OP_ANNOTATIONS_BULK_CREATE, path=path, query=query, body=body, model=models.BulkAnnotationResponseResult, options=options)
 
 
+class ContextCredentialsResource(Resource):
+    """`client.context_credentials`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+
+    def issue(self, *, purpose: Literal['consume', 'report'], grants: List[Dict[str, Any]], binding_ids: List[str], expires_at: str, idempotency_key: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextCredentialIssued:
+        """
+
+        .. beta:: this method may change without notice.
+
+        POST /model-hub/skills/contexts/credentials/
+        """
+        _stability('context_credentials.issue', 'beta')
+        options = operation_options(options, {'Idempotency-Key': idempotency_key}, required=('Idempotency-Key',))
+        path = None
+        query = {**(extra_query or {})}
+        body = {'purpose': purpose, 'grants': grants, 'binding_ids': binding_ids, 'expires_at': expires_at, **(extra_body or {})}
+        return self._t.call(_ops.OP_CONTEXT_CREDENTIALS_ISSUE, path=path, query=query, body=body, model=models.SkillsContextCredentialIssued, options=options)
+
+    def list(self, *, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.SkillsContextCredentialMetadata]:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/credentials/
+        """
+        _stability('context_credentials.list', 'beta')
+        path = None
+        query = {'page_size': page_size, **(extra_query or {})}
+        return self._t.paginate(_ops.OP_CONTEXT_CREDENTIALS_LIST, path=path, query=query, model=models.SkillsContextCredentialMetadata, options=options)
+
+    def revoke(self, credential_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+        """
+
+        .. beta:: this method may change without notice.
+
+        DELETE /model-hub/skills/contexts/credentials/{credential_id}/
+        """
+        _stability('context_credentials.revoke', 'beta')
+        path = {'credential_id': credential_id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(_ops.OP_CONTEXT_CREDENTIALS_REVOKE, path=path, query=query, body=body, model=None, options=options)
+
+
+class ContextsResource(Resource):
+    """`client.contexts`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+
+    def check_access(self, resource_id: str, number: int, *, resolution_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextAccessCheck:
+        """
+
+        .. beta:: this method may change without notice.
+
+        POST /model-hub/skills/contexts/{resource_id}/versions/{number}/access-check/
+        """
+        _stability('contexts.check_access', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(_ops.OP_CONTEXTS_CHECK_ACCESS, path=path, query=query, body=body, model=models.SkillsContextAccessCheck, options=options)
+
+    def manifest(self, resource_id: str, number: int, *, resolution_id: str, file_offset: int | None | NotGiven = NOT_GIVEN, file_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/{resource_id}/versions/{number}/manifest/
+        """
+        _stability('contexts.manifest', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {'file_offset': file_offset, 'file_limit': file_limit, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_CONTEXTS_MANIFEST, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+    def read_file(self, resource_id: str, number: int, *, path: str, resolution_id: str, offset: int | None | NotGiven = NOT_GIVEN, max_bytes: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionChunk:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/{resource_id}/versions/{number}/files/
+        """
+        _stability('contexts.read_file', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        _path = {'resource_id': resource_id, 'number': number}
+        query = {'path': path, 'offset': offset, 'max_bytes': max_bytes, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_CONTEXTS_READ_FILE, path=_path, query=query, body=body, model=models.SkillsContextConsumptionChunk, options=options)
+
+    def resolve(self, *, name: str, version: int | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/resolve/
+        """
+        _stability('contexts.resolve', 'beta')
+        path = None
+        query = {'name': name, 'version': version, 'label': label, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_CONTEXTS_RESOLVE, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+
 class DashboardsResource(Resource):
     """`client.dashboards`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -1345,6 +1452,26 @@ class ErrorClustersResource(Resource):
         body = None
         return self._t.call(_ops.OP_ERROR_CLUSTERS_LIST, path=path, query=query, body=body, model=models.FeedListResponse, options=options)
 
+    def overview(self, cluster_id: str, *, rep_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.OverviewResponse:
+        """GET /tracer/feed/issues/{cluster_id}/overview/
+
+        GET /tracer/feed/issues/{cluster_id}/overview/
+        """
+        path = {'cluster_id': cluster_id}
+        query = {'rep_limit': rep_limit, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_ERROR_CLUSTERS_OVERVIEW, path=path, query=query, body=body, model=models.OverviewResponse, options=options)
+
+    def traces(self, cluster_id: str, *, limit: int | None | NotGiven = NOT_GIVEN, offset: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TracesTabResponse:
+        """GET /tracer/feed/issues/{cluster_id}/traces/
+
+        GET /tracer/feed/issues/{cluster_id}/traces/
+        """
+        path = {'cluster_id': cluster_id}
+        query = {'limit': limit, 'offset': offset, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_ERROR_CLUSTERS_TRACES, path=path, query=query, body=body, model=models.TracesTabResponse, options=options)
+
 
 class EvalsResource(Resource):
     """`client.evals`. Subclass to add methods; override `_children` to swap a nested resource."""
@@ -1417,8 +1544,8 @@ class FileKnowledgeBasesResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'name': name, **(extra_body or {})}
-        files = {'file': files}
-        return self._t.call(_ops.OP_FILE_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseCreateResult, options=options)
+        _files = {'file': files}
+        return self._t.call(_ops.OP_FILE_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=_files, model=models.LegacyKnowledgeBaseCreateResult, options=options)
 
     def delete(self, *, kb_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Delete file knowledge bases by id.
@@ -1458,8 +1585,8 @@ class FileKnowledgeBasesResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'kb_id': kb_id, 'name': name, **(extra_body or {})}
-        files = {'file': files}
-        return self._t.call(_ops.OP_FILE_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseMutationResult, options=options)
+        _files = {'file': files}
+        return self._t.call(_ops.OP_FILE_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, files=_files, model=models.LegacyKnowledgeBaseMutationResult, options=options)
 
 
 class GatewayResource(Resource):
@@ -1868,6 +1995,132 @@ class SimulationResource(Resource):
     _children: Dict[str, type] = {'executions': SimulationExecutionsResource, 'scenarios': SimulationScenariosResource, 'tests': SimulationTestsResource}
 
 
+class SkillConsumptionResource(Resource):
+    """`client.skill_consumption`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+
+    def check_access(self, resource_id: str, number: int, *, resolution_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextAccessCheck:
+        """
+
+        .. beta:: this method may change without notice.
+
+        POST /model-hub/skills/consumption/{resource_id}/versions/{number}/access-check/
+        """
+        _stability('skill_consumption.check_access', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(_ops.OP_SKILL_CONSUMPTION_CHECK_ACCESS, path=path, query=query, body=body, model=models.SkillsContextAccessCheck, options=options)
+
+    def manifest(self, resource_id: str, number: int, *, resolution_id: str, file_offset: int | None | NotGiven = NOT_GIVEN, file_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/consumption/{resource_id}/versions/{number}/manifest/
+        """
+        _stability('skill_consumption.manifest', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {'file_offset': file_offset, 'file_limit': file_limit, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SKILL_CONSUMPTION_MANIFEST, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+    def read_file(self, resource_id: str, number: int, *, path: str, resolution_id: str, offset: int | None | NotGiven = NOT_GIVEN, max_bytes: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionChunk:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/consumption/{resource_id}/versions/{number}/files/
+        """
+        _stability('skill_consumption.read_file', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        _path = {'resource_id': resource_id, 'number': number}
+        query = {'path': path, 'offset': offset, 'max_bytes': max_bytes, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SKILL_CONSUMPTION_READ_FILE, path=_path, query=query, body=body, model=models.SkillsContextConsumptionChunk, options=options)
+
+    def resolve(self, *, name: str, version: int | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/consumption/resolve/
+        """
+        _stability('skill_consumption.resolve', 'beta')
+        path = None
+        query = {'name': name, 'version': version, 'label': label, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SKILL_CONSUMPTION_RESOLVE, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+
+class SkillsResource(Resource):
+    """`client.skills`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+
+    def list(self, *, page_size: int | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, tag: str | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, sort: Literal['updated', 'name', 'created'] | None | NotGiven = NOT_GIVEN, order: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.SkillsHubSkillSummary]:
+        """
+
+        GET /model-hub/skills/
+        """
+        path = None
+        query = {'page_size': page_size, 'search': search, 'tag': tag, 'label': label, 'sort': sort, 'order': order, **(extra_query or {})}
+        return self._t.paginate(_ops.OP_SKILLS_LIST, path=path, query=query, model=models.SkillsHubSkillSummary, options=options)
+
+    def publish(self, *, files: List[Dict[str, Any]], expected_digest: str | None | NotGiven = NOT_GIVEN, expected_release_revision: int | None | NotGiven = NOT_GIVEN, evidence_run_id: str | None | NotGiven = NOT_GIVEN, note: str | None | NotGiven = NOT_GIVEN, labels: List[str] | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, acknowledge_warnings: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubPushResult:
+        """
+
+        POST /model-hub/skills/publish/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'files': files, 'expected_digest': expected_digest, 'expected_release_revision': expected_release_revision, 'evidence_run_id': evidence_run_id, 'note': note, 'labels': labels, 'tags': tags, 'acknowledge_warnings': acknowledge_warnings, **(extra_body or {})}
+        return self._t.call(_ops.OP_SKILLS_PUBLISH, path=path, query=query, body=body, model=models.SkillsHubPushResult, options=options)
+
+    def read_file(self, skill_id: str, number: int, *, path: str, offset: int | None | NotGiven = NOT_GIVEN, max_bytes: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubFileChunk:
+        """
+
+        GET /model-hub/skills/{skill_id}/versions/{number}/files/
+        """
+        _path = {'skill_id': skill_id, 'number': number}
+        query = {'path': path, 'offset': offset, 'max_bytes': max_bytes, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SKILLS_READ_FILE, path=_path, query=query, body=body, model=models.SkillsHubFileChunk, options=options)
+
+    def resolve(self, *, name: str, label: str | None | NotGiven = NOT_GIVEN, version: int | None | NotGiven = NOT_GIVEN, include_content: bool | None | NotGiven = NOT_GIVEN, file_offset: int | None | NotGiven = NOT_GIVEN, file_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubManifest:
+        """Resolve an immutable skill manifest. Returns ETag: "<digest>". Send If-None-Match with that value for HTTP 304; a missing label never falls back. Optional file_offset/file_limit page the file inventory; follow next_file_offset with the returned version pinned. MCP defaults to 25 files per page and omits frontmatter and file contents; read SKILL.md in chunks for the original metadata.
+
+        GET /model-hub/skills/resolve/
+        """
+        path = None
+        query = {'name': name, 'label': label, 'version': version, 'include_content': include_content, 'file_offset': file_offset, 'file_limit': file_limit, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SKILLS_RESOLVE, path=path, query=query, body=body, model=models.SkillsHubManifest, options=options)
+
+    def set_label(self, skill_id: str, label: str, *, version: int, expected_release_revision: int | None | NotGiven = NOT_GIVEN, expected_version: int | None | NotGiven = NOT_GIVEN, expected_digest: str | None | NotGiven = NOT_GIVEN, evidence_run_id: str | None | NotGiven = NOT_GIVEN, note: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubLabelOut:
+        """
+
+        PUT /model-hub/skills/{skill_id}/labels/{label}/
+        """
+        path = {'skill_id': skill_id, 'label': label}
+        query = {**(extra_query or {})}
+        body = {'version': version, 'expected_release_revision': expected_release_revision, 'expected_version': expected_version, 'expected_digest': expected_digest, 'evidence_run_id': evidence_run_id, 'note': note, **(extra_body or {})}
+        return self._t.call(_ops.OP_SKILLS_SET_LABEL, path=path, query=query, body=body, model=models.SkillsHubLabelOut, options=options)
+
+    def update_tags(self, skill_id: str, *, tags: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubSkillDetail:
+        """
+
+        PATCH /model-hub/skills/{skill_id}/
+        """
+        path = {'skill_id': skill_id}
+        query = {**(extra_query or {})}
+        body = {'tags': tags, **(extra_body or {})}
+        return self._t.call(_ops.OP_SKILLS_UPDATE_TAGS, path=path, query=query, body=body, model=models.SkillsHubSkillDetail, options=options)
+
+
 class SpansResource(Resource):
     """`client.spans`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -1921,13 +2174,13 @@ class TracesResource(Resource):
         body = None
         return self._t.call(_ops.OP_TRACES_GET, path=path, query=query, body=body, model=models.TraceDetailResult, options=options)
 
-    def list(self, *, project_id: str | None | NotGiven = NOT_GIVEN, project_version_id: str | None | NotGiven = NOT_GIVEN, session_id: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, cursor_mode: bool | None | NotGiven = NOT_GIVEN, attribute_keys: str | None | NotGiven = NOT_GIVEN, allow_sampled: bool | None | NotGiven = NOT_GIVEN, interval: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceObserveListResult:
+    def list(self, *, sort_params: str | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, project_version_id: str | None | NotGiven = NOT_GIVEN, session_id: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, cursor_mode: bool | None | NotGiven = NOT_GIVEN, attribute_keys: str | None | NotGiven = NOT_GIVEN, allow_sampled: bool | None | NotGiven = NOT_GIVEN, interval: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceObserveListResult:
         """Search traces using project, time range, status, and attribute filters.
 
         GET /tracer/trace/list_traces_of_session/
         """
         path = None
-        query = {'project_id': project_id, 'project_version_id': project_version_id, 'session_id': session_id, 'filters': filters, 'page_number': page_number, 'page_size': page_size, 'cursor': cursor, 'cursor_mode': cursor_mode, 'attribute_keys': attribute_keys, 'allow_sampled': allow_sampled, 'interval': interval, **(extra_query or {})}
+        query = {'sort_params': sort_params, 'project_id': project_id, 'project_version_id': project_version_id, 'session_id': session_id, 'filters': filters, 'page_number': page_number, 'page_size': page_size, 'cursor': cursor, 'cursor_mode': cursor_mode, 'attribute_keys': attribute_keys, 'allow_sampled': allow_sampled, 'interval': interval, **(extra_query or {})}
         body = None
         return self._t.call(_ops.OP_TRACES_LIST, path=path, query=query, body=body, model=models.TraceObserveListResult, options=options)
 
@@ -2527,14 +2780,14 @@ class AsyncEvalsTemplatesResource(Resource):
 
     _t: AsyncTransport
 
-    async def create(self, *, name: str | None | NotGiven = NOT_GIVEN, is_draft: bool | None | NotGiven = NOT_GIVEN, eval_type: Literal['llm', 'code', 'agent'] | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None | NotGiven = NOT_GIVEN, pass_threshold: float | None | NotGiven = NOT_GIVEN, choice_scores: Dict[str, Any] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, code: str | None | NotGiven = NOT_GIVEN, code_language: Literal['python', 'javascript'] | None | NotGiven = NOT_GIVEN, messages: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, few_shot_examples: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, mode: Literal['auto', 'agent', 'quick'] | None | NotGiven = NOT_GIVEN, tools: Dict[str, Any] | None | NotGiven = NOT_GIVEN, knowledge_bases: List[str] | None | NotGiven = NOT_GIVEN, data_injection: Dict[str, Any] | None | NotGiven = NOT_GIVEN, summary: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer_enabled: bool | None | NotGiven = NOT_GIVEN, template_format: Literal['mustache', 'jinja'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateCreateResponseResult:
+    async def create(self, *, jev_mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, multi_choice: bool | None | NotGiven = NOT_GIVEN, input_data_types: Dict[str, Any] | None | NotGiven = NOT_GIVEN, name: str | None | NotGiven = NOT_GIVEN, is_draft: bool | None | NotGiven = NOT_GIVEN, eval_type: Literal['llm', 'code', 'agent'] | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None | NotGiven = NOT_GIVEN, pass_threshold: float | None | NotGiven = NOT_GIVEN, choice_scores: Dict[str, Any] | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, code: str | None | NotGiven = NOT_GIVEN, code_language: Literal['python', 'javascript'] | None | NotGiven = NOT_GIVEN, messages: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, few_shot_examples: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, mode: Literal['auto', 'agent', 'quick'] | None | NotGiven = NOT_GIVEN, tools: Dict[str, Any] | None | NotGiven = NOT_GIVEN, knowledge_bases: List[str] | None | NotGiven = NOT_GIVEN, data_injection: Dict[str, Any] | None | NotGiven = NOT_GIVEN, summary: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer_enabled: bool | None | NotGiven = NOT_GIVEN, template_format: Literal['mustache', 'jinja'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateCreateResponseResult:
         """Create an evaluation template.
 
         POST /model-hub/eval-templates/create-v2/
         """
         path = None
         query = {**(extra_query or {})}
-        body = {'name': name, 'is_draft': is_draft, 'eval_type': eval_type, 'instructions': instructions, 'model': model, 'output_type': output_type, 'pass_threshold': pass_threshold, 'choice_scores': choice_scores, 'description': description, 'tags': tags, 'check_internet': check_internet, 'code': code, 'code_language': code_language, 'messages': messages, 'few_shot_examples': few_shot_examples, 'mode': mode, 'tools': tools, 'knowledge_bases': knowledge_bases, 'data_injection': data_injection, 'summary': summary, 'error_localizer_enabled': error_localizer_enabled, 'template_format': template_format, **(extra_body or {})}
+        body = {'jev_mapping': jev_mapping, 'multi_choice': multi_choice, 'input_data_types': input_data_types, 'name': name, 'is_draft': is_draft, 'eval_type': eval_type, 'instructions': instructions, 'model': model, 'output_type': output_type, 'pass_threshold': pass_threshold, 'choice_scores': choice_scores, 'description': description, 'tags': tags, 'check_internet': check_internet, 'code': code, 'code_language': code_language, 'messages': messages, 'few_shot_examples': few_shot_examples, 'mode': mode, 'tools': tools, 'knowledge_bases': knowledge_bases, 'data_injection': data_injection, 'summary': summary, 'error_localizer_enabled': error_localizer_enabled, 'template_format': template_format, **(extra_body or {})}
         return await self._t.acall(_ops.OP_EVALS_TEMPLATES_CREATE, path=path, query=query, body=body, model=models.EvalTemplateCreateResponseResult, options=options)
 
     async def get(self, template_id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateDetailResponseResult:
@@ -2557,14 +2810,14 @@ class AsyncEvalsTemplatesResource(Resource):
         body = {'page': page, 'page_size': page_size, 'search': search, 'owner_filter': owner_filter, 'filters': filters, 'sort_by': sort_by, 'sort_order': sort_order, **(extra_body or {})}
         return await self._t.acall(_ops.OP_EVALS_TEMPLATES_LIST, path=path, query=query, body=body, model=models.EvalTemplateListResponseResult, options=options)
 
-    async def update(self, template_id: str, *, name: str | None | NotGiven = NOT_GIVEN, eval_type: Literal['llm', 'code', 'agent'] | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None | NotGiven = NOT_GIVEN, pass_threshold: float | None | NotGiven = NOT_GIVEN, choice_scores: Dict[str, Any] | None | NotGiven = NOT_GIVEN, multi_choice: bool | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, code: str | None | NotGiven = NOT_GIVEN, code_language: Literal['python', 'javascript'] | None | NotGiven = NOT_GIVEN, messages: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, few_shot_examples: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, mode: Literal['auto', 'agent', 'quick'] | None | NotGiven = NOT_GIVEN, tools: Dict[str, Any] | None | NotGiven = NOT_GIVEN, knowledge_bases: List[str] | None | NotGiven = NOT_GIVEN, data_injection: Dict[str, Any] | None | NotGiven = NOT_GIVEN, summary: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer_enabled: bool | None | NotGiven = NOT_GIVEN, publish: bool | None | NotGiven = NOT_GIVEN, template_format: Literal['mustache', 'jinja'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateUpdateResponseResult:
+    async def update(self, template_id: str, *, jev_mapping: Dict[str, Any] | None | NotGiven = NOT_GIVEN, input_data_types: Dict[str, Any] | None | NotGiven = NOT_GIVEN, name: str | None | NotGiven = NOT_GIVEN, eval_type: Literal['llm', 'code', 'agent'] | None | NotGiven = NOT_GIVEN, instructions: str | None | NotGiven = NOT_GIVEN, model: str | None | NotGiven = NOT_GIVEN, output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None | NotGiven = NOT_GIVEN, pass_threshold: float | None | NotGiven = NOT_GIVEN, choice_scores: Dict[str, Any] | None | NotGiven = NOT_GIVEN, multi_choice: bool | None | NotGiven = NOT_GIVEN, description: str | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, check_internet: bool | None | NotGiven = NOT_GIVEN, code: str | None | NotGiven = NOT_GIVEN, code_language: Literal['python', 'javascript'] | None | NotGiven = NOT_GIVEN, messages: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, few_shot_examples: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, mode: Literal['auto', 'agent', 'quick'] | None | NotGiven = NOT_GIVEN, tools: Dict[str, Any] | None | NotGiven = NOT_GIVEN, knowledge_bases: List[str] | None | NotGiven = NOT_GIVEN, data_injection: Dict[str, Any] | None | NotGiven = NOT_GIVEN, summary: Dict[str, Any] | None | NotGiven = NOT_GIVEN, error_localizer_enabled: bool | None | NotGiven = NOT_GIVEN, publish: bool | None | NotGiven = NOT_GIVEN, template_format: Literal['mustache', 'jinja'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvalTemplateUpdateResponseResult:
         """Update an existing evaluation template.
 
         PUT /model-hub/eval-templates/{template_id}/update/
         """
         path = {'template_id': template_id}
         query = {**(extra_query or {})}
-        body = {'name': name, 'eval_type': eval_type, 'instructions': instructions, 'model': model, 'output_type': output_type, 'pass_threshold': pass_threshold, 'choice_scores': choice_scores, 'multi_choice': multi_choice, 'description': description, 'tags': tags, 'check_internet': check_internet, 'code': code, 'code_language': code_language, 'messages': messages, 'few_shot_examples': few_shot_examples, 'mode': mode, 'tools': tools, 'knowledge_bases': knowledge_bases, 'data_injection': data_injection, 'summary': summary, 'error_localizer_enabled': error_localizer_enabled, 'publish': publish, 'template_format': template_format, **(extra_body or {})}
+        body = {'jev_mapping': jev_mapping, 'input_data_types': input_data_types, 'name': name, 'eval_type': eval_type, 'instructions': instructions, 'model': model, 'output_type': output_type, 'pass_threshold': pass_threshold, 'choice_scores': choice_scores, 'multi_choice': multi_choice, 'description': description, 'tags': tags, 'check_internet': check_internet, 'code': code, 'code_language': code_language, 'messages': messages, 'few_shot_examples': few_shot_examples, 'mode': mode, 'tools': tools, 'knowledge_bases': knowledge_bases, 'data_injection': data_injection, 'summary': summary, 'error_localizer_enabled': error_localizer_enabled, 'publish': publish, 'template_format': template_format, **(extra_body or {})}
         return await self._t.acall(_ops.OP_EVALS_TEMPLATES_UPDATE, path=path, query=query, body=body, model=models.EvalTemplateUpdateResponseResult, options=options)
 
 
@@ -3107,6 +3360,112 @@ class AsyncAnnotationsResource(Resource):
         return await self._t.acall(_ops.OP_ANNOTATIONS_BULK_CREATE, path=path, query=query, body=body, model=models.BulkAnnotationResponseResult, options=options)
 
 
+class AsyncContextCredentialsResource(Resource):
+    """`client.context_credentials`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+
+    async def issue(self, *, purpose: Literal['consume', 'report'], grants: List[Dict[str, Any]], binding_ids: List[str], expires_at: str, idempotency_key: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextCredentialIssued:
+        """
+
+        .. beta:: this method may change without notice.
+
+        POST /model-hub/skills/contexts/credentials/
+        """
+        _stability('context_credentials.issue', 'beta')
+        options = operation_options(options, {'Idempotency-Key': idempotency_key}, required=('Idempotency-Key',))
+        path = None
+        query = {**(extra_query or {})}
+        body = {'purpose': purpose, 'grants': grants, 'binding_ids': binding_ids, 'expires_at': expires_at, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_CONTEXT_CREDENTIALS_ISSUE, path=path, query=query, body=body, model=models.SkillsContextCredentialIssued, options=options)
+
+    def list(self, *, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.SkillsContextCredentialMetadata]:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/credentials/
+        """
+        _stability('context_credentials.list', 'beta')
+        path = None
+        query = {'page_size': page_size, **(extra_query or {})}
+        return self._t.apaginate(_ops.OP_CONTEXT_CREDENTIALS_LIST, path=path, query=query, model=models.SkillsContextCredentialMetadata, options=options)
+
+    async def revoke(self, credential_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+        """
+
+        .. beta:: this method may change without notice.
+
+        DELETE /model-hub/skills/contexts/credentials/{credential_id}/
+        """
+        _stability('context_credentials.revoke', 'beta')
+        path = {'credential_id': credential_id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(_ops.OP_CONTEXT_CREDENTIALS_REVOKE, path=path, query=query, body=body, model=None, options=options)
+
+
+class AsyncContextsResource(Resource):
+    """`client.contexts`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+
+    async def check_access(self, resource_id: str, number: int, *, resolution_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextAccessCheck:
+        """
+
+        .. beta:: this method may change without notice.
+
+        POST /model-hub/skills/contexts/{resource_id}/versions/{number}/access-check/
+        """
+        _stability('contexts.check_access', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(_ops.OP_CONTEXTS_CHECK_ACCESS, path=path, query=query, body=body, model=models.SkillsContextAccessCheck, options=options)
+
+    async def manifest(self, resource_id: str, number: int, *, resolution_id: str, file_offset: int | None | NotGiven = NOT_GIVEN, file_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/{resource_id}/versions/{number}/manifest/
+        """
+        _stability('contexts.manifest', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {'file_offset': file_offset, 'file_limit': file_limit, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_CONTEXTS_MANIFEST, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+    async def read_file(self, resource_id: str, number: int, *, path: str, resolution_id: str, offset: int | None | NotGiven = NOT_GIVEN, max_bytes: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionChunk:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/{resource_id}/versions/{number}/files/
+        """
+        _stability('contexts.read_file', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        _path = {'resource_id': resource_id, 'number': number}
+        query = {'path': path, 'offset': offset, 'max_bytes': max_bytes, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_CONTEXTS_READ_FILE, path=_path, query=query, body=body, model=models.SkillsContextConsumptionChunk, options=options)
+
+    async def resolve(self, *, name: str, version: int | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/resolve/
+        """
+        _stability('contexts.resolve', 'beta')
+        path = None
+        query = {'name': name, 'version': version, 'label': label, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_CONTEXTS_RESOLVE, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+
 class AsyncDashboardsResource(Resource):
     """`client.dashboards`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -3293,6 +3652,26 @@ class AsyncErrorClustersResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_ERROR_CLUSTERS_LIST, path=path, query=query, body=body, model=models.FeedListResponse, options=options)
 
+    async def overview(self, cluster_id: str, *, rep_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.OverviewResponse:
+        """GET /tracer/feed/issues/{cluster_id}/overview/
+
+        GET /tracer/feed/issues/{cluster_id}/overview/
+        """
+        path = {'cluster_id': cluster_id}
+        query = {'rep_limit': rep_limit, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_ERROR_CLUSTERS_OVERVIEW, path=path, query=query, body=body, model=models.OverviewResponse, options=options)
+
+    async def traces(self, cluster_id: str, *, limit: int | None | NotGiven = NOT_GIVEN, offset: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TracesTabResponse:
+        """GET /tracer/feed/issues/{cluster_id}/traces/
+
+        GET /tracer/feed/issues/{cluster_id}/traces/
+        """
+        path = {'cluster_id': cluster_id}
+        query = {'limit': limit, 'offset': offset, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_ERROR_CLUSTERS_TRACES, path=path, query=query, body=body, model=models.TracesTabResponse, options=options)
+
 
 class AsyncEvalsResource(Resource):
     """`client.evals`. Subclass to add methods; override `_children` to swap a nested resource."""
@@ -3365,8 +3744,8 @@ class AsyncFileKnowledgeBasesResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'name': name, **(extra_body or {})}
-        files = {'file': files}
-        return await self._t.acall(_ops.OP_FILE_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseCreateResult, options=options)
+        _files = {'file': files}
+        return await self._t.acall(_ops.OP_FILE_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=_files, model=models.LegacyKnowledgeBaseCreateResult, options=options)
 
     async def delete(self, *, kb_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Delete file knowledge bases by id.
@@ -3406,8 +3785,8 @@ class AsyncFileKnowledgeBasesResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'kb_id': kb_id, 'name': name, **(extra_body or {})}
-        files = {'file': files}
-        return await self._t.acall(_ops.OP_FILE_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseMutationResult, options=options)
+        _files = {'file': files}
+        return await self._t.acall(_ops.OP_FILE_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, files=_files, model=models.LegacyKnowledgeBaseMutationResult, options=options)
 
 
 class AsyncGatewayResource(Resource):
@@ -3816,6 +4195,132 @@ class AsyncSimulationResource(Resource):
     _children: Dict[str, type] = {'executions': AsyncSimulationExecutionsResource, 'scenarios': AsyncSimulationScenariosResource, 'tests': AsyncSimulationTestsResource}
 
 
+class AsyncSkillConsumptionResource(Resource):
+    """`client.skill_consumption`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+
+    async def check_access(self, resource_id: str, number: int, *, resolution_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextAccessCheck:
+        """
+
+        .. beta:: this method may change without notice.
+
+        POST /model-hub/skills/consumption/{resource_id}/versions/{number}/access-check/
+        """
+        _stability('skill_consumption.check_access', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(_ops.OP_SKILL_CONSUMPTION_CHECK_ACCESS, path=path, query=query, body=body, model=models.SkillsContextAccessCheck, options=options)
+
+    async def manifest(self, resource_id: str, number: int, *, resolution_id: str, file_offset: int | None | NotGiven = NOT_GIVEN, file_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/consumption/{resource_id}/versions/{number}/manifest/
+        """
+        _stability('skill_consumption.manifest', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {'file_offset': file_offset, 'file_limit': file_limit, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SKILL_CONSUMPTION_MANIFEST, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+    async def read_file(self, resource_id: str, number: int, *, path: str, resolution_id: str, offset: int | None | NotGiven = NOT_GIVEN, max_bytes: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionChunk:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/consumption/{resource_id}/versions/{number}/files/
+        """
+        _stability('skill_consumption.read_file', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        _path = {'resource_id': resource_id, 'number': number}
+        query = {'path': path, 'offset': offset, 'max_bytes': max_bytes, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SKILL_CONSUMPTION_READ_FILE, path=_path, query=query, body=body, model=models.SkillsContextConsumptionChunk, options=options)
+
+    async def resolve(self, *, name: str, version: int | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/consumption/resolve/
+        """
+        _stability('skill_consumption.resolve', 'beta')
+        path = None
+        query = {'name': name, 'version': version, 'label': label, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SKILL_CONSUMPTION_RESOLVE, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+
+class AsyncSkillsResource(Resource):
+    """`client.skills`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+
+    def list(self, *, page_size: int | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, tag: str | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, sort: Literal['updated', 'name', 'created'] | None | NotGiven = NOT_GIVEN, order: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.SkillsHubSkillSummary]:
+        """
+
+        GET /model-hub/skills/
+        """
+        path = None
+        query = {'page_size': page_size, 'search': search, 'tag': tag, 'label': label, 'sort': sort, 'order': order, **(extra_query or {})}
+        return self._t.apaginate(_ops.OP_SKILLS_LIST, path=path, query=query, model=models.SkillsHubSkillSummary, options=options)
+
+    async def publish(self, *, files: List[Dict[str, Any]], expected_digest: str | None | NotGiven = NOT_GIVEN, expected_release_revision: int | None | NotGiven = NOT_GIVEN, evidence_run_id: str | None | NotGiven = NOT_GIVEN, note: str | None | NotGiven = NOT_GIVEN, labels: List[str] | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, acknowledge_warnings: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubPushResult:
+        """
+
+        POST /model-hub/skills/publish/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'files': files, 'expected_digest': expected_digest, 'expected_release_revision': expected_release_revision, 'evidence_run_id': evidence_run_id, 'note': note, 'labels': labels, 'tags': tags, 'acknowledge_warnings': acknowledge_warnings, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SKILLS_PUBLISH, path=path, query=query, body=body, model=models.SkillsHubPushResult, options=options)
+
+    async def read_file(self, skill_id: str, number: int, *, path: str, offset: int | None | NotGiven = NOT_GIVEN, max_bytes: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubFileChunk:
+        """
+
+        GET /model-hub/skills/{skill_id}/versions/{number}/files/
+        """
+        _path = {'skill_id': skill_id, 'number': number}
+        query = {'path': path, 'offset': offset, 'max_bytes': max_bytes, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SKILLS_READ_FILE, path=_path, query=query, body=body, model=models.SkillsHubFileChunk, options=options)
+
+    async def resolve(self, *, name: str, label: str | None | NotGiven = NOT_GIVEN, version: int | None | NotGiven = NOT_GIVEN, include_content: bool | None | NotGiven = NOT_GIVEN, file_offset: int | None | NotGiven = NOT_GIVEN, file_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubManifest:
+        """Resolve an immutable skill manifest. Returns ETag: "<digest>". Send If-None-Match with that value for HTTP 304; a missing label never falls back. Optional file_offset/file_limit page the file inventory; follow next_file_offset with the returned version pinned. MCP defaults to 25 files per page and omits frontmatter and file contents; read SKILL.md in chunks for the original metadata.
+
+        GET /model-hub/skills/resolve/
+        """
+        path = None
+        query = {'name': name, 'label': label, 'version': version, 'include_content': include_content, 'file_offset': file_offset, 'file_limit': file_limit, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SKILLS_RESOLVE, path=path, query=query, body=body, model=models.SkillsHubManifest, options=options)
+
+    async def set_label(self, skill_id: str, label: str, *, version: int, expected_release_revision: int | None | NotGiven = NOT_GIVEN, expected_version: int | None | NotGiven = NOT_GIVEN, expected_digest: str | None | NotGiven = NOT_GIVEN, evidence_run_id: str | None | NotGiven = NOT_GIVEN, note: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubLabelOut:
+        """
+
+        PUT /model-hub/skills/{skill_id}/labels/{label}/
+        """
+        path = {'skill_id': skill_id, 'label': label}
+        query = {**(extra_query or {})}
+        body = {'version': version, 'expected_release_revision': expected_release_revision, 'expected_version': expected_version, 'expected_digest': expected_digest, 'evidence_run_id': evidence_run_id, 'note': note, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SKILLS_SET_LABEL, path=path, query=query, body=body, model=models.SkillsHubLabelOut, options=options)
+
+    async def update_tags(self, skill_id: str, *, tags: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubSkillDetail:
+        """
+
+        PATCH /model-hub/skills/{skill_id}/
+        """
+        path = {'skill_id': skill_id}
+        query = {**(extra_query or {})}
+        body = {'tags': tags, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SKILLS_UPDATE_TAGS, path=path, query=query, body=body, model=models.SkillsHubSkillDetail, options=options)
+
+
 class AsyncSpansResource(Resource):
     """`client.spans`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -3869,13 +4374,13 @@ class AsyncTracesResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_TRACES_GET, path=path, query=query, body=body, model=models.TraceDetailResult, options=options)
 
-    async def list(self, *, project_id: str | None | NotGiven = NOT_GIVEN, project_version_id: str | None | NotGiven = NOT_GIVEN, session_id: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, cursor_mode: bool | None | NotGiven = NOT_GIVEN, attribute_keys: str | None | NotGiven = NOT_GIVEN, allow_sampled: bool | None | NotGiven = NOT_GIVEN, interval: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceObserveListResult:
+    async def list(self, *, sort_params: str | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, project_version_id: str | None | NotGiven = NOT_GIVEN, session_id: str | None | NotGiven = NOT_GIVEN, filters: str | None | NotGiven = NOT_GIVEN, page_number: int | None | NotGiven = NOT_GIVEN, page_size: int | None | NotGiven = NOT_GIVEN, cursor: str | None | NotGiven = NOT_GIVEN, cursor_mode: bool | None | NotGiven = NOT_GIVEN, attribute_keys: str | None | NotGiven = NOT_GIVEN, allow_sampled: bool | None | NotGiven = NOT_GIVEN, interval: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TraceObserveListResult:
         """Search traces using project, time range, status, and attribute filters.
 
         GET /tracer/trace/list_traces_of_session/
         """
         path = None
-        query = {'project_id': project_id, 'project_version_id': project_version_id, 'session_id': session_id, 'filters': filters, 'page_number': page_number, 'page_size': page_size, 'cursor': cursor, 'cursor_mode': cursor_mode, 'attribute_keys': attribute_keys, 'allow_sampled': allow_sampled, 'interval': interval, **(extra_query or {})}
+        query = {'sort_params': sort_params, 'project_id': project_id, 'project_version_id': project_version_id, 'session_id': session_id, 'filters': filters, 'page_number': page_number, 'page_size': page_size, 'cursor': cursor, 'cursor_mode': cursor_mode, 'attribute_keys': attribute_keys, 'allow_sampled': allow_sampled, 'interval': interval, **(extra_query or {})}
         body = None
         return await self._t.acall(_ops.OP_TRACES_LIST, path=path, query=query, body=body, model=models.TraceObserveListResult, options=options)
 
@@ -3933,6 +4438,8 @@ __all__ = [
     'AnnotationQueuesItemsResource',
     'AnnotationsResource',
     'AnnotationsLabelsResource',
+    'ContextCredentialsResource',
+    'ContextsResource',
     'DashboardsResource',
     'DashboardsMetricsResource',
     'DashboardsWidgetsResource',
@@ -3969,6 +4476,8 @@ __all__ = [
     'SimulationExecutionsResource',
     'SimulationScenariosResource',
     'SimulationTestsResource',
+    'SkillConsumptionResource',
+    'SkillsResource',
     'SpansResource',
     'TracesResource',
     'TracesPropertiesResource',
@@ -3984,6 +4493,8 @@ __all__ = [
     'AsyncAnnotationQueuesItemsResource',
     'AsyncAnnotationsResource',
     'AsyncAnnotationsLabelsResource',
+    'AsyncContextCredentialsResource',
+    'AsyncContextsResource',
     'AsyncDashboardsResource',
     'AsyncDashboardsMetricsResource',
     'AsyncDashboardsWidgetsResource',
@@ -4020,6 +4531,8 @@ __all__ = [
     'AsyncSimulationExecutionsResource',
     'AsyncSimulationScenariosResource',
     'AsyncSimulationTestsResource',
+    'AsyncSkillConsumptionResource',
+    'AsyncSkillsResource',
     'AsyncSpansResource',
     'AsyncTracesResource',
     'AsyncTracesPropertiesResource',

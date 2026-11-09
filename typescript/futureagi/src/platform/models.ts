@@ -110,6 +110,11 @@ export interface AgentDefinitionResponse {
   livekit_max_concurrency?: unknown | null;
 }
 
+export interface AgentFlowGraph {
+  nodes?: Array<unknown | null> | null;
+  edges?: Array<unknown | null> | null;
+}
+
 export interface AgentVersionCreateResponse {
   message?: string | null;
   version?: AgentVersionResponse | null;
@@ -315,6 +320,13 @@ export interface CallExecutionErrorLocalizerTask {
   updated_at?: string | null;
 }
 
+export interface CaptureCoverage {
+  scope?: string | null; // one of: observed_requests
+  source_summary_present?: boolean | null;
+  request_count?: number | null;
+  coverage_unknown?: boolean | null;
+}
+
 export interface Column {
   id?: string | null;
   name?: string | null;
@@ -322,6 +334,13 @@ export interface Column {
   dataset?: string | null;
   source?: string | null; // one of: evaluation, evaluation_tags, evaluation_reason, run_prompt, experiment, optimisation, experiment_evaluation, experiment_evaluation_tags, optimisation_evaluation, annotation_label, optimisation_evaluation_tags, extracted_json, classification, extracted_entities, api_call, python_code, vector_db, conditional, eval_playground, OTHERS
   source_id?: string | null;
+}
+
+export interface CostCoverage {
+  status?: string | null; // one of: complete, partial, unknown
+  known_subtotal?: number | null;
+  known_fact_count?: number | null;
+  unknown_fact_count?: number | null;
 }
 
 export interface CustomEvalConfig {
@@ -792,6 +811,7 @@ export interface EvalTemplateCreateResponseResult {
 }
 
 export interface EvalTemplateDetailResponseResult {
+  jev_mapping?: unknown | null;
   id?: string | null;
   name?: string | null;
   description?: string | null;
@@ -824,6 +844,8 @@ export interface EvalTemplateDetailResponseResult {
 }
 
 export interface EvalTemplateListItem {
+  jev_mapping?: unknown | null;
+  model?: string | null;
   id?: string | null;
   name?: string | null;
   template_type?: string | null;
@@ -855,6 +877,13 @@ export interface EvalTemplateUpdateResponseResult {
 
 export interface EvalsConfigsCreateResult {
   id?: string | null;
+}
+
+export interface EventsOverTimePoint {
+  date?: string | null;
+  errors?: number | null;
+  passing?: number | null;
+  users?: number | null;
 }
 
 export interface ExperimentDetailV2 {
@@ -983,6 +1012,11 @@ export interface GatewaySummaryResult {
   model_count?: number | null;
 }
 
+export interface KeyMoment {
+  kevinified?: string | null;
+  verbatim?: string | null;
+}
+
 export interface KnowledgeBaseItem {
   id?: string | null;
   name?: string | null;
@@ -1105,6 +1139,42 @@ export interface Organization {
   require_2fa?: boolean | null;
   require_2fa_grace_period_days?: number | null;
   require_2fa_enforced_at?: string | null;
+}
+
+export interface OverviewResponse {
+  events_over_time?: Array<EventsOverTimePoint | null> | null;
+  pattern_summary?: PatternSummary | null;
+  representative_traces?: Array<RepresentativeTrace | null> | null;
+  representative_total?: number | null;
+}
+
+export interface PatternInsight {
+  title?: string | null;
+  value?: string | null;
+  caption?: string | null;
+  evidence?: PatternInsightEvidence | null;
+}
+
+export interface PatternInsightEvidence {
+  test?: string | null;
+  baseline?: string | null;
+  tool?: string | null;
+  z?: number | null;
+  p_value?: number | null;
+  ks_stat?: number | null;
+  fail_median?: number | null;
+  baseline_median?: number | null;
+  fail_pct?: number | null;
+  baseline_pct?: number | null;
+  hits?: number | null;
+  total?: number | null;
+  missing_in?: number | null;
+  traces_with_tools?: number | null;
+}
+
+export interface PatternSummary {
+  insights?: Array<PatternInsight | null> | null;
+  key_moments?: Array<KeyMoment | null> | null;
 }
 
 export interface ProjectDetailResult {
@@ -1423,6 +1493,18 @@ export interface RcaTrailStep {
   confidence?: string | null;
 }
 
+export interface RepresentativeTrace {
+  id?: string | null;
+  status?: string | null;
+  timestamp?: string | null;
+  summary?: TraceSummary | null;
+  evidence?: TraceEvidence | null;
+  agent_flow?: AgentFlowGraph | null;
+  root_causes?: Array<unknown | null> | null;
+  recommendations?: Array<unknown | null> | null;
+  what_changed?: unknown | null;
+}
+
 export interface RunEnvironmentRef {
   id?: string | null;
   name?: string | null;
@@ -1570,6 +1652,215 @@ export interface SimulateEvalConfigResponse {
   editable?: boolean | null;
 }
 
+export interface SkillsContextAccessCheck {
+  allowed?: boolean | null;
+  version_id?: string | null;
+  digest?: string | null;
+  checked_at?: string | null;
+}
+
+export interface SkillsContextConsumeGrant {
+  kind?: string | null; // one of: skill, agent_context
+  resource_id?: string | null;
+  labels?: Array<string | null> | null;
+  version_ids?: Array<string | null> | null;
+}
+
+export interface SkillsContextConsumptionChunk {
+  path?: string | null;
+  sha256?: string | null;
+  size_bytes?: number | null;
+  total_chars?: number | null;
+  offset?: number | null;
+  next_offset?: number | null;
+  eof?: boolean | null;
+  text?: string | null;
+  resource_id?: string | null;
+  version_id?: string | null;
+  digest?: string | null;
+}
+
+export interface SkillsContextConsumptionManifest {
+  resource_id?: string | null;
+  kind?: string | null; // one of: skill, agent_context
+  name?: string | null;
+  description?: string | null;
+  version?: number | null;
+  version_id?: string | null;
+  digest?: string | null;
+  requested?: SkillsContextSelector | null;
+  entrypoint?: string | null;
+  descriptor_path?: string | null;
+  files?: Array<SkillsContextFileMeta | null> | null;
+  file_count?: number | null;
+  file_offset?: number | null;
+  next_file_offset?: number | null;
+  created_at?: string | null;
+  resolution_id?: string | null;
+  resolution_expires_at?: string | null;
+}
+
+export interface SkillsContextCredentialIssued {
+  id?: string | null;
+  secret?: string | null;
+  secret_available?: boolean | null;
+  metadata?: SkillsContextCredentialMetadata | null;
+}
+
+export interface SkillsContextCredentialMetadata {
+  purpose?: string | null; // one of: consume, report
+  grants?: Array<SkillsContextConsumeGrant | null> | null;
+  binding_ids?: Array<string | null> | null;
+  expires_at?: string | null;
+  id?: string | null;
+  created_at?: string | null;
+  revoked_at?: string | null;
+  last_used_at?: string | null;
+}
+
+export interface SkillsContextFileMeta {
+  path?: string | null;
+  sha256?: string | null;
+  size_bytes?: number | null;
+  origin?: SkillsContextFileOrigin | null;
+}
+
+export interface SkillsContextFileOrigin {
+  kind?: string | null; // one of: owned, linked, generated
+  skill_id?: string | null;
+  version_id?: string | null;
+  source_path?: string | null;
+}
+
+export interface SkillsContextSelector {
+  version?: number | null;
+  label?: string | null;
+}
+
+export interface SkillsHubDraftSummary {
+  user?: Record<string, unknown> | null;
+  updated_at?: string | null;
+  base_version?: number | null;
+  is_mine?: boolean | null;
+}
+
+export interface SkillsHubEvidenceCurrentness {
+  content?: boolean | null;
+  baseline?: boolean | null;
+  suite?: boolean | null;
+  competitors?: boolean | null;
+  payload_available?: boolean | null;
+}
+
+export interface SkillsHubFileChunk {
+  path?: string | null;
+  sha256?: string | null;
+  size_bytes?: number | null;
+  total_chars?: number | null;
+  offset?: number | null;
+  next_offset?: number | null;
+  eof?: boolean | null;
+  text?: string | null;
+}
+
+export interface SkillsHubLabelOut {
+  name?: string | null;
+  version?: number | null;
+  version_id?: string | null;
+  updated_at?: string | null;
+  updated_by?: Record<string, unknown> | null;
+  is_protected?: boolean | null;
+  can_move?: boolean | null;
+  can_remove?: boolean | null;
+  release_revision?: number | null;
+}
+
+export interface SkillsHubLabelSummary {
+  name?: string | null;
+  version?: number | null;
+}
+
+export interface SkillsHubManifest {
+  skill_id?: string | null;
+  name?: string | null;
+  description?: string | null;
+  version?: number | null;
+  version_id?: string | null;
+  digest?: string | null;
+  requested?: SkillsHubRequested | null;
+  frontmatter?: unknown | null;
+  files?: Array<SkillsHubManifestFile | null> | null;
+  file_count?: number | null;
+  file_offset?: number | null;
+  next_file_offset?: number | null;
+  created_at?: string | null;
+}
+
+export interface SkillsHubManifestFile {
+  path?: string | null;
+  size_bytes?: number | null;
+  sha256?: string | null;
+  content?: string | null;
+}
+
+export interface SkillsHubPushResult {
+  release_revision?: number | null;
+  evidence?: Record<string, unknown> | null;
+  skill?: SkillsHubSkillSummary | null;
+  version?: Record<string, unknown> | null;
+  unchanged?: boolean | null;
+}
+
+export interface SkillsHubRequested {
+  label?: string | null;
+  version?: number | null;
+}
+
+export interface SkillsHubSkillDetail {
+  release_revision?: number | null;
+  protected_label_names?: Array<string | null> | null;
+  id?: string | null;
+  name?: string | null;
+  description?: string | null;
+  tags?: Array<string | null> | null;
+  latest_version?: number | null;
+  labels?: Array<SkillsHubLabelOut | null> | null;
+  has_draft?: boolean | null;
+  updated_at?: string | null;
+  updated_by?: Record<string, unknown> | null;
+  created_at?: string | null;
+  fetches_7d?: number | null;
+  file_count?: number | null;
+  source?: unknown | null;
+  created_by?: Record<string, unknown> | null;
+  latest?: Record<string, unknown> | null;
+  drafts?: Array<SkillsHubDraftSummary | null> | null;
+  permissions?: SkillsHubSkillPermissions | null;
+}
+
+export interface SkillsHubSkillPermissions {
+  can_manage_label_protection?: boolean | null;
+  can_archive?: boolean | null;
+  can_run_tests?: boolean | null;
+}
+
+export interface SkillsHubSkillSummary {
+  release_revision?: number | null;
+  protected_label_names?: Array<string | null> | null;
+  id?: string | null;
+  name?: string | null;
+  description?: string | null;
+  tags?: Array<string | null> | null;
+  latest_version?: number | null;
+  labels?: Array<SkillsHubLabelSummary | null> | null;
+  has_draft?: boolean | null;
+  updated_at?: string | null;
+  updated_by?: Record<string, unknown> | null;
+  created_at?: string | null;
+  fetches_7d?: number | null;
+  file_count?: number | null;
+}
+
 export interface SpanListColumnConfig {
   id?: string | null;
   name?: string | null;
@@ -1655,6 +1946,8 @@ export interface TraceDetailResult {
   trace?: unknown | null;
   observation_spans?: Array<TraceDetailSpan | null> | null;
   summary?: unknown | null;
+  cost_coverage?: CostCoverage | null;
+  capture_coverage?: CaptureCoverage | null;
   graph?: unknown | null;
 }
 
@@ -1679,6 +1972,15 @@ export interface TraceErrorAnalysisResult {
   grouped_errors?: Array<unknown | null> | null;
   scores?: unknown | null;
   memory_context?: unknown | null;
+}
+
+export interface TraceEvidence {
+  input?: string | null;
+  output?: string | null;
+  fail_reel?: Array<unknown | null> | null;
+  pass_reel?: Array<unknown | null> | null;
+  judge_reason?: string | null;
+  score?: number | null;
 }
 
 export interface TraceObserveColumnConfig {
@@ -1724,6 +2026,7 @@ export interface TraceObserveListMetadata {
 }
 
 export interface TraceObserveListResult {
+  trace_capture_coverage?: unknown | null;
   metadata?: TraceObserveListMetadata | null;
   table?: Array<unknown | null> | null;
   config?: Array<TraceObserveColumnConfig | null> | null;
@@ -1737,6 +2040,8 @@ export interface TracePreview {
 
 export interface TraceSessionDetailResult {
   session_metadata?: unknown | null;
+  cost_coverage?: CostCoverage | null;
+  capture_coverage?: CaptureCoverage | null;
   response?: Array<unknown | null> | null;
   next?: boolean | null;
 }
@@ -1764,6 +2069,7 @@ export interface TraceSessionListMetadata {
 }
 
 export interface TraceSessionListResult {
+  trace_capture_coverage?: unknown | null;
   metadata?: TraceSessionListMetadata | null;
   table?: Array<TraceSessionTableRow | null> | null;
   config?: Array<TraceObserveColumnConfig | null> | null;
@@ -1778,6 +2084,8 @@ export interface TraceSessionTableRow {
   created_at?: string | null;
   duration?: number | null;
   total_cost?: number | null;
+  cost_coverage?: CostCoverage | null;
+  capture_coverage?: CaptureCoverage | null;
   total_tokens?: number | null;
   total_traces_count?: number | null;
   first_message?: unknown | null;
@@ -1785,6 +2093,42 @@ export interface TraceSessionTableRow {
   user_id?: string | null;
   user_id_type?: string | null;
   user_id_hash?: string | null;
+}
+
+export interface TraceSummary {
+  eval_score?: number | null;
+  latency_ms?: number | null;
+  turns?: number | null;
+  model?: string | null;
+  input_tokens?: number | null;
+  output_tokens?: number | null;
+}
+
+export interface TracesAggregates {
+  total_traces?: number | null;
+  failing_traces?: number | null;
+  passing_traces?: number | null;
+  avg_score?: number | null;
+  p50_latency?: number | null;
+  p95_latency?: number | null;
+  avg_turns?: number | null;
+}
+
+export interface TracesListRow {
+  id?: string | null;
+  input?: string | null;
+  timestamp?: string | null;
+  latency_ms?: number | null;
+  tokens?: number | null;
+  cost?: number | null;
+  score?: number | null;
+  turns?: number | null;
+}
+
+export interface TracesTabResponse {
+  aggregates?: TracesAggregates | null;
+  traces?: Array<TracesListRow | null> | null;
+  total?: number | null;
 }
 
 export interface TrendPoint {
@@ -1922,6 +2266,7 @@ export interface UserInfoResponse {
   two_factor_methods?: UserInfoTwoFactorMethods | null;
   org_2fa_required?: boolean | null;
   org_2fa_grace_ends_at?: string | null;
+  restrict_simulate_to_environments?: boolean | null;
 }
 
 export interface UserInfoTwoFactorMethods {
@@ -1958,6 +2303,7 @@ export interface _EvalTaskListRowResponse {
   project_name?: string | null;
   status?: string | null;
   run_type?: string | null;
+  row_type?: string | null;
   filters_applied?: unknown | null;
   created_at?: string | null;
   evals_applied?: Array<string | null> | null;

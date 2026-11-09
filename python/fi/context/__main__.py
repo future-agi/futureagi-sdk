@@ -19,7 +19,14 @@ from fi.platform._errors import APIConnectionError, APIError
 
 from .doctor import doctor
 from .journal import Authorization, SafeProject, parse_plan, recover, write_plan
-from .lock import CONTEXT_LOCK, Identity, InstallationError, SourceBundle, parse_lock
+from .lock import (
+    CONTEXT_LOCK,
+    Identity,
+    InstallationError,
+    SkillIdentity,
+    SourceBundle,
+    parse_lock,
+)
 from .materialize import (
     apply_plan,
     from_verified_snapshot,
@@ -28,6 +35,13 @@ from .materialize import (
     plan_remove,
     verify,
 )
+from .snapshot import (
+    ManifestCollector,
+    ResolutionExpiredError,
+    ResolutionLease,
+    SnapshotIdentity,
+)
+from .source import ConsumptionSource
 
 
 class Registry:
@@ -58,7 +72,7 @@ class Registry:
     def close(self) -> None:
         self.client.close()
 
-    def check_scope(self, identity: Identity) -> None:
+    def check_scope(self, identity: Identity | SkillIdentity) -> None:
         if (identity.origin, identity.organization_id, identity.workspace_id) != (
             self.origin,
             self.organization_id,
@@ -107,30 +121,23 @@ class Registry:
         Recheck every page with the original lease; never renew or resolve latest.
         The backend must enforce the full quarantine closure on this read.
         """
-        if authorization.kind != "agent_context" or not isinstance(
-            authorization.identity, Identity
-        ):
-            raise InstallationError(
-                "leaf_contract_unavailable",
-                "The generated leaf-consumption source must supply standalone-skill authorization.",
-                3,
-            )
         self.check_scope(authorization.identity)
-        try:
-            from .snapshot import ManifestCollector, ResolutionExpiredError
-        except ImportError as exc:
-            raise InstallationError(
-                "snapshot_client_unavailable",
-                "The integrated L10 snapshot package is required.",
-                3,
-            ) from exc
         identity = authorization.identity
-        authorization.lease.require_live()
-        path = f"/model-hub/skills/contexts/{identity.context_id}/versions/{identity.version}/manifest/"
-        options = RequestOptions(resolution_id=authorization.lease.resolution_id)
-        first = self.client.request(
-            "GET", path, query={"file_offset": 0, "file_limit": 25}, options=options
+        resource_id = (
+            identity.context_id if isinstance(identity, Identity) else identity.skill_id
         )
+        snapshot_identity = SnapshotIdentity(
+            kind=authorization.kind,
+            resource_id=resource_id,
+            name=identity.name,
+            version=identity.version,
+            version_id=identity.version_id,
+            digest=identity.digest,
+        )
+        source = ConsumptionSource(self.client, kind=authorization.kind)
+        authorization.lease.require_live()
+        options = RequestOptions(resolution_id=authorization.lease.resolution_id)
+        first = source.manifest(snapshot_identity, offset=0, options=options)
         # Continuations may omit lease fields; retain the original plan's lease.
         if not isinstance(first, dict):
             raise InstallationError(
@@ -138,24 +145,14 @@ class Registry:
             )
         if "resolution_id" not in first and "resolution_expires_at" not in first:
             first = {**first, **authorization.lease.model_dump()}
-        collector = ManifestCollector(first, kind="agent_context")
-        if (
-            collector.identity.resource_id,
-            collector.identity.version,
-            collector.identity.version_id,
-            collector.identity.digest,
-        ) != (
-            identity.context_id,
-            identity.version,
-            identity.version_id,
-            identity.digest,
-        ):
+        collector = ManifestCollector(first, kind=authorization.kind)
+        if collector.identity != snapshot_identity:
             raise InstallationError(
                 "integrity_failure",
                 "Authorization returned another immutable release.",
                 6,
             )
-        if collector.lease.resolution_id != authorization.lease.resolution_id:
+        if collector.lease != ResolutionLease.parse(authorization.lease.model_dump()):
             raise InstallationError(
                 "integrity_failure",
                 "Authorization substituted the resolution lease.",
@@ -163,10 +160,9 @@ class Registry:
             )
         while collector.next_offset is not None:
             authorization.lease.require_live()
-            page = self.client.request(
-                "GET",
-                path,
-                query={"file_offset": collector.next_offset, "file_limit": 25},
+            page = source.manifest(
+                snapshot_identity,
+                offset=collector.next_offset,
                 options=options,
             )
             collector.add(page)
@@ -326,6 +322,12 @@ def execute(args: argparse.Namespace) -> tuple[dict[str, object], int]:
                         label=lock.requested.label,
                         version=lock.requested.version,
                     )
+                    if source.identity.context_id != lock.context_id:
+                        raise InstallationError(
+                            "identity_collision",
+                            "The name now resolves to another context UUID.",
+                            6,
+                        )
                     if args.check:
                         changed = (
                             source.identity.version_id,
@@ -367,6 +369,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             "schema": 1,
             "error": {"code": exc.code, "message": str(exc)},
         }, exc.exit_code
+    except ResolutionExpiredError:
+        outcome, status = {
+            "schema": 1,
+            "error": {
+                "code": "resolution_expired",
+                "message": "The original lease expired; explicitly replan.",
+            },
+        }, 3
     except APIError as exc:
         # Never echo arbitrary response bodies, request headers or signed URLs.
         code = str(getattr(exc, "code", "transport_error"))

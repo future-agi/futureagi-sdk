@@ -12,6 +12,7 @@ Scaffolded (written once, then owned by hand)
 
 from __future__ import annotations
 
+import ast
 import keyword
 import re
 
@@ -195,7 +196,7 @@ def _signature(op: Op) -> tuple[list[str], list[tuple[Param, str]]]:
     rest.sort(key=lambda p: not p.required)
     named: list[tuple[Param, str]] = []
     for p in op.params_in("path"):
-        args.append(f"{arg_name(p)}: str")
+        args.append(f"{arg_name(p)}: {py_type(p.schema, for_input=True)}")
         named.append((p, arg_name(p)))
     args.append("*")
     for p in rest:
@@ -226,25 +227,34 @@ def _method(op: Op, *, is_async: bool) -> str:
         headers = ", ".join(f"{p.name!r}: {a}" for p, a in named if p.location == "header")
         required = tuple(p.name for p in op.params_in("header") if p.required)
         lines.append(f"        options = operation_options(options, {{{headers}}}, required={required!r})\n")
+    local = {}
+    occupied = {a for _, a in named} | {"options", "extra_query", "extra_body"}
+    for location in ("path", "query", "body", "files"):
+        variable = location
+        while variable in occupied:
+            variable = "_" + variable
+        local[location] = variable
+        occupied.add(variable)
     for location in ("path", "query", "body") if op.sends_body else ("path", "query"):
         group = [(p, a) for p, a in named if p.location == location and not (location == "body" and is_file(p.schema))]
         items = ", ".join(f"{p.name!r}: {a}" for p, a in group)
         if location in ("query", "body"):
             items = f"{items}, **(extra_{location} or {{}})".lstrip(", ")
-        lines.append(f"        {location} = {{{items}}}\n" if items else f"        {location} = None\n")
+        variable = local[location]
+        lines.append(f"        {variable} = {{{items}}}\n" if items else f"        {variable} = None\n")
     if not op.sends_body and not op.pagination:
-        lines.append("        body = None\n")
+        lines.append(f"        {local['body']} = None\n")
     if op.multipart:  # file params travel separately from the form fields
         uploads = ", ".join(f"{p.name!r}: {a}" for p, a in named if p.location == "body" and is_file(p.schema))
-        lines.append(f"        files = {{{uploads}}}\n")
+        lines.append(f"        {local['files']} = {{{uploads}}}\n")
     model_arg = model or "None"
     if op.pagination:
         fn = "apaginate" if is_async else "paginate"
-        lines.append(f"        return self._t.{fn}(_ops.{op_constant(op)}, path=path, query=query, model={model_arg}, options=options)\n")
+        lines.append(f"        return self._t.{fn}(_ops.{op_constant(op)}, path={local['path']}, query={local['query']}, model={model_arg}, options=options)\n")
     else:
         prefix = "await self._t.acall" if is_async else "self._t.call"
-        files_arg = ", files=files" if op.multipart else ""
-        lines.append(f"        return {prefix}(_ops.{op_constant(op)}, path=path, query=query, body=body{files_arg}, model={model_arg}, options=options)\n")
+        files_arg = f", files={local['files']}" if op.multipart else ""
+        lines.append(f"        return {prefix}(_ops.{op_constant(op)}, path={local['path']}, query={local['query']}, body={local['body']}{files_arg}, model={model_arg}, options=options)\n")
     return "".join(lines)
 
 
@@ -295,8 +305,9 @@ def emit_resources(ops: list[Op]) -> str:
     out.append("]\n")
     # typing.List/Dict, not list[]/dict[]: inside a resource class `list` is the list() method
     text = py39("".join(out))
-    body = text.split("{typing}", 1)[1]
-    used = [name for name in ("Any", "Dict", "List", "Literal", "Optional") if re.search(rf"\b{name}\b", body)]
+    # Descriptions can contain words such as "Optional" without using a type.
+    referenced = {node.id for node in ast.walk(ast.parse(text.replace("{typing}", ""))) if isinstance(node, ast.Name)}
+    used = [name for name in ("Any", "Dict", "List", "Literal", "Optional") if name in referenced]
     return text.replace("{typing}", f"from typing import {', '.join(used)}\n\n", 1)
 
 

@@ -113,3 +113,25 @@ def test_revocation_or_outage_never_returns_cached_content():
     ):
         with pytest.raises(PermissionError):
             operation()
+
+
+def test_runtime_backend_live_authorizer_is_exact_and_never_claims_delivery():
+    from fi.context import ContextClient, SnapshotIntegrityError
+    from fi.context.adapters.deepagents import ReadOnlyContextBackend
+    from fi.platform import APIError
+    from test_f12 import WireFixture, platform
+
+    fixture = WireFixture("agent_context")
+    with platform(fixture) as client:
+        wrapper = ContextClient(client)
+        snapshot = wrapper.resolve("fixture").read_all()
+        backend = ReadOnlyContextBackend(snapshot, authorize=wrapper.check_access)
+        assert backend.download_files(["/AGENTS.md"])[0].content == fixture.files["AGENTS.md"].encode()
+        fixture.access_override = {"allowed": True, "version_id": VERSION, "digest": "sha256:" + "0" * 64}
+        with pytest.raises(SnapshotIntegrityError):
+            backend.download_files(["/AGENTS.md"])
+        fixture.denied = True
+        with pytest.raises(APIError):
+            backend.read("/AGENTS.md")
+    assert fixture.resolve_count == 1
+    assert not any("receipts" in request.url.path for request in fixture.requests)

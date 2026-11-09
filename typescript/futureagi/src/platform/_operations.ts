@@ -3,6 +3,23 @@
 
 import type { Operation } from "./transport";
 
+export const OP_CONTEXTS_RESOLVE: Operation = {"id": "contexts.resolve", "method": "GET", "path": "/model-hub/skills/contexts/resolve/", "unwrap": "result", "pagination": null};
+export const OP_CONTEXTS_MANIFEST: Operation = {"id": "contexts.manifest", "method": "GET", "path": "/model-hub/skills/contexts/{resource_id}/versions/{number}/manifest/", "unwrap": "result", "pagination": null};
+export const OP_CONTEXTS_READ_FILE: Operation = {"id": "contexts.read_file", "method": "GET", "path": "/model-hub/skills/contexts/{resource_id}/versions/{number}/files/", "unwrap": "result", "pagination": null};
+export const OP_CONTEXTS_CHECK_ACCESS: Operation = {"id": "contexts.check_access", "method": "POST", "path": "/model-hub/skills/contexts/{resource_id}/versions/{number}/access-check/", "unwrap": "result", "pagination": null};
+export const OP_SKILL_CONSUMPTION_RESOLVE: Operation = {"id": "skill_consumption.resolve", "method": "GET", "path": "/model-hub/skills/consumption/resolve/", "unwrap": "result", "pagination": null};
+export const OP_SKILL_CONSUMPTION_MANIFEST: Operation = {"id": "skill_consumption.manifest", "method": "GET", "path": "/model-hub/skills/consumption/{resource_id}/versions/{number}/manifest/", "unwrap": "result", "pagination": null};
+export const OP_SKILL_CONSUMPTION_READ_FILE: Operation = {"id": "skill_consumption.read_file", "method": "GET", "path": "/model-hub/skills/consumption/{resource_id}/versions/{number}/files/", "unwrap": "result", "pagination": null};
+export const OP_SKILL_CONSUMPTION_CHECK_ACCESS: Operation = {"id": "skill_consumption.check_access", "method": "POST", "path": "/model-hub/skills/consumption/{resource_id}/versions/{number}/access-check/", "unwrap": "result", "pagination": null};
+export const OP_CONTEXT_CREDENTIALS_ISSUE: Operation = {"id": "context_credentials.issue", "method": "POST", "path": "/model-hub/skills/contexts/credentials/", "unwrap": "result", "pagination": null};
+export const OP_CONTEXT_CREDENTIALS_LIST: Operation = {"id": "context_credentials.list", "method": "GET", "path": "/model-hub/skills/contexts/credentials/", "unwrap": "result", "pagination": {"page_param": "page", "size_param": "page_size", "first_page": 1, "items": "results", "total_pages": "total_pages"}};
+export const OP_CONTEXT_CREDENTIALS_REVOKE: Operation = {"id": "context_credentials.revoke", "method": "DELETE", "path": "/model-hub/skills/contexts/credentials/{credential_id}/", "unwrap": null, "pagination": null};
+export const OP_SKILLS_LIST: Operation = {"id": "skills.list", "method": "GET", "path": "/model-hub/skills/", "unwrap": "result", "pagination": {"page_param": "page", "size_param": "page_size", "first_page": 1, "items": "results", "total_pages": "total_pages"}};
+export const OP_SKILLS_RESOLVE: Operation = {"id": "skills.resolve", "method": "GET", "path": "/model-hub/skills/resolve/", "unwrap": "result", "pagination": null};
+export const OP_SKILLS_READ_FILE: Operation = {"id": "skills.read_file", "method": "GET", "path": "/model-hub/skills/{skill_id}/versions/{number}/files/", "unwrap": "result", "pagination": null};
+export const OP_SKILLS_PUBLISH: Operation = {"id": "skills.publish", "method": "POST", "path": "/model-hub/skills/publish/", "unwrap": "result", "pagination": null};
+export const OP_SKILLS_SET_LABEL: Operation = {"id": "skills.set_label", "method": "PUT", "path": "/model-hub/skills/{skill_id}/labels/{label}/", "unwrap": "result", "pagination": null};
+export const OP_SKILLS_UPDATE_TAGS: Operation = {"id": "skills.update_tags", "method": "PATCH", "path": "/model-hub/skills/{skill_id}/", "unwrap": "result", "pagination": null};
 export const OP_ACCOUNT_WHOAMI: Operation = {"id": "account.whoami", "method": "GET", "path": "/accounts/user-info/", "unwrap": null, "pagination": null};
 export const OP_WORKSPACES_LIST: Operation = {"id": "workspaces.list", "method": "GET", "path": "/accounts/workspaces/", "unwrap": "result", "pagination": null};
 export const OP_WORKSPACES_GET: Operation = {"id": "workspaces.get", "method": "GET", "path": "/accounts/workspaces/{workspace_id}/", "unwrap": "result", "pagination": null};
@@ -56,6 +73,8 @@ export const OP_ALERTS_LOGS_LIST: Operation = {"id": "alerts.logs.list", "method
 export const OP_ALERTS_RULES_LIST: Operation = {"id": "alerts.rules.list", "method": "GET", "path": "/tracer/user-alerts/list_monitors/", "unwrap": "result", "pagination": null};
 export const OP_EVALS_TASKS_PAUSE: Operation = {"id": "evals.tasks.pause", "method": "POST", "path": "/tracer/eval-task/pause_eval_task/", "unwrap": "result", "pagination": null};
 export const OP_EVALS_TASKS_RESUME: Operation = {"id": "evals.tasks.resume", "method": "POST", "path": "/tracer/eval-task/unpause_eval_task/", "unwrap": "result", "pagination": null};
+export const OP_ERROR_CLUSTERS_OVERVIEW: Operation = {"id": "error_clusters.overview", "method": "GET", "path": "/tracer/feed/issues/{cluster_id}/overview/", "unwrap": "result", "pagination": null};
+export const OP_ERROR_CLUSTERS_TRACES: Operation = {"id": "error_clusters.traces", "method": "GET", "path": "/tracer/feed/issues/{cluster_id}/traces/", "unwrap": "result", "pagination": null};
 export const OP_ERROR_CLUSTERS_LIST: Operation = {"id": "error_clusters.list", "method": "GET", "path": "/tracer/feed/issues/", "unwrap": "result", "pagination": null};
 export const OP_ERROR_CLUSTERS_GET: Operation = {"id": "error_clusters.get", "method": "GET", "path": "/tracer/feed/issues/{cluster_id}/", "unwrap": "result", "pagination": null};
 export const OP_ANNOTATION_QUEUES_LIST: Operation = {"id": "annotation_queues.list", "method": "GET", "path": "/model-hub/annotation-queues/", "unwrap": null, "pagination": {"page_param": "page", "size_param": "limit", "first_page": 1, "items": "results", "next": "next"}};

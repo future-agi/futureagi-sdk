@@ -60,6 +60,13 @@ const leaf = await new SkillsClient(leafSource).resolve("refund", { version: 2 }
 await leaf.readFile("SKILL.md");
 new RootContextClient(context);
 new RootSkillsClient(leafSource);
+const onlineSkills = new SkillsClient(context);
+const onlineLeaf = await onlineSkills.resolve("refund", { version: 2 });
+await onlineSkills.checkAccess(onlineLeaf.identity, onlineLeaf.manifest.lease);
+await snapshots.checkAccess(snapshot.identity, snapshot.manifest.lease);
+await context.contexts.readFile("resource-id", 7, {path: "AGENTS.md", resolution_id: "lease"});
+await context.skillConsumption.manifest("resource-id", 7, {resolution_id: "lease", file_offset: 25});
+await c.contextCredentials.issue({purpose: "consume", grants: [{kind: "skill", resource_id: "resource-id", labels: ["production"], version_ids: []}], binding_ids: [], expires_at: "2026-12-01T00:00:00Z", idempotency_key: "operation-id"});
 // @ts-expect-error A selector is exclusive, not both label and version.
 await snapshots.resolve("team-policy", { label: "production", version: 2 });
 

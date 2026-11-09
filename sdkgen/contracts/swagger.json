@@ -14,6 +14,12 @@
     "version": "v1"
   },
   "securityDefinitions": {
+    "ContextCredential": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "Context <credential-id>.<secret>; never combine with API/secret keys."
+    },
     "X-Api-Key": {
       "type": "apiKey",
       "in": "header",
@@ -33,7 +39,7 @@
       "X-Secret-Key": []
     }
   ],
-  "x-source-sha256": "e3faac5732b8caa78103e3d7cfba7f72faa15a7efc482a72cbade951f5cdf65d",
+  "x-source-sha256": "d3f49d80cecc0022360869c1093f4b4a74b05f46a6bdb92df5e24639896fd57d",
   "paths": {
     "/accounts/user-info/": {
       "parameters": [],
@@ -7314,6 +7320,2138 @@
         "x-runtime-response-validation": true
       }
     },
+    "/model-hub/skills/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_skills_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 25,
+            "maximum": 100,
+            "minimum": 1
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "label",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "updated",
+              "name",
+              "created"
+            ],
+            "default": "updated"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "desc"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsSkillPageResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/skills/consumption/resolve/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_skills_consumption_resolve_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "maxLength": 64,
+            "minLength": 1
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1
+          },
+          {
+            "name": "label",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,39}$",
+            "minLength": 1
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConsumptionManifestResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "security": [
+          {
+            "ContextCredential": []
+          }
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/skills/consumption/{resource_id}/versions/{number}/access-check/": {
+      "parameters": [
+        {
+          "name": "resource_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "number",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_skills_consumption_versions_access-check_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SkillsContextEmptyInput"
+            }
+          },
+          {
+            "name": "X-Context-Resolution",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "minimum": 1
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsAccessCheckResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "security": [
+          {
+            "ContextCredential": []
+          }
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/skills/consumption/{resource_id}/versions/{number}/files/": {
+      "parameters": [
+        {
+          "name": "resource_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "number",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "operationId": "model-hub_skills_consumption_versions_files_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          {
+            "name": "max_bytes",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 32768,
+            "maximum": 49152,
+            "minimum": 4
+          },
+          {
+            "name": "X-Context-Resolution",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "minimum": 1
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConsumptionChunkResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "security": [
+          {
+            "ContextCredential": []
+          }
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/skills/consumption/{resource_id}/versions/{number}/manifest/": {
+      "parameters": [
+        {
+          "name": "resource_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "number",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "operationId": "model-hub_skills_consumption_versions_manifest_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "file_offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          {
+            "name": "file_limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 25,
+            "maximum": 25,
+            "minimum": 1
+          },
+          {
+            "name": "X-Context-Resolution",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "minimum": 1
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConsumptionManifestResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "304": {
+            "description": "Authorized immutable manifest not modified."
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "security": [
+          {
+            "ContextCredential": []
+          }
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/skills/contexts/credentials/": {
+      "parameters": [],
+      "post": {
+        "operationId": "model-hub_skills_contexts_credentials_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SkillsContextCredentialInput"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsCredentialIssuedResponse"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsCredentialIssuedResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "get": {
+        "operationId": "model-hub_skills_contexts_credentials_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 25,
+            "maximum": 100,
+            "minimum": 1
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsCredentialPageResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/skills/contexts/credentials/{credential_id}/": {
+      "parameters": [
+        {
+          "name": "credential_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "delete": {
+        "operationId": "model-hub_skills_contexts_credentials_delete",
+        "description": "",
+        "parameters": [
+          {
+            "name": "credential_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "204": {
+            "description": "No content"
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/skills/contexts/resolve/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_skills_contexts_resolve_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "maxLength": 64,
+            "minLength": 1
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1
+          },
+          {
+            "name": "label",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,39}$",
+            "minLength": 1
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConsumptionManifestResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "security": [
+          {
+            "ContextCredential": []
+          }
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/skills/contexts/{resource_id}/versions/{number}/access-check/": {
+      "parameters": [
+        {
+          "name": "resource_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "number",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "operationId": "model-hub_skills_contexts_versions_access-check_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SkillsContextEmptyInput"
+            }
+          },
+          {
+            "name": "X-Context-Resolution",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "minimum": 1
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsAccessCheckResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "security": [
+          {
+            "ContextCredential": []
+          }
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/skills/contexts/{resource_id}/versions/{number}/files/": {
+      "parameters": [
+        {
+          "name": "resource_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "number",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "operationId": "model-hub_skills_contexts_versions_files_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          {
+            "name": "max_bytes",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 32768,
+            "maximum": 49152,
+            "minimum": 4
+          },
+          {
+            "name": "X-Context-Resolution",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "minimum": 1
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConsumptionChunkResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "security": [
+          {
+            "ContextCredential": []
+          }
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/skills/contexts/{resource_id}/versions/{number}/manifest/": {
+      "parameters": [
+        {
+          "name": "resource_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "number",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "operationId": "model-hub_skills_contexts_versions_manifest_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "file_offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          {
+            "name": "file_limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 25,
+            "maximum": 25,
+            "minimum": 1
+          },
+          {
+            "name": "X-Context-Resolution",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "minimum": 1
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConsumptionManifestResponse"
+            }
+          },
+          "503": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "304": {
+            "description": "Authorized immutable manifest not modified."
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "security": [
+          {
+            "ContextCredential": []
+          }
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/skills/publish/": {
+      "parameters": [],
+      "post": {
+        "operationId": "model-hub_skills_publish_create",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SkillsHubPushRequest"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsPushResultResponse"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsPushResultResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/skills/resolve/": {
+      "parameters": [],
+      "get": {
+        "operationId": "model-hub_skills_resolve_list",
+        "description": "Resolve an immutable skill manifest. Returns ETag: \"<digest>\". Send If-None-Match with that value for HTTP 304; a missing label never falls back. Optional file_offset/file_limit page the file inventory; follow next_file_offset with the returned version pinned. MCP defaults to 25 files per page and omits frontmatter and file contents; read SKILL.md in chunks for the original metadata.",
+        "parameters": [
+          {
+            "name": "label",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "name": "include_content",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "file_offset",
+            "in": "query",
+            "description": "Zero-based file offset. Pin version when following next_file_offset.",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "maximum": 200,
+            "minimum": 0
+          },
+          {
+            "name": "file_limit",
+            "in": "query",
+            "description": "Files per manifest page (1\u201325). REST defaults to all files; MCP defaults to 25.",
+            "required": false,
+            "type": "integer",
+            "maximum": 25,
+            "minimum": 1
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsManifestResponse"
+            }
+          },
+          "304": {
+            "description": "Not modified"
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/skills/{skill_id}/": {
+      "parameters": [
+        {
+          "name": "skill_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "patch": {
+        "operationId": "model-hub_skills_partial_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SkillsHubTagsRequest"
+            }
+          },
+          {
+            "name": "skill_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsSkillDetailResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/skills/{skill_id}/labels/{label}/": {
+      "parameters": [
+        {
+          "name": "skill_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "put": {
+        "operationId": "model-hub_skills_labels_update",
+        "description": "",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SkillsHubSetLabelRequest"
+            }
+          },
+          {
+            "name": "skill_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "label",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsLabelOutResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/model-hub/skills/{skill_id}/versions/{number}/files/": {
+      "parameters": [
+        {
+          "name": "skill_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "number",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "operationId": "model-hub_skills_versions_files_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          {
+            "name": "max_bytes",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 32768,
+            "maximum": 49152,
+            "minimum": 1
+          },
+          {
+            "name": "skill_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "minimum": 1
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "401": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "410": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "413": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "428": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsError"
+            }
+          },
+          "409": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsConflictError"
+            }
+          },
+          "422": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsChecksError"
+            }
+          },
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SkillsFileChunkResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "Skills"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
     "/model-hub/test-evaluation/": {
       "parameters": [],
       "post": {
@@ -9885,6 +12023,150 @@
         "x-runtime-response-validation": true
       }
     },
+    "/tracer/feed/issues/{cluster_id}/overview/": {
+      "parameters": [
+        {
+          "name": "cluster_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "operationId": "tracer_feed_issues_overview_list",
+        "description": "GET /tracer/feed/issues/{cluster_id}/overview/",
+        "parameters": [
+          {
+            "name": "rep_limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "maximum": 200,
+            "minimum": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/OverviewApiResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/tracer/feed/issues/{cluster_id}/traces/": {
+      "parameters": [
+        {
+          "name": "cluster_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "operationId": "tracer_feed_issues_traces_list",
+        "description": "GET /tracer/feed/issues/{cluster_id}/traces/",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 50,
+            "maximum": 500,
+            "minimum": 1
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/TracesTabApiResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "404": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "500": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ApiErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
     "/tracer/observation-span/list_spans_observe/": {
       "parameters": [],
       "get": {
@@ -10556,6 +12838,14 @@
         "operationId": "tracer_trace_list_traces_of_session",
         "description": "List traces filtered by project ID with optimized queries.",
         "parameters": [
+          {
+            "name": "sort_params",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "[]",
+            "minLength": 1
+          },
           {
             "name": "project_id",
             "in": "query",
@@ -12329,6 +14619,35 @@
           "title": "Livekit max concurrency",
           "type": "string",
           "readOnly": true
+        }
+      }
+    },
+    "AgentFlowGraph": {
+      "required": [
+        "nodes",
+        "edges"
+      ],
+      "type": "object",
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "x-nullable": true
+            }
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "x-nullable": true
+            }
+          }
         }
       }
     },
@@ -14276,6 +16595,39 @@
         }
       }
     },
+    "CaptureCoverage": {
+      "required": [
+        "scope",
+        "source_summary_present",
+        "request_count",
+        "coverage_unknown"
+      ],
+      "type": "object",
+      "properties": {
+        "scope": {
+          "title": "Scope",
+          "type": "string",
+          "enum": [
+            "observed_requests"
+          ]
+        },
+        "source_summary_present": {
+          "title": "Source summary present",
+          "type": "boolean"
+        },
+        "request_count": {
+          "title": "Request count",
+          "description": "Observed request spans only; never inferred from source summary totals.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "coverage_unknown": {
+          "title": "Coverage unknown",
+          "description": "Whether capture completeness is unproved. Matching summary totals or a successful exact query do not prove capture completeness.",
+          "type": "boolean"
+        }
+      }
+    },
     "Column": {
       "required": [
         "name",
@@ -14393,6 +16745,44 @@
           "type": "string",
           "maxLength": 200,
           "minLength": 1
+        }
+      }
+    },
+    "CostCoverage": {
+      "required": [
+        "status",
+        "known_subtotal",
+        "known_fact_count",
+        "unknown_fact_count"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "enum": [
+            "complete",
+            "partial",
+            "unknown"
+          ]
+        },
+        "known_subtotal": {
+          "title": "Known subtotal",
+          "description": "Sum in USD of known observed contributions, never an average.",
+          "type": "number",
+          "minimum": 0
+        },
+        "known_fact_count": {
+          "title": "Known fact count",
+          "description": "Observed additive monetary facts with known cost, including zero.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "unknown_fact_count": {
+          "title": "Unknown fact count",
+          "description": "Observed additive monetary facts with unknown cost, not missing requests.",
+          "type": "integer",
+          "minimum": 0
         }
       }
     },
@@ -16114,7 +18504,8 @@
             "$ref": "#/definitions/DatasetRowRequest"
           }
         }
-      }
+      },
+      "additionalProperties": false
     },
     "DatasetColumnConfigEntry": {
       "type": "object",
@@ -17005,7 +19396,8 @@
           "x-json-value": true,
           "description": "Any valid JSON value."
         }
-      }
+      },
+      "additionalProperties": false
     },
     "DatasetRowRequest": {
       "type": "object",
@@ -17015,6 +19407,11 @@
           "type": "string",
           "format": "uuid"
         },
+        "order": {
+          "title": "Order",
+          "description": "Legacy input accepted for compatibility; rows are appended in request order.",
+          "type": "integer"
+        },
         "cells": {
           "type": "array",
           "items": {
@@ -17022,7 +19419,8 @@
           },
           "default": []
         }
-      }
+      },
+      "additionalProperties": false
     },
     "DatasetRunPromptStatsPrompt": {
       "required": [
@@ -19004,6 +21402,21 @@
     "EvalTemplateCreateV2Request": {
       "type": "object",
       "properties": {
+        "jev_mapping": {
+          "title": "Jev mapping",
+          "type": "object",
+          "x-nullable": true
+        },
+        "multi_choice": {
+          "title": "Multi choice",
+          "type": "boolean",
+          "default": false
+        },
+        "input_data_types": {
+          "title": "Input data types",
+          "type": "object",
+          "x-nullable": true
+        },
         "name": {
           "title": "Name",
           "type": "string",
@@ -19193,6 +21606,11 @@
       ],
       "type": "object",
       "properties": {
+        "jev_mapping": {
+          "title": "Jev mapping",
+          "type": "object",
+          "x-nullable": true
+        },
         "id": {
           "title": "Id",
           "type": "string",
@@ -19356,6 +21774,16 @@
       ],
       "type": "object",
       "properties": {
+        "jev_mapping": {
+          "title": "Jev mapping",
+          "type": "object",
+          "x-nullable": true
+        },
+        "model": {
+          "title": "Model",
+          "type": "string",
+          "x-nullable": true
+        },
         "id": {
           "title": "Id",
           "type": "string",
@@ -19518,6 +21946,16 @@
     "EvalTemplateUpdateV2Request": {
       "type": "object",
       "properties": {
+        "jev_mapping": {
+          "title": "Jev mapping",
+          "type": "object",
+          "x-nullable": true
+        },
+        "input_data_types": {
+          "title": "Input data types",
+          "type": "object",
+          "x-nullable": true
+        },
         "name": {
           "title": "Name",
           "type": "string",
@@ -19671,6 +22109,34 @@
             "jinja"
           ],
           "x-nullable": true
+        }
+      }
+    },
+    "EventsOverTimePoint": {
+      "required": [
+        "date",
+        "errors",
+        "passing",
+        "users"
+      ],
+      "type": "object",
+      "properties": {
+        "date": {
+          "title": "Date",
+          "type": "string",
+          "minLength": 1
+        },
+        "errors": {
+          "title": "Errors",
+          "type": "integer"
+        },
+        "passing": {
+          "title": "Passing",
+          "type": "integer"
+        },
+        "users": {
+          "title": "Users",
+          "type": "integer"
         }
       }
     },
@@ -20581,6 +23047,24 @@
           "title": "Annotator id",
           "type": "string",
           "format": "uuid"
+        }
+      }
+    },
+    "KeyMoment": {
+      "required": [
+        "kevinified",
+        "verbatim"
+      ],
+      "type": "object",
+      "properties": {
+        "kevinified": {
+          "title": "Kevinified",
+          "type": "string",
+          "minLength": 1
+        },
+        "verbatim": {
+          "title": "Verbatim",
+          "type": "string"
         }
       }
     },
@@ -21803,6 +24287,52 @@
         }
       }
     },
+    "OverviewApiResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/OverviewResponse"
+        }
+      }
+    },
+    "OverviewResponse": {
+      "required": [
+        "events_over_time",
+        "pattern_summary",
+        "representative_traces"
+      ],
+      "type": "object",
+      "properties": {
+        "events_over_time": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EventsOverTimePoint"
+          }
+        },
+        "pattern_summary": {
+          "$ref": "#/definitions/PatternSummary"
+        },
+        "representative_traces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RepresentativeTrace"
+          }
+        },
+        "representative_total": {
+          "title": "Representative total",
+          "type": "integer",
+          "default": 0
+        }
+      }
+    },
     "PageDepthExceededError": {
       "required": [
         "code"
@@ -21875,6 +24405,118 @@
               "type": "string",
               "minLength": 1
             }
+          }
+        }
+      }
+    },
+    "PatternInsight": {
+      "required": [
+        "value",
+        "caption"
+      ],
+      "type": "object",
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string",
+          "default": "",
+          "minLength": 1
+        },
+        "value": {
+          "title": "Value",
+          "type": "string",
+          "minLength": 1
+        },
+        "caption": {
+          "title": "Caption",
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/definitions/PatternInsightEvidence"
+        }
+      }
+    },
+    "PatternInsightEvidence": {
+      "type": "object",
+      "properties": {
+        "test": {
+          "title": "Test",
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline": {
+          "title": "Baseline",
+          "type": "string",
+          "minLength": 1
+        },
+        "tool": {
+          "title": "Tool",
+          "type": "string",
+          "minLength": 1
+        },
+        "z": {
+          "title": "Z",
+          "type": "number"
+        },
+        "p_value": {
+          "title": "P value",
+          "type": "number"
+        },
+        "ks_stat": {
+          "title": "Ks stat",
+          "type": "number"
+        },
+        "fail_median": {
+          "title": "Fail median",
+          "type": "number"
+        },
+        "baseline_median": {
+          "title": "Baseline median",
+          "type": "number"
+        },
+        "fail_pct": {
+          "title": "Fail pct",
+          "type": "integer"
+        },
+        "baseline_pct": {
+          "title": "Baseline pct",
+          "type": "integer"
+        },
+        "hits": {
+          "title": "Hits",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "missing_in": {
+          "title": "Missing in",
+          "type": "integer"
+        },
+        "traces_with_tools": {
+          "title": "Traces with tools",
+          "type": "integer"
+        }
+      }
+    },
+    "PatternSummary": {
+      "required": [
+        "insights",
+        "key_moments"
+      ],
+      "type": "object",
+      "properties": {
+        "insights": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PatternInsight"
+          }
+        },
+        "key_moments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/KeyMoment"
           }
         }
       }
@@ -24299,6 +26941,76 @@
         }
       }
     },
+    "RepresentativeTrace": {
+      "required": [
+        "id",
+        "status",
+        "timestamp",
+        "summary",
+        "evidence",
+        "agent_flow",
+        "root_causes",
+        "recommendations",
+        "what_changed"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "summary": {
+          "$ref": "#/definitions/TraceSummary"
+        },
+        "evidence": {
+          "$ref": "#/definitions/TraceEvidence"
+        },
+        "agent_flow": {
+          "$ref": "#/definitions/AgentFlowGraph"
+        },
+        "root_causes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "x-nullable": true
+            }
+          }
+        },
+        "recommendations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "x-nullable": true
+            }
+          }
+        },
+        "what_changed": {
+          "title": "What changed",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "x-nullable": true
+          },
+          "x-nullable": true
+        }
+      }
+    },
     "RunEnvironmentRef": {
       "required": [
         "id",
@@ -25839,6 +28551,2094 @@
         }
       }
     },
+    "SkillsAccessCheckResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/SkillsContextAccessCheck"
+        }
+      }
+    },
+    "SkillsChecksError": {
+      "required": [
+        "detail"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "x-nullable": true
+        },
+        "detail": {
+          "$ref": "#/definitions/SkillsHubChecksResult"
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "title": "Details",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "SkillsConflictError": {
+      "required": [
+        "detail"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "x-nullable": true
+        },
+        "detail": {
+          "$ref": "#/definitions/SkillsHubConflictDetail"
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "title": "Details",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "SkillsConsumptionChunkResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/SkillsContextConsumptionChunk"
+        }
+      }
+    },
+    "SkillsConsumptionManifestResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/SkillsContextConsumptionManifest"
+        }
+      }
+    },
+    "SkillsContextAccessCheck": {
+      "required": [
+        "allowed",
+        "version_id",
+        "digest",
+        "checked_at"
+      ],
+      "type": "object",
+      "properties": {
+        "allowed": {
+          "title": "Allowed",
+          "type": "boolean"
+        },
+        "version_id": {
+          "title": "Version id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "digest": {
+          "title": "Digest",
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "minLength": 1
+        },
+        "checked_at": {
+          "title": "Checked at",
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "SkillsContextConsumeGrant": {
+      "required": [
+        "kind",
+        "resource_id",
+        "labels",
+        "version_ids"
+      ],
+      "type": "object",
+      "properties": {
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "enum": [
+            "skill",
+            "agent_context"
+          ]
+        },
+        "resource_id": {
+          "title": "Resource id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,39}$",
+            "minLength": 1
+          },
+          "maxItems": 20
+        },
+        "version_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "maxItems": 100
+        }
+      }
+    },
+    "SkillsContextConsumptionChunk": {
+      "required": [
+        "path",
+        "sha256",
+        "size_bytes",
+        "total_chars",
+        "offset",
+        "next_offset",
+        "eof",
+        "text",
+        "resource_id",
+        "version_id",
+        "digest"
+      ],
+      "type": "object",
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "title": "Sha256",
+          "type": "string",
+          "minLength": 1
+        },
+        "size_bytes": {
+          "title": "Size bytes",
+          "type": "integer"
+        },
+        "total_chars": {
+          "title": "Total chars",
+          "type": "integer"
+        },
+        "offset": {
+          "title": "Offset",
+          "type": "integer"
+        },
+        "next_offset": {
+          "title": "Next offset",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "eof": {
+          "title": "Eof",
+          "type": "boolean"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "resource_id": {
+          "title": "Resource id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "version_id": {
+          "title": "Version id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "digest": {
+          "title": "Digest",
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "minLength": 1
+        }
+      }
+    },
+    "SkillsContextConsumptionManifest": {
+      "required": [
+        "resource_id",
+        "kind",
+        "name",
+        "description",
+        "version",
+        "version_id",
+        "digest",
+        "requested",
+        "entrypoint",
+        "descriptor_path",
+        "files",
+        "file_count",
+        "file_offset",
+        "next_file_offset",
+        "created_at",
+        "resolution_id",
+        "resolution_expires_at"
+      ],
+      "type": "object",
+      "properties": {
+        "resource_id": {
+          "title": "Resource id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "enum": [
+            "skill",
+            "agent_context"
+          ]
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer",
+          "minimum": 1
+        },
+        "version_id": {
+          "title": "Version id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "digest": {
+          "title": "Digest",
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "minLength": 1
+        },
+        "requested": {
+          "$ref": "#/definitions/SkillsContextSelector"
+        },
+        "entrypoint": {
+          "title": "Entrypoint",
+          "type": "string",
+          "minLength": 1
+        },
+        "descriptor_path": {
+          "title": "Descriptor path",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SkillsContextFileMeta"
+          }
+        },
+        "file_count": {
+          "title": "File count",
+          "type": "integer",
+          "minimum": 1
+        },
+        "file_offset": {
+          "title": "File offset",
+          "type": "integer",
+          "minimum": 0
+        },
+        "next_file_offset": {
+          "title": "Next file offset",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "resolution_id": {
+          "title": "Resolution id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "resolution_expires_at": {
+          "title": "Resolution expires at",
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "SkillsContextCredentialInput": {
+      "required": [
+        "purpose",
+        "grants",
+        "binding_ids",
+        "expires_at"
+      ],
+      "type": "object",
+      "properties": {
+        "purpose": {
+          "title": "Purpose",
+          "type": "string",
+          "enum": [
+            "consume",
+            "report"
+          ]
+        },
+        "grants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SkillsContextConsumeGrant"
+          }
+        },
+        "binding_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "maxItems": 100
+        },
+        "expires_at": {
+          "title": "Expires at",
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "SkillsContextCredentialIssued": {
+      "required": [
+        "id",
+        "secret",
+        "secret_available",
+        "metadata"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "secret": {
+          "title": "Secret",
+          "description": "Returned once; never available on replay or list.",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "secret_available": {
+          "title": "Secret available",
+          "type": "boolean"
+        },
+        "metadata": {
+          "$ref": "#/definitions/SkillsContextCredentialMetadata"
+        }
+      }
+    },
+    "SkillsContextCredentialMetadata": {
+      "required": [
+        "purpose",
+        "grants",
+        "binding_ids",
+        "expires_at",
+        "id",
+        "created_at",
+        "revoked_at",
+        "last_used_at"
+      ],
+      "type": "object",
+      "properties": {
+        "purpose": {
+          "title": "Purpose",
+          "type": "string",
+          "enum": [
+            "consume",
+            "report"
+          ]
+        },
+        "grants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SkillsContextConsumeGrant"
+          }
+        },
+        "binding_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "maxItems": 100
+        },
+        "expires_at": {
+          "title": "Expires at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "revoked_at": {
+          "title": "Revoked at",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "last_used_at": {
+          "title": "Last used at",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        }
+      }
+    },
+    "SkillsContextCredentialPage": {
+      "required": [
+        "results",
+        "count",
+        "page",
+        "page_size",
+        "total_pages"
+      ],
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SkillsContextCredentialMetadata"
+          }
+        },
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "title": "Page size",
+          "type": "integer"
+        },
+        "total_pages": {
+          "title": "Total pages",
+          "type": "integer"
+        }
+      }
+    },
+    "SkillsContextEmptyInput": {
+      "type": "object",
+      "properties": {}
+    },
+    "SkillsContextFileMeta": {
+      "required": [
+        "path",
+        "sha256",
+        "size_bytes",
+        "origin"
+      ],
+      "type": "object",
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "title": "Sha256",
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "minLength": 1
+        },
+        "size_bytes": {
+          "title": "Size bytes",
+          "type": "integer",
+          "minimum": 0
+        },
+        "origin": {
+          "$ref": "#/definitions/SkillsContextFileOrigin"
+        }
+      }
+    },
+    "SkillsContextFileOrigin": {
+      "required": [
+        "kind",
+        "skill_id",
+        "version_id",
+        "source_path"
+      ],
+      "type": "object",
+      "properties": {
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "enum": [
+            "owned",
+            "linked",
+            "generated"
+          ]
+        },
+        "skill_id": {
+          "title": "Skill id",
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "version_id": {
+          "title": "Version id",
+          "type": "string",
+          "format": "uuid",
+          "x-nullable": true
+        },
+        "source_path": {
+          "title": "Source path",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        }
+      }
+    },
+    "SkillsContextSelector": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "title": "Version",
+          "type": "integer",
+          "minimum": 1
+        },
+        "label": {
+          "title": "Label",
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,39}$",
+          "minLength": 1
+        }
+      }
+    },
+    "SkillsCredentialIssuedResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/SkillsContextCredentialIssued"
+        }
+      }
+    },
+    "SkillsCredentialPageResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/SkillsContextCredentialPage"
+        }
+      }
+    },
+    "SkillsError": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "x-nullable": true
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string",
+          "x-nullable": true,
+          "x-anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/SkillsHubConflictDetail"
+            },
+            {
+              "$ref": "#/definitions/SkillsHubChecksResult"
+            }
+          ]
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "title": "Details",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "SkillsFileChunkResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/SkillsHubFileChunk"
+        }
+      }
+    },
+    "SkillsHubCheck": {
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "type": "object",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "title": "Severity",
+          "type": "string",
+          "enum": [
+            "error",
+            "warning",
+            "info"
+          ]
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "title": "Path",
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "title": "Line",
+          "type": "integer"
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "object"
+        }
+      }
+    },
+    "SkillsHubCheckSummary": {
+      "required": [
+        "errors",
+        "warnings",
+        "infos"
+      ],
+      "type": "object",
+      "properties": {
+        "errors": {
+          "title": "Errors",
+          "type": "integer"
+        },
+        "warnings": {
+          "title": "Warnings",
+          "type": "integer"
+        },
+        "infos": {
+          "title": "Infos",
+          "type": "integer"
+        }
+      }
+    },
+    "SkillsHubChecksResult": {
+      "required": [
+        "items",
+        "summary",
+        "tokens",
+        "frontmatter"
+      ],
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SkillsHubCheck"
+          }
+        },
+        "summary": {
+          "$ref": "#/definitions/SkillsHubCheckSummary"
+        },
+        "tokens": {
+          "$ref": "#/definitions/SkillsHubTokens"
+        },
+        "frontmatter": {
+          "title": "Frontmatter",
+          "type": "object",
+          "x-nullable": true
+        }
+      }
+    },
+    "SkillsHubConflictDetail": {
+      "type": "object",
+      "properties": {
+        "base_version": {
+          "title": "Base version",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "latest_version": {
+          "title": "Latest version",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "current_version": {
+          "title": "Current version",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "release_revision": {
+          "title": "Release revision",
+          "type": "integer"
+        },
+        "retry_at": {
+          "title": "Retry at",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "SkillsHubDraftSummary": {
+      "required": [
+        "user",
+        "updated_at",
+        "base_version"
+      ],
+      "type": "object",
+      "properties": {
+        "user": {
+          "required": [
+            "id",
+            "name"
+          ],
+          "type": "object",
+          "properties": {
+            "id": {
+              "title": "Id",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": {
+              "title": "Name",
+              "type": "string"
+            }
+          }
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "base_version": {
+          "title": "Base version",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "is_mine": {
+          "title": "Is mine",
+          "type": "boolean",
+          "readOnly": true
+        }
+      }
+    },
+    "SkillsHubEvidenceCurrentness": {
+      "required": [
+        "content",
+        "baseline",
+        "suite",
+        "competitors",
+        "payload_available"
+      ],
+      "type": "object",
+      "properties": {
+        "content": {
+          "title": "Content",
+          "type": "boolean"
+        },
+        "baseline": {
+          "title": "Baseline",
+          "type": "boolean",
+          "x-nullable": true
+        },
+        "suite": {
+          "title": "Suite",
+          "type": "boolean",
+          "x-nullable": true
+        },
+        "competitors": {
+          "title": "Competitors",
+          "type": "boolean",
+          "x-nullable": true
+        },
+        "payload_available": {
+          "title": "Payload available",
+          "type": "boolean"
+        }
+      }
+    },
+    "SkillsHubFileChunk": {
+      "required": [
+        "path",
+        "sha256",
+        "size_bytes",
+        "total_chars",
+        "offset",
+        "next_offset",
+        "eof",
+        "text"
+      ],
+      "type": "object",
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "title": "Sha256",
+          "type": "string",
+          "minLength": 1
+        },
+        "size_bytes": {
+          "title": "Size bytes",
+          "type": "integer"
+        },
+        "total_chars": {
+          "title": "Total chars",
+          "type": "integer"
+        },
+        "offset": {
+          "title": "Offset",
+          "type": "integer"
+        },
+        "next_offset": {
+          "title": "Next offset",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "eof": {
+          "title": "Eof",
+          "type": "boolean"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      }
+    },
+    "SkillsHubFileInput": {
+      "required": [
+        "path",
+        "content"
+      ],
+      "type": "object",
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "content": {
+          "title": "Content",
+          "type": "string"
+        }
+      }
+    },
+    "SkillsHubLabelOut": {
+      "required": [
+        "name",
+        "version",
+        "version_id",
+        "updated_at",
+        "updated_by",
+        "release_revision"
+      ],
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        },
+        "version_id": {
+          "title": "Version id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_by": {
+          "required": [
+            "id",
+            "name"
+          ],
+          "type": "object",
+          "properties": {
+            "id": {
+              "title": "Id",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": {
+              "title": "Name",
+              "type": "string"
+            }
+          },
+          "x-nullable": true
+        },
+        "is_protected": {
+          "title": "Is protected",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "can_move": {
+          "title": "Can move",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "can_remove": {
+          "title": "Can remove",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "release_revision": {
+          "title": "Release revision",
+          "type": "integer"
+        }
+      }
+    },
+    "SkillsHubLabelSummary": {
+      "required": [
+        "name",
+        "version"
+      ],
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        }
+      }
+    },
+    "SkillsHubManifest": {
+      "required": [
+        "skill_id",
+        "name",
+        "description",
+        "version",
+        "version_id",
+        "digest",
+        "requested",
+        "files",
+        "file_count",
+        "file_offset",
+        "next_file_offset",
+        "created_at"
+      ],
+      "type": "object",
+      "properties": {
+        "skill_id": {
+          "title": "Skill id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        },
+        "version_id": {
+          "title": "Version id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "digest": {
+          "title": "Digest",
+          "type": "string",
+          "minLength": 1
+        },
+        "requested": {
+          "$ref": "#/definitions/SkillsHubRequested"
+        },
+        "frontmatter": {
+          "title": "Frontmatter",
+          "description": "REST only. MCP callers read the original frontmatter from SKILL.md in chunks.",
+          "type": "object"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SkillsHubManifestFile"
+          }
+        },
+        "file_count": {
+          "title": "File count",
+          "type": "integer"
+        },
+        "file_offset": {
+          "title": "File offset",
+          "type": "integer"
+        },
+        "next_file_offset": {
+          "title": "Next file offset",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "SkillsHubManifestFile": {
+      "required": [
+        "path",
+        "size_bytes",
+        "sha256"
+      ],
+      "type": "object",
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string",
+          "minLength": 1
+        },
+        "size_bytes": {
+          "title": "Size bytes",
+          "type": "integer"
+        },
+        "sha256": {
+          "title": "Sha256",
+          "type": "string",
+          "minLength": 1
+        },
+        "content": {
+          "title": "Content",
+          "type": "string"
+        }
+      }
+    },
+    "SkillsHubPushRequest": {
+      "required": [
+        "files"
+      ],
+      "type": "object",
+      "properties": {
+        "expected_digest": {
+          "title": "Expected digest",
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "minLength": 1
+        },
+        "expected_release_revision": {
+          "title": "Expected release revision",
+          "type": "integer",
+          "minimum": 0
+        },
+        "evidence_run_id": {
+          "title": "Evidence run id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SkillsHubFileInput"
+          }
+        },
+        "note": {
+          "title": "Note",
+          "type": "string",
+          "default": "",
+          "maxLength": 2000
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,39}$",
+            "minLength": 1
+          },
+          "default": [],
+          "maxItems": 20
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,39}$",
+            "minLength": 1
+          },
+          "default": [],
+          "maxItems": 20
+        },
+        "acknowledge_warnings": {
+          "title": "Acknowledge warnings",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "SkillsHubPushResult": {
+      "required": [
+        "release_revision",
+        "evidence",
+        "skill",
+        "version",
+        "unchanged"
+      ],
+      "type": "object",
+      "properties": {
+        "release_revision": {
+          "title": "Release revision",
+          "type": "integer"
+        },
+        "evidence": {
+          "required": [
+            "run_id",
+            "currentness",
+            "validity"
+          ],
+          "type": "object",
+          "properties": {
+            "run_id": {
+              "title": "Run id",
+              "type": "string",
+              "format": "uuid"
+            },
+            "currentness": {
+              "$ref": "#/definitions/SkillsHubEvidenceCurrentness"
+            },
+            "validity": {
+              "title": "Validity",
+              "type": "string",
+              "enum": [
+                "reviewed",
+                "diagnostic"
+              ]
+            }
+          },
+          "x-nullable": true
+        },
+        "skill": {
+          "$ref": "#/definitions/SkillsHubSkillSummary"
+        },
+        "version": {
+          "required": [
+            "id",
+            "number",
+            "digest",
+            "note",
+            "created_at",
+            "created_by",
+            "file_count",
+            "total_bytes",
+            "source"
+          ],
+          "type": "object",
+          "properties": {
+            "id": {
+              "title": "Id",
+              "type": "string",
+              "format": "uuid"
+            },
+            "number": {
+              "title": "Number",
+              "type": "integer"
+            },
+            "digest": {
+              "title": "Digest",
+              "type": "string",
+              "minLength": 1
+            },
+            "note": {
+              "title": "Note",
+              "type": "string"
+            },
+            "created_at": {
+              "title": "Created at",
+              "type": "string",
+              "format": "date-time"
+            },
+            "created_by": {
+              "required": [
+                "id",
+                "name"
+              ],
+              "type": "object",
+              "properties": {
+                "id": {
+                  "title": "Id",
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                }
+              },
+              "x-nullable": true
+            },
+            "file_count": {
+              "title": "File count",
+              "type": "integer"
+            },
+            "total_bytes": {
+              "title": "Total bytes",
+              "type": "integer"
+            },
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "readOnly": true
+            },
+            "source": {
+              "title": "Source",
+              "type": "object"
+            }
+          }
+        },
+        "unchanged": {
+          "title": "Unchanged",
+          "type": "boolean"
+        }
+      }
+    },
+    "SkillsHubRequested": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        }
+      }
+    },
+    "SkillsHubSetLabelRequest": {
+      "required": [
+        "version"
+      ],
+      "type": "object",
+      "properties": {
+        "expected_release_revision": {
+          "title": "Expected release revision",
+          "type": "integer",
+          "minimum": 0
+        },
+        "expected_version": {
+          "title": "Expected version",
+          "type": "integer",
+          "minimum": 1,
+          "x-nullable": true
+        },
+        "expected_digest": {
+          "title": "Expected digest",
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "minLength": 1
+        },
+        "evidence_run_id": {
+          "title": "Evidence run id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer",
+          "minimum": 1
+        },
+        "note": {
+          "title": "Note",
+          "type": "string",
+          "default": "",
+          "maxLength": 500
+        }
+      }
+    },
+    "SkillsHubSkillDetail": {
+      "required": [
+        "release_revision",
+        "protected_label_names",
+        "id",
+        "name",
+        "description",
+        "tags",
+        "labels",
+        "updated_at",
+        "updated_by",
+        "created_at",
+        "source",
+        "created_by"
+      ],
+      "type": "object",
+      "properties": {
+        "release_revision": {
+          "title": "Release revision",
+          "type": "integer"
+        },
+        "protected_label_names": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "minLength": 1
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "latest_version": {
+          "title": "Latest version",
+          "type": "integer",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SkillsHubLabelOut"
+          }
+        },
+        "has_draft": {
+          "title": "Has draft",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_by": {
+          "required": [
+            "id",
+            "name"
+          ],
+          "type": "object",
+          "properties": {
+            "id": {
+              "title": "Id",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": {
+              "title": "Name",
+              "type": "string"
+            }
+          },
+          "x-nullable": true
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "fetches_7d": {
+          "title": "Fetches 7d",
+          "type": "integer",
+          "readOnly": true
+        },
+        "file_count": {
+          "title": "File count",
+          "type": "integer",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "source": {
+          "title": "Source",
+          "type": "object"
+        },
+        "created_by": {
+          "required": [
+            "id",
+            "name"
+          ],
+          "type": "object",
+          "properties": {
+            "id": {
+              "title": "Id",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": {
+              "title": "Name",
+              "type": "string"
+            }
+          },
+          "x-nullable": true
+        },
+        "latest": {
+          "required": [
+            "id",
+            "number",
+            "digest",
+            "note",
+            "created_at",
+            "created_by",
+            "file_count",
+            "total_bytes",
+            "source"
+          ],
+          "type": "object",
+          "properties": {
+            "id": {
+              "title": "Id",
+              "type": "string",
+              "format": "uuid"
+            },
+            "number": {
+              "title": "Number",
+              "type": "integer"
+            },
+            "digest": {
+              "title": "Digest",
+              "type": "string",
+              "minLength": 1
+            },
+            "note": {
+              "title": "Note",
+              "type": "string"
+            },
+            "created_at": {
+              "title": "Created at",
+              "type": "string",
+              "format": "date-time"
+            },
+            "created_by": {
+              "required": [
+                "id",
+                "name"
+              ],
+              "type": "object",
+              "properties": {
+                "id": {
+                  "title": "Id",
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                }
+              },
+              "x-nullable": true
+            },
+            "file_count": {
+              "title": "File count",
+              "type": "integer"
+            },
+            "total_bytes": {
+              "title": "Total bytes",
+              "type": "integer"
+            },
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "readOnly": true
+            },
+            "source": {
+              "title": "Source",
+              "type": "object"
+            }
+          },
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "drafts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SkillsHubDraftSummary"
+          },
+          "readOnly": true
+        },
+        "permissions": {
+          "$ref": "#/definitions/SkillsHubSkillPermissions"
+        }
+      }
+    },
+    "SkillsHubSkillPage": {
+      "required": [
+        "count",
+        "page",
+        "page_size",
+        "total_pages",
+        "results",
+        "stats"
+      ],
+      "type": "object",
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "title": "Page size",
+          "type": "integer"
+        },
+        "total_pages": {
+          "title": "Total pages",
+          "type": "integer"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SkillsHubSkillSummary"
+          }
+        },
+        "stats": {
+          "$ref": "#/definitions/SkillsHubStats"
+        }
+      }
+    },
+    "SkillsHubSkillPermissions": {
+      "required": [
+        "can_manage_label_protection",
+        "can_archive",
+        "can_run_tests"
+      ],
+      "type": "object",
+      "properties": {
+        "can_manage_label_protection": {
+          "title": "Can manage label protection",
+          "type": "boolean"
+        },
+        "can_archive": {
+          "title": "Can archive",
+          "type": "boolean"
+        },
+        "can_run_tests": {
+          "title": "Can run tests",
+          "type": "boolean"
+        }
+      }
+    },
+    "SkillsHubSkillSummary": {
+      "required": [
+        "release_revision",
+        "protected_label_names",
+        "id",
+        "name",
+        "description",
+        "tags",
+        "labels",
+        "updated_at",
+        "updated_by",
+        "created_at"
+      ],
+      "type": "object",
+      "properties": {
+        "release_revision": {
+          "title": "Release revision",
+          "type": "integer"
+        },
+        "protected_label_names": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "minLength": 1
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "latest_version": {
+          "title": "Latest version",
+          "type": "integer",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SkillsHubLabelSummary"
+          }
+        },
+        "has_draft": {
+          "title": "Has draft",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_by": {
+          "required": [
+            "id",
+            "name"
+          ],
+          "type": "object",
+          "properties": {
+            "id": {
+              "title": "Id",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": {
+              "title": "Name",
+              "type": "string"
+            }
+          },
+          "x-nullable": true
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "fetches_7d": {
+          "title": "Fetches 7d",
+          "type": "integer",
+          "readOnly": true
+        },
+        "file_count": {
+          "title": "File count",
+          "type": "integer",
+          "readOnly": true,
+          "x-nullable": true
+        }
+      }
+    },
+    "SkillsHubStats": {
+      "required": [
+        "total",
+        "in_production",
+        "fetches_7d",
+        "my_drafts"
+      ],
+      "type": "object",
+      "properties": {
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "in_production": {
+          "title": "In production",
+          "type": "integer"
+        },
+        "fetches_7d": {
+          "title": "Fetches 7d",
+          "type": "integer"
+        },
+        "my_drafts": {
+          "title": "My drafts",
+          "type": "integer"
+        }
+      }
+    },
+    "SkillsHubTagsRequest": {
+      "required": [
+        "tags"
+      ],
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,39}$",
+            "minLength": 1
+          },
+          "maxItems": 20
+        }
+      }
+    },
+    "SkillsHubTokens": {
+      "required": [
+        "metadata",
+        "skill_md",
+        "total"
+      ],
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "title": "Metadata",
+          "type": "integer"
+        },
+        "skill_md": {
+          "title": "Skill md",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      }
+    },
+    "SkillsLabelOutResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/SkillsHubLabelOut"
+        }
+      }
+    },
+    "SkillsManifestResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/SkillsHubManifest"
+        }
+      }
+    },
+    "SkillsPushResultResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/SkillsHubPushResult"
+        }
+      }
+    },
+    "SkillsSkillDetailResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/SkillsHubSkillDetail"
+        }
+      }
+    },
+    "SkillsSkillPageResponse": {
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "result": {
+          "$ref": "#/definitions/SkillsHubSkillPage"
+        }
+      }
+    },
     "SpanListColumnConfig": {
       "required": [
         "id",
@@ -26665,6 +31465,12 @@
           "title": "Summary",
           "type": "object"
         },
+        "cost_coverage": {
+          "$ref": "#/definitions/CostCoverage"
+        },
+        "capture_coverage": {
+          "$ref": "#/definitions/CaptureCoverage"
+        },
         "graph": {
           "title": "Graph",
           "type": "object"
@@ -26784,6 +31590,60 @@
         "memory_context": {
           "title": "Memory context",
           "type": "object"
+        }
+      }
+    },
+    "TraceEvidence": {
+      "required": [
+        "input",
+        "output",
+        "fail_reel",
+        "pass_reel"
+      ],
+      "type": "object",
+      "properties": {
+        "input": {
+          "title": "Input",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "output": {
+          "title": "Output",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "fail_reel": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "x-nullable": true
+            }
+          }
+        },
+        "pass_reel": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "x-nullable": true
+            }
+          }
+        },
+        "judge_reason": {
+          "title": "Judge reason",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "score": {
+          "title": "Score",
+          "type": "number",
+          "x-nullable": true
         }
       }
     },
@@ -27034,6 +31894,17 @@
       ],
       "type": "object",
       "properties": {
+        "trace_capture_coverage": {
+          "title": "Trace capture coverage",
+          "description": "Capture coverage for returned rows only, keyed by project ID then trace ID. Omitted entries retain legacy presentation; never implies complete capture.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/definitions/CaptureCoverage"
+            }
+          }
+        },
         "metadata": {
           "$ref": "#/definitions/TraceObserveListMetadata"
         },
@@ -27114,6 +31985,12 @@
           "title": "Session metadata",
           "type": "object",
           "additionalProperties": true
+        },
+        "cost_coverage": {
+          "$ref": "#/definitions/CostCoverage"
+        },
+        "capture_coverage": {
+          "$ref": "#/definitions/CaptureCoverage"
         },
         "response": {
           "type": "array",
@@ -27260,6 +32137,17 @@
       ],
       "type": "object",
       "properties": {
+        "trace_capture_coverage": {
+          "title": "Trace capture coverage",
+          "description": "Capture coverage for returned rows only, keyed by project ID then trace ID. Omitted entries retain legacy presentation; never implies complete capture.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/definitions/CaptureCoverage"
+            }
+          }
+        },
         "metadata": {
           "$ref": "#/definitions/TraceSessionListMetadata"
         },
@@ -27324,6 +32212,12 @@
           "type": "number",
           "x-nullable": true
         },
+        "cost_coverage": {
+          "$ref": "#/definitions/CostCoverage"
+        },
+        "capture_coverage": {
+          "$ref": "#/definitions/CaptureCoverage"
+        },
         "total_tokens": {
           "title": "Total tokens",
           "type": "integer",
@@ -27368,6 +32262,190 @@
         "x-json-value": true,
         "description": "Any valid JSON value.",
         "x-nullable": true
+      }
+    },
+    "TraceSummary": {
+      "required": [
+        "eval_score",
+        "latency_ms",
+        "turns",
+        "model",
+        "input_tokens",
+        "output_tokens"
+      ],
+      "type": "object",
+      "properties": {
+        "eval_score": {
+          "title": "Eval score",
+          "type": "number",
+          "x-nullable": true
+        },
+        "latency_ms": {
+          "title": "Latency ms",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "turns": {
+          "title": "Turns",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "model": {
+          "title": "Model",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "input_tokens": {
+          "title": "Input tokens",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "output_tokens": {
+          "title": "Output tokens",
+          "type": "integer",
+          "x-nullable": true
+        }
+      }
+    },
+    "TracesAggregates": {
+      "required": [
+        "total_traces",
+        "failing_traces",
+        "passing_traces",
+        "avg_score",
+        "p50_latency",
+        "p95_latency",
+        "avg_turns"
+      ],
+      "type": "object",
+      "properties": {
+        "total_traces": {
+          "title": "Total traces",
+          "type": "integer"
+        },
+        "failing_traces": {
+          "title": "Failing traces",
+          "type": "integer"
+        },
+        "passing_traces": {
+          "title": "Passing traces",
+          "type": "integer"
+        },
+        "avg_score": {
+          "title": "Avg score",
+          "type": "number",
+          "x-nullable": true
+        },
+        "p50_latency": {
+          "title": "P50 latency",
+          "type": "integer"
+        },
+        "p95_latency": {
+          "title": "P95 latency",
+          "type": "integer"
+        },
+        "avg_turns": {
+          "title": "Avg turns",
+          "type": "number",
+          "x-nullable": true
+        }
+      }
+    },
+    "TracesListRow": {
+      "required": [
+        "id",
+        "input",
+        "timestamp",
+        "latency_ms",
+        "tokens",
+        "cost",
+        "score",
+        "turns"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "minLength": 1
+        },
+        "input": {
+          "title": "Input",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "latency_ms": {
+          "title": "Latency ms",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "tokens": {
+          "title": "Tokens",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "cost": {
+          "title": "Cost",
+          "type": "number",
+          "x-nullable": true
+        },
+        "score": {
+          "title": "Score",
+          "type": "number",
+          "x-nullable": true
+        },
+        "turns": {
+          "title": "Turns",
+          "type": "integer",
+          "x-nullable": true
+        }
+      }
+    },
+    "TracesTabApiResponse": {
+      "required": [
+        "result"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": true
+        },
+        "result": {
+          "$ref": "#/definitions/TracesTabResponse"
+        }
+      }
+    },
+    "TracesTabResponse": {
+      "required": [
+        "aggregates",
+        "traces",
+        "total"
+      ],
+      "type": "object",
+      "properties": {
+        "aggregates": {
+          "$ref": "#/definitions/TracesAggregates"
+        },
+        "traces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TracesListRow"
+          }
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
       }
     },
     "TrendPoint": {
@@ -28038,7 +33116,8 @@
         "default_workspace_role",
         "org_level",
         "ws_level",
-        "effective_level"
+        "effective_level",
+        "restrict_simulate_to_environments"
       ],
       "type": "object",
       "properties": {
@@ -28159,6 +33238,10 @@
           "title": "Org 2fa grace ends at",
           "type": "string",
           "format": "date-time"
+        },
+        "restrict_simulate_to_environments": {
+          "title": "Restrict simulate to environments",
+          "type": "boolean"
         }
       }
     },
@@ -28323,6 +33406,7 @@
         "name",
         "status",
         "run_type",
+        "row_type",
         "filters_applied",
         "created_at",
         "evals_applied",
@@ -28355,6 +33439,12 @@
         },
         "run_type": {
           "title": "Run type",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "row_type": {
+          "title": "Row type",
           "type": "string",
           "minLength": 1,
           "x-nullable": true

@@ -14,10 +14,11 @@ tarball=$(cd "$pkg" && npm pack --ignore-scripts --pack-destination "$work" 2>/d
 cd "$work"
 npm init -y >/dev/null
 npm install --no-audit --no-fund --silent "./$tarball" "typescript@5.6.3"
-cp "$pkg"/consumer/*.mts "$pkg"/consumer/tsconfig.json .
+cp "$pkg"/consumer/*.mts "$pkg"/consumer/*.mjs "$pkg"/consumer/tsconfig.json .
 
 echo "consumer: tsc against $tarball"
 npx tsc -p tsconfig.json
+node context-consumer.mjs
 
 echo "consumer: ESM import"
 node --input-type=module -e '

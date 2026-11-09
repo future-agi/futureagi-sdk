@@ -1,6 +1,6 @@
 """Snapshot orchestration over the existing platform transport.
 
-Context routes are SPEC v1.2 D.5. Source protocols also let generated leaf
+Routes come from the pinned F12 generated operations. Source protocols let leaf
 consumption operations use the same verification engine without a second HTTP
 implementation. Neither source nor snapshot retries a failed resolution.
 """
@@ -15,18 +15,16 @@ from fi.platform import Client as PlatformClient
 from fi.platform import RequestOptions
 
 from .snapshot import (
-    CHUNK_BYTES,
-    PAGE_SIZE,
     ChunkCollector,
     ManifestCollector,
+    ResolutionLease,
     SnapshotIdentity,
     SnapshotIntegrityError,
     SnapshotManifest,
     VerifiedSnapshot,
     _selector,
 )
-
-CONTEXT_PREFIX = "/model-hub/skills/contexts/"
+from .source import AsyncConsumptionSource, ConsumptionSource
 
 
 class SnapshotSource(Protocol):
@@ -205,91 +203,24 @@ class AsyncSnapshotClient:
         return AsyncContextSnapshot(collector.finish(), self._source)
 
 
-def _version_path(identity: SnapshotIdentity) -> str:
-    return f"{CONTEXT_PREFIX}{identity.resource_id}/versions/{identity.version}/"
-
-
-class _ContextSource:
-    def __init__(self, client: PlatformClient) -> None:
-        self.client = client
-
-    def resolve(self, *, name: str, selector: dict[str, object]) -> object:
-        return self.client.request(
-            "GET", CONTEXT_PREFIX + "resolve/", query={"name": name, **selector}
-        )
-
-    def manifest(
-        self, identity: SnapshotIdentity, *, offset: int, options: RequestOptions
-    ) -> object:
-        return self.client.request(
-            "GET",
-            _version_path(identity) + "manifest/",
-            query={"file_offset": offset, "file_limit": PAGE_SIZE},
-            options=options,
-        )
-
-    def chunk(
-        self,
-        identity: SnapshotIdentity,
-        *,
-        path: str,
-        offset: int,
-        options: RequestOptions,
-    ) -> object:
-        return self.client.request(
-            "GET",
-            _version_path(identity) + "files/",
-            query={"path": path, "offset": offset, "max_bytes": CHUNK_BYTES},
-            options=options,
-        )
-
-
-class _AsyncContextSource:
-    def __init__(self, client: PlatformAsyncClient) -> None:
-        self.client = client
-
-    async def resolve(self, *, name: str, selector: dict[str, object]) -> object:
-        return await self.client.request(
-            "GET", CONTEXT_PREFIX + "resolve/", query={"name": name, **selector}
-        )
-
-    async def manifest(
-        self, identity: SnapshotIdentity, *, offset: int, options: RequestOptions
-    ) -> object:
-        return await self.client.request(
-            "GET",
-            _version_path(identity) + "manifest/",
-            query={"file_offset": offset, "file_limit": PAGE_SIZE},
-            options=options,
-        )
-
-    async def chunk(
-        self,
-        identity: SnapshotIdentity,
-        *,
-        path: str,
-        offset: int,
-        options: RequestOptions,
-    ) -> object:
-        return await self.client.request(
-            "GET",
-            _version_path(identity) + "files/",
-            query={"path": path, "offset": offset, "max_bytes": CHUNK_BYTES},
-            options=options,
-        )
-
-
 class ContextClient(SnapshotClient):
-    """Use ContextClient(fi.platform.Client(auth=ContextAuth(...))).
-
-    The caller owns the shared platform client and closes it. No credentials,
-    environment variables, HTTP sessions or caches are created by this wrapper.
-    """
+    """Verified reads and live access checks using the caller-owned platform client."""
 
     def __init__(self, client: PlatformClient) -> None:
-        super().__init__(_ContextSource(client), kind="agent_context")
+        self._consumption = ConsumptionSource(client, kind="agent_context")
+        super().__init__(self._consumption, kind="agent_context")
+
+    def check_access(self, identity: SnapshotIdentity, lease: ResolutionLease) -> None:
+        """Reauthorize exact bytes; does not renew a lease or report delivery."""
+        self._consumption.check_access(identity, lease)
 
 
 class AsyncContextClient(AsyncSnapshotClient):
     def __init__(self, client: PlatformAsyncClient) -> None:
-        super().__init__(_AsyncContextSource(client), kind="agent_context")
+        self._consumption = AsyncConsumptionSource(client, kind="agent_context")
+        super().__init__(self._consumption, kind="agent_context")
+
+    async def check_access(
+        self, identity: SnapshotIdentity, lease: ResolutionLease
+    ) -> None:
+        await self._consumption.check_access(identity, lease)

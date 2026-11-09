@@ -122,17 +122,15 @@ function identity(
   const name = string(value.name, "name");
   if (name.length > 64 || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(name))
     return invalid("Invalid snapshot name");
-  if (
-    kind === "agent_context" &&
-    (value.entrypoint !== "AGENTS.md" ||
-      value.descriptor_path !== ".futureagi/context.json")
-  )
-    return invalid("Invalid context entrypoint");
+  if (value.kind !== kind) return invalid("Manifest resource kind mismatch");
+  const root = kind === "agent_context" ? "AGENTS.md" : "SKILL.md";
+  const descriptor =
+    kind === "agent_context" ? ".futureagi/context.json" : null;
+  if (value.entrypoint !== root || value.descriptor_path !== descriptor)
+    return invalid("Invalid snapshot entrypoint");
   return Object.freeze({
     kind,
-    resourceId: uuid(
-      value[kind === "agent_context" ? "context_id" : "skill_id"],
-    ),
+    resourceId: uuid(value.resource_id),
     name,
     version: integer(value.version, "version", 1, Number.MAX_SAFE_INTEGER),
     versionId: uuid(value.version_id),
@@ -311,15 +309,13 @@ export class ChunkCollector {
       return invalid("File identity changed during continuation");
     const id = this.manifest.identity;
     const identities = {
-      [id.kind === "agent_context" ? "context_id" : "skill_id"]: id.resourceId,
+      resource_id: id.resourceId,
       version_id: id.versionId,
       digest: id.digest,
     };
     if (
       Object.entries(identities).some(
-        ([key, expected]) =>
-          (id.kind === "agent_context" || key in value) &&
-          value[key] !== expected,
+        ([key, expected]) => value[key] !== expected,
       )
     )
       return invalid("Chunk belongs to another snapshot");
@@ -349,8 +345,8 @@ export class ChunkCollector {
     if (value.next_offset !== (value.eof ? null : end))
       return invalid("Invalid chunk continuation");
     if (!value.eof && !value.text) return invalid("Chunk made no progress");
-    if (!value.eof && encoded.length < CHUNK_BYTES - 3)
-      return invalid("Nonfinal chunk is not the maximal UTF-8 prefix");
+    // JSON escaping can shorten the server's byte-bounded chunk. Contiguity,
+    // progress, total size and the final hash still prove complete delivery.
     this.parts.push(value.text);
     this.offset = end;
     this.eof = value.eof;

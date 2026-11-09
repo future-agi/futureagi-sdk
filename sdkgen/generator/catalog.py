@@ -351,7 +351,19 @@ def _apply_response_fix(op_id: str, spec: dict, fix: dict | None, returns: dict 
 
 def _contract_params(op_id: str, spec: dict, method: str, item: dict, contract_op: dict) -> list[Param]:
     params: list[Param] = []
-    for p in item.get("parameters", []) + contract_op.get("parameters", []):
+    # OpenAPI operation-level parameters override path-item declarations by
+    # (name, in). Do not concatenate them into duplicate function arguments.
+    parameters: dict[tuple[str, str], dict] = {}
+    for level in (item.get("parameters", []), contract_op.get("parameters", [])):
+        seen: set[tuple[str, str]] = set()
+        for parameter in level:
+            name, location = parameter["name"], parameter["in"]
+            key = (name.lower() if location == "header" else name, location)
+            if key in seen:
+                raise CatalogError(f"{op_id}: duplicate operation parameter {name}")
+            seen.add(key)
+            parameters[key] = parameter
+    for p in parameters.values():
         if p["in"] == "body":
             body = resolve(spec, p["schema"]) or {}
             # A PATCH is a partial update: the backend accepts any subset of the fields, whatever

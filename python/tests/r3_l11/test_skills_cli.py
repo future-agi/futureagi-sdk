@@ -189,16 +189,20 @@ def test_skills_cli_verifies_without_credentials_and_removes_via_private_plan(
     assert json.loads(capsys.readouterr().out)["state"] == "removed"
 
 
-def test_cli_leaf_application_fails_closed_when_contract_source_not_integrated(
-    project, tmp_path, capsys
+def test_cli_leaf_application_fails_closed_without_context_configuration(
+    project, tmp_path, capsys, monkeypatch
 ):
+    for name in ("FI_CONTEXT_ORIGIN", "FI_CONTEXT_CREDENTIAL", "FI_CONTEXT_ORGANIZATION_ID", "FI_CONTEXT_WORKSPACE_ID"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv("FI_API_KEY", "stale-broad")
+    monkeypatch.setenv("FI_SECRET_KEY", "stale-broad")
     prepared = planned(skill(), project)
     path = tmp_path / "plan.json"
     write_plan(path, prepared)
     assert skills_main(["apply", "--plan", str(path), "--quiescent"]) == 3
     assert (
         json.loads(capsys.readouterr().out)["error"]["code"]
-        == "leaf_contract_unavailable"
+        == "configuration_required"
     )
     assert list(project.iterdir()) == []
 

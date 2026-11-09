@@ -123,17 +123,15 @@ class SnapshotIdentity:
         name = _string(value.get("name"), "name")
         if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", name) or len(name) > 64:
             raise SnapshotIntegrityError("Invalid snapshot name")
-        if kind == "agent_context" and (
-            value.get("entrypoint") != "AGENTS.md"
-            or value.get("descriptor_path") != ".futureagi/context.json"
-        ):
-            raise SnapshotIntegrityError("Invalid context entrypoint")
+        if value.get("kind") != kind:
+            raise SnapshotIntegrityError("Manifest resource kind mismatch")
+        root = "AGENTS.md" if kind == "agent_context" else "SKILL.md"
+        descriptor = ".futureagi/context.json" if kind == "agent_context" else None
+        if value.get("entrypoint") != root or value.get("descriptor_path") != descriptor:
+            raise SnapshotIntegrityError("Invalid snapshot entrypoint")
         return cls(
             kind=kind,
-            resource_id=_uuid(
-                value.get("context_id" if kind == "agent_context" else "skill_id"),
-                "resource ID",
-            ),
+            resource_id=_uuid(value.get("resource_id"), "resource ID"),
             name=name,
             version=_integer(value.get("version"), "version", 1, 2**53 - 1),
             version_id=_uuid(value.get("version_id"), "version ID"),
@@ -314,18 +312,11 @@ class ChunkCollector:
             raise SnapshotIntegrityError("Invalid file size")
         identity = self.manifest.identity
         identity_fields = (
-            (
-                "context_id" if identity.kind == "agent_context" else "skill_id",
-                identity.resource_id,
-            ),
+            ("resource_id", identity.resource_id),
             ("version_id", identity.version_id),
             ("digest", identity.digest),
         )
-        if any(
-            item.get(key) != value
-            for key, value in identity_fields
-            if identity.kind == "agent_context" or key in item
-        ):
+        if any(item.get(key) != value for key, value in identity_fields):
             raise SnapshotIntegrityError("Chunk belongs to another snapshot")
         if (
             _integer(item.get("offset"), "chunk offset", 0, MAX_FILE_BYTES)
@@ -355,10 +346,8 @@ class ChunkCollector:
             raise SnapshotIntegrityError("Invalid chunk continuation")
         if not eof and (not text or type(item["next_offset"]) is not int):
             raise SnapshotIntegrityError("Chunk made no progress")
-        if not eof and len(encoded) < CHUNK_BYTES - 3:
-            raise SnapshotIntegrityError(
-                "Nonfinal chunk is not the maximal UTF-8 prefix"
-            )
+        # The server may shorten a chunk to bound the JSON-escaped envelope.
+        # Contiguity, progress, total size and the final hash prove completeness.
         self.parts.append(text)
         self.offset = end
         self.eof = eof

@@ -187,7 +187,7 @@ def _params_interface(op: Op) -> tuple[str, list[Param]]:
 
 def _method(op: Op, fields: list[Param]) -> str:
     path_params = op.params_in("path")
-    args = [f"{ts_arg(p)}: string" for p in path_params]
+    args = [f"{ts_arg(p)}: {ts_type(p.schema, for_input=True)}" for p in path_params]
     if fields:
         optional = "" if any(p.required for p in fields) else " = {}"
         args.append(f"params: {ts_params_type(op)}{optional}")

@@ -95,7 +95,8 @@ class SnapshotMaterializationContract(unittest.TestCase):
             offset = int(request.url.params.get("file_offset", 0))
             size = int(request.url.params.get("file_limit", 25))
             result = {
-                "context_id": identity.context_id,
+                "resource_id": identity.context_id,
+                "kind": "agent_context",
                 "name": identity.name,
                 "description": "Reviewed policy",
                 "version": identity.version,
@@ -138,7 +139,8 @@ class SnapshotMaterializationContract(unittest.TestCase):
                 "next_offset": end if end < len(text) else None,
                 "eof": end == len(text),
                 "text": chunk,
-                "context_id": identity.context_id,
+                "resource_id": identity.context_id,
+                "kind": "agent_context",
                 "version_id": identity.version_id,
                 "digest": identity.digest,
             }

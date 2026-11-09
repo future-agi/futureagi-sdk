@@ -107,14 +107,15 @@ class Fixture:
 
     def page(self, offset=0):
         return {
-            "context_id" if self.kind == "agent_context" else "skill_id": RESOURCE,
+            "resource_id": RESOURCE,
+            "kind": self.kind,
             "name": "fixture",
             "version": 7,
             "version_id": VERSION,
             "digest": self.digest,
             "requested": {"label": "production"},
-            "entrypoint": "AGENTS.md",
-            "descriptor_path": ".futureagi/context.json",
+            "entrypoint": "AGENTS.md" if self.kind == "agent_context" else "SKILL.md",
+            "descriptor_path": ".futureagi/context.json" if self.kind == "agent_context" else None,
             "resolution_id": LEASE,
             "resolution_expires_at": self.expiry,
             "files": copy.deepcopy(self.metadata[offset : offset + 25]),
@@ -139,7 +140,7 @@ class Fixture:
             "next_offset": end if end < len(content) else None,
             "eof": end == len(content),
             "text": content[offset:end],
-            "context_id": RESOURCE,
+            "resource_id": RESOURCE,
             "version_id": VERSION,
             "digest": self.digest,
         }
@@ -254,7 +255,7 @@ async def test_complete_inventory_utf8_and_moved_label(monkeypatch, asynchronous
         ("files", []),
         ("file_count", True),
         ("version", True),
-        ("context_id", "../../escape"),
+        ("resource_id", "../../escape"),
         ("resolution_id", "bad\nheader"),
         ("resolution_expires_at", "2026-01-01T00:00:00"),
         ("entrypoint", "SKILL.md"),

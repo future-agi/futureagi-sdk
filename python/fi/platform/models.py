@@ -138,6 +138,12 @@ class AgentDefinitionResponse(_Model):
     livekit_max_concurrency: Optional[Any] = Field(default=None)
 
 
+class AgentFlowGraph(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['edges', 'nodes'])
+    nodes: Optional[List[Optional[Any]]] = Field(default=None)
+    edges: Optional[List[Optional[Any]]] = Field(default=None)
+
+
 class AgentVersionCreateResponse(_Model):
     message: Optional[str] = Field(default=None)
     version: Optional[AgentVersionResponse] = Field(default=None)
@@ -350,6 +356,14 @@ class CallExecutionErrorLocalizerTask(_Model):
     updated_at: Optional[str] = Field(default=None)
 
 
+class CaptureCoverage(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['coverage_unknown', 'request_count', 'scope', 'source_summary_present'])
+    scope: Optional[str] = Field(default=None)  # one of: observed_requests
+    source_summary_present: Optional[bool] = Field(default=None)
+    request_count: Optional[int] = Field(default=None)
+    coverage_unknown: Optional[bool] = Field(default=None)
+
+
 class Column(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['data_type', 'name', 'source'])
     id: Optional[str] = Field(default=None)
@@ -358,6 +372,14 @@ class Column(_Model):
     dataset: Optional[str] = Field(default=None)
     source: Optional[str] = Field(default=None)  # one of: evaluation, evaluation_tags, evaluation_reason, run_prompt, experiment, optimisation, experiment_evaluation, experiment_evaluation_tags, optimisation_evaluation, annotation_label, optimisation_evaluation_tags, extracted_json, classification, extracted_entities, api_call, python_code, vector_db, conditional, eval_playground, OTHERS
     source_id: Optional[str] = Field(default=None)
+
+
+class CostCoverage(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['known_fact_count', 'known_subtotal', 'status', 'unknown_fact_count'])
+    status: Optional[str] = Field(default=None)  # one of: complete, partial, unknown
+    known_subtotal: Optional[float] = Field(default=None)
+    known_fact_count: Optional[int] = Field(default=None)
+    unknown_fact_count: Optional[int] = Field(default=None)
 
 
 class CustomEvalConfig(_Model):
@@ -870,6 +892,7 @@ class EvalTemplateCreateResponseResult(_Model):
 
 class EvalTemplateDetailResponseResult(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['aggregation_enabled', 'aggregation_function', 'check_internet', 'created_at', 'created_by_name', 'current_version', 'error_localizer_enabled', 'eval_type', 'id', 'multi_choice', 'name', 'output_type', 'owner', 'pass_threshold', 'required_keys', 'tags', 'template_format', 'template_type', 'updated_at', 'version_count'])
+    jev_mapping: Optional[Any] = Field(default=None)
     id: Optional[str] = Field(default=None)
     name: Optional[str] = Field(default=None)
     description: Optional[str] = Field(default=None)
@@ -903,6 +926,8 @@ class EvalTemplateDetailResponseResult(_Model):
 
 class EvalTemplateListItem(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['created_by_name', 'current_version', 'eval_type', 'id', 'last_updated', 'name', 'output_type', 'owner', 'tags', 'template_type', 'thirty_day_chart', 'thirty_day_error_rate', 'thirty_day_run_count', 'version_count'])
+    jev_mapping: Optional[Any] = Field(default=None)
+    model: Optional[str] = Field(default=None)
     id: Optional[str] = Field(default=None)
     name: Optional[str] = Field(default=None)
     template_type: Optional[str] = Field(default=None)
@@ -936,6 +961,14 @@ class EvalTemplateUpdateResponseResult(_Model):
 
 class EvalsConfigsCreateResult(_Model):
     id: Optional[str] = Field(default=None)
+
+
+class EventsOverTimePoint(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['date', 'errors', 'passing', 'users'])
+    date: Optional[str] = Field(default=None)
+    errors: Optional[int] = Field(default=None)
+    passing: Optional[int] = Field(default=None)
+    users: Optional[int] = Field(default=None)
 
 
 class ExperimentDetailV2(_Model):
@@ -1071,6 +1104,12 @@ class GatewaySummaryResult(_Model):
     status: Optional[str] = Field(default=None)
     provider_count: Optional[int] = Field(default=None)
     model_count: Optional[int] = Field(default=None)
+
+
+class KeyMoment(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['kevinified', 'verbatim'])
+    kevinified: Optional[str] = Field(default=None)
+    verbatim: Optional[str] = Field(default=None)
 
 
 class KnowledgeBaseItem(_Model):
@@ -1209,6 +1248,45 @@ class Organization(_Model):
     require_2fa: Optional[bool] = Field(default=None)
     require_2fa_grace_period_days: Optional[int] = Field(default=None)
     require_2fa_enforced_at: Optional[str] = Field(default=None)
+
+
+class OverviewResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['events_over_time', 'pattern_summary', 'representative_traces'])
+    events_over_time: Optional[List[Optional[EventsOverTimePoint]]] = Field(default=None)
+    pattern_summary: Optional[PatternSummary] = Field(default=None)
+    representative_traces: Optional[List[Optional[RepresentativeTrace]]] = Field(default=None)
+    representative_total: Optional[int] = Field(default=None)
+
+
+class PatternInsight(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['caption', 'value'])
+    title: Optional[str] = Field(default=None)
+    value: Optional[str] = Field(default=None)
+    caption: Optional[str] = Field(default=None)
+    evidence: Optional[PatternInsightEvidence] = Field(default=None)
+
+
+class PatternInsightEvidence(_Model):
+    test: Optional[str] = Field(default=None)
+    baseline: Optional[str] = Field(default=None)
+    tool: Optional[str] = Field(default=None)
+    z: Optional[float] = Field(default=None)
+    p_value: Optional[float] = Field(default=None)
+    ks_stat: Optional[float] = Field(default=None)
+    fail_median: Optional[float] = Field(default=None)
+    baseline_median: Optional[float] = Field(default=None)
+    fail_pct: Optional[int] = Field(default=None)
+    baseline_pct: Optional[int] = Field(default=None)
+    hits: Optional[int] = Field(default=None)
+    total: Optional[int] = Field(default=None)
+    missing_in: Optional[int] = Field(default=None)
+    traces_with_tools: Optional[int] = Field(default=None)
+
+
+class PatternSummary(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['insights', 'key_moments'])
+    insights: Optional[List[Optional[PatternInsight]]] = Field(default=None)
+    key_moments: Optional[List[Optional[KeyMoment]]] = Field(default=None)
 
 
 class ProjectDetailResult(_Model):
@@ -1557,6 +1635,19 @@ class RcaTrailStep(_Model):
     confidence: Optional[str] = Field(default=None)
 
 
+class RepresentativeTrace(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent_flow', 'evidence', 'id', 'recommendations', 'root_causes', 'status', 'summary'])
+    id: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)
+    timestamp: Optional[str] = Field(default=None)
+    summary: Optional[TraceSummary] = Field(default=None)
+    evidence: Optional[TraceEvidence] = Field(default=None)
+    agent_flow: Optional[AgentFlowGraph] = Field(default=None)
+    root_causes: Optional[List[Optional[Any]]] = Field(default=None)
+    recommendations: Optional[List[Optional[Any]]] = Field(default=None)
+    what_changed: Optional[Any] = Field(default=None)
+
+
 class RunEnvironmentRef(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'name'])
     id: Optional[str] = Field(default=None)
@@ -1707,6 +1798,234 @@ class SimulateEvalConfigResponse(_Model):
     editable: Optional[bool] = Field(default=None)
 
 
+class SkillsContextAccessCheck(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['allowed', 'checked_at', 'digest', 'version_id'])
+    allowed: Optional[bool] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    digest: Optional[str] = Field(default=None)
+    checked_at: Optional[str] = Field(default=None)
+
+
+class SkillsContextConsumeGrant(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['kind', 'labels', 'resource_id', 'version_ids'])
+    kind: Optional[str] = Field(default=None)  # one of: skill, agent_context
+    resource_id: Optional[str] = Field(default=None)
+    labels: Optional[List[Optional[str]]] = Field(default=None)
+    version_ids: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class SkillsContextConsumptionChunk(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['digest', 'eof', 'offset', 'path', 'resource_id', 'sha256', 'size_bytes', 'text', 'total_chars', 'version_id'])
+    path: Optional[str] = Field(default=None)
+    sha256: Optional[str] = Field(default=None)
+    size_bytes: Optional[int] = Field(default=None)
+    total_chars: Optional[int] = Field(default=None)
+    offset: Optional[int] = Field(default=None)
+    next_offset: Optional[int] = Field(default=None)
+    eof: Optional[bool] = Field(default=None)
+    text: Optional[str] = Field(default=None)
+    resource_id: Optional[str] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    digest: Optional[str] = Field(default=None)
+
+
+class SkillsContextConsumptionManifest(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'description', 'digest', 'entrypoint', 'file_count', 'file_offset', 'files', 'kind', 'name', 'requested', 'resolution_expires_at', 'resolution_id', 'resource_id', 'version', 'version_id'])
+    resource_id: Optional[str] = Field(default=None)
+    kind: Optional[str] = Field(default=None)  # one of: skill, agent_context
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    digest: Optional[str] = Field(default=None)
+    requested: Optional[SkillsContextSelector] = Field(default=None)
+    entrypoint: Optional[str] = Field(default=None)
+    descriptor_path: Optional[str] = Field(default=None)
+    files: Optional[List[Optional[SkillsContextFileMeta]]] = Field(default=None)
+    file_count: Optional[int] = Field(default=None)
+    file_offset: Optional[int] = Field(default=None)
+    next_file_offset: Optional[int] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    resolution_id: Optional[str] = Field(default=None)
+    resolution_expires_at: Optional[str] = Field(default=None)
+
+
+class SkillsContextCredentialIssued(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'metadata', 'secret_available'])
+    id: Optional[str] = Field(default=None)
+    secret: Optional[str] = Field(default=None)
+    secret_available: Optional[bool] = Field(default=None)
+    metadata: Optional[SkillsContextCredentialMetadata] = Field(default=None)
+
+
+class SkillsContextCredentialMetadata(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['binding_ids', 'created_at', 'expires_at', 'grants', 'id', 'purpose'])
+    purpose: Optional[str] = Field(default=None)  # one of: consume, report
+    grants: Optional[List[Optional[SkillsContextConsumeGrant]]] = Field(default=None)
+    binding_ids: Optional[List[Optional[str]]] = Field(default=None)
+    expires_at: Optional[str] = Field(default=None)
+    id: Optional[str] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    revoked_at: Optional[str] = Field(default=None)
+    last_used_at: Optional[str] = Field(default=None)
+
+
+class SkillsContextFileMeta(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['origin', 'path', 'sha256', 'size_bytes'])
+    path: Optional[str] = Field(default=None)
+    sha256: Optional[str] = Field(default=None)
+    size_bytes: Optional[int] = Field(default=None)
+    origin: Optional[SkillsContextFileOrigin] = Field(default=None)
+
+
+class SkillsContextFileOrigin(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['kind'])
+    kind: Optional[str] = Field(default=None)  # one of: owned, linked, generated
+    skill_id: Optional[str] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    source_path: Optional[str] = Field(default=None)
+
+
+class SkillsContextSelector(_Model):
+    version: Optional[int] = Field(default=None)
+    label: Optional[str] = Field(default=None)
+
+
+class SkillsHubDraftSummary(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['updated_at', 'user'])
+    user: Optional[Dict[str, Any]] = Field(default=None)
+    updated_at: Optional[str] = Field(default=None)
+    base_version: Optional[int] = Field(default=None)
+    is_mine: Optional[bool] = Field(default=None)
+
+
+class SkillsHubEvidenceCurrentness(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['content', 'payload_available'])
+    content: Optional[bool] = Field(default=None)
+    baseline: Optional[bool] = Field(default=None)
+    suite: Optional[bool] = Field(default=None)
+    competitors: Optional[bool] = Field(default=None)
+    payload_available: Optional[bool] = Field(default=None)
+
+
+class SkillsHubFileChunk(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['eof', 'offset', 'path', 'sha256', 'size_bytes', 'text', 'total_chars'])
+    path: Optional[str] = Field(default=None)
+    sha256: Optional[str] = Field(default=None)
+    size_bytes: Optional[int] = Field(default=None)
+    total_chars: Optional[int] = Field(default=None)
+    offset: Optional[int] = Field(default=None)
+    next_offset: Optional[int] = Field(default=None)
+    eof: Optional[bool] = Field(default=None)
+    text: Optional[str] = Field(default=None)
+
+
+class SkillsHubLabelOut(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name', 'release_revision', 'updated_at', 'version', 'version_id'])
+    name: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    updated_at: Optional[str] = Field(default=None)
+    updated_by: Optional[Dict[str, Any]] = Field(default=None)
+    is_protected: Optional[bool] = Field(default=None)
+    can_move: Optional[bool] = Field(default=None)
+    can_remove: Optional[bool] = Field(default=None)
+    release_revision: Optional[int] = Field(default=None)
+
+
+class SkillsHubLabelSummary(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name', 'version'])
+    name: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+
+
+class SkillsHubManifest(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'description', 'digest', 'file_count', 'file_offset', 'files', 'name', 'requested', 'skill_id', 'version', 'version_id'])
+    skill_id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    digest: Optional[str] = Field(default=None)
+    requested: Optional[SkillsHubRequested] = Field(default=None)
+    frontmatter: Optional[Any] = Field(default=None)
+    files: Optional[List[Optional[SkillsHubManifestFile]]] = Field(default=None)
+    file_count: Optional[int] = Field(default=None)
+    file_offset: Optional[int] = Field(default=None)
+    next_file_offset: Optional[int] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+
+
+class SkillsHubManifestFile(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['path', 'sha256', 'size_bytes'])
+    path: Optional[str] = Field(default=None)
+    size_bytes: Optional[int] = Field(default=None)
+    sha256: Optional[str] = Field(default=None)
+    content: Optional[str] = Field(default=None)
+
+
+class SkillsHubPushResult(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['release_revision', 'skill', 'unchanged', 'version'])
+    release_revision: Optional[int] = Field(default=None)
+    evidence: Optional[Dict[str, Any]] = Field(default=None)
+    skill: Optional[SkillsHubSkillSummary] = Field(default=None)
+    version: Optional[Dict[str, Any]] = Field(default=None)
+    unchanged: Optional[bool] = Field(default=None)
+
+
+class SkillsHubRequested(_Model):
+    label: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+
+
+class SkillsHubSkillDetail(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'description', 'id', 'labels', 'name', 'protected_label_names', 'release_revision', 'source', 'tags', 'updated_at'])
+    release_revision: Optional[int] = Field(default=None)
+    protected_label_names: Optional[List[Optional[str]]] = Field(default=None)
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    tags: Optional[List[Optional[str]]] = Field(default=None)
+    latest_version: Optional[int] = Field(default=None)
+    labels: Optional[List[Optional[SkillsHubLabelOut]]] = Field(default=None)
+    has_draft: Optional[bool] = Field(default=None)
+    updated_at: Optional[str] = Field(default=None)
+    updated_by: Optional[Dict[str, Any]] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    fetches_7d: Optional[int] = Field(default=None)
+    file_count: Optional[int] = Field(default=None)
+    source: Optional[Any] = Field(default=None)
+    created_by: Optional[Dict[str, Any]] = Field(default=None)
+    latest: Optional[Dict[str, Any]] = Field(default=None)
+    drafts: Optional[List[Optional[SkillsHubDraftSummary]]] = Field(default=None)
+    permissions: Optional[SkillsHubSkillPermissions] = Field(default=None)
+
+
+class SkillsHubSkillPermissions(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['can_archive', 'can_manage_label_protection', 'can_run_tests'])
+    can_manage_label_protection: Optional[bool] = Field(default=None)
+    can_archive: Optional[bool] = Field(default=None)
+    can_run_tests: Optional[bool] = Field(default=None)
+
+
+class SkillsHubSkillSummary(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'description', 'id', 'labels', 'name', 'protected_label_names', 'release_revision', 'tags', 'updated_at'])
+    release_revision: Optional[int] = Field(default=None)
+    protected_label_names: Optional[List[Optional[str]]] = Field(default=None)
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    tags: Optional[List[Optional[str]]] = Field(default=None)
+    latest_version: Optional[int] = Field(default=None)
+    labels: Optional[List[Optional[SkillsHubLabelSummary]]] = Field(default=None)
+    has_draft: Optional[bool] = Field(default=None)
+    updated_at: Optional[str] = Field(default=None)
+    updated_by: Optional[Dict[str, Any]] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    fetches_7d: Optional[int] = Field(default=None)
+    file_count: Optional[int] = Field(default=None)
+
+
 class SpanListColumnConfig(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'is_visible', 'name'])
     id: Optional[str] = Field(default=None)
@@ -1798,6 +2117,8 @@ class TraceDetailResult(_Model):
     trace: Optional[Any] = Field(default=None)
     observation_spans: Optional[List[Optional[TraceDetailSpan]]] = Field(default=None)
     summary: Optional[Any] = Field(default=None)
+    cost_coverage: Optional[CostCoverage] = Field(default=None)
+    capture_coverage: Optional[CaptureCoverage] = Field(default=None)
     graph: Optional[Any] = Field(default=None)
 
 
@@ -1824,6 +2145,16 @@ class TraceErrorAnalysisResult(_Model):
     grouped_errors: Optional[List[Optional[Any]]] = Field(default=None)
     scores: Optional[Any] = Field(default=None)
     memory_context: Optional[Any] = Field(default=None)
+
+
+class TraceEvidence(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['fail_reel', 'pass_reel'])
+    input: Optional[str] = Field(default=None)
+    output: Optional[str] = Field(default=None)
+    fail_reel: Optional[List[Optional[Any]]] = Field(default=None)
+    pass_reel: Optional[List[Optional[Any]]] = Field(default=None)
+    judge_reason: Optional[str] = Field(default=None)
+    score: Optional[float] = Field(default=None)
 
 
 class TraceObserveColumnConfig(_Model):
@@ -1872,6 +2203,7 @@ class TraceObserveListMetadata(_Model):
 
 class TraceObserveListResult(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['config', 'metadata', 'table'])
+    trace_capture_coverage: Optional[Any] = Field(default=None)
     metadata: Optional[TraceObserveListMetadata] = Field(default=None)
     table: Optional[List[Optional[Any]]] = Field(default=None)
     config: Optional[List[Optional[TraceObserveColumnConfig]]] = Field(default=None)
@@ -1887,6 +2219,8 @@ class TracePreview(_Model):
 class TraceSessionDetailResult(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['next', 'response', 'session_metadata'])
     session_metadata: Optional[Any] = Field(default=None)
+    cost_coverage: Optional[CostCoverage] = Field(default=None)
+    capture_coverage: Optional[CaptureCoverage] = Field(default=None)
     response: Optional[List[Optional[Any]]] = Field(default=None)
     next: Optional[bool] = Field(default=None)
 
@@ -1916,6 +2250,7 @@ class TraceSessionListMetadata(_Model):
 
 class TraceSessionListResult(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['config', 'metadata', 'table'])
+    trace_capture_coverage: Optional[Any] = Field(default=None)
     metadata: Optional[TraceSessionListMetadata] = Field(default=None)
     table: Optional[List[Optional[TraceSessionTableRow]]] = Field(default=None)
     config: Optional[List[Optional[TraceObserveColumnConfig]]] = Field(default=None)
@@ -1930,6 +2265,8 @@ class TraceSessionTableRow(_Model):
     created_at: Optional[str] = Field(default=None)
     duration: Optional[float] = Field(default=None)
     total_cost: Optional[float] = Field(default=None)
+    cost_coverage: Optional[CostCoverage] = Field(default=None)
+    capture_coverage: Optional[CaptureCoverage] = Field(default=None)
     total_tokens: Optional[int] = Field(default=None)
     total_traces_count: Optional[int] = Field(default=None)
     first_message: Optional[Any] = Field(default=None)
@@ -1937,6 +2274,45 @@ class TraceSessionTableRow(_Model):
     user_id: Optional[str] = Field(default=None)
     user_id_type: Optional[str] = Field(default=None)
     user_id_hash: Optional[str] = Field(default=None)
+
+
+class TraceSummary(_Model):
+    eval_score: Optional[float] = Field(default=None)
+    latency_ms: Optional[int] = Field(default=None)
+    turns: Optional[int] = Field(default=None)
+    model: Optional[str] = Field(default=None)
+    input_tokens: Optional[int] = Field(default=None)
+    output_tokens: Optional[int] = Field(default=None)
+
+
+class TracesAggregates(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['failing_traces', 'p50_latency', 'p95_latency', 'passing_traces', 'total_traces'])
+    total_traces: Optional[int] = Field(default=None)
+    failing_traces: Optional[int] = Field(default=None)
+    passing_traces: Optional[int] = Field(default=None)
+    avg_score: Optional[float] = Field(default=None)
+    p50_latency: Optional[int] = Field(default=None)
+    p95_latency: Optional[int] = Field(default=None)
+    avg_turns: Optional[float] = Field(default=None)
+
+
+class TracesListRow(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id'])
+    id: Optional[str] = Field(default=None)
+    input: Optional[str] = Field(default=None)
+    timestamp: Optional[str] = Field(default=None)
+    latency_ms: Optional[int] = Field(default=None)
+    tokens: Optional[int] = Field(default=None)
+    cost: Optional[float] = Field(default=None)
+    score: Optional[float] = Field(default=None)
+    turns: Optional[int] = Field(default=None)
+
+
+class TracesTabResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['aggregates', 'total', 'traces'])
+    aggregates: Optional[TracesAggregates] = Field(default=None)
+    traces: Optional[List[Optional[TracesListRow]]] = Field(default=None)
+    total: Optional[int] = Field(default=None)
 
 
 class TrendPoint(_Model):
@@ -2060,7 +2436,7 @@ class UserInfoOrganization(_Model):
 
 
 class UserInfoResponse(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'email', 'get_started_completed', 'id', 'onboarding_completed', 'organization', 'remember_me', 'status', 'ws_enabled'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'email', 'get_started_completed', 'id', 'onboarding_completed', 'organization', 'remember_me', 'restrict_simulate_to_environments', 'status', 'ws_enabled'])
     id: Optional[str] = Field(default=None)
     email: Optional[str] = Field(default=None)
     name: Optional[str] = Field(default=None)
@@ -2086,6 +2462,7 @@ class UserInfoResponse(_Model):
     two_factor_methods: Optional[UserInfoTwoFactorMethods] = Field(default=None)
     org_2fa_required: Optional[bool] = Field(default=None)
     org_2fa_grace_ends_at: Optional[str] = Field(default=None)
+    restrict_simulate_to_environments: Optional[bool] = Field(default=None)
 
 
 class UserInfoTwoFactorMethods(_Model):
@@ -2127,6 +2504,7 @@ class _EvalTaskListRowResponse(_Model):
     project_name: Optional[str] = Field(default=None)
     status: Optional[str] = Field(default=None)
     run_type: Optional[str] = Field(default=None)
+    row_type: Optional[str] = Field(default=None)
     filters_applied: Optional[Any] = Field(default=None)
     created_at: Optional[str] = Field(default=None)
     evals_applied: Optional[List[Optional[str]]] = Field(default=None)
@@ -2139,6 +2517,7 @@ AgentDefinitionDetailResponse.model_rebuild()
 AgentDefinitionEditResponse.model_rebuild()
 AgentDefinitionListResponse.model_rebuild()
 AgentDefinitionResponse.model_rebuild()
+AgentFlowGraph.model_rebuild()
 AgentVersionCreateResponse.model_rebuild()
 AgentVersionResponse.model_rebuild()
 AgentccRequestLog.model_rebuild()
@@ -2150,7 +2529,9 @@ BulkAnnotationResponseResult.model_rebuild()
 BulkCreateScoresResult.model_rebuild()
 CallExecution.model_rebuild()
 CallExecutionErrorLocalizerTask.model_rebuild()
+CaptureCoverage.model_rebuild()
 Column.model_rebuild()
+CostCoverage.model_rebuild()
 CustomEvalConfig.model_rebuild()
 Dashboard.model_rebuild()
 DashboardDetail.model_rebuild()
@@ -2202,6 +2583,7 @@ EvalTemplateListItem.model_rebuild()
 EvalTemplateListResponseResult.model_rebuild()
 EvalTemplateUpdateResponseResult.model_rebuild()
 EvalsConfigsCreateResult.model_rebuild()
+EventsOverTimePoint.model_rebuild()
 ExperimentDetailV2.model_rebuild()
 ExperimentListV2.model_rebuild()
 FeedDetailCore.model_rebuild()
@@ -2211,6 +2593,7 @@ GatewayConfigProvider.model_rebuild()
 GatewayConfigResult.model_rebuild()
 GatewayStatus.model_rebuild()
 GatewaySummaryResult.model_rebuild()
+KeyMoment.model_rebuild()
 KnowledgeBaseItem.model_rebuild()
 LegacyKnowledgeBaseCreateResult.model_rebuild()
 LegacyKnowledgeBaseFileRow.model_rebuild()
@@ -2227,6 +2610,10 @@ ModelHubSuccessMessageResult.model_rebuild()
 ObservationSpanDetailResult.model_rebuild()
 OptimizationsCreateResult.model_rebuild()
 Organization.model_rebuild()
+OverviewResponse.model_rebuild()
+PatternInsight.model_rebuild()
+PatternInsightEvidence.model_rebuild()
+PatternSummary.model_rebuild()
 ProjectDetailResult.model_rebuild()
 PromptHistoryExecution.model_rebuild()
 PromptLabel.model_rebuild()
@@ -2261,6 +2648,7 @@ QueueRemoveLabelResult.model_rebuild()
 QueueSubmitAnnotationsResult.model_rebuild()
 RcaSummary.model_rebuild()
 RcaTrailStep.model_rebuild()
+RepresentativeTrace.model_rebuild()
 RunEnvironmentRef.model_rebuild()
 RunTestExecutionResponse.model_rebuild()
 RunTestResponse.model_rebuild()
@@ -2271,6 +2659,27 @@ ScenarioPromptItem.model_rebuild()
 ScenarioResponse.model_rebuild()
 Score.model_rebuild()
 SimulateEvalConfigResponse.model_rebuild()
+SkillsContextAccessCheck.model_rebuild()
+SkillsContextConsumeGrant.model_rebuild()
+SkillsContextConsumptionChunk.model_rebuild()
+SkillsContextConsumptionManifest.model_rebuild()
+SkillsContextCredentialIssued.model_rebuild()
+SkillsContextCredentialMetadata.model_rebuild()
+SkillsContextFileMeta.model_rebuild()
+SkillsContextFileOrigin.model_rebuild()
+SkillsContextSelector.model_rebuild()
+SkillsHubDraftSummary.model_rebuild()
+SkillsHubEvidenceCurrentness.model_rebuild()
+SkillsHubFileChunk.model_rebuild()
+SkillsHubLabelOut.model_rebuild()
+SkillsHubLabelSummary.model_rebuild()
+SkillsHubManifest.model_rebuild()
+SkillsHubManifestFile.model_rebuild()
+SkillsHubPushResult.model_rebuild()
+SkillsHubRequested.model_rebuild()
+SkillsHubSkillDetail.model_rebuild()
+SkillsHubSkillPermissions.model_rebuild()
+SkillsHubSkillSummary.model_rebuild()
 SpanListColumnConfig.model_rebuild()
 SpanListMetadata.model_rebuild()
 SpanObserveListResult.model_rebuild()
@@ -2279,6 +2688,7 @@ TestExecutionAnalytics.model_rebuild()
 TraceDetailResult.model_rebuild()
 TraceDetailSpan.model_rebuild()
 TraceErrorAnalysisResult.model_rebuild()
+TraceEvidence.model_rebuild()
 TraceObserveColumnConfig.model_rebuild()
 TraceObserveListMetadata.model_rebuild()
 TraceObserveListResult.model_rebuild()
@@ -2287,6 +2697,10 @@ TraceSessionDetailResult.model_rebuild()
 TraceSessionListMetadata.model_rebuild()
 TraceSessionListResult.model_rebuild()
 TraceSessionTableRow.model_rebuild()
+TraceSummary.model_rebuild()
+TracesAggregates.model_rebuild()
+TracesListRow.model_rebuild()
+TracesTabResponse.model_rebuild()
 TrendPoint.model_rebuild()
 UsageOverviewDimension.model_rebuild()
 UsageOverviewResult.model_rebuild()
@@ -2312,6 +2726,7 @@ __all__ = [
     'AgentDefinitionEditResponse',
     'AgentDefinitionListResponse',
     'AgentDefinitionResponse',
+    'AgentFlowGraph',
     'AgentVersionCreateResponse',
     'AgentVersionResponse',
     'AgentccRequestLog',
@@ -2323,7 +2738,9 @@ __all__ = [
     'BulkCreateScoresResult',
     'CallExecution',
     'CallExecutionErrorLocalizerTask',
+    'CaptureCoverage',
     'Column',
+    'CostCoverage',
     'CustomEvalConfig',
     'Dashboard',
     'DashboardDetail',
@@ -2375,6 +2792,7 @@ __all__ = [
     'EvalTemplateListResponseResult',
     'EvalTemplateUpdateResponseResult',
     'EvalsConfigsCreateResult',
+    'EventsOverTimePoint',
     'ExperimentDetailV2',
     'ExperimentListV2',
     'FeedDetailCore',
@@ -2384,6 +2802,7 @@ __all__ = [
     'GatewayConfigResult',
     'GatewayStatus',
     'GatewaySummaryResult',
+    'KeyMoment',
     'KnowledgeBaseItem',
     'LegacyKnowledgeBaseCreateResult',
     'LegacyKnowledgeBaseFileRow',
@@ -2400,6 +2819,10 @@ __all__ = [
     'ObservationSpanDetailResult',
     'OptimizationsCreateResult',
     'Organization',
+    'OverviewResponse',
+    'PatternInsight',
+    'PatternInsightEvidence',
+    'PatternSummary',
     'ProjectDetailResult',
     'PromptHistoryExecution',
     'PromptLabel',
@@ -2434,6 +2857,7 @@ __all__ = [
     'QueueSubmitAnnotationsResult',
     'RcaSummary',
     'RcaTrailStep',
+    'RepresentativeTrace',
     'RunEnvironmentRef',
     'RunTestExecutionResponse',
     'RunTestResponse',
@@ -2444,6 +2868,27 @@ __all__ = [
     'ScenarioResponse',
     'Score',
     'SimulateEvalConfigResponse',
+    'SkillsContextAccessCheck',
+    'SkillsContextConsumeGrant',
+    'SkillsContextConsumptionChunk',
+    'SkillsContextConsumptionManifest',
+    'SkillsContextCredentialIssued',
+    'SkillsContextCredentialMetadata',
+    'SkillsContextFileMeta',
+    'SkillsContextFileOrigin',
+    'SkillsContextSelector',
+    'SkillsHubDraftSummary',
+    'SkillsHubEvidenceCurrentness',
+    'SkillsHubFileChunk',
+    'SkillsHubLabelOut',
+    'SkillsHubLabelSummary',
+    'SkillsHubManifest',
+    'SkillsHubManifestFile',
+    'SkillsHubPushResult',
+    'SkillsHubRequested',
+    'SkillsHubSkillDetail',
+    'SkillsHubSkillPermissions',
+    'SkillsHubSkillSummary',
     'SpanListColumnConfig',
     'SpanListMetadata',
     'SpanObserveListResult',
@@ -2452,6 +2897,7 @@ __all__ = [
     'TraceDetailResult',
     'TraceDetailSpan',
     'TraceErrorAnalysisResult',
+    'TraceEvidence',
     'TraceObserveColumnConfig',
     'TraceObserveListMetadata',
     'TraceObserveListResult',
@@ -2460,6 +2906,10 @@ __all__ = [
     'TraceSessionListMetadata',
     'TraceSessionListResult',
     'TraceSessionTableRow',
+    'TraceSummary',
+    'TracesAggregates',
+    'TracesListRow',
+    'TracesTabResponse',
     'TrendPoint',
     'UsageOverviewDimension',
     'UsageOverviewResult',

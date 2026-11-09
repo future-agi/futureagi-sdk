@@ -23,7 +23,7 @@ from fi.context.materialize import (
     plan_remove,
     verify,
 )
-from fi.platform import AsyncClient, Client, ContextAuth, RequestOptions
+from fi.platform import AsyncClient, Client, ContextAuth
 from fi.skills import AsyncSkillsClient, SkillsClient
 from fi.skills.installer import (
     apply_skill_plan,
@@ -76,7 +76,10 @@ def digest(files: dict[str, str]) -> str:
 def manifest(*, leaf: bool = False) -> dict[str, object]:
     files = LEAF_FILES if leaf else FILES
     result: dict[str, object] = {
-        "skill_id" if leaf else "context_id": RESOURCE,
+        "resource_id": RESOURCE,
+        "kind": "skill" if leaf else "agent_context",
+        "entrypoint": "SKILL.md" if leaf else "AGENTS.md",
+        "descriptor_path": None if leaf else ".futureagi/context.json",
         "name": "refund" if leaf else "team-policy",
         "version": 1,
         "version_id": VERSION,
@@ -105,7 +108,7 @@ def chunk(path: str, *, leaf: bool = False) -> dict[str, object]:
     files = LEAF_FILES if leaf else FILES
     text = files[path]
     return {
-        "skill_id" if leaf else "context_id": RESOURCE,
+        "resource_id": RESOURCE,
         "version_id": VERSION,
         "digest": digest(files),
         "path": path,
@@ -122,49 +125,24 @@ def chunk(path: str, *, leaf: bool = False) -> dict[str, object]:
 def handler(request: httpx.Request) -> httpx.Response:
     assert request.headers["Authorization"] == "Context synthetic-context"
     assert "X-Api-Key" not in request.headers and "X-Secret-Key" not in request.headers
-    if request.url.path.endswith("/resolve/"):
-        result = manifest()
+    leaf = request.url.path.startswith("/model-hub/skills/consumption/")
+    prefix = "/model-hub/skills/consumption/" if leaf else "/model-hub/skills/contexts/"
+    if request.url.path == prefix + "resolve/":
+        result = manifest(leaf=leaf)
     else:
         assert request.headers["X-Context-Resolution"] == LEASE
-        assert (
-            request.url.path
-            == f"/model-hub/skills/contexts/{RESOURCE}/versions/1/files/"
-        )
-        result = chunk(request.url.params["path"])
+        assert request.url.path.startswith(f"{prefix}{RESOURCE}/versions/1/")
+        if request.url.path.endswith("access-check/"):
+            result = {
+                "allowed": True,
+                "version_id": VERSION,
+                "digest": digest(LEAF_FILES if leaf else FILES),
+                "checked_at": EXPIRY,
+            }
+        else:
+            assert request.url.path.endswith("files/")
+            result = chunk(request.url.params["path"], leaf=leaf)
     return httpx.Response(200, json={"status": True, "result": result})
-
-
-# This source is a protocol conformance fixture, not a fictional leaf REST route.
-class LeafSource:
-    def resolve(self, *, name: str, selector: dict[str, object]) -> object:
-        assert name == "refund" and selector == {"label": "production"}
-        return manifest(leaf=True)
-
-    def manifest(
-        self, identity: object, *, offset: int, options: RequestOptions
-    ) -> object:
-        raise AssertionError("A complete one-page fixture cannot continue")
-
-    def chunk(
-        self, identity: object, *, path: str, offset: int, options: RequestOptions
-    ) -> object:
-        assert offset == 0 and options.resolution_id == LEASE
-        return chunk(path, leaf=True)
-
-
-class AsyncLeafSource:
-    async def resolve(self, *, name: str, selector: dict[str, object]) -> object:
-        return LeafSource().resolve(name=name, selector=selector)
-
-    async def manifest(
-        self, identity: object, *, offset: int, options: RequestOptions
-    ) -> object:
-        return LeafSource().manifest(identity, offset=offset, options=options)
-
-    async def chunk(
-        self, identity: object, *, path: str, offset: int, options: RequestOptions
-    ) -> object:
-        return LeafSource().chunk(identity, path=path, offset=offset, options=options)
 
 
 def authorize(authorization: Authorization) -> None:
@@ -179,9 +157,12 @@ def main() -> None:
         base_url=ORIGIN,
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
     ) as client:
-        verified: VerifiedSnapshot = (
-            ContextClient(client).resolve("team-policy").read_all()
-        )
+        contexts = ContextClient(client)
+        verified: VerifiedSnapshot = contexts.resolve("team-policy").read_all()
+        contexts.check_access(verified.identity, verified.manifest.lease)
+        skills = SkillsClient(client)
+        leaf = skills.resolve("refund").read_all()
+        skills.check_access(leaf.identity, leaf.manifest.lease)
     assert dict(verified.files) == FILES
     source = from_verified_snapshot(
         verified, origin=ORIGIN, organization_id=SCOPE, workspace_id=SCOPE
@@ -196,7 +177,6 @@ def main() -> None:
         apply_plan(plan_remove(project=project), authorize=authorize, quiescent=True)
         assert not (project / "AGENTS.md").exists()
 
-    leaf = SkillsClient(LeafSource()).resolve("refund").read_all()
     assert dict(leaf.files) == LEAF_FILES
     skill = skill_from_verified_snapshot(
         leaf, origin=ORIGIN, organization_id=SCOPE, workspace_id=SCOPE
@@ -223,8 +203,10 @@ async def async_contract() -> None:
     ) as client:
         snapshot = await AsyncContextClient(client).resolve("team-policy")
         assert dict((await snapshot.read_all()).files) == FILES
-    leaf = await AsyncSkillsClient(AsyncLeafSource()).resolve("refund")
-    assert dict((await leaf.read_all()).files) == LEAF_FILES
+        skills = AsyncSkillsClient(client)
+        leaf = await skills.resolve("refund")
+        assert dict((await leaf.read_all()).files) == LEAF_FILES
+        await skills.check_access(leaf.identity, leaf.manifest.lease)
 
 
 if __name__ == "__main__":

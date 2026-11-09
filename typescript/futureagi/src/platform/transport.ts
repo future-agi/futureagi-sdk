@@ -73,7 +73,7 @@ export interface RequestOptions {
 }
 
 export interface RequestArgs {
-  path?: Record<string, string>;
+  path?: Record<string, string | number>;
   query?: Record<string, unknown>;
   body?: unknown;
   files?: Record<string, FileInput | FileInput[] | undefined>;

@@ -2,7 +2,10 @@
 
 `sdkgen` generates the platform client for both SDKs (`fi.Client` in Python, `new Client()` in TypeScript) from the backend's API contract plus a small catalog. The catalog records, for each operation, the MCP tool it corresponds to in the monorepo (`futureagi/mcp_server/catalog/tools.yaml`), so an operation has the same name in the SDKs and in MCP; the MCP server itself is generated and served from the monorepo, not here.
 
-It covers the operations behind **all 105 MCP tools** (same names) plus **53 SDK-only operations** that give the clients everything the hand-written `fi.datasets`, `fi.prompt`, `fi.kb`, `fi.queues` and `fi.annotations` modules can do: 158 operations across 24 resources. The monorepo's E2E CI checks that the catalog's MCP names still match the monorepo's tool list.
+It covers the operations behind the pinned backend's MCP tools (same names), the
+SDK-only dataset/prompt/KB/queue/annotation surface, and F12 isolated context/leaf
+consumption. The catalog parity gate checks exact MCP tool-name agreement; snapshot,
+installer and runtime adapters reuse these generated operations and the shared transport.
 
 ```
 future-agi/api_contracts/openapi/swagger.json ──sync_contract.py──▶ sdkgen/contracts/swagger.json
@@ -134,11 +137,16 @@ Auth/scope/arbitrary headers, duplicate headers and argument collisions fail gen
 `operation.decode: bytes` generates `bytes` / `Promise<Uint8Array>` downloads; 202-only
 operations use the actual accepted-response model.
 
-The currently pinned contract has no Context/leaf-consumption endpoints. Integration must
-sync the serializer-generated backend contract and add real operation catalog entries before
-advertising generated Context resources. Do not manufacture a second schema or add disabled
-proposal/campaign methods. Until that sync, `Client.request` uses the same auth/options/error
-boundary for the downstream snapshot and materializer lanes.
+The pinned F12 contract provides `contexts` and `skill_consumption` (TypeScript:
+`skillConsumption`) resolve/manifest/read-file/access-check resources, plus
+`context_credentials` (`contextCredentials`) issue/list/revoke. Credential administration
+uses ordinary human-bound admin authentication, not a consume token. Issuance requires a
+caller-retained `idempotency_key`; a replay returns the same ID without its one-time secret.
+`contracts/SOURCE.json` identifies the exact unreleased backend commit and source hashes;
+`contracts/mcp-tools.json` pins its generated tool names for offline parity checks. Sync both
+with `sync_contract.py SOURCE --backend-commit SHA --mcp-tools TOOLS`. A subsequent released
+sync clears the commit-specific metadata. No unavailable ZIP/session/report/proposal/campaign
+operation is advertised.
 
 ## Snapshot and installer integration (unreleased preview)
 
@@ -146,7 +154,7 @@ The branch packages `fi.context`, `fi.skills`, `@future-agi/sdk/context` and
 `@future-agi/sdk/skills`. `ContextClient` and `SkillsClient` are also exported from
 the npm root. The Python wheel remains 0.7.0 and the npm package remains 0.2.0;
 these are **unpublished branch builds**, not versions to advertise as released
-Context support. The generated backend contract has not yet gained these routes.
+Context support. The backend consumption feature remains disabled pending release qualification.
 
 ```python
 from fi.platform import Client, ContextAuth
@@ -166,12 +174,17 @@ verify per-file and complete snapshot hashes, preserve the original requested
 selector and lease, and fail rather than return partial files or renew a lease.
 The caller owns the platform client. There is no content cache.
 
-`SkillsClient(source)` / `AsyncSkillsClient(source)` use the same engine for a
-leaf skill. The source must implement `SnapshotSource` / `AsyncSnapshotSource`
-from `fi.context.client` (TypeScript: `SnapshotSource` from the context subpath).
-This is an adapter seam, **not a standalone REST quickstart**. The serializer-owned
-leaf consumption contract and lease-bound authorizer are still required; legacy
-broad-key Skills APIs are never a fallback.
+`SkillsClient(platform)` / `AsyncSkillsClient(platform)` use the same verified engine
+through the generated isolated leaf facade, never legacy broad-key Skills routes.
+Custom `SnapshotSource` / `AsyncSnapshotSource` adapters remain supported, with their own
+live authorization responsibility. Both kinds consume F12 `resource_id`/`kind` manifests
+and require all chunk identity fields. Short chunks caused by JSON escaping are accepted
+only with contiguous progress, exact byte totals and matching final hashes.
+
+`client.check_access(snapshot.identity, snapshot.manifest.lease)` (async: await it;
+TypeScript: `checkAccess`) checks the exact version/digest and the original live lease.
+It does not renew authorization or report installation/delivery. Use this callable as
+the Python read-only backend's `authorize` argument, not a cached permission decision.
 
 ### CLI and environment
 
@@ -225,12 +238,29 @@ python -I -m fi.context recover --project /path/to/project --quiescent
   3 denied/missing credentials, 4 transport, 5 stale/local filesystem conflict,
   6 integrity, 7 unsupported/unverified profile, 8 update available (`--check`).
 
-Standalone `python -I -m fi.skills` exposes `verify --project`,
-`remove --project --name --plan`, `apply --plan --quiescent` for reviewed removal,
-and `recover --project --quiescent`. Online leaf plan/update/restore/application
-is unavailable until the consumption contract is generated. Library consumers can
-compose `fi.skills.installer` with a verified leaf snapshot and live authorizer.
-Context helpers live in `fi.context.materialize`; both share `fi.context.journal`.
+Standalone skills use the same environment and journaled materializer, retaining the
+cumulative v1 `.futureagi-skills.lock.json` plus a separate scoped ownership receipt:
+
+```sh
+python -I -m fi.skills plan --name refund --version 1 --client codex \
+  --project /path/to/project --plan /private/skill-plan.json --allow-preview
+python -I -m fi.skills inspect --plan /private/skill-plan.json
+python -I -m fi.skills apply --plan /private/skill-plan.json --quiescent
+python -I -m fi.skills verify --project /path/to/project
+python -I -m fi.skills update --project /path/to/project --name refund --check
+python -I -m fi.skills update --project /path/to/project --name refund \
+  --plan /private/skill-update.json --allow-preview
+python -I -m fi.skills restore --project /path/to/project --name refund \
+  --lock /private/retained-skills.lock.json --plan /private/skill-restore.json --allow-preview
+python -I -m fi.skills remove --project /path/to/project --name refund --plan /private/skill-remove.json
+python -I -m fi.skills recover --project /path/to/project --quiescent
+```
+
+Restore requires current scoped ownership and verifies the retained version ID/digest;
+updates preserve pins and refuse same-name identity replacement. Each invocation plans
+one skill without erasing other installed entries. Tag-wide/batch install and reviewed
+push remain unavailable. Context helpers live in `fi.context.materialize`; standalone
+helpers live in `fi.skills.installer`; both share `fi.context.journal`.
 
 ### Optional backend and qualification gates
 
@@ -261,8 +291,8 @@ The npm consumer gate checks declarations plus ESM/CommonJS public subpath expor
 The action installs nothing and executes no project code; it requires a preinstalled
 trusted interpreter, exact SDK version and materializer hash. It is not behavioral CI.
 
-Release prerequisites remain serializer-generated Context/leaf contracts and live
-credential conformance, approved GCP/E2B native qualification orchestration, actual
+Release prerequisites remain live integrated-backend credential conformance,
+approved GCP/E2B native qualification orchestration, actual
 host discovery/delivery qualification, full customer journeys, and normal reviewed
 package publication. Native diagnostics and external application work require
 separate approved jobs; ordinary unit-green cannot enable a profile. No 10x result

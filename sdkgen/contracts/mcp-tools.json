@@ -1,0 +1,344 @@
+{
+  "x-source-sha256": "72cbc5d421fd5a94fb96fb2d485fbbf2cf9d882b09401e0126ec48b46d54b906",
+  "tools": [
+    {
+      "name": "add_dataset_prompt"
+    },
+    {
+      "name": "add_dataset_rows"
+    },
+    {
+      "name": "complete_annotation_item"
+    },
+    {
+      "name": "configure_dataset_evaluation"
+    },
+    {
+      "name": "create_agent"
+    },
+    {
+      "name": "create_agent_version"
+    },
+    {
+      "name": "create_dashboard"
+    },
+    {
+      "name": "create_dashboard_widget"
+    },
+    {
+      "name": "create_dataset"
+    },
+    {
+      "name": "create_dataset_column"
+    },
+    {
+      "name": "create_eval_config"
+    },
+    {
+      "name": "create_eval_task"
+    },
+    {
+      "name": "create_eval_template"
+    },
+    {
+      "name": "create_experiment"
+    },
+    {
+      "name": "create_optimization_run"
+    },
+    {
+      "name": "create_prompt_template"
+    },
+    {
+      "name": "create_scenario"
+    },
+    {
+      "name": "create_simulation_test"
+    },
+    {
+      "name": "delete_dashboard"
+    },
+    {
+      "name": "delete_datasets"
+    },
+    {
+      "name": "get_agent"
+    },
+    {
+      "name": "get_annotation_item_detail"
+    },
+    {
+      "name": "get_annotation_queue"
+    },
+    {
+      "name": "get_dashboard"
+    },
+    {
+      "name": "get_dashboard_filter_values"
+    },
+    {
+      "name": "get_dashboard_widget"
+    },
+    {
+      "name": "get_dataset"
+    },
+    {
+      "name": "get_dataset_prompt_stats"
+    },
+    {
+      "name": "get_error_cluster"
+    },
+    {
+      "name": "get_error_cluster_overview"
+    },
+    {
+      "name": "get_eval_group"
+    },
+    {
+      "name": "get_eval_task"
+    },
+    {
+      "name": "get_eval_template"
+    },
+    {
+      "name": "get_experiment"
+    },
+    {
+      "name": "get_gateway_analytics"
+    },
+    {
+      "name": "get_gateway_config"
+    },
+    {
+      "name": "get_knowledge_base"
+    },
+    {
+      "name": "get_optimization_run"
+    },
+    {
+      "name": "get_project"
+    },
+    {
+      "name": "get_prompt_run"
+    },
+    {
+      "name": "get_prompt_template"
+    },
+    {
+      "name": "get_scenario"
+    },
+    {
+      "name": "get_session"
+    },
+    {
+      "name": "get_simulation_test"
+    },
+    {
+      "name": "get_skill"
+    },
+    {
+      "name": "get_span"
+    },
+    {
+      "name": "get_test_execution"
+    },
+    {
+      "name": "get_test_execution_analytics"
+    },
+    {
+      "name": "get_trace"
+    },
+    {
+      "name": "get_trace_error_analysis"
+    },
+    {
+      "name": "get_usage_overview"
+    },
+    {
+      "name": "get_workspace"
+    },
+    {
+      "name": "list_agents"
+    },
+    {
+      "name": "list_alert_rules"
+    },
+    {
+      "name": "list_annotation_queue_items"
+    },
+    {
+      "name": "list_annotation_queues"
+    },
+    {
+      "name": "list_dashboard_metrics"
+    },
+    {
+      "name": "list_dashboard_widgets"
+    },
+    {
+      "name": "list_dashboards"
+    },
+    {
+      "name": "list_dataset_evaluations"
+    },
+    {
+      "name": "list_datasets"
+    },
+    {
+      "name": "list_error_cluster_traces"
+    },
+    {
+      "name": "list_error_clusters"
+    },
+    {
+      "name": "list_eval_configs"
+    },
+    {
+      "name": "list_eval_groups"
+    },
+    {
+      "name": "list_eval_tasks"
+    },
+    {
+      "name": "list_eval_templates"
+    },
+    {
+      "name": "list_experiments"
+    },
+    {
+      "name": "list_fired_alerts"
+    },
+    {
+      "name": "list_gateway_request_logs"
+    },
+    {
+      "name": "list_gateway_session_requests"
+    },
+    {
+      "name": "list_gateway_sessions"
+    },
+    {
+      "name": "list_gateways"
+    },
+    {
+      "name": "list_guardrail_rules"
+    },
+    {
+      "name": "list_knowledge_bases"
+    },
+    {
+      "name": "list_optimization_runs"
+    },
+    {
+      "name": "list_projects"
+    },
+    {
+      "name": "list_prompt_templates"
+    },
+    {
+      "name": "list_prompt_versions"
+    },
+    {
+      "name": "list_scenarios"
+    },
+    {
+      "name": "list_sessions"
+    },
+    {
+      "name": "list_simulation_tests"
+    },
+    {
+      "name": "list_skills"
+    },
+    {
+      "name": "list_spans"
+    },
+    {
+      "name": "list_test_executions"
+    },
+    {
+      "name": "list_trace_properties"
+    },
+    {
+      "name": "list_workspaces"
+    },
+    {
+      "name": "pause_eval_task"
+    },
+    {
+      "name": "publish_skill"
+    },
+    {
+      "name": "query_dashboard_metrics"
+    },
+    {
+      "name": "query_dashboard_widget"
+    },
+    {
+      "name": "read_skill_file"
+    },
+    {
+      "name": "rename_dataset_column"
+    },
+    {
+      "name": "resume_eval_task"
+    },
+    {
+      "name": "run_dataset_evals"
+    },
+    {
+      "name": "run_dataset_prompts"
+    },
+    {
+      "name": "run_prompt"
+    },
+    {
+      "name": "run_simulation"
+    },
+    {
+      "name": "search_traces"
+    },
+    {
+      "name": "set_skill_label"
+    },
+    {
+      "name": "submit_annotation"
+    },
+    {
+      "name": "test_evaluation"
+    },
+    {
+      "name": "update_agent"
+    },
+    {
+      "name": "update_dashboard"
+    },
+    {
+      "name": "update_dashboard_widget"
+    },
+    {
+      "name": "update_dataset_cell"
+    },
+    {
+      "name": "update_dataset_prompt"
+    },
+    {
+      "name": "update_eval_task"
+    },
+    {
+      "name": "update_eval_template"
+    },
+    {
+      "name": "update_prompt_template"
+    },
+    {
+      "name": "update_scenario"
+    },
+    {
+      "name": "update_skill_tags"
+    },
+    {
+      "name": "whoami"
+    }
+  ]
+}

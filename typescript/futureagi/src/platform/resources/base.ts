@@ -13,6 +13,8 @@ import { Resource } from "../resource";
 import { warnStability } from "../stability";
 import type { FileInput, JsonValue, RequestOptions, Transport } from "../transport";
 
+import { operationOptions } from "../transport";
+
 export interface AgentsCreateParams {
   /** Agent name */
   agent_name: string;
@@ -378,6 +380,43 @@ export interface AnnotationsLabelsListParams {
   archived?: boolean | null;
 }
 
+export interface ContextCredentialsIssueParams {
+  /** Purpose */
+  purpose: "consume" | "report";
+  grants: Array<Record<string, unknown>>;
+  binding_ids: Array<string>;
+  /** Expires at */
+  expires_at: string;
+  idempotency_key: string;
+}
+
+export interface ContextCredentialsListParams {
+  page_size?: number | null;
+}
+
+export interface ContextsCheckAccessParams {
+  resolution_id: string;
+}
+
+export interface ContextsManifestParams {
+  resolution_id: string;
+  file_offset?: number | null;
+  file_limit?: number | null;
+}
+
+export interface ContextsReadFileParams {
+  path: string;
+  resolution_id: string;
+  offset?: number | null;
+  max_bytes?: number | null;
+}
+
+export interface ContextsResolveParams {
+  name: string;
+  version?: number | null;
+  label?: string | null;
+}
+
 export interface DashboardsCreateParams {
   /** Name */
   name: string;
@@ -657,6 +696,15 @@ export interface ErrorClustersListParams {
   offset?: number | null;
 }
 
+export interface ErrorClustersOverviewParams {
+  rep_limit?: number | null;
+}
+
+export interface ErrorClustersTracesParams {
+  limit?: number | null;
+  offset?: number | null;
+}
+
 export interface EvalsTestParams {
   /** Config */
   config: Record<string, unknown>;
@@ -815,6 +863,12 @@ export interface EvalsTasksUpdateParams {
 }
 
 export interface EvalsTemplatesCreateParams {
+  /** Jev mapping */
+  jev_mapping?: Record<string, unknown> | null;
+  /** Multi choice */
+  multi_choice?: boolean | null;
+  /** Input data types */
+  input_data_types?: Record<string, unknown> | null;
   /** Name */
   name?: string | null;
   /** Is draft */
@@ -874,6 +928,10 @@ export interface EvalsTemplatesListParams {
 }
 
 export interface EvalsTemplatesUpdateParams {
+  /** Jev mapping */
+  jev_mapping?: Record<string, unknown> | null;
+  /** Input data types */
+  input_data_types?: Record<string, unknown> | null;
   /** Name */
   name?: string | null;
   /** Eval type */
@@ -1466,6 +1524,90 @@ export interface SimulationTestsRunParams {
   select_all?: boolean | null;
 }
 
+export interface SkillConsumptionCheckAccessParams {
+  resolution_id: string;
+}
+
+export interface SkillConsumptionManifestParams {
+  resolution_id: string;
+  file_offset?: number | null;
+  file_limit?: number | null;
+}
+
+export interface SkillConsumptionReadFileParams {
+  path: string;
+  resolution_id: string;
+  offset?: number | null;
+  max_bytes?: number | null;
+}
+
+export interface SkillConsumptionResolveParams {
+  name: string;
+  version?: number | null;
+  label?: string | null;
+}
+
+export interface SkillsListParams {
+  page_size?: number | null;
+  search?: string | null;
+  tag?: string | null;
+  label?: string | null;
+  sort?: "updated" | "name" | "created" | null;
+  order?: "asc" | "desc" | null;
+}
+
+export interface SkillsPublishParams {
+  files: Array<Record<string, unknown>>;
+  /** Expected digest */
+  expected_digest?: string | null;
+  /** Expected release revision */
+  expected_release_revision?: number | null;
+  /** Evidence run id */
+  evidence_run_id?: string | null;
+  /** Note */
+  note?: string | null;
+  labels?: Array<string> | null;
+  tags?: Array<string> | null;
+  /** Acknowledge warnings */
+  acknowledge_warnings?: boolean | null;
+}
+
+export interface SkillsReadFileParams {
+  path: string;
+  offset?: number | null;
+  max_bytes?: number | null;
+}
+
+export interface SkillsResolveParams {
+  name: string;
+  label?: string | null;
+  version?: number | null;
+  include_content?: boolean | null;
+  /** Zero-based file offset. Pin version when following next_file_offset. */
+  file_offset?: number | null;
+  /** Files per manifest page (1–25). REST defaults to all files; MCP defaults to 25. */
+  file_limit?: number | null;
+}
+
+export interface SkillsSetLabelParams {
+  /** Version */
+  version: number;
+  /** Expected release revision */
+  expected_release_revision?: number | null;
+  /** Expected version */
+  expected_version?: number | null;
+  /** Expected digest */
+  expected_digest?: string | null;
+  /** Evidence run id */
+  evidence_run_id?: string | null;
+  /** Note */
+  note?: string | null;
+}
+
+export interface SkillsUpdateTagsParams {
+  tags?: Array<string> | null;
+}
+
 export interface SpansGetParams {
   /** A run the caller can read; opens the hidden simulation project of that run's agent. */
   test_execution_id?: string | null;
@@ -1504,6 +1646,7 @@ export interface TracesGetParams {
 }
 
 export interface TracesListParams {
+  sort_params?: string | null;
   project_id?: string | null;
   project_version_id?: string | null;
   session_id?: string | null;
@@ -2060,7 +2203,7 @@ export class EvalsTemplatesResource extends Resource {
    * POST /model-hub/eval-templates/create-v2/
    */
   create(params: EvalsTemplatesCreateParams = {}, options?: RequestOptions): Promise<models.EvalTemplateCreateResponseResult> {
-    return this._t.call<models.EvalTemplateCreateResponseResult>(ops.OP_EVALS_TEMPLATES_CREATE, { path: {}, query: {}, body: { name: params.name, is_draft: params.is_draft, eval_type: params.eval_type, instructions: params.instructions, model: params.model, output_type: params.output_type, pass_threshold: params.pass_threshold, choice_scores: params.choice_scores, description: params.description, tags: params.tags, check_internet: params.check_internet, code: params.code, code_language: params.code_language, messages: params.messages, few_shot_examples: params.few_shot_examples, mode: params.mode, tools: params.tools, knowledge_bases: params.knowledge_bases, data_injection: params.data_injection, summary: params.summary, error_localizer_enabled: params.error_localizer_enabled, template_format: params.template_format } }, options);
+    return this._t.call<models.EvalTemplateCreateResponseResult>(ops.OP_EVALS_TEMPLATES_CREATE, { path: {}, query: {}, body: { jev_mapping: params.jev_mapping, multi_choice: params.multi_choice, input_data_types: params.input_data_types, name: params.name, is_draft: params.is_draft, eval_type: params.eval_type, instructions: params.instructions, model: params.model, output_type: params.output_type, pass_threshold: params.pass_threshold, choice_scores: params.choice_scores, description: params.description, tags: params.tags, check_internet: params.check_internet, code: params.code, code_language: params.code_language, messages: params.messages, few_shot_examples: params.few_shot_examples, mode: params.mode, tools: params.tools, knowledge_bases: params.knowledge_bases, data_injection: params.data_injection, summary: params.summary, error_localizer_enabled: params.error_localizer_enabled, template_format: params.template_format } }, options);
   }
 
   /**
@@ -2087,7 +2230,7 @@ export class EvalsTemplatesResource extends Resource {
    * PUT /model-hub/eval-templates/{template_id}/update/
    */
   update(templateId: string, params: EvalsTemplatesUpdateParams = {}, options?: RequestOptions): Promise<models.EvalTemplateUpdateResponseResult> {
-    return this._t.call<models.EvalTemplateUpdateResponseResult>(ops.OP_EVALS_TEMPLATES_UPDATE, { path: { template_id: templateId }, query: {}, body: { name: params.name, eval_type: params.eval_type, instructions: params.instructions, model: params.model, output_type: params.output_type, pass_threshold: params.pass_threshold, choice_scores: params.choice_scores, multi_choice: params.multi_choice, description: params.description, tags: params.tags, check_internet: params.check_internet, code: params.code, code_language: params.code_language, messages: params.messages, few_shot_examples: params.few_shot_examples, mode: params.mode, tools: params.tools, knowledge_bases: params.knowledge_bases, data_injection: params.data_injection, summary: params.summary, error_localizer_enabled: params.error_localizer_enabled, publish: params.publish, template_format: params.template_format } }, options);
+    return this._t.call<models.EvalTemplateUpdateResponseResult>(ops.OP_EVALS_TEMPLATES_UPDATE, { path: { template_id: templateId }, query: {}, body: { jev_mapping: params.jev_mapping, input_data_types: params.input_data_types, name: params.name, eval_type: params.eval_type, instructions: params.instructions, model: params.model, output_type: params.output_type, pass_threshold: params.pass_threshold, choice_scores: params.choice_scores, multi_choice: params.multi_choice, description: params.description, tags: params.tags, check_internet: params.check_internet, code: params.code, code_language: params.code_language, messages: params.messages, few_shot_examples: params.few_shot_examples, mode: params.mode, tools: params.tools, knowledge_bases: params.knowledge_bases, data_injection: params.data_injection, summary: params.summary, error_localizer_enabled: params.error_localizer_enabled, publish: params.publish, template_format: params.template_format } }, options);
   }
 }
 
@@ -2613,6 +2756,99 @@ export class AnnotationsResource extends Resource {
 }
 
 /**
+ * `client.contextCredentials`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class ContextCredentialsResource extends Resource {
+
+  /**
+   *
+   *
+   * POST /model-hub/skills/contexts/credentials/
+   * @beta this method may change without notice.
+   */
+  issue(params: ContextCredentialsIssueParams, options?: RequestOptions): Promise<models.SkillsContextCredentialIssued> {
+    warnStability("context_credentials.issue", "beta");
+    options = operationOptions(options, { "Idempotency-Key": params.idempotency_key }, ["Idempotency-Key"]);
+    return this._t.call<models.SkillsContextCredentialIssued>(ops.OP_CONTEXT_CREDENTIALS_ISSUE, { path: {}, query: {}, body: { purpose: params.purpose, grants: params.grants, binding_ids: params.binding_ids, expires_at: params.expires_at } }, options);
+  }
+
+  /**
+   *
+   *
+   * GET /model-hub/skills/contexts/credentials/
+   * @beta this method may change without notice.
+   */
+  list(params: ContextCredentialsListParams = {}, options?: RequestOptions): Pager<models.SkillsContextCredentialMetadata> {
+    warnStability("context_credentials.list", "beta");
+    return this._t.paginate<models.SkillsContextCredentialMetadata>(ops.OP_CONTEXT_CREDENTIALS_LIST, { path: {}, query: { page_size: params.page_size } }, options);
+  }
+
+  /**
+   *
+   *
+   * DELETE /model-hub/skills/contexts/credentials/{credential_id}/
+   * @beta this method may change without notice.
+   */
+  revoke(credentialId: string, options?: RequestOptions): Promise<unknown> {
+    warnStability("context_credentials.revoke", "beta");
+    return this._t.call<unknown>(ops.OP_CONTEXT_CREDENTIALS_REVOKE, { path: { credential_id: credentialId }, query: {}, body: {} }, options);
+  }
+}
+
+/**
+ * `client.contexts`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class ContextsResource extends Resource {
+
+  /**
+   *
+   *
+   * POST /model-hub/skills/contexts/{resource_id}/versions/{number}/access-check/
+   * @beta this method may change without notice.
+   */
+  checkAccess(resourceId: string, number: number, params: ContextsCheckAccessParams, options?: RequestOptions): Promise<models.SkillsContextAccessCheck> {
+    warnStability("contexts.check_access", "beta");
+    options = operationOptions(options, { "X-Context-Resolution": params.resolution_id }, ["X-Context-Resolution"]);
+    return this._t.call<models.SkillsContextAccessCheck>(ops.OP_CONTEXTS_CHECK_ACCESS, { path: { resource_id: resourceId, number: number }, query: {}, body: {} }, options);
+  }
+
+  /**
+   *
+   *
+   * GET /model-hub/skills/contexts/{resource_id}/versions/{number}/manifest/
+   * @beta this method may change without notice.
+   */
+  manifest(resourceId: string, number: number, params: ContextsManifestParams, options?: RequestOptions): Promise<models.SkillsContextConsumptionManifest> {
+    warnStability("contexts.manifest", "beta");
+    options = operationOptions(options, { "X-Context-Resolution": params.resolution_id }, ["X-Context-Resolution"]);
+    return this._t.call<models.SkillsContextConsumptionManifest>(ops.OP_CONTEXTS_MANIFEST, { path: { resource_id: resourceId, number: number }, query: { file_offset: params.file_offset, file_limit: params.file_limit } }, options);
+  }
+
+  /**
+   *
+   *
+   * GET /model-hub/skills/contexts/{resource_id}/versions/{number}/files/
+   * @beta this method may change without notice.
+   */
+  readFile(resourceId: string, number: number, params: ContextsReadFileParams, options?: RequestOptions): Promise<models.SkillsContextConsumptionChunk> {
+    warnStability("contexts.read_file", "beta");
+    options = operationOptions(options, { "X-Context-Resolution": params.resolution_id }, ["X-Context-Resolution"]);
+    return this._t.call<models.SkillsContextConsumptionChunk>(ops.OP_CONTEXTS_READ_FILE, { path: { resource_id: resourceId, number: number }, query: { path: params.path, offset: params.offset, max_bytes: params.max_bytes } }, options);
+  }
+
+  /**
+   *
+   *
+   * GET /model-hub/skills/contexts/resolve/
+   * @beta this method may change without notice.
+   */
+  resolve(params: ContextsResolveParams, options?: RequestOptions): Promise<models.SkillsContextConsumptionManifest> {
+    warnStability("contexts.resolve", "beta");
+    return this._t.call<models.SkillsContextConsumptionManifest>(ops.OP_CONTEXTS_RESOLVE, { path: {}, query: { name: params.name, version: params.version, label: params.label } }, options);
+  }
+}
+
+/**
  * `client.dashboards`. Subclass to add methods; reassign a child in the constructor to swap it.
  */
 export class DashboardsResource extends Resource {
@@ -2793,6 +3029,24 @@ export class ErrorClustersResource extends Resource {
    */
   list(params: ErrorClustersListParams = {}, options?: RequestOptions): Promise<models.FeedListResponse> {
     return this._t.call<models.FeedListResponse>(ops.OP_ERROR_CLUSTERS_LIST, { path: {}, query: { project_id: params.project_id, search: params.search, status: params.status, severity: params.severity, fix_layer: params.fix_layer, source: params.source, issue_group: params.issue_group, time_range_days: params.time_range_days, sort_by: params.sort_by, sort_dir: params.sort_dir, limit: params.limit, offset: params.offset } }, options);
+  }
+
+  /**
+   * GET /tracer/feed/issues/{cluster_id}/overview/
+   *
+   * GET /tracer/feed/issues/{cluster_id}/overview/
+   */
+  overview(clusterId: string, params: ErrorClustersOverviewParams = {}, options?: RequestOptions): Promise<models.OverviewResponse> {
+    return this._t.call<models.OverviewResponse>(ops.OP_ERROR_CLUSTERS_OVERVIEW, { path: { cluster_id: clusterId }, query: { rep_limit: params.rep_limit } }, options);
+  }
+
+  /**
+   * GET /tracer/feed/issues/{cluster_id}/traces/
+   *
+   * GET /tracer/feed/issues/{cluster_id}/traces/
+   */
+  traces(clusterId: string, params: ErrorClustersTracesParams = {}, options?: RequestOptions): Promise<models.TracesTabResponse> {
+    return this._t.call<models.TracesTabResponse>(ops.OP_ERROR_CLUSTERS_TRACES, { path: { cluster_id: clusterId }, query: { limit: params.limit, offset: params.offset } }, options);
   }
 }
 
@@ -3308,6 +3562,119 @@ export class SimulationResource extends Resource {
 }
 
 /**
+ * `client.skillConsumption`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SkillConsumptionResource extends Resource {
+
+  /**
+   *
+   *
+   * POST /model-hub/skills/consumption/{resource_id}/versions/{number}/access-check/
+   * @beta this method may change without notice.
+   */
+  checkAccess(resourceId: string, number: number, params: SkillConsumptionCheckAccessParams, options?: RequestOptions): Promise<models.SkillsContextAccessCheck> {
+    warnStability("skill_consumption.check_access", "beta");
+    options = operationOptions(options, { "X-Context-Resolution": params.resolution_id }, ["X-Context-Resolution"]);
+    return this._t.call<models.SkillsContextAccessCheck>(ops.OP_SKILL_CONSUMPTION_CHECK_ACCESS, { path: { resource_id: resourceId, number: number }, query: {}, body: {} }, options);
+  }
+
+  /**
+   *
+   *
+   * GET /model-hub/skills/consumption/{resource_id}/versions/{number}/manifest/
+   * @beta this method may change without notice.
+   */
+  manifest(resourceId: string, number: number, params: SkillConsumptionManifestParams, options?: RequestOptions): Promise<models.SkillsContextConsumptionManifest> {
+    warnStability("skill_consumption.manifest", "beta");
+    options = operationOptions(options, { "X-Context-Resolution": params.resolution_id }, ["X-Context-Resolution"]);
+    return this._t.call<models.SkillsContextConsumptionManifest>(ops.OP_SKILL_CONSUMPTION_MANIFEST, { path: { resource_id: resourceId, number: number }, query: { file_offset: params.file_offset, file_limit: params.file_limit } }, options);
+  }
+
+  /**
+   *
+   *
+   * GET /model-hub/skills/consumption/{resource_id}/versions/{number}/files/
+   * @beta this method may change without notice.
+   */
+  readFile(resourceId: string, number: number, params: SkillConsumptionReadFileParams, options?: RequestOptions): Promise<models.SkillsContextConsumptionChunk> {
+    warnStability("skill_consumption.read_file", "beta");
+    options = operationOptions(options, { "X-Context-Resolution": params.resolution_id }, ["X-Context-Resolution"]);
+    return this._t.call<models.SkillsContextConsumptionChunk>(ops.OP_SKILL_CONSUMPTION_READ_FILE, { path: { resource_id: resourceId, number: number }, query: { path: params.path, offset: params.offset, max_bytes: params.max_bytes } }, options);
+  }
+
+  /**
+   *
+   *
+   * GET /model-hub/skills/consumption/resolve/
+   * @beta this method may change without notice.
+   */
+  resolve(params: SkillConsumptionResolveParams, options?: RequestOptions): Promise<models.SkillsContextConsumptionManifest> {
+    warnStability("skill_consumption.resolve", "beta");
+    return this._t.call<models.SkillsContextConsumptionManifest>(ops.OP_SKILL_CONSUMPTION_RESOLVE, { path: {}, query: { name: params.name, version: params.version, label: params.label } }, options);
+  }
+}
+
+/**
+ * `client.skills`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SkillsResource extends Resource {
+
+  /**
+   *
+   *
+   * GET /model-hub/skills/
+   */
+  list(params: SkillsListParams = {}, options?: RequestOptions): Pager<models.SkillsHubSkillSummary> {
+    return this._t.paginate<models.SkillsHubSkillSummary>(ops.OP_SKILLS_LIST, { path: {}, query: { page_size: params.page_size, search: params.search, tag: params.tag, label: params.label, sort: params.sort, order: params.order } }, options);
+  }
+
+  /**
+   *
+   *
+   * POST /model-hub/skills/publish/
+   */
+  publish(params: SkillsPublishParams, options?: RequestOptions): Promise<models.SkillsHubPushResult> {
+    return this._t.call<models.SkillsHubPushResult>(ops.OP_SKILLS_PUBLISH, { path: {}, query: {}, body: { files: params.files, expected_digest: params.expected_digest, expected_release_revision: params.expected_release_revision, evidence_run_id: params.evidence_run_id, note: params.note, labels: params.labels, tags: params.tags, acknowledge_warnings: params.acknowledge_warnings } }, options);
+  }
+
+  /**
+   *
+   *
+   * GET /model-hub/skills/{skill_id}/versions/{number}/files/
+   */
+  readFile(skillId: string, number: number, params: SkillsReadFileParams, options?: RequestOptions): Promise<models.SkillsHubFileChunk> {
+    return this._t.call<models.SkillsHubFileChunk>(ops.OP_SKILLS_READ_FILE, { path: { skill_id: skillId, number: number }, query: { path: params.path, offset: params.offset, max_bytes: params.max_bytes } }, options);
+  }
+
+  /**
+   * Resolve an immutable skill manifest. Returns ETag: "<digest>". Send If-None-Match with that value for HTTP 304; a missing label never falls back. Optional file_offset/file_limit page the file inventory; follow next_file_offset with the returned version pinned. MCP defaults to 25 files per page and omits frontmatter and file contents; read SKILL.md in chunks for the original metadata.
+   *
+   * GET /model-hub/skills/resolve/
+   */
+  resolve(params: SkillsResolveParams, options?: RequestOptions): Promise<models.SkillsHubManifest> {
+    return this._t.call<models.SkillsHubManifest>(ops.OP_SKILLS_RESOLVE, { path: {}, query: { name: params.name, label: params.label, version: params.version, include_content: params.include_content, file_offset: params.file_offset, file_limit: params.file_limit } }, options);
+  }
+
+  /**
+   *
+   *
+   * PUT /model-hub/skills/{skill_id}/labels/{label}/
+   */
+  setLabel(skillId: string, label: string, params: SkillsSetLabelParams, options?: RequestOptions): Promise<models.SkillsHubLabelOut> {
+    return this._t.call<models.SkillsHubLabelOut>(ops.OP_SKILLS_SET_LABEL, { path: { skill_id: skillId, label: label }, query: {}, body: { version: params.version, expected_release_revision: params.expected_release_revision, expected_version: params.expected_version, expected_digest: params.expected_digest, evidence_run_id: params.evidence_run_id, note: params.note } }, options);
+  }
+
+  /**
+   *
+   *
+   * PATCH /model-hub/skills/{skill_id}/
+   */
+  updateTags(skillId: string, params: SkillsUpdateTagsParams = {}, options?: RequestOptions): Promise<models.SkillsHubSkillDetail> {
+    return this._t.call<models.SkillsHubSkillDetail>(ops.OP_SKILLS_UPDATE_TAGS, { path: { skill_id: skillId }, query: {}, body: { tags: params.tags } }, options);
+  }
+}
+
+/**
  * `client.spans`. Subclass to add methods; reassign a child in the constructor to swap it.
  */
 export class SpansResource extends Resource {
@@ -3366,7 +3733,7 @@ export class TracesResource extends Resource {
    * GET /tracer/trace/list_traces_of_session/
    */
   list(params: TracesListParams = {}, options?: RequestOptions): Promise<models.TraceObserveListResult> {
-    return this._t.call<models.TraceObserveListResult>(ops.OP_TRACES_LIST, { path: {}, query: { project_id: params.project_id, project_version_id: params.project_version_id, session_id: params.session_id, filters: params.filters, page_number: params.page_number, page_size: params.page_size, cursor: params.cursor, cursor_mode: params.cursor_mode, attribute_keys: params.attribute_keys, allow_sampled: params.allow_sampled, interval: params.interval } }, options);
+    return this._t.call<models.TraceObserveListResult>(ops.OP_TRACES_LIST, { path: {}, query: { sort_params: params.sort_params, project_id: params.project_id, project_version_id: params.project_version_id, session_id: params.session_id, filters: params.filters, page_number: params.page_number, page_size: params.page_size, cursor: params.cursor, cursor_mode: params.cursor_mode, attribute_keys: params.attribute_keys, allow_sampled: params.allow_sampled, interval: params.interval } }, options);
   }
 }
 

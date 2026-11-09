@@ -24,9 +24,9 @@ def test_the_committed_catalog_names_every_tool_once():
 
 def test_a_new_tool_and_a_stale_entry_are_both_reported():
     names = parity.catalog_mcp_names(CATALOG)
-    problems = parity.compare(_tools((names - {"list_datasets"}) | {"get_error_cluster_overview"}), CATALOG)
+    problems = parity.compare(_tools((names - {"list_datasets"}) | {"synthetic_new_tool"}), CATALOG)
     assert problems == [
-        "MCP tools without a catalog entry (add them to sdkgen/catalog/operations.yaml): get_error_cluster_overview",
+        "MCP tools without a catalog entry (add them to sdkgen/catalog/operations.yaml): synthetic_new_tool",
         "catalog entries whose MCP tool the backend does not have: list_datasets",
     ]
 

@@ -138,3 +138,74 @@ async def test_generated_methods_send_headers_and_return_binary(monkeypatch, is_
     with pytest.raises(ValueError, match="conflicting"):
         await result(fixture.manifest(resolution_id="lease-7", options=RequestOptions(resolution_id="lease-8")))
     assert len(seen) == 3
+
+
+@pytest.mark.parametrize("is_async", [False, True], ids=["sync", "async"])
+@pytest.mark.asyncio
+async def test_generated_numeric_paths_do_not_shadow_file_query(monkeypatch, is_async):
+    from fi.platform import AsyncClient, Client, ContextAuth, _operations
+
+    spec = copy.deepcopy(SPEC)
+    endpoint = spec["paths"].pop("/fixture/manifest/")
+    endpoint["parameters"] = [
+        {"name": "resource_id", "in": "path", "type": "string", "required": True},
+        {"name": "number", "in": "path", "type": "string", "required": True},
+    ]
+    endpoint["get"]["parameters"] += [
+        {"name": "number", "in": "path", "type": "integer", "required": True},
+        {"name": "path", "in": "query", "type": "string", "required": True},
+    ]
+    path = "/fixture/{resource_id}/versions/{number}/"
+    spec["paths"][path] = endpoint
+    catalog_input = copy.deepcopy(CATALOG)
+    catalog_input["operations"][1]["operation"]["path"] = path
+    ops = catalog.load(spec, catalog_input)
+    operation = next(op for op in ops if op.id == "fixture.manifest")
+    assert len(operation.params_in("path")) == 2
+    py = python.emit_resources(ops)
+    assert "number: int" in py
+    assert "number: number" in typescript.emit_resources(ops)
+    generated_ops = ModuleType("fi.platform.fixture_operations")
+    exec(python.emit_operations(ops), generated_ops.__dict__)
+    monkeypatch.setattr(_operations, python.op_constant(operation), getattr(generated_ops, python.op_constant(operation)), raising=False)
+    resources = ModuleType("fi.platform.resources.fixture_base")
+    exec(py, resources.__dict__)
+    seen = []
+
+    def handle(req):
+        seen.append(req)
+        assert req.url.path == "/fixture/resource/versions/7/"
+        assert req.url.params["path"] == "references/snow 雪.md"
+        assert req.headers["X-Context-Resolution"] == "lease"
+        return httpx.Response(200, json={"status": True, "result": {"exact": True}})
+
+    cls, http_cls, resource_cls = (AsyncClient, httpx.AsyncClient, resources.AsyncFixtureResource) if is_async else (Client, httpx.Client, resources.FixtureResource)
+    client = cls(auth=ContextAuth("synthetic"), base_url="https://fixture.invalid", http_client=http_cls(transport=httpx.MockTransport(handle)))
+    resource = resource_cls(client._transport)
+    value = resource.manifest("resource", 7, path="references/snow 雪.md", resolution_id="lease")
+    assert (await value if is_async else value) == {"exact": True}
+    assert len(seen) == 1
+    if is_async:
+        await client.aclose()
+    else:
+        client.close()
+
+
+def test_description_words_do_not_create_unused_typing_imports():
+    catalog_input = copy.deepcopy(CATALOG)
+    catalog_input["operations"][0]["description"] = "Optional demonstration, not an Optional type."
+    emitted = python.emit_resources(catalog.load(copy.deepcopy(SPEC), catalog_input))
+    imports = next(line for line in emitted.splitlines() if line.startswith("from typing import"))
+    assert "Optional" not in imports
+    assert "Optional demonstration" in emitted
+
+
+def test_duplicate_parameters_at_the_same_level_are_invalid():
+    spec = copy.deepcopy(SPEC)
+    item = spec["paths"]["/fixture/manifest/"]
+    item["parameters"] = [
+        {"name": "file_offset", "in": "query", "type": "integer"},
+        {"name": "file_offset", "in": "query", "type": "integer"},
+    ]
+    with pytest.raises(catalog.CatalogError, match="duplicate operation parameter"):
+        catalog.load(spec, CATALOG)

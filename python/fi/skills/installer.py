@@ -214,6 +214,64 @@ def _read_ownership(
         ) from exc
 
 
+def read_ownership(*, project: str | Path) -> SkillOwnership:
+    """Read and validate both cumulative lock and scoped ownership receipt."""
+    with SafeProject(project) as filesystem:
+        ownership, _, _ = _read_ownership(filesystem)
+    if ownership is None:
+        raise InstallationError(
+            "ownership_missing", "No skill ownership receipt exists.", 6
+        )
+    return ownership
+
+
+def retained_identity(raw: bytes, current: SkillIdentity) -> SkillIdentity:
+    """Bind a retained v1 lock entry to this project's already owned UUID/scope."""
+    value = json.loads(raw)
+    if (
+        not isinstance(value, dict)
+        or set(value) != {"schema", "origin", "skills", "skipped"}
+        or type(value["schema"]) is not int
+        or value["schema"] != 1
+        or value["origin"] != current.origin
+        or not isinstance(value["skills"], list)
+        or not 1 <= len(value["skills"]) <= 50
+        or not isinstance(value["skipped"], list)
+    ):
+        raise InstallationError(
+            "lock_invalid", "Invalid retained skill lock or origin.", 6
+        )
+    targets = [
+        item
+        for item in value["skills"]
+        if isinstance(item, dict) and item.get("name") == current.name
+    ]
+    if len(targets) != 1 or set(targets[0]) != {
+        "name",
+        "version",
+        "version_id",
+        "digest",
+        "label",
+    }:
+        raise InstallationError(
+            "lock_invalid", "Retained lock must identify this skill exactly once.", 6
+        )
+    target = targets[0]
+    return SkillIdentity.model_validate(
+        {
+            **current.model_dump(),
+            "version": target["version"],
+            "version_id": target["version_id"],
+            "digest": target["digest"],
+            "requested": (
+                {"label": target["label"]}
+                if target["label"] is not None
+                else {"version": target["version"]}
+            ),
+        }
+    )
+
+
 def plan_install_skill(
     bundle: SkillBundle,
     *,

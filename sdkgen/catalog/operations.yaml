@@ -16,14 +16,72 @@
 # Operation headers come from OpenAPI `in: header` parameters, never auth overrides.
 # Only Idempotency-Key and X-Context-Resolution are supported (idempotency_key and
 # resolution_id SDK arguments). Downloads use operation.decode: bytes.
-# Context/leaf consumption entries must be added with the integrated backend's
-# serializer-generated contract; the pinned contract here has neither facade yet.
-# Do not fabricate endpoints or register disabled proposal/campaign operations.
+# Context/leaf consumption uses the pinned serializer-generated F12 contract.
+# Do not register unavailable session/proposal/campaign operations.
 #
-# Imported from future-agi/futureagi/mcp_server/catalog/tools.yaml (all 105 tools).
+# MCP names follow the exact generated tool manifest pinned in contracts/.
 
 version: 1
 operations:
+
+# Isolated consumption; no legacy route fallback or implicit lease renewal.
+- id: contexts.resolve
+  operation: {method: GET, path: /model-hub/skills/contexts/resolve/}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: contexts.manifest
+  operation: {method: GET, path: '/model-hub/skills/contexts/{resource_id}/versions/{number}/manifest/'}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: contexts.read_file
+  operation: {method: GET, path: '/model-hub/skills/contexts/{resource_id}/versions/{number}/files/'}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: contexts.check_access
+  operation: {method: POST, path: '/model-hub/skills/contexts/{resource_id}/versions/{number}/access-check/'}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: skill_consumption.resolve
+  operation: {method: GET, path: /model-hub/skills/consumption/resolve/}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: skill_consumption.manifest
+  operation: {method: GET, path: '/model-hub/skills/consumption/{resource_id}/versions/{number}/manifest/'}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: skill_consumption.read_file
+  operation: {method: GET, path: '/model-hub/skills/consumption/{resource_id}/versions/{number}/files/'}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: skill_consumption.check_access
+  operation: {method: POST, path: '/model-hub/skills/consumption/{resource_id}/versions/{number}/access-check/'}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+
+# Human/admin authentication, distinct from the isolated consumption principal.
+- id: context_credentials.issue
+  operation: {method: POST, path: /model-hub/skills/contexts/credentials/}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: context_credentials.list
+  operation: {method: GET, path: /model-hub/skills/contexts/credentials/}
+  pagination: {page_param: page, size_param: page_size, first_page: 1, items: results, total_pages: total_pages}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: context_credentials.revoke
+  operation: {method: DELETE, path: '/model-hub/skills/contexts/credentials/{credential_id}/'}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+
+# Existing skill-only operations; their MCP names are unchanged.
+- id: skills.list
+  operation: {method: GET, path: /model-hub/skills/}
+  pagination: {page_param: page, size_param: page_size, first_page: 1, items: results, total_pages: total_pages}
+  surfaces: {sdk: {}, mcp: {name: list_skills, group: skills, access: read}}
+- id: skills.resolve
+  operation: {method: GET, path: /model-hub/skills/resolve/}
+  surfaces: {sdk: {}, mcp: {name: get_skill, group: skills, access: read}}
+- id: skills.read_file
+  operation: {method: GET, path: '/model-hub/skills/{skill_id}/versions/{number}/files/'}
+  surfaces: {sdk: {}, mcp: {name: read_skill_file, group: skills, access: read}}
+- id: skills.publish
+  operation: {method: POST, path: /model-hub/skills/publish/}
+  surfaces: {sdk: {}, mcp: {name: publish_skill, group: skills, access: write}}
+- id: skills.set_label
+  operation: {method: PUT, path: '/model-hub/skills/{skill_id}/labels/{label}/'}
+  surfaces: {sdk: {}, mcp: {name: set_skill_label, group: skills, access: write}}
+- id: skills.update_tags
+  operation: {method: PATCH, path: '/model-hub/skills/{skill_id}/'}
+  surfaces: {sdk: {}, mcp: {name: update_skill_tags, group: skills, access: write}}
 
 - id: account.whoami
   description: Return the authenticated user, organization, and workspace context.
@@ -495,6 +553,14 @@ operations:
   surfaces:
     sdk: {}
     mcp: {name: resume_eval_task, group: observability, access: write, open_world: true}
+
+- id: error_clusters.overview
+  operation: {method: GET, path: '/tracer/feed/issues/{cluster_id}/overview/'}
+  surfaces: {sdk: {}, mcp: {name: get_error_cluster_overview, group: error_feed, access: read}}
+
+- id: error_clusters.traces
+  operation: {method: GET, path: '/tracer/feed/issues/{cluster_id}/traces/'}
+  surfaces: {sdk: {}, mcp: {name: list_error_cluster_traces, group: error_feed, access: read}}
 
 - id: error_clusters.list
   description: List grouped error issues detected in project traces.

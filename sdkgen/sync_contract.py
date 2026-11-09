@@ -79,11 +79,40 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Copy the catalog's slice of the monorepo contract into contracts/.")
     parser.add_argument("source", help="path to future-agi/api_contracts/openapi/swagger.json")
     parser.add_argument("--backend-version", help="backend release tag (vX.Y.Z) to record in contracts/BACKEND_VERSION")
+    parser.add_argument("--backend-commit", help="exact product commit for an unreleased contract")
+    parser.add_argument("--mcp-tools", type=Path, help="tools.generated.json from that same product commit")
     args = parser.parse_args()
+    if bool(args.backend_commit) != bool(args.mcp_tools):
+        parser.error("--backend-commit and --mcp-tools must be supplied together")
+    if args.backend_commit and not re.fullmatch(r"[0-9a-f]{40}", args.backend_commit):
+        parser.error("--backend-commit must be a full lowercase commit SHA")
     if args.backend_version and not re.fullmatch(r"v\d+\.\d+\.\d+", args.backend_version):
         parser.error("--backend-version must look like v1.54.0")
 
+    tools_snapshot = OUT.parent / "mcp-tools.json"
+    provenance = OUT.parent / "SOURCE.json"
+    # Validate all supplied inputs before updating the contract slice.
+    tools = json.loads(args.mcp_tools.read_bytes()) if args.mcp_tools else None
+    if tools is not None:
+        names = sorted(tool["name"] for tool in tools["tools"])
+        if len(set(names)) != len(names) or not all(isinstance(n, str) and n for n in names):
+            parser.error("MCP source has invalid or duplicate names")
     print(sync(Path(args.source)))
+    if tools is not None:
+        metadata = {
+            "backend_commit": args.backend_commit,
+            "openapi_sha256": hashlib.sha256(Path(args.source).read_bytes()).hexdigest(),
+            "mcp_sha256": hashlib.sha256(args.mcp_tools.read_bytes()).hexdigest(),
+        }
+        provenance.write_text(json.dumps(metadata, indent=2) + "\n")
+        tools_snapshot.write_text(json.dumps({
+            "x-source-sha256": metadata["mcp_sha256"],
+            "tools": [{"name": name} for name in names],
+        }, indent=2) + "\n")
+    else:
+        # A later released sync must not retain a different commit's MCP list.
+        tools_snapshot.unlink(missing_ok=True)
+        provenance.unlink(missing_ok=True)
     if args.backend_version:
         VERSION_FILE.write_text(args.backend_version + "\n")
         print(f"wrote {VERSION_FILE.relative_to(ROOT)}: {args.backend_version}")
