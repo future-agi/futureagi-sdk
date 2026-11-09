@@ -13,6 +13,13 @@ from fi.prompt.cache import prompt_cache
 from fi.prompt.label_management import LabelManagementMixin
 
 
+def _model_config_to_wire(config: ModelConfig) -> Dict:
+    """Preserve every model setting while using the backend's model key."""
+    payload = config.model_dump()
+    payload["model"] = payload.pop("model_name")
+    return payload
+
+
 class SimpleJsonResponseHandler(ResponseHandler[Dict, Dict]):
     """Simply parses JSON and handles common errors."""
 
@@ -353,14 +360,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             "prompt_config": [
                 {
                     "messages": messages,
-                    "configuration": {
-                        "model": self.template.model_configuration.model_name,
-                        "temperature": self.template.model_configuration.temperature,
-                        "max_tokens": self.template.model_configuration.max_tokens,
-                        "top_p": self.template.model_configuration.top_p,
-                        "frequency_penalty": self.template.model_configuration.frequency_penalty,
-                        "presence_penalty": self.template.model_configuration.presence_penalty,
-                    },
+                    "configuration": _model_config_to_wire(self.template.model_configuration),
                     "placeholders": list(placeholders.keys()),
                 }
             ],
@@ -405,14 +405,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
 
         messages, placeholders = self._prepare_messages_and_placeholders()
 
-        model_config = {
-            "model": self.template.model_configuration.model_name,
-            "temperature": self.template.model_configuration.temperature,
-            "max_tokens": self.template.model_configuration.max_tokens,
-            "top_p": self.template.model_configuration.top_p,
-            "frequency_penalty": self.template.model_configuration.frequency_penalty,
-            "presence_penalty": self.template.model_configuration.presence_penalty,
-        }
+        model_config = _model_config_to_wire(self.template.model_configuration)
 
         draft_entry = {
             "prompt_config": [
@@ -824,14 +817,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         # Prepare messages and configuration just like in _create_new_draft
         messages, placeholders = self._prepare_messages_and_placeholders()
 
-        model_cfg = {
-            "model": self.template.model_configuration.model_name,
-            "temperature": self.template.model_configuration.temperature,
-            "max_tokens": self.template.model_configuration.max_tokens,
-            "top_p": self.template.model_configuration.top_p,
-            "frequency_penalty": self.template.model_configuration.frequency_penalty,
-            "presence_penalty": self.template.model_configuration.presence_penalty,
-        }
+        model_cfg = _model_config_to_wire(self.template.model_configuration)
 
         body = {
             "is_run": "draft",  # purely save changes
