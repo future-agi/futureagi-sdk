@@ -50,7 +50,7 @@
   "fi/evals/metrics/function_calling/metrics.py": "split into focused modules with compatible public exports; every module is at most 400 lines",
   "fi/evals/otel/conventions.py": "split into focused modules with compatible public exports; every module is at most 400 lines",
   "fi/evals/otel/instrumentors/anthropic.py": "split into focused modules with compatible public exports; every module is at most 400 lines",
-  "fi/evals/otel/instrumentors/openai.py": "split into focused modules with compatible public exports; every module is at most 400 lines",
+  "fi/evals/otel/instrumentors/openai.py": "split into focused modules with compatible public exports; every module is at most 400 lines; additive sync/async stream context managers, close methods and attribute delegation preserve the provider interface without changing pinned legacy method bodies",
   "fi/evals/otel/processors/base.py": "split into focused modules with compatible public exports; every module is at most 400 lines",
   "fi/evals/otel/processors/cost.py": "split into focused modules with compatible public exports; every module is at most 400 lines",
   "fi/evals/otel/processors/evaluation.py": "split into focused modules with compatible public exports; every module is at most 400 lines",

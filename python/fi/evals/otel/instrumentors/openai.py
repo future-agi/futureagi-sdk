@@ -99,6 +99,19 @@ class _StreamWrapper:
         self._content_parts = []
         self._usage = {"input_tokens": 0, "output_tokens": 0}
 
+    def __getattr__(self, name):
+        return getattr(self._stream, name)
+
+    def __enter__(self):
+        self._stream.__enter__()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        return self._stream.__exit__(exc_type, exc_value, traceback)
+
+    def close(self):
+        return self._stream.close()
+
     def __iter__(self):
         return self
 
@@ -155,6 +168,19 @@ class _AsyncStreamWrapper:
         self._capture_content = capture_content
         self._content_parts = []
         self._usage = {"input_tokens": 0, "output_tokens": 0}
+
+    def __getattr__(self, name):
+        return getattr(self._stream, name)
+
+    async def __aenter__(self):
+        await self._stream.__aenter__()
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        return await self._stream.__aexit__(exc_type, exc_value, traceback)
+
+    async def close(self):
+        return await self._stream.close()
 
     def __aiter__(self):
         return self
