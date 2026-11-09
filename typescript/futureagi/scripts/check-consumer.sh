@@ -3,14 +3,22 @@
 # project, compile consumer/*.mts against it (type-level: every public call there must
 # type-check from the published .d.ts files, not from this repository's sources), then load it
 # as ESM and as CommonJS. Run after `pnpm run build`; CI runs it on every pull request.
+# An optional existing tarball qualifies those exact retained bytes without repacking.
 set -euo pipefail
 
+[ "$#" -le 1 ] || { echo "usage: check-consumer.sh [package.tgz]" >&2; exit 2; }
 pkg=$(cd "$(dirname "$0")/.." && pwd)
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 
-[ -d "$pkg/dist/esm" ] || { echo "build first: pnpm run build" >&2; exit 1; }
-tarball=$(cd "$pkg" && npm pack --ignore-scripts --pack-destination "$work" 2>/dev/null | tail -1)
+if [ "$#" -eq 1 ]; then
+  [ -f "$1" ] || { echo "package tarball not found: $1" >&2; exit 1; }
+  tarball=package.tgz
+  cp -- "$1" "$work/$tarball"
+else
+  [ -d "$pkg/dist/esm" ] || { echo "build first: pnpm run build" >&2; exit 1; }
+  tarball=$(cd "$pkg" && npm pack --ignore-scripts --pack-destination "$work" 2>/dev/null | tail -1)
+fi
 cd "$work"
 npm init -y >/dev/null
 npm install --no-audit --no-fund --silent "./$tarball" "typescript@5.6.3"
