@@ -109,3 +109,68 @@ def test_delete_by_name_uses_the_requested_account(monkeypatch):
     assert deletion.method == HttpMethod.DELETE
     assert deletion.json == {"dataset_ids": [str(UUID(int=12))]}
     assert first.dataset_config.id == UUID(int=11)
+
+
+def table(values, metadata, reverse_columns=False):
+    columns = [Column(id=COLUMN_ID, name="number", data_type="integer"),
+               Column(id=BOOLEAN_COLUMN_ID, name="enabled", data_type="boolean")]
+    if reverse_columns:
+        columns.reverse()
+    rows = [Row(id=UUID(int=100 + value), cells=[
+        Cell(column_id=COLUMN_ID, value=value),
+        Cell(column_id=BOOLEAN_COLUMN_ID, value="true" if value % 2 else "false"),
+    ]) for value in values]
+    return DatasetTable(id=DATASET_ID, columns=columns, rows=rows, metadata=metadata)
+
+
+def download_client(pages):
+    client = Dataset(dataset_config=dataset_config(), session=Mock())
+    seen = []
+
+    def request(config, response_handler):
+        assert response_handler is DatasetResponseHandler
+        assert config.method == HttpMethod.GET
+        page = config.params["current_page_index"]
+        seen.append(page)
+        assert page < len(pages), "Download requested a page after pagination had ended"
+        return pages[page]
+
+    client.request = Mock(side_effect=request)
+    return client, seen
+
+
+@pytest.mark.parametrize("metadata", [
+    {"total_pages": 0, "total_rows": 0, "has_more": False},
+    {"totalPages": 0, "totalRows": 0, "hasMore": False},
+    {"total_pages": 0},
+    {"has_more": False},
+    {},
+    None,
+])
+def test_empty_download_stops_after_one_request(tmp_path, metadata):
+    client, seen = download_client([table([], metadata)])
+    frame = client.download(str(tmp_path / "empty.csv"), load_to_pandas=True)
+    assert isinstance(frame, pd.DataFrame)
+    assert frame.empty
+    assert list(frame.columns) == ["number", "enabled"]
+    assert seen == [0]
+
+
+@pytest.mark.parametrize("metadata", [
+    {"total_pages": 5, "has_more": False},
+    {"totalPages": 5, "hasMore": False},
+    {"total_pages": 0},
+])
+def test_download_honors_terminal_pagination_metadata(tmp_path, metadata):
+    client, seen = download_client([table([1], metadata)])
+    frame = client.download(str(tmp_path / "last.csv"), load_to_pandas=True)
+    assert frame["number"].tolist() == [1]
+    assert seen == [0]
+
+
+@pytest.mark.parametrize("metadata", [{}, {"total_pages": "invalid"}, {"total_pages": -1}])
+def test_download_rejects_nonempty_pages_without_a_finite_page_count(tmp_path, metadata):
+    client, seen = download_client([table([1], metadata)])
+    with pytest.raises(DatasetError, match="pagination"):
+        client.download(str(tmp_path / "invalid.csv"))
+    assert seen == [0]
