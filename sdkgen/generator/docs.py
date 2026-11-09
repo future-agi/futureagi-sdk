@@ -384,6 +384,26 @@ def _method_section(op: Op, homes: dict[str, str], definitions: dict) -> str:
         + typescript_example(op, definitions)
         + "\n```\n\n</CodeGroup>\n\n"
     )
+    if op.id == "datasets.cells.update":
+        out.append(
+            "#### Clear a cell deliberately\n\n"
+            'The API clears a cell when `new_value` is omitted, `null`, or `""`. '
+            "To prevent accidental clearing, these SDK methods reject an omitted replacement "
+            "(Python `NOT_GIVEN` or TypeScript `undefined`), including body overrides. "
+            "Use Python `None` or TypeScript `null` explicitly as below; an explicit empty string also clears the cell.\n\n"
+            "<CodeGroup>\n\n```python Python\n"
+            "result = client.datasets.cells.update(\n"
+            '    "your-dataset-id",\n'
+            '    row_id="your-row-id",\n'
+            '    column_id="your-column-id",\n'
+            "    new_value=None,\n"
+            ")\n```\n\n```typescript TypeScript\n"
+            'const result = await client.datasets.cells.update("your-dataset-id", {\n'
+            '  row_id: "your-row-id",\n'
+            '  column_id: "your-column-id",\n'
+            "  new_value: null,\n"
+            "});\n```\n\n</CodeGroup>\n\n"
+        )
     out.append(
         '<Expandable title="Signature">\n\n```python Python\n'
         + python_signature(op)

@@ -173,7 +173,7 @@ def _params_interface(op: Op) -> tuple[str, list[Param]]:
         ts = ts_type(p.schema, for_input=True)
         # Optional: left out when undefined, sent as null when null (clears a nullable field). A file
         # field has no null form: it is either uploaded or left out.
-        nullable = not p.required and not is_file(p.schema)
+        nullable = (not p.required or bool((p.schema or {}).get("x-nullable"))) and not is_file(p.schema)
         out.append(f"{desc}  {prop_key(p.name)}{'' if p.required else '?'}: {ts + ' | null' if nullable else ts};\n")
     out.append("}\n\n")
     return "".join(out), fields
@@ -196,18 +196,41 @@ def _method(op: Op, fields: list[Param]) -> str:
     lines.append(f"  {ts_method(op)}({', '.join(args)}): {_return_type(op)} {{\n")
     if stability != "stable":
         lines.append(f"    warnStability({json.dumps(op.id)}, {json.dumps(stability)});\n")
+    # TypeScript types do not protect JavaScript callers from destructive omission.
+    required_nullable = [
+        p for p in fields
+        if p.location == "body" and p.required and (p.schema or {}).get("x-nullable") and not is_file(p.schema)
+    ]
+    for p in required_nullable:
+        access = f"params?.{p.name}" if _IDENTIFIER.match(p.name) else f"params?.[{json.dumps(p.name)}]"
+        message = json.dumps(f"{p.name} is required; pass null explicitly to clear it")
+        lines.append(f"    if ({access} === undefined) {{\n")
+        lines.append(f"      return Promise.reject(new TypeError({message}));\n")
+        lines.append("    }\n")
     path = ", ".join(f"{prop_key(p.name)}: {ts_arg(p)}" for p in path_params)
     parts = [f"path: {{ {path} }}" if path else "path: {}"]
     for location in ("query", "body") if op.sends_body else ("query",):
         group = [p for p in fields if p.location == location and not (location == "body" and is_file(p.schema))]
         items = ", ".join(f"{prop_key(p.name)}: params.{prop_key(p.name)}" if _IDENTIFIER.match(p.name) else f"{prop_key(p.name)}: params[{prop_key(p.name)}]" for p in group)
-        parts.append(f"{location}: {{ {items} }}" if items else f"{location}: {{}}")
+        if location == "body" and required_nullable:
+            # Validate the effective body once, then prevent the transport from reapplying overrides.
+            lines.append(f"    const body: Record<string, unknown> = {{ {items}, ...(options?.extraBody ?? {{}}) }};\n")
+            for p in required_nullable:
+                access = f"body.{p.name}" if _IDENTIFIER.match(p.name) else f"body[{json.dumps(p.name)}]"
+                message = json.dumps(f"{p.name} is required; pass null explicitly to clear it")
+                lines.append(f"    if ({access} === undefined) {{\n")
+                lines.append(f"      return Promise.reject(new TypeError({message}));\n")
+                lines.append("    }\n")
+            parts.append("body")
+        else:
+            parts.append(f"{location}: {{ {items} }}" if items else f"{location}: {{}}")
     if op.multipart:
         uploads = ", ".join(f"{prop_key(p.name)}: params.{prop_key(p.name)}" for p in fields if p.location == "body" and is_file(p.schema))
         parts.append(f"files: {{ {uploads} }}")
     call = "paginate" if op.pagination else "call"
     generic = _return_type(op)[len("Pager<") if op.pagination else len("Promise<") : -1]
-    lines.append(f"    return this._t.{call}<{generic}>(ops.{op_constant(op)}, {{ {', '.join(parts)} }}, options);\n")
+    request_options = "{ ...options, extraBody: undefined }" if required_nullable else "options"
+    lines.append(f"    return this._t.{call}<{generic}>(ops.{op_constant(op)}, {{ {', '.join(parts)} }}, {request_options});\n")
     lines.append("  }\n")
     return "".join(lines)
 

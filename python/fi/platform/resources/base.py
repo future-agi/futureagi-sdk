@@ -299,14 +299,16 @@ class DatasetsCellsResource(Resource):
 
     _t: SyncTransport
 
-    def update(self, dataset_id: str, *, row_id: str, column_id: str, new_value: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
-        """Set the value of a single dataset cell. Use this to correct one value; add_dataset_rows only appends and cannot edit an existing row.
+    def update(self, dataset_id: str, *, row_id: str, column_id: str, new_value: str | None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+        """Set the value of a single dataset cell. Use this to correct one value; add_dataset_rows only appends and cannot edit an existing row. Pass new_value explicitly; omission is rejected. To clear a cell deliberately, pass None in Python or null in TypeScript; an explicit empty string also clears the cell.
 
         POST /model-hub/develops/{dataset_id}/update_cell_value/
         """
         path = {'dataset_id': dataset_id}
         query = {**(extra_query or {})}
         body = {'row_id': row_id, 'column_id': column_id, 'new_value': new_value, **(extra_body or {})}
+        if isinstance(body['new_value'], NotGiven):
+            raise TypeError('new_value is required; pass None explicitly to clear it')
         return self._t.call(_ops.OP_DATASETS_CELLS_UPDATE, path=path, query=query, body=body, model=None, options=options)
 
 
@@ -2267,14 +2269,16 @@ class AsyncDatasetsCellsResource(Resource):
 
     _t: AsyncTransport
 
-    async def update(self, dataset_id: str, *, row_id: str, column_id: str, new_value: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
-        """Set the value of a single dataset cell. Use this to correct one value; add_dataset_rows only appends and cannot edit an existing row.
+    async def update(self, dataset_id: str, *, row_id: str, column_id: str, new_value: str | None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+        """Set the value of a single dataset cell. Use this to correct one value; add_dataset_rows only appends and cannot edit an existing row. Pass new_value explicitly; omission is rejected. To clear a cell deliberately, pass None in Python or null in TypeScript; an explicit empty string also clears the cell.
 
         POST /model-hub/develops/{dataset_id}/update_cell_value/
         """
         path = {'dataset_id': dataset_id}
         query = {**(extra_query or {})}
         body = {'row_id': row_id, 'column_id': column_id, 'new_value': new_value, **(extra_body or {})}
+        if isinstance(body['new_value'], NotGiven):
+            raise TypeError('new_value is required; pass None explicitly to clear it')
         return await self._t.acall(_ops.OP_DATASETS_CELLS_UPDATE, path=path, query=query, body=body, model=None, options=options)
 
 

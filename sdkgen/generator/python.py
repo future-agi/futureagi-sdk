@@ -198,6 +198,9 @@ def _signature(op: Op) -> tuple[list[str], list[tuple[Param, str]]]:
     args.append("*")
     for p in rest:
         py = py_type(p.schema, for_input=True)
+        # Required and nullable are independent: callers must still pass None explicitly.
+        if p.required and (p.schema or {}).get("x-nullable") and not is_file(p.schema):
+            py += " | None"
         # Optional: NOT_GIVEN is left out of the request, an explicit None is sent as null.
         args.append(f"{arg_name(p)}: {py}" if p.required else f"{arg_name(p)}: {py} | None | NotGiven = NOT_GIVEN")
         named.append((p, arg_name(p)))
@@ -231,6 +234,12 @@ def _method(op: Op, *, is_async: bool) -> str:
     if op.multipart:  # file params travel separately from the form fields
         uploads = ", ".join(f"{p.name!r}: {a}" for p, a in named if p.location == "body" and is_file(p.schema))
         lines.append(f"        files = {{{uploads}}}\n")
+    # A required nullable body field must not become an omitted field on the wire.
+    for p in op.params_in("body"):
+        if p.required and (p.schema or {}).get("x-nullable") and not is_file(p.schema):
+            message = f"{p.name} is required; pass None explicitly to clear it"
+            lines.append(f"        if isinstance(body[{p.name!r}], NotGiven):\n")
+            lines.append(f"            raise TypeError({message!r})\n")
     model_arg = model or "None"
     if op.pagination:
         fn = "apaginate" if is_async else "paginate"
