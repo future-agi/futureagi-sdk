@@ -351,6 +351,12 @@ class _NoOpContextManager:
         pass
 
 
+# Keep the setup API and exporter factory signatures while applying content
+# controls to each exporter's own span view, including batch exports.
+from ._content_export import _configure_content_exports
+_configure_content_exports(globals())
+
+
 __all__ = [
     "setup_tracing",
     "get_tracer",
