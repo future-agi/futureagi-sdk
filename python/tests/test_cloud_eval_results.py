@@ -101,3 +101,34 @@ def test_cloud_mixed_batch_counts_only_completed_requests(evaluator):
     assert batch.success_rate == 0.5
     assert [result.status for result in batch] == ["failed", "completed"]
     assert batch.results[1].score == 0.0
+
+
+@pytest.mark.parametrize("config", [
+    {"run_config": {"max_steps": 1}},
+    {"knowledge_base_id": "kb-test", "choice_scores": {"yes": 1, "no": 0}},
+])
+@pytest.mark.parametrize("name", ["tone", ["tone", "toxicity"]], ids=["single", "batch"])
+def test_cloud_config_reaches_each_request(evaluator, config, name):
+    from copy import deepcopy
+
+    original = deepcopy(config)
+
+    result = cloud_evaluate(name, config=config)
+
+    assert result is not None
+    assert config == original
+    assert evaluator.request.call_count == (len(name) if isinstance(name, list) else 1)
+    for call in evaluator.request.call_args_list:
+        payload = call.kwargs["config"].json
+        assert payload.get("config") == {"params": original}
+        assert payload["inputs"] == {"output": "hello"}
+        assert payload["model"] == "turing_flash"
+
+
+@pytest.mark.parametrize("config", [None, {}])
+def test_cloud_config_defaults_keep_existing_payload(evaluator, config):
+    result = cloud_evaluate(config=config)
+
+    assert result.status == "completed"
+    evaluator.request.assert_called_once()
+    assert "config" not in evaluator.request.call_args.kwargs["config"].json
