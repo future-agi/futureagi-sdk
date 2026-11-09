@@ -59,9 +59,10 @@ export class ModelConfig {
     this.presence_penalty = config.presence_penalty ?? 0;
     this.max_tokens = config.max_tokens;
     this.top_p = config.top_p ?? 1.0;
-    this.response_format = config.response_format ?? null;
-    this.tool_choice = config.tool_choice ?? null;
-    this.tools = config.tools ?? null;
+    // Keep omitted settings distinct from explicit null values when saving.
+    this.response_format = config.response_format;
+    this.tool_choice = config.tool_choice;
+    this.tools = config.tools;
   }
 }
 

@@ -17,6 +17,21 @@ import {
   TemplateNotFound,
 } from '../utils/errors';
 
+/** Serialize the configuration consistently for every prompt persistence endpoint. */
+function serializeModelConfig(config?: ModelConfig) {
+  return {
+    model: config?.model_name ?? 'gpt-4o-mini',
+    temperature: config?.temperature,
+    max_tokens: config?.max_tokens,
+    top_p: config?.top_p,
+    frequency_penalty: config?.frequency_penalty,
+    presence_penalty: config?.presence_penalty,
+    ...(config?.response_format !== undefined ? { response_format: config.response_format } : {}),
+    ...(config?.tool_choice !== undefined ? { tool_choice: config.tool_choice } : {}),
+    ...(config?.tools !== undefined ? { tools: config.tools } : {}),
+  };
+}
+
 /**
  * Simple JSON handler – returns parsed JSON on success, handles common auth/not-found errors.
  */
@@ -57,7 +72,7 @@ class PromptResponseHandler extends ResponseHandler<
       top_p: cfgSrc.top_p ?? 0,
       response_format: cfgSrc.response_format,
       tool_choice: cfgSrc.tool_choice,
-      tools: cfgSrc.tools ?? null,
+      tools: cfgSrc.tools,
     });
   }
 
@@ -415,14 +430,7 @@ export class Prompt extends APIKeyAuth {
       prompt_config: [
         {
           messages,
-          configuration: {
-            model: this.template.model_configuration?.model_name ?? 'gpt-4o-mini',
-            temperature: this.template.model_configuration?.temperature,
-            max_tokens: this.template.model_configuration?.max_tokens,
-            top_p: this.template.model_configuration?.top_p,
-            frequency_penalty: this.template.model_configuration?.frequency_penalty,
-            presence_penalty: this.template.model_configuration?.presence_penalty,
-          },
+          configuration: serializeModelConfig(this.template.model_configuration),
           placeholders: Object.keys(placeholders),
         },
       ],
@@ -493,14 +501,7 @@ export class Prompt extends APIKeyAuth {
 
     const { messages, placeholders } = this._prepareMessagesAndPlaceholders();
 
-    const modelConfig = {
-      model: this.template.model_configuration?.model_name ?? 'gpt-4o-mini',
-      temperature: this.template.model_configuration?.temperature,
-      max_tokens: this.template.model_configuration?.max_tokens,
-      top_p: this.template.model_configuration?.top_p,
-      frequency_penalty: this.template.model_configuration?.frequency_penalty,
-      presence_penalty: this.template.model_configuration?.presence_penalty,
-    };
+    const modelConfig = serializeModelConfig(this.template.model_configuration);
 
     const body = {
       new_prompts: [
@@ -599,14 +600,7 @@ export class Prompt extends APIKeyAuth {
     }
 
     const { messages, placeholders } = this._prepareMessagesAndPlaceholders();
-    const modelCfg = {
-      model: this.template.model_configuration?.model_name ?? 'gpt-4o-mini',
-      temperature: this.template.model_configuration?.temperature,
-      max_tokens: this.template.model_configuration?.max_tokens,
-      top_p: this.template.model_configuration?.top_p,
-      frequency_penalty: this.template.model_configuration?.frequency_penalty,
-      presence_penalty: this.template.model_configuration?.presence_penalty,
-    };
+    const modelCfg = serializeModelConfig(this.template.model_configuration);
 
     const body = {
       is_run: 'draft',
