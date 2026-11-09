@@ -80,13 +80,15 @@
    "area": "responses",
    "ai_evaluation": "`fi.api.auth.ResponseHandler.parse` treated every status other than 200 as an error. Unified cloud evaluations treated caught request failures as completed evaluations.",
    "futureagi": "The shared `ResponseHandler.parse` treats every 2xx status as a success and calls `_parse_success` for it. Unified cloud evaluations report request failures with failed status and error details; batch success_rate counts only completed requests. Legacy Evaluator.evaluate calls keep their default failure placeholders.",
-   "docs": "A custom `ResponseHandler` subclass now sees 201 to 299 as successes. Check unified evaluation status/error rather than treating a failed request as a completed score.",
+   "docs": "A custom `ResponseHandler` subclass now sees 201 to 299 as successes. Check unified evaluation status/error rather than treating a failed request as a completed score. Per-call cloud config overrides now reach the request as config.params instead of being silently ignored.",
    "tests": [
     "tests/evals/test_differences.py::test_any_2xx_status_is_a_success",
     "tests/evals/test_differences.py::test_a_status_outside_2xx_is_an_error",
     "tests/test_cloud_eval_results.py::test_cloud_request_failure_has_failed_status",
     "tests/test_cloud_eval_results.py::test_cloud_mixed_batch_counts_only_completed_requests",
-    "tests/test_cloud_eval_results.py::test_legacy_evaluate_keeps_failure_placeholder_by_default"
+    "tests/test_cloud_eval_results.py::test_legacy_evaluate_keeps_failure_placeholder_by_default",
+    "tests/test_cloud_eval_results.py::test_cloud_config_reaches_each_request",
+    "tests/test_cloud_eval_results.py::test_cloud_config_defaults_keep_existing_payload"
    ]
   },
   {
