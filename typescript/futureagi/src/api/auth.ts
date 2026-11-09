@@ -237,7 +237,11 @@ export class HttpClient {
             };
         }
 
-        const retryAttempts = config.retry_attempts || this._defaultRetryAttempts;
+        // Node multipart bodies contain one-shot streams. Retrying an exhausted form can
+        // hang until the upload timeout; surface the first failure without retry backoff.
+        const retryAttempts = requestConfig.data instanceof NodeFormData
+            ? 1
+            : (config.retry_attempts || this._defaultRetryAttempts);
         const retryDelay = config.retry_delay || this._defaultRetryDelay;
 
         // Execute request with bounded concurrency
