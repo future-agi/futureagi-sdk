@@ -50,6 +50,8 @@ def _transport_error(
         message += " " + _UNKNOWN_DISPATCH_REMEDY
     cls = APITimeoutError if isinstance(error, httpx.TimeoutException) else APIConnectionError
     translated = cls(message, gateway_evidence=evidence)
+    # Keep transport proof separate from the existing response-header evidence.
+    translated.request_not_sent = pre_send and evidence.dispatched is not True
     # Headers have already been masked, but transports can quote their original
     # values in args/message text. Scrub the whole preserved exception chain
     # before callbacks or formatted tracebacks can observe the original cause.

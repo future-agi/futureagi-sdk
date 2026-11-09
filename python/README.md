@@ -298,6 +298,46 @@ print(reply.choices[0].message.content)
 - Optional gateway dependencies: `pip install "futureagi[gateway-tokens]"` for token helpers, or `pip install "futureagi[gateway-otel]"` for OpenTelemetry.
 - Managing gateways (keys, providers, request logs, analytics) is a platform API: `fi.Client().gateway`.
 
+#### Retry a stream only when dispatch is ruled out
+
+Python streaming calls make one automatic attempt, even with `max_retries` set.
+A connection-establishment or connection-pool failure before send raises
+`APIConnectionError` (including `APITimeoutError`) with
+`error.request_not_sent is True`. The same typed evidence is available
+on sync and async non-streaming connection errors after their retry budget is
+exhausted. `False` means there is no pre-send proof, not that dispatch occurred.
+The separate `gateway_evidence` still describes response headers: it stays
+`"unknown"` when no headers arrived and is preserved if reading a body fails.
+
+If your application wants one additional attempt, catch only the stream-opening
+error and require the boolean `True`, not a message or a timeout class alone:
+
+```python
+from fi.gateway import APIConnectionError, Gateway
+
+client = Gateway(max_retries=0)
+
+def open_stream(**params):
+    try:
+        return client.chat.completions.create(**params, stream=True)
+    except APIConnectionError as error:
+        if error.request_not_sent is not True:
+            raise
+    # At most one caller-managed retry; a second failure propagates.
+    return client.chat.completions.create(**params, stream=True)
+
+with open_stream(
+    model="your-model", messages=[{"role": "user", "content": "Hello"}],
+) as stream:
+    for chunk in stream:
+        print(chunk.choices[0].delta.content or "", end="")
+```
+
+For `AsyncGateway`, apply the same check around
+`await client.chat.completions.create(..., stream=True)` and consume the stream
+with `async with` / `async for` outside the retry block. Never restart a stream
+because iteration failed, or retry without pre-send proof until you have checked
+the original outcome. Dispatch evidence is not a billing receipt.
 
 ---
 

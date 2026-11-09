@@ -64,6 +64,55 @@ environment:
 
 **Gateway client:** for model calls through the Agent Command Center gateway, use `@future-agi/sdk/gateway` (with `/gateway/testing`, `/gateway/express`, `/gateway/nextjs`, and `/gateway/react`, which needs React 17–19), the `@agentcc/client` 1.0 client (and `@agentcc/react` as `/gateway/react`) ported into this package under the same names with some intended behaviour changes, and keep the standalone `@agentcc/client` package only for helpers that were not ported, such as the budget, batch and token utilities.
 
+### Retry a gateway stream only when dispatch is ruled out
+
+An `APIConnectionError` exposes typed `gatewayEvidence.dispatched`: `false` for
+recognized failures before send (for example, DNS resolution or connection
+refusal), or `"unknown"` when the transport cannot prove whether the request was
+sent. This applies to ordinary and streaming requests. Browser fetch failures
+usually provide no such proof; a generic network error is not safe to replay.
+Response-header evidence is preserved on later body failures.
+
+For a caller-managed retry, disable the client's automatic retry budget and
+retry stream opening at most once, only for the exact boolean `false`:
+
+```ts
+import { AgentCC, APIConnectionError, Stream } from "@future-agi/sdk/gateway";
+
+const client = new AgentCC({ maxRetries: 0 });
+const request = {
+  method: "POST",
+  path: "/v1/chat/completions",
+  body: {
+    model: "your-model",
+    messages: [{ role: "user", content: "Hello" }],
+    stream: true,
+  },
+};
+
+async function openStream() {
+  try {
+    return await client.requestStream(request);
+  } catch (error) {
+    if (!(error instanceof APIConnectionError) ||
+        error.gatewayEvidence.dispatched !== false) throw error;
+  }
+  // At most one caller-managed retry; a second failure propagates.
+  return client.requestStream(request);
+}
+
+const stream = new Stream(await openStream());
+for await (const chunk of stream) {
+  console.log(chunk.choices[0]?.delta.content ?? "");
+}
+```
+
+Keep iteration outside the retry block. Do not replay a partial stream or treat
+`true`, `"unknown"`, or missing evidence as permission to retry; check the original
+outcome first. This example changes no SDK retry policy: without `maxRetries: 0`,
+the TypeScript client's existing stream-opening retry budget still applies.
+Dispatch evidence is not a billing receipt.
+
 ### Cancel a gateway request
 
 The gateway client's low-level `request`, `requestWithResponse`, `requestRaw`
