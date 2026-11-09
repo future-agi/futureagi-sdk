@@ -7,7 +7,7 @@ import { Optimizations } from "./generated/catalog/optimizations";
 import { Workspaces } from "./generated/catalog/workspaces";
 import { API_KEY_ENVVAR_NAME, SECRET_KEY_ENVVAR_NAME } from "./utils/constants";
 import { SDKException } from "./utils/errors";
-import { createClient, type Client } from "./generated/openapi/client";
+import { createClient, formDataBodySerializer, type Client } from "./generated/openapi/client";
 import {
   FACADE_DEFAULT_QUEUE_CALL,
   FACADE_DEFAULT_QUEUE_METHOD,
@@ -910,9 +910,20 @@ export class DatasetsClient {
     });
   }
 
-  createFromFile(body: LooseBody) {
+  /** Upload a file with optional dataset metadata, or pass native FormData. */
+  createFromFile(body: BodyOf<generatedTypes.CreateDatasetFromLocalFileData> | FormData) {
+    const form = body instanceof FormData
+      ? body
+      : formDataBodySerializer.bodySerializer(body);
+    if (!(form.get("file") instanceof Blob)) {
+      throw new TypeError("Dataset uploads require a file.");
+    }
     return callGenerated(this.client, dataSdk.createDatasetFromLocalFile, {
-      body,
+      body: form,
+      // Preserve FormData rather than JSON-stringifying or rebuilding its parts.
+      bodySerializer: null,
+      // Clear inherited JSON headers so Request supplies the multipart boundary.
+      headers: { "Content-Type": null },
     });
   }
 

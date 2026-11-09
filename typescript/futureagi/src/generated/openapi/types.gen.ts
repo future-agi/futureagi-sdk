@@ -4212,7 +4212,7 @@ export type CreateDatasetFromLocalFileRequest = {
     /**
      * File
      */
-    readonly file?: string;
+    file: Blob | File;
     /**
      * New dataset name
      */
@@ -15528,6 +15528,10 @@ export type DatasetSdkRowsResponseWritable = {
 };
 
 export type CreateDatasetFromLocalFileRequestWritable = {
+    /**
+     * File
+     */
+    file: Blob | File;
     /**
      * New dataset name
      */
