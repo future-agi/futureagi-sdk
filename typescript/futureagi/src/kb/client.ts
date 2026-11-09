@@ -105,6 +105,8 @@ class KBResponseHandler extends ResponseHandler<
  */
 export class KnowledgeBase extends APIKeyAuth {
     public kb?: KnowledgeBaseConfig;
+    /** Await named construction, or use KnowledgeBase.open() for a ready instance. */
+    public readonly ready: Promise<void>;
     private _validFilePaths: string[] = [];
 
     constructor(kbName?: string, options: KnowledgeBaseOptions = {}) {
@@ -117,17 +119,23 @@ export class KnowledgeBase extends APIKeyAuth {
 
         this.kb = undefined;
 
-        if (kbName) {
-            // Resolve name → id at construction time
-            this._getKbFromName(kbName)
-                .then(foundKb => {
-                    this.kb = foundKb;
-                })
-                .catch(() => {
-                    throw new SDKException(
-                        `Knowledge Base with name '${kbName}' not found. Please create it first.`
-                    );
-                });
+        this.ready = kbName
+            ? this._getKbFromName(kbName).then(foundKb => { this.kb = foundKb; })
+            : Promise.resolve();
+        // Observe failures even when legacy callers do not await readiness.
+        // Keep the original promise rejected so callers can catch the actual cause.
+        void this.ready.catch(() => {});
+    }
+
+    /** Resolve an existing name and return a ready-to-use client. */
+    static async open(kbName: string, options: KnowledgeBaseOptions = {}): Promise<KnowledgeBase> {
+        const instance = new KnowledgeBase(kbName, options);
+        try {
+            await instance.ready;
+            return instance;
+        } catch (error) {
+            await instance.close();
+            throw error;
         }
     }
 
@@ -143,6 +151,7 @@ export class KnowledgeBase extends APIKeyAuth {
         newName?: string;
         filePaths?: string | string[];
     }): Promise<KnowledgeBase> {
+        await this.ready;
         try {
             // Resolve target KB by name if needed
             if (!this.kb || this.kb.name !== kbName) {
@@ -238,6 +247,7 @@ export class KnowledgeBase extends APIKeyAuth {
         kbName: string;
         fileNames: string[];
     }): Promise<KnowledgeBase> {
+        await this.ready;
         try {
             if (!this.kb || this.kb.name !== kbName) {
                 this.kb = await this._getKbFromName(kbName);
@@ -285,6 +295,7 @@ export class KnowledgeBase extends APIKeyAuth {
         kbNames?: string | string[];
         kbIds?: string | string[];
     } = {}): Promise<KnowledgeBase> {
+        await this.ready;
         try {
             const resolvedIds: string[] = [];
 
@@ -359,6 +370,7 @@ export class KnowledgeBase extends APIKeyAuth {
         name?: string,
         filePaths: string | string[] = []
     ): Promise<KnowledgeBase> {
+        await this.ready;
         try {
 
             const finalKbName = name || (this.kb?.name) || "Unnamed KB";
