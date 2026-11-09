@@ -691,7 +691,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                         response_handler=PromptResponseHandler,
                     )
 
-            prompt_cache.set(cache_key, template)
+            prompt_cache.set(cache_key, template, snapshot=True)
             return cls(
                 template=template,
                 fi_api_key=fi_api_key,

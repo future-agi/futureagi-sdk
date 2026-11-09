@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import atexit
+import copy
 import logging
 import threading
 import time
@@ -32,10 +33,11 @@ logger = logging.getLogger("fi.prompt.cache")
 class _CacheItem:
     """A wrapper around the cached PromptTemplate with expiry metadata."""
 
-    __slots__ = ("value", "expiry")
+    __slots__ = ("value", "expiry", "snapshot")
 
-    def __init__(self, value: "PromptTemplate", ttl_sec: int):
-        self.value: "PromptTemplate" = value
+    def __init__(self, value: "PromptTemplate", ttl_sec: int, *, snapshot: bool = False):
+        self.snapshot = snapshot
+        self.value: "PromptTemplate" = copy.deepcopy(value) if snapshot else value
         self.expiry: float = time.time() + ttl_sec
 
     def is_stale(self) -> bool:
@@ -140,20 +142,26 @@ class PromptCache:
         with self._lock:
             item = self._store.get(key)
             if item and not item.is_stale():
-                return item.value
+                return copy.deepcopy(item.value) if item.snapshot else item.value
             return None
 
     def get_stale(self, key: str) -> Optional["PromptTemplate"]:
         """Return cached value even if stale (used for fallback)."""
         with self._lock:
             item = self._store.get(key)
-            return item.value if item else None
+            if item is None:
+                return None
+            return copy.deepcopy(item.value) if item.snapshot else item.value
 
-    def set(self, key: str, template: "PromptTemplate", ttl_sec: Optional[int] = None):
+    def set(self, key: str, template: "PromptTemplate", ttl_sec: Optional[int] = None, *, snapshot: bool = False):
+        """Cache a value; snapshots isolate both stored and retrieved templates.
+
+        Direct cache users retain reference semantics unless they opt in.
+        """
         if ttl_sec is None:
             ttl_sec = self._ttl_sec
         with self._lock:
-            self._store[key] = _CacheItem(template, ttl_sec)
+            self._store[key] = _CacheItem(template, ttl_sec, snapshot=snapshot)
 
     def invalidate(self, key_prefix: str):
         with self._lock:
