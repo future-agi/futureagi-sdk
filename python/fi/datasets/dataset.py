@@ -1084,13 +1084,7 @@ class Dataset(APIKeyAuth):
         excluded_datasets: Optional[List[str]] = None,
         **kwargs,
     ) -> "Dataset":
-        """Get dataset configuration with caching"""
-        cache_key = f"{dataset_name}_{str(excluded_datasets)}"
-        
-        cached_instance = cls._dataset_instance_cache.get(cache_key)
-        if cached_instance:
-            return cached_instance
-
+        """Look up a dataset using a fresh client with the caller's current options."""
         request_instance = cls._get_instance(**kwargs)
         
         params = {"search_text": dataset_name}
@@ -1117,10 +1111,8 @@ class Dataset(APIKeyAuth):
         if not isinstance(fetched_dataset_config, DatasetConfig):
             raise DatasetError(f"API did not return a valid DatasetConfig for '{dataset_name}'. Got: {type(fetched_dataset_config)}")
 
-        instance_to_cache = cls(dataset_config=fetched_dataset_config, **kwargs)
-
-        cls._dataset_instance_cache.put(cache_key, instance_to_cache)
-        return instance_to_cache
+        request_instance.dataset_config = fetched_dataset_config
+        return request_instance
 
     @classmethod
     def add_dataset_columns(
