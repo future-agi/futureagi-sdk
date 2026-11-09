@@ -149,14 +149,13 @@ class KnowledgeBase(APIKeyAuth):
         try:
             import requests  
             
-            # Resolve the KB if not already cached or if a different kb_name is provided
-            if not self.kb or self.kb.name != kb_name:
-                try:
-                    self.kb = self._get_kb_from_name(kb_name)
-                except Exception:
-                    raise SDKException(
-                        f"Knowledge Base named '{kb_name}' not found when attempting to update."
-                    )
+            # Resolve the explicit name again; a cached name may now target another KB.
+            try:
+                self.kb = self._get_kb_from_name(kb_name)
+            except Exception:
+                raise SDKException(
+                    f"Knowledge Base named '{kb_name}' not found when attempting to update."
+                )
 
             valid_file_paths: List[str] = []
             if file_paths:

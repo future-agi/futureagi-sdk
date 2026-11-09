@@ -51,7 +51,10 @@ def test_update_kb_without_files_uses_json_body():
         files=[],
     )
 
-    with patch("requests.patch") as patch_request:
+    with (
+        patch.object(client, "list_kbs", return_value=[client.kb]),
+        patch("requests.patch") as patch_request,
+    ):
         patch_request.return_value = _response(
             "PATCH",
             "http://example.test/model-hub/knowledge-base/",

@@ -153,7 +153,10 @@ def _upload(client, operation, path, *, fail=False):
         sent.append(handle)
         return response
 
-    with patch("requests.post" if operation == "create" else "requests.patch", side_effect=capture):
+    with (
+        patch.object(client, "list_kbs", return_value=[client.kb]),
+        patch("requests.post" if operation == "create" else "requests.patch", side_effect=capture),
+    ):
         if fail:
             with pytest.raises(SDKException, match="Upload rejected"):
                 getattr(client, operation + "_kb")("product_docs", file_paths=[str(path)])
@@ -190,10 +193,7 @@ def test_rename_does_not_reuse_previous_upload(
     assert kwargs["json"] == {"kb_id": target_id, "name": "renamed"}
     assert client.kb.name == "renamed"
     assert str(client.kb.id) == target_id
-    if target_name == "product_docs":
-        lookup.assert_not_called()
-    else:
-        lookup.assert_called_once_with(target_name)
+    lookup.assert_called_once_with(target_name)
 
 
 @pytest.mark.parametrize("previous_operation", ["create", "update"])
@@ -203,7 +203,10 @@ def test_rename_does_not_reuse_rejected_upload(clients, tmp_path, previous_opera
     document.write_text("Rejected document")
     _upload(client, previous_operation, document, fail=True)
 
-    with patch("requests.patch", return_value=_response("PATCH", {})) as update:
+    with (
+        patch.object(client, "list_kbs", return_value=[client.kb]),
+        patch("requests.patch", return_value=_response("PATCH", {})) as update,
+    ):
         client.update_kb("product_docs", new_name="renamed")
 
     assert "files" not in update.call_args.kwargs
