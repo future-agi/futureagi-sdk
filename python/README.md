@@ -188,6 +188,15 @@ dataset.add_evaluation(
 print("✓ Dataset created with automated evaluations")
 ```
 
+Dataset POST and PATCH requests, including creation and adding rows, are not
+automatically replayed after a transport failure. A timeout or dropped connection
+can mean the server applied the write but its response was lost. Check the
+dataset's state before manually retrying. Dataset reads share one retry budget
+(three total attempts by default), rather than multiplying nested retries.
+`Dataset.request_with_retry(..., max_retries=...)` caps the total attempts at the
+smaller of `max_retries` and `RequestConfig.retry_attempts` without changing the
+caller's configuration.
+
 ### 🎨 Prompt Workbench
 
 Version control and A/B test your prompts:

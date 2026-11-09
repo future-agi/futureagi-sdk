@@ -9,7 +9,7 @@ from requests import Response, sessions
 from requests_futures.sessions import FuturesSession
 
 from fi._extra_headers import ExtraHeaders, ExtraHeadersError, ExtraHeadersInput, on_platform
-from fi.api.types import RequestConfig
+from fi.api.types import HttpMethod, RequestConfig
 from fi.utils.constants import (
     API_KEY_ENVVAR_NAME,
     get_base_url,
@@ -114,12 +114,12 @@ class HttpClient:
         config: RequestConfig,
         response_handler: Optional[ResponseHandler[T, U]] = None,
     ) -> Union[Response, T]:
-        """Make an HTTP request, retrying only transport-level failures.
+        """Make an HTTP request, retrying transport failures for idempotent methods.
 
-        The network round-trip is the only thing retried. Response parsing runs
-        once, after the loop, so a parse/deserialization error (or an HTTP error
-        status) never re-sends the request — retrying a non-idempotent POST on a
-        parse failure silently duplicates server-side writes.
+        POST and PATCH failures propagate without replay: the server may have
+        applied the write before its response was lost. GET, PUT and DELETE keep
+        the configured attempt budget. Response parsing runs once, outside the
+        loop, so HTTP errors and parse failures never re-send a request.
         """
 
         url = config.url
@@ -144,6 +144,8 @@ class HttpClient:
                 ).result()
                 break
             except Exception:
+                if config.method not in (HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE):
+                    raise
                 if attempt == config.retry_attempts - 1:
                     raise
                 time.sleep(config.retry_delay)
