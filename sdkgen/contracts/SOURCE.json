@@ -1,5 +1,5 @@
 {
-  "backend_commit": "2d4b93fd6c9259544da468cb68214ccbaebc180a",
-  "openapi_sha256": "e38d58ad38e50f1df7d13d9dbd04004d2b6d8b93b241f3a82ce30024800fb57b",
-  "mcp_sha256": "677b5cc236a407dd78bbb41ca80296c8e08297d85c62229b54ee4af61c2faa93"
+  "backend_commit": "2c917a55fd728d0f4befc2c1312bfe4398dc8f05",
+  "openapi_sha256": "c8542cbbbbbdaa97ad068e8a89132ddddbd8b83b20cfb7f62385ced044805300",
+  "mcp_sha256": "d9a3e82366af6ddfba4fb905cd07b2d53d5663e9093d8e5bb15310e60c2ba6c0"
 }

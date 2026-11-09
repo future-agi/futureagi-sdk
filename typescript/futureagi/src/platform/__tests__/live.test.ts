@@ -11,6 +11,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 
+import { ContextClient } from "../../context/client";
+import { SkillsClient } from "../../skills/client";
 import { Client } from "../client";
 import { APIError, BadRequestError, NotFoundError } from "../errors";
 
@@ -226,6 +228,80 @@ live("platform client against a live backend", () => {
       expect(updated.name).toBe(dashboard.name);
     } finally {
       await client.dashboards.delete(dashboard.id!);
+    }
+  });
+
+  test.each(["skill", "agent_context"] as const)("%s: verified snapshot pagination, Unicode chunks and revocation", async (kind) => {
+    const resourceName = name("consume");
+    const entrypoint = kind === "skill" ? "SKILL.md" : "AGENTS.md";
+    const text = kind === "skill"
+      ? `---\nname: ${resourceName}\ndescription: Use for SDK consumption validation.\n---\nRead the approved policy.\n`
+      : "Read the approved policy.\n";
+    const files = [
+      { path: entrypoint, content: text },
+      ...Array.from({ length: 26 }, (_, i) => ({ path: `references/part-${i}.md`, content: `Policy part ${i}.\n` })),
+      { path: "references/unicode.md", content: "雪𠜎 café\n".repeat(6000) },
+    ];
+    let resourceId: string;
+    let version: { id: string; number: number; digest: string };
+    if (kind === "skill") {
+      const published = await client.skills.publish({ files, labels: [], acknowledge_warnings: true });
+      resourceId = published.skill!.id!;
+      version = published.version as typeof version;
+    } else {
+      // Human authoring remains a raw request until it enters the catalog.
+      const created = await client.request("POST", "/model-hub/skills/contexts/", {
+        body: { name: resourceName, description: "SDK live snapshot fixture", tags: [], files },
+      }, { headers: { "Idempotency-Key": randomUUID() } }) as { context_id: string };
+      resourceId = created.context_id;
+      const root = `/model-hub/skills/contexts/${resourceId}/draft/`;
+      const draft = await client.request("GET", root) as { revision: number; digest: string; base_version: number | null };
+      const review = await client.request("POST", `${root}head-review/`, { body: { revision: draft.revision } }) as {
+        expected_head_version: number | null; review_fingerprint: string;
+      };
+      const acknowledgment = { revision: draft.revision, expected_digest: draft.digest,
+        expected_head_version: review.expected_head_version, review_fingerprint: review.review_fingerprint };
+      const accepted = await client.request("POST", `${root}acknowledge-head/`, { body: acknowledgment }) as {
+        revision: number; review_fingerprint: string;
+      };
+      const published = await client.request("POST", `${root}publish/`, {
+        body: { ...acknowledgment, revision: accepted.revision, base_version: draft.base_version,
+          review_fingerprint: accepted.review_fingerprint, note: "SDK live snapshot", acknowledge_warnings: true },
+      }, { headers: { "Idempotency-Key": randomUUID() } }) as { version: typeof version };
+      version = published.version;
+    }
+    const issued = await client.contextCredentials.issue({
+      purpose: "consume", grants: [{ kind, resource_id: resourceId, labels: [], version_ids: [version.id] }],
+      binding_ids: [], expires_at: new Date(Date.now() + 3_600_000).toISOString(), idempotency_key: randomUUID(),
+    });
+    let revoked = false;
+    try {
+      if (!issued.id || !issued.secret) throw new Error("Issuance did not return a one-time credential");
+      const scoped = new Client({ baseUrl: process.env.FI_BASE_URL, auth: { type: "context", credential: issued.secret }, maxRetries: 0 });
+      const snapshots = kind === "skill" ? new SkillsClient(scoped) : new ContextClient(scoped);
+      const snapshot = await snapshots.resolve(resourceName, { version: version.number });
+      expect(snapshot.identity.versionId).toBe(version.id);
+      expect(snapshot.identity.digest).toBe(version.digest);
+      const verified = await snapshot.readAll();
+      expect(Object.keys(verified.files)).toHaveLength(snapshot.manifest.files.length);
+      for (const file of files) expect(verified.files[file.path]).toBe(file.content);
+      await snapshots.checkAccess(snapshot.identity, snapshot.manifest.lease);
+      const denied = await scoped.skills.list().firstPage().catch((error: unknown) => error);
+      expect(denied).toBeInstanceOf(APIError);
+      expect([401, 403]).toContain((denied as APIError).status);
+      await client.contextCredentials.revoke(issued.id);
+      revoked = true;
+      for (const operation of [
+        () => snapshot.readFile(entrypoint),
+        () => snapshots.checkAccess(snapshot.identity, snapshot.manifest.lease),
+        () => snapshots.resolve(resourceName, { version: version.number }),
+      ]) {
+        const error = await operation().then(() => { throw new Error("Revoked access succeeded"); }, (failure: unknown) => failure);
+        expect(error).toBeInstanceOf(APIError);
+        expect([401, 403]).toContain((error as APIError).status);
+      }
+    } finally {
+      if (!revoked && issued.id) await client.contextCredentials.revoke(issued.id);
     }
   });
 

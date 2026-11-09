@@ -284,6 +284,19 @@ def test_observability(client, project, code_template):
     allow(lambda: client.error_clusters.get(str(uuid.uuid4())), 400, 402, 404)
 
 
+def test_error_cluster_missing_tabs(client):
+    """Both catalogued tabs must preserve the missing-issue/plan-gate errors.
+
+    A fresh workspace has no scanner-produced issue. Exercise these read-only
+    operations explicitly rather than silently dropping them from completeness.
+    This is negative-path coverage, not evidence of a successful issue read.
+    """
+    missing = str(uuid.uuid4())
+    for read in (client.error_clusters.overview, client.error_clusters.traces):
+        with pytest.raises((fi.NotFoundError, fi.PaymentRequiredError)):
+            read(missing)
+
+
 def test_annotation_labels(client, text_label, project):
     assert client.annotations.labels.get(text_label.id).name == text_label.name
     assert text_label.id in [lbl.id for lbl in client.annotations.labels.list(search=text_label.name)]
@@ -538,16 +551,27 @@ def test_scoped_consumption_lifecycle(client, kind):
     No mocked transport or blanket error allowance: a missing facade fails this
     suite, rather than letting the completeness check report false coverage.
     """
+    import asyncio
     import hashlib
     import os
     from datetime import datetime, timedelta, timezone
+
+    from fi.context import AsyncContextClient, ContextClient
+    from fi.skills import AsyncSkillsClient, SkillsClient
 
     name = _name("consume")
     entrypoint = "SKILL.md" if kind == "skill" else "AGENTS.md"
     text = "Read the approved café policy before responding.\n"
     if kind == "skill":
         text = f"---\nname: {name}\ndescription: Use for SDK consumption validation.\n---\n" + text
-    files = [{"path": entrypoint, "content": text}, {"path": "references/policy.md", "content": "Approved policy.\n"}]
+    files = [
+        {"path": entrypoint, "content": text},
+        {"path": "references/policy.md", "content": "Approved policy.\n"},
+        # Exceed both default page and chunk sizes: the public snapshot clients
+        # must continue the original lease, not merely read the resolve page.
+        *[{"path": f"references/part-{i:02d}.md", "content": f"Policy part {i}.\n"} for i in range(26)],
+        {"path": "references/unicode.md", "content": "雪𠜎 café\n" * 6000},
+    ]
     if kind == "skill":
         published = client.skills.publish(files=files, labels=["sdk-live"], acknowledge_warnings=True)
         resource_id, version = published.skill.id, published.version
@@ -576,6 +600,9 @@ def test_scoped_consumption_lifecycle(client, kind):
             resolved = resource.resolve(name=name, **({"label": "sdk-live"} if kind == "skill" else {"version": version["number"]}))
             assert (resolved.resource_id, resolved.version_id, resolved.digest) == (resource_id, version["id"], version["digest"])
             assert resolved.resolution_id and resolved.resolution_expires_at
+            snapshots = SkillsClient(scoped) if kind == "skill" else ContextClient(scoped)
+            snapshot = snapshots.resolve(name, version=version["number"])
+            assert snapshot.identity.version_id == resolved.version_id
             if kind == "skill":
                 newer = client.skills.publish(
                     files=[{**files[0], "content": text + "New policy revision.\n"}, files[1]],
@@ -614,6 +641,23 @@ def test_scoped_consumption_lifecycle(client, kind):
             assert entry.size_bytes == len(text.encode())
             access = resource.check_access(resource_id, resolved.version, resolution_id=resolved.resolution_id)
             assert access.allowed and access.version_id == resolved.version_id and access.digest == resolved.digest
+            verified = snapshot.read_all()
+            expected_files = {item["path"]: item["content"] for item in files}
+            assert {path: verified.files[path] for path in expected_files} == expected_files
+            assert len(verified.files) == resolved.file_count
+            snapshots.check_access(snapshot.identity, snapshot.manifest.lease)
+
+            async def verify_async_snapshot():
+                async with fi.AsyncClient(base_url=os.environ["FI_BASE_URL"], auth=fi.ContextAuth(issued.secret),
+                                          strict_responses=True, max_retries=0) as async_scoped:
+                    async_snapshots = AsyncSkillsClient(async_scoped) if kind == "skill" else AsyncContextClient(async_scoped)
+                    async_snapshot = await async_snapshots.resolve(name, version=version["number"])
+                    async_verified = await async_snapshot.read_all()
+                    assert async_snapshot.identity == snapshot.identity
+                    assert dict(async_verified.files) == dict(verified.files)
+                    await async_snapshots.check_access(async_snapshot.identity, async_snapshot.manifest.lease)
+
+            asyncio.run(verify_async_snapshot())
             # Consumption credentials cannot enumerate the broader library.
             with pytest.raises(fi.APIError) as denied:
                 scoped.skills.list().first_page()
@@ -625,6 +669,8 @@ def test_scoped_consumption_lifecycle(client, kind):
                 lambda: resource.manifest(resource_id, resolved.version, resolution_id=resolved.resolution_id),
                 lambda: resource.read_file(resource_id, resolved.version, path=entrypoint, resolution_id=resolved.resolution_id),
                 lambda: resource.check_access(resource_id, resolved.version, resolution_id=resolved.resolution_id),
+                lambda: snapshot.read_file(entrypoint),
+                lambda: snapshots.check_access(snapshot.identity, snapshot.manifest.lease),
             ):
                 with pytest.raises(fi.APIError) as revoked_error:
                     continuation()
