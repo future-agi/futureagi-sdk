@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import atexit
 import copy
+import hashlib
+import json
 import logging
 import threading
 import time
@@ -136,6 +138,25 @@ class PromptCache:
             parts.append(f"label:{label}")
         return "|".join(parts)
 
+    @staticmethod
+    def scope_for(client, *, headers: Optional[Dict[str, str]] = None) -> str:
+        """Fingerprint the resolved origin and effective authentication/workspace headers."""
+        if headers is None:
+            headers = client._platform_headers(
+                client._base_url + "/", dict(client._default_headers)
+            )
+        identity = [client._base_url, sorted(
+            (name.lower(), value) for name, value in headers.items()
+        )]
+        return hashlib.sha256(json.dumps(identity, separators=(",", ":")).encode()).hexdigest()
+
+    @staticmethod
+    def make_scoped_key(name: str, *, scope: str, version: Optional[str] = None,
+                        label: Optional[str] = None) -> str:
+        """Separate authenticated entries from legacy keys without storing header values."""
+        selector = [name, version, label if version is None else None]
+        return scope + "|" + json.dumps(selector, separators=(",", ":"))
+
     # ------------------------------- CRUD ------------------------------
 
     def get(self, key: str) -> Optional["PromptTemplate"]:
@@ -182,6 +203,20 @@ class PromptCache:
             ]
             for key in to_delete:
                 del self._store[key]
+
+    def invalidate_scoped_template(self, name: str, *, scope: str):
+        """Evict this identity's selectors, leaving other authenticated scopes intact."""
+        prefix = scope + "|"
+        with self._lock:
+            to_delete = [
+                key for key, item in self._store.items()
+                if key.startswith(prefix) and item.value.name == name
+            ]
+            for key in to_delete:
+                del self._store[key]
+        # Retain cleanup for direct legacy cache users. Public fetches never
+        # consume these identity-free entries, and this cannot match scoped keys.
+        self.invalidate_template(name)
 
     # -------------------------- refresh management ---------------------
 

@@ -448,12 +448,15 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         if not self.template or not self.template.id:
             raise ValueError("Template ID missing; cannot delete.")
 
+        headers = self._platform_headers(self._base_url + "/", dict(self._default_headers))
+        scope = prompt_cache.scope_for(self, headers=headers)
         response = self.request(
             config=RequestConfig(
                 method=HttpMethod.DELETE,
                 url=self._base_url
                 + "/"
                 + Routes.delete_template.value.format(template_id=self.template.id),
+                headers=headers,
             ),
             response_handler=None,
         )
@@ -464,7 +467,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
 
         if self.template.name:
             try:
-                prompt_cache.invalidate_template(self.template.name)
+                prompt_cache.invalidate_scoped_template(self.template.name, scope=scope)
             except Exception:
                 logger.warning("Prompt cache invalidation failed after delete()", exc_info=True)
 
@@ -490,11 +493,14 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         )
 
         try:
+            headers = client._platform_headers(client._base_url + "/", dict(client._default_headers))
+            scope = prompt_cache.scope_for(client, headers=headers)
             tmpl: PromptTemplate = client.request(
                 config=RequestConfig(
                     method=HttpMethod.GET,
                     url=client._base_url + "/" + Routes.get_template_by_name.value,
                     params={"name": name},
+                    headers=headers,
                 ),
                 response_handler=PromptResponseHandler,
             )
@@ -505,6 +511,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                     url=client._base_url
                     + "/"
                     + Routes.delete_template.value.format(template_id=tmpl.id),
+                    headers=headers,
                 ),
                 response_handler=None,
             )
@@ -512,7 +519,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             if not 200 <= response.status_code < 300:
                 raise SDKException(f"Template deletion did not succeed (HTTP {response.status_code}).")
             try:
-                prompt_cache.invalidate_template(name)
+                prompt_cache.invalidate_scoped_template(name, scope=scope)
             except Exception:
                 logger.warning("Prompt cache invalidation failed after delete_template_by_name()", exc_info=True)
             return True
@@ -613,28 +620,33 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         'production' label, and if that fails, it will fall back to the server's
         default version resolution (e.g., the latest committed version).
         """
-        cache_key = prompt_cache.make_key(name, version=version, label=label)
-
-        fresh = prompt_cache.get(cache_key)
-        if fresh is not None:
-            return cls(
-                template=fresh,
-                fi_api_key=fi_api_key,
-                fi_secret_key=fi_secret_key,
-                fi_base_url=fi_base_url,
-            )
-
-        stale = prompt_cache.get_stale(cache_key)
-        # Note: Async refresh logic is not applied here to simplify the fallback flow.
-        # If stale data is present, it will be used only if the live fetch fails.
-
         client = APIKeyAuth(
             fi_api_key=fi_api_key,
             fi_secret_key=fi_secret_key,
             fi_base_url=fi_base_url,
         )
-
+        stale = None
         try:
+            headers = client._platform_headers(client._base_url + "/", dict(client._default_headers))
+            cache_key = prompt_cache.make_scoped_key(
+                name, scope=prompt_cache.scope_for(client, headers=headers),
+                version=version, label=label,
+            )
+            # Use the same resolved credentials/origin for the returned client.
+            fi_api_key, fi_secret_key, fi_base_url = (
+                client._fi_api_key, client._fi_secret_key, client._base_url
+            )
+            fresh = prompt_cache.get(cache_key)
+            if fresh is not None:
+                return cls(
+                    template=fresh,
+                    fi_api_key=fi_api_key,
+                    fi_secret_key=fi_secret_key,
+                    fi_base_url=fi_base_url,
+                )
+
+            # Stale fallback is available only within the resolved identity.
+            stale = prompt_cache.get_stale(cache_key)
             template = None
             # If a specific version or label is provided, use the direct endpoint. No fallback.
             if version or label:
@@ -651,6 +663,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                         + "/"
                         + Routes.prompt_label_get_by_name.value,
                         params=params,
+                        headers=headers,
                     ),
                     response_handler=PromptResponseHandler,
                 )
@@ -665,6 +678,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                             + "/"
                             + Routes.prompt_label_get_by_name.value,
                             params=params,
+                            headers=headers,
                         ),
                         response_handler=PromptResponseHandler,
                     )
@@ -681,6 +695,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                             + "/"
                             + Routes.get_template_by_name.value,
                             params=fallback_params,
+                            headers=headers,
                         ),
                         response_handler=PromptResponseHandler,
                     )

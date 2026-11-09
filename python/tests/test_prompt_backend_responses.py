@@ -334,7 +334,9 @@ def test_deleting_one_name_preserves_cached_lookup_of_another(client, transport,
     other = client.template.model_copy(update={
         "name": other_name, "id": UUID("00000000-0000-0000-0000-000000000002"),
     })
-    transport.cache.set(transport.cache.make_key(other_name, label="production"), other)
+    transport.cache.set(transport.cache.make_scoped_key(
+        other_name, scope=transport.cache.scope_for(client), label="production"
+    ), other)
     if by_name:
         transport.replies.append((200, {"result": TEMPLATE}))
     transport.replies.append((204, None))
@@ -359,7 +361,9 @@ def test_delete_preserves_distinct_name_containing_selector_syntax(client, trans
     other = PromptTemplate(name=other_name, id=UUID("00000000-0000-0000-0000-000000000002"),
                            version="v2", messages=[])
     assert other.name == other_name
-    other_key = transport.cache.make_key(other_name, label="production")
+    other_key = transport.cache.make_scoped_key(
+        other_name, scope=transport.cache.scope_for(client), label="production"
+    )
     target_keys = [NAME, transport.cache.make_key(NAME, version="v2"),
                    transport.cache.make_key(NAME, label="production")]
     assert other_key not in target_keys
