@@ -43,7 +43,9 @@ def backend(monkeypatch):
         response = Response()
         response.status_code = status
         response._content = b"" if payload is None else json.dumps(payload).encode()
-        response.request = Request(kwargs["method"], kwargs["url"], params=kwargs["params"]).prepare()
+        response.request = Request(
+            kwargs["method"], kwargs["url"], params=kwargs["params"], headers=kwargs["headers"]
+        ).prepare()
         response.url = response.request.url
         future = Future()
         future.set_result(response)

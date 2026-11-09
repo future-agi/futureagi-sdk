@@ -1,6 +1,7 @@
 import copy
 import time
 import threading
+from contextvars import ContextVar
 from typing import Dict, Optional
 
 from fi.api.auth import APIKeyAuth, ResponseHandler
@@ -12,6 +13,32 @@ from fi.utils.logging import logger
 from fi.utils.routes import Routes
 from fi.prompt.cache import prompt_cache
 from fi.prompt.label_management import LabelManagementMixin
+
+
+_active_cache_scope = ContextVar("prompt_cache_request_scope", default=None)
+
+
+class _PromptRequestScope:
+    """Keep only the outgoing identity digest, local to one prompt operation."""
+
+    def __init__(self, client):
+        self.client = client
+        self.value = None
+        self._token = _active_cache_scope.set(self)
+
+    def close(self):
+        _active_cache_scope.reset(self._token)
+
+
+class _PromptAPIKeyAuth(APIKeyAuth):
+    def _platform_headers(self, url: str, headers: Dict[str, str]) -> Dict[str, str]:
+        headers = super()._platform_headers(url, headers)
+        scope = _active_cache_scope.get()
+        if scope is not None and scope.client is self:
+            # HttpClient sends this resolved map, which may now include headers
+            # added after the cache lookup. Never retain their raw values here.
+            scope.value = prompt_cache.scope_for(self, headers=headers)
+        return headers
 
 
 def _model_config_to_wire(config: ModelConfig) -> Dict:
@@ -160,7 +187,7 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
             response.raise_for_status()
 
 
-class Prompt(APIKeyAuth, LabelManagementMixin):
+class Prompt(_PromptAPIKeyAuth, LabelManagementMixin):
     # Use global prompt_cache; keep TTL alias for backward compat
     CACHE_TTL_SEC: int = prompt_cache._ttl_sec
 
@@ -448,18 +475,19 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         if not self.template or not self.template.id:
             raise ValueError("Template ID missing; cannot delete.")
 
-        headers = self._platform_headers(self._base_url + "/", dict(self._default_headers))
-        scope = prompt_cache.scope_for(self, headers=headers)
-        response = self.request(
-            config=RequestConfig(
-                method=HttpMethod.DELETE,
-                url=self._base_url
-                + "/"
-                + Routes.delete_template.value.format(template_id=self.template.id),
-                headers=headers,
-            ),
-            response_handler=None,
-        )
+        request_scope = _PromptRequestScope(self)
+        try:
+            response = self.request(
+                config=RequestConfig(
+                    method=HttpMethod.DELETE,
+                    url=self._base_url
+                    + "/"
+                    + Routes.delete_template.value.format(template_id=self.template.id),
+                ),
+                response_handler=None,
+            )
+        finally:
+            request_scope.close()
 
         response.raise_for_status()
         if not 200 <= response.status_code < 300:
@@ -467,7 +495,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
 
         if self.template.name:
             try:
-                prompt_cache.invalidate_scoped_template(self.template.name, scope=scope)
+                prompt_cache.invalidate_scoped_template(self.template.name, scope=request_scope.value)
             except Exception:
                 logger.warning("Prompt cache invalidation failed after delete()", exc_info=True)
 
@@ -486,15 +514,15 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         """Delete a template by its exact name, preserving cache on HTTP failure.
         """
 
-        client = APIKeyAuth(
+        client = _PromptAPIKeyAuth(
             fi_api_key=fi_api_key,
             fi_secret_key=fi_secret_key,
             fi_base_url=fi_base_url,
         )
 
+        request_scope = _PromptRequestScope(client)
         try:
             headers = client._platform_headers(client._base_url + "/", dict(client._default_headers))
-            scope = prompt_cache.scope_for(client, headers=headers)
             tmpl: PromptTemplate = client.request(
                 config=RequestConfig(
                     method=HttpMethod.GET,
@@ -519,11 +547,12 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             if not 200 <= response.status_code < 300:
                 raise SDKException(f"Template deletion did not succeed (HTTP {response.status_code}).")
             try:
-                prompt_cache.invalidate_scoped_template(name, scope=scope)
+                prompt_cache.invalidate_scoped_template(name, scope=request_scope.value)
             except Exception:
                 logger.warning("Prompt cache invalidation failed after delete_template_by_name()", exc_info=True)
             return True
         finally:
+            request_scope.close()
             client.close()
 
     # Keep existing methods but update them to work with PromptTemplate
@@ -620,12 +649,12 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         'production' label, and if that fails, it will fall back to the server's
         default version resolution (e.g., the latest committed version).
         """
-        client = APIKeyAuth(
+        client = _PromptAPIKeyAuth(
             fi_api_key=fi_api_key,
             fi_secret_key=fi_secret_key,
             fi_base_url=fi_base_url,
         )
-        stale = None
+        request_scope = _PromptRequestScope(client)
         try:
             headers = client._platform_headers(client._base_url + "/", dict(client._default_headers))
             cache_key = prompt_cache.make_scoped_key(
@@ -645,8 +674,6 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                     fi_base_url=fi_base_url,
                 )
 
-            # Stale fallback is available only within the resolved identity.
-            stale = prompt_cache.get_stale(cache_key)
             template = None
             # If a specific version or label is provided, use the direct endpoint. No fallback.
             if version or label:
@@ -700,6 +727,9 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                         response_handler=PromptResponseHandler,
                     )
 
+            cache_key = prompt_cache.make_scoped_key(
+                name, scope=request_scope.value, version=version, label=label,
+            )
             prompt_cache.set(cache_key, template, snapshot=True)
             return cls(
                 template=template,
@@ -709,6 +739,14 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             )
 
         except Exception as exc:
+            # A request can resolve a different workspace after the initial
+            # lookup. Its failure must not expose the earlier scope's stale data.
+            stale = None
+            if request_scope.value is not None:
+                cache_key = prompt_cache.make_scoped_key(
+                    name, scope=request_scope.value, version=version, label=label,
+                )
+                stale = prompt_cache.get_stale(cache_key)
             if stale:
                 logger.warning(
                     "Using stale cached template '%s' due to fetch failure: %s",
@@ -723,6 +761,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                 )
             raise
         finally:
+            request_scope.close()
             client.close()
 
     def commit_current_version(self, message: str = "", *, set_default: bool = False, label: Optional[str] = None) -> bool:
