@@ -507,6 +507,28 @@ operations:
     sdk: {}
     mcp: {name: get_error_cluster, group: error_feed, access: read}
 
+- id: error_clusters.overview
+  description: Return a cluster's pattern summary (the statistical insights that separate its failing traces from the passing baseline), its daily error counts, and representative traces with their evidence and agent flow. Representative traces carry inputs, outputs and conversation reels, so start with a small `rep_limit`.
+  operation: {method: GET, path: '/tracer/feed/issues/{cluster_id}/overview/'}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: get_error_cluster_overview
+      group: error_feed
+      access: read
+      max_page_size: {rep_limit: 20}
+
+- id: error_clusters.list_traces
+  description: List the traces grouped into a cluster with each one's score, latency, tokens and cost, alongside cluster-wide aggregates.
+  operation: {method: GET, path: '/tracer/feed/issues/{cluster_id}/traces/'}
+  surfaces:
+    sdk: {}
+    mcp:
+      name: list_error_cluster_traces
+      group: error_feed
+      access: read
+      max_page_size: {limit: 100}
+
 - id: annotation_queues.list
   description: List annotation queues in the current workspace.
   operation: {method: GET, path: /model-hub/annotation-queues/}

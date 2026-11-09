@@ -657,6 +657,15 @@ export interface ErrorClustersListParams {
   offset?: number | null;
 }
 
+export interface ErrorClustersListTracesParams {
+  limit?: number | null;
+  offset?: number | null;
+}
+
+export interface ErrorClustersOverviewParams {
+  rep_limit?: number | null;
+}
+
 export interface EvalsTestParams {
   /** Config */
   config: Record<string, unknown>;
@@ -1504,6 +1513,7 @@ export interface TracesGetParams {
 }
 
 export interface TracesListParams {
+  sort_params?: string | null;
   project_id?: string | null;
   project_version_id?: string | null;
   session_id?: string | null;
@@ -2794,6 +2804,24 @@ export class ErrorClustersResource extends Resource {
   list(params: ErrorClustersListParams = {}, options?: RequestOptions): Promise<models.FeedListResponse> {
     return this._t.call<models.FeedListResponse>(ops.OP_ERROR_CLUSTERS_LIST, { path: {}, query: { project_id: params.project_id, search: params.search, status: params.status, severity: params.severity, fix_layer: params.fix_layer, source: params.source, issue_group: params.issue_group, time_range_days: params.time_range_days, sort_by: params.sort_by, sort_dir: params.sort_dir, limit: params.limit, offset: params.offset } }, options);
   }
+
+  /**
+   * List the traces grouped into a cluster with each one's score, latency, tokens and cost, alongside cluster-wide aggregates.
+   *
+   * GET /tracer/feed/issues/{cluster_id}/traces/
+   */
+  listTraces(clusterId: string, params: ErrorClustersListTracesParams = {}, options?: RequestOptions): Promise<models.TracesTabResponse> {
+    return this._t.call<models.TracesTabResponse>(ops.OP_ERROR_CLUSTERS_LIST_TRACES, { path: { cluster_id: clusterId }, query: { limit: params.limit, offset: params.offset } }, options);
+  }
+
+  /**
+   * Return a cluster's pattern summary (the statistical insights that separate its failing traces from the passing baseline), its daily error counts, and representative traces with their evidence and agent flow. Representative traces carry inputs, outputs and conversation reels, so start with a small `rep_limit`.
+   *
+   * GET /tracer/feed/issues/{cluster_id}/overview/
+   */
+  overview(clusterId: string, params: ErrorClustersOverviewParams = {}, options?: RequestOptions): Promise<models.OverviewResponse> {
+    return this._t.call<models.OverviewResponse>(ops.OP_ERROR_CLUSTERS_OVERVIEW, { path: { cluster_id: clusterId }, query: { rep_limit: params.rep_limit } }, options);
+  }
 }
 
 /**
@@ -3366,7 +3394,7 @@ export class TracesResource extends Resource {
    * GET /tracer/trace/list_traces_of_session/
    */
   list(params: TracesListParams = {}, options?: RequestOptions): Promise<models.TraceObserveListResult> {
-    return this._t.call<models.TraceObserveListResult>(ops.OP_TRACES_LIST, { path: {}, query: { project_id: params.project_id, project_version_id: params.project_version_id, session_id: params.session_id, filters: params.filters, page_number: params.page_number, page_size: params.page_size, cursor: params.cursor, cursor_mode: params.cursor_mode, attribute_keys: params.attribute_keys, allow_sampled: params.allow_sampled, interval: params.interval } }, options);
+    return this._t.call<models.TraceObserveListResult>(ops.OP_TRACES_LIST, { path: {}, query: { sort_params: params.sort_params, project_id: params.project_id, project_version_id: params.project_version_id, session_id: params.session_id, filters: params.filters, page_number: params.page_number, page_size: params.page_size, cursor: params.cursor, cursor_mode: params.cursor_mode, attribute_keys: params.attribute_keys, allow_sampled: params.allow_sampled, interval: params.interval } }, options);
   }
 }
 

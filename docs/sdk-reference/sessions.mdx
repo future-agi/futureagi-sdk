@@ -1,0 +1,175 @@
+---
+title: "Sessions"
+description: "Reference for client.sessions in the Future AGI Python and TypeScript SDKs: sessions.get, sessions.list."
+---
+
+`client.sessions` on `fi.Client` (Python) and `client.sessions` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Observability response models](/docs/sdk/reference/observability-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+<div class="sdk-ref-table">
+
+| Method | Description |
+|---|---|
+| [`sessions.get`](#sessionsget) | Return a trace session by its identifier. |
+| [`sessions.list`](#sessionslist) | List trace sessions using the supplied filters. |
+
+</div>
+
+## client.sessions
+
+### sessions.get
+
+Return a trace session by its identifier.
+
+<ApiEndpoint method="GET" path="/tracer/trace-session/{id}/query/" />
+
+**MCP tool**: `get_session`
+
+<CodeGroup>
+
+```python Python
+result = client.sessions.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.sessions.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.sessions.get(
+    id: str,
+    *,
+    navigation_context: str | None | NotGiven = NOT_GIVEN,
+    user_id: str | None | NotGiven = NOT_GIVEN,
+    filters: str | None | NotGiven = NOT_GIVEN,
+    sort_params: str | None | NotGiven = NOT_GIVEN,
+    page_number: int | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.TraceSessionDetailResult
+```
+
+```typescript TypeScript
+client.sessions.get(id: string, params: SessionsGetParams = {}, options?: RequestOptions): Promise<models.TraceSessionDetailResult>
+
+export interface SessionsGetParams {
+  navigation_context?: string | null;
+  user_id?: string | null;
+  filters?: string | null;
+  sort_params?: string | null;
+  page_number?: number | null;
+  page_size?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField query="navigation_context" type="string" optional />
+<ParamField query="user_id" type="string" optional />
+<ParamField query="filters" type="string" optional />
+<ParamField query="sort_params" type="string" optional />
+<ParamField query="page_number" type="integer" optional />
+<ParamField query="page_size" type="integer" optional />
+
+#### Returns
+
+[`TraceSessionDetailResult`](/docs/sdk/reference/observability-models#tracesessiondetailresult).
+
+### sessions.list
+
+List trace sessions using the supplied filters.
+
+<ApiEndpoint method="GET" path="/tracer/trace-session/list_sessions/" />
+
+**MCP tool**: `list_sessions`
+
+<CodeGroup>
+
+```python Python
+result = client.sessions.list()
+```
+
+```typescript TypeScript
+const result = await client.sessions.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.sessions.list(
+    *,
+    project_id: str | None | NotGiven = NOT_GIVEN,
+    user_id: str | None | NotGiven = NOT_GIVEN,
+    bookmarked: bool | None | NotGiven = NOT_GIVEN,
+    filters: str | None | NotGiven = NOT_GIVEN,
+    sort_params: str | None | NotGiven = NOT_GIVEN,
+    page_number: int | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    cursor: str | None | NotGiven = NOT_GIVEN,
+    cursor_mode: bool | None | NotGiven = NOT_GIVEN,
+    interval: str | None | NotGiven = NOT_GIVEN,
+    allow_sampled: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.TraceSessionListResult
+```
+
+```typescript TypeScript
+client.sessions.list(params: SessionsListParams = {}, options?: RequestOptions): Promise<models.TraceSessionListResult>
+
+export interface SessionsListParams {
+  project_id?: string | null;
+  user_id?: string | null;
+  bookmarked?: boolean | null;
+  filters?: string | null;
+  sort_params?: string | null;
+  /** Zero-based numbered page. Pages whose required ordered work exceeds the finite read contract return HTTP 422 with code page_depth_exceeded; request an earlier page or narrow the time range. */
+  page_number?: number | null;
+  page_size?: number | null;
+  /** Opaque continuation token returned by the previous page. When supplied, do not also send the numbered-page parameter. */
+  cursor?: string | null;
+  cursor_mode?: boolean | null;
+  interval?: string | null;
+  /** Omit for backward-compatible complete bounded pages, which may label total_rows as a lower bound. Send false to require an exact total, or true to opt in explicitly to lower-bound totals. */
+  allow_sampled?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="project_id" type="string" optional />
+<ParamField query="user_id" type="string" optional />
+<ParamField query="bookmarked" type="boolean" optional />
+<ParamField query="filters" type="string" optional />
+<ParamField query="sort_params" type="string" optional />
+<ParamField query="page_number" type="integer" optional>
+  Zero-based numbered page. Pages whose required ordered work exceeds the finite read contract return HTTP 422 with code page_depth_exceeded; request an earlier page or narrow the time range.
+</ParamField>
+<ParamField query="page_size" type="integer" optional />
+<ParamField query="cursor" type="string" optional>
+  Opaque continuation token returned by the previous page. When supplied, do not also send the numbered-page parameter.
+</ParamField>
+<ParamField query="cursor_mode" type="boolean" optional />
+<ParamField query="interval" type="string" optional />
+<ParamField query="allow_sampled" type="boolean" optional>
+  Omit for backward-compatible complete bounded pages, which may label total_rows as a lower bound. Send false to require an exact total, or true to opt in explicitly to lower-bound totals.
+</ParamField>
+
+#### Returns
+
+[`TraceSessionListResult`](/docs/sdk/reference/observability-models#tracesessionlistresult).

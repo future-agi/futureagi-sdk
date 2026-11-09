@@ -42,6 +42,23 @@ def sync(source: Path) -> str:
     spec = json.loads(source.read_text())
     catalog = yaml.safe_load(CATALOG.read_text())
 
+    # Fail closed, and say why, when the backend dropped or moved an endpoint the
+    # SDK exposes: that is a breaking change for SDK users and needs a person to
+    # retire or remap the catalog entry (sdkgen/catalog/operations.yaml), never a
+    # silent sync. sdk-sync in the monorepo surfaces this message as the job error.
+    gone = [
+        f"{entry['id']}: {entry['operation']['method'].upper()} {entry['operation']['path']}"
+        for entry in catalog["operations"]
+        if entry["operation"]["method"].lower()
+        not in spec["paths"].get(entry["operation"]["path"], {})
+    ]
+    if gone:
+        raise SystemExit(
+            "the backend contract no longer has these catalog operations (a breaking "
+            "change; retire or remap them in sdkgen/catalog/operations.yaml before "
+            "syncing):\n  " + "\n  ".join(gone)
+        )
+
     paths: dict = {}
     for entry in catalog["operations"]:
         method = entry["operation"]["method"].lower()
@@ -76,11 +93,20 @@ def sync(source: Path) -> str:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Copy the catalog's slice of the monorepo contract into contracts/.")
-    parser.add_argument("source", help="path to future-agi/api_contracts/openapi/swagger.json")
-    parser.add_argument("--backend-version", help="backend release tag (vX.Y.Z) to record in contracts/BACKEND_VERSION")
+    parser = argparse.ArgumentParser(
+        description="Copy the catalog's slice of the monorepo contract into contracts/."
+    )
+    parser.add_argument(
+        "source", help="path to future-agi/api_contracts/openapi/swagger.json"
+    )
+    parser.add_argument(
+        "--backend-version",
+        help="backend release tag (vX.Y.Z) to record in contracts/BACKEND_VERSION",
+    )
     args = parser.parse_args()
-    if args.backend_version and not re.fullmatch(r"v\d+\.\d+\.\d+", args.backend_version):
+    if args.backend_version and not re.fullmatch(
+        r"v\d+\.\d+\.\d+", args.backend_version
+    ):
         parser.error("--backend-version must look like v1.54.0")
 
     print(sync(Path(args.source)))

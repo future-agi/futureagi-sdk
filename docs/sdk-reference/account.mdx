@@ -1,0 +1,62 @@
+---
+title: "Account"
+description: "Reference for client.account in the Future AGI Python and TypeScript SDKs: account.whoami."
+---
+
+`client.account` on `fi.Client` (Python) and `client.account` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Account response models](/docs/sdk/reference/account-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+<div class="sdk-ref-table">
+
+| Method | Description |
+|---|---|
+| [`account.whoami`](#accountwhoami) | Return the authenticated user, organization, and workspace context. |
+
+</div>
+
+## client.account
+
+### account.whoami
+
+Return the authenticated user, organization, and workspace context.
+
+<ApiEndpoint method="GET" path="/accounts/user-info/" />
+
+**MCP tool**: `whoami`
+
+<CodeGroup>
+
+```python Python
+result = client.account.whoami()
+```
+
+```typescript TypeScript
+const result = await client.account.whoami();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.account.whoami(
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.UserInfoResponse
+```
+
+```typescript TypeScript
+client.account.whoami(options?: RequestOptions): Promise<models.UserInfoResponse>
+```
+
+</Expandable>
+
+#### Parameters
+
+This method takes no parameters beyond the per-call `options`.
+
+#### Returns
+
+[`UserInfoResponse`](/docs/sdk/reference/account-models#userinforesponse).

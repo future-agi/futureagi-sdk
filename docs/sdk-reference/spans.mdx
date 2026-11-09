@@ -1,0 +1,181 @@
+---
+title: "Spans"
+description: "Reference for client.spans in the Future AGI Python and TypeScript SDKs: spans.get, spans.list."
+---
+
+`client.spans` on `fi.Client` (Python) and `client.spans` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Observability response models](/docs/sdk/reference/observability-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+<div class="sdk-ref-table">
+
+| Method | Description |
+|---|---|
+| [`spans.get`](#spansget) | Return an observation span by its identifier. |
+| [`spans.list`](#spanslist) | List observation spans using the supplied filters. |
+
+</div>
+
+## client.spans
+
+### spans.get
+
+Return an observation span by its identifier.
+
+<ApiEndpoint method="GET" path="/tracer/observation-span/{id}/" />
+
+**MCP tool**: `get_span`
+
+<CodeGroup>
+
+```python Python
+result = client.spans.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.spans.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.spans.get(
+    id: str,
+    *,
+    test_execution_id: str | None | NotGiven = NOT_GIVEN,
+    call_execution_id: str | None | NotGiven = NOT_GIVEN,
+    project_id: str | None | NotGiven = NOT_GIVEN,
+    trace_id: str | None | NotGiven = NOT_GIVEN,
+    start_hour: str | None | NotGiven = NOT_GIVEN,
+    observation_type: str | None | NotGiven = NOT_GIVEN,
+    service_name: str | None | NotGiven = NOT_GIVEN,
+    expected_start_time: str | None | NotGiven = NOT_GIVEN,
+    expected_version: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.ObservationSpanDetailResult
+```
+
+```typescript TypeScript
+client.spans.get(id: string, params: SpansGetParams = {}, options?: RequestOptions): Promise<models.ObservationSpanDetailResult>
+
+export interface SpansGetParams {
+  /** A run the caller can read; opens the hidden simulation project of that run's agent. */
+  test_execution_id?: string | null;
+  /** A run the caller can read; opens the hidden simulation project of that run's agent. */
+  call_execution_id?: string | null;
+  project_id?: string | null;
+  trace_id?: string | null;
+  start_hour?: string | null;
+  observation_type?: string | null;
+  service_name?: string | null;
+  expected_start_time?: string | null;
+  expected_version?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField query="test_execution_id" type="string" optional>
+  A run the caller can read; opens the hidden simulation project of that run's agent.
+</ParamField>
+<ParamField query="call_execution_id" type="string" optional>
+  A run the caller can read; opens the hidden simulation project of that run's agent.
+</ParamField>
+<ParamField query="project_id" type="string" optional />
+<ParamField query="trace_id" type="string" optional />
+<ParamField query="start_hour" type="string" optional />
+<ParamField query="observation_type" type="string" optional />
+<ParamField query="service_name" type="string" optional />
+<ParamField query="expected_start_time" type="string" optional />
+<ParamField query="expected_version" type="string" optional />
+
+#### Returns
+
+[`ObservationSpanDetailResult`](/docs/sdk/reference/observability-models#observationspandetailresult).
+
+### spans.list
+
+List observation spans using the supplied filters.
+
+<ApiEndpoint method="GET" path="/tracer/observation-span/list_spans_observe/" />
+
+**MCP tool**: `list_spans`
+
+<CodeGroup>
+
+```python Python
+result = client.spans.list()
+```
+
+```typescript TypeScript
+const result = await client.spans.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.spans.list(
+    *,
+    project_id: str | None | NotGiven = NOT_GIVEN,
+    user_id: str | None | NotGiven = NOT_GIVEN,
+    filters: str | None | NotGiven = NOT_GIVEN,
+    page_number: int | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    cursor: str | None | NotGiven = NOT_GIVEN,
+    cursor_mode: bool | None | NotGiven = NOT_GIVEN,
+    allow_sampled: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SpanObserveListResult
+```
+
+```typescript TypeScript
+client.spans.list(params: SpansListParams = {}, options?: RequestOptions): Promise<models.SpanObserveListResult>
+
+export interface SpansListParams {
+  project_id?: string | null;
+  user_id?: string | null;
+  filters?: string | null;
+  /** Zero-based numbered page. Pages whose required ordered work exceeds the finite read contract return HTTP 422 with code page_depth_exceeded; request an earlier page or narrow the time range. */
+  page_number?: number | null;
+  page_size?: number | null;
+  /** Opaque continuation token returned by the previous page. When supplied, do not also send the numbered-page parameter. */
+  cursor?: string | null;
+  cursor_mode?: boolean | null;
+  /** Omit for backward-compatible complete bounded pages, which may label total_rows as a lower bound. Send false to require an exact total, or true to opt in explicitly to lower-bound totals. */
+  allow_sampled?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="project_id" type="string" optional />
+<ParamField query="user_id" type="string" optional />
+<ParamField query="filters" type="string" optional />
+<ParamField query="page_number" type="integer" optional>
+  Zero-based numbered page. Pages whose required ordered work exceeds the finite read contract return HTTP 422 with code page_depth_exceeded; request an earlier page or narrow the time range.
+</ParamField>
+<ParamField query="page_size" type="integer" optional />
+<ParamField query="cursor" type="string" optional>
+  Opaque continuation token returned by the previous page. When supplied, do not also send the numbered-page parameter.
+</ParamField>
+<ParamField query="cursor_mode" type="boolean" optional />
+<ParamField query="allow_sampled" type="boolean" optional>
+  Omit for backward-compatible complete bounded pages, which may label total_rows as a lower bound. Send false to require an exact total, or true to opt in explicitly to lower-bound totals.
+</ParamField>
+
+#### Returns
+
+[`SpanObserveListResult`](/docs/sdk/reference/observability-models#spanobservelistresult).

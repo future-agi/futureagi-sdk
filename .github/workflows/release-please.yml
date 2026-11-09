@@ -95,6 +95,30 @@ jobs:
           # Compare-and-swap against the exact diff the guard approved.
           # No --admin or bypass: normal protected-branch checks still apply.
           gh pr merge --auto --squash --match-head-commit "$HEAD" "$NUMBER"
+      - uses: actions/create-github-app-token@v2
+        if: steps.approval.outputs.head != ''
+        id: docs-token
+        with:
+          app-id: ${{ vars.RELEASE_BOT_APP_ID || secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+          owner: future-agi
+          repositories: docs
+          permission-contents: write
+      - name: Open the docs reference PR as a draft for this release candidate
+        if: steps.approval.outputs.head != ''
+        # The version PR's head carries the manifest with the versions about to
+        # ship. future-agi/docs opens a DRAFT reference PR keyed by those versions;
+        # publish.yml's `released` dispatch marks the same PR ready once both
+        # packages are installable. A docs hiccup never blocks the release.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ steps.docs-token.outputs.token }}
+          HEAD: ${{ steps.approval.outputs.head }}
+          SOURCE: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          jq -n --arg ref "$HEAD" --arg source "$SOURCE" \
+            '{event_type:"sdk-release",client_payload:{ref:$ref,stage:"candidate",source:$source}}' \
+            | gh api --method POST repos/future-agi/docs/dispatches --input -
       - name: Request publication of new tags from the main workflow
         if: steps.release.outputs.releases_created == 'true'
         env:

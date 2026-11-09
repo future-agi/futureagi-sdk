@@ -1,0 +1,491 @@
+---
+title: "Gateway"
+description: "Reference for client.gateway in the Future AGI Python and TypeScript SDKs: gateway.analytics, gateway.config, gateway.list, gateway.guardrail_rules.list, gateway.request_logs.list, gateway.sessions.list and 1 more."
+---
+
+`client.gateway` on `fi.Client` (Python) and `client.gateway` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.gateway.guardrail_rules`, `client.gateway.request_logs`, `client.gateway.sessions`. The models these methods return are on [Gateway response models](/docs/sdk/reference/gateway-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+<div class="sdk-ref-table">
+
+| Method | Description |
+|---|---|
+| [`gateway.analytics`](#gatewayanalytics) | Return overview usage, latency, error, and cost analytics for the AI gateway. |
+| [`gateway.config`](#gatewayconfig) | Return the effective configuration for an AI gateway. |
+| [`gateway.list`](#gatewaylist) | List configured AI gateways. |
+| [`gateway.guardrail_rules.list`](#gatewayguardrail_ruleslist) | Per-rule guardrail trigger breakdown - which guardrail rules exist and how often each has fired. |
+| [`gateway.request_logs.list`](#gatewayrequest_logslist) | List request logs recorded by the AI gateway. |
+| [`gateway.sessions.list`](#gatewaysessionslist) | List AI gateway sessions with their stats. |
+| [`gateway.sessions.requests`](#gatewaysessionsrequests) | List every request log belonging to one gateway session. |
+
+</div>
+
+## client.gateway
+
+### gateway.analytics
+
+Return overview usage, latency, error, and cost analytics for the AI gateway.
+
+<ApiEndpoint method="GET" path="/agentcc/analytics/overview/" />
+
+**MCP tool**: `get_gateway_analytics`
+
+<CodeGroup>
+
+```python Python
+result = client.gateway.analytics()
+```
+
+```typescript TypeScript
+const result = await client.gateway.analytics();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.gateway.analytics(
+    *,
+    start: str | None | NotGiven = NOT_GIVEN,
+    end: str | None | NotGiven = NOT_GIVEN,
+    granularity: str | None | NotGiven = NOT_GIVEN,
+    api_key_id: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.gateway.analytics(params: GatewayAnalyticsParams = {}, options?: RequestOptions): Promise<unknown>
+
+export interface GatewayAnalyticsParams {
+  start?: string | null;
+  end?: string | null;
+  granularity?: string | null;
+  /** Gateway key id (not the API key's UUID primary key). */
+  api_key_id?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="start" type="string" optional />
+<ParamField query="end" type="string" optional />
+<ParamField query="granularity" type="string" optional />
+<ParamField query="api_key_id" type="string" optional>
+  Gateway key id (not the API key's UUID primary key).
+</ParamField>
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### gateway.config
+
+Return the effective configuration for an AI gateway.
+
+<ApiEndpoint method="GET" path="/agentcc/gateways/{id}/config/" />
+
+**MCP tool**: `get_gateway_config`
+
+<CodeGroup>
+
+```python Python
+result = client.gateway.config("your-id")
+```
+
+```typescript TypeScript
+const result = await client.gateway.config("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.gateway.config(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.GatewayConfigResult
+```
+
+```typescript TypeScript
+client.gateway.config(id: string, options?: RequestOptions): Promise<models.GatewayConfigResult>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`GatewayConfigResult`](/docs/sdk/reference/gateway-models#gatewayconfigresult).
+
+### gateway.list
+
+List configured AI gateways.
+
+<ApiEndpoint method="GET" path="/agentcc/gateways/" />
+
+**MCP tool**: `list_gateways`
+
+<CodeGroup>
+
+```python Python
+result = client.gateway.list()
+```
+
+```typescript TypeScript
+const result = await client.gateway.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.gateway.list(
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> List[models.GatewaySummaryResult]
+```
+
+```typescript TypeScript
+client.gateway.list(options?: RequestOptions): Promise<Array<models.GatewaySummaryResult>>
+```
+
+</Expandable>
+
+#### Parameters
+
+This method takes no parameters beyond the per-call `options`.
+
+#### Returns
+
+A list of [`GatewaySummaryResult`](/docs/sdk/reference/gateway-models#gatewaysummaryresult).
+
+## client.gateway.guardrail_rules
+
+TypeScript: `client.gateway.guardrailRules`.
+
+### gateway.guardrail_rules.list
+
+Per-rule guardrail trigger breakdown - which guardrail rules exist and how often each has fired. Request logs report guardrail_triggered but not which rule caused it; this is what turns "the request was blocked" into "the PII rule blocked it".
+
+<ApiEndpoint method="GET" path="/agentcc/analytics/guardrail-rules/" />
+
+**MCP tool**: `list_guardrail_rules`
+
+<CodeGroup>
+
+```python Python
+result = client.gateway.guardrail_rules.list()
+```
+
+```typescript TypeScript
+const result = await client.gateway.guardrailRules.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.gateway.guardrail_rules.list(
+    *,
+    page: int | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.gateway.guardrailRules.list(params: GatewayGuardrailRulesListParams = {}, options?: RequestOptions): Promise<unknown>
+
+export interface GatewayGuardrailRulesListParams {
+  /** A page number within the paginated result set. */
+  page?: number | null;
+  /** Number of results to return per page. */
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="page" type="integer" optional>
+  A page number within the paginated result set.
+</ParamField>
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+## client.gateway.request_logs
+
+TypeScript: `client.gateway.requestLogs`.
+
+### gateway.request_logs.list
+
+List request logs recorded by the AI gateway.
+
+<ApiEndpoint method="GET" path="/agentcc/request-logs/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_gateway_request_logs`
+
+<CodeGroup>
+
+```python Python
+for item in client.gateway.request_logs.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.gateway.requestLogs.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.gateway.request_logs.list(
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    user_id: str | None | NotGiven = NOT_GIVEN,
+    session_id: str | None | NotGiven = NOT_GIVEN,
+    api_key_id: str | None | NotGiven = NOT_GIVEN,
+    request_id: str | None | NotGiven = NOT_GIVEN,
+    model: str | None | NotGiven = NOT_GIVEN,
+    provider: str | None | NotGiven = NOT_GIVEN,
+    status_code: str | None | NotGiven = NOT_GIVEN,
+    min_status_code: int | None | NotGiven = NOT_GIVEN,
+    max_status_code: int | None | NotGiven = NOT_GIVEN,
+    is_error: bool | None | NotGiven = NOT_GIVEN,
+    cache_hit: bool | None | NotGiven = NOT_GIVEN,
+    fallback_used: bool | None | NotGiven = NOT_GIVEN,
+    guardrail_triggered: bool | None | NotGiven = NOT_GIVEN,
+    is_stream: bool | None | NotGiven = NOT_GIVEN,
+    started_after: str | None | NotGiven = NOT_GIVEN,
+    started_before: str | None | NotGiven = NOT_GIVEN,
+    min_latency: int | None | NotGiven = NOT_GIVEN,
+    max_latency: int | None | NotGiven = NOT_GIVEN,
+    min_cost: float | None | NotGiven = NOT_GIVEN,
+    max_cost: float | None | NotGiven = NOT_GIVEN,
+    min_tokens: int | None | NotGiven = NOT_GIVEN,
+    max_tokens: int | None | NotGiven = NOT_GIVEN,
+    q: str | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    ordering: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.AgentccRequestLog]
+```
+
+```typescript TypeScript
+client.gateway.requestLogs.list(params: GatewayRequestLogsListParams = {}, options?: RequestOptions): Pager<models.AgentccRequestLog>
+
+export interface GatewayRequestLogsListParams {
+  limit?: number | null;
+  user_id?: string | null;
+  session_id?: string | null;
+  /** Gateway key id (not the API key's UUID primary key). */
+  api_key_id?: string | null;
+  request_id?: string | null;
+  /** Comma-separated model names. */
+  model?: string | null;
+  /** Comma-separated provider names. */
+  provider?: string | null;
+  /** Comma-separated HTTP status codes. */
+  status_code?: string | null;
+  min_status_code?: number | null;
+  max_status_code?: number | null;
+  is_error?: boolean | null;
+  cache_hit?: boolean | null;
+  fallback_used?: boolean | null;
+  guardrail_triggered?: boolean | null;
+  is_stream?: boolean | null;
+  started_after?: string | null;
+  started_before?: string | null;
+  min_latency?: number | null;
+  max_latency?: number | null;
+  min_cost?: number | null;
+  max_cost?: number | null;
+  min_tokens?: number | null;
+  max_tokens?: number | null;
+  q?: string | null;
+  search?: string | null;
+  ordering?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="limit" type="integer" optional />
+<ParamField query="user_id" type="string" optional />
+<ParamField query="session_id" type="string" optional />
+<ParamField query="api_key_id" type="string" optional>
+  Gateway key id (not the API key's UUID primary key).
+</ParamField>
+<ParamField query="request_id" type="string" optional />
+<ParamField query="model" type="string" optional>
+  Comma-separated model names.
+</ParamField>
+<ParamField query="provider" type="string" optional>
+  Comma-separated provider names.
+</ParamField>
+<ParamField query="status_code" type="string" optional>
+  Comma-separated HTTP status codes.
+</ParamField>
+<ParamField query="min_status_code" type="integer" optional />
+<ParamField query="max_status_code" type="integer" optional />
+<ParamField query="is_error" type="boolean" optional />
+<ParamField query="cache_hit" type="boolean" optional />
+<ParamField query="fallback_used" type="boolean" optional />
+<ParamField query="guardrail_triggered" type="boolean" optional />
+<ParamField query="is_stream" type="boolean" optional />
+<ParamField query="started_after" type="string" optional />
+<ParamField query="started_before" type="string" optional />
+<ParamField query="min_latency" type="integer" optional />
+<ParamField query="max_latency" type="integer" optional />
+<ParamField query="min_cost" type="number" optional />
+<ParamField query="max_cost" type="number" optional />
+<ParamField query="min_tokens" type="integer" optional />
+<ParamField query="max_tokens" type="integer" optional />
+<ParamField query="q" type="string" optional />
+<ParamField query="search" type="string" optional />
+<ParamField query="ordering" type="string" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`AgentccRequestLog`](/docs/sdk/reference/gateway-models#agentccrequestlog) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+## client.gateway.sessions
+
+TypeScript: `client.gateway.sessions`.
+
+### gateway.sessions.list
+
+List AI gateway sessions with their stats. These are gateway sessions, distinct from the tracing sessions returned by list_sessions. Use this to obtain a session id for list_gateway_session_requests.
+
+<ApiEndpoint method="GET" path="/agentcc/sessions/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_gateway_sessions`
+
+<CodeGroup>
+
+```python Python
+for item in client.gateway.sessions.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.gateway.sessions.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.gateway.sessions.list(
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.AgentccSession]
+```
+
+```typescript TypeScript
+client.gateway.sessions.list(params: GatewaySessionsListParams = {}, options?: RequestOptions): Pager<models.AgentccSession>
+
+export interface GatewaySessionsListParams {
+  /** Number of results to return per page. */
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`AgentccSession`](/docs/sdk/reference/gateway-models#agentccsession) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### gateway.sessions.requests
+
+List every request log belonging to one gateway session. Request logs carry no trace id, so grouping by session is the way to see what else happened around a failed request.
+
+<ApiEndpoint method="GET" path="/agentcc/sessions/{id}/requests/" />
+
+**MCP tool**: `list_gateway_session_requests`
+
+<CodeGroup>
+
+```python Python
+result = client.gateway.sessions.requests("your-id")
+```
+
+```typescript TypeScript
+const result = await client.gateway.sessions.requests("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.gateway.sessions.requests(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.gateway.sessions.requests(id: string, options?: RequestOptions): Promise<unknown>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this agentcc session.
+</ParamField>
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
