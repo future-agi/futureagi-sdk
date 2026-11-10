@@ -145,7 +145,7 @@ describe("D-06b request metadata: client, then session, then request, key by key
     for await (const _ of await client.chat.completions.create({ ...MSG, stream: true, request_metadata: { b: 2 } })) void _;
     await client.completions.create({ model: "m", prompt: "p", request_metadata: { b: 2 } } as never);
     await client.embeddings.create({ model: "m", input: "x", request_metadata: { b: 2 } } as never);
-    await client.images.generate({ prompt: "p", request_metadata: { b: 2 } } as never);
+    await client.images.generate({ model: "m", prompt: "p", request_metadata: { b: 2 } } as never);
     expect(calls.map((c) => [new URL(c.url).pathname, sent(c.headers)])).toEqual([
       ["/v1/chat/completions", { a: 1, b: 2 }],
       ["/v1/completions", { a: 1, b: 2 }],
