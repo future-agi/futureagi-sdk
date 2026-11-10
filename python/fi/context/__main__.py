@@ -11,8 +11,8 @@ import json
 import os
 import re
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 from uuid import UUID
 
 from fi.platform import Client, ContextAuth, RequestOptions
@@ -208,6 +208,14 @@ def parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Versioned JSON is also the default output."
     )
     commands = result.add_subparsers(dest="command", required=True)
+    inventory = commands.add_parser(
+        "inventory", help="Read selected repositories without hooks or writes."
+    )
+    inventory.add_argument(
+        "--repositories",
+        required=True,
+        help="JSON array of repository_id/project selections.",
+    )
     make = commands.add_parser("plan")
     make.add_argument("--name", required=True)
     select = make.add_mutually_exclusive_group()
@@ -250,6 +258,19 @@ def parser() -> argparse.ArgumentParser:
 def execute(args: argparse.Namespace) -> tuple[dict[str, object], int]:
     registry: Registry | None = None
     try:
+        if args.command == "inventory":
+            from .repositories import inventory_repositories
+
+            try:
+                selected = json.loads(read_local(args.repositories))
+            except (ValueError, UnicodeError) as exc:
+                raise InstallationError(
+                    "invalid_inventory", "The repository selection must be JSON.", 2
+                ) from exc
+            result = inventory_repositories(selected)
+            return result, 0 if all(
+                row["state"] == "inventoried" for row in result["targets"]
+            ) else 6
         if args.command == "recover":
             return recover(args.project, quiescent=args.quiescent), 0
         if args.command == "inspect":
@@ -388,18 +409,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         args = parser().parse_args(argv)
         outcome, status = execute(args)
     except InstallationError as exc:
-        outcome, status = {
-            "schema": 1,
-            "error": {"code": exc.code, "message": str(exc)},
-        }, exc.exit_code
-    except ResolutionExpiredError:
-        outcome, status = {
-            "schema": 1,
-            "error": {
-                "code": "resolution_expired",
-                "message": "The original lease expired; explicitly replan.",
+        outcome, status = (
+            {
+                "schema": 1,
+                "error": {"code": exc.code, "message": str(exc)},
             },
-        }, 3
+            exc.exit_code,
+        )
+    except ResolutionExpiredError:
+        outcome, status = (
+            {
+                "schema": 1,
+                "error": {
+                    "code": "resolution_expired",
+                    "message": "The original lease expired; explicitly replan.",
+                },
+            },
+            3,
+        )
     except APIError as exc:
         # Never echo arbitrary response bodies, request headers or signed URLs.
         code = str(getattr(exc, "code", "transport_error"))
@@ -414,30 +441,39 @@ def main(argv: Sequence[str] | None = None) -> int:
             },
         }
     except APIConnectionError:
-        outcome, status = {
-            "schema": 1,
-            "error": {
-                "code": "transport_error",
-                "message": "Registry transport failed. No fallback occurred.",
+        outcome, status = (
+            {
+                "schema": 1,
+                "error": {
+                    "code": "transport_error",
+                    "message": "Registry transport failed. No fallback occurred.",
+                },
             },
-        }, 4
+            4,
+        )
     except ValueError:
         # Validation exceptions can contain submitted bytes: never print them.
-        outcome, status = {
-            "schema": 1,
-            "error": {
-                "code": "integrity_failure",
-                "message": "Input or immutable content validation failed.",
+        outcome, status = (
+            {
+                "schema": 1,
+                "error": {
+                    "code": "integrity_failure",
+                    "message": "Input or immutable content validation failed.",
+                },
             },
-        }, 6
+            6,
+        )
     except OSError:
-        outcome, status = {
-            "schema": 1,
-            "error": {
-                "code": "filesystem_error",
-                "message": "Filesystem operation failed; inspect doctor/recover before retry.",
+        outcome, status = (
+            {
+                "schema": 1,
+                "error": {
+                    "code": "filesystem_error",
+                    "message": "Filesystem operation failed; inspect doctor/recover before retry.",
+                },
             },
-        }, 5
+            5,
+        )
     print(json.dumps(outcome, sort_keys=True))
     return status
 
