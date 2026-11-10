@@ -998,7 +998,18 @@ class Dataset(APIKeyAuth):
         if not all(isinstance(row, Row) for row in rows):
             raise DatasetValidationError("Each item in rows list must be a Row object for _add_rows.")
 
-        serialized_rows = [row.to_dict() for row in rows]
+        # Add-row cells accept only input fields, not the public Cell metadata.
+        serialized_rows = [
+            {
+                "id": str(row.id),
+                "order": row.order,
+                "cells": [
+                    {"column_name": cell.column_name, "value": cell.value}
+                    for cell in row.cells
+                ],
+            }
+            for row in rows
+        ]
 
         url = f"{self._base_url}/{Routes.dataset_add_rows.value.format(dataset_id=str(self.dataset_config.id))}"
         payload = {"rows": serialized_rows}
