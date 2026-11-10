@@ -71,7 +71,9 @@ def target_plan(
     )
     if current.plan_digest != plan.plan_digest:
         raise InstallationError(
-            "stale_plan", "Current ownership/preimages differ from the reviewed plan.", 6
+            "stale_plan",
+            "Current ownership/preimages differ from the reviewed plan.",
+            6,
         )
     previous_raw = decode(plan.previous_lock)
     previous = parse_lock(previous_raw) if previous_raw is not None else None
