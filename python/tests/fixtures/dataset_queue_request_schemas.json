@@ -1,0 +1,429 @@
+{
+  "source_sha256": "8853ef2bef70a5d26c439d51f43ad2101661f5f5d2167cd21de140adc1f7648e",
+  "definitions": {
+    "AssignItems": {
+      "required": [
+        "item_ids"
+      ],
+      "type": "object",
+      "properties": {
+        "item_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minItems": 1
+        },
+        "user_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "default": []
+        },
+        "action": {
+          "title": "Action",
+          "type": "string",
+          "enum": [
+            "add",
+            "set",
+            "remove"
+          ],
+          "default": "add"
+        }
+      }
+    },
+    "HuggingFaceDatasetCreateRequest": {
+      "required": [
+        "huggingface_dataset_name",
+        "huggingface_dataset_split"
+      ],
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "default": ""
+        },
+        "model_type": {
+          "title": "Model type",
+          "type": "string",
+          "default": ""
+        },
+        "num_rows": {
+          "title": "Num rows",
+          "type": "integer",
+          "minimum": 0
+        },
+        "huggingface_dataset_name": {
+          "title": "Huggingface dataset name",
+          "type": "string",
+          "minLength": 1
+        },
+        "huggingface_dataset_config": {
+          "title": "Huggingface dataset config",
+          "type": "string"
+        },
+        "huggingface_dataset_split": {
+          "title": "Huggingface dataset split",
+          "type": "string",
+          "minLength": 1
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "string",
+          "maxLength": 200
+        }
+      }
+    },
+    "AnnotationQueue": {
+      "required": [
+        "name",
+        "label_ids"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "x-nullable": true
+        },
+        "instructions": {
+          "title": "Instructions",
+          "type": "string",
+          "x-nullable": true
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "enum": [
+            "draft",
+            "active",
+            "paused",
+            "completed"
+          ],
+          "readOnly": true
+        },
+        "assignment_strategy": {
+          "title": "Assignment strategy",
+          "type": "string",
+          "enum": [
+            "manual",
+            "round_robin",
+            "load_balanced"
+          ]
+        },
+        "annotations_required": {
+          "title": "Annotations required",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648
+        },
+        "reservation_timeout_minutes": {
+          "title": "Reservation timeout minutes",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648
+        },
+        "requires_review": {
+          "title": "Requires review",
+          "type": "boolean"
+        },
+        "auto_assign": {
+          "title": "Auto assign",
+          "description": "When enabled, all queue members can annotate any item without explicit assignment.",
+          "type": "boolean"
+        },
+        "organization": {
+          "title": "Organization",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "project": {
+          "title": "Project",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "dataset": {
+          "title": "Dataset",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "agent_definition": {
+          "title": "Agent definition",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "is_default": {
+          "title": "Is default",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QueueLabelNested"
+          },
+          "readOnly": true
+        },
+        "annotators": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QueueAnnotatorNested"
+          },
+          "readOnly": true
+        },
+        "label_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minItems": 1
+        },
+        "annotator_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "default": []
+        },
+        "annotator_roles": {
+          "title": "Annotator roles",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
+          "default": {}
+        },
+        "label_count": {
+          "title": "Label count",
+          "type": "integer",
+          "readOnly": true
+        },
+        "annotator_count": {
+          "title": "Annotator count",
+          "type": "integer",
+          "readOnly": true
+        },
+        "item_count": {
+          "title": "Item count",
+          "type": "integer",
+          "readOnly": true
+        },
+        "completed_count": {
+          "title": "Completed count",
+          "type": "integer",
+          "readOnly": true
+        },
+        "created_by": {
+          "title": "Created by",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "created_by_name": {
+          "title": "Created by name",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "viewer_role": {
+          "title": "Viewer role",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "viewer_roles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "readOnly": true
+        },
+        "deleted": {
+          "title": "Deleted",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    },
+    "QueueLabelNested": {
+      "required": [
+        "label_id"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "label_id": {
+          "title": "Label id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "required": {
+          "title": "Required",
+          "type": "boolean"
+        },
+        "order": {
+          "title": "Order",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648
+        }
+      }
+    },
+    "QueueAnnotatorNested": {
+      "required": [
+        "user_id"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "user_id": {
+          "title": "User id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "email": {
+          "title": "Email",
+          "type": "string",
+          "format": "email",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "role": {
+          "title": "Role",
+          "type": "string",
+          "default": "annotator",
+          "minLength": 1
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "readOnly": true
+        }
+      }
+    }
+  },
+  "item_list_query": [
+    {
+      "name": "page",
+      "in": "query",
+      "description": "A page number within the paginated result set.",
+      "required": false,
+      "type": "integer"
+    },
+    {
+      "name": "limit",
+      "in": "query",
+      "description": "Number of results to return per page.",
+      "required": false,
+      "type": "integer"
+    },
+    {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    {
+      "name": "source_type",
+      "in": "query",
+      "required": false,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    {
+      "name": "assigned_to",
+      "in": "query",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "review_status",
+      "in": "query",
+      "required": false,
+      "type": "string"
+    },
+    {
+      "name": "ordering",
+      "in": "query",
+      "required": false,
+      "type": "string",
+      "enum": [
+        "created_at",
+        "-created_at"
+      ]
+    }
+  ]
+}

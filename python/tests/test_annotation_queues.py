@@ -535,13 +535,13 @@ class TestItems:
         config = mock_request.call_args[0][0]
         assert config.method == HttpMethod.POST
         assert "assign" in config.url
-        assert config.json["user_id"] == "u1"
+        assert config.json == {"item_ids": ["i1", "i2"], "user_ids": ["u1"], "action": "set"}
 
     def test_unassign_items(self, client, mock_request):
         mock_request.return_value = {"assigned": 1}
         client.assign_items("q1", item_ids=["i1"], user_id=None)
         config = mock_request.call_args[0][0]
-        assert config.json["user_id"] is None
+        assert config.json == {"item_ids": ["i1"], "user_ids": [], "action": "set"}
 
 
 # ===========================================================================

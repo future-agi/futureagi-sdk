@@ -813,7 +813,7 @@ class AnnotationQueue(APIKeyAuth):
         user_id: Optional[str] = None,
         timeout: Optional[int] = None,
     ) -> Dict[str, Any]:
-        """Assign items to an annotator. Pass ``user_id=None`` to unassign."""
+        """Replace item assignments with one annotator; ``user_id=None`` clears them."""
         if not item_ids:
             raise ValueError("item_ids must be a non-empty list")
         if not queue_id and not queue_name:
@@ -821,7 +821,11 @@ class AnnotationQueue(APIKeyAuth):
         resolved_id = queue_id or self._get_queue_id_from_name(queue_name)
         _validate_id(resolved_id, "queue_id")
         url = f"{self._base_url}/{Routes.queue_items_assign.value}".format(queue_id=resolved_id)
-        body: Dict[str, Any] = {"item_ids": item_ids, "user_id": user_id}
+        body: Dict[str, Any] = {
+            "item_ids": item_ids,
+            "user_ids": [user_id] if user_id is not None else [],
+            "action": "set",
+        }
         config = RequestConfig(method=HttpMethod.POST, url=url, json=body, timeout=timeout)
         return self.request(config, _DictResponseHandler)
 
