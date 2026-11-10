@@ -609,7 +609,7 @@ export class Prompt extends APIKeyAuth {
     };
 
     const body = {
-      is_run: 'draft',
+      is_run: false,
       is_sdk: true,
       version: this.template.version,
       prompt_config: [

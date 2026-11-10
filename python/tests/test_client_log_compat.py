@@ -8,7 +8,7 @@ from unittest.mock import Mock
 import pytest
 import requests
 
-from fi.client import Client, ClientResponseHandler
+from fi.client import Client, ClientResponseHandler, LegacyModelLogUnavailableError
 from fi.api.types import HttpMethod
 from fi.utils.constants import MAX_FUTURE_YEARS_FROM_CURRENT_TIME, MAX_PAST_YEARS_FROM_CURRENT_TIME
 from fi.utils.errors import InvalidValueType, MissingRequiredKey
@@ -202,7 +202,11 @@ def test_http_errors_remain_requests_http_errors(transport, status_code):
     response._content = b"server error, not JSON"
     with pytest.raises(requests.HTTPError) as caught:
         log(client)
-    assert type(caught.value) is requests.HTTPError
+    assert isinstance(caught.value, requests.HTTPError)
+    if status_code == 404:
+        assert type(caught.value) is LegacyModelLogUnavailableError
+    else:
+        assert type(caught.value) is requests.HTTPError
     assert caught.value.response is response
     assert caught.value.request is calls[0][0]
     assert calls[0][0].url == BASE_URL + "/sdk/api/v1/log/model/"

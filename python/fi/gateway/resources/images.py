@@ -47,6 +47,8 @@ class Images:
             body.update(extra_body)
         if kwargs:
             body.update(kwargs)
+        if not isinstance(body.get("model"), str) or not body["model"].strip():
+            raise ValueError("model must be a non-empty string for image generation")
 
         from fi.gateway._utils import parse_timeout
 
@@ -98,6 +100,8 @@ class AsyncImages:
             body.update(extra_body)
         if kwargs:
             body.update(kwargs)
+        if not isinstance(body.get("model"), str) or not body["model"].strip():
+            raise ValueError("model must be a non-empty string for image generation")
 
         from fi.gateway._utils import parse_timeout
 
