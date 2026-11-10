@@ -32,8 +32,8 @@ class AgentCCError(SDKException):
         return self.message
 
 class APIConnectionError(AgentCCError):
-    """Network-level errors."""
-
+    """Network errors; ``request_not_sent`` is True only with pre-send proof."""
+    request_not_sent: bool = False
     # Transport translation may preserve the public class without permitting replay.
     _retryable: bool = True
     _status_error: APIStatusError | None = None
