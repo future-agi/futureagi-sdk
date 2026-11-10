@@ -63,6 +63,18 @@ def test_modified_local_preimage_cannot_export_the_old_plan(project):
         export(prepared)
 
 
+def test_new_unowned_native_file_blocks_campaign_export(project):
+    prepared = plan(bundle(), project)
+    unexpected = project / ".agents/skills/refunds/local.md"
+    unexpected.parent.mkdir(parents=True)
+    unexpected.write_bytes(b"Keep local skill instructions")
+    with pytest.raises(InstallationError) as error:
+        export(prepared)
+    assert error.value.code == "unmanaged_collision"
+    assert unexpected.read_bytes() == b"Keep local skill instructions"
+    assert not (project / CONTEXT_LOCK).exists()
+
+
 def test_update_and_reviewed_reverse_have_exact_previous_lock_digest(project):
     first = bundle(version=1)
     apply(plan(first, project))

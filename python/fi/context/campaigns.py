@@ -14,7 +14,7 @@ from fi.platform import Client, RequestOptions
 
 from .journal import InstallPlan, decode, parse_plan
 from .lock import CONTEXT_LOCK, InstallationError, canonical_json, parse_lock, sha256
-from .materialize import _validate_context_plan, inspect_plan
+from .materialize import _validate_context_plan, inspect_plan, plan_install
 
 ROOT = "/model-hub/skills/contexts/campaigns/"
 
@@ -56,8 +56,23 @@ def target_plan(
         raise InstallationError(
             "invalid_campaign", "Campaigns require an exact desired context release.", 2
         )
-    _validate_context_plan(plan)
+    source = _validate_context_plan(plan)
     desired = parse_lock(plan.changes[-1].require_content())
+    # Export has the same ownership/preimage checks as apply, including unowned
+    # files arriving in a native skill tree and retained local segments. A
+    # self-consistent edited lock/digest is not an authority to erase local work.
+    current = plan_install(
+        source,
+        project=plan.project,
+        profile=desired.materialization.profile,
+        adopt_local=True,
+        allow_preview=True,
+        operation=plan.operation,
+    )
+    if current.plan_digest != plan.plan_digest:
+        raise InstallationError(
+            "stale_plan", "Current ownership/preimages differ from the reviewed plan.", 6
+        )
     previous_raw = decode(plan.previous_lock)
     previous = parse_lock(previous_raw) if previous_raw is not None else None
     ownership = {}
