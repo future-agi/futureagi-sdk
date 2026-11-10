@@ -35,8 +35,21 @@ need cross-process resumability.
 from __future__ import annotations
 
 import time
+from contextvars import ContextVar
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Optional
+
+
+# Scoped to the calling context, not the evaluator: independent waits must not
+# change a shared client's timeout or the published zero-argument refresh API.
+_WAIT_DEADLINE: ContextVar[Optional[float]] = ContextVar("execution_wait_deadline", default=None)
+
+
+def _remaining_wait(deadline: float) -> float:
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise TimeoutError("Execution wait deadline expired")
+    return remaining
 
 
 class ExecutionError(Exception):
@@ -126,7 +139,10 @@ class Execution:
     ) -> "Execution":
         """
         Block until the execution reaches a terminal state, refreshing
-        every ``poll_interval`` seconds.
+        every ``poll_interval`` seconds. Sleep, evaluator polling and retry
+        delays share one deadline. A timeout does not cancel the evaluation.
+        Custom synchronous refresh callbacks are checked when they return;
+        they must implement their own I/O timeouts.
 
         Args:
             timeout: Maximum number of seconds to wait before giving up.
@@ -150,16 +166,26 @@ class Execution:
             return self
 
         deadline = time.monotonic() + float(timeout)
-        while True:
-            time.sleep(poll_interval)
-            self.refresh()
-            if self.is_done():
-                break
-            if time.monotonic() > deadline:
-                raise TimeoutError(
-                    f"Execution {self.id} did not complete within {timeout}s "
-                    f"(last status: {self.status})"
-                )
+        parent_deadline = _WAIT_DEADLINE.get()
+        if parent_deadline is not None:
+            deadline = min(deadline, parent_deadline)
+        try:
+            while True:
+                time.sleep(min(poll_interval, _remaining_wait(deadline)))
+                _remaining_wait(deadline)
+                token = _WAIT_DEADLINE.set(deadline)
+                try:
+                    self.refresh()
+                finally:
+                    _WAIT_DEADLINE.reset(token)
+                _remaining_wait(deadline)
+                if self.is_done():
+                    break
+        except TimeoutError as exc:
+            raise TimeoutError(
+                f"Execution {self.id} did not complete within {timeout}s "
+                f"(last status: {self.status})"
+            ) from exc
 
         if self.status == "failed" and raise_on_failure:
             raise ExecutionError(
