@@ -41,6 +41,18 @@ class _BaseSpanProcessorEnabledMethods:
         pass
 
 
+    def _on_ending(self, span: Any) -> None:
+        """
+        Called while a span is ending, before ``on_end``.
+
+        OpenTelemetry SDK 1.40 and later call this hook on every registered
+        span processor; older SDKs never call it. It does nothing by default.
+
+        Args:
+            span: The span that is ending
+        """
+
+
     @abstractmethod
     def on_end(self, span: ReadableSpan) -> None:
         """

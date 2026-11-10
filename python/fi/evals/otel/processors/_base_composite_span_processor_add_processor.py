@@ -37,6 +37,22 @@ class _CompositeSpanProcessorAddProcessorMethods:
                 logger.warning(f"Processor on_start error: {e}")
 
 
+    def _on_ending(self, span: Any) -> None:
+        """Call the span-ending hook on each child processor that has one."""
+        from fi.evals.otel.processors.base import (logger)
+        if not self.enabled:
+            return
+
+        for processor in self._processors:
+            hook = getattr(processor, "_on_ending", None)
+            if not callable(hook):
+                continue
+            try:
+                hook(span)
+            except Exception as e:
+                logger.warning(f"Processor _on_ending error: {e}")
+
+
     def on_end(self, span: ReadableSpan) -> None:
         """Call on_end on all child processors."""
         from fi.evals.otel.processors.base import (ReadableSpan)
