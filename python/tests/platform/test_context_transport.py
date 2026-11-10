@@ -44,21 +44,23 @@ def factory(request):
     return make
 
 
-@pytest.mark.asyncio
-async def test_context_only_with_and_without_stale_environment(factory, monkeypatch):
-    for stale in (False, True):
-        for key in ("FI_API_KEY", "FI_SECRET_KEY", "FI_WORKSPACE_ID"):
-            monkeypatch.delenv(key, raising=False)
-            if stale:
-                monkeypatch.setenv(key, "stale-broad-value")
-        seen = []
-        client = factory(lambda r: seen.append(r) or response({"resolution_id": "lease-v7", "resolution_expires_at": "2026-11-07T01:15:00Z"}), auth=ContextAuth(TOKEN))
-        result = await call(client)
-        assert result["resolution_id"] == "lease-v7"
-        assert result["resolution_expires_at"] == "2026-11-07T01:15:00Z"
-        assert seen[0].headers["authorization"] == f"Context {TOKEN}"
-        assert not {"x-api-key", "x-secret-key", "x-workspace-id", "cookie"} & set(seen[0].headers)
-        assert TOKEN not in repr(client._transport.config)
+def test_context_only_with_and_without_stale_environment(factory, monkeypatch):
+    async def run():
+        for stale in (False, True):
+            for key in ("FI_API_KEY", "FI_SECRET_KEY", "FI_WORKSPACE_ID"):
+                monkeypatch.delenv(key, raising=False)
+                if stale:
+                    monkeypatch.setenv(key, "stale-broad-value")
+            seen = []
+            client = factory(lambda r: seen.append(r) or response({"resolution_id": "lease-v7", "resolution_expires_at": "2026-11-07T01:15:00Z"}), auth=ContextAuth(TOKEN))
+            result = await call(client)
+            assert result["resolution_id"] == "lease-v7"
+            assert result["resolution_expires_at"] == "2026-11-07T01:15:00Z"
+            assert seen[0].headers["authorization"] == f"Context {TOKEN}"
+            assert not {"x-api-key", "x-secret-key", "x-workspace-id", "cookie"} & set(seen[0].headers)
+            assert TOKEN not in repr(client._transport.config)
+
+    asyncio.run(run())
 
 
 @pytest.mark.parametrize("kwargs", [{"api_key": "broad"}, {"secret_key": "broad"}, {"api_key": ""}])
@@ -68,75 +70,85 @@ def test_mixed_config_fails_before_http(factory, kwargs):
 
 
 @pytest.mark.parametrize("header", ["Authorization", "x-API-key", "X-Secret-Key", "Cookie", "Proxy-Authorization"])
-@pytest.mark.asyncio
-async def test_auth_header_overrides_rejected_in_all_layers(factory, header):
-    with pytest.raises(ValueError, match="authentication header"):
-        factory(auth=ContextAuth(TOKEN), default_headers={header: "hidden"})
-    client = factory(auth=ContextAuth(TOKEN))
-    with pytest.raises(ValueError, match="authentication header"):
-        await call(client, options=RequestOptions(headers={header: "hidden"}))
-    client._transport._http.headers[header] = "hidden"
-    with pytest.raises(ValueError, match="authentication header"):
-        await call(client)
-
-
-@pytest.mark.asyncio
-async def test_injected_http_auth_and_cookies_rejected(factory):
-    for mode in ("auth", "cookie"):
+def test_auth_header_overrides_rejected_in_all_layers(factory, header):
+    async def run():
+        with pytest.raises(ValueError, match="authentication header"):
+            factory(auth=ContextAuth(TOKEN), default_headers={header: "hidden"})
         client = factory(auth=ContextAuth(TOKEN))
-        if mode == "auth":
-            client._transport._http.auth = httpx.BasicAuth("broad", "secret")
-        else:
-            client._transport._http.cookies.set("session", "hidden")
-        with pytest.raises(ValueError, match="without auth or cookies"):
+        with pytest.raises(ValueError, match="authentication header"):
+            await call(client, options=RequestOptions(headers={header: "hidden"}))
+        client._transport._http.headers[header] = "hidden"
+        with pytest.raises(ValueError, match="authentication header"):
             await call(client)
 
-
-@pytest.mark.asyncio
-async def test_workspace_is_explicit_and_cannot_be_overridden(factory):
-    seen = []
-    client = factory(lambda r: seen.append(r) or response({}), auth=ContextAuth(TOKEN), workspace_id="workspace-1")
-    await call(client, options=RequestOptions(headers={"x-workspace-id": "workspace-1"}))
-    assert seen[0].headers.get_list("x-workspace-id") == ["workspace-1"]
-    with pytest.raises(ValueError, match="workspace header"):
-        await call(client, options=RequestOptions(headers={"X-WORKSPACE-ID": "workspace-2"}))
-    with pytest.raises(ValueError, match="workspace header"):
-        factory(auth=ContextAuth(TOKEN), default_headers={"x-workspace-id": "workspace-2"})
-    assert len(seen) == 1
+    asyncio.run(run())
 
 
-@pytest.mark.asyncio
-async def test_explicit_pair_ignores_ambient_keys_and_rejects_auth_overrides(factory, monkeypatch):
-    monkeypatch.setenv("FI_API_KEY", "ambient")
-    monkeypatch.setenv("FI_SECRET_KEY", "ambient")
-    seen = []
-    client = factory(lambda r: seen.append(r) or response({}), auth=ApiKeyAuth("explicit", "pair"))
-    await call(client)
-    assert seen[0].headers["x-api-key"] == "explicit"
-    assert seen[0].headers["x-secret-key"] == "pair"
-    assert "authorization" not in seen[0].headers
-    with pytest.raises(ValueError, match="authentication header"):
-        await call(client, options=RequestOptions(headers={"authorization": f"Context {TOKEN}"}))
+def test_injected_http_auth_and_cookies_rejected(factory):
+    async def run():
+        for mode in ("auth", "cookie"):
+            client = factory(auth=ContextAuth(TOKEN))
+            if mode == "auth":
+                client._transport._http.auth = httpx.BasicAuth("broad", "secret")
+            else:
+                client._transport._http.cookies.set("session", "hidden")
+            with pytest.raises(ValueError, match="without auth or cookies"):
+                await call(client)
+
+    asyncio.run(run())
 
 
-@pytest.mark.asyncio
-async def test_lease_stays_on_exact_version_after_label_moves(factory):
-    seen = []
-    def handle(req):
-        seen.append(req)
-        if req.url.path == RESOLVE:
-            return response({"version": 7, "version_id": "version-7", "digest": "digest-7", "resolution_id": "lease-v7", "resolution_expires_at": "2026-11-07T01:15:00Z"})
-        assert req.url.path == MANIFEST
-        assert req.headers["x-context-resolution"] == "lease-v7"
-        # The label now points to v8; continuation is v7, not another resolve.
-        return response({"version": 7, "digest": "digest-7", "file_offset": int(req.url.params["file_offset"])})
-    client = factory(handle, auth=ContextAuth(TOKEN))
-    resolved = await call(client, query={"name": "demo", "label": "production"})
-    options = RequestOptions(resolution_id=resolved["resolution_id"])
-    for offset in (25, 50):
-        result = await call(client, path=MANIFEST, query={"file_offset": offset}, options=options)
-        assert result["version"] == 7 and result["file_offset"] == offset
-    assert len(seen) == 3
+def test_workspace_is_explicit_and_cannot_be_overridden(factory):
+    async def run():
+        seen = []
+        client = factory(lambda r: seen.append(r) or response({}), auth=ContextAuth(TOKEN), workspace_id="workspace-1")
+        await call(client, options=RequestOptions(headers={"x-workspace-id": "workspace-1"}))
+        assert seen[0].headers.get_list("x-workspace-id") == ["workspace-1"]
+        with pytest.raises(ValueError, match="workspace header"):
+            await call(client, options=RequestOptions(headers={"X-WORKSPACE-ID": "workspace-2"}))
+        with pytest.raises(ValueError, match="workspace header"):
+            factory(auth=ContextAuth(TOKEN), default_headers={"x-workspace-id": "workspace-2"})
+        assert len(seen) == 1
+
+    asyncio.run(run())
+
+
+def test_explicit_pair_ignores_ambient_keys_and_rejects_auth_overrides(factory, monkeypatch):
+    async def run():
+        monkeypatch.setenv("FI_API_KEY", "ambient")
+        monkeypatch.setenv("FI_SECRET_KEY", "ambient")
+        seen = []
+        client = factory(lambda r: seen.append(r) or response({}), auth=ApiKeyAuth("explicit", "pair"))
+        await call(client)
+        assert seen[0].headers["x-api-key"] == "explicit"
+        assert seen[0].headers["x-secret-key"] == "pair"
+        assert "authorization" not in seen[0].headers
+        with pytest.raises(ValueError, match="authentication header"):
+            await call(client, options=RequestOptions(headers={"authorization": f"Context {TOKEN}"}))
+
+    asyncio.run(run())
+
+
+def test_lease_stays_on_exact_version_after_label_moves(factory):
+    async def run():
+        seen = []
+        def handle(req):
+            seen.append(req)
+            if req.url.path == RESOLVE:
+                return response({"version": 7, "version_id": "version-7", "digest": "digest-7", "resolution_id": "lease-v7", "resolution_expires_at": "2026-11-07T01:15:00Z"})
+            assert req.url.path == MANIFEST
+            assert req.headers["x-context-resolution"] == "lease-v7"
+            # The label now points to v8; continuation is v7, not another resolve.
+            return response({"version": 7, "digest": "digest-7", "file_offset": int(req.url.params["file_offset"])})
+        client = factory(handle, auth=ContextAuth(TOKEN))
+        resolved = await call(client, query={"name": "demo", "label": "production"})
+        options = RequestOptions(resolution_id=resolved["resolution_id"])
+        for offset in (25, 50):
+            result = await call(client, path=MANIFEST, query={"file_offset": offset}, options=options)
+            assert result["version"] == 7 and result["file_offset"] == offset
+        assert len(seen) == 3
+
+    asyncio.run(run())
 
 
 @pytest.mark.parametrize("status,code,error", [
@@ -146,70 +158,84 @@ async def test_lease_stays_on_exact_version_after_label_moves(factory):
     (422, "context_quarantined", APIError),
     (304, "", APIError),
 ])
-@pytest.mark.asyncio
-async def test_denials_do_not_retry_or_reresolve_even_for_downloads(factory, status, code, error):
-    seen = []
-    client = factory(lambda r: seen.append(r) or httpx.Response(status, json={"code": code}), auth=ContextAuth(TOKEN))
-    with pytest.raises(error) as exc:
-        await call(client, path=MANIFEST, decode="bytes", options=RequestOptions(resolution_id="lease"))
-    assert len(seen) == 1 and exc.value.status_code == status
+def test_denials_do_not_retry_or_reresolve_even_for_downloads(factory, status, code, error):
+    async def run():
+        seen = []
+        client = factory(lambda r: seen.append(r) or httpx.Response(status, json={"code": code}), auth=ContextAuth(TOKEN))
+        with pytest.raises(error) as exc:
+            await call(client, path=MANIFEST, decode="bytes", options=RequestOptions(resolution_id="lease"))
+        assert len(seen) == 1 and exc.value.status_code == status
+
+    asyncio.run(run())
 
 
-@pytest.mark.asyncio
-async def test_retry_retains_caller_operation_and_lease(factory):
-    seen = []
-    client = factory(lambda r: seen.append(r) or (httpx.Response(429, headers={"retry-after": "0"}) if len(seen) == 1 else response({})), auth=ContextAuth(TOKEN))
-    await call(client, "POST", "/model-hub/skills/contexts/bindings/b/receipts/", body={"event_id": "event"},
-               options=RequestOptions(resolution_id="lease", idempotency_key="original-key"))
-    assert len(seen) == 2
-    assert seen[0].content == seen[1].content
-    assert all(r.headers["idempotency-key"] == "original-key" and r.headers["x-context-resolution"] == "lease" for r in seen)
+def test_retry_retains_caller_operation_and_lease(factory):
+    async def run():
+        seen = []
+        client = factory(lambda r: seen.append(r) or (httpx.Response(429, headers={"retry-after": "0"}) if len(seen) == 1 else response({})), auth=ContextAuth(TOKEN))
+        await call(client, "POST", "/model-hub/skills/contexts/bindings/b/receipts/", body={"event_id": "event"},
+                   options=RequestOptions(resolution_id="lease", idempotency_key="original-key"))
+        assert len(seen) == 2
+        assert seen[0].content == seen[1].content
+        assert all(r.headers["idempotency-key"] == "original-key" and r.headers["x-context-resolution"] == "lease" for r in seen)
+
+    asyncio.run(run())
 
 
-@pytest.mark.asyncio
-async def test_unknown_post_is_not_replayed(factory):
-    seen = []
-    def handle(req):
-        seen.append(req)
-        raise httpx.ReadError("lost response")
-    client = factory(handle, auth=ContextAuth(TOKEN))
-    with pytest.raises(APIConnectionError):
-        await call(client, "POST", options=RequestOptions(idempotency_key="original-key"))
-    assert len(seen) == 1
+def test_unknown_post_is_not_replayed(factory):
+    async def run():
+        seen = []
+        def handle(req):
+            seen.append(req)
+            raise httpx.ReadError("lost response")
+        client = factory(handle, auth=ContextAuth(TOKEN))
+        with pytest.raises(APIConnectionError):
+            await call(client, "POST", options=RequestOptions(idempotency_key="original-key"))
+        assert len(seen) == 1
+
+    asyncio.run(run())
 
 
 @pytest.mark.parametrize("target", ["/other/", "https://evil.test/token", "https://user:pass@backend.test/other/"])
-@pytest.mark.asyncio
-async def test_context_redirects_fail_closed(factory, target):
-    seen = []
-    client = factory(lambda r: seen.append(r) or httpx.Response(307, headers={"location": target}), auth=ContextAuth(TOKEN))
-    with pytest.raises(APIConnectionError, match="cannot follow redirects"):
+def test_context_redirects_fail_closed(factory, target):
+    async def run():
+        seen = []
+        client = factory(lambda r: seen.append(r) or httpx.Response(307, headers={"location": target}), auth=ContextAuth(TOKEN))
+        with pytest.raises(APIConnectionError, match="cannot follow redirects"):
+            await call(client)
+        assert len(seen) == 1
+
+    asyncio.run(run())
+
+
+def test_zip_bytes_are_lossless_and_empty_bytes_are_bytes(factory):
+    async def run():
+        for raw in (b"PK\x00\xff\xfe\x80\r\n", b""):
+            client = factory(lambda r: httpx.Response(200, content=raw, headers={"content-type": "application/zip"}), auth=ContextAuth(TOKEN))
+            assert await call(client, decode="bytes", options=RequestOptions(resolution_id="lease")) == raw
+
+    asyncio.run(run())
+
+
+def test_per_call_leases_do_not_leak_between_concurrent_reads(factory):
+    async def run():
+        seen = []
+        client = factory(lambda r: seen.append(r) or response({}), auth=ContextAuth(TOKEN))
+        await asyncio.gather(*(call(client, path=MANIFEST, options=RequestOptions(resolution_id=f"lease-{i}")) for i in range(8)))
+        assert {r.headers["x-context-resolution"] for r in seen} == {f"lease-{i}" for i in range(8)}
         await call(client)
-    assert len(seen) == 1
+        assert "x-context-resolution" not in seen[-1].headers
+
+    asyncio.run(run())
 
 
-@pytest.mark.asyncio
-async def test_zip_bytes_are_lossless_and_empty_bytes_are_bytes(factory):
-    for raw in (b"PK\x00\xff\xfe\x80\r\n", b""):
-        client = factory(lambda r: httpx.Response(200, content=raw, headers={"content-type": "application/zip"}), auth=ContextAuth(TOKEN))
-        assert await call(client, decode="bytes", options=RequestOptions(resolution_id="lease")) == raw
+def test_typed_headers_never_overwrite_conflicting_defaults(factory):
+    async def run():
+        client = factory(auth=ContextAuth(TOKEN), default_headers={"x-context-resolution": "old"})
+        with pytest.raises(ValueError, match="conflicting X-Context-Resolution"):
+            await call(client, options=RequestOptions(resolution_id="new"))
 
-
-@pytest.mark.asyncio
-async def test_per_call_leases_do_not_leak_between_concurrent_reads(factory):
-    seen = []
-    client = factory(lambda r: seen.append(r) or response({}), auth=ContextAuth(TOKEN))
-    await asyncio.gather(*(call(client, path=MANIFEST, options=RequestOptions(resolution_id=f"lease-{i}")) for i in range(8)))
-    assert {r.headers["x-context-resolution"] for r in seen} == {f"lease-{i}" for i in range(8)}
-    await call(client)
-    assert "x-context-resolution" not in seen[-1].headers
-
-
-@pytest.mark.asyncio
-async def test_typed_headers_never_overwrite_conflicting_defaults(factory):
-    client = factory(auth=ContextAuth(TOKEN), default_headers={"x-context-resolution": "old"})
-    with pytest.raises(ValueError, match="conflicting X-Context-Resolution"):
-        await call(client, options=RequestOptions(resolution_id="new"))
+    asyncio.run(run())
 
 
 def test_operation_header_allowlist_and_collision_checks():

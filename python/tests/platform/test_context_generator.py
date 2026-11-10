@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import copy
 import inspect
 import sys
@@ -90,105 +91,109 @@ def test_header_duplicates_types_and_argument_collisions_fail_codegen():
 
 
 @pytest.mark.parametrize("is_async", [False, True], ids=["sync", "async"])
-@pytest.mark.asyncio
-async def test_generated_methods_send_headers_and_return_binary(monkeypatch, is_async):
-    from fi.platform import (
-        AsyncClient,
-        Client,
-        ContextAuth,
-        RequestOptions,
-        _operations,
-        models,
-    )
+def test_generated_methods_send_headers_and_return_binary(monkeypatch, is_async):
+    async def run():
+        from fi.platform import (
+            AsyncClient,
+            Client,
+            ContextAuth,
+            RequestOptions,
+            _operations,
+            models,
+        )
 
-    ops = catalog.load(copy.deepcopy(SPEC), CATALOG)
-    # Execute the real emitters in their package context, not a hand-written imitation.
-    operations = ModuleType("fi.platform.fixture_operations")
-    exec(python.emit_operations(ops), operations.__dict__)
-    generated_models = ModuleType("fi.platform.fixture_models")
-    monkeypatch.setitem(sys.modules, generated_models.__name__, generated_models)
-    exec(python.emit_models(SPEC, ops), generated_models.__dict__)
-    monkeypatch.setattr(models, "FixtureAck", generated_models.FixtureAck, raising=False)
-    for op in ops:
-        monkeypatch.setattr(_operations, python.op_constant(op), getattr(operations, python.op_constant(op)), raising=False)
-    resources = ModuleType("fi.platform.resources.fixture_base")
-    exec(python.emit_resources(ops), resources.__dict__)
-    seen = []
-    def handle(req):
-        seen.append(req)
-        if req.url.path.endswith("download/"):
-            return httpx.Response(200, content=b"PK\x00\xff")
-        if req.url.path.endswith("start/"):
-            return httpx.Response(202, json={"status": True, "result": {"id": "job"}})
-        return httpx.Response(200, json={"status": True, "result": {"file_offset": 25}})
-    cls, http_cls, resource_cls = (AsyncClient, httpx.AsyncClient, resources.AsyncFixtureResource) if is_async else (Client, httpx.Client, resources.FixtureResource)
-    client = cls(auth=ContextAuth("synthetic-context"), base_url="https://fixture.test", http_client=http_cls(transport=httpx.MockTransport(handle)))
-    fixture = resource_cls(client._transport)
-    async def result(value):
-        return await value if inspect.isawaitable(value) else value
-    ack = await result(fixture.start(idempotency_key="original-key", note="content"))
-    assert ack.id == "job"
-    assert await result(fixture.manifest(resolution_id="lease-7", file_offset=25)) == {"file_offset": 25}
-    assert await result(fixture.download(resolution_id="lease-7")) == b"PK\x00\xff"
-    assert seen[0].headers["idempotency-key"] == "original-key"
-    assert seen[0].content == b'{"note":"content"}'
-    assert seen[1].headers["x-context-resolution"] == "lease-7"
-    assert str(seen[1].url) == "https://fixture.test/fixture/manifest/?file_offset=25"
-    assert seen[2].headers["x-context-resolution"] == "lease-7"
-    with pytest.raises(ValueError, match="conflicting"):
-        await result(fixture.manifest(resolution_id="lease-7", options=RequestOptions(resolution_id="lease-8")))
-    assert len(seen) == 3
+        ops = catalog.load(copy.deepcopy(SPEC), CATALOG)
+        # Execute the real emitters in their package context, not a hand-written imitation.
+        operations = ModuleType("fi.platform.fixture_operations")
+        exec(python.emit_operations(ops), operations.__dict__)
+        generated_models = ModuleType("fi.platform.fixture_models")
+        monkeypatch.setitem(sys.modules, generated_models.__name__, generated_models)
+        exec(python.emit_models(SPEC, ops), generated_models.__dict__)
+        monkeypatch.setattr(models, "FixtureAck", generated_models.FixtureAck, raising=False)
+        for op in ops:
+            monkeypatch.setattr(_operations, python.op_constant(op), getattr(operations, python.op_constant(op)), raising=False)
+        resources = ModuleType("fi.platform.resources.fixture_base")
+        exec(python.emit_resources(ops), resources.__dict__)
+        seen = []
+        def handle(req):
+            seen.append(req)
+            if req.url.path.endswith("download/"):
+                return httpx.Response(200, content=b"PK\x00\xff")
+            if req.url.path.endswith("start/"):
+                return httpx.Response(202, json={"status": True, "result": {"id": "job"}})
+            return httpx.Response(200, json={"status": True, "result": {"file_offset": 25}})
+        cls, http_cls, resource_cls = (AsyncClient, httpx.AsyncClient, resources.AsyncFixtureResource) if is_async else (Client, httpx.Client, resources.FixtureResource)
+        client = cls(auth=ContextAuth("synthetic-context"), base_url="https://fixture.test", http_client=http_cls(transport=httpx.MockTransport(handle)))
+        fixture = resource_cls(client._transport)
+        async def result(value):
+            return await value if inspect.isawaitable(value) else value
+        ack = await result(fixture.start(idempotency_key="original-key", note="content"))
+        assert ack.id == "job"
+        assert await result(fixture.manifest(resolution_id="lease-7", file_offset=25)) == {"file_offset": 25}
+        assert await result(fixture.download(resolution_id="lease-7")) == b"PK\x00\xff"
+        assert seen[0].headers["idempotency-key"] == "original-key"
+        assert seen[0].content == b'{"note":"content"}'
+        assert seen[1].headers["x-context-resolution"] == "lease-7"
+        assert str(seen[1].url) == "https://fixture.test/fixture/manifest/?file_offset=25"
+        assert seen[2].headers["x-context-resolution"] == "lease-7"
+        with pytest.raises(ValueError, match="conflicting"):
+            await result(fixture.manifest(resolution_id="lease-7", options=RequestOptions(resolution_id="lease-8")))
+        assert len(seen) == 3
+
+    asyncio.run(run())
 
 
 @pytest.mark.parametrize("is_async", [False, True], ids=["sync", "async"])
-@pytest.mark.asyncio
-async def test_generated_numeric_paths_do_not_shadow_file_query(monkeypatch, is_async):
-    from fi.platform import AsyncClient, Client, ContextAuth, _operations
+def test_generated_numeric_paths_do_not_shadow_file_query(monkeypatch, is_async):
+    async def run():
+        from fi.platform import AsyncClient, Client, ContextAuth, _operations
 
-    spec = copy.deepcopy(SPEC)
-    endpoint = spec["paths"].pop("/fixture/manifest/")
-    endpoint["parameters"] = [
-        {"name": "resource_id", "in": "path", "type": "string", "required": True},
-        {"name": "number", "in": "path", "type": "string", "required": True},
-    ]
-    endpoint["get"]["parameters"] += [
-        {"name": "number", "in": "path", "type": "integer", "required": True},
-        {"name": "path", "in": "query", "type": "string", "required": True},
-    ]
-    path = "/fixture/{resource_id}/versions/{number}/"
-    spec["paths"][path] = endpoint
-    catalog_input = copy.deepcopy(CATALOG)
-    catalog_input["operations"][1]["operation"]["path"] = path
-    ops = catalog.load(spec, catalog_input)
-    operation = next(op for op in ops if op.id == "fixture.manifest")
-    assert len(operation.params_in("path")) == 2
-    py = python.emit_resources(ops)
-    assert "number: int" in py
-    assert "number: number" in typescript.emit_resources(ops)
-    generated_ops = ModuleType("fi.platform.fixture_operations")
-    exec(python.emit_operations(ops), generated_ops.__dict__)
-    monkeypatch.setattr(_operations, python.op_constant(operation), getattr(generated_ops, python.op_constant(operation)), raising=False)
-    resources = ModuleType("fi.platform.resources.fixture_base")
-    exec(py, resources.__dict__)
-    seen = []
+        spec = copy.deepcopy(SPEC)
+        endpoint = spec["paths"].pop("/fixture/manifest/")
+        endpoint["parameters"] = [
+            {"name": "resource_id", "in": "path", "type": "string", "required": True},
+            {"name": "number", "in": "path", "type": "string", "required": True},
+        ]
+        endpoint["get"]["parameters"] += [
+            {"name": "number", "in": "path", "type": "integer", "required": True},
+            {"name": "path", "in": "query", "type": "string", "required": True},
+        ]
+        path = "/fixture/{resource_id}/versions/{number}/"
+        spec["paths"][path] = endpoint
+        catalog_input = copy.deepcopy(CATALOG)
+        catalog_input["operations"][1]["operation"]["path"] = path
+        ops = catalog.load(spec, catalog_input)
+        operation = next(op for op in ops if op.id == "fixture.manifest")
+        assert len(operation.params_in("path")) == 2
+        py = python.emit_resources(ops)
+        assert "number: int" in py
+        assert "number: number" in typescript.emit_resources(ops)
+        generated_ops = ModuleType("fi.platform.fixture_operations")
+        exec(python.emit_operations(ops), generated_ops.__dict__)
+        monkeypatch.setattr(_operations, python.op_constant(operation), getattr(generated_ops, python.op_constant(operation)), raising=False)
+        resources = ModuleType("fi.platform.resources.fixture_base")
+        exec(py, resources.__dict__)
+        seen = []
 
-    def handle(req):
-        seen.append(req)
-        assert req.url.path == "/fixture/resource/versions/7/"
-        assert req.url.params["path"] == "references/snow 雪.md"
-        assert req.headers["X-Context-Resolution"] == "lease"
-        return httpx.Response(200, json={"status": True, "result": {"exact": True}})
+        def handle(req):
+            seen.append(req)
+            assert req.url.path == "/fixture/resource/versions/7/"
+            assert req.url.params["path"] == "references/snow 雪.md"
+            assert req.headers["X-Context-Resolution"] == "lease"
+            return httpx.Response(200, json={"status": True, "result": {"exact": True}})
 
-    cls, http_cls, resource_cls = (AsyncClient, httpx.AsyncClient, resources.AsyncFixtureResource) if is_async else (Client, httpx.Client, resources.FixtureResource)
-    client = cls(auth=ContextAuth("synthetic"), base_url="https://fixture.invalid", http_client=http_cls(transport=httpx.MockTransport(handle)))
-    resource = resource_cls(client._transport)
-    value = resource.manifest("resource", 7, path="references/snow 雪.md", resolution_id="lease")
-    assert (await value if is_async else value) == {"exact": True}
-    assert len(seen) == 1
-    if is_async:
-        await client.aclose()
-    else:
-        client.close()
+        cls, http_cls, resource_cls = (AsyncClient, httpx.AsyncClient, resources.AsyncFixtureResource) if is_async else (Client, httpx.Client, resources.FixtureResource)
+        client = cls(auth=ContextAuth("synthetic"), base_url="https://fixture.invalid", http_client=http_cls(transport=httpx.MockTransport(handle)))
+        resource = resource_cls(client._transport)
+        value = resource.manifest("resource", 7, path="references/snow 雪.md", resolution_id="lease")
+        assert (await value if is_async else value) == {"exact": True}
+        assert len(seen) == 1
+        if is_async:
+            await client.aclose()
+        else:
+            client.close()
+
+    asyncio.run(run())
 
 
 def test_description_words_do_not_create_unused_typing_imports():

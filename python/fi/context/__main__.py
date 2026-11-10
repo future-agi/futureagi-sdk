@@ -13,6 +13,7 @@ import re
 import sys
 from pathlib import Path
 from typing import Sequence
+from uuid import UUID
 
 from fi.platform import Client, ContextAuth, RequestOptions
 from fi.platform._errors import APIConnectionError, APIError
@@ -49,14 +50,25 @@ class Registry:
 
     def __init__(self) -> None:
         self.origin = self._required("FI_CONTEXT_ORIGIN").rstrip("/")
-        self.organization_id = self._required("FI_CONTEXT_ORGANIZATION_ID")
-        self.workspace_id = self._required("FI_CONTEXT_WORKSPACE_ID")
+        self.organization_id = self._scope_uuid("FI_CONTEXT_ORGANIZATION_ID")
+        self.workspace_id = self._scope_uuid("FI_CONTEXT_WORKSPACE_ID")
         credential = self._required("FI_CONTEXT_CREDENTIAL")
         self.client = Client(
             auth=ContextAuth(credential),
             base_url=self.origin,
             workspace_id=self.workspace_id,
+            default_headers={"X-Organization-Id": self.organization_id},
         )
+
+    @classmethod
+    def _scope_uuid(cls, name: str) -> str:
+        value = cls._required(name)
+        try:
+            return str(UUID(value))
+        except ValueError as exc:
+            raise InstallationError(
+                "configuration_invalid", f"Set {name} to a valid UUID.", 3
+            ) from exc
 
     @staticmethod
     def _required(name: str) -> str:
@@ -218,7 +230,10 @@ def parser() -> argparse.ArgumentParser:
     )
     for name in ("update", "restore", "remove", "verify", "doctor"):
         command = commands.add_parser(name)
-        command.add_argument("--lock", default=CONTEXT_LOCK)
+        command.add_argument(
+            "--lock",
+            help=f"Explicit lock path; otherwise {CONTEXT_LOCK} in --project or the current directory.",
+        )
         command.add_argument("--project")
         if name in ("update", "restore", "remove"):
             command.add_argument("--plan", "--out", dest="out")
@@ -274,21 +289,29 @@ def execute(args: argparse.Namespace) -> tuple[dict[str, object], int]:
                 allow_preview=args.allow_preview,
             )
         else:
+            # Only the implicit lock follows --project. Explicit paths remain
+            # caller-relative, including retained locks used for restore/verify.
+            lock_path = (
+                Path(args.lock)
+                if args.lock is not None
+                else Path(args.project or ".") / CONTEXT_LOCK
+            )
             project = (
                 Path(args.project)
                 if args.project
-                else Path(os.path.abspath(args.lock)).parent
+                else Path(os.path.abspath(lock_path)).parent
             )
             if args.command == "doctor":
                 return doctor(project=project), 0
-            lock = parse_lock(read_local(args.lock))
+            lock_bytes = read_local(lock_path)
+            lock = parse_lock(lock_bytes)
             if args.command == "verify":
                 outcome = verify(project=project, lock=lock)
                 return outcome, 0 if outcome["verified"] else 6
             if args.command == "remove":
                 # Removal uses the current project's ownership, not a stale external lock.
                 with SafeProject(project) as filesystem:
-                    if filesystem.read(CONTEXT_LOCK) != read_local(args.lock):
+                    if filesystem.read(CONTEXT_LOCK) != lock_bytes:
                         raise InstallationError(
                             "stale_plan", "Removal requires the current project lock."
                         )
