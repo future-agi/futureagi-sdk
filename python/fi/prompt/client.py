@@ -789,7 +789,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         }
 
         body = {
-            "is_run": "draft",  # purely save changes
+            "is_run": False,  # purely save changes
             "is_sdk": True,
             "version": self.template.version,
             "prompt_config": [
