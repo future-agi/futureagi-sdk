@@ -140,7 +140,7 @@ describe('legacy multipart retry safety', () => {
         expect(sleep).not.toHaveBeenCalled();
     });
 
-    it.each(['json', 'blob', 'text'])('still retries replayable %s bodies with their full contents', async kind => {
+    it.each(['json', 'blob', 'text'])('sends the full %s body once without replaying POST after HTTP 503', async kind => {
         const bodies: Buffer[] = [];
         const text = 'Synthetic replayable content.';
         const adapter: jest.MockedFunction<AxiosAdapter> = jest.fn(async config => {
@@ -154,18 +154,16 @@ describe('legacy multipart retry safety', () => {
         axios.defaults.adapter = adapter;
         client = new HttpClient({ baseUrl: 'https://sdk.invalid', retryAttempts: 2, retryDelay: 1 });
         const sleep = jest.spyOn(client as any, '_sleep').mockResolvedValue(undefined);
-        const response = await client.request({
+        await expect(client.request({
             method: HttpMethod.POST,
             url: '/upload',
             ...(kind === 'json'
                 ? { json: { name: text } }
                 : { files: { file0: kind === 'blob' ? new Blob([text]) : text }, data: { name: 'docs' } })
-        }) as AxiosResponse;
+        })).rejects.toBeInstanceOf(ServiceUnavailableError);
 
-        expect(response.status).toBe(200);
-        expect(adapter).toHaveBeenCalledTimes(2);
-        expect(sleep).toHaveBeenCalledTimes(1);
-        expect(sleep).toHaveBeenCalledWith(1);
+        expect(adapter).toHaveBeenCalledTimes(1);
+        expect(sleep).not.toHaveBeenCalled();
         for (const body of bodies) {
             if (kind === 'json') expect(JSON.parse(body.toString())).toEqual({ name: text });
             else {

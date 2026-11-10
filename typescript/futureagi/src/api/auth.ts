@@ -247,12 +247,21 @@ export class HttpClient {
             ? 1
             : (config.retry_attempts || this._defaultRetryAttempts);
         const retryDelay = config.retry_delay || this._defaultRetryDelay;
+        const retryableMethod = ['GET', 'HEAD', 'OPTIONS'].includes((config.method || HttpMethod.GET).toUpperCase());
 
         // Execute request with bounded concurrency
         return this._executor.submit(async () => {
             for (let attempt = 0; attempt < retryAttempts; attempt++) {
+                let receivedResponse: AxiosResponse | undefined;
+                let redirected = false;
+                requestConfig.beforeRedirect = (options) => {
+                    // A failed connection on a later hop does not prove the original write was unsent.
+                    redirected = true;
+                    this._guardRedirect(options);
+                };
                 try {
                     const response = await this._axiosInstance.request(requestConfig);
+                    receivedResponse = response;
 
                     if (responseHandler) {
                         return ResponseHandler.parse<T, any>(response, responseHandler);
@@ -274,8 +283,21 @@ export class HttpClient {
                         throw error;
                     }
 
-                    // Last attempt - throw the error
-                    if (attempt === retryAttempts - 1) {
+                    const failedResponse = receivedResponse || (error instanceof AxiosError ? error.response : undefined);
+                    const connectionFailure = error instanceof AxiosError &&
+                        ['ECONNREFUSED', 'ENOTFOUND', 'EAI_AGAIN'].includes(error.code || '');
+                    const transientFailure = failedResponse
+                        ? [408, 429].includes(failedResponse.status) ||
+                            (failedResponse.status >= 500 && failedResponse.status < 600)
+                        : connectionFailure || (error instanceof AxiosError &&
+                            ['ECONNABORTED', 'ETIMEDOUT', 'ECONNRESET', 'EPIPE', 'ERR_NETWORK'].includes(error.code || ''));
+                    // Writes may have succeeded after a timeout, reset, or HTTP error. Only a
+                    // connection/DNS failure before any response (including redirects) is safe.
+                    const canRetry = retryableMethod
+                        ? transientFailure
+                        : connectionFailure && !failedResponse && !redirected;
+
+                    if (!canRetry || attempt === retryAttempts - 1) {
                         if (error instanceof AxiosError) {
                             ResponseHandler._handleError(error.response!);
                         }
