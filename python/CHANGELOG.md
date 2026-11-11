@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fixed: dependency floors
+- Raise the base dependency minimums to anyio 4.14.2, certifi 2026.10.18,
+  idna 3.15, requests 2.33.0 and urllib3 2.8.0 to exclude versions affected
+  by published advisories. Retain the anyio <5 upper bound.
+
 ### Fixed: dataset error compatibility
 - SDK-owned `fi.utils.errors.RateLimitError` / `ServerError` now also subclass their
   `fi.errors` counterparts, retaining `DatasetError` catches, legacy messages and

@@ -70,7 +70,7 @@ def test_python_candidate_floor_typing_and_gateway_inclusion():
     project = (ROOT / "python" / "pyproject.toml").read_text()
     assert 'version = "0.7.0"' in project
     assert 'python = ">=3.10"' in project
-    assert _anyio_requirement(project) == SpecifierSet(">=4.0,<5")
+    assert _anyio_requirement(project) == SpecifierSet(">=4.14.2,<5")
     excluded = project.split("exclude = [", 1)[1].split("]", 1)[0]
     assert '"fi/gateway' not in excluded
     for namespace in PYTHON_OFF_EXCLUDES:
