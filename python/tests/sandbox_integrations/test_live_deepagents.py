@@ -7,7 +7,7 @@ created for the class and deleted after it. ``FI_SANDBOX_TEMPLATE`` picks its te
 deployment's default otherwise). Building the backend fails first when the template has no python3.
 The standard tests' files live under ``/workspace/test_sandbox_ops/``, the folder the files API
 reaches. ``test_futureagi_edit_over_50_kb`` is expected to fail until large edits work (see the
-README's "Not yet").
+README's "Not supported").
 """
 
 from __future__ import annotations

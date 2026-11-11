@@ -1,7 +1,6 @@
 # Trace context for sandbox commands
 
-These integrations ship in the Future AGI SDK (`pip install futureagi`). Until that release is published, use the
-sandbox HTTP API.
+These integrations ship in the Future AGI SDK (`pip install futureagi`).
 
 `fi.sandbox_integrations.tracing` puts a sandbox command into your trace. `run_traced` wraps `sbx.commands.run` in a
 client span, `sandbox.exec`, that records how the command ended; `tracing_env` builds the `env` that carries the trace
@@ -19,10 +18,10 @@ No new extra. It uses your app's own OpenTelemetry (for example through `futurea
 
 | Where | Client span `sandbox.exec` in your trace | Spans made inside the sandbox | Sandbox server spans |
 |---|---|---|---|
-| Hosted | yes, through your own exporter | not offered yet: hosted sandboxes have no network today (full internet access is being built), and keys may not travel in a command's `env` | not yet |
-| Self-hosted, network on | yes | not offered yet: Future AGI keys reach code inside a sandbox only through a workspace credential for sandboxes (a separate, audited path), and that path is not yet documented for SDK use; a command's `env` may never carry `FI_API_KEY` or `FI_SECRET_KEY` (`run_traced` refuses them) | not yet |
+| Hosted | yes, through your own exporter | not offered: hosted sandboxes have no network access today, and keys may not travel in a command's `env` | no |
+| Self-hosted, network on | yes | not offered: Future AGI keys reach code inside a sandbox only through a workspace credential for sandboxes (a separate, audited path), and that path is not documented for SDK use; a command's `env` may never carry `FI_API_KEY` or `FI_SECRET_KEY` (`run_traced` refuses them) | no |
 
-On hosted, only the client span reaches the trace until then. The `TRACEPARENT` your command receives still names the
+On hosted, only the client span reaches the trace. The `TRACEPARENT` your command receives still names the
 `sandbox.exec` span, so anything in the sandbox that can export joins the same trace.
 
 ## `tracing_env` with `commands.run`
@@ -75,7 +74,7 @@ result = run_traced(sbx, "pytest -q", cwd="app", env={"CI": "1"}, timeout_second
 - The command line goes on the span only with `record_command=True`: a command line can carry secrets. An `env` value
   never goes on a span.
 
-These attribute names are provisional until the sandbox service names its own server spans.
+These attribute names are provisional: they may change before the first release that includes them.
 
 ## Inside the sandbox
 
@@ -101,15 +100,12 @@ With `futureagi` installed in the sandbox, `context.attach(context_from_env())` 
   `FUTUREAGI_OMEGA_API_KEY`, `FI_PLATFORM_TOKEN` and `OMEGA_OS_API_KEY` in `env` with a `ConfigurationError` whose code
   is `secret_in_env`, before anything is sent; `tracing_env` never returns them (`REFUSED_ENV_NAMES`).
 - Future AGI keys reach code inside a sandbox only through a workspace credential for sandboxes (a separate, audited
-  path); until that path is documented for SDK use, exporting from inside the sandbox is not offered.
+  path). That path is not documented for SDK use, so exporting from inside the sandbox is not offered.
 - Nothing here logs, prints or puts into a span an `env` value or a key.
 
-## When the trace header lands
+## Where the trace context travels
 
-Today the trace context travels only in the command's `env`. When the sandbox API declares the `traceparent` /
-`tracestate` request headers, the sandbox service records them and passes `TRACEPARENT` / `TRACESTATE` into the
-command's environment itself, and `commands.run` gains matching arguments. `run_traced` then keeps its client span and
-sends the context as those arguments; its `env` behaviour and the opt-ins stay as they are.
+The trace context travels only in the command's `env`.
 
 ## Names
 

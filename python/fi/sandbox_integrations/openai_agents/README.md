@@ -4,8 +4,7 @@
 files in a Future AGI sandbox. You pass `FutureAGISandboxClient` to `SandboxRunConfig(client=...)`; the agent
 definition stays the same.
 
-These integrations ship in the Future AGI SDK (`pip install futureagi`). Until that release is published, use the
-sandbox HTTP API.
+These integrations ship in the Future AGI SDK (`pip install futureagi`).
 
 ## Install
 
@@ -13,10 +12,14 @@ sandbox HTTP API.
 pip install futureagi "openai-agents>=0.24,<0.25"
 ```
 
-There is no `futureagi` extra for this integration yet, so install the Agents SDK directly. The supported range is
+There is no `futureagi` extra for this integration, so install the Agents SDK directly. The supported range is
 `openai-agents>=0.24,<0.25`. The client builds on the SDK's sandbox base classes, some of whose hooks are
 underscored, so other versions are not supported. Without the SDK's sandbox support installed,
 importing the module raises `fi.errors.MissingExtraError` with that install line.
+
+openai-agents 0.24 needs `openai` 3 or later, while `futureagi[evals]` needs `openai` below 3, so this integration
+cannot be installed in the same environment as `futureagi[evals]`. Use a separate environment for each; pip reports
+the conflict when both are asked for.
 
 ## Quickstart
 
@@ -132,7 +135,7 @@ That needs `pip install "futureagi[sandbox-mcp]"`; see `fi/sandbox_integrations/
 
 ## Hosted limits
 
-Hosted sandboxes have no network today; full internet access is being built.
+Hosted sandboxes have no network access today, so a command inside a hosted sandbox cannot reach the internet.
 
 ## Coming from `openai-agents[e2b]`
 

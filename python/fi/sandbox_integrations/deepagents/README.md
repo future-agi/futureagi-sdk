@@ -1,7 +1,6 @@
 # Deep Agents backend
 
-These integrations ship in the Future AGI SDK (`pip install futureagi`). Until that release is published, use the
-sandbox HTTP API.
+These integrations ship in the Future AGI SDK (`pip install futureagi`).
 
 `FutureAGISandbox` is a [Deep Agents](https://docs.langchain.com/oss/python/deepagents/overview) sandbox backend: pass it
 as `backend=` to `create_deep_agent` and the agent's file and shell tools run inside a Future AGI sandbox instead of
@@ -44,7 +43,7 @@ with Sandbox.create(name="agent-scratch") as sbx:          # deleted when the bl
 
 | Argument | Meaning |
 |---|---|
-| `sandbox` | A sync `fi.sandbox.Sandbox` handle. `AsyncSandbox` is not supported yet (async agents work: Deep Agents runs the backend in worker threads). |
+| `sandbox` | A sync `fi.sandbox.Sandbox` handle. `AsyncSandbox` is not supported (async agents work: Deep Agents runs the backend in worker threads). |
 | `workdir` | The folder commands run in. Default `/workspace`. |
 | `timeout` | The default time limit of a command, in seconds. Default 30 minutes, or your workspace's maximum when that is lower. |
 | `max_timeout` | Your workspace's exec maximum, in seconds (`caps.exec.maxTimeoutSeconds` of its sandbox settings). Default: read from the settings. |
@@ -148,13 +147,12 @@ call, so an agent does not retry a call that cannot work.
   maximum here.
 - Building the backend checks for `python3` up front instead of failing on the first file tool.
 
-## Not yet
+## Not supported
 
 - `edit_file` with old and new text over 50,000 bytes together, and `write_file` outside `/workspace`: both
   upload to paths the files API does not reach (Deep Agents stages large edits in `/tmp`).
 - An async class over `AsyncSandbox`.
 - A `dcode --sandbox futureagi` provider for Deep Agents Code.
-- A listing in LangChain's integrations directory.
 
 The module path `fi.sandbox_integrations.deepagents`, the class name `FutureAGISandbox` and the extra
 `sandbox-deepagents` are provisional names and may change before the first release that includes them.

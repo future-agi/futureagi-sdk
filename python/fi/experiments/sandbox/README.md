@@ -1,7 +1,6 @@
 # `fi.experiments.sandbox`: one sandbox per trial, the results in an experiment run
 
-This ships in the Future AGI SDK (`pip install futureagi`). Until that release is published, use the sandbox
-HTTP API.
+This ships in the Future AGI SDK (`pip install futureagi`).
 
 `run_in_sandboxes(dataset, spec, evaluators)` runs every (row, trial) of a dataset in its own sandbox: it writes
 the row and your task files, runs the agent, runs a verifier, reads a reward, and deletes the sandbox, even when
@@ -21,7 +20,7 @@ result = run_in_sandboxes("swe-mini", spec, [reward()], trials=2, name="sandbox-
 ```
 
 Names in this module (`fi.experiments.sandbox`, `SandboxEval`, `run_in_sandboxes`, `sandbox_task`, `reward`)
-are provisional until the owner names them.
+may change before the first release.
 
 ## 1. When to use it
 
@@ -35,8 +34,8 @@ For a task that only calls a model and returns text, use `fi.experiments.run` di
 
 **Agent outside** (`agent=`): your async function `agent(row, sbx, ctx)` runs in this process, calls your model,
 and acts on the sandbox through the handle (`sbx.files`, `sbx.commands`). Only the verifier runs inside. This is
-the mode for hosted sandboxes: hosted sandboxes have no network today; the owner ruled full internet (G-05), being
-built. Until it ships, a command inside a hosted sandbox cannot reach a model API.
+the mode for hosted sandboxes: hosted sandboxes have no network access today, so a command inside a hosted sandbox
+cannot reach a model API.
 
 **Agent inside** (`agent_command=`): a command, such as `python3 /workspace/solve.py /workspace/task.md`, runs
 inside the sandbox. Use it on a self-hosted deployment whose sandboxes have network, or for an agent that needs
@@ -128,7 +127,7 @@ no such reward gets an error score. Use one per key: `[reward(), reward("style",
 
 - **Sandboxes at once.** `max_active=` if you give it, else the workspace's `caps.maxActiveSandboxes` (read once
   from the sandbox settings), else 2. The engine's `concurrency` is lowered to it. A hosted workspace allows 2.
-  An organization's own limit is not readable yet; a create over it gets the same quota refusal and waits.
+  An organization's own limit is not readable from the SDK; a create over it gets the same quota refusal and waits.
 - **The quota wait.** A create refused with 409 `quota_exceeded` created nothing, so it is sent again after the
   server's `Retry-After` (else 5 s), until `quota_wait_s` (default 120; 0 turns the wait off) is spent. No other
   call is sent again. A create that got no answer is never repeated: whether it made a sandbox is unknown.

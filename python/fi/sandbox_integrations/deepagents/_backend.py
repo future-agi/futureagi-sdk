@@ -108,7 +108,7 @@ class FutureAGISandbox(BaseSandbox):
         if inspect.iscoroutinefunction(getattr(sandbox.commands, "run", None)):
             raise TypeError(
                 "FutureAGISandbox needs a sync fi.sandbox.Sandbox; an AsyncSandbox is not "
-                "supported yet (Deep Agents runs the sync backend in worker threads for async agents)"
+                "supported (Deep Agents runs the sync backend in worker threads for async agents)"
             )
         self._sandbox = sandbox
         self._workdir = workdir
@@ -286,9 +286,8 @@ def _exec_maximum(sandbox: Sandbox) -> int:
     """The workspace's exec time limit (``caps.exec.maxTimeoutSeconds`` of its sandbox settings);
     an operator sets it, so it is read, never assumed. It is read with the handle's own client and
     credentials: ``Sandbox.settings()`` would read them from the environment instead."""
-    # TODO: call a public per-handle accessor for the workspace's sandbox settings once the
-    # Python SDK has one; until then this reads the handle's private Sandboxes resource, and
-    # ``max_timeout=`` avoids the read altogether.
+    # The Python SDK has no public per-handle accessor for the workspace's sandbox settings, so
+    # this reads the handle's private Sandboxes resource; ``max_timeout=`` avoids the read altogether.
     raw: Any = sandbox._sandboxes.settings.get()
     caps = raw.get("caps") if isinstance(raw, Mapping) else None
     limits = caps.get("exec") if isinstance(caps, Mapping) else None

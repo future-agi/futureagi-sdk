@@ -22,7 +22,9 @@ sandbox (openai-agents 0.24)::
     )
 
 Without the Agents SDK's sandbox support installed, importing this module raises
-``fi.errors.MissingExtraError``. See ``README.md`` in this folder.
+``fi.errors.MissingExtraError``. openai-agents 0.24 needs ``openai`` 3 or later, while ``futureagi[evals]``
+needs ``openai`` below 3, so this integration cannot be installed in the same environment as
+``futureagi[evals]``; pip reports the conflict when both are asked for. See ``README.md`` in this folder.
 """
 
 from ._client import FutureAGISandboxClient

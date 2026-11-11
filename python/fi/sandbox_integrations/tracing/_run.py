@@ -8,8 +8,8 @@ only a raised error sets the status to ERROR, and it is raised again. The comman
 span only with ``record_command=True`` (a command line can carry secrets); no ``env`` value ever
 does. Without OpenTelemetry both run the command once with the caller's ``env``.
 
-The attribute names (``sandbox.id``, ``sandbox.exec.*``) are provisional until the sandbox service
-names its own server spans.
+The attribute names (``sandbox.id``, ``sandbox.exec.*``) are provisional: they may change before
+the first release that includes them.
 """
 
 from __future__ import annotations

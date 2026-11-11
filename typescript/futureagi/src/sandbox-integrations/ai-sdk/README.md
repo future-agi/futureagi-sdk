@@ -3,8 +3,7 @@
 `@future-agi/sdk/sandbox/ai-sdk` runs the commands and file edits of an AI SDK agent in a Future AGI sandbox: an
 isolated Linux computer whose `/workspace` folder keeps its files until the sandbox is deleted.
 
-These integrations ship in the Future AGI SDK (`npm i @future-agi/sdk`). Until that release is published, use the
-sandbox HTTP API.
+These integrations ship in the Future AGI SDK (`npm i @future-agi/sdk`).
 
 ## Install
 

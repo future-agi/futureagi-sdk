@@ -253,7 +253,7 @@ class SandboxSnapshots(_Part):
 
 
 class SandboxNetworkPolicy(_Part):
-    """``client.sandboxes.network_policy`` (needs the network-on release part)."""
+    """``client.sandboxes.network_policy`` (on deployments whose sandboxes have network access)."""
 
     def get(self, sandbox_id: str) -> T.GetWorkspaceSandboxNetworkPolicyResponse:
         """The desired and applied policy. The response's ``ETag`` header (read it with

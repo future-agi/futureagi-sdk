@@ -1,6 +1,6 @@
 """The error raised when the Agents SDK's sandbox support is not installed, and the line that installs it.
 
-There is no ``futureagi`` extra for this integration yet: the Agents SDK is installed directly, at the
+There is no ``futureagi`` extra for this integration: the Agents SDK is installed directly, at the
 range this client is written for.
 """
 

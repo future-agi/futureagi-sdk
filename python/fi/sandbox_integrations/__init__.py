@@ -16,7 +16,7 @@ of them, no framework and no sandbox client. Each one needs its framework instal
         from fi.sandbox_integrations.mcp_server import SandboxTools, build_server
 
 ``fi.sandbox_integrations.openai_agents``
-    A sandbox client for the OpenAI Agents SDK (no extra yet: install the Agents SDK directly)::
+    A sandbox client for the OpenAI Agents SDK (no extra: install the Agents SDK directly)::
 
         pip install futureagi "openai-agents>=0.24,<0.25"
         from fi.sandbox_integrations.openai_agents import FutureAGISandboxClient, FutureAGISandboxClientOptions

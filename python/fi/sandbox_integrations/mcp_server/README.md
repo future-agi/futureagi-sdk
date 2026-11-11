@@ -1,7 +1,6 @@
 # Sandbox tools over MCP: `futureagi-py sandbox mcp`
 
-These integrations ship in the Future AGI SDK (`pip install futureagi`). Until that release is published, use the
-sandbox HTTP API.
+These integrations ship in the Future AGI SDK (`pip install futureagi`).
 
 `futureagi-py sandbox mcp` is a Model Context Protocol server on standard input and output. Any MCP client (Claude
 Code, the OpenAI Agents SDK, Cursor and others) starts it and gets tools to list, create, run commands in, read,
@@ -174,7 +173,7 @@ and is not deleted on exit.
 
 ## Hosted limits
 
-Hosted sandboxes have no network today; full internet access has been decided and is being built. A workspace runs
+Hosted sandboxes have no network access today, so a command inside one cannot reach the internet. A workspace runs
 at most two active sandboxes at a time (`caps.maxActiveSandboxes`).
 
 ## Not offered

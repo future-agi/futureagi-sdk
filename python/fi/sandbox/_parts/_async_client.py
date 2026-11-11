@@ -257,7 +257,7 @@ class AsyncSnapshots:
 
 
 class AsyncNetworkPolicy:
-    """``sbx.network_policy`` (needs the network-on release part)."""
+    """``sbx.network_policy`` (on deployments whose sandboxes have network access)."""
 
     def __init__(self, sandbox: AsyncSandbox) -> None:
         self._sandbox = sandbox
