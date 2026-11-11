@@ -11,7 +11,10 @@ import type { Experimental_SandboxSession } from "ai";
 
 import { FutureAGIClient } from "../../../futureagi-client";
 import { CommandFailedError, CommandIncompleteError, Sandbox, SandboxError } from "../../../sandbox";
-import { BASE, EXEC, SID, SandboxApi, json, sseText, streamed } from "../../../sandbox/__fixtures__/openapi-mock";
+import { EXEC, SID, SandboxApi, json, sseText, streamed } from "../../../sandbox/__fixtures__/openapi-mock";
+
+// Environment keys go only to Future AGI hosts, so the mock answers on a Future AGI fixture host.
+const HOSTED = "https://sandbox-fixture.futureagi.com/omega/api";
 import {
   EXIT_CANCELLED,
   EXIT_FAILED,
@@ -50,7 +53,7 @@ let globalFetch: jest.SpyInstance;
 beforeEach(() => {
   saved = ENV.map((key) => [key, process.env[key]]);
   for (const key of ENV) delete process.env[key];
-  api = new SandboxApi();
+  api = new SandboxApi(HOSTED);
   globalFetch = jest.spyOn(globalThis, "fetch").mockImplementation((input, init) => api.fetch(input as RequestInfo, init));
 });
 afterEach(() => {
@@ -68,7 +71,7 @@ function client(): FutureAGIClient {
   return c;
 }
 const hostedEnv = (): void => {
-  Object.assign(process.env, { OMEGA_BASE_URL: BASE, FI_API_KEY: API_KEY, FI_SECRET_KEY: SECRET_KEY });
+  Object.assign(process.env, { OMEGA_BASE_URL: api.base, FI_API_KEY: API_KEY, FI_SECRET_KEY: SECRET_KEY });
 };
 const connect = (): Promise<Sandbox> => client().sandboxes.connect(SID);
 const session = async (options: Omit<FutureAGISandboxSessionOptions, "sandbox" | "create"> = {}): Promise<FutureAGISandboxSession> =>
