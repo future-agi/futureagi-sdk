@@ -117,3 +117,24 @@ def test_cli_retains_preview_request_and_scoped_transport(tmp_path, monkeypatch,
     assert testing.main(["preview", CONTEXT, "--input", str(document)]) == 0
     assert json.loads(capsys.readouterr().out) == {"fingerprint": FINGERPRINT}
     assert seen[0][2]["body"] == {"candidate": {"kind": "version", "version": 1}}
+
+
+def test_cli_reports_only_status_and_machine_code_of_a_rejected_request(tmp_path, monkeypatch, capsys):
+    document = tmp_path / "config.json"
+    document.write_text(json.dumps({"candidate": {"kind": "version", "version": 1}}))
+    monkeypatch.setenv("FI_ORGANIZATION_ID", str(uuid4()))
+    monkeypatch.setenv("FI_WORKSPACE_ID", str(uuid4()))
+
+    def handle(request):
+        return httpx.Response(400, json={"status": False, "type": "validation", "code": "model_not_configured",
+                                         "message": "private fixture prompt", "detail": {"prompt": "secret case text"}},
+                              request=request)
+
+    real = testing.Client
+    monkeypatch.setattr(testing, "Client", lambda **kwargs: real(
+        api_key="k", secret_key="s", base_url="https://example.invalid", max_retries=0,
+        http_client=httpx.Client(transport=httpx.MockTransport(handle)), **kwargs))
+    assert testing.main(["preview", CONTEXT, "--input", str(document)]) == 1
+    err = capsys.readouterr().err
+    assert "HTTP 400, model_not_configured" in err
+    assert "private fixture prompt" not in err and "secret case text" not in err

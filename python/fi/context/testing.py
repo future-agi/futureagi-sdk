@@ -147,10 +147,14 @@ def main(argv: list[str] | None = None) -> int:
                 result = getattr(tests, args.command)(args.context_id, args.run_id)
         print(json.dumps(result, ensure_ascii=False))
         return 0
-    except (APIConnectionError, APIError):
-        # Server messages and URLs may include private request content. Keep
-        # uncertain operation keys in the caller's retained input, not stderr.
-        print("Context test request failed; inspect the original operation before retrying.", file=sys.stderr)
+    except (APIConnectionError, APIError) as error:
+        # Server messages, details and URLs may include private request content. Keep
+        # uncertain operation keys in the caller's retained input, not stderr. Only the
+        # HTTP status and the machine error code (a short token) are safe to print.
+        code = getattr(error, "code", None)
+        status = getattr(error, "status_code", None)
+        suffix = f" (HTTP {status}" + (f", {code}" if isinstance(code, str) and re.fullmatch(r"[a-z0-9_]{1,64}", code) else "") + ")" if isinstance(status, int) else ""
+        print(f"Context test request failed{suffix}; inspect the original operation before retrying.", file=sys.stderr)
         return 1
     except (ValueError, KeyError, OSError):
         print("Invalid context test input or scoped SDK configuration.", file=sys.stderr)
