@@ -24,6 +24,10 @@ GATEWAY_TYPES = {
     "gateway/nextjs": ["./dist/gateway/cjs/nextjs.d.ts"],
     "gateway/react": ["./dist/gateway/cjs/react/index.d.ts"],
 }
+# Optional peers: react for ./gateway/react; the AI SDK (`ai`) for ./sandbox/ai-sdk, whose sandbox interface is
+# experimental, so its range stays narrow.
+REACT_PEER = {"react": ">=17.0.0 <20"}
+AI_SDK_PEER = {"ai": ">=7.0.156 <7.1.0"}
 
 
 def digest(path):
@@ -130,6 +134,8 @@ def main(repo, wheel, sdist, tarball, output):
         expected_exports.add("./agents/runs")
     if (repo / "typescript/futureagi/src/sandbox/index.ts").is_file():
         expected_exports.add("./sandbox")
+    if (repo / "typescript/futureagi/src/sandbox-integrations/ai-sdk/index.ts").is_file():
+        expected_exports.add("./sandbox/ai-sdk")
     assert set(pkg["exports"]) == expected_exports, "Exact feature-derived exports"
     boundary_spec = importlib.util.spec_from_file_location(
         "check_gateway_boundaries", Path(__file__).with_name("check_gateway_boundaries.py")
@@ -146,8 +152,9 @@ def main(repo, wheel, sdist, tarball, output):
         assert {key: mapping.get(key) for key in GATEWAY_TYPES} == GATEWAY_TYPES, "Gateway typesVersions mappings"
     for key in GATEWAY_SUBPATHS:
         assert set(pkg["exports"][key]) == {"import", "require"}, "Gateway subpaths resolve with default conditions: " + key
-    assert pkg.get("peerDependencies") == {"react": ">=17.0.0 <20"}, "React is the only peer"
-    assert pkg.get("peerDependenciesMeta") == {"react": {"optional": True}}, "The React peer stays optional"
+    peers = {**REACT_PEER, **(AI_SDK_PEER if "./sandbox/ai-sdk" in expected_exports else {})}
+    assert pkg.get("peerDependencies") == peers, "React and, with ./sandbox/ai-sdk, the AI SDK are the only peers"
+    assert pkg.get("peerDependenciesMeta") == {name: {"optional": True} for name in peers}, "Every peer stays optional"
     assert not pkg.get("scripts")
     dist = repo / "typescript" / "futureagi" / "dist"
     expected_dist = set()
