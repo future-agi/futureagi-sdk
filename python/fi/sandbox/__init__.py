@@ -11,7 +11,9 @@
 ``Sandbox.create`` / ``connect`` / ``list`` / ``settings`` read the environment only:
 ``OMEGA_BASE_URL`` (there is no default host), then ``FI_API_KEY`` + ``FI_SECRET_KEY`` (hosted) or
 ``FUTUREAGI_OMEGA_API_KEY`` (self-hosted EE), never both, and ``FI_WORKSPACE_ID`` /
-``FI_ORGANIZATION_ID`` as the scope. To pass keys, a base URL, a workspace or an organization in
+``FI_ORGANIZATION_ID`` as the scope. The key pair goes only to a Future AGI host (HTTPS in the
+``futureagi.com`` zone) or to loopback unless ``FI_ALLOW_CUSTOM_PLATFORM_URL=1`` is set (the
+command line's ``--allow-custom-base-url``). To pass keys, a base URL, a workspace or an organization in
 code, build the client and use its generated layer, whose ``create`` / ``connect`` return the same
 handle. The client has no default sandbox host either: give it the address::
 

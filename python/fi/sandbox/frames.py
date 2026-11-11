@@ -10,13 +10,17 @@ The server sends ``started`` first, then any number of ``stdout`` / ``stderr``, 
 ``frame.raw`` keeps the frame as the contract types it (``{"event", "id", "data"}``). An event type
 this SDK does not know becomes an :class:`UnknownFrame`, never an error, so a newer server cannot
 break an older SDK. The stream is not resumable: the stream *is* the command.
+
+The server's own failure text (an ``error`` frame's ``message``, an ``exit`` frame's ``error``) is
+passed through the HTTP error path's scrubber and length cap by :func:`private_frame` before a
+caller, an exception or the command line sees it, ``raw`` included.
 """
 
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
-from typing import Any, Mapping, Optional, Union
+from dataclasses import dataclass, field, replace
+from typing import Any, Callable, Mapping, Optional, Union
 
 from fi._core.sse import SseFrame
 
@@ -146,6 +150,27 @@ def to_frame(sse: SseFrame, known: tuple[str, ...] = KNOWN_EVENTS) -> ExecFrame:
     return UnknownFrame(kind, ident, data, raw)
 
 
+#: The field of each frame type that holds the server's own failure text.
+_FAILURE_TEXT = {"error": "message", "exit": "error"}
+
+
+def private_frame(frame: ExecFrame, scrub: Callable[[str], str]) -> ExecFrame:
+    """``frame`` with its server-written failure text (an ``error`` frame's ``message``, an
+    ``exit`` frame's ``error``) passed through ``scrub``, in ``raw`` too. Any other frame, and an
+    ``exit`` frame with no error, is returned as it is."""
+    if not isinstance(frame, (ErrorFrame, ExitFrame)):
+        return frame
+    name = _FAILURE_TEXT[frame.event]
+    text = getattr(frame, name)
+    if not isinstance(text, str):
+        return frame
+    data = frame.raw.get("data")
+    raw = dict(frame.raw)
+    if isinstance(data, dict) and isinstance(data.get(name), str):
+        raw["data"] = {**data, name: scrub(data[name])}
+    return replace(frame, **{name: scrub(text), "raw": raw})
+
+
 __all__ = [
     "ExecFrame",
     "StartedFrame",
@@ -155,5 +180,6 @@ __all__ = [
     "ErrorFrame",
     "UnknownFrame",
     "KNOWN_EVENTS",
+    "private_frame",
     "to_frame",
 ]

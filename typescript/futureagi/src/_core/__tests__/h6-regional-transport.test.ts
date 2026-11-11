@@ -31,6 +31,9 @@ const operations = { json: 'sandboxes.list', create: 'sandboxes.create', sse: 's
 const bases = [US, EU];
 const modes: Mode[] = ['keys', 'bearer'];
 const retrySettings = [undefined, 0];
+// client.sandboxes sends a self-hosted Bearer token only to loopback unless the client opts in with the
+// constructor-only allowCustomBaseUrl; it changes nothing else (the Python harness opts in the same way).
+const optIn = (mode: Mode) => (mode === 'bearer' ? { allowCustomBaseUrl: true } : {});
 
 function regionalGuidance(error: errors.FutureAGIAPIError): void {
   expect(error).toBeInstanceOf(errors.FutureAGIAPIError);
@@ -49,10 +52,10 @@ function regionalGuidance(error: errors.FutureAGIAPIError): void {
 
 const refusalCases = bases.flatMap(base => modes.flatMap(mode => retrySettings.flatMap(retries =>
   ACTIONS.flatMap(action => REFUSALS.map(refusal => ({ base, mode, retries, action, ...refusal }))))));
-(SANDBOX_ABSENT ? test.skip : test).each(refusalCases)('H6 $label $base $mode retries=$retries $action never discovers another region' + " [NOT_APPLICABLE_AT_FOLD: sandbox surface absent (python/tests/platform/test_sandboxes_absent.py); runs automatically when it returns]", async row => {
+(SANDBOX_ABSENT ? test.skip : test).each(refusalCases)('H6 $label $base $mode retries=$retries $action never discovers another region', async row => {
   const wire = new Wire();
   wire.respond = () => new Response(row.body, { status: row.status, headers: { 'content-type': 'application/json' } });
-  const c = wire.client(row.mode, row.retries, { baseUrl: row.base });
+  const c = wire.client(row.mode, row.retries, { baseUrl: row.base, ...optIn(row.mode) });
   const got = await failure(() => invoke(c, row.action));
   expect(got).toBeInstanceOf(errors.FutureAGIAPIError);
   const error = got as errors.FutureAGIAPIError;
@@ -81,11 +84,11 @@ const refusalCases = bases.flatMap(base => modes.flatMap(mode => retrySettings.f
 const redirects = [[US, EU], [EU, US]].flatMap(([base, other]) => modes.flatMap(mode => retrySettings.flatMap(retries =>
   ACTIONS.flatMap(action => [301, 302, 303, 307, 308].flatMap(status => [false, true].map(downgrade =>
     ({ base: base!, other: other!, mode, retries, action, status, downgrade })))))));
-(SANDBOX_ABSENT ? test.skip : test).each(redirects)('H6 redirect $status $base $mode $action retries=$retries downgrade=$downgrade is single-send' + " [NOT_APPLICABLE_AT_FOLD: sandbox surface absent (python/tests/platform/test_sandboxes_absent.py); runs automatically when it returns]", async row => {
+(SANDBOX_ABSENT ? test.skip : test).each(redirects)('H6 redirect $status $base $mode $action retries=$retries downgrade=$downgrade is single-send', async row => {
   const target = (row.downgrade ? row.base.replace('https://', 'http://') : row.other) + '/collect/' + SUBMITTED;
   const wire = new Wire();
   wire.respond = () => new Response(null, { status: row.status, headers: { location: target } });
-  const c = wire.client(row.mode, row.retries, { baseUrl: row.base });
+  const c = wire.client(row.mode, row.retries, { baseUrl: row.base, ...optIn(row.mode) });
   const got = await failure(() => invoke(c, row.action));
   expect(got).toBeInstanceOf(errors.UnexpectedRedirectError);
   const error = got as errors.UnexpectedRedirectError;
@@ -97,7 +100,7 @@ const redirects = [[US, EU], [EU, US]].flatMap(([base, other]) => modes.flatMap(
 });
 
 (SANDBOX_ABSENT ? test.skip : test).each(bases.flatMap(base => ACTIONS.map(action => ({ base, action }))))(
-  'H6 $base $action guidance is fixed, never a response-supplied destination' + " [NOT_APPLICABLE_AT_FOLD: sandbox surface absent (python/tests/platform/test_sandboxes_absent.py); runs automatically when it returns]", async ({ base, action }) => {
+  'H6 $base $action guidance is fixed, never a response-supplied destination', async ({ base, action }) => {
     const wire = new Wire(), c = wire.client('keys', 0, { baseUrl: base });
     const bait = 'https://untrusted-h6.invalid/' + SUBMITTED;
     const messages: string[] = [];
@@ -122,7 +125,7 @@ const redirects = [[US, EU], [EU, US]].flatMap(([base, other]) => modes.flatMap(
   { status: 401, body: '{"error":"wrong_region"}', kind: errors.AuthenticationError, sandboxKind: sandboxErrors.AuthenticationError },
   { status: 503, body: '{"error":"wrong_region"}', kind: CoreServerError, sandboxKind: sandboxErrors.UnavailableError },
   { status: 403, body: '{"error":"role_forbidden"}', kind: errors.PermissionDeniedError, sandboxKind: sandboxErrors.PermissionDeniedError },
-])('H6 specialization does not guess from status/code alone: $status $body' + " [NOT_APPLICABLE_AT_FOLD: sandbox surface absent (python/tests/platform/test_sandboxes_absent.py); runs automatically when it returns]", async ({ status, body, kind, sandboxKind }) => {
+])('H6 specialization does not guess from status/code alone: $status $body', async ({ status, body, kind, sandboxKind }) => {
   const wire = new Wire(), c = wire.client('keys', 0, { baseUrl: EU });
   wire.respond = () => new Response(body, { status });
   const got = await failure(() => c.sandboxes.list());
@@ -137,7 +140,7 @@ const redirects = [[US, EU], [EU, US]].flatMap(([base, other]) => modes.flatMap(
 });
 
 (SANDBOX_ABSENT ? test.skip : test).each(bases.flatMap(base => (['json', 'download'] as const).map(action => ({ base, action }))))(
-  'H6 safe same-origin retry is not fallback: $base $action' + " [NOT_APPLICABLE_AT_FOLD: sandbox surface absent (python/tests/platform/test_sandboxes_absent.py); runs automatically when it returns]", async ({ base, action }) => {
+  'H6 safe same-origin retry is not fallback: $base $action', async ({ base, action }) => {
     const wire = new Wire(), c = wire.client('keys', undefined, { baseUrl: base });
     wire.respond = r => wire.requests.length === 1
       ? new Response('{"error":"omega_service_unavailable"}', { status: 503 }) : success(r);
@@ -149,7 +152,7 @@ const redirects = [[US, EU], [EU, US]].flatMap(([base, other]) => modes.flatMap(
   },
 );
 
-(SANDBOX_ABSENT ? test.skip : test).each(bases)('H6 clone retries=0 preserves selected origin %s' + " [NOT_APPLICABLE_AT_FOLD: sandbox surface absent (python/tests/platform/test_sandboxes_absent.py); runs automatically when it returns]", async base => {
+(SANDBOX_ABSENT ? test.skip : test).each(bases)('H6 clone retries=0 preserves selected origin %s', async base => {
   const wire = new Wire(), c = wire.client('keys', undefined, { baseUrl: base });
   wire.respond = () => new Response('{"error":"omega_service_unavailable"}', { status: 503 });
   const clone = c.withOptions({ retries: 0 });
@@ -159,7 +162,7 @@ const redirects = [[US, EU], [EU, US]].flatMap(([base, other]) => modes.flatMap(
 });
 
 (SANDBOX_ABSENT ? test.skip : test).each(['us-derived', 'eu-env-derived', 'platform-env', 'argument-wins', 'selfhost'])(
-  'H6 selected base derivation/overrides %s' + " [NOT_APPLICABLE_AT_FOLD: sandbox surface absent (python/tests/platform/test_sandboxes_absent.py); runs automatically when it returns]", async which => {
+  'H6 selected base derivation/overrides %s', async which => {
     let options: { baseUrl?: string; platformBaseUrl?: string } = {}, expected = '';
     if (which === 'us-derived') { options = { baseUrl: US }; expected = US + '/omega/api'; }
     else if (which === 'eu-env-derived') { process.env.FI_BASE_URL = EU; expected = EU + '/omega/api'; }

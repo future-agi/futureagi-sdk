@@ -9,7 +9,7 @@ import tempfile
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, Union
 
 from .._resource._stream._async_client import AsyncCommandStream
-from .._wire import UploadBody, policy_info, present
+from .._wire import DOWNLOAD_LIMIT, UploadBody, policy_info, present
 from ..errors import (
     CommandFailedError,
     CommandIncompleteError,
@@ -164,17 +164,23 @@ class AsyncFiles:
         """Upload raw bytes, a path or a binary file (at most 64 MiB). The folder must exist."""
         return await self._api.upload(self._sandbox.id, path, body=data_or_file)
 
-    async def download(self, path: str) -> bytes:
-        """A file's raw bytes."""
-        return await self._api.download(self._sandbox.id, path)
+    async def download(self, path: str, *, max_bytes: int = DOWNLOAD_LIMIT) -> bytes:
+        """A file's raw bytes, at most ``max_bytes`` (64 MiB unless raised or lowered): a larger
+        file raises ``PayloadTooLargeError`` and nothing past the limit is kept."""
+        stream = self._api._stream(self._sandbox.id, path, max_bytes)
+        return b"".join([chunk async for chunk in stream])
 
     async def download_to(
         self,
         path: str,
         local_path: Union[str, "os.PathLike[str]"],
+        *,
+        max_bytes: int = DOWNLOAD_LIMIT,
     ) -> str:
         """Stream a file to ``local_path``: written to a temporary file beside it and renamed
-        only once every byte arrived, so a failure never leaves a partial file there."""
+        only once every byte arrived, so a failure never leaves a partial file there. At most
+        ``max_bytes`` (64 MiB unless raised or lowered): a larger file raises
+        ``PayloadTooLargeError`` and its partial file is removed."""
         target = os.fspath(local_path)
         folder = os.path.dirname(os.path.abspath(target))
         handle = tempfile.NamedTemporaryFile(
@@ -182,7 +188,7 @@ class AsyncFiles:
         )
         try:
             with handle:
-                async for chunk in self._api._stream(self._sandbox.id, path):
+                async for chunk in self._api._stream(self._sandbox.id, path, max_bytes):
                     handle.write(chunk)
             os.replace(handle.name, target)
         except BaseException:

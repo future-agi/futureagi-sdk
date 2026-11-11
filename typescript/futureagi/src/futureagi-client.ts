@@ -232,8 +232,9 @@ export class FutureAGIClient {
   readonly #options: FutureAGIClientOptions;
   /** A base URL was given (`baseUrl` or `FI_BASE_URL`); `client.sandboxes` has no default host. */
   #baseUrlGiven: boolean;
-  private platformShared: PlatformShared;
-  private platformCore?: PlatformCore;
+  // private fields: util.inspect and JSON.stringify of a client never reach the resolved origin's credential headers
+  #platformShared: PlatformShared;
+  #platformCore?: PlatformCore;
   private managementShared: PlatformShared;
   private managementCore?: PlatformCore;
 
@@ -271,7 +272,7 @@ export class FutureAGIClient {
     // checked now; the setting is read per request, before the retrying transport (an error is never retried).
     // Core and platform calls share it: a platform origin under baseUrl (the derived one) gets the headers.
     const extra = new ExtraHeaders(baseUrl, options.extraHeaders);
-    this.platformShared = {
+    this.#platformShared = {
       // Supplemental contracts never replace certified platform operation objects.
       table: { ...CONNECTOR_OPERATIONS, ...PLATFORM_OPERATIONS },
       resolveOrigin: () => {
@@ -289,7 +290,7 @@ export class FutureAGIClient {
     };
 
     this.managementShared = {
-      ...this.platformShared,
+      ...this.#platformShared,
       table: MANAGEMENT_OPERATIONS,
       errorScrubber: scrubManagementValue,
       resolveOrigin: () => managementOrigin(baseUrl, requireAuth(options), selectorHeaders(options), options.platformToken ?? readEnv("FI_PLATFORM_TOKEN")),
@@ -336,7 +337,7 @@ export class FutureAGIClient {
    */
   withOptions(options: { timeoutMs?: number; retries?: number }): FutureAGIClient {
     const copy = new FutureAGIClient({ ...this.#options, ...options });
-    copy.platformShared = this.platformShared; // one resolved origin; the copy's own settings carry the new defaults
+    copy.#platformShared = this.#platformShared; // one resolved origin; the copy's own settings carry the new defaults
     copy.managementShared = this.managementShared;
     copy.#baseUrlGiven = this.#baseUrlGiven;
     return copy;
@@ -364,12 +365,12 @@ export class FutureAGIClient {
 
   /** @internal The platform executor (`src/_core/platform-base.ts`); platform namespaces call it. */
   get _platform(): PlatformCore {
-    this.platformCore ??= new PlatformCore(this.platformShared, {
+    this.#platformCore ??= new PlatformCore(this.#platformShared, {
       timeoutMs: this.#options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
       streamIdleTimeoutMs: DEFAULT_STREAM_IDLE_MS,
       ...(this.#options.retries !== undefined ? { retries: this.#options.retries } : {}),
     });
-    return this.platformCore;
+    return this.#platformCore;
   }
 
   /** @deprecated Renamed `experimentsV2`; this alias will be removed. */

@@ -17,6 +17,7 @@ from ._sandbox_mock import (
     FAKE_KEY,
     FAKE_SECRET,
     FAKE_TOKEN,
+    HOSTED,
     MODES,
     ORIGIN,
     SBX,
@@ -54,7 +55,7 @@ def env(monkeypatch, **values):
         monkeypatch.setenv(name, value)
 
 
-def keys(monkeypatch, base=ORIGIN):
+def keys(monkeypatch, base=HOSTED):
     env(monkeypatch, OMEGA_BASE_URL=base, FI_API_KEY=FAKE_KEY, FI_SECRET_KEY=FAKE_SECRET)
 
 
@@ -86,7 +87,7 @@ def test_hosted_keys_and_scope_from_the_environment(mode, server, monkeypatch):
     assert "x-omega-workspace" not in headers and "x-omega-org" not in headers
     assert "authorization" not in headers
     assert "fake-operator-key-0009" not in str(server.last.request.headers.raw)
-    assert str(server.last.request.url).startswith(ORIGIN + "/workspace/sandboxes")
+    assert str(server.last.request.url).startswith(HOSTED + "/workspace/sandboxes")
 
 
 @pytest.mark.parametrize("mode", MODES)
@@ -185,8 +186,8 @@ def test_plain_http_off_loopback_is_refused_whatever_the_flags(mode, auth, serve
 
 
 def test_the_origin_carries_its_secrets_for_scrubbing_and_hides_them_from_repr():
-    found = resolve_origin({"OMEGA_BASE_URL": ORIGIN + "/", "FI_API_KEY": FAKE_KEY, "FI_SECRET_KEY": FAKE_SECRET})
-    assert found.base == ORIGIN and found.mode == "keys" and set(found.secrets) == {FAKE_KEY, FAKE_SECRET}
+    found = resolve_origin({"OMEGA_BASE_URL": HOSTED + "/", "FI_API_KEY": FAKE_KEY, "FI_SECRET_KEY": FAKE_SECRET})
+    assert found.base == HOSTED and found.mode == "keys" and set(found.secrets) == {FAKE_KEY, FAKE_SECRET}
     assert not any(secret in repr(found) for secret in SECRETS)
 
 

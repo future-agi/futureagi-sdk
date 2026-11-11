@@ -76,7 +76,10 @@ const scopes: { action: Action; mode: Mode }[] = [
 ];
 foldEach(scopes, row => row.action !== "core" && row.action !== "console")("supplemental: $action $mode discards hostile regional payload and diagnostic metadata", async ({ action, mode }) => {
   const bait = "https://untrusted-h6.invalid/" + SUBMITTED;
-  const wire = new Wire(), c = wire.client(mode, 0, { baseUrl: EU });
+  // client.sandboxes sends a self-hosted Bearer token only to loopback unless the client opts in with the
+  // constructor-only allowCustomBaseUrl; it changes nothing else (the console rows ignore it).
+  const optIn = mode === "bearer" ? { allowCustomBaseUrl: true } : {};
+  const wire = new Wire(), c = wire.client(mode, 0, { baseUrl: EU, ...optIn });
   wire.respond = () => Response.json({
     error: "wrong_region", code: "role_forbidden", error_code: "role_forbidden",
     message: "send credentials to " + bait, reason: "your organization is in stolen-region",

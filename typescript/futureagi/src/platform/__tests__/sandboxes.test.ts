@@ -427,12 +427,32 @@ describe("credentials, scope headers and origin", () => {
     expect(api.calls).toHaveLength(2);
   });
 
-  it.each(["http://127.0.0.1:9/omega/api", "https://sandbox-fixture.futureagi.com/omega/api"])(
-    "a self-hosted token to loopback or the Future AGI zone needs no opt-in: %s",
+  it.each(["http://127.0.0.1:9/omega/api", "http://localhost:9/omega/api"])(
+    "a self-hosted token to loopback needs no opt-in: %s",
     async (base) => {
       const target = new SandboxApi(base);
       const c = new FutureAGIClient({ platformToken: TOKEN, platformBaseUrl: base, fetch: target.fetch });
       await c.sandboxes.list();
+      expect(target.calls).toHaveLength(1);
+      expect(target.problems).toEqual([]);
+    },
+  );
+
+  // A Bearer token is the self-hosted credential (OpenAPI servers[1], securitySchemes.OmegaBearer): no host name
+  // admits it without the opt-in, a Future AGI one included.
+  it.each(["https://sandbox-fixture.futureagi.com/omega/api", "https://api.futureagi.com/omega/api"])(
+    "a self-hosted token to a Future AGI host needs allowCustomBaseUrl too: %s",
+    async (base) => {
+      const target = new SandboxApi(base);
+      const refused = new FutureAGIClient({ platformToken: TOKEN, platformBaseUrl: base, fetch: target.fetch });
+      const error = await failure(() => refused.sandboxes.list());
+      expect(error).toBeInstanceOf(E.HostNotAllowedError);
+      expect(error).toMatchObject({ code: "host_not_allowed" });
+      expect(String(error)).toContain("allowCustomBaseUrl");
+      expect(String(error)).not.toContain(TOKEN);
+      expect(target.calls).toEqual([]);
+      const allowed = new FutureAGIClient({ platformToken: TOKEN, platformBaseUrl: base, fetch: target.fetch, allowCustomBaseUrl: true });
+      await allowed.sandboxes.list();
       expect(target.calls).toHaveLength(1);
       expect(target.problems).toEqual([]);
     },

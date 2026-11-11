@@ -10,8 +10,9 @@ import httpx
 
 from fi._core.sse import SseParser
 
+from ..._wire import failure_text
 from ...errors import CORE_ERRORS, stream_failure, translate
-from ...frames import KNOWN_EVENTS, ExecFrame, StartedFrame, to_frame
+from ...frames import KNOWN_EVENTS, ExecFrame, StartedFrame, private_frame, to_frame
 
 NAME = "sandboxes.commands.run"
 
@@ -65,8 +66,11 @@ class CommandStream:
         if self._response is not None:
             self._response.close()
 
-    def _take(self, sse: Any, known: tuple[str, ...]) -> ExecFrame:
-        frame = to_frame(sse, known)
+    def _take(
+        self, sse: Any, known: tuple[str, ...], scrub: Callable[[str], str]
+    ) -> ExecFrame:
+        """One frame, its server-written failure text scrubbed and capped (``scrub``)."""
+        frame = private_frame(to_frame(sse, known), scrub)
         if isinstance(frame, StartedFrame):
             self.exec_id = frame.exec_id
         return frame
@@ -89,11 +93,12 @@ class CommandStream:
         known = tuple(spec.known_events) if spec and spec.known_events else KNOWN_EVENTS
         parser = SseParser()
         try:
+            scrub = failure_text(self._core, NAME, opened.response.request, self._body)
             for chunk in opened.response.iter_bytes():
                 for sse in parser.push(chunk):
-                    yield self._take(sse, known)
+                    yield self._take(sse, known, scrub)
             for sse in parser.end():
-                yield self._take(sse, known)
+                yield self._take(sse, known, scrub)
         except httpx.HTTPError as error:
             raise stream_failure(NAME, error) from None
         finally:

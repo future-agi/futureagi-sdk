@@ -153,7 +153,7 @@ class ValidationError(SandboxAPIError, e.BadRequestError, e.UnprocessableEntityE
 
 
 class PayloadTooLargeError(SandboxAPIError, e.PayloadTooLargeError):
-    """413, or a body over the limit refused before sending (``local=True``, ``limit_bytes``)."""
+    """413, or an upload or download over its limit (``local=True``, ``limit_bytes``)."""
 
     _error_code = "PAYLOAD_TOO_LARGE"
 

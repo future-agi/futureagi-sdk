@@ -28,7 +28,7 @@ from ._sandbox_cli_support import (  # noqa: F401 (registers the server fixture)
     run,
     server_fixture,
 )
-from ._sandbox_mock import FAKE_KEY, FAKE_SECRET, FAKE_TOKEN, ORIGIN, SBX, error
+from ._sandbox_mock import FAKE_KEY, FAKE_SECRET, FAKE_TOKEN, HOSTED, SBX, error
 
 # --- registration and help -------------------------------------------------------------------
 
@@ -133,7 +133,7 @@ def test_a_foreign_self_host_refusal_speaks_to_a_command_line_user(server, capsy
 
 def test_hosted_keys_and_scope_headers_by_mode(server, capsys, monkeypatch):
     monkeypatch.delenv("FUTUREAGI_OMEGA_API_KEY")
-    monkeypatch.setenv("OMEGA_BASE_URL", ORIGIN)
+    monkeypatch.setenv("OMEGA_BASE_URL", HOSTED)
     monkeypatch.setenv("FI_API_KEY", FAKE_KEY)
     monkeypatch.setenv("FI_SECRET_KEY", FAKE_SECRET)
     monkeypatch.setenv("FI_WORKSPACE_ID", "ws_1")
@@ -143,7 +143,7 @@ def test_hosted_keys_and_scope_headers_by_mode(server, capsys, monkeypatch):
     assert headers["x-api-key"] == FAKE_KEY and headers["x-secret-key"] == FAKE_SECRET
     assert headers["x-workspace-id"] == "ws_1" and headers["x-organization-id"] == "org_1"
     assert "authorization" not in headers and "x-omega-workspace" not in headers
-    assert str(server.last.request.url).startswith(ORIGIN + "/workspace/sandboxes")
+    assert str(server.last.request.url).startswith(HOSTED + "/workspace/sandboxes")
     no_secret(*capsys.readouterr())
 
 

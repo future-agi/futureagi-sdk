@@ -10,6 +10,7 @@ import type * as T from "../generated/platform/types.gen";
 import type { Sandboxes, UploadBody } from "../platform/resources/sandboxes";
 import { mapped } from "./errors";
 import type { Sandbox } from "./sandbox";
+import type { DownloadOptions } from "./wire";
 
 /** One entry of a folder listing. */
 export type FileEntry = T.ListWorkspaceSandboxFilesResponse["entries"][number];
@@ -76,14 +77,17 @@ export class Files {
     return mapped(() => this.#api.files.upload(this.#sandbox.id, path, { body: data }));
   }
 
-  /** A file's raw bytes. */
-  download(path: string): Promise<Uint8Array> {
-    return mapped(() => this.#api.files.download(this.#sandbox.id, path));
+  /** A file's raw bytes, up to `maxBytes` (default 64 MiB, the upload limit): a larger file throws
+   * `PayloadTooLargeError` (code `download_too_large`, `limitBytes`) and nothing is kept. */
+  download(path: string, options: { readonly maxBytes?: number } = {}): Promise<Uint8Array> {
+    const call: DownloadOptions = options.maxBytes !== undefined ? { maxBytes: options.maxBytes } : {};
+    return mapped(() => this.#api.files.download(this.#sandbox.id, path, call));
   }
 
-  /** Download to `localPath`: written to a temporary file next to it, renamed only once complete (Node.js). */
-  async downloadTo(path: string, localPath: string): Promise<string> {
-    const data = await this.download(path);
+  /** Download to `localPath`, up to `maxBytes` as `download`: written to a temporary file next to it, renamed only
+   * once complete (Node.js). On any failure, including a file over the limit, no file is left behind. */
+  async downloadTo(path: string, localPath: string, options: { readonly maxBytes?: number } = {}): Promise<string> {
+    const data = await this.download(path, options);
     const fs = await import("node:fs/promises");
     const partial = `${localPath}.${uuidv4()}.partial`;
     try {

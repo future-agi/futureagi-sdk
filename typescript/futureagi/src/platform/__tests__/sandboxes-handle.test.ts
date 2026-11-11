@@ -44,6 +44,8 @@ const SECRET_KEY = "sbx-test-secret-key-not-valid";
 const TOKEN = "sbx-test-bearer-token-not-valid";
 const OS_KEY = "sbx-test-operator-key-never-sent";
 const LOCAL = "http://127.0.0.1:9/omega/api";
+/** A Future AGI host: hosted keys from the environment go only to one (or to loopback). */
+const HOSTED = "https://sandbox-fixture.futureagi.com/omega/api";
 const ENV = [
   "FI_BASE_URL", "FI_PLATFORM_BASE_URL", "FI_API_KEY", "FI_SECRET_KEY", "FI_PLATFORM_TOKEN", "FI_WORKSPACE_ID",
   "FI_ORGANIZATION_ID", "FI_ALLOW_CUSTOM_PLATFORM_URL", "FI_ALLOW_INSECURE_HTTP", "FI_EXTRA_HEADERS",
@@ -61,7 +63,7 @@ let routed: SandboxApi;
 beforeEach(() => {
   saved = ENV.map((key) => [key, process.env[key]]);
   for (const key of ENV) delete process.env[key];
-  api = new SandboxApi();
+  api = new SandboxApi(HOSTED);
   routed = api;
   globalFetch = jest.spyOn(globalThis, "fetch").mockImplementation((input, init) => routed.fetch(input as RequestInfo, init));
 });
@@ -85,9 +87,9 @@ function client(mode: "keys" | "bearer" = "keys"): FutureAGIClient {
   return c;
 }
 
-/** Hosted keys and the mock's base in the environment, for the statics. */
+/** Hosted keys and the mock's (Future AGI) base in the environment, for the statics. */
 const hostedEnv = (extra: Record<string, string> = {}): void => {
-  Object.assign(process.env, { OMEGA_BASE_URL: BASE, FI_API_KEY: API_KEY, FI_SECRET_KEY: SECRET_KEY, ...extra });
+  Object.assign(process.env, { OMEGA_BASE_URL: api.base, FI_API_KEY: API_KEY, FI_SECRET_KEY: SECRET_KEY, ...extra });
 };
 
 const connect = (): Promise<Sandbox> => client().sandboxes.connect(SID);
@@ -207,12 +209,21 @@ describe("Sandbox statics read the environment only", () => {
   });
 
   it.each([{ FI_API_KEY: API_KEY, FI_SECRET_KEY: SECRET_KEY }, { FUTUREAGI_OMEGA_API_KEY: TOKEN }])(
-    "refuses plain HTTP to a remote host before any request",
+    "refuses plain HTTP to a remote host before any request, whatever the opt-ins",
     async (credentials) => {
-      Object.assign(process.env, { OMEGA_BASE_URL: "http://remote-ee.test:8080", FI_ALLOW_INSECURE_HTTP: "1", ...credentials });
-      const error = await failure(() => Sandbox.list());
-      expect(error).toMatchObject({ code: "insecure_sandbox_origin" });
-      expect(api.calls).toEqual([]);
+      // FI_ALLOW_CUSTOM_PLATFORM_URL lets the keys past the host rule, so the HTTPS rule is what refuses them here
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      try {
+        Object.assign(process.env, {
+          OMEGA_BASE_URL: "http://remote-ee.test:8080", FI_ALLOW_INSECURE_HTTP: "1", FI_ALLOW_CUSTOM_PLATFORM_URL: "1", ...credentials,
+        });
+        const error = await failure(() => Sandbox.list());
+        expect(error).toMatchObject({ code: "insecure_sandbox_origin" });
+        expect(api.calls).toEqual([]);
+        expect(globalFetch).not.toHaveBeenCalled();
+      } finally {
+        warn.mockRestore();
+      }
     },
   );
 
@@ -434,7 +445,7 @@ describe("commands", () => {
   });
 
   it("an idle stream is CommandIncompleteError caused by a timeout", async () => {
-    const origin = resolveSandboxOrigin({ OMEGA_BASE_URL: BASE, FI_API_KEY: API_KEY, FI_SECRET_KEY: SECRET_KEY });
+    const origin = resolveSandboxOrigin({ OMEGA_BASE_URL: api.base, FI_API_KEY: API_KEY, FI_SECRET_KEY: SECRET_KEY });
     const core = new PlatformCore(
       { resolveOrigin: () => origin, table: PLATFORM_OPERATIONS, fetch: api.fetch },
       { timeoutMs: 5_000, streamIdleTimeoutMs: 30 },

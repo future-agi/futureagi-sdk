@@ -30,6 +30,9 @@ from ._gates_support import REPO
 
 SPEC_PATH = REPO / "openapi" / "platform" / "generated" / "futureagi-platform.openapi.json"
 ORIGIN = "https://sbx.example.test/omega/api"
+#: A hosted origin in the Future AGI zone: the environment path sends the hosted keys only there
+#: (or to loopback) unless FI_ALLOW_CUSTOM_PLATFORM_URL allows another host.
+HOSTED = "https://sbx.futureagi.com/omega/api"
 SBX = "sbx_" + "a" * 24
 EXEC = "exec_" + "b" * 24
 SNAP = "snap_1"

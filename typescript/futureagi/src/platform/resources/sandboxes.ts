@@ -11,9 +11,11 @@
 //   `FI_PLATFORM_BASE_URL` is refused before anything is sent (`missing_base_url`);
 // - plain HTTP to anything but loopback is refused before a request is built (`insecure_sandbox_origin`), in
 //   both credential modes and whatever `allowInsecureHttp` says;
-// - a self-hosted origin (Bearer token) that is not loopback and not in the Future AGI zone needs the
+// - a self-hosted origin (Bearer token) that is not loopback, a Future AGI host included, needs the
 //   constructor-only `allowCustomBaseUrl: true` (OpenAPI servers[1]); `FI_ALLOW_CUSTOM_PLATFORM_URL` and
 //   `allowCustomPlatformUrl` do not stand in for it;
+// - a download is read up to `maxBytes` (default 64 MiB, the upload limit); a larger file throws
+//   `PayloadTooLargeError` (code `download_too_large`) and nothing is kept;
 // - every call the contract marks non-idempotent is sent once, with no retry at all (not on a 429, not after a
 //   failure before sending): create, hibernate, resume, snapshots.create, snapshots.restore, files.rename,
 //   files.upload, files.write, files.makeDir, files.remove and networkPolicy.update. `update` and
@@ -33,6 +35,7 @@ import {
   type Bound,
   bytes,
   call,
+  type DownloadOptions,
   ExecStream,
   failure,
   type Host,
@@ -41,7 +44,14 @@ import {
   type UploadBody,
 } from "../../sandbox/wire";
 
-export { ExecStream, type ExecFrame, type SandboxCallOptions, type UnknownExecFrame, type UploadBody } from "../../sandbox/wire";
+export {
+  type DownloadOptions,
+  ExecStream,
+  type ExecFrame,
+  type SandboxCallOptions,
+  type UnknownExecFrame,
+  type UploadBody,
+} from "../../sandbox/wire";
 
 /** `client.sandboxes.files`: files and folders by path inside a sandbox. */
 export class SandboxFiles {
@@ -68,8 +78,9 @@ export class SandboxFiles {
     const { recursive, ...rest } = options;
     return call(this.#bound, "sandboxes.files.remove", { path: { id: sandboxId, path }, query: { recursive } }, rest, true);
   }
-  /** A file's raw bytes. */
-  download(sandboxId: string, path: string, options: SandboxCallOptions = {}): APIPromise<Uint8Array> {
+  /** A file's raw bytes, up to `maxBytes` (default 64 MiB, the upload limit): a larger file throws
+   * `PayloadTooLargeError` (code `download_too_large`) and nothing is kept. */
+  download(sandboxId: string, path: string, options: DownloadOptions = {}): APIPromise<Uint8Array> {
     return bytes(this.#bound, "sandboxes.files.download", { path: { id: sandboxId, path } }, options);
   }
   /** Upload raw bytes; the target is replaced only once every byte arrived, and its folder must exist. Sent once, never retried. */

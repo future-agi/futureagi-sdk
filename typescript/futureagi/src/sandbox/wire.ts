@@ -1,17 +1,18 @@
 // The sandbox rules on top of the shared platform executor, used by `client.sandboxes`
 // (src/platform/resources/sandboxes.ts): no default host, the HTTPS guard, the self-hosted origin opt-in
-// (`allowCustomBaseUrl`), the error scrubber that keeps a sandbox state, the sandbox error classes
-// (./errors.ts) on every call, redirect privacy, send-once calls, and the exec stream.
+// (`allowCustomBaseUrl`: a Bearer token goes only to loopback without it), the error scrubber that keeps a
+// sandbox state, the sandbox error classes (./errors.ts) on every call, redirect privacy, send-once calls, the
+// download size limit, and the exec stream, whose server error text is scrubbed and capped as an HTTP error
+// body's message is.
 
 import type * as T from "../generated/platform/types.gen";
-import { connectionError } from "../_core/error-map";
+import { connectionError, readErrorShape } from "../_core/error-map";
 import { ConfigurationError, HostNotAllowedError, PlatformNotConfiguredError, UnexpectedRedirectError } from "../_core/errors";
-import { isInsecureHttp } from "../_core/http-security";
-import { hostAllowed } from "../_core/origins";
+import { isInsecureHttp, isLoopback } from "../_core/http-security";
 import { type CallOptions, type Opened, PlatformCore } from "../_core/platform-base";
 import { APIPromise } from "../_core/raw";
 import { scrubValue } from "../_core/redact";
-import type { OperationParams } from "../_core/request";
+import { BODY_LIMITS, type OperationParams } from "../_core/request";
 import { readSse, type SseFrame } from "../_core/sse";
 import { SDKException } from "../utils/errors";
 import { toSandboxError } from "./errors";
@@ -29,6 +30,13 @@ export interface Bound {
 
 /** Per-call options of every sandbox method. Sandbox operations take no idempotency key. */
 export type SandboxCallOptions = Omit<CallOptions, "idempotencyKey">;
+
+/** `files.download` options: the call options plus the largest file to accept. */
+export type DownloadOptions = SandboxCallOptions & {
+  /** The largest file to accept, in bytes; default `BODY_LIMITS.bundle` (64 MiB, the upload limit). A larger file
+   * throws `PayloadTooLargeError` (code `download_too_large`) and nothing is kept. */
+  readonly maxBytes?: number;
+};
 
 /** Raw file content for `files.upload`: bytes, a Blob (a file from `fs.openAsBlob`), or text. */
 export type UploadBody = Uint8Array | ArrayBuffer | Blob | string;
@@ -92,20 +100,40 @@ export function sandboxCore(bound: Bound, operation: string): PlatformCore {
       operation,
     );
   }
-  if (origin.mode === "bearer" && !bound.allowCustomBaseUrl && !hostAllowed(origin.url)) {
+  // A Bearer token is the self-hosted credential (OpenAPI servers[1], securitySchemes.OmegaBearer): loopback only,
+  // unless the client was built with allowCustomBaseUrl. No hosted host name admits it.
+  if (origin.mode === "bearer" && !bound.allowCustomBaseUrl && !isLoopback(origin.url)) {
     throw new HostNotAllowedError(
       `${operation}: refusing to send a self-hosted Bearer token to ${origin.url.host}, which is not loopback. ` +
         "If this is your Omega EE, pass allowCustomBaseUrl: true to the FutureAGIClient constructor " +
-        "(FI_ALLOW_CUSTOM_PLATFORM_URL and allowCustomPlatformUrl do not apply to sandboxes)",
+        "(FI_ALLOW_CUSTOM_PLATFORM_URL and allowCustomPlatformUrl do not apply to a Bearer token)",
       "host_not_allowed",
       operation,
     );
   }
   const scrub = core.shared.errorScrubber ?? scrubValue;
+  // the origin is handed over by resolveOrigin, so the per-call state keeps it off its enumerable fields too
   return new PlatformCore(
-    { ...core.shared, origin, errorScrubber: (value, secrets) => liftSandboxState(scrub(value, secrets)) },
+    { ...core.shared, resolveOrigin: () => origin, errorScrubber: (value, secrets) => liftSandboxState(scrub(value, secrets)) },
     core.settings,
   );
+}
+
+/** The byte limit of one download: `maxBytes`, else `BODY_LIMITS.bundle`. */
+function downloadLimit(maxBytes: number | undefined, operation: string): number {
+  if (maxBytes === undefined) return BODY_LIMITS.bundle;
+  if (typeof maxBytes !== "number" || !Number.isSafeInteger(maxBytes) || maxBytes < 0) {
+    throw new ConfigurationError(`${operation}: maxBytes must be a whole number of bytes, 0 or more`, "invalid_max_bytes", operation);
+  }
+  return maxBytes;
+}
+
+/** Server-supplied error text from the exec stream, treated as an HTTP error body's message is: every secret the
+ * request carried replaced, whitespace collapsed and the length capped the same way. */
+function errorText(text: string, scrub: (value: unknown) => unknown): string {
+  const scrubbed = scrub(text);
+  if (typeof scrubbed !== "string") return "";
+  return readErrorShape({ code: "exec_error", message: scrubbed }).message ?? scrubbed.trim();
 }
 
 /** A redirect on a sandbox call never names where it pointed. */
@@ -140,12 +168,15 @@ export function call<R>(bound: Bound, name: string, params: OperationParams, opt
   });
 }
 
-/** Call an operation whose success body is a file, under the sandbox rules. */
-export function bytes(bound: Bound, name: string, params: OperationParams, options: SandboxCallOptions): APIPromise<Uint8Array> {
+/** Call an operation whose success body is a file, under the sandbox rules, up to `maxBytes` (default
+ * `BODY_LIMITS.bundle`). */
+export function bytes(bound: Bound, name: string, params: OperationParams, options: DownloadOptions): APIPromise<Uint8Array> {
   return new APIPromise(async () => {
+    const { maxBytes, ...rest } = options;
     const core = sandboxCore(bound, name);
+    const limit = downloadLimit(maxBytes, name);
     try {
-      const { data, meta } = await core.call<Uint8Array>(name, params, options, undefined, true).withResponse();
+      const { data, meta } = await core.call<Uint8Array>(name, params, rest, undefined, limit).withResponse();
       return { data, meta };
     } catch (error) {
       throw failure(error);
@@ -153,7 +184,15 @@ export function bytes(bound: Bound, name: string, params: OperationParams, optio
   });
 }
 
-function decodeFrame(frame: SseFrame, known: readonly string[]): ExecFrame {
+/** A known frame's data with its server error text (`error.message`, `exit.error`) passed through `errorText`;
+ * output and every other field are left as sent. */
+function scrubbedData(event: string, data: Record<string, unknown>, scrub: (value: unknown) => unknown): Record<string, unknown> {
+  if (event === "error" && typeof data.message === "string") return { ...data, message: errorText(data.message, scrub) };
+  if (event === "exit" && typeof data.error === "string") return { ...data, error: errorText(data.error, scrub) };
+  return data;
+}
+
+function decodeFrame(frame: SseFrame, known: readonly string[], scrub: (value: unknown) => unknown): ExecFrame {
   let raw: unknown;
   try {
     raw = JSON.parse(frame.data);
@@ -162,7 +201,7 @@ function decodeFrame(frame: SseFrame, known: readonly string[]): ExecFrame {
   }
   const id = frame.id ?? (frame.lastEventId !== "" ? frame.lastEventId : undefined);
   if (known.includes(frame.event) && raw !== null && typeof raw === "object" && !Array.isArray(raw)) {
-    return { event: frame.event, id: id ?? "", data: raw } as T.OmegaExecFrame;
+    return { event: frame.event, id: id ?? "", data: scrubbedData(frame.event, raw as Record<string, unknown>, scrub) } as T.OmegaExecFrame;
   }
   return { event: "unknown", eventType: frame.event, ...(id !== undefined ? { id } : {}), raw };
 }
@@ -171,7 +210,9 @@ function decodeFrame(frame: SseFrame, known: readonly string[]): ExecFrame {
  * A command's output stream, for `for await`. It ends after the `exit` (or `error`) frame; if the
  * connection ends first it simply ends, and the caller decides (the `Sandbox` handle throws
  * `CommandIncompleteError`). `return()` (a `break` out of the loop) closes the connection, which cancels the
- * command. Never retried: a reconnect would run the command again.
+ * command. Never retried: a reconnect would run the command again. The server's error text in an `error` frame
+ * (`message`) and an `exit` frame (`error`) has every secret the request carried replaced and is capped as an
+ * HTTP error body's message is; output frames are passed as sent.
  */
 export class ExecStream implements AsyncIterableIterator<ExecFrame> {
   /** Request id of the response that opened the stream, when the server sent one. */
@@ -180,6 +221,7 @@ export class ExecStream implements AsyncIterableIterator<ExecFrame> {
   readonly #controller: AbortController;
   readonly #release: () => void;
   readonly #body: ReadableStream<Uint8Array>;
+  readonly #scrub: (value: unknown) => unknown;
   #closed = false;
   #execId?: string;
 
@@ -189,6 +231,7 @@ export class ExecStream implements AsyncIterableIterator<ExecFrame> {
     this.#controller = controller;
     this.#release = release;
     this.#body = opened.response.body ?? new ReadableStream<Uint8Array>();
+    this.#scrub = opened.scrubError ?? ((value: unknown) => (core.shared.errorScrubber ?? scrubValue)(value, core.origin().secrets));
     this.#frames = this.#read(core, operation);
   }
 
@@ -225,7 +268,7 @@ export class ExecStream implements AsyncIterableIterator<ExecFrame> {
     try {
       const frames = readSse(this.#body, { idleTimeoutMs: core.settings.streamIdleTimeoutMs, signal: this.#controller.signal });
       for await (const frame of frames) {
-        const decoded = decodeFrame(frame, known);
+        const decoded = decodeFrame(frame, known, this.#scrub);
         if (decoded.event === "started") this.#execId = decoded.data.execId;
         yield decoded;
         if (decoded.event === "exit" || decoded.event === "error") return;

@@ -18,8 +18,13 @@ Settings come from the environment, as for ``Sandbox.create`` (contract section 
 ``--base-url`` or ``OMEGA_BASE_URL`` (no default host); ``FI_API_KEY`` + ``FI_SECRET_KEY`` (hosted)
 or ``FUTUREAGI_OMEGA_API_KEY`` (self-hosted EE), never both; ``FI_WORKSPACE_ID`` /
 ``FI_ORGANIZATION_ID`` sent as the mode's scope headers. A saved ``login`` is not used (the
-refusal for a missing credential says so). A self-host token goes only to a loopback origin from here (the constructor-only
-``allow_custom_base_url`` has no command-line or environment form).
+refusal for a missing credential says so). The key pair goes only to a Future AGI host (HTTPS in
+the ``futureagi.com`` zone) or to loopback, and a self-host token only to loopback, unless
+``--allow-custom-base-url`` (the command-line form of ``allow_custom_base_url``) is passed: a
+``--base-url`` copied from a document cannot send the exported keys anywhere else. For an
+``OMEGA_BASE_URL`` from the environment, ``FI_ALLOW_CUSTOM_PLATFORM_URL=1`` also lets the key pair
+go to another host, as for ``Sandbox.create``; it never applies to ``--base-url``. Either prints the
+core's one-time notice.
 
 Output: ``--format text`` (the default) is for people. ``--format json`` (or ``--json``) prints the
 API record: the list response for ``list``; the sandbox record for ``create``, ``get``,
@@ -53,7 +58,9 @@ Run commands and keep files in hosted sandboxes: isolated computers in your work
 Settings come from the environment:
   OMEGA_BASE_URL             where the sandbox API is (or pass --base-url). Hosted:
                              https://<gateway-host>/omega/api. Self-hosted: your EE's
-                             address with its port. There is no default.
+                             address with its port. There is no default. Your keys go
+                             only to Future AGI hosts (futureagi.com, HTTPS) or loopback
+                             unless you pass --allow-custom-base-url.
   FI_API_KEY, FI_SECRET_KEY  your Future AGI API key pair (hosted), or
   FUTUREAGI_OMEGA_API_KEY    an EE account key (self-hosted). Set one, not both.
   FI_WORKSPACE_ID            optional: the workspace to use.
@@ -83,6 +90,8 @@ examples:
 Put the command after --: words after it are the command's, not this tool's options."""
 #: exec's own options that take a value (the pre-parse check skips them and their value).
 _EXEC_VALUED = ("--cwd", "--env", "--timeout", "--base-url", "--format")
+#: exec's own options that take none (the pre-parse check skips them).
+_EXEC_FLAGS = ("--json", "--allow-custom-base-url")
 _SETTING = "OMEGA_BASE_URL (or --base-url)"
 _NO_LOGIN = " (a saved login is not read by sandbox commands: export the variables)"
 #: The program name and this group as typed, set by register() from the root parser's prog.
@@ -96,10 +105,16 @@ def _command(*words: str) -> str:
 
 
 _CLI_HINT = (
-    "the command line never allows that; reach the EE on a loopback address (for example "
-    "through an SSH tunnel to http://127.0.0.1:PORT), or use Python: "
+    "pass --allow-custom-base-url if this is your EE, or reach it on a loopback address (for "
+    "example through an SSH tunnel to http://127.0.0.1:PORT); in Python: "
     "FutureAGIClient(platform_token=..., platform_base_url=..., allow_custom_base_url=True)"
 )
+#: What a refusal of the key pair to another host says, for an address typed here and for
+#: OMEGA_BASE_URL.
+_KEYS_HINT = ("pass --allow-custom-base-url to send them to that host. A self-hosted server takes "
+              "FUTUREAGI_OMEGA_API_KEY instead")
+_ENV_KEYS_HINT = ("pass --allow-custom-base-url (or set FI_ALLOW_CUSTOM_PLATFORM_URL=1) to send them "
+                  "to that host. A self-hosted server takes FUTUREAGI_OMEGA_API_KEY instead")
 
 
 class _Usage(Exception):
@@ -137,7 +152,14 @@ def _add_globals(parser: argparse.ArgumentParser, *, nested: bool) -> None:
     unless given, so it never undoes the group-level value)."""
     parser.add_argument(
         "--base-url", metavar="URL", default=argparse.SUPPRESS if nested else None,
-        help="where the sandbox API is (default: $OMEGA_BASE_URL)",
+        help="where the sandbox API is (default: $OMEGA_BASE_URL); your keys go only to Future "
+             "AGI hosts (futureagi.com, HTTPS) or loopback unless --allow-custom-base-url is given",
+    )
+    parser.add_argument(
+        "--allow-custom-base-url", action="store_true",
+        default=argparse.SUPPRESS if nested else False,
+        help="send the credentials to a host outside Future AGI's and loopback: a self-hosted "
+             "EE, or a host you trust (prints a notice)",
     )
     parser.add_argument(
         "--format", choices=("text", "json"), default=argparse.SUPPRESS if nested else "text",
@@ -170,7 +192,7 @@ def _exec_needs_dashes(argv: list):
         if word in _EXEC_VALUED:
             index += 2
             continue
-        if word.split("=", 1)[0] in _EXEC_VALUED or word == "--json":
+        if word.split("=", 1)[0] in _EXEC_VALUED or word in _EXEC_FLAGS:
             index += 1
             continue
         if word in ("-h", "--help"):
@@ -389,7 +411,8 @@ def _open(args: argparse.Namespace):
     from fi.sandbox._connection import BASE_URL_ENV, OriginRule, SandboxConnection
 
     env = dict(os.environ)
-    base = args.base_url if getattr(args, "base_url", None) is not None else env.get(BASE_URL_ENV, "")
+    typed = getattr(args, "base_url", None) is not None
+    base = args.base_url if typed else env.get(BASE_URL_ENV, "")
     if not base.strip():
         raise _Usage(
             "missing_base_url",
@@ -398,8 +421,13 @@ def _open(args: argparse.Namespace):
             "There is no default.",
         )
     env[BASE_URL_ENV] = base
-    core = SandboxConnection(environ=env).core()
-    rule = OriginRule(allow_custom_base_url=False, hint=_CLI_HINT, setting=_SETTING)
+    flag = bool(getattr(args, "allow_custom_base_url", False))
+    # A typed address takes the keys off Future AGI's hosts only with the flag: the variable that
+    # allows it for OMEGA_BASE_URL never applies to a --base-url copied from a document.
+    allow = True if flag else (False if typed else None)
+    hint = _KEYS_HINT if typed else _ENV_KEYS_HINT
+    core = SandboxConnection(environ=env, allow_custom_base_url=allow, keys_hint=hint).core()
+    rule = OriginRule(allow_custom_base_url=flag, hint=_CLI_HINT, setting=_SETTING)
     return Sandboxes(core, rule=rule), core
 
 
@@ -470,6 +498,8 @@ def _next_step(error: BaseException, code: str, args, core) -> str:
                 f"check the id with: {_command('list')}, and FI_WORKSPACE_ID")
     if isinstance(error, sb.InsufficientStorageError):
         return ". Free some space: delete files (rm) or sandboxes you no longer need"
+    if code == "download_too_large":
+        return " (cp keeps this limit; copy a larger file from Python with that argument)"
     return ""
 
 
@@ -722,9 +752,34 @@ def _remote(text: str):
     return head, tail
 
 
+def _inside(folder: str, sandbox_id: str, path: str) -> str:
+    """Where ``SANDBOX_ID:PATH`` lands in the local ``folder``: the last part of ``path``, with
+    both ``/`` and ``\\`` as separators on every system. A name that is empty, ``.`` or ``..``,
+    names a drive or is absolute, or resolves outside ``folder`` (a link there pointing out) is
+    refused before anything is sent or written: a script may copy names a sandbox listed."""
+    import ntpath
+    import os
+    import re
+
+    name = os.path.normpath(re.split(r"[\\/]", path)[-1] or ".")
+    target = os.path.join(folder, name)
+    unsafe = name in (".", "..") or bool(ntpath.splitdrive(name)[0])
+    unsafe = unsafe or os.path.isabs(name) or ntpath.isabs(name)
+    if not unsafe:
+        base, real = os.path.realpath(folder), os.path.realpath(target)
+        try:
+            unsafe = real == base or os.path.commonpath([base, real]) != base
+        except ValueError:  # another drive, or a device name
+            unsafe = True
+    if unsafe:
+        raise _Usage("unsafe_file_name", f"{sandbox_id}:{path} has no file name that can be written "
+                                         f"inside {folder}; name the local file: "
+                                         f"{_command('cp', f'{sandbox_id}:{path}', 'LOCAL_FILE')}")
+    return target
+
+
 def _cp(args, api, out: _Output) -> int:
     import os
-    import posixpath
     from pathlib import Path
 
     from fi.sandbox.types import EXIT_OK, EXIT_REFUSED
@@ -761,7 +816,7 @@ def _cp(args, api, out: _Output) -> int:
                                           f"{sandbox_id}:results.json")
     local = args.destination
     if os.path.isdir(local):
-        local = os.path.join(local, posixpath.basename(path))
+        local = _inside(local, sandbox_id, path)
     try:
         target = _handle(api, sandbox_id).files.download_to(path, local)
     except OSError as error:

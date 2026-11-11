@@ -17,7 +17,7 @@
  * `idempotency_key_in_progress` on a keyed call waits (`Retry-After`, else 1 s) and resends with the
  * same key; a 3xx throws `UnexpectedRedirectError` (the keys never reach another origin); every other
  * status maps through `apiError` (payload redacted, held secrets scrubbed); a failure with no response
- * is `APIConnectionError` / `APITimeoutError`.
+ * is `APIConnectionError` / `APITimeoutError`. A file body is read up to a size limit (`readBytes`).
  */
 
 import type { ExtraHeaders } from "../extra-headers";
@@ -35,6 +35,7 @@ import {
   IDEMPOTENCY_HEADER,
   inProgressWait,
   type OperationParams,
+  readBytes,
   REPLAYED_HEADER,
   resolveIdempotencyKey,
 } from "./request";
@@ -179,6 +180,8 @@ async function readCapped(response: Response): Promise<{ text: string; complete:
 export interface Opened {
   readonly response: Response;
   readonly meta: CallMeta;
+  /** Scrubs every secret this request carried from server error text that arrives inside the stream. */
+  readonly scrubError?: (value: unknown) => unknown;
 }
 
 export class PlatformCore {
@@ -207,12 +210,13 @@ export class PlatformCore {
   }
 
   origin(): PlatformOrigin {
-    this.shared.origin ??= this.shared.resolveOrigin();
-    return this.shared.origin;
+    // not enumerable (the default): util.inspect and JSON.stringify of a client never show its credential headers
+    if (this.shared.origin === undefined) Object.defineProperty(this.shared, "origin", { value: this.shared.resolveOrigin(), writable: true, configurable: true });
+    return this.shared.origin as PlatformOrigin;
   }
 
-  /** Call a JSON operation (with `bytes`, one whose success body is a file: `T` is `Uint8Array`); await it for the parsed body, or `.withResponse()` for `{ data, meta }`. */
-  call<T = unknown>(name: string, params: OperationParams = {}, options: CallOptions = {}, mapResponse?: ResponseMapper, bytes = false): APIPromise<T> {
+  /** Call a JSON operation (with `bytes`, one whose success body is a file: `T` is `Uint8Array`, read up to `bytes` bytes when a number, else `readBytes`'s default); await it for the parsed body, or `.withResponse()` for `{ data, meta }`. */
+  call<T = unknown>(name: string, params: OperationParams = {}, options: CallOptions = {}, mapResponse?: ResponseMapper, bytes: boolean | number = false): APIPromise<T> {
     return new APIPromise(async () => {
       const { data, meta } = await this.execute(name, params, options, false, mapResponse, bytes);
       return { data: data as T, meta };
@@ -221,11 +225,11 @@ export class PlatformCore {
 
   /** Open a streaming operation; read `response.body` (the resumable helpers do). */
   async openStream(name: string, params: OperationParams = {}, options: CallOptions = {}): Promise<Opened> {
-    const { response, meta } = await this.execute(name, params, options, true);
-    return { response: response as Response, meta };
+    const { response, meta, scrubError } = await this.execute(name, params, options, true);
+    return { response, meta, ...(scrubError !== undefined ? { scrubError } : {}) };
   }
 
-  private async execute(name: string, params: OperationParams, options: CallOptions, stream: boolean, mapResponse?: ResponseMapper, bytes = false) {
+  private async execute(name: string, params: OperationParams, options: CallOptions, stream: boolean, mapResponse?: ResponseMapper, bytes: boolean | number = false): Promise<Opened & { readonly data: unknown }> {
     const op = this.operation(name);
     if (op.humanOnly === true)
       throw new ConfigurationError(`${name} is a decision only a person makes, in the Future AGI app`, "human_only_verb", name);
@@ -241,7 +245,7 @@ export class PlatformCore {
     const encoded = buildBody(op, params.body);
     const key = resolveIdempotencyKey(op, options.idempotencyKey);
     const headers: Record<string, string> = {
-      Accept: stream ? "text/event-stream" : bytes ? "application/octet-stream, */*;q=0.5" : "application/json",
+      Accept: stream ? "text/event-stream" : bytes !== false ? "application/octet-stream, */*;q=0.5" : "application/json",
       "User-Agent": "futureagi-typescript",
       ...origin.headers,
     };
@@ -311,7 +315,8 @@ export class PlatformCore {
         throw this.redirect(name, url, response);
       }
       if (response.ok) {
-        if (stream || bytes) return { response, data: bytes ? new Uint8Array(await response.arrayBuffer()) : undefined, meta: metaOf() };
+        if (stream) return { response, data: undefined, meta: metaOf(), scrubError: (value: unknown) => (this.shared.errorScrubber ?? scrubValue)(value, scrub) };
+        if (bytes !== false) return { response, data: await readBytes(response, name, bytes === true ? undefined : bytes), meta: metaOf() };
         const text = await response.text();
         let data: unknown;
         try {

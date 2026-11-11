@@ -1,19 +1,102 @@
-"""Helpers both modes share: the no-retry count, upload bodies, If-Match values, records, and what
-``create`` / ``connect`` return in each mode."""
+"""Helpers both modes share: the no-retry count, upload bodies, the download limit, the scrubber
+for a stream's failure text, If-Match values, records, and what ``create`` / ``connect`` return in
+each mode."""
 
 from __future__ import annotations
 
 import os
-from typing import IO, Any, Awaitable, Dict, Generator, Mapping, TypeVar, Union
+from typing import (
+    IO,
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    Generator,
+    Mapping,
+    TypeVar,
+    Union,
+)
 
+from fi._core.platform_base import _values
+from fi._core.redact import request_secret_values, scrub_value
 from fi._core.request import BODY_LIMITS
+from fi._core.transport import MAX_ERROR_BODY
+from fi._extra_headers import ExtraHeadersError
 
-from .errors import ConfigurationError, SandboxError
+from .errors import ConfigurationError, PayloadTooLargeError, SandboxError
 from .types import NetworkPolicyInfo
 
 #: ``retries=`` for a call that must never be sent twice.
 NO_RETRY = 0
 UploadBody = Union[bytes, bytearray, memoryview, str, "os.PathLike[str]", IO[bytes]]
+#: The most bytes a download keeps unless ``max_bytes=`` says otherwise: the upload limit.
+DOWNLOAD_LIMIT = BODY_LIMITS["bundle"]
+DOWNLOAD = "sandboxes.files.download"
+
+
+class DownloadBudget:
+    """What one download may still keep: ``limit`` bytes (None: :data:`DOWNLOAD_LIMIT`). Built
+    before the request is sent, so a bad limit sends nothing; a ``Content-Length`` over it is
+    refused before a byte is read, and a body that grows past it as it arrives, so nothing past
+    the limit is ever kept (``download_to`` then removes its partial file)."""
+
+    def __init__(self, limit: Any = None) -> None:
+        limit = DOWNLOAD_LIMIT if limit is None else limit
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
+            raise ConfigurationError(
+                f"{DOWNLOAD}: max_bytes must be a whole number of bytes above 0",
+                code="invalid_option",
+                operation=DOWNLOAD,
+            )
+        self.limit, self.size = limit, 0
+
+    def start(self, response: Any) -> None:
+        """Refuse a response whose ``Content-Length`` is over the limit, before reading it."""
+        declared = response.headers.get("content-length", "").strip()
+        if declared.isdigit() and int(declared) > self.limit:
+            raise self._over()
+
+    def take(self, chunk: bytes) -> bytes:
+        """``chunk``, or the refusal once the bytes so far are over the limit."""
+        self.size += len(chunk)
+        if self.size > self.limit:
+            raise self._over()
+        return chunk
+
+    def _over(self) -> PayloadTooLargeError:
+        error = PayloadTooLargeError(
+            413,
+            None,
+            code="download_too_large",
+            operation=DOWNLOAD,
+            message=f"{DOWNLOAD}: the file is larger than the download limit of {self.limit} "
+            "bytes, so it was not kept; pass a larger max_bytes= to sbx.files.download or "
+            "sbx.files.download_to",
+        )
+        error.limit_bytes, error.local = self.limit, True
+        return error
+
+
+def failure_text(core: Any, name: str, request: Any, body: Any) -> Callable[[str], str]:
+    """What the server's failure text in a stream passes through, as the HTTP error path treats
+    an error body: the executor's error scrubber over every secret the request carried (the
+    origin's, the extra headers' values, the request's secret fields such as ``commands.run``'s
+    ``env``), then the error-body length cap."""
+    shared = core.shared
+    try:
+        extra = {} if shared.extra_headers is None else shared.extra_headers.for_url(request.url)
+    except ExtraHeadersError:  # changed since it was sent: scrub every value the request carried
+        extra = dict(request.headers)
+    marked = core.operation(name).secret_fields
+    secrets = [*shared.origin().secrets, *_values(extra), *request_secret_values(body, marked)]
+    scrub = shared.error_scrubber or scrub_value
+
+    def private(text: str) -> str:
+        clean = scrub(text, secrets)
+        clean = clean if isinstance(clean, str) else str(clean)
+        return clean.encode("utf-8")[:MAX_ERROR_BODY].decode("utf-8", "replace")
+
+    return private
 
 
 def payload(body: UploadBody) -> bytes:

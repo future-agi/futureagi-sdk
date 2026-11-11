@@ -4,7 +4,9 @@
 
 - ``OMEGA_BASE_URL``: hosted is ``https://<gateway-host>/omega/api``; a self-hosted EE is its origin
   with its port. There is no default host: without it a
-  :class:`~fi.sandbox.errors.ConfigurationError` names ``OMEGA_BASE_URL``. The URL is used as given.
+  :class:`~fi.sandbox.errors.ConfigurationError` names ``OMEGA_BASE_URL``. The URL is used as given,
+  but the hosted key pair goes only to a Future AGI host (HTTPS in the ``futureagi.com`` zone) or to
+  loopback, the core's host guard; another host needs ``FI_ALLOW_CUSTOM_PLATFORM_URL=1``.
 - Hosted: ``FI_API_KEY`` + ``FI_SECRET_KEY``, sent as ``X-Api-Key`` / ``X-Secret-Key``.
 - Self-host: ``FUTUREAGI_OMEGA_API_KEY``, sent as ``Authorization: Bearer``.
 - Both modes set is a configuration error: both are never sent. ``OMEGA_OS_API_KEY`` is never read.
@@ -14,18 +16,27 @@
 - ``FI_EXTRA_HEADERS``: exactly as ``FutureAGIClient`` sends it (the same ``fi._http`` path), read
   from the process environment when each request is sent, only to URLs under ``OMEGA_BASE_URL``
   (same scheme, host and port, a path under its path), never over a header the SDK sets, and
-  never in an error. A malformed value is refused before anything is sent.
+  never in an error. A malformed value is refused before anything is sent. A scope header of
+  either mode named there is dropped, so only ``FI_WORKSPACE_ID`` / ``FI_ORGANIZATION_ID`` choose
+  the scope.
 
 To pass keys, a base URL, a workspace or an organization in code, build ``FutureAGIClient`` /
 ``AsyncFutureAGIClient`` and call ``client.sandboxes.create(...)`` / ``.connect(id)``: the client's
 own origin rules apply there and it sends the same scope headers.
 
+The hosted keys' host rule is the core's (:func:`fi._core.origins.host_allowed`, with loopback
+exactly as the core reads it): a key pair for any other host is refused before anything is sent
+(``custom_base_url_not_allowed``, naming only ``host[:port]``) unless the environment sets
+``FI_ALLOW_CUSTOM_PLATFORM_URL`` (read as the core reads it) or the command line passes
+``--allow-custom-base-url``; either prints the core's one-time notice.
+
 Every sandbox call, from either path, also passes :class:`OriginRule` first: a client given no base
 URL is refused (``missing_base_url``: its derived default host is not a sandbox host); plain HTTP to a
 host that is not loopback is refused (``insecure_sandbox_origin``, whatever ``allow_insecure_http``
 says); and a self-host Bearer token goes to a host that is not loopback only when the client was
-built with the constructor-only ``allow_custom_base_url=True`` (OpenAPI ``servers[1]``); the
-environment can never allow that. No key appears in a ``repr``, a log line or an error.
+built with the constructor-only ``allow_custom_base_url=True`` (OpenAPI ``servers[1]``), or the
+command line passes ``--allow-custom-base-url``; the environment can never allow that. No key
+appears in a ``repr``, a log line or an error.
 
 Closing an environment connection forgets its HTTP client, so a handle that shares it (a restored or
 listed sandbox) opens a new one on its next call instead of failing.
@@ -35,12 +46,22 @@ from __future__ import annotations
 
 import ipaddress
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Dict, List, Mapping, Optional
 
 import httpx
 
-from fi._core.origins import PlatformOrigin, ascii_host, display_host
+from fi._core.http_security import is_insecure_http
+from fi._core.origins import (
+    ALLOW_CUSTOM_ENV,
+    FUTURE_AGI_ZONE,
+    PlatformOrigin,
+    _allow_flag,
+    _warn_once,
+    ascii_host,
+    display_host,
+    host_allowed,
+)
 from fi._core.platform_async import AsyncPlatformCore
 from fi._core.platform_base import PlatformCore
 from fi._core.redact import scrub_value
@@ -98,9 +119,47 @@ def _url(raw: str) -> httpx.URL:
     return url
 
 
-def resolve_origin(environ: Optional[Mapping[str, str]] = None) -> PlatformOrigin:
+#: What a refusal of the hosted keys to another host tells an environment user to do.
+KEYS_HINT = (
+    f"set {ALLOW_CUSTOM_ENV}=1 if you trust it. A self-hosted EE takes {BEARER_ENV} instead"
+)
+
+
+def _keys_zone(
+    origin: PlatformOrigin,
+    env: Mapping[str, str],
+    allow: Optional[bool],
+    hint: str,
+) -> PlatformOrigin:
+    """The hosted keys go only where the core's host guard sends them (HTTPS in the Future AGI
+    zone, or loopback as the core reads it). Another host needs ``allow`` (None: the environment's
+    ``FI_ALLOW_CUSTOM_PLATFORM_URL``, read by the core's own parser) and then gets the core's
+    one-time notice. Plain HTTP off loopback is left to :class:`OriginRule`, which refuses it
+    whatever is allowed."""
+    url = origin.url
+    if origin.mode != "keys" or is_insecure_http(url) or host_allowed(url):
+        return origin
+    if not _allow_flag(allow, env):
+        raise ConfigurationError(
+            f"{API_KEY_ENV} and {SECRET_KEY_ENV} go only to Future AGI hosts "
+            f"({FUTURE_AGI_ZONE} over HTTPS) or loopback; refusing to send them to "
+            f"{display_host(url)}: {hint}",
+            code="custom_base_url_not_allowed",
+        )
+    _warn_once(url)
+    return replace(origin, custom=True)
+
+
+def resolve_origin(
+    environ: Optional[Mapping[str, str]] = None,
+    *,
+    allow_custom_base_url: Optional[bool] = None,
+    keys_hint: str = KEYS_HINT,
+) -> PlatformOrigin:
     """The origin, the one credential and the scope headers every request carries, from the
-    environment only; a configuration error before anything is sent."""
+    environment only; a configuration error before anything is sent. ``allow_custom_base_url``
+    lets the hosted keys go to a host outside the Future AGI zone (None: the environment's
+    ``FI_ALLOW_CUSTOM_PLATFORM_URL`` decides; False: never)."""
     env = os.environ if environ is None else environ
     raw = _env(env, BASE_URL_ENV)
     if raw is None:
@@ -134,7 +193,8 @@ def resolve_origin(environ: Optional[Mapping[str, str]] = None) -> PlatformOrigi
             code="missing_credentials",
         )
     scope = scope_headers(mode, _env(env, WORKSPACE_ENV), _env(env, ORGANIZATION_ENV))
-    return PlatformOrigin(url, mode, "env", {**headers, **scope}, secrets)
+    origin = PlatformOrigin(url, mode, "env", {**headers, **scope}, secrets)
+    return _keys_zone(origin, env, allow_custom_base_url, keys_hint)
 
 
 def is_loopback(host: str) -> bool:
@@ -244,10 +304,17 @@ class _Connection:
     core_class: Any = PlatformCore
 
     def __init__(
-        self, *, environ: Optional[Mapping[str, str]] = None, transport: Any = None
+        self,
+        *,
+        environ: Optional[Mapping[str, str]] = None,
+        transport: Any = None,
+        allow_custom_base_url: Optional[bool] = None,
+        keys_hint: str = KEYS_HINT,
     ) -> None:
         self._environ = environ
         self._transport = transport
+        self._allow = allow_custom_base_url
+        self._keys_hint = keys_hint
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}()"
@@ -255,7 +322,9 @@ class _Connection:
     def core(self) -> Any:
         """A platform executor for the environment's settings; resolves (and may refuse) now.
         ``FI_EXTRA_HEADERS`` goes only under the origin's URL, as the client's under its own."""
-        origin = resolve_origin(self._environ)
+        origin = resolve_origin(
+            self._environ, allow_custom_base_url=self._allow, keys_hint=self._keys_hint
+        )
         transport = self._transport
         if transport is None:
             transport = default_transport()

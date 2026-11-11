@@ -6,7 +6,9 @@
  *     const result = await sbx.commands.run("echo hello");        // result.exitCode, result.stdout
  *
  * `Sandbox.create`, `Sandbox.connect`, `Sandbox.list` and `Sandbox.settings` read the environment only
- * (./config.ts). To pass keys, a base URL, a workspace or an organization in code, build a client:
+ * (./config.ts). With `FI_API_KEY` + `FI_SECRET_KEY`, `OMEGA_BASE_URL` must be a Future AGI host over HTTPS (or
+ * loopback); any other host is refused before anything is sent unless `FI_ALLOW_CUSTOM_PLATFORM_URL=1`. To pass
+ * keys, a base URL, a workspace or an organization in code, build a client:
  *
  *     const client = new FutureAGIClient({ platformBaseUrl: "https://ee.internal:8443", platformToken, allowCustomBaseUrl: true });
  *     const sbx = await client.sandboxes.create({ body: { name: "demo" } });   // the same Sandbox handle

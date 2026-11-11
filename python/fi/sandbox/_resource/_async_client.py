@@ -22,7 +22,7 @@ from fi._core.transport import MAX_ERROR_BODY
 from fi.generated.platform import types as T
 
 from .._connection import OriginRule, http_of, sandbox_core
-from .._wire import NO_RETRY, UploadBody, etag, payload, sandbox_record
+from .._wire import NO_RETRY, DownloadBudget, UploadBody, etag, payload, sandbox_record
 from ..errors import CORE_ERRORS, stream_failure, translate
 from ._stream._async_client import AsyncCommandStream
 
@@ -116,8 +116,8 @@ class AsyncSandboxFiles(_Part):
         )
 
     async def download(self, sandbox_id: str, path: str) -> bytes:
-        """A file's raw bytes."""
-        return b"".join([chunk async for chunk in self._stream(sandbox_id, path)])
+        """A file's raw bytes, at most 64 MiB (a larger file raises ``PayloadTooLargeError``)."""
+        return b"".join([chunk async for chunk in self._stream(sandbox_id, path, None)])
 
     async def upload(
         self, sandbox_id: str, path: str, *, body: UploadBody
@@ -152,10 +152,12 @@ class AsyncSandboxFiles(_Part):
             retries=NO_RETRY,
         )
 
-    async def _stream(self, sandbox_id: str, path: str) -> AsyncIterator[bytes]:
-        """The file's bytes as they arrive (the executor has no binary call, so this sends
-        the prepared request itself with the executor's own error mapping)."""
+    async def _stream(self, sandbox_id: str, path: str, max_bytes: Any) -> AsyncIterator[bytes]:
+        """The file's bytes as they arrive, never more than ``max_bytes`` (None: 64 MiB; the
+        executor has no binary call, so this sends the prepared request itself with the
+        executor's own error mapping)."""
         name, core, setting = "sandboxes.files.download", self._core, self._rule.setting
+        budget = DownloadBudget(max_bytes)
         failure = self._refusal(name)
         http = http_of(core)
         if failure is None:
@@ -191,8 +193,9 @@ class AsyncSandboxFiles(_Part):
                 failure = await self._refused(prep, response)
             else:
                 core._meta(prep, response, 0)
+                budget.start(response)
                 async for chunk in response.aiter_bytes():
-                    yield chunk
+                    yield budget.take(chunk)
         except httpx.HTTPError as error:
             raise stream_failure(name, error) from None
         finally:
