@@ -3,6 +3,7 @@
  * 077a67e123501299cc0a47943c285fb1ea391301. Literal wire expectations are
  * independent of production mapping/policy tables. */
 import * as errors from '../errors';
+import * as sandboxErrors from '../../sandbox/errors';
 import { CoreServerError } from '../__fixtures__/platform';
 import { ACTIONS, EU, US, SUBMITTED, SANDBOX_ABSENT, Wire, assertPrivate, assertSelectedOnly,
   failure, invoke, isolate, success, type Mode } from '../__fixtures__/h6-k2w-transport';
@@ -57,7 +58,8 @@ const refusalCases = bases.flatMap(base => modes.flatMap(mode => retrySettings.f
   const error = got as errors.FutureAGIAPIError;
   // Safe same-origin GET/PUT retries are not regional fallback. Exec/creation
   // retain the narrower no-replay policy, even with default client retries.
-  const count = row.status === 503 && row.retries === undefined && ['json', 'upload', 'download'].includes(row.action) ? 4 : 1;
+  // Upload is sent once: it is non-idempotent, so it is never retried.
+  const count = row.status === 503 && row.retries === undefined && ['json', 'download'].includes(row.action) ? 4 : 1;
   assertSelectedOnly(wire, row.base, row.mode, count);
   expect(wire.sleeps).toHaveLength(count - 1);
   expect(error).toMatchObject({ statusCode: row.status, operation: operations[row.action] });
@@ -66,7 +68,10 @@ const refusalCases = bases.flatMap(base => modes.flatMap(mode => retrySettings.f
   assertPrivate(error, logs());
   if (row.status === 403) regionalGuidance(error);
   else {
-    expect(error.constructor).toBe(row.status === 401 ? errors.AuthenticationError : CoreServerError);
+    // client.sandboxes throws the sandbox status classes (src/sandbox/errors.ts), which extend these shared
+    // ones; the pin moved from the shared class to its sandbox subclass when the generated layer began mapping.
+    expect(error).toBeInstanceOf(row.status === 401 ? errors.AuthenticationError : CoreServerError);
+    expect(error.constructor).toBe(row.status === 401 ? sandboxErrors.AuthenticationError : sandboxErrors.UnavailableError);
     expect(error.message).not.toContain(US);
     expect(error.message).not.toContain(EU);
     expect(error.message).not.toContain('wrong_region');
@@ -114,23 +119,24 @@ const redirects = [[US, EU], [EU, US]].flatMap(([base, other]) => modes.flatMap(
 );
 
 (SANDBOX_ABSENT ? test.skip : test).each([
-  { status: 401, body: '{"error":"wrong_region"}', kind: errors.AuthenticationError },
-  { status: 503, body: '{"error":"wrong_region"}', kind: CoreServerError },
-  { status: 403, body: '{"error":"role_forbidden"}', kind: errors.PermissionDeniedError },
-])('H6 specialization does not guess from status/code alone: $status $body' + " [NOT_APPLICABLE_AT_FOLD: sandbox surface absent (python/tests/platform/test_sandboxes_absent.py); runs automatically when it returns]", async ({ status, body, kind }) => {
+  { status: 401, body: '{"error":"wrong_region"}', kind: errors.AuthenticationError, sandboxKind: sandboxErrors.AuthenticationError },
+  { status: 503, body: '{"error":"wrong_region"}', kind: CoreServerError, sandboxKind: sandboxErrors.UnavailableError },
+  { status: 403, body: '{"error":"role_forbidden"}', kind: errors.PermissionDeniedError, sandboxKind: sandboxErrors.PermissionDeniedError },
+])('H6 specialization does not guess from status/code alone: $status $body' + " [NOT_APPLICABLE_AT_FOLD: sandbox surface absent (python/tests/platform/test_sandboxes_absent.py); runs automatically when it returns]", async ({ status, body, kind, sandboxKind }) => {
   const wire = new Wire(), c = wire.client('keys', 0, { baseUrl: EU });
   wire.respond = () => new Response(body, { status });
-  // @ts-expect-error NOT_APPLICABLE_AT_FOLD: sandbox surface absent (python/tests/platform/test_sandboxes_absent.py); runs automatically when it returns
   const got = await failure(() => c.sandboxes.list());
   expect(got).toBeInstanceOf(kind);
   const error = got as errors.FutureAGIAPIError;
-  expect(error.constructor).toBe(kind);
+  // the sandbox subclass of the shared class (src/sandbox/errors.ts), never WrongRegionError
+  expect(error.constructor).toBe(sandboxKind);
+  expect(error).not.toBeInstanceOf(errors.WrongRegionError);
   expect(error.message).not.toContain(US);
   expect(error.message).not.toContain(EU);
   assertSelectedOnly(wire, EU, 'keys', 1);
 });
 
-(SANDBOX_ABSENT ? test.skip : test).each(bases.flatMap(base => (['json', 'upload', 'download'] as const).map(action => ({ base, action }))))(
+(SANDBOX_ABSENT ? test.skip : test).each(bases.flatMap(base => (['json', 'download'] as const).map(action => ({ base, action }))))(
   'H6 safe same-origin retry is not fallback: $base $action' + " [NOT_APPLICABLE_AT_FOLD: sandbox surface absent (python/tests/platform/test_sandboxes_absent.py); runs automatically when it returns]", async ({ base, action }) => {
     const wire = new Wire(), c = wire.client('keys', undefined, { baseUrl: base });
     wire.respond = r => wire.requests.length === 1
@@ -147,7 +153,6 @@ const redirects = [[US, EU], [EU, US]].flatMap(([base, other]) => modes.flatMap(
   const wire = new Wire(), c = wire.client('keys', undefined, { baseUrl: base });
   wire.respond = () => new Response('{"error":"omega_service_unavailable"}', { status: 503 });
   const clone = c.withOptions({ retries: 0 });
-  // @ts-expect-error NOT_APPLICABLE_AT_FOLD: sandbox surface absent (python/tests/platform/test_sandboxes_absent.py); runs automatically when it returns
   await expect(clone.sandboxes.list()).rejects.toBeInstanceOf(CoreServerError);
   assertSelectedOnly(wire, base, 'keys', 1);
   expect(wire.sleeps).toEqual([]);
@@ -165,7 +170,6 @@ const redirects = [[US, EU], [EU, US]].flatMap(([base, other]) => modes.flatMap(
       options = { baseUrl: US, platformBaseUrl: EU + '/chosen/api' }; expected = EU + '/chosen/api';
     } else { options = { baseUrl: 'https://selfhost-h6.invalid/root' }; expected = 'https://selfhost-h6.invalid/root/omega/api'; }
     const wire = new Wire(), c = wire.client('keys', 0, options);
-    // @ts-expect-error NOT_APPLICABLE_AT_FOLD: sandbox surface absent (python/tests/platform/test_sandboxes_absent.py); runs automatically when it returns
     await c.sandboxes.list();
     await c.environments.list();
     expect(wire.requests.map(r => r.url)).toEqual([

@@ -211,10 +211,10 @@ export class PlatformCore {
     return this.shared.origin;
   }
 
-  /** Call a JSON operation; await it for the parsed body, or `.withResponse()` for `{ data, meta }`. */
-  call<T = unknown>(name: string, params: OperationParams = {}, options: CallOptions = {}, mapResponse?: ResponseMapper): APIPromise<T> {
+  /** Call a JSON operation (with `bytes`, one whose success body is a file: `T` is `Uint8Array`); await it for the parsed body, or `.withResponse()` for `{ data, meta }`. */
+  call<T = unknown>(name: string, params: OperationParams = {}, options: CallOptions = {}, mapResponse?: ResponseMapper, bytes = false): APIPromise<T> {
     return new APIPromise(async () => {
-      const { data, meta } = await this.execute(name, params, options, false, mapResponse);
+      const { data, meta } = await this.execute(name, params, options, false, mapResponse, bytes);
       return { data: data as T, meta };
     });
   }
@@ -225,7 +225,7 @@ export class PlatformCore {
     return { response: response as Response, meta };
   }
 
-  private async execute(name: string, params: OperationParams, options: CallOptions, stream: boolean, mapResponse?: ResponseMapper) {
+  private async execute(name: string, params: OperationParams, options: CallOptions, stream: boolean, mapResponse?: ResponseMapper, bytes = false) {
     const op = this.operation(name);
     if (op.humanOnly === true)
       throw new ConfigurationError(`${name} is a decision only a person makes, in the Future AGI app`, "human_only_verb", name);
@@ -241,7 +241,7 @@ export class PlatformCore {
     const encoded = buildBody(op, params.body);
     const key = resolveIdempotencyKey(op, options.idempotencyKey);
     const headers: Record<string, string> = {
-      Accept: stream ? "text/event-stream" : "application/json",
+      Accept: stream ? "text/event-stream" : bytes ? "application/octet-stream, */*;q=0.5" : "application/json",
       "User-Agent": "futureagi-typescript",
       ...origin.headers,
     };
@@ -311,7 +311,7 @@ export class PlatformCore {
         throw this.redirect(name, url, response);
       }
       if (response.ok) {
-        if (stream) return { response, data: undefined, meta: metaOf() };
+        if (stream || bytes) return { response, data: bytes ? new Uint8Array(await response.arrayBuffer()) : undefined, meta: metaOf() };
         const text = await response.text();
         let data: unknown;
         try {

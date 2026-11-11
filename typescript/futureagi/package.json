@@ -36,6 +36,10 @@
       "import": { "types": "./dist/esm/credentials/index.d.ts", "default": "./dist/esm/credentials/index.js" },
       "require": { "types": "./dist/src/credentials/index.d.ts", "default": "./dist/src/credentials/index.js" }
     },
+    "./sandbox": {
+      "import": { "types": "./dist/esm/sandbox/index.d.ts", "default": "./dist/esm/sandbox/index.js" },
+      "require": { "types": "./dist/src/sandbox/index.d.ts", "default": "./dist/src/sandbox/index.js" }
+    },
     "./webhooks": {
       "import": { "types": "./dist/esm/webhooks/index.d.ts", "default": "./dist/esm/webhooks/index.js" },
       "require": { "types": "./dist/src/webhooks/index.d.ts", "default": "./dist/src/webhooks/index.js" }
@@ -69,6 +73,7 @@
       "connectors": ["./dist/src/connectors/index.d.ts"],
       "integrations": ["./dist/src/integrations/index.d.ts"],
       "credentials": ["./dist/src/credentials/index.d.ts"],
+      "sandbox": ["./dist/src/sandbox/index.d.ts"],
       "webhooks": ["./dist/src/webhooks/index.d.ts"],
       "gateway": ["./dist/gateway/cjs/index.d.ts"],
       "gateway/testing": ["./dist/gateway/cjs/testing.d.ts"],

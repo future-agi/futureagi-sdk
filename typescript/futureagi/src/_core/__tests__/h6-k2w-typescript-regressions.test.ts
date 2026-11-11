@@ -6,6 +6,7 @@ import { apiError, errorClassFor } from "../error-map";
 import { AuthenticationError, ConfigurationError, CredentialsMissingError, HostNotAllowedError,
   MixedCredentialsError, PermissionDeniedError, WrongRegionError, isAuthError } from "../errors";
 import { CoreServerError } from "../__fixtures__/platform";
+import * as SandboxErrors from "../../sandbox/errors";
 import { resetWarnings, resolvePlatformOrigin } from "../origins";
 import { ACTIONS, API_KEY, SECRET_KEY, TOKEN, SUBMITTED, EU, US, Wire, assertPrivate,
   assertSelectedOnly, failure, foldEach, invoke, isolate, type Action, type Mode } from "../__fixtures__/h6-k2w-transport";
@@ -105,7 +106,10 @@ foldEach(["json", "sse", "upload", "console"] as const, action => action !== "co
     const wire = new Wire(), c = wire.client("keys", 0, { baseUrl: US });
     wire.respond = () => Response.json({ error: { code: "wrong_region" } }, { status: 403 });
     const got = await failure(() => invoke(c, action));
-    expect((got as Error).constructor).toBe(PermissionDeniedError);
+    // client.sandboxes throws the sandbox subclass of the same shared class (src/sandbox/errors.ts)
+    expect((got as Error).constructor).toBe(action === "console" ? PermissionDeniedError : SandboxErrors.PermissionDeniedError);
+    expect(got).toBeInstanceOf(PermissionDeniedError);
+    expect(got).not.toBeInstanceOf(WrongRegionError);
     expect(String(got)).not.toContain(EU);
     expect(String(got)).not.toContain(US);
     assertSelectedOnly(wire, US, "keys", 1);
