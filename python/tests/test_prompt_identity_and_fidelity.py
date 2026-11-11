@@ -311,6 +311,64 @@ def test_write_configuration_preserves_supported_settings(backend, operation):
     assert fetched.template.model_configuration == config
 
 
+DEFAULT_WIRE_SETTINGS = {
+    "model": "test-model", "temperature": 0.7, "max_tokens": 1000, "top_p": 1.0,
+    "frequency_penalty": 0, "presence_penalty": 0,
+}
+LOOKUP_TOOL = {"type": "function", "function": {
+    "name": "lookup", "parameters": {"type": "object", "properties": {
+        "order_id": {"type": ["string", "null"], "default": None},
+    }},
+}}
+
+
+@pytest.mark.parametrize("operation", ["create", "create_new_version", "save_current_draft"])
+@pytest.mark.parametrize("settings", [
+    {},
+    {"tools": [LOOKUP_TOOL]},
+    {"tool_choice": "auto"},
+    {"response_format": {"type": "json_object"}},
+], ids=["none-set", "tools-only", "tool-choice-only", "response-format-only"])
+def test_write_configuration_omits_unset_settings(backend, operation, settings):
+    config = ModelConfig(model_name="test-model", **copy.deepcopy(settings))
+    template = PromptTemplate(
+        id=TEMPLATE_ID, name=NAME, version="v1", model_configuration=config,
+        messages=[MessageBase(role="user", content="Hello")],
+    )
+    client = Prompt(template=template, **AUTH)
+    backend.clients.append(client)
+    if operation == "create":
+        client.template.id = None
+        backend.replies.append((201, {"result": {"id": TEMPLATE_ID, "name": NAME,
+                                                "template_version": "v1"}}))
+    elif operation == "create_new_version":
+        backend.replies.extend([
+            (200, {"results": [{"template_version": "v1", "is_draft": False}]}),
+            (201, {"result": [{"template_version": "v2"}]}),
+        ])
+    else:
+        backend.replies.extend([
+            (200, {"results": [{"template_version": "v1", "is_draft": True}]}),
+            (200, {"status": True}),
+        ])
+    getattr(client, operation)()
+    write = backend.calls[-1]["json"]
+    entry = write["new_prompts"][0] if operation == "create_new_version" else write
+    wire_config = entry["prompt_config"][0]["configuration"]
+    # Set settings are sent as given (nested values included); unset ones are left out, not sent as null.
+    assert wire_config == {**DEFAULT_WIRE_SETTINGS, **settings}
+    unset = {"response_format", "tool_choice", "tools"} - set(settings)
+    assert not (unset & set(wire_config))
+    assert None not in wire_config.values()
+
+    backend.replies.append((200, {"result": {
+        "id": TEMPLATE_ID, "name": NAME, "version": client.template.version,
+        "prompt_config": entry["prompt_config"],
+    }}))
+    fetched = backend.fetch(version=client.template.version)
+    assert fetched.template.model_configuration == config
+
+
 @pytest.mark.parametrize("as_model", [False, True])
 def test_compile_fidelity_preserves_multimodal_content(backend, as_model):
     content = [

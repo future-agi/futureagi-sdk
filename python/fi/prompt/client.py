@@ -15,8 +15,13 @@ from fi.prompt.label_management import LabelManagementMixin
 
 
 def _model_config_to_wire(config: ModelConfig) -> Dict:
-    """Preserve every model setting while using the backend's model key."""
-    payload = config.model_dump()
+    """Send every model setting that has a value, using the backend's model key.
+
+    Settings left as None are omitted rather than sent as null, so a saved
+    prompt never stores null where the backend later expects a value such as
+    a list of tools. Values nested inside a setting are sent unchanged.
+    """
+    payload = {key: value for key, value in config.model_dump().items() if value is not None}
     payload["model"] = payload.pop("model_name")
     return payload
 
