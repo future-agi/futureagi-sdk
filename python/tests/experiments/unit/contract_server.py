@@ -133,6 +133,8 @@ class ContractServer:
         self.metrics: dict[str, dict] = {}  # metric_id -> record (external or template)
         self.runs: dict[str, dict] = {}
         self.requests: list[tuple[str, str, Any]] = []
+        self.queries: list[tuple[str, str, dict]] = []  # (method, path, query parameters) of every request
+        self.items_page: Optional[int] = None  # serve at most this many run items per page: paging is exercised
         self.fail_ingest: list[int] = []  # statuses to answer the next ingest calls with
         self.fail_create: list[int] = []  # statuses to answer the next run-create calls with
         # statuses a GATEWAY answers the next ingest / run-create calls with: an HTML page, not the API's JSON
@@ -170,6 +172,7 @@ class ContractServer:
         body = json.loads(request.content) if request.content else None
         self.requests.append((method, path, body))
         q = dict(request.url.params)
+        self.queries.append((method, path, q))
         if path == "/model-hub/develops/get-datasets-names/":
             return ok({"datasets": [{"dataset_id": d["id"], "name": d["name"]} for d in self.datasets.values()
                                     if d["listed"]]})
@@ -235,13 +238,8 @@ class ContractServer:
         if m and method == "GET":
             return self._read_run(m.group(1))
         m = re.fullmatch(r"/model-hub/experiment-runs/([^/]+)/items/", path)
-        if m:
-            run = self.runs[m.group(1)]
-            items = sorted(run["items"].values(), key=lambda i: (i["example_id"], i["trial_number"]))
-            wanted = set(q["status"].split(",")) if q.get("status") else None
-            items = [i for i in items if wanted is None or i["status"] in wanted]
-            off, lim = int(q.get("offset", 0)), int(q.get("limit", 100))
-            return ok({"items": items[off:off + lim], "limit": lim, "offset": off, "has_more": off + lim < len(items)})
+        if m and method == "GET":
+            return self._items(m.group(1), q)
         return err(404, f"no route {method} {path}")
 
     # ---- dataset versions ----
@@ -313,15 +311,17 @@ class ContractServer:
         return f"{self.app_url_base.rstrip('/')}/dashboard/develop/{did}?tab=experiments&run={b['run_id']}"
 
     def _header(self, run: dict) -> dict:
+        """A run made in the app can be seeded with its own ``status``, ``task_kind`` and ``completed_at``."""
         b = run["body"]
         done = all((e["example_id"], e.get("trial_number", 1)) in run["items"] for e in b["expected_items"])
+        status = run.get("status") or ("completed" if done else ("running" if run["items"] else "queued"))
         return {"id": b["run_id"], "app_url": self._app_url(b),
                 "dataset_version_id": b["dataset_version_id"], "experiment_id": b.get("experiment_id"),
-                "task_kind": "external", "status": "completed" if done else ("running" if run["items"] else "queued"),
+                "task_kind": run.get("task_kind", "external"), "status": status,
                 "expected_items": b["expected_items"],
                 "evaluator_bindings": [self._binding(m) for m in b.get("evaluator_metric_ids", [])],
                 "model_config": b.get("model_config", {}), "metadata": b.get("metadata", {}),
-                "started_at": None, "completed_at": None, "created_at": "2026-10-22T00:00:00Z",
+                "started_at": None, "completed_at": run.get("completed_at"), "created_at": "2026-10-22T00:00:00Z",
                 "updated_at": "2026-10-22T00:00:00Z"}
 
     def _binding(self, metric_id: str) -> dict:
@@ -370,6 +370,8 @@ class ContractServer:
                 if (ref["metric_id"], ref["evaluator_version_id"]) not in pinned:
                     return err(409, "score ref is not pinned by this run")
             have = run["items"].get(ident)
+            if have is None and (run.get("completed_at") or run.get("status") in ("completed", "failed", "cancelled")):
+                return err(409, "terminal run cannot accept a new result identity")  # experiment_run_ingestion
             if have is not None and have["_payload"] != it:
                 return err(409, "Result receipt conflict.")
             staged[ident] = {**it, "trial_number": ident[1], "_payload": it}
@@ -380,14 +382,59 @@ class ContractServer:
         return ok({"run": self._header(run), "items": receipts})
 
     def _read_run(self, run_id: str) -> httpx.Response:
+        """``ExperimentRunReadSerializer``: the run header plus ordinal, label, plan_size and item_counts."""
         run = self.runs.get(run_id)
         if run is None:
             return err(404, "Experiment run not found.")
         h = self._header(run)
-        counts = {s: sum(1 for i in run["items"].values() if i["status"] == s) for s in ("completed", "failed", "skipped")}
-        return ok({**h, "plan_size": len(h["expected_items"]),
-                   "item_counts": {**counts, "pending": 0, "running": 0,
-                                   "not_started": len(h["expected_items"]) - len(run["items"])}})
+        counts = {s: sum(1 for i in run["items"].values() if i["status"] == s) for s in ITEM_STATUSES}
+        ordinal = list(self.runs).index(run_id) + 1
+        return ok({**h, "ordinal": ordinal, "label": f"#{ordinal}", "plan_size": len(h["expected_items"]),
+                   "item_counts": {**counts, "not_started": len(h["expected_items"]) - len(run["items"])}})
+
+    def _items(self, run_id: str, q: dict) -> httpx.Response:
+        """``ExperimentRunItemsView``: recorded items in plan order, ``status`` a comma-separated filter, ``limit``
+        1-500, ``limit * max_value_bytes`` at most 4 MiB (``ExperimentRunItemsQuerySerializer``)."""
+        run = self.runs.get(run_id)
+        if run is None:
+            return err(404, "Experiment run not found.")
+        statuses = [s.strip() for s in q.get("status", "").split(",") if s.strip()]
+        unknown = sorted(set(statuses) - set(ITEM_STATUSES))
+        if unknown:
+            return err(400, f"Unknown item status: {', '.join(unknown)}.")
+        off, lim, cap = int(q.get("offset", 0)), int(q.get("limit", 100)), int(q.get("max_value_bytes", 4096))
+        if not 1 <= lim <= 500 or not 0 <= cap <= 262144 or lim * cap > 4194304 or off < 0:
+            return err(400, "limit must be 1-500 and limit * max_value_bytes must not exceed 4194304.")
+        items = sorted(run["items"].values(), key=lambda i: (i["example_id"], i["trial_number"]))
+        items = [i for i in items if not statuses or i["status"] in statuses]
+        served = min(lim, self.items_page or lim)
+        return ok({"run_id": run_id, "run_status": self._header(run)["status"],
+                   "items": [_item_read(i, cap) for i in items[off:off + served]], "total": len(items),
+                   "limit": lim, "offset": off, "has_more": off + served < len(items)})
+
+
+ITEM_STATUSES = ("pending", "running", "completed", "failed", "skipped")  # experiment_run_read.ITEM_STATUSES
+
+
+def _item_read(item: dict, cap: int) -> dict:
+    """``ExperimentRunItemReadSerializer`` for one stored item: output and error over ``cap`` bytes of canonical JSON
+    come back as a prefix with ``*_truncated`` and the full size in ``*_bytes``."""
+    out = {"id": item.get("id") or str(uuid.uuid5(uuid.NAMESPACE_URL, f"{item['example_id']}/{item['trial_number']}")),
+           "example_id": item["example_id"], "trial_number": item["trial_number"], "status": item["status"],
+           "receipt_key": item.get("receipt_key"), "trace_id": item.get("trace_id"),
+           "root_span_id": item.get("root_span_id"), "latency_ms": item.get("latency_ms"), "cost": item.get("cost"),
+           "token_usage": item.get("token_usage"),
+           "score_refs": [{"metric_id": r.get("metric_id"), "evaluator_version_id": r.get("evaluator_version_id"),
+                           "status": r.get("status"), "value": r.get("value"), "explanation": r.get("explanation"),
+                           "trace_id": None, "span_id": None} for r in item.get("score_refs") or []],
+           "created_at": "2026-10-22T00:00:00Z", "updated_at": "2026-10-22T00:00:00Z"}
+    for name in ("output", "error"):
+        value = item.get(name)
+        data = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+        cut = value is not None and len(data) > cap
+        out[name] = data[:cap].decode("utf-8", errors="ignore") if cut else value
+        out[f"{name}_truncated"], out[f"{name}_bytes"] = cut, len(data) if value is not None else 0
+    return out
 
 
 def client_for(server: ContractServer, base_url: str = "http://srv.test"):
