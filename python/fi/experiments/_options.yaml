@@ -120,6 +120,7 @@ options:
   cli:run --description: [command.case-07]
   cli:run --metadata: [command.case-07]
   cli:run --experiment: [command.case-07, experiment.case-28]
+  cli:run --run: [command.case-existing-run]  # a run made elsewhere; no live result is recorded for it yet
   cli:run --project: [command.case-07, experiment.case-29]
   cli:run --retries: [command.case-08, experiment.case-27]
   cli:run --fail-fast: [command.case-08, experiment.case-39]

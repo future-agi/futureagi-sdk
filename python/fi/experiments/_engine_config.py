@@ -49,6 +49,7 @@ class RunConfig:
     trace: Any = True
     instrument: Any = "auto"
     resume: Any = None
+    attach: Any = None  # CLI --run: the id of a run created elsewhere that this run adds its results to
     client: Any = None
     progress: bool = True
     error_policy: str = "zero"  # how a failed trial counts in summary() and the gate (results.py)
@@ -77,6 +78,10 @@ class RunConfig:
             raise UsageError("timeout_s must be > 0 (or None for no limit)")
         if self.max_cost_usd is not None and self.max_cost_usd <= 0:
             raise UsageError("max_cost_usd must be > 0")
+        if self.attach is not None:
+            from fi.experiments._attach import check_flags
+
+            check_flags(self)
         if self.experiment is not None and not self.upload:
             raise UsageError(
                 "experiment= (CLI --experiment) attaches the stored run to an experiment, and upload=False "
