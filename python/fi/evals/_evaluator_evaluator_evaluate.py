@@ -1,7 +1,14 @@
 """Evaluator evaluate operations."""
 from __future__ import annotations
 
-from fi.evals.evaluator import (Any, BatchRunResult, Dict, EvalTemplate, Optional, Union)
+from fi.evals.evaluator import (Any, BatchRunResult, Dict, EvalResult, EvalTemplate, Optional, Union)
+
+
+class _FailedEvalResult(EvalResult):
+    """The result ``evaluate`` returns for a request that failed or was refused instead of raising.
+    ``error`` repeats the reason, so ``fi.evals.evaluate`` can report it as a failed evaluation."""
+
+    error: Optional[str] = None
 
 
 class _EvaluatorEvaluateMethods:
@@ -198,11 +205,12 @@ class _EvaluatorEvaluateMethods:
                     )
                     failed_inputs.append(input_case)
                     all_results.append(
-                        EvalResult(
+                        _FailedEvalResult(
                             name=eval_name,
                             output=None,
                             reason=str(exc),
                             runtime=0,
+                            error=str(exc),
                         )
                     )
 

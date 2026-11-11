@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Fixed: refused evaluations
+- When the eval endpoint refuses an evaluation, `Evaluator.evaluate()` still returns a result,
+  and its reason now leads with the server's own message and ends with the HTTP status (for
+  example `Validation failed: inputs: ... (HTTP 400)`) instead of the raw response body; a
+  body without a message gives a short excerpt. `evaluate(..., engine="turing")` reports the
+  refusal as status `failed` with that text as `error` instead of a completed result with no score.
+
 ### Fixed: dependency floors
 - Raise the base dependency minimums to anyio 4.14.2, certifi 2026.10.18,
   idna 3.15, requests 2.33.0 and urllib3 2.8.0 to exclude versions affected
