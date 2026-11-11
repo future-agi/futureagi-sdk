@@ -57,6 +57,7 @@ class UploadSession:
     header: Optional[dict] = None
     uploader: Optional[Uploader] = None
     export_status: Any = None  # lazy: upload with trace=False never imports OpenTelemetry
+    attached: Any = None  # a run created elsewhere (``_attach.Attached``): read back, never created here
 
     @property
     def base_url(self) -> str:
@@ -77,6 +78,40 @@ class UploadSession:
         else:
             ds = await call(pin_dataset, client, source, version=version, base_url=base_url)
         return cls(client=client, dataset=ds)
+
+    @classmethod
+    async def attach(cls, client: Any, source: Any, run_id: str, *, resumed: Optional[Mapping[str, Any]] = None,
+                     no_keys_hint: Optional[str] = PY_NO_KEYS_HINT) -> "UploadSession":
+        """``--run``: read the run created elsewhere and pin its own version (``_attach``); nothing is created."""
+        from fi.experiments._attach import open_attached
+
+        require_keys(client, no_keys_hint)
+        section = (resumed or {}).get("upload_session") or {}
+        name = str(((resumed or {}).get("dataset") or {}).get("name") or section.get("dataset_id") or "")
+        base_url = str(getattr(client, "base_url", ""))
+        found = await call(open_attached, client, source, run_id, section, name, base_url=base_url)
+        return cls(client=client, dataset=found.dataset, attached=found)
+
+    async def scorers(self, local: Sequence[Any], judge_model: Optional[str]) -> list:
+        """The attached run's evaluators, from its bindings (``_attach.scorers``)."""
+        from fi.experiments._attach import scorers
+
+        columns = list(self.dataset.rows[0].keys()) if self.dataset.rows else []
+        evaluators, self.bindings = await call(scorers, self.client, self.attached.run, local, judge_model, columns,
+                                               base_url=self.base_url)
+        return evaluators
+
+    def attach_section(self, evaluators: Sequence[Any]) -> dict[str, Any]:
+        """The journal's upload section for an attached run: no create body; each binding with its fingerprint, so a
+        resume refuses evaluators that changed."""
+        from dataclasses import replace
+
+        from fi.experiments.evaluators.binding import fingerprints
+
+        prints = fingerprints(evaluators)
+        self.bindings = {n: replace(b, fingerprint=prints.get(n)) for n, b in self.bindings.items()}
+        return {"dataset_id": self.dataset.dataset_id, "dataset_version_id": self.dataset.version_id,
+                "attached": True, "bindings": [b.to_json() for b in self.bindings.values()]}
 
     async def bind(self, evaluators: Sequence[Any]) -> None:
         self.bindings = await call(bind_all, self.client, self.dataset.dataset_id, evaluators, base_url=self.base_url)
@@ -103,10 +138,13 @@ class UploadSession:
                 f"resume={run_id}: the evaluators changed since the run started ({changed}); a run never mixes "
                 "two versions of an evaluator. Start a new run"
             )
-        self.body = dict(section["create_body"])
+        self.body = dict(section["create_body"]) if section.get("create_body") else None  # none: an attached run
         self.bindings = bindings
 
     async def create(self) -> dict[str, Any]:
+        if self.attached is not None:  # a run created elsewhere: its header was read, and nothing is created
+            self.header = dict(self.attached.run.raw)
+            return self.header
         assert self.body is not None
         self.header = await call(create_run, self.client, self.body, base_url=self.base_url)
         self.bindings = check_bindings(self.bindings, self.header or {})

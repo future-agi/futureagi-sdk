@@ -157,7 +157,7 @@ def overlay_from_args(args: Any) -> dict[str, Any]:
 
     out: dict[str, Any] = {}
     for key in ("judge_model", "trials", "concurrency", "limit", "timeout_s", "max_cost_usd", "name",
-                "version", "description", "experiment", "project", "resume", "error_policy"):
+                "version", "description", "experiment", "project", "resume", "attach", "error_policy"):
         value = getattr(args, key, None)
         if value is not None:
             out[key] = value
@@ -259,6 +259,10 @@ def build_runs(args: Any, target: Target) -> list[dict[str, Any]]:
                 f"--resume continues one run, and {len(declared)} declared runs are selected ({names}). "
                 "Add --filter NAME to select the interrupted one."
             )
+        if "attach" in overlay and len(declared) != 1:
+            names = ", ".join(d.name for d in declared)
+            raise UsageError(f"--run adds results to one run, and {len(declared)} declared runs are selected "
+                             f"({names}). Add --filter NAME to select one.")
         several = (file_mode.name_contexts(declared, collected, getattr(args, "dataset", None))
                    if len(declared) > 1 and not getattr(args, "list_runs", False) else [])
         file_mode.refuse_one_name_for_many(several, args, argv)  # one --dataset-name for many rows files (M1)
@@ -282,9 +286,10 @@ def build_runs(args: Any, target: Target) -> list[dict[str, Any]]:
     if getattr(args, "list_runs", False) or getattr(args, "filter", None):
         raise UsageError("--list and --filter apply to run files")
     dataset = _dataset_arg(args)
-    if dataset is None:
-        raise UsageError("this TARGET needs rows: add --dataset rows.jsonl (a local file) or --dataset NAME|ID (a "
-                         "server dataset)")
+    if dataset is None and getattr(args, "attach", None) is None and getattr(args, "resume", None) is None:
+        from fi.experiments._attach import NEEDS_ROWS  # --run reads the run's own rows; a resume checks its journal
+
+        raise UsageError(NEEDS_ROWS)
     if target.kind == "none":
         task = experiments.from_column(args.from_column)
     else:

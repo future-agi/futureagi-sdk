@@ -126,20 +126,35 @@ class Engine(PoolMixin, TrialMixin):
                 )
             check_resume_params(run_id, resumed.plan, self.params, self.redactor, argv=cfg.argv)
             checklists.restore(run_id, resumed.checklists, evaluators, cfg.argv)  # one run, one checklist (S4)
+        elif cfg.attach is not None:  # CLI --run: a run created elsewhere keeps its own id (_attach)
+            from fi.experiments._attach import run_id_for
+
+            run_id = run_id_for(cfg.attach, cfg.journal_root)
         else:
             run_id = str(uuid.uuid4())
+        attached = cfg.attach is not None or bool(((resumed.plan if resumed is not None else {}).get(
+            "upload_session") or {}).get("attached"))
+        if cfg.dataset is None and not attached and cfg.argv is not None:  # CLI: only --run and --resume may omit it
+            from fi.experiments._attach import NEEDS_ROWS
+
+            raise UsageError(NEEDS_ROWS)
         if cfg.upload:
             from fi.experiments._server_dataset import check_local_name
             from fi.experiments._upload_session import PY_NO_KEYS_HINT, UploadSession
 
-            if resumed is None:  # local rows need a dataset name before any request (the dataset contract, S3 (a))
+            if resumed is None and not attached:  # local rows need a dataset name before any request (S3 (a))
                 check_local_name(self._source(), **cfg.name_fix())
 
-            self.session = await UploadSession.pin(
-                self._client(), self._source(), cfg.version, resumed=resumed.plan if resumed is not None else None,
+            pin = UploadSession.attach if attached else UploadSession.pin
+            self.session = await pin(
+                self._client(), self._source(), run_id if attached else cfg.version,
+                resumed=resumed.plan if resumed is not None else None,
                 no_keys_hint=getattr(cfg.task, "no_keys_hint", PY_NO_KEYS_HINT),
             )
             ds = self.session.dataset
+            if attached:  # the run's own evaluators score (--eval must name exactly them)
+                evaluators = await self.session.scorers(evaluators, judge_model)
+                uses_templates = any(ev.kind == "template" for ev in evaluators)
         else:
             ds = self._load_dataset()
         if runner.needs_single_input:
@@ -160,9 +175,13 @@ class Engine(PoolMixin, TrialMixin):
         if isinstance(selection, RowSelector) and selection.run_id == run_id:
             raise UsageError("rows=failed(run)/new_since(run) makes a new run; use resume= to continue a run")
         remote = self.session.remote_journal if self.session is not None else None
-        chosen = select_rows(ds.rows, selection, cfg.limit, journal_root=cfg.journal_root, remote=remote,
-                             uploaded=bool(cfg.upload))
-        identities = [(r, t) for r in chosen for t in range(1, int(cfg.trials) + 1)]
+        if attached:  # the run's planned trials with no result yet (on a resume: the journaled ones)
+            journaled = resumed.plan.get("items", []) if resumed is not None else None
+            chosen, identities = self.session.attached.plan(ds.rows, journaled)
+        else:
+            chosen = select_rows(ds.rows, selection, cfg.limit, journal_root=cfg.journal_root, remote=remote,
+                                 uploaded=bool(cfg.upload))
+            identities = [(r, t) for r in chosen for t in range(1, int(cfg.trials) + 1)]
         plan_identities = getattr(cfg.task, "plan_identities", None)  # log_results: exactly the recorded ones
         if callable(plan_identities):
             identities = plan_identities(chosen)
@@ -209,6 +228,8 @@ class Engine(PoolMixin, TrialMixin):
                         f"{str(section.get('dataset_version_id'))[:8]} → {ds.version_id[:8]}); resume needs the same rows"
                     )
                 self.session.restore(section, evaluators, run_id)
+            elif attached:
+                plan["upload_session"] = self.session.attach_section(evaluators)
             else:
                 await self.session.bind(evaluators)
                 server_meta = self.redactor.value({
@@ -252,7 +273,7 @@ class Engine(PoolMixin, TrialMixin):
             checklists.journal(evaluators, journal, resumed.checklists if resumed is not None else {})
             if self.session is not None:  # the run exists on the server before any span or item is sent
                 header = await self.session.create()
-                journal.event("run_created", server_status=header.get("status"))
+                journal.event("run_attached" if attached else "run_created", server_status=header.get("status"))
             factory = (self.session.exporter_factory(project=project, run_name=name, run_id=run_id,
                                                      redactor=self.redactor)
                        if self.session is not None and cfg.trace is True else None)
@@ -295,6 +316,8 @@ class Engine(PoolMixin, TrialMixin):
         if evaluators:
             hosted = " · templates on the hosted eval API" if uses_templates else ""
             self.say(f"Evals    {', '.join(ev.describe() for ev in evaluators)}{hosted}")
+        elif attached:
+            self.say(f"Evals    none: run {run_id} has no evaluators, so its results are recorded unscored")
         self.say(tracing.header)
         if budget.active:
             excl = " (template evals are not counted: the platform bills them in credits)" if uses_templates else ""
@@ -309,6 +332,10 @@ class Engine(PoolMixin, TrialMixin):
             self.say("Upload   off (--no-upload): nothing is stored on the platform")
         if resumed is not None:
             self.say(f"Resume   {len(identities) - len(todo)} of {len(identities)} trials already done")
+        elif attached:
+            planned, done = self.session.attached.counts()
+            self.say(f"Plan     {done} of {planned} planned trials already have a result and are skipped; "
+                     f"running {len(todo)}")
 
         shared = _Shared()
         upload_stats = None
