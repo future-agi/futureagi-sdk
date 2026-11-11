@@ -2,7 +2,7 @@
 
 Opt-in only: it runs when ``FI_E2E_REQUIRED=1`` and the sandbox environment are set (``OMEGA_BASE_URL``
 plus ``FI_API_KEY`` and ``FI_SECRET_KEY``, or ``FUTUREAGI_OMEGA_API_KEY``) and when ``agents.sandbox`` is
-installed (``futureagi[sandbox-openai-agents]``). ``FI_SANDBOX_TEMPLATE`` picks the template (the
+installed (``pip install futureagi "openai-agents>=0.24,<0.25"``). ``FI_SANDBOX_TEMPLATE`` picks the template (the
 deployment's default otherwise). Every sandbox it makes is deleted at the end. The ``SandboxAgent`` run
 also needs a model: it runs only when ``OPENAI_API_KEY`` is set.
 """

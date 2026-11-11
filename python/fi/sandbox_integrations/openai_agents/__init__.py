@@ -1,7 +1,7 @@
 """An OpenAI Agents SDK sandbox client that runs a ``SandboxAgent``'s commands and files in a Future AGI
 sandbox (openai-agents 0.24)::
 
-    pip install "futureagi[sandbox-openai-agents]"
+    pip install futureagi "openai-agents>=0.24,<0.25"
 
     from agents import Runner, RunConfig
     from agents.sandbox import SandboxAgent, SandboxRunConfig

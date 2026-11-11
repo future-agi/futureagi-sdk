@@ -10,11 +10,12 @@ sandbox HTTP API.
 ## Install
 
 ```bash
-pip install "futureagi[sandbox-openai-agents]"
+pip install futureagi "openai-agents>=0.24,<0.25"
 ```
 
-The supported range is `openai-agents>=0.24,<0.25`. The client builds on the SDK's sandbox base classes, some of
-whose hooks are underscored, so other versions are not supported. Without the SDK's sandbox support installed,
+There is no `futureagi` extra for this integration yet, so install the Agents SDK directly. The supported range is
+`openai-agents>=0.24,<0.25`. The client builds on the SDK's sandbox base classes, some of whose hooks are
+underscored, so other versions are not supported. Without the SDK's sandbox support installed,
 importing the module raises `fi.errors.MissingExtraError` with that install line.
 
 ## Quickstart
@@ -144,5 +145,4 @@ Hosted sandboxes have no network today; full internet access is being built.
 | `exposed_ports` | not offered |
 | `mcp` (the in-sandbox MCP gateway) | not offered; see the MCP alternative above |
 
-The package path, the class names, the backend id `futureagi` and the extra `sandbox-openai-agents` are
-provisional names.
+The package path, the class names and the backend id `futureagi` are provisional names.

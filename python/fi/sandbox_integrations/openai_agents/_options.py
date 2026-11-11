@@ -8,15 +8,13 @@ from __future__ import annotations
 
 from typing import Literal, Optional
 
-from fi.errors import MissingExtraError
+from ._missing import missing_agents_sandbox
 
 try:
     from agents.sandbox.session.sandbox_client import BaseSandboxClientOptions
     from agents.sandbox.session.sandbox_session_state import SandboxSessionState
 except ImportError as exc:
-    raise MissingExtraError(
-        cause=exc, extra="sandbox-openai-agents", module="agents.sandbox"
-    ) from exc
+    raise missing_agents_sandbox(exc) from exc
 
 #: The sandbox's writable folder, and the only folder the sandbox files API reaches.
 WORKSPACE_ROOT = "/workspace"

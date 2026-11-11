@@ -245,12 +245,14 @@ def test_missing_agents_sandbox_raises_missing_extra(monkeypatch):
         monkeypatch.setitem(sys.modules, name, None)
     with pytest.raises(MissingExtraError) as caught:
         importlib.import_module(fake.ADAPTER)
-    assert caught.value.extra == "sandbox-openai-agents"
-    assert caught.value.install_hint == 'pip install "futureagi[sandbox-openai-agents]"'
+    # No extra is declared for this integration yet: the hint installs the Agents SDK directly.
+    assert caught.value.extra is None and caught.value.module == "agents.sandbox"
+    assert caught.value.install_hint == 'pip install futureagi "openai-agents>=0.24,<0.25"'
+    assert caught.value.install_hint in str(caught.value)
 
 
 def test_real_framework_contract(monkeypatch):
-    """Against the installed SDK (openai-agents 0.24 after the extra is installed); skipped where
+    """Against the installed SDK (openai-agents 0.24, installed directly); skipped where
     ``agents.sandbox`` is missing, as with the 0.4.2 pin."""
     pytest.importorskip("agents.sandbox")
     fake.forget_adapter(monkeypatch)

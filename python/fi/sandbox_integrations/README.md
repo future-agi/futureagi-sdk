@@ -4,7 +4,7 @@ These integrations ship in the Future AGI SDK (`pip install futureagi`). Until t
 sandbox HTTP API.
 
 `fi.sandbox_integrations` puts Future AGI sandboxes inside other agent frameworks. Each integration is a subpackage
-you import by its own name, with its own extra; `import fi.sandbox_integrations` on its own loads no framework and no
+you import by its own name, with its own install line; `import fi.sandbox_integrations` on its own loads no framework and no
 sandbox client. Every integration calls the sandbox handle (`fi.sandbox.Sandbox` / `AsyncSandbox`, or a client's
 `sandboxes`), so it gets the handle's settings, errors and limits.
 
@@ -14,14 +14,14 @@ sandbox client. Every integration calls the sandbox handle (`fi.sandbox.Sandbox`
 |---|---|---|---|
 | Deep Agents backend (Python 3.11+) | `from fi.sandbox_integrations.deepagents import FutureAGISandbox` | `pip install "futureagi[sandbox-deepagents]"` | [`deepagents/README.md`](deepagents/README.md) |
 | MCP server (stdio) | `futureagi-py sandbox mcp`, or `from fi.sandbox_integrations.mcp_server import SandboxTools, build_server` | `pip install "futureagi[sandbox-mcp]"` | [`mcp_server/README.md`](mcp_server/README.md) |
-| OpenAI Agents SDK sandbox client | `from fi.sandbox_integrations.openai_agents import FutureAGISandboxClient, FutureAGISandboxClientOptions` | `pip install "futureagi[sandbox-openai-agents]"` | [`openai_agents/README.md`](openai_agents/README.md) |
+| OpenAI Agents SDK sandbox client | `from fi.sandbox_integrations.openai_agents import FutureAGISandboxClient, FutureAGISandboxClientOptions` | `pip install futureagi "openai-agents>=0.24,<0.25"` (no extra yet: the Agents SDK is installed directly) | [`openai_agents/README.md`](openai_agents/README.md) |
 | Trace context for sandbox commands | `from fi.sandbox_integrations.tracing import tracing_env, run_traced, arun_traced, context_from_env` | none new; it uses the app's own OpenTelemetry when present (for example `futureagi[gateway-otel]`) | [`tracing/README.md`](tracing/README.md) |
 
 The eval runner that fans trials out over sandboxes lives with the experiments engine instead:
 `from fi.experiments.sandbox import SandboxEval, run_in_sandboxes` (`pip install "futureagi[experiments]"`), guide in
 [`../experiments/sandbox/README.md`](../experiments/sandbox/README.md).
 
-A missing extra raises `fi.errors.MissingExtraError` when you import that integration, and the message names the
+A missing framework raises `fi.errors.MissingExtraError` when you import that integration, and the message names the
 install line. `futureagi-py sandbox mcp` without its extra prints the install line and exits 3.
 
 ## How a command ended
@@ -63,6 +63,6 @@ hibernated sandbox on its own: the error says to resume it first.
 
 ## Names
 
-The package path `fi.sandbox_integrations`, the extras `sandbox-deepagents`, `sandbox-mcp` and
-`sandbox-openai-agents`, and the `sandbox mcp` command are provisional: they may change before the first release
+The package path `fi.sandbox_integrations`, the extras `sandbox-deepagents` and `sandbox-mcp`, and the `sandbox mcp`
+command are provisional: they may change before the first release
 that includes them. `futureagi-py` becomes `futureagi` when the SDK's console script is renamed.

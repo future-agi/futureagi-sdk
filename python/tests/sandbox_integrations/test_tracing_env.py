@@ -75,7 +75,11 @@ def test_traceparent_format_and_names_active_span(otel):
     match = TRACEPARENT.match(out["TRACEPARENT"])
     assert match, out["TRACEPARENT"]
     assert (match.group(1), match.group(2)) == ids(span)
-    assert match.group(3) in ("00", "01")  # the trace flags
+    # The trace flags: any byte (W3C level 2 adds random-trace-id, 0x02, beside sampled, 0x01), copied
+    # from the span unchanged, so the sampled bit is the span's.
+    flags = int(match.group(3), 16)
+    assert flags == int(span.get_span_context().trace_flags)
+    assert bool(flags & 0x01) == span.get_span_context().trace_flags.sampled
 
 
 def test_explicit_span_argument_wins(otel):
@@ -99,6 +103,16 @@ def test_tracestate_present_when_the_span_carries_it(otel):
     )
     out = tracing_env(span=NonRecordingSpan(sc), environ={})
     assert out == {"TRACEPARENT": f"00-{0x1234:032x}-{0x5678:016x}-01", "TRACESTATE": "fi=1,vendor=x"}
+
+
+def test_trace_flags_pass_through_unchanged(otel):
+    from opentelemetry.trace import NonRecordingSpan, SpanContext, TraceFlags
+
+    # Flag bits other than sampled (here random-trace-id, 0x02) are neither dropped nor rewritten.
+    for value in (0x00, 0x01, 0x02, 0x03):
+        sc = SpanContext(trace_id=0x1234, span_id=0x5678, is_remote=False, trace_flags=TraceFlags(value))
+        out = tracing_env(span=NonRecordingSpan(sc), environ={})
+        assert out == {"TRACEPARENT": f"00-{0x1234:032x}-{0x5678:016x}-{value:02x}"}
 
 
 def test_default_is_traceparent_and_tracestate_only(otel):

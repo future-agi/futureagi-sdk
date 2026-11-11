@@ -1,7 +1,7 @@
 """Future AGI sandboxes inside other agent frameworks.
 
 Each integration is a subpackage that you import by its own name; importing this package loads none
-of them, no framework and no sandbox client. Each one needs its extra installed:
+of them, no framework and no sandbox client. Each one needs its framework installed:
 
 ``fi.sandbox_integrations.deepagents``
     A Deep Agents backend (Python 3.11+)::
@@ -16,9 +16,9 @@ of them, no framework and no sandbox client. Each one needs its extra installed:
         from fi.sandbox_integrations.mcp_server import SandboxTools, build_server
 
 ``fi.sandbox_integrations.openai_agents``
-    A sandbox client for the OpenAI Agents SDK::
+    A sandbox client for the OpenAI Agents SDK (no extra yet: install the Agents SDK directly)::
 
-        pip install "futureagi[sandbox-openai-agents]"
+        pip install futureagi "openai-agents>=0.24,<0.25"
         from fi.sandbox_integrations.openai_agents import FutureAGISandboxClient, FutureAGISandboxClientOptions
 
 ``fi.sandbox_integrations.tracing``

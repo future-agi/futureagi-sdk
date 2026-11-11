@@ -346,14 +346,16 @@ class _Batch:
                 name = str(sbx.info.get("name") or "")
                 if not name.startswith(self.prefix) or sbx.state == "destroyed":
                     continue
+                # The listed id, read before the delete: the handle takes on the record the delete returns.
+                ident = sbx.id
                 try:
                     await sbx.delete()
                 except Exception as exc:
-                    print(f"fi.experiments.sandbox: could not delete leftover sandbox {sbx.id} ({name}): "
+                    print(f"fi.experiments.sandbox: could not delete leftover sandbox {ident} ({name}): "
                           f"{describe(exc)}", file=sys.stderr)
                     continue
-                gone.append(sbx.id)
-                print(f"fi.experiments.sandbox: deleted leftover sandbox {sbx.id} ({name})", file=sys.stderr)
+                gone.append(ident)
+                print(f"fi.experiments.sandbox: deleted leftover sandbox {ident} ({name})", file=sys.stderr)
         finally:
             await quietly(*(sbx.aclose for sbx in handles), close)
         return gone

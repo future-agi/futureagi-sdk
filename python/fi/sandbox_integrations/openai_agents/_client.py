@@ -16,7 +16,7 @@ import uuid
 from pathlib import PurePosixPath
 from typing import Any, Dict, Mapping, Optional
 
-from fi.errors import MissingExtraError
+from ._missing import missing_agents_sandbox
 
 try:
     from agents.sandbox.entries import Dir, File, LocalDir, LocalFile
@@ -24,9 +24,7 @@ try:
     from agents.sandbox.session.sandbox_client import BaseSandboxClient
     from agents.sandbox.snapshot import resolve_snapshot
 except ImportError as exc:
-    raise MissingExtraError(
-        cause=exc, extra="sandbox-openai-agents", module="agents.sandbox"
-    ) from exc
+    raise missing_agents_sandbox(exc) from exc
 
 from fi.sandbox import AsyncSandbox
 from fi.sandbox.errors import ConfigurationError, NotFoundError, SandboxError

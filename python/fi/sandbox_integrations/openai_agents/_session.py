@@ -34,7 +34,7 @@ import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
-from fi.errors import MissingExtraError
+from ._missing import missing_agents_sandbox
 
 try:
     from agents.sandbox.errors import (
@@ -50,9 +50,7 @@ try:
     from agents.sandbox.types import ExecResult
     from agents.sandbox.util.tar_utils import UnsafeTarMemberError, validate_tar_bytes
 except ImportError as exc:
-    raise MissingExtraError(
-        cause=exc, extra="sandbox-openai-agents", module="agents.sandbox"
-    ) from exc
+    raise missing_agents_sandbox(exc) from exc
 
 from fi.sandbox.errors import (
     CommandFailedError,
