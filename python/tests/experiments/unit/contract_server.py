@@ -135,6 +135,10 @@ class ContractServer:
         self.requests: list[tuple[str, str, Any]] = []
         self.queries: list[tuple[str, str, dict]] = []  # (method, path, query parameters) of every request
         self.items_page: Optional[int] = None  # serve at most this many run items per page: paging is exercised
+        self.experiments: dict[str, dict] = {}  # experiment_id -> {"name", "dataset_id"} (the experiment detail read)
+        # the hosted eval API answers get-evals (this response) and new-eval only when a catalog is set
+        self.eval_catalog: Optional[dict] = None
+        self.eval_calls: list[dict] = []  # new-eval bodies, in call order
         self.fail_ingest: list[int] = []  # statuses to answer the next ingest calls with
         self.fail_create: list[int] = []  # statuses to answer the next run-create calls with
         # statuses a GATEWAY answers the next ingest / run-create calls with: an HTML page, not the API's JSON
@@ -227,7 +231,8 @@ class ContractServer:
                                 "No spaces allowed.")
             assert body["run"] is False
             self.metrics[str(uuid.uuid4())] = {"name": body["name"], "dataset": m.group(1), "kind": "template",
-                                               "template_id": body["template_id"], "version": str(uuid.uuid4())}
+                                               "template_id": body["template_id"], "version": str(uuid.uuid4()),
+                                               "config": body.get("config") or {}, "model": body.get("model")}
             return ok("success")
         if path == "/model-hub/experiment-runs/" and method == "POST":
             return self._create_run(body)
@@ -240,7 +245,25 @@ class ContractServer:
         m = re.fullmatch(r"/model-hub/experiment-runs/([^/]+)/items/", path)
         if m and method == "GET":
             return self._items(m.group(1), q)
+        m = re.fullmatch(r"/model-hub/experiments/v2/([^/]+)/", path)
+        if m and method == "GET":
+            return self._experiment(m.group(1))
+        if self.eval_catalog is not None and path == "/sdk/api/v1/get-evals/":
+            return httpx.Response(200, json=self.eval_catalog)
+        if self.eval_catalog is not None and path == "/sdk/api/v1/new-eval/" and method == "POST":
+            self.eval_calls.append(body)
+            return httpx.Response(200, json={"result": [{"evaluations": [{"output": "Passed", "reason": "ok"}]}]})
         return err(404, f"no route {method} {path}")
+
+    def _experiment(self, experiment_id: str) -> httpx.Response:
+        """``ExperimentsTableV2View.get`` (``ExperimentDetailV2Serializer``): the fields a run read needs."""
+        e = self.experiments.get(experiment_id)
+        if e is None:
+            return err(404, "Experiment not found")
+        return ok({"id": experiment_id, "name": e["name"], "description": None, "dataset_id": e["dataset_id"],
+                   "column_id": None, "experiment_type": "llm", "status": "Completed", "snapshot_dataset_id": None,
+                   "prompt_configs": [], "agent_configs": [], "user_eval_metrics": [],
+                   "created_at": "2026-10-22T00:00:00Z"})
 
     # ---- dataset versions ----
     def _versions(self, did: str, method: str, body: Any, q: dict) -> httpx.Response:
@@ -311,26 +334,33 @@ class ContractServer:
         return f"{self.app_url_base.rstrip('/')}/dashboard/develop/{did}?tab=experiments&run={b['run_id']}"
 
     def _header(self, run: dict) -> dict:
-        """A run made in the app can be seeded with its own ``status``, ``task_kind`` and ``completed_at``."""
+        """A run made in the app can be seeded with its own ``status``, ``task_kind`` and ``completed_at``, and with
+        ``header_dataset_id`` (a header that also names the version's dataset, as a later server may send)."""
         b = run["body"]
         done = all((e["example_id"], e.get("trial_number", 1)) in run["items"] for e in b["expected_items"])
         status = run.get("status") or ("completed" if done else ("running" if run["items"] else "queued"))
-        return {"id": b["run_id"], "app_url": self._app_url(b),
-                "dataset_version_id": b["dataset_version_id"], "experiment_id": b.get("experiment_id"),
-                "task_kind": run.get("task_kind", "external"), "status": status,
-                "expected_items": b["expected_items"],
-                "evaluator_bindings": [self._binding(m) for m in b.get("evaluator_metric_ids", [])],
-                "model_config": b.get("model_config", {}), "metadata": b.get("metadata", {}),
-                "started_at": None, "completed_at": run.get("completed_at"), "created_at": "2026-10-22T00:00:00Z",
-                "updated_at": "2026-10-22T00:00:00Z"}
+        header = {"id": b["run_id"], "app_url": self._app_url(b),
+                  "dataset_version_id": b["dataset_version_id"], "experiment_id": b.get("experiment_id"),
+                  "task_kind": run.get("task_kind", "external"), "status": status,
+                  "expected_items": b["expected_items"],
+                  "evaluator_bindings": [self._binding(m) for m in b.get("evaluator_metric_ids", [])],
+                  "model_config": b.get("model_config", {}), "metadata": b.get("metadata", {}),
+                  "started_at": None, "completed_at": run.get("completed_at"), "created_at": "2026-10-22T00:00:00Z",
+                  "updated_at": "2026-10-22T00:00:00Z"}
+        if run.get("header_dataset_id"):
+            header["dataset_id"] = next(d["id"] for d in self.datasets.values()
+                                        if any(v["id"] == b["dataset_version_id"] for v in d["versions"]))
+        return header
 
     def _binding(self, metric_id: str) -> dict:
+        """``_evaluator_snapshots``: ``binding_config`` and ``binding_model`` are the metric's own config and model."""
         rec = self.metrics[metric_id]
         external = rec["kind"] == "external"
         return {"metric_id": metric_id, "evaluator_version_id": rec["version"],
                 "template_id": rec.get("template_id") or str(uuid.uuid5(uuid.NAMESPACE_URL, metric_id)),
-                "version_number": 1, "binding_config": {}, "binding_model": None, "prompt_messages": [],
-                "config_snapshot": {"external": {"name": rec["name"]}} if external else {}, "criteria": None,
+                "version_number": 1, "binding_config": rec.get("config") or {}, "binding_model": rec.get("model"),
+                "prompt_messages": [],
+                "config_snapshot": {"external": _external_snapshot(rec)} if external else {}, "criteria": None,
                 "model": None, "output_type_normalized": None, "pass_threshold": None, "choice_scores": None}
 
     def _create_run(self, body: dict) -> httpx.Response:
@@ -414,6 +444,16 @@ class ContractServer:
 
 
 ITEM_STATUSES = ("pending", "running", "completed", "failed", "skipped")  # experiment_run_read.ITEM_STATUSES
+
+
+def _external_snapshot(rec: dict) -> dict:
+    """An external metric's pinned ``config_snapshot["external"]`` (``ExternalMetricDefinition.snapshot`` + key)."""
+    if "key" not in rec:
+        return {"name": rec["name"]}
+    _, name, source_hash, output_type, higher_is_better, pass_threshold = rec["key"]
+    return {"name": name, "output_type": output_type, "higher_is_better": higher_is_better,
+            "pass_threshold": pass_threshold, "source_hash": source_hash,
+            "key": hashlib.sha256(json.dumps(list(rec["key"]), default=str).encode()).hexdigest()}
 
 
 def _item_read(item: dict, cap: int) -> dict:
