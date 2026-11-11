@@ -5,7 +5,8 @@ Registered by one line of ``python/pyproject.toml`` (``[tool.poetry.plugins."fut
 ``futureagi sandbox``, needs the console-script rename (``scripts/packaging/rename-cli.py
 futureagi``) with ``sandbox`` in that script's ``COMMANDS`` and the group's sub-commands (``exec``,
 ``cp``, ``cat``, ``mv``, ``mkdir``, ``snapshot``, ``restore``, ``hibernate``, ``settings``,
-``network-policy``, ``set``) in its ``RESERVED_NAMES``; without that the rename drops this group.
+``network-policy``, ``set``, ``mcp``) in its ``RESERVED_NAMES``; without that the rename drops this
+group.
 The group lives here rather than in ``fi/sandbox/`` because
 importing that package loads the HTTP client: this module imports only ``argparse`` when it is
 loaded, and a command imports ``fi.sandbox`` when it runs, so ``--help`` stays fast and a broken
@@ -32,6 +33,12 @@ API record: the list response for ``list``; the sandbox record for ``create``, `
 settings and policy records for the others (``network-policy`` adds the ``etag``); ``cp`` out of a
 sandbox prints ``{"from", "to", "bytes"}``. ``exec --format json`` prints each output frame
 (``{"event", "id", "data"}``) as one JSON line as it arrives, the exit frame last.
+
+``mcp`` is different: it serves the sandbox tools to an AI agent over the Model Context Protocol on
+standard input and output (``fi.sandbox_integrations.mcp_server``, extra ``sandbox-mcp``, loaded
+only when it runs). Its stdout carries the protocol and nothing else, so every message it prints goes
+to stderr and ``--format`` has no effect; it exits 0 when the client disconnects or sends SIGTERM,
+after deleting the sandboxes it created (unless ``--keep``).
 
 Exit codes: ``exec`` exits with the command's own code; 124 when it ran out of time; 128+N when
 signal N ended it (Linux numbering: the sandbox runs Linux); 130 when it was cancelled, including by
@@ -74,6 +81,7 @@ examples:
   %(prog)s cp ./data.csv SANDBOX_ID:data.csv
   %(prog)s cp SANDBOX_ID:results.json ./results.json
   %(prog)s delete SANDBOX_ID
+  %(prog)s mcp            (sandbox tools for an AI agent, over MCP)
 
 exit codes: 0 done; 1 refused by the server (it prints "code: message"); 2 a usage or
 configuration problem. exec exits with the command's own code: 124 when it ran out of
@@ -92,6 +100,23 @@ Put the command after --: words after it are the command's, not this tool's opti
 _EXEC_VALUED = ("--cwd", "--env", "--timeout", "--base-url", "--format")
 #: exec's own options that take none (the pre-parse check skips them).
 _EXEC_FLAGS = ("--json", "--allow-custom-base-url")
+
+_MCP_INSTALL = 'pip install "futureagi[sandbox-mcp]"'
+_MCP_MAX_OUTPUT_CHARS = 20_000  # fi.sandbox_integrations.mcp_server.DEFAULT_MAX_OUTPUT_CHARS
+_MCP_TEXT = "serve sandbox tools to an AI agent over MCP (stdio)"
+_MCP_EPILOG = """\
+An MCP client starts this command and talks to it over standard input and output, for example:
+  claude mcp add futureagi-sandbox --env OMEGA_BASE_URL=... --env FI_API_KEY=... \\
+    --env FI_SECRET_KEY=... -- %(prog)s
+
+Tools: sandbox_list, sandbox_create, sandbox_exec, sandbox_read_file, sandbox_write_file,
+sandbox_list_files, sandbox_delete (with --sandbox: only the exec and file tools, on that sandbox).
+Settings come from the environment, as for every sandbox command. Stdout carries the protocol only:
+messages go to stderr. When the client disconnects or stops the server (SIGTERM, Ctrl-C), the
+sandboxes this server created are deleted, all at once, unless --keep is given; others are never
+deleted then.
+
+Needs the extra: """ + _MCP_INSTALL
 _SETTING = "OMEGA_BASE_URL (or --base-url)"
 _NO_LOGIN = " (a saved login is not read by sandbox commands: export the variables)"
 #: The program name and this group as typed, set by register() from the root parser's prog.
@@ -322,6 +347,18 @@ def register(subparsers) -> None:
     p.add_argument("--if-match", metavar="ETAG",
                    help="change it only if it is still at this ETag (default: read the current "
                         "one first)")
+
+    # Not through _main/_dispatch: those print records to stdout, which here carries the protocol.
+    p = add(commands, "mcp", _MCP_TEXT, epilog=_MCP_EPILOG,
+            formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--sandbox", metavar="SANDBOX_ID",
+                   help="serve only this sandbox: just the exec and file tools, and no other id")
+    p.add_argument("--keep", action="store_true",
+                   help="do not delete, on exit, the sandboxes this server created")
+    p.add_argument("--max-output-chars", type=_positive, metavar="N", default=_MCP_MAX_OUTPUT_CHARS,
+                   help=f"keep the last N characters of a command's stdout and of its stderr "
+                        f"(default: {_MCP_MAX_OUTPUT_CHARS})")
+    p.set_defaults(func=_mcp, install_hint=_MCP_INSTALL)
 
     registry.set_section(GROUP, "platform")
 
@@ -1010,4 +1047,60 @@ def _policy_set(args, api, out: _Output) -> int:
     else:
         out.line(f"Saved the network policy. ETag: {info.etag or '-'}; apply status: "
                  f"{_show(info.policy.get('applyStatus'))}.")
+    return EXIT_OK
+
+
+# ---------------------------------------------------------------------------------------------
+# mcp
+
+
+def _mcp(args: argparse.Namespace) -> int:
+    """``sandbox mcp``: serve the sandbox tools over MCP on stdin and stdout until the client
+    disconnects or sends SIGTERM (exit 0 after the cleanup). Stdout is the protocol's, so a refusal
+    goes to stderr (``code: message``, exit 2); without the ``mcp`` package the import raises
+    ``MissingExtraError`` and the core prints the install line (exit 3)."""
+    import asyncio
+    import os
+    import sys
+
+    from fi import errors
+    from fi.sandbox import AsyncSandboxes
+    from fi.sandbox._connection import BASE_URL_ENV, AsyncSandboxConnection, OriginRule
+    from fi.sandbox.types import EXIT_OK, EXIT_USAGE
+
+    def refuse(code: str, message: str) -> int:
+        print(f"{code}: {message}", file=sys.stderr)
+        return EXIT_USAGE
+
+    env = dict(os.environ)
+    base = args.base_url if getattr(args, "base_url", None) is not None else env.get(BASE_URL_ENV, "")
+    if not base.strip():
+        return refuse("missing_base_url", f"no sandbox address: pass --base-url URL or set {BASE_URL_ENV} "
+                                          "(hosted: https://<gateway-host>/omega/api; self-hosted: your "
+                                          "EE's address with its port). There is no default.")
+    env[BASE_URL_ENV] = base
+    try:
+        core = AsyncSandboxConnection(environ=env).core()
+    except errors.ConfigurationError as error:
+        return refuse(_code(error), _configuration(error))
+    try:
+        rule = OriginRule(allow_custom_base_url=False, hint=_CLI_HINT, setting=_SETTING)
+        problem = rule.problem(core.shared.origin())
+        if problem is not None:
+            return refuse(_code(problem), str(problem))
+        from fi.sandbox_integrations.mcp_server import _server  # needs the extra (exit 3 without it)
+        from fi.sandbox_integrations.mcp_server._tools import SandboxTools
+
+        tools = SandboxTools(AsyncSandboxes(core, rule=rule), pinned=args.sandbox,
+                             max_output_chars=args.max_output_chars)
+
+        async def serve() -> None:
+            try:
+                await _server.serve_stdio(tools, keep=args.keep)
+            finally:
+                await core.shared.aclose()
+
+        asyncio.run(serve())
+    finally:
+        core.shared.close()
     return EXIT_OK
