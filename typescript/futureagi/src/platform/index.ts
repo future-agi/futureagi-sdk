@@ -29,5 +29,6 @@ export { type FileInput, type JsonValue, type Operation, type RequestArgs, type 
 // The resource classes behind `client.<name>` (subclass them to add methods), their generated base
 // classes, every method's `params` type, and the `Resources` map that lists them.
 export * from "./resources";
+export { UsageOverviewUnavailableError } from "./resources/usage";
 // Response models, also importable on their own from "@future-agi/sdk/platform/models".
 export * as models from "./models";

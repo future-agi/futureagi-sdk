@@ -46,7 +46,7 @@ def test_images_generate():
     )
 
     client = AgentCC(api_key="sk-test", base_url=GATEWAY)
-    result = client.images.generate(prompt="A cute cat")
+    result = client.images.generate(model="m", prompt="A cute cat")
     assert len(result.data) == 1
     assert result.data[0].url == "https://example.com/image.png"
     client.close()

@@ -2,7 +2,7 @@ import time
 import warnings
 from typing import Dict, List, Optional, Union
 
-from requests import Response
+from requests import HTTPError, Response
 
 from fi.api.auth import APIKeyAuth, ResponseHandler
 # Published 0.6.13 imports remain aliases of their canonical definitions.
@@ -16,6 +16,10 @@ from fi.utils.errors import InvalidSupportedType, InvalidValueType, MissingRequi
 from fi.utils.logging import logger
 from fi.utils.types import Environments, ModelTypes
 from fi.utils.utils import is_timestamp_in_range
+
+
+class LegacyModelLogUnavailableError(HTTPError):
+    """The deployment does not provide the legacy model-log endpoint."""
 
 
 class ClientResponseHandler(ResponseHandler[Dict, None]):
@@ -47,6 +51,14 @@ class ClientResponseHandler(ResponseHandler[Dict, None]):
         Raises:
             HTTPError: If response indicates an error
         """
+        if response.status_code == 404:
+            raise LegacyModelLogUnavailableError(
+                "This deployment does not provide the legacy model-log endpoint "
+                "(POST /sdk/api/v1/log/model/). "
+                "traceAI instrumentation is the supported way to send traces.",
+                response=response,
+                request=response.request,
+            )
         response.raise_for_status()
 
 
