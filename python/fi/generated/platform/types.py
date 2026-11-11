@@ -8,6 +8,7 @@ from typing import Any, Literal, TypeAlias, TypedDict, Union
 
 #: Every type this module defines, by contract title.
 TITLES: tuple[str, ...] = (
+    "CancelWorkspaceSandboxExecResponse",
     "ContinueWorkspaceConversationResponse",
     "ControlWorkspaceEnvironmentProfileRequest",
     "ControlWorkspaceEnvironmentProfileResponse",
@@ -17,13 +18,19 @@ TITLES: tuple[str, ...] = (
     "CreateWorkspaceDeploymentResponse",
     "CreateWorkspaceEnvironmentProfileRequest",
     "CreateWorkspaceEnvironmentProfileResponse",
+    "CreateWorkspaceSandboxFolderResponse",
+    "CreateWorkspaceSandboxRequest",
+    "CreateWorkspaceSandboxResponse",
     "CreateWorkspaceScheduleRequest",
     "CreateWorkspaceScheduleResponse",
     "CreateWorkspaceScheduleResponse2",
     "DeleteWorkspaceDeploymentResponse",
+    "DeleteWorkspaceSandboxPathResponse",
     "DeleteWorkspaceScheduleResponse",
+    "DestroyWorkspaceSandboxResponse",
     "DraftWorkforceAgentRequest",
     "DraftWorkforceAgentResponse",
+    "ExecInWorkspaceSandboxRequest",
     "ForkWorkspaceConversationRequest",
     "ForkWorkspaceConversationResponse",
     "GetConversationRatingsResponse",
@@ -38,7 +45,11 @@ TITLES: tuple[str, ...] = (
     "GetWorkspaceEnvironmentProfileRevisionResponse",
     "GetWorkspaceRatingsSummaryResponse",
     "GetWorkspaceRatingsTrajectoryResponse",
+    "GetWorkspaceSandboxNetworkPolicyResponse",
+    "GetWorkspaceSandboxResponse",
+    "GetWorkspaceSandboxSettingsResponse",
     "GetWorkspaceScheduleResponse",
+    "HibernateWorkspaceSandboxResponse",
     "InterruptWorkspaceConversationResponse",
     "ListWorkforceAgentDeploymentsResponse",
     "ListWorkforceAgentRevisionsResponse",
@@ -48,7 +59,13 @@ TITLES: tuple[str, ...] = (
     "ListWorkspaceDeploymentsResponse",
     "ListWorkspaceEnvironmentProfileRevisionsResponse",
     "ListWorkspaceEnvironmentProfilesResponse",
+    "ListWorkspaceSandboxActivityResponse",
+    "ListWorkspaceSandboxFilesResponse",
+    "ListWorkspaceSandboxSnapshotsResponse",
+    "ListWorkspaceSandboxesResponse",
     "ListWorkspaceSchedulesResponse",
+    "MoveWorkspaceSandboxPathRequest",
+    "MoveWorkspaceSandboxPathResponse",
     "OmegaDeleteWorkspaceConversationsByIdResponse",
     "OmegaDeploymentLogEnd",
     "OmegaDeploymentLogEndFrame",
@@ -57,6 +74,17 @@ TITLES: tuple[str, ...] = (
     "OmegaDeploymentLogLineFrame",
     "OmegaEeError",
     "OmegaError",
+    "OmegaExecError",
+    "OmegaExecErrorFrame",
+    "OmegaExecExit",
+    "OmegaExecExitFrame",
+    "OmegaExecFrame",
+    "OmegaExecStarted",
+    "OmegaExecStartedFrame",
+    "OmegaExecStderr",
+    "OmegaExecStderrFrame",
+    "OmegaExecStdout",
+    "OmegaExecStdoutFrame",
     "OmegaGatewayError",
     "OmegaGetWorkspaceApprovalsResponse",
     "OmegaGetWorkspaceConversationsByIdApprovalsResponse",
@@ -101,8 +129,14 @@ TITLES: tuple[str, ...] = (
     "OmegaRunEventStatus",
     "OmegaRunEventStatusFrame",
     "OmegaWorkforceRetirement",
+    "PutWorkspaceSandboxNetworkPolicyRequest",
+    "PutWorkspaceSandboxNetworkPolicyResponse",
+    "ReadWorkspaceSandboxFileResponse",
     "RecordConversationRatingRequest",
     "RecordConversationRatingResponse",
+    "RestoreWorkspaceSandboxSnapshotRequest",
+    "RestoreWorkspaceSandboxSnapshotResponse",
+    "ResumeWorkspaceSandboxResponse",
     "RetryWorkspaceConversationRequest",
     "RetryWorkspaceConversationResponse",
     "ReviseWorkspaceEnvironmentProfileRequest",
@@ -117,10 +151,14 @@ TITLES: tuple[str, ...] = (
     "RunWorkspaceScheduleRequest",
     "RunWorkspaceScheduleResponse",
     "RunWorkspaceScheduleResponse2",
+    "SnapshotWorkspaceSandboxResponse",
     "UpdateWorkforceAgentRequest",
     "UpdateWorkforceAgentResponse",
+    "UpdateWorkspaceSandboxRequest",
+    "UpdateWorkspaceSandboxResponse",
     "UpdateWorkspaceScheduleRequest",
     "UpdateWorkspaceScheduleResponse",
+    "UploadWorkspaceSandboxFileResponse",
     "WorkspaceConversationsIdEvidenceBrowser",
     "WorkspaceConversationsIdEvidenceCapture",
     "WorkspaceConversationsIdEvidenceFile",
@@ -133,7 +171,19 @@ TITLES: tuple[str, ...] = (
     "WorkspaceConversationsIdEvidenceModelRoutingReceiptEntry",
     "WorkspaceConversationsIdEvidenceStatus",
     "WorkspaceConversationsIdEvidenceTask",
+    "WriteWorkspaceSandboxFileRequest",
+    "WriteWorkspaceSandboxFileResponse",
 )
+
+
+class CancelWorkspaceSandboxExecResponse(TypedDict, total=False):
+    """The ``CancelWorkspaceSandboxExecResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    execId: str
+    cancelled: Literal[True]
+    request_id: str
+    receipt: dict[str, Any]
 
 
 class ContinueWorkspaceConversationResponse(TypedDict, total=False):
@@ -257,6 +307,39 @@ class CreateWorkspaceEnvironmentProfileResponse(TypedDict, total=False):
     receipt: dict[str, Any]
 
 
+class CreateWorkspaceSandboxFolderResponse(TypedDict, total=False):
+    """The ``CreateWorkspaceSandboxFolderResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v2"] | str
+    folder: dict[str, Any]
+    request_id: str
+    receipt: dict[str, Any]
+
+
+class CreateWorkspaceSandboxRequest(TypedDict, total=False):
+    """The ``CreateWorkspaceSandboxRequest`` schema of the platform contract."""
+
+    name: str
+    template: str
+    image: str
+    environmentId: str
+    size: Literal["small", "medium", "large", "xl"] | str
+    limits: dict[str, Any]
+    network: Literal["none", "full"] | str
+    #: CIDR policy. At most 1024 expanded CIDR/port rules across both lists; duplicate ports are normalized before counting. Mandatory denies override deny, then allow. Domains and proxy/credential fields re
+    networkPolicy: Any
+    idleTtlSeconds: int
+
+
+class CreateWorkspaceSandboxResponse(TypedDict, total=False):
+    """The ``CreateWorkspaceSandboxResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    sandbox: dict[str, Any]
+    request_id: str
+    receipt: dict[str, Any]
+
+
 class CreateWorkspaceScheduleRequest(TypedDict, total=False):
     """The ``CreateWorkspaceScheduleRequest`` schema of the platform contract."""
 
@@ -315,6 +398,15 @@ class DeleteWorkspaceDeploymentResponse(TypedDict, total=False):
     operation: dict[str, Any]
 
 
+class DeleteWorkspaceSandboxPathResponse(TypedDict, total=False):
+    """The ``DeleteWorkspaceSandboxPathResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v2"] | str
+    deleted: dict[str, Any]
+    request_id: str
+    receipt: dict[str, Any]
+
+
 class DeleteWorkspaceScheduleResponse(TypedDict, total=False):
     """The ``DeleteWorkspaceScheduleResponse`` schema of the platform contract."""
 
@@ -322,6 +414,15 @@ class DeleteWorkspaceScheduleResponse(TypedDict, total=False):
     deleted: Literal[True]
     id: str
     #: Unique id for this HTTP exchange.
+    request_id: str
+    receipt: dict[str, Any]
+
+
+class DestroyWorkspaceSandboxResponse(TypedDict, total=False):
+    """The ``DestroyWorkspaceSandboxResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    sandbox: dict[str, Any]
     request_id: str
     receipt: dict[str, Any]
 
@@ -348,6 +449,16 @@ class DraftWorkforceAgentResponse(TypedDict, total=False):
     #: Unique id for this HTTP exchange.
     request_id: str
     receipt: dict[str, Any]
+
+
+class ExecInWorkspaceSandboxRequest(TypedDict, total=False):
+    """The ``ExecInWorkspaceSandboxRequest`` schema of the platform contract."""
+
+    command: str
+    cwd: str
+    #: Plain, NON-secret variables for this command only. Values are not audited but are passed to the container runtime in clear; never put credentials here.
+    env: dict[str, str]
+    timeoutSeconds: int
 
 
 class ForkWorkspaceConversationRequest(TypedDict, total=False):
@@ -534,6 +645,38 @@ class GetWorkspaceRatingsTrajectoryResponse(TypedDict, total=False):
     receipt: dict[str, Any]
 
 
+class GetWorkspaceSandboxNetworkPolicyResponse(TypedDict, total=False):
+    """The ``GetWorkspaceSandboxNetworkPolicyResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    policy: dict[str, Any]
+    request_id: str
+    receipt: dict[str, Any]
+
+
+class GetWorkspaceSandboxResponse(TypedDict, total=False):
+    """The ``GetWorkspaceSandboxResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    sandbox: dict[str, Any]
+    request_id: str
+    receipt: dict[str, Any]
+
+
+class GetWorkspaceSandboxSettingsResponse(TypedDict, total=False):
+    """The ``GetWorkspaceSandboxSettingsResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    settings: dict[str, Any]
+    updatedAt: str
+    updatedBy: str
+    operator: dict[str, Any]
+    canEdit: bool
+    caps: dict[str, Any]
+    request_id: str
+    receipt: dict[str, Any]
+
+
 class GetWorkspaceScheduleResponse(TypedDict, total=False):
     """The ``GetWorkspaceScheduleResponse`` schema of the platform contract."""
 
@@ -542,6 +685,15 @@ class GetWorkspaceScheduleResponse(TypedDict, total=False):
     #: Newest-first bounded run history.
     runs: list[dict[str, Any]]
     #: Unique id for this HTTP exchange.
+    request_id: str
+    receipt: dict[str, Any]
+
+
+class HibernateWorkspaceSandboxResponse(TypedDict, total=False):
+    """The ``HibernateWorkspaceSandboxResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    sandbox: dict[str, Any]
     request_id: str
     receipt: dict[str, Any]
 
@@ -642,12 +794,60 @@ class ListWorkspaceEnvironmentProfilesResponse(TypedDict, total=False):
     receipt: dict[str, Any]
 
 
+class ListWorkspaceSandboxActivityResponse(TypedDict, total=False):
+    """The ``ListWorkspaceSandboxActivityResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    activity: list[dict[str, Any]]
+    request_id: str
+    receipt: dict[str, Any]
+
+
+class ListWorkspaceSandboxFilesResponse(TypedDict, total=False):
+    """The ``ListWorkspaceSandboxFilesResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    path: str
+    entries: list[dict[str, Any]]
+    request_id: str
+    receipt: dict[str, Any]
+
+
+class ListWorkspaceSandboxSnapshotsResponse(TypedDict, total=False):
+    """The ``ListWorkspaceSandboxSnapshotsResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    snapshots: list[dict[str, Any]]
+    request_id: str
+    receipt: dict[str, Any]
+
+
+class ListWorkspaceSandboxesResponse(TypedDict, total=False):
+    """The ``ListWorkspaceSandboxesResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    sandboxes: list[dict[str, Any]]
+    caps: dict[str, Any]
+    provider: dict[str, Any]
+    request_id: str
+    receipt: dict[str, Any]
+
+
 class ListWorkspaceSchedulesResponse(TypedDict, total=False):
     """The ``ListWorkspaceSchedulesResponse`` schema of the platform contract."""
 
     schemaVersion: Literal["omega-schedules/v1"] | str
     schedules: list[dict[str, Any]]
     #: Unique id for this HTTP exchange.
+    request_id: str
+    receipt: dict[str, Any]
+
+
+class MoveWorkspaceSandboxPathResponse(TypedDict, total=False):
+    """The ``MoveWorkspaceSandboxPathResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v2"] | str
+    moved: dict[str, Any]
     request_id: str
     receipt: dict[str, Any]
 
@@ -714,6 +914,96 @@ class OmegaEeError(TypedDict, total=False):
     request_id: str
     schemaVersion: str
     error: str | OmegaNestedError
+
+
+class OmegaExecError(TypedDict, total=False):
+    """The ``OmegaExecError`` schema of the platform contract."""
+
+    message: str
+
+
+class OmegaExecErrorFrame(TypedDict, total=False):
+    """The server failed after the command started; the stream ends."""
+
+    event: Literal["error"] | str
+    #: The SSE `id:` sequence number (starting at 1 for each stream). The stream is not resumable; a reconnect does not replay events and starts a new command.
+    id: str
+    data: OmegaExecError
+
+
+class OmegaExecExit(TypedDict, total=False):
+    """The ``OmegaExecExit`` schema of the platform contract."""
+
+    #: null when the process ended by a signal or never started.
+    exitCode: int | None
+    signal: str
+    timedOut: bool
+    cancelled: bool
+    #: Output beyond the server's cap was dropped.
+    truncated: bool
+    durationMs: int
+    stdoutBytes: int
+    stderrBytes: int
+    #: Why the command could not run (a spawn failure).
+    error: str
+
+
+class OmegaExecExitFrame(TypedDict, total=False):
+    """The command ended. Always the last frame of a stream that started."""
+
+    event: Literal["exit"] | str
+    #: The SSE `id:` sequence number (starting at 1 for each stream). The stream is not resumable; a reconnect does not replay events and starts a new command.
+    id: str
+    data: OmegaExecExit
+
+
+class OmegaExecStarted(TypedDict, total=False):
+    """The ``OmegaExecStarted`` schema of the platform contract."""
+
+    #: Pass to commands.cancel to stop it.
+    execId: str
+    sandboxId: str
+
+
+class OmegaExecStartedFrame(TypedDict, total=False):
+    """The command started."""
+
+    event: Literal["started"] | str
+    #: The SSE `id:` sequence number (starting at 1 for each stream). The stream is not resumable; a reconnect does not replay events and starts a new command.
+    id: str
+    data: OmegaExecStarted
+
+
+class OmegaExecStderr(TypedDict, total=False):
+    """The ``OmegaExecStderr`` schema of the platform contract."""
+
+    #: Output text as the command wrote it (UTF-8). Concatenate in order.
+    data: str
+
+
+class OmegaExecStderrFrame(TypedDict, total=False):
+    """Standard error."""
+
+    event: Literal["stderr"] | str
+    #: The SSE `id:` sequence number (starting at 1 for each stream). The stream is not resumable; a reconnect does not replay events and starts a new command.
+    id: str
+    data: OmegaExecStderr
+
+
+class OmegaExecStdout(TypedDict, total=False):
+    """The ``OmegaExecStdout`` schema of the platform contract."""
+
+    #: Output text as the command wrote it (UTF-8). Concatenate in order.
+    data: str
+
+
+class OmegaExecStdoutFrame(TypedDict, total=False):
+    """Standard output."""
+
+    event: Literal["stdout"] | str
+    #: The SSE `id:` sequence number (starting at 1 for each stream). The stream is not resumable; a reconnect does not replay events and starts a new command.
+    id: str
+    data: OmegaExecStdout
 
 
 class OmegaGatewayError(TypedDict, total=False):
@@ -1214,6 +1504,34 @@ class OmegaWorkforceRetirement(TypedDict, total=False):
     receipt: dict[str, Any]
 
 
+class PutWorkspaceSandboxNetworkPolicyRequest(TypedDict, total=False):
+    """CIDR policy. At most 1024 expanded CIDR/port rules across both lists; duplicate ports are normalized before counting. Mandatory denies override deny, then allow. Domains and proxy/credential fields return typed 422, not silently ignored."""
+
+    version: Literal[1]
+    revision: int | None
+    mode: Literal["off", "allow-all-public", "allow-list"] | str | None
+    allow: list[Any]
+    deny: list[Any]
+
+
+class PutWorkspaceSandboxNetworkPolicyResponse(TypedDict, total=False):
+    """The ``PutWorkspaceSandboxNetworkPolicyResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    policy: dict[str, Any]
+    request_id: str
+    receipt: dict[str, Any]
+
+
+class ReadWorkspaceSandboxFileResponse(TypedDict, total=False):
+    """The ``ReadWorkspaceSandboxFileResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    file: dict[str, Any]
+    request_id: str
+    receipt: dict[str, Any]
+
+
 class RecordConversationRatingRequest(TypedDict, total=False):
     """The current runtime ignores unrecognized fields. A null rating clears the selected rating."""
 
@@ -1230,6 +1548,36 @@ class RecordConversationRatingResponse(TypedDict, total=False):
     rating: Literal["up", "down"] | str | None
     at: str
     #: Unique id for this HTTP exchange.
+    request_id: str
+    receipt: dict[str, Any]
+
+
+class RestoreWorkspaceSandboxSnapshotRequest(TypedDict, total=False):
+    """The ``RestoreWorkspaceSandboxSnapshotRequest`` schema of the platform contract."""
+
+    name: str
+    size: Literal["small", "medium", "large", "xl"] | str
+    limits: dict[str, Any]
+    network: Literal["none", "full"] | str
+    #: CIDR policy. At most 1024 expanded CIDR/port rules across both lists; duplicate ports are normalized before counting. Mandatory denies override deny, then allow. Domains and proxy/credential fields re
+    networkPolicy: Any
+    idleTtlSeconds: int
+
+
+class RestoreWorkspaceSandboxSnapshotResponse(TypedDict, total=False):
+    """The ``RestoreWorkspaceSandboxSnapshotResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    sandbox: dict[str, Any]
+    request_id: str
+    receipt: dict[str, Any]
+
+
+class ResumeWorkspaceSandboxResponse(TypedDict, total=False):
+    """The ``ResumeWorkspaceSandboxResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    sandbox: dict[str, Any]
     request_id: str
     receipt: dict[str, Any]
 
@@ -1419,6 +1767,15 @@ class RunWorkspaceScheduleResponse2(TypedDict, total=False):
     receipt: dict[str, Any]
 
 
+class SnapshotWorkspaceSandboxResponse(TypedDict, total=False):
+    """The ``SnapshotWorkspaceSandboxResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    snapshot: dict[str, Any]
+    request_id: str
+    receipt: dict[str, Any]
+
+
 class UpdateWorkforceAgentRequest(TypedDict, total=False):
     """The ``UpdateWorkforceAgentRequest`` schema of the platform contract."""
 
@@ -1453,6 +1810,22 @@ class UpdateWorkforceAgentResponse(TypedDict, total=False):
     receipt: dict[str, Any]
 
 
+class UpdateWorkspaceSandboxRequest(TypedDict, total=False):
+    """The ``UpdateWorkspaceSandboxRequest`` schema of the platform contract."""
+
+    name: str
+    idleTtlSeconds: int
+
+
+class UpdateWorkspaceSandboxResponse(TypedDict, total=False):
+    """The ``UpdateWorkspaceSandboxResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    sandbox: dict[str, Any]
+    request_id: str
+    receipt: dict[str, Any]
+
+
 class UpdateWorkspaceScheduleRequest(TypedDict, total=False):
     """The ``UpdateWorkspaceScheduleRequest`` schema of the platform contract."""
 
@@ -1481,6 +1854,15 @@ class UpdateWorkspaceScheduleResponse(TypedDict, total=False):
     schemaVersion: Literal["omega-schedules/v1"] | str
     schedule: dict[str, Any]
     #: Unique id for this HTTP exchange.
+    request_id: str
+    receipt: dict[str, Any]
+
+
+class UploadWorkspaceSandboxFileResponse(TypedDict, total=False):
+    """The ``UploadWorkspaceSandboxFileResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v2"] | str
+    file: dict[str, Any]
     request_id: str
     receipt: dict[str, Any]
 
@@ -1613,8 +1995,32 @@ class WorkspaceConversationsIdEvidenceTask(TypedDict, total=False):
     browser: WorkspaceConversationsIdEvidenceBrowser
 
 
+class WriteWorkspaceSandboxFileRequest(TypedDict, total=False):
+    """The ``WriteWorkspaceSandboxFileRequest`` schema of the platform contract."""
+
+    content: str
+    encoding: Literal["utf8", "base64"] | str
+
+
+class WriteWorkspaceSandboxFileResponse(TypedDict, total=False):
+    """The ``WriteWorkspaceSandboxFileResponse`` schema of the platform contract."""
+
+    schemaVersion: Literal["omega-workspace-sandboxes/v1"] | str
+    file: dict[str, Any]
+    request_id: str
+    receipt: dict[str, Any]
+
+
 #: The ``CreateWorkspaceEnvironmentProfileRequest`` schema of the platform contract.
 CreateWorkspaceEnvironmentProfileRequest: TypeAlias = dict[str, Any]
+
+#: The ``MoveWorkspaceSandboxPathRequest`` schema of the platform contract.
+MoveWorkspaceSandboxPathRequest = TypedDict(
+    "MoveWorkspaceSandboxPathRequest", {"from": str, "to": str}, total=False
+)
+MoveWorkspaceSandboxPathRequest.__doc__ = (
+    "The ``MoveWorkspaceSandboxPathRequest`` schema of the platform contract."
+)
 
 #: One frame of a deployment's build or runtime log. Build logs resume with Last-Event-ID; runtime log following is best effort: lines can be lost or repeated across a reconnect.
 OmegaDeploymentLogFrame: TypeAlias = Union[
@@ -1623,6 +2029,15 @@ OmegaDeploymentLogFrame: TypeAlias = Union[
 
 #: Any error body a customer receives: the gateway's, Omega EE's or the Hub's. The SDK maps every one to the same typed error with `code`, `message`, `requestId` and `retryAfterSeconds`.
 OmegaError: TypeAlias = Union["OmegaGatewayError", "OmegaEeError", "OmegaHubError"]
+
+#: One frame of a command's output stream. `started` comes first, then any number of `stdout`/`stderr`, then exactly one `exit` (or `error` if the server failed after starting). Not resumable: the stream is the command, and closing it cancels the command.
+OmegaExecFrame: TypeAlias = Union[
+    "OmegaExecStartedFrame",
+    "OmegaExecStdoutFrame",
+    "OmegaExecStderrFrame",
+    "OmegaExecExitFrame",
+    "OmegaExecErrorFrame",
+]
 
 #: The ``OmegaGetWorkspaceApprovalsResponse`` schema of the platform contract.
 OmegaGetWorkspaceApprovalsResponse: TypeAlias = dict[str, Any]

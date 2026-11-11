@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { ContinueWorkspaceConversationData, ContinueWorkspaceConversationErrors, ContinueWorkspaceConversationResponses, ControlWorkspaceEnvironmentProfileData, ControlWorkspaceEnvironmentProfileErrors, ControlWorkspaceEnvironmentProfileResponses, CreateWorkforceAgentData, CreateWorkforceAgentErrors, CreateWorkforceAgentResponses, CreateWorkspaceDeploymentData, CreateWorkspaceDeploymentErrors, CreateWorkspaceDeploymentResponses, CreateWorkspaceEnvironmentProfileData, CreateWorkspaceEnvironmentProfileErrors, CreateWorkspaceEnvironmentProfileResponses, CreateWorkspaceScheduleData, CreateWorkspaceScheduleErrors, CreateWorkspaceScheduleResponses, DeleteWorkspaceDeploymentData, DeleteWorkspaceDeploymentErrors, DeleteWorkspaceDeploymentResponses, DeleteWorkspaceScheduleData, DeleteWorkspaceScheduleErrors, DeleteWorkspaceScheduleResponses, DraftWorkforceAgentData, DraftWorkforceAgentErrors, DraftWorkforceAgentResponses, ForkWorkspaceConversationData, ForkWorkspaceConversationErrors, ForkWorkspaceConversationResponses, GetConversationRatingsData, GetConversationRatingsErrors, GetConversationRatingsResponses, GetWorkforceAgentData, GetWorkforceAgentErrors, GetWorkforceAgentResponses, GetWorkspaceCapabilitiesData, GetWorkspaceCapabilitiesErrors, GetWorkspaceCapabilitiesResponses, GetWorkspaceConversationObservationsData, GetWorkspaceConversationObservationsErrors, GetWorkspaceConversationObservationsResponses, GetWorkspaceConversationTaskTreeData, GetWorkspaceConversationTaskTreeErrors, GetWorkspaceConversationTaskTreeResponses, GetWorkspaceCredentialData, GetWorkspaceCredentialErrors, GetWorkspaceCredentialResponses, GetWorkspaceDeploymentData, GetWorkspaceDeploymentErrors, GetWorkspaceDeploymentHealthData, GetWorkspaceDeploymentHealthErrors, GetWorkspaceDeploymentHealthResponses, GetWorkspaceDeploymentResponses, GetWorkspaceEnvironmentProfileData, GetWorkspaceEnvironmentProfileErrors, GetWorkspaceEnvironmentProfileResponses, GetWorkspaceEnvironmentProfileRevisionData, GetWorkspaceEnvironmentProfileRevisionErrors, GetWorkspaceEnvironmentProfileRevisionResponses, GetWorkspaceRatingsSummaryData, GetWorkspaceRatingsSummaryErrors, GetWorkspaceRatingsSummaryResponses, GetWorkspaceRatingsTrajectoryData, GetWorkspaceRatingsTrajectoryErrors, GetWorkspaceRatingsTrajectoryResponses, GetWorkspaceScheduleData, GetWorkspaceScheduleErrors, GetWorkspaceScheduleResponses, InterruptWorkspaceConversationData, InterruptWorkspaceConversationErrors, InterruptWorkspaceConversationResponses, ListWorkforceAgentDeploymentsData, ListWorkforceAgentDeploymentsErrors, ListWorkforceAgentDeploymentsResponses, ListWorkforceAgentRevisionsData, ListWorkforceAgentRevisionsErrors, ListWorkforceAgentRevisionsResponses, ListWorkforceData, ListWorkforceErrors, ListWorkforceResponses, ListWorkspaceCredentialBindingsData, ListWorkspaceCredentialBindingsErrors, ListWorkspaceCredentialBindingsResponses, ListWorkspaceCredentialsData, ListWorkspaceCredentialsErrors, ListWorkspaceCredentialsResponses, ListWorkspaceDeploymentsData, ListWorkspaceDeploymentsErrors, ListWorkspaceDeploymentsResponses, ListWorkspaceEnvironmentProfileRevisionsData, ListWorkspaceEnvironmentProfileRevisionsErrors, ListWorkspaceEnvironmentProfileRevisionsResponses, ListWorkspaceEnvironmentProfilesData, ListWorkspaceEnvironmentProfilesErrors, ListWorkspaceEnvironmentProfilesResponses, ListWorkspaceSchedulesData, ListWorkspaceSchedulesErrors, ListWorkspaceSchedulesResponses, OmegaDeleteWorkspaceConversationsByIdData, OmegaDeleteWorkspaceConversationsByIdErrors, OmegaDeleteWorkspaceConversationsByIdResponses, OmegaGetWorkspaceApprovalsData, OmegaGetWorkspaceApprovalsErrors, OmegaGetWorkspaceApprovalsResponses, OmegaGetWorkspaceConversationsByIdApprovalsData, OmegaGetWorkspaceConversationsByIdApprovalsErrors, OmegaGetWorkspaceConversationsByIdApprovalsResponses, OmegaGetWorkspaceConversationsByIdControlStatusData, OmegaGetWorkspaceConversationsByIdControlStatusErrors, OmegaGetWorkspaceConversationsByIdControlStatusResponses, OmegaGetWorkspaceConversationsByIdData, OmegaGetWorkspaceConversationsByIdErrors, OmegaGetWorkspaceConversationsByIdEventsData, OmegaGetWorkspaceConversationsByIdEventsErrors, OmegaGetWorkspaceConversationsByIdEventsResponse, OmegaGetWorkspaceConversationsByIdEventsResponses, OmegaGetWorkspaceConversationsByIdEvidenceData, OmegaGetWorkspaceConversationsByIdEvidenceErrors, OmegaGetWorkspaceConversationsByIdEvidenceResponses, OmegaGetWorkspaceConversationsByIdProofPackData, OmegaGetWorkspaceConversationsByIdProofPackErrors, OmegaGetWorkspaceConversationsByIdProofPackResponses, OmegaGetWorkspaceConversationsByIdResponses, OmegaGetWorkspaceConversationsData, OmegaGetWorkspaceConversationsErrors, OmegaGetWorkspaceConversationsResponses, OmegaPostWorkspaceConversationsByIdCancelData, OmegaPostWorkspaceConversationsByIdCancelErrors, OmegaPostWorkspaceConversationsByIdCancelResponses, OmegaPostWorkspaceConversationsByIdMessagesData, OmegaPostWorkspaceConversationsByIdMessagesErrors, OmegaPostWorkspaceConversationsByIdMessagesResponses, OmegaPostWorkspaceConversationsData, OmegaPostWorkspaceConversationsErrors, OmegaPostWorkspaceConversationsResponses, RecordConversationRatingData, RecordConversationRatingErrors, RecordConversationRatingResponses, RetireWorkforceAgentData, RetireWorkforceAgentErrors, RetireWorkforceAgentResponses, RetryWorkspaceConversationData, RetryWorkspaceConversationErrors, RetryWorkspaceConversationResponses, ReviseWorkspaceEnvironmentProfileData, ReviseWorkspaceEnvironmentProfileErrors, ReviseWorkspaceEnvironmentProfileResponses, RollbackWorkforceAgentDeploymentData, RollbackWorkforceAgentDeploymentErrors, RollbackWorkforceAgentDeploymentResponses, RollbackWorkforceAgentRevisionData, RollbackWorkforceAgentRevisionErrors, RollbackWorkforceAgentRevisionResponses, RollbackWorkspaceDeploymentData, RollbackWorkspaceDeploymentErrors, RollbackWorkspaceDeploymentResponses, RotateWorkspaceDeploymentAccessTokenData, RotateWorkspaceDeploymentAccessTokenErrors, RotateWorkspaceDeploymentAccessTokenResponses, RunWorkspaceScheduleData, RunWorkspaceScheduleErrors, RunWorkspaceScheduleResponses, StreamWorkspaceDeploymentLogsData, StreamWorkspaceDeploymentLogsErrors, StreamWorkspaceDeploymentLogsResponse, StreamWorkspaceDeploymentLogsResponses, UpdateWorkforceAgentData, UpdateWorkforceAgentErrors, UpdateWorkforceAgentResponses, UpdateWorkspaceScheduleData, UpdateWorkspaceScheduleErrors, UpdateWorkspaceScheduleResponses } from './types.gen';
+import type { CancelWorkspaceSandboxExecData, CancelWorkspaceSandboxExecErrors, CancelWorkspaceSandboxExecResponses, ContinueWorkspaceConversationData, ContinueWorkspaceConversationErrors, ContinueWorkspaceConversationResponses, ControlWorkspaceEnvironmentProfileData, ControlWorkspaceEnvironmentProfileErrors, ControlWorkspaceEnvironmentProfileResponses, CreateWorkforceAgentData, CreateWorkforceAgentErrors, CreateWorkforceAgentResponses, CreateWorkspaceDeploymentData, CreateWorkspaceDeploymentErrors, CreateWorkspaceDeploymentResponses, CreateWorkspaceEnvironmentProfileData, CreateWorkspaceEnvironmentProfileErrors, CreateWorkspaceEnvironmentProfileResponses, CreateWorkspaceSandboxData, CreateWorkspaceSandboxErrors, CreateWorkspaceSandboxFolderData, CreateWorkspaceSandboxFolderErrors, CreateWorkspaceSandboxFolderResponses, CreateWorkspaceSandboxResponses, CreateWorkspaceScheduleData, CreateWorkspaceScheduleErrors, CreateWorkspaceScheduleResponses, DeleteWorkspaceDeploymentData, DeleteWorkspaceDeploymentErrors, DeleteWorkspaceDeploymentResponses, DeleteWorkspaceSandboxPathData, DeleteWorkspaceSandboxPathErrors, DeleteWorkspaceSandboxPathResponses, DeleteWorkspaceScheduleData, DeleteWorkspaceScheduleErrors, DeleteWorkspaceScheduleResponses, DestroyWorkspaceSandboxData, DestroyWorkspaceSandboxErrors, DestroyWorkspaceSandboxResponses, DownloadWorkspaceSandboxFileData, DownloadWorkspaceSandboxFileErrors, DownloadWorkspaceSandboxFileResponses, DraftWorkforceAgentData, DraftWorkforceAgentErrors, DraftWorkforceAgentResponses, ExecInWorkspaceSandboxData, ExecInWorkspaceSandboxErrors, ExecInWorkspaceSandboxResponse, ExecInWorkspaceSandboxResponses, ForkWorkspaceConversationData, ForkWorkspaceConversationErrors, ForkWorkspaceConversationResponses, GetConversationRatingsData, GetConversationRatingsErrors, GetConversationRatingsResponses, GetWorkforceAgentData, GetWorkforceAgentErrors, GetWorkforceAgentResponses, GetWorkspaceCapabilitiesData, GetWorkspaceCapabilitiesErrors, GetWorkspaceCapabilitiesResponses, GetWorkspaceConversationObservationsData, GetWorkspaceConversationObservationsErrors, GetWorkspaceConversationObservationsResponses, GetWorkspaceConversationTaskTreeData, GetWorkspaceConversationTaskTreeErrors, GetWorkspaceConversationTaskTreeResponses, GetWorkspaceCredentialData, GetWorkspaceCredentialErrors, GetWorkspaceCredentialResponses, GetWorkspaceDeploymentData, GetWorkspaceDeploymentErrors, GetWorkspaceDeploymentHealthData, GetWorkspaceDeploymentHealthErrors, GetWorkspaceDeploymentHealthResponses, GetWorkspaceDeploymentResponses, GetWorkspaceEnvironmentProfileData, GetWorkspaceEnvironmentProfileErrors, GetWorkspaceEnvironmentProfileResponses, GetWorkspaceEnvironmentProfileRevisionData, GetWorkspaceEnvironmentProfileRevisionErrors, GetWorkspaceEnvironmentProfileRevisionResponses, GetWorkspaceRatingsSummaryData, GetWorkspaceRatingsSummaryErrors, GetWorkspaceRatingsSummaryResponses, GetWorkspaceRatingsTrajectoryData, GetWorkspaceRatingsTrajectoryErrors, GetWorkspaceRatingsTrajectoryResponses, GetWorkspaceSandboxData, GetWorkspaceSandboxErrors, GetWorkspaceSandboxNetworkPolicyData, GetWorkspaceSandboxNetworkPolicyErrors, GetWorkspaceSandboxNetworkPolicyResponses, GetWorkspaceSandboxResponses, GetWorkspaceSandboxSettingsData, GetWorkspaceSandboxSettingsErrors, GetWorkspaceSandboxSettingsResponses, GetWorkspaceScheduleData, GetWorkspaceScheduleErrors, GetWorkspaceScheduleResponses, HibernateWorkspaceSandboxData, HibernateWorkspaceSandboxErrors, HibernateWorkspaceSandboxResponses, InterruptWorkspaceConversationData, InterruptWorkspaceConversationErrors, InterruptWorkspaceConversationResponses, ListWorkforceAgentDeploymentsData, ListWorkforceAgentDeploymentsErrors, ListWorkforceAgentDeploymentsResponses, ListWorkforceAgentRevisionsData, ListWorkforceAgentRevisionsErrors, ListWorkforceAgentRevisionsResponses, ListWorkforceData, ListWorkforceErrors, ListWorkforceResponses, ListWorkspaceCredentialBindingsData, ListWorkspaceCredentialBindingsErrors, ListWorkspaceCredentialBindingsResponses, ListWorkspaceCredentialsData, ListWorkspaceCredentialsErrors, ListWorkspaceCredentialsResponses, ListWorkspaceDeploymentsData, ListWorkspaceDeploymentsErrors, ListWorkspaceDeploymentsResponses, ListWorkspaceEnvironmentProfileRevisionsData, ListWorkspaceEnvironmentProfileRevisionsErrors, ListWorkspaceEnvironmentProfileRevisionsResponses, ListWorkspaceEnvironmentProfilesData, ListWorkspaceEnvironmentProfilesErrors, ListWorkspaceEnvironmentProfilesResponses, ListWorkspaceSandboxActivityData, ListWorkspaceSandboxActivityErrors, ListWorkspaceSandboxActivityResponses, ListWorkspaceSandboxesData, ListWorkspaceSandboxesErrors, ListWorkspaceSandboxesResponses, ListWorkspaceSandboxFilesData, ListWorkspaceSandboxFilesErrors, ListWorkspaceSandboxFilesResponses, ListWorkspaceSandboxSnapshotsData, ListWorkspaceSandboxSnapshotsErrors, ListWorkspaceSandboxSnapshotsResponses, ListWorkspaceSchedulesData, ListWorkspaceSchedulesErrors, ListWorkspaceSchedulesResponses, MoveWorkspaceSandboxPathData, MoveWorkspaceSandboxPathErrors, MoveWorkspaceSandboxPathResponses, OmegaDeleteWorkspaceConversationsByIdData, OmegaDeleteWorkspaceConversationsByIdErrors, OmegaDeleteWorkspaceConversationsByIdResponses, OmegaGetWorkspaceApprovalsData, OmegaGetWorkspaceApprovalsErrors, OmegaGetWorkspaceApprovalsResponses, OmegaGetWorkspaceConversationsByIdApprovalsData, OmegaGetWorkspaceConversationsByIdApprovalsErrors, OmegaGetWorkspaceConversationsByIdApprovalsResponses, OmegaGetWorkspaceConversationsByIdControlStatusData, OmegaGetWorkspaceConversationsByIdControlStatusErrors, OmegaGetWorkspaceConversationsByIdControlStatusResponses, OmegaGetWorkspaceConversationsByIdData, OmegaGetWorkspaceConversationsByIdErrors, OmegaGetWorkspaceConversationsByIdEventsData, OmegaGetWorkspaceConversationsByIdEventsErrors, OmegaGetWorkspaceConversationsByIdEventsResponse, OmegaGetWorkspaceConversationsByIdEventsResponses, OmegaGetWorkspaceConversationsByIdEvidenceData, OmegaGetWorkspaceConversationsByIdEvidenceErrors, OmegaGetWorkspaceConversationsByIdEvidenceResponses, OmegaGetWorkspaceConversationsByIdProofPackData, OmegaGetWorkspaceConversationsByIdProofPackErrors, OmegaGetWorkspaceConversationsByIdProofPackResponses, OmegaGetWorkspaceConversationsByIdResponses, OmegaGetWorkspaceConversationsData, OmegaGetWorkspaceConversationsErrors, OmegaGetWorkspaceConversationsResponses, OmegaPostWorkspaceConversationsByIdCancelData, OmegaPostWorkspaceConversationsByIdCancelErrors, OmegaPostWorkspaceConversationsByIdCancelResponses, OmegaPostWorkspaceConversationsByIdMessagesData, OmegaPostWorkspaceConversationsByIdMessagesErrors, OmegaPostWorkspaceConversationsByIdMessagesResponses, OmegaPostWorkspaceConversationsData, OmegaPostWorkspaceConversationsErrors, OmegaPostWorkspaceConversationsResponses, PutWorkspaceSandboxNetworkPolicyData, PutWorkspaceSandboxNetworkPolicyErrors, PutWorkspaceSandboxNetworkPolicyResponses, ReadWorkspaceSandboxFileData, ReadWorkspaceSandboxFileErrors, ReadWorkspaceSandboxFileResponses, RecordConversationRatingData, RecordConversationRatingErrors, RecordConversationRatingResponses, RestoreWorkspaceSandboxSnapshotData, RestoreWorkspaceSandboxSnapshotErrors, RestoreWorkspaceSandboxSnapshotResponses, ResumeWorkspaceSandboxData, ResumeWorkspaceSandboxErrors, ResumeWorkspaceSandboxResponses, RetireWorkforceAgentData, RetireWorkforceAgentErrors, RetireWorkforceAgentResponses, RetryWorkspaceConversationData, RetryWorkspaceConversationErrors, RetryWorkspaceConversationResponses, ReviseWorkspaceEnvironmentProfileData, ReviseWorkspaceEnvironmentProfileErrors, ReviseWorkspaceEnvironmentProfileResponses, RollbackWorkforceAgentDeploymentData, RollbackWorkforceAgentDeploymentErrors, RollbackWorkforceAgentDeploymentResponses, RollbackWorkforceAgentRevisionData, RollbackWorkforceAgentRevisionErrors, RollbackWorkforceAgentRevisionResponses, RollbackWorkspaceDeploymentData, RollbackWorkspaceDeploymentErrors, RollbackWorkspaceDeploymentResponses, RotateWorkspaceDeploymentAccessTokenData, RotateWorkspaceDeploymentAccessTokenErrors, RotateWorkspaceDeploymentAccessTokenResponses, RunWorkspaceScheduleData, RunWorkspaceScheduleErrors, RunWorkspaceScheduleResponses, SnapshotWorkspaceSandboxData, SnapshotWorkspaceSandboxErrors, SnapshotWorkspaceSandboxResponses, StreamWorkspaceDeploymentLogsData, StreamWorkspaceDeploymentLogsErrors, StreamWorkspaceDeploymentLogsResponse, StreamWorkspaceDeploymentLogsResponses, UpdateWorkforceAgentData, UpdateWorkforceAgentErrors, UpdateWorkforceAgentResponses, UpdateWorkspaceSandboxData, UpdateWorkspaceSandboxErrors, UpdateWorkspaceSandboxResponses, UpdateWorkspaceScheduleData, UpdateWorkspaceScheduleErrors, UpdateWorkspaceScheduleResponses, UploadWorkspaceSandboxFileData, UploadWorkspaceSandboxFileErrors, UploadWorkspaceSandboxFileResponses, WriteWorkspaceSandboxFileData, WriteWorkspaceSandboxFileErrors, WriteWorkspaceSandboxFileResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -779,6 +779,399 @@ export const runWorkspaceSchedule = <ThrowOnError extends boolean = false>(optio
         'Content-Type': 'application/json',
         ...options.headers
     }
+});
+
+/**
+ * List this workspace's sandboxes with the provider's caps
+ *
+ * List this workspace's sandboxes with the provider's caps Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const listWorkspaceSandboxes = <ThrowOnError extends boolean = false>(options?: Options<ListWorkspaceSandboxesData, ThrowOnError>) => (options?.client ?? client).get<ListWorkspaceSandboxesResponses, ListWorkspaceSandboxesErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes',
+    ...options
+});
+
+/**
+ * Create a sandbox (network off by default, limits within the provider's caps)
+ *
+ * Create a sandbox (network off by default, limits within the provider's caps) Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const createWorkspaceSandbox = <ThrowOnError extends boolean = false>(options: Options<CreateWorkspaceSandboxData, ThrowOnError>) => (options.client ?? client).post<CreateWorkspaceSandboxResponses, CreateWorkspaceSandboxErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Read this workspace's sandbox settings, the operator's layer they narrow, and the resulting caps
+ *
+ * Read this workspace's sandbox settings, the operator's layer they narrow, and the resulting caps Customer-scoped: the tenant is the caller's server-derived organization and workspace. Any member reads; only owners and admins write (others get 403 `role_forbidden`). The operator's own policy is /os/workspace-sandboxes/policy, never reachable here.
+ */
+export const getWorkspaceSandboxSettings = <ThrowOnError extends boolean = false>(options?: Options<GetWorkspaceSandboxSettingsData, ThrowOnError>) => (options?.client ?? client).get<GetWorkspaceSandboxSettingsResponses, GetWorkspaceSandboxSettingsErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/settings',
+    ...options
+});
+
+/**
+ * Destroy a sandbox and remove its container
+ *
+ * Destroy a sandbox and remove its container Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const destroyWorkspaceSandbox = <ThrowOnError extends boolean = false>(options: Options<DestroyWorkspaceSandboxData, ThrowOnError>) => (options.client ?? client).delete<DestroyWorkspaceSandboxResponses, DestroyWorkspaceSandboxErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}',
+    ...options
+});
+
+/**
+ * Read one sandbox, including the runs that used it
+ *
+ * Read one sandbox, including the runs that used it Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const getWorkspaceSandbox = <ThrowOnError extends boolean = false>(options: Options<GetWorkspaceSandboxData, ThrowOnError>) => (options.client ?? client).get<GetWorkspaceSandboxResponses, GetWorkspaceSandboxErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}',
+    ...options
+});
+
+/**
+ * Rename a sandbox or change its idle TTL
+ *
+ * Rename a sandbox or change its idle TTL Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const updateWorkspaceSandbox = <ThrowOnError extends boolean = false>(options: Options<UpdateWorkspaceSandboxData, ThrowOnError>) => (options.client ?? client).patch<UpdateWorkspaceSandboxResponses, UpdateWorkspaceSandboxErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Read sandbox egress policy and applied state
+ *
+ * Available only with the sandbox_network_on release part, OFF by default. Private, host-local, link-local, metadata, peer-sandbox, multicast and all IPv6 traffic remain denied under every policy. Domain lists return 422 network_policy_domains_not_supported; proxy or credential rules return 422 network_policy_proxy_not_supported. A successful reply means atomic kernel apply and exact readback completed. No established-connection bypass is installed. GET returns desired versus applied revision; use the quoted ETag as PUT If-Match. Live PUT requires an active network-on sandbox.
+ */
+export const getWorkspaceSandboxNetworkPolicy = <ThrowOnError extends boolean = false>(options: Options<GetWorkspaceSandboxNetworkPolicyData, ThrowOnError>) => (options.client ?? client).get<GetWorkspaceSandboxNetworkPolicyResponses, GetWorkspaceSandboxNetworkPolicyErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/network-policy',
+    ...options
+});
+
+/**
+ * Atomically update sandbox egress policy
+ *
+ * Available only with the sandbox_network_on release part, OFF by default. Private, host-local, link-local, metadata, peer-sandbox, multicast and all IPv6 traffic remain denied under every policy. Domain lists return 422 network_policy_domains_not_supported; proxy or credential rules return 422 network_policy_proxy_not_supported. A successful reply means atomic kernel apply and exact readback completed. No established-connection bypass is installed. GET returns desired versus applied revision; use the quoted ETag as PUT If-Match. Live PUT requires an active network-on sandbox.
+ */
+export const putWorkspaceSandboxNetworkPolicy = <ThrowOnError extends boolean = false>(options: Options<PutWorkspaceSandboxNetworkPolicyData, ThrowOnError>) => (options.client ?? client).put<PutWorkspaceSandboxNetworkPolicyResponses, PutWorkspaceSandboxNetworkPolicyErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/network-policy',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List files at a workspace-relative path
+ *
+ * List files at a workspace-relative path Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const listWorkspaceSandboxFiles = <ThrowOnError extends boolean = false>(options: Options<ListWorkspaceSandboxFilesData, ThrowOnError>) => (options.client ?? client).get<ListWorkspaceSandboxFilesResponses, ListWorkspaceSandboxFilesErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/files',
+    ...options
+});
+
+/**
+ * Delete a file, link or folder inside the sandbox (a folder must be empty unless recursive=true; a link is removed, never followed)
+ *
+ * Delete a file, link or folder inside the sandbox (a folder must be empty unless recursive=true; a link is removed, never followed) Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const deleteWorkspaceSandboxPath = <ThrowOnError extends boolean = false>(options: Options<DeleteWorkspaceSandboxPathData, ThrowOnError>) => (options.client ?? client).delete<DeleteWorkspaceSandboxPathResponses, DeleteWorkspaceSandboxPathErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/files/{path}',
+    ...options
+});
+
+/**
+ * Read one file (bounded; utf8 or base64)
+ *
+ * Read one file (bounded; utf8 or base64) Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const readWorkspaceSandboxFile = <ThrowOnError extends boolean = false>(options: Options<ReadWorkspaceSandboxFileData, ThrowOnError>) => (options.client ?? client).get<ReadWorkspaceSandboxFileResponses, ReadWorkspaceSandboxFileErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/files/{path}',
+    ...options
+});
+
+/**
+ * Write one file (audited, confined to the workspace)
+ *
+ * Write one file (audited, confined to the workspace) Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const writeWorkspaceSandboxFile = <ThrowOnError extends boolean = false>(options: Options<WriteWorkspaceSandboxFileData, ThrowOnError>) => (options.client ?? client).put<WriteWorkspaceSandboxFileResponses, WriteWorkspaceSandboxFileErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/files/{path}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Download one file, streamed from inside the sandbox
+ *
+ * Download one file, streamed from inside the sandbox Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const downloadWorkspaceSandboxFile = <ThrowOnError extends boolean = false>(options: Options<DownloadWorkspaceSandboxFileData, ThrowOnError>) => (options.client ?? client).get<DownloadWorkspaceSandboxFileResponses, DownloadWorkspaceSandboxFileErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/download/{path}',
+    ...options
+});
+
+/**
+ * Upload one file, streamed into the sandbox; it replaces the target only once every byte arrived
+ *
+ * Upload one file, streamed into the sandbox; it replaces the target only once every byte arrived Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const uploadWorkspaceSandboxFile = <ThrowOnError extends boolean = false>(options: Options<UploadWorkspaceSandboxFileData, ThrowOnError>) => (options.client ?? client).put<UploadWorkspaceSandboxFileResponses, UploadWorkspaceSandboxFileErrors, ThrowOnError>({
+    bodySerializer: null,
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/upload/{path}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/octet-stream',
+        ...options.headers
+    }
+});
+
+/**
+ * Move or rename a file, link or folder inside the sandbox; the target must not exist
+ *
+ * Move or rename a file, link or folder inside the sandbox; the target must not exist Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const moveWorkspaceSandboxPath = <ThrowOnError extends boolean = false>(options: Options<MoveWorkspaceSandboxPathData, ThrowOnError>) => (options.client ?? client).post<MoveWorkspaceSandboxPathResponses, MoveWorkspaceSandboxPathErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/move',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Create one folder inside the sandbox; its parent must exist
+ *
+ * Create one folder inside the sandbox; its parent must exist Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const createWorkspaceSandboxFolder = <ThrowOnError extends boolean = false>(options: Options<CreateWorkspaceSandboxFolderData, ThrowOnError>) => (options.client ?? client).put<CreateWorkspaceSandboxFolderResponses, CreateWorkspaceSandboxFolderErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/folders/{path}',
+    ...options
+});
+
+/**
+ * List files-only snapshots, newest first
+ *
+ * List files-only snapshots, newest first Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const listWorkspaceSandboxSnapshots = <ThrowOnError extends boolean = false>(options: Options<ListWorkspaceSandboxSnapshotsData, ThrowOnError>) => (options.client ?? client).get<ListWorkspaceSandboxSnapshotsResponses, ListWorkspaceSandboxSnapshotsErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/snapshots',
+    ...options
+});
+
+/**
+ * Take a files-only, content-addressed snapshot
+ *
+ * Take a files-only, content-addressed snapshot Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const snapshotWorkspaceSandbox = <ThrowOnError extends boolean = false>(options: Options<SnapshotWorkspaceSandboxData, ThrowOnError>) => (options.client ?? client).post<SnapshotWorkspaceSandboxResponses, SnapshotWorkspaceSandboxErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/snapshots',
+    ...options
+});
+
+/**
+ * Restore a snapshot as a NEW sandbox (the source is unchanged)
+ *
+ * Restore a snapshot as a NEW sandbox (the source is unchanged) Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const restoreWorkspaceSandboxSnapshot = <ThrowOnError extends boolean = false>(options: Options<RestoreWorkspaceSandboxSnapshotData, ThrowOnError>) => (options.client ?? client).post<RestoreWorkspaceSandboxSnapshotResponses, RestoreWorkspaceSandboxSnapshotErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/snapshots/{snapshotId}/restore',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Audited activity for one sandbox, newest first
+ *
+ * Audited activity for one sandbox, newest first Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const listWorkspaceSandboxActivity = <ThrowOnError extends boolean = false>(options: Options<ListWorkspaceSandboxActivityData, ThrowOnError>) => (options.client ?? client).get<ListWorkspaceSandboxActivityResponses, ListWorkspaceSandboxActivityErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/activity',
+    ...options
+});
+
+/**
+ * Snapshot the files and stop the sandbox's container
+ *
+ * Snapshot the files and stop the sandbox's container Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const hibernateWorkspaceSandbox = <ThrowOnError extends boolean = false>(options: Options<HibernateWorkspaceSandboxData, ThrowOnError>) => (options.client ?? client).post<HibernateWorkspaceSandboxResponses, HibernateWorkspaceSandboxErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/hibernate',
+    ...options
+});
+
+/**
+ * Rebuild the workspace from its snapshot and start a fresh container
+ *
+ * Rebuild the workspace from its snapshot and start a fresh container Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const resumeWorkspaceSandbox = <ThrowOnError extends boolean = false>(options: Options<ResumeWorkspaceSandboxData, ThrowOnError>) => (options.client ?? client).post<ResumeWorkspaceSandboxResponses, ResumeWorkspaceSandboxErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/resume',
+    ...options
+});
+
+/**
+ * Run a command inside the sandbox's container
+ *
+ * Run a command inside the sandbox's container Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const execInWorkspaceSandbox = <ThrowOnError extends boolean = false>(options: Options<ExecInWorkspaceSandboxData, ThrowOnError, ExecInWorkspaceSandboxResponse>) => (options.client ?? client).sse.post<ExecInWorkspaceSandboxResponses, ExecInWorkspaceSandboxErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/exec',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Signal a running command's process group inside the container
+ *
+ * Signal a running command's process group inside the container Customer-scoped: the tenant is the caller's server-derived organization and workspace; another tenant's id answers 404. Operator /os/sandboxes verbs are not reachable here.
+ */
+export const cancelWorkspaceSandboxExec = <ThrowOnError extends boolean = false>(options: Options<CancelWorkspaceSandboxExecData, ThrowOnError>) => (options.client ?? client).post<CancelWorkspaceSandboxExecResponses, CancelWorkspaceSandboxExecErrors, ThrowOnError>({
+    security: [
+        { name: 'X-Api-Key', type: 'apiKey' },
+        { name: 'X-Secret-Key', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/workspace/sandboxes/{id}/exec/{execId}/cancel',
+    ...options
 });
 
 /**
