@@ -45,7 +45,7 @@ RESERVED_NAMES = frozenset((*COMMANDS, "version",
     "proof-pack", "control-status", "approvals", "list-approvals", "rating-get",
     "rating-set", "ratings-summary", "ratings-trajectory", "wait", "wait-for-approval",
     "exec", "cp", "cat", "mv", "mkdir", "snapshot", "restore", "hibernate", "settings",
-    "network-policy", "set",
+    "network-policy", "set", "mcp",
 ))
 NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\Z")
 

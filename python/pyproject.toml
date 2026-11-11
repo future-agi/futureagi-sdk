@@ -80,6 +80,12 @@ tiktoken = {version = ">=0.5", optional = true}
 # [gateway-otel] extra, which must keep installing on Python 3.10, so the marker is the union (>=3.10).
 opentelemetry-api = {version = ">=1.39.1,<2", optional = true, python = ">=3.10"}
 opentelemetry-sdk = {version = ">=1.39.1,<2", optional = true, python = ">=3.10"}
+# fi.sandbox_integrations extras: unlike the instrumentor extras above, these install the framework
+# itself, because the range is the compatibility promise of each adapter.
+deepagents = {version = ">=0.7.35,<0.8", optional = true, python = ">=3.11,<4.0"}
+mcp = {version = ">=1.30,<3,!=2.0.*,!=2.1.*", optional = true, python = ">=3.10,<3.14"}
+# No sandbox-openai-agents extra yet: openai-agents 0.24, the range fi.sandbox_integrations.openai_agents
+# is written for, requires openai>=3, while the evals extra and litellm require openai<3; one lock cannot hold both.
 
 [tool.poetry.extras]
 tracing = ["fi-instrumentation-otel"]
@@ -93,6 +99,9 @@ openai = ["fi-instrumentation-otel", "python-dotenv", "traceAI-openai"]
 # pip install "futureagi[gateway-tokens]" / "futureagi[gateway-otel]"
 gateway-tokens = ["tiktoken"]
 gateway-otel = ["opentelemetry-api", "opentelemetry-sdk"]
+# pip install "futureagi[sandbox-deepagents]" (Python 3.11+) / "futureagi[sandbox-mcp]"
+sandbox-deepagents = ["deepagents"]
+sandbox-mcp = ["mcp"]
 
 [tool.poetry.scripts]
 futureagi-py = "fi._cli.main:main"
@@ -110,7 +119,7 @@ sandbox = "fi._cli.sandbox"
 [tool.poetry.group.dev.dependencies]
 # Agent adapter test toolchain; resolve alongside the evals OpenAI dependency.
 openai-agents = {version = "0.4.2", python = ">=3.10,<3.14"}
-mcp = {version = "1.12.4", python = ">=3.10,<3.14"}
+mcp = {version = "1.30.0", python = ">=3.10,<3.14"}
 pre-commit = {version = "^4.0.1", python = ">=3.11"}
 pytest = "^8.3.3"
 pytest-cov = "^6.0.0"

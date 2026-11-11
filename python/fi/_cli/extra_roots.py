@@ -12,9 +12,11 @@ import sys
 from typing import Optional
 
 EXTRA_ROOTS = {
+    "deepagents": "sandbox-deepagents",
     "filelock": "evals",
     "jinja2": "evals",
     "litellm": "evals",
+    "mcp": "sandbox-mcp",
     "nltk": "evals",
     "rouge_score": "evals",
     "tiktoken": "gateway-tokens",
