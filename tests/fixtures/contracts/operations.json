@@ -1,9 +1,9 @@
 {
   "version": 2,
   "inputs": {
-    "openapi/platform/generated/futureagi-platform.openapi.json": "sha256:cd952ca478a5b21e92ee8cbbcc534fd28e1367ffd1a3175ae7a79509d7a348dc",
-    "openapi/platform/wrapper-map.json": "sha256:cacc7315539bd8c16a98941ed0c819662a39d33345efd6a2c2b784c6a051ed91",
-    "openapi/contract-inputs.json": "sha256:4e95666dace45ccb855914c636a92b461c891d8a1ae5aced81579811e4c2854b",
+    "openapi/platform/generated/futureagi-platform.openapi.json": "sha256:5d6f229a92c970d9ff869b4b488ac28c079d1a1f3d3dc16f2b69e62ad75c45a8",
+    "openapi/platform/wrapper-map.json": "sha256:3a62c35f10789674d93d6e7e1d7b9e00e379d0485997f61247cafde2727486e1",
+    "openapi/contract-inputs.json": "sha256:469e0a1f4d6dbcb8c2fd841cd40aadc8f7ecfed62c2dec4c2d5503cb02759390",
     "openapi/connectors/features.json": "sha256:02f7481d46d10a4d8e3a0c0bc532e0f29e677e0f0e809008a6f260cafe5f2e22",
     "openapi/sdk/lifecycle-source.openapi.json": "sha256:a5455eb3b3702eb50824b7fb5de06fd1fe1cd0ce04c026e1f4bf4f3eed35d5f6",
     "openapi/sdk/lifecycle-source.json": "sha256:0596c05e8df18b09a9db785454d1c12ae2fe7723c577ef170eb8da04c4008013",
@@ -96,18 +96,6 @@
       ],
       "ts": [
         "client.workspace"
-      ]
-    },
-    {
-      "id": "sandboxes",
-      "status": "NOT-OFFERED",
-      "owner": "sandboxes",
-      "reason": "Hosted sandboxes are hidden from this release",
-      "py": [
-        "client.sandboxes"
-      ],
-      "ts": [
-        "client.sandboxes"
       ]
     },
     {
@@ -438,6 +426,30 @@
       "platform:runs.retry",
       "platform:runs.send",
       "platform:runs.tree",
+      "platform:sandboxes.activity.list",
+      "platform:sandboxes.commands.cancel",
+      "platform:sandboxes.commands.run",
+      "platform:sandboxes.create",
+      "platform:sandboxes.files.download",
+      "platform:sandboxes.files.list",
+      "platform:sandboxes.files.makeDir",
+      "platform:sandboxes.files.read",
+      "platform:sandboxes.files.remove",
+      "platform:sandboxes.files.rename",
+      "platform:sandboxes.files.upload",
+      "platform:sandboxes.files.write",
+      "platform:sandboxes.getInfo",
+      "platform:sandboxes.hibernate",
+      "platform:sandboxes.kill",
+      "platform:sandboxes.list",
+      "platform:sandboxes.networkPolicy.get",
+      "platform:sandboxes.networkPolicy.update",
+      "platform:sandboxes.resume",
+      "platform:sandboxes.settings.get",
+      "platform:sandboxes.snapshots.create",
+      "platform:sandboxes.snapshots.list",
+      "platform:sandboxes.snapshots.restore",
+      "platform:sandboxes.update",
       "tracing:tracing.annotationLabels",
       "tracing:tracing.bulkAnnotation",
       "tracing:tracing.errorAnalysis",
@@ -630,6 +642,30 @@
       "platform:runs.retry",
       "platform:runs.send",
       "platform:runs.tree",
+      "platform:sandboxes.activity.list",
+      "platform:sandboxes.commands.cancel",
+      "platform:sandboxes.commands.run",
+      "platform:sandboxes.create",
+      "platform:sandboxes.files.download",
+      "platform:sandboxes.files.list",
+      "platform:sandboxes.files.makeDir",
+      "platform:sandboxes.files.read",
+      "platform:sandboxes.files.remove",
+      "platform:sandboxes.files.rename",
+      "platform:sandboxes.files.upload",
+      "platform:sandboxes.files.write",
+      "platform:sandboxes.getInfo",
+      "platform:sandboxes.hibernate",
+      "platform:sandboxes.kill",
+      "platform:sandboxes.list",
+      "platform:sandboxes.networkPolicy.get",
+      "platform:sandboxes.networkPolicy.update",
+      "platform:sandboxes.resume",
+      "platform:sandboxes.settings.get",
+      "platform:sandboxes.snapshots.create",
+      "platform:sandboxes.snapshots.list",
+      "platform:sandboxes.snapshots.restore",
+      "platform:sandboxes.update",
       "tracing:tracing.annotationLabels",
       "tracing:tracing.bulkAnnotation",
       "tracing:tracing.errorAnalysis",
@@ -939,6 +975,30 @@
       "platform:runs.retry",
       "platform:runs.send",
       "platform:runs.tree",
+      "platform:sandboxes.activity.list",
+      "platform:sandboxes.commands.cancel",
+      "platform:sandboxes.commands.run",
+      "platform:sandboxes.create",
+      "platform:sandboxes.files.download",
+      "platform:sandboxes.files.list",
+      "platform:sandboxes.files.makeDir",
+      "platform:sandboxes.files.read",
+      "platform:sandboxes.files.remove",
+      "platform:sandboxes.files.rename",
+      "platform:sandboxes.files.upload",
+      "platform:sandboxes.files.write",
+      "platform:sandboxes.getInfo",
+      "platform:sandboxes.hibernate",
+      "platform:sandboxes.kill",
+      "platform:sandboxes.list",
+      "platform:sandboxes.networkPolicy.get",
+      "platform:sandboxes.networkPolicy.update",
+      "platform:sandboxes.resume",
+      "platform:sandboxes.settings.get",
+      "platform:sandboxes.snapshots.create",
+      "platform:sandboxes.snapshots.list",
+      "platform:sandboxes.snapshots.restore",
+      "platform:sandboxes.update",
       "tracing:tracing.annotationLabels",
       "tracing:tracing.bulkAnnotation",
       "tracing:tracing.errorAnalysis",
@@ -17083,6 +17143,7 @@
           "purpose": "fixture",
           "status": "idle",
           "currentWork": "fixture",
+          "hasActiveWork": true,
           "workMode": "on_demand",
           "updatedAt": "2026-01-01T00:00:00+00:00",
           "capabilities": {
@@ -17220,6 +17281,7 @@
           "purpose": "fixture",
           "status": "idle",
           "currentWork": "fixture",
+          "hasActiveWork": true,
           "workMode": "on_demand",
           "updatedAt": "2026-01-01T00:00:00+00:00",
           "capabilities": {
@@ -17483,6 +17545,7 @@
           "purpose": "fixture",
           "status": "idle",
           "currentWork": "fixture",
+          "hasActiveWork": true,
           "workMode": "on_demand",
           "updatedAt": "2026-01-01T00:00:00+00:00",
           "capabilities": {
@@ -17699,6 +17762,7 @@
           "purpose": "fixture",
           "status": "idle",
           "currentWork": "fixture",
+          "hasActiveWork": true,
           "workMode": "on_demand",
           "updatedAt": "2026-01-01T00:00:00+00:00",
           "capabilities": {
@@ -17856,6 +17920,7 @@
           "purpose": "fixture",
           "status": "idle",
           "currentWork": "fixture",
+          "hasActiveWork": true,
           "workMode": "on_demand",
           "updatedAt": "2026-01-01T00:00:00+00:00",
           "capabilities": {
@@ -18030,6 +18095,7 @@
           "purpose": "fixture",
           "status": "idle",
           "currentWork": "fixture",
+          "hasActiveWork": true,
           "workMode": "on_demand",
           "updatedAt": "2026-01-01T00:00:00+00:00",
           "capabilities": {
@@ -18209,6 +18275,7 @@
             "purpose": "fixture",
             "status": "idle",
             "currentWork": "fixture",
+            "hasActiveWork": true,
             "workMode": "on_demand",
             "updatedAt": "2026-01-01T00:00:00+00:00",
             "capabilities": {
@@ -18303,6 +18370,7 @@
           "purpose": "fixture",
           "status": "idle",
           "currentWork": "fixture",
+          "hasActiveWork": true,
           "workMode": "on_demand",
           "updatedAt": "2026-01-01T00:00:00+00:00",
           "capabilities": {
@@ -22837,6 +22905,2679 @@
           "handle": "Run",
           "py_args": [],
           "ts_args": []
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.activity.list",
+      "adapter": "platform",
+      "name": "sandboxes.activity.list",
+      "method": "GET",
+      "path": "/workspace/sandboxes/{id}/activity",
+      "path_params": [
+        "id"
+      ],
+      "idempotent": false,
+      "retry": "http-idempotent",
+      "content_type": null,
+      "stream": null,
+      "pagination": {
+        "style": "single-page",
+        "itemsField": "activity"
+      },
+      "operation_id": "listWorkspaceSandboxActivity",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "activity": [
+          {
+            "at": "2026-01-01T00:00:00+00:00",
+            "sandboxId": "fixture",
+            "verb": "fixture",
+            "actor": "fixture",
+            "outcome": "fixture"
+          }
+        ]
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.activity.list",
+          "ts": "client.sandboxes.activity.list",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.activity.list",
+          "ts": "client.sandboxes.activity.list",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.activity.list",
+          "ts": "client.sandboxes.activity.list",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.activity.list",
+          "ts": "client.sandboxes.activity.list",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.commands.cancel",
+      "adapter": "platform",
+      "name": "sandboxes.commands.cancel",
+      "method": "POST",
+      "path": "/workspace/sandboxes/{id}/exec/{execId}/cancel",
+      "path_params": [
+        "id",
+        "execId"
+      ],
+      "idempotent": false,
+      "retry": "unsafe",
+      "content_type": null,
+      "stream": null,
+      "pagination": null,
+      "operation_id": "cancelWorkspaceSandboxExec",
+      "namespace": "sandboxes",
+      "success_status": 202,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "execId": "fixture",
+        "cancelled": true
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.commands.cancel",
+          "ts": "client.sandboxes.commands.cancel",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "exec_id"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "execId"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.commands.cancel",
+          "ts": "client.sandboxes.commands.cancel",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "exec_id"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "execId"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.commands.cancel",
+          "ts": "client.sandboxes.commands.cancel",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "exec_id"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "execId"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.commands.cancel",
+          "ts": "client.sandboxes.commands.cancel",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "exec_id"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "execId"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.commands.run",
+      "adapter": "platform",
+      "name": "sandboxes.commands.run",
+      "method": "POST",
+      "path": "/workspace/sandboxes/{id}/exec",
+      "path_params": [
+        "id"
+      ],
+      "idempotent": false,
+      "retry": "unsafe",
+      "content_type": "application/json",
+      "stream": {
+        "kind": "sse-post",
+        "resume": "none",
+        "events": "#/components/schemas/OmegaExecFrame",
+        "keepaliveSeconds": 15,
+        "cancelOnDisconnect": true,
+        "known_events": [
+          "started",
+          "stdout",
+          "stderr",
+          "exit",
+          "error"
+        ]
+      },
+      "pagination": null,
+      "operation_id": "execInWorkspaceSandbox",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {
+        "command": "fixture"
+      },
+      "response_example": "fixture",
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.commands.run",
+          "ts": "client.sandboxes.commands.run",
+          "handle": null,
+          "returns": "stream",
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body"
+          ]
+        },
+        {
+          "py": "Sandbox.commands.stream",
+          "ts": "Sandbox.commands.stream",
+          "handle": "Sandbox",
+          "returns": "stream",
+          "py_args": [
+            "command",
+            "*",
+            "cwd",
+            "env",
+            "timeout_seconds"
+          ],
+          "ts_args": [
+            "command",
+            "options.cwd",
+            "options.env",
+            "options.timeoutSeconds"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.commands.run",
+          "ts": "client.sandboxes.commands.run",
+          "handle": null,
+          "returns": "stream",
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.commands.run",
+          "ts": "client.sandboxes.commands.run",
+          "handle": null,
+          "returns": "stream",
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.commands.run",
+          "ts": "client.sandboxes.commands.run",
+          "handle": null,
+          "returns": "stream",
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.create",
+      "adapter": "platform",
+      "name": "sandboxes.create",
+      "method": "POST",
+      "path": "/workspace/sandboxes",
+      "path_params": [],
+      "idempotent": false,
+      "retry": "unsafe",
+      "content_type": "application/json",
+      "stream": null,
+      "pagination": null,
+      "operation_id": "createWorkspaceSandbox",
+      "namespace": "sandboxes",
+      "success_status": 201,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "sandbox": {
+          "id": "fixture",
+          "name": "fixture",
+          "origin": "created",
+          "state": "active",
+          "createdAt": "2026-01-01T00:00:00+00:00",
+          "updatedAt": "2026-01-01T00:00:00+00:00",
+          "lastActivityAt": "2026-01-01T00:00:00+00:00",
+          "image": "fixture",
+          "limits": {
+            "cpus": 1,
+            "memoryMb": 1,
+            "pidsLimit": 1
+          },
+          "network": "none",
+          "idleTtlSeconds": 1,
+          "generation": 1,
+          "meter": {
+            "execCount": 1
+          },
+          "readOnly": true,
+          "usedBy": [
+            {
+              "runId": "fixture",
+              "taskId": "fixture"
+            }
+          ],
+          "provider": {
+            "kind": "container",
+            "bindingId": "fixture",
+            "isolationStatement": "fixture",
+            "snapshotKind": "files",
+            "snapshotStatement": "fixture",
+            "isolation": {
+              "image": "fixture",
+              "network": "none",
+              "memory": "fixture",
+              "cpus": "fixture",
+              "pidsLimit": 1,
+              "readOnlyRootfs": true,
+              "capDrop": "all",
+              "noNewPrivileges": true,
+              "workspaceMount": "fixture"
+            }
+          }
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.create",
+          "ts": "client.sandboxes.create",
+          "handle": null,
+          "returns": "Sandbox",
+          "py_args": [
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "options.body"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.create",
+          "ts": "client.sandboxes.create",
+          "handle": null,
+          "returns": "Sandbox",
+          "py_args": [
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "options.body"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.create",
+          "ts": "client.sandboxes.create",
+          "handle": null,
+          "returns": "Sandbox",
+          "py_args": [
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "options.body"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.create",
+          "ts": "client.sandboxes.create",
+          "handle": null,
+          "returns": "Sandbox",
+          "py_args": [
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "options.body"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.files.download",
+      "adapter": "platform",
+      "name": "sandboxes.files.download",
+      "method": "GET",
+      "path": "/workspace/sandboxes/{id}/download/{path}",
+      "path_params": [
+        "id",
+        "path"
+      ],
+      "idempotent": false,
+      "retry": "http-idempotent",
+      "content_type": null,
+      "stream": null,
+      "pagination": null,
+      "operation_id": "downloadWorkspaceSandboxFile",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {},
+      "response_example": "fixture",
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.files.download",
+          "ts": "client.sandboxes.files.download",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.files.download",
+          "ts": "client.sandboxes.files.download",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.files.download",
+          "ts": "client.sandboxes.files.download",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.files.download",
+          "ts": "client.sandboxes.files.download",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.files.list",
+      "adapter": "platform",
+      "name": "sandboxes.files.list",
+      "method": "GET",
+      "path": "/workspace/sandboxes/{id}/files",
+      "path_params": [
+        "id"
+      ],
+      "idempotent": false,
+      "retry": "http-idempotent",
+      "content_type": null,
+      "stream": null,
+      "pagination": {
+        "style": "single-page",
+        "itemsField": "entries"
+      },
+      "operation_id": "listWorkspaceSandboxFiles",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "path": "fixture",
+        "entries": [
+          {
+            "name": "fixture",
+            "size": 1,
+            "mode": "fixture"
+          }
+        ]
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.files.list",
+          "ts": "client.sandboxes.files.list",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "path"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.path"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.files.list",
+          "ts": "client.sandboxes.files.list",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "path"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.path"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.files.list",
+          "ts": "client.sandboxes.files.list",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "path"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.path"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.files.list",
+          "ts": "client.sandboxes.files.list",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "path"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.path"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.files.makeDir",
+      "adapter": "platform",
+      "name": "sandboxes.files.makeDir",
+      "method": "PUT",
+      "path": "/workspace/sandboxes/{id}/folders/{path}",
+      "path_params": [
+        "id",
+        "path"
+      ],
+      "idempotent": false,
+      "retry": "http-idempotent",
+      "content_type": null,
+      "stream": null,
+      "pagination": null,
+      "operation_id": "createWorkspaceSandboxFolder",
+      "namespace": "sandboxes",
+      "success_status": 201,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v2",
+        "folder": {
+          "path": "fixture"
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.files.make_dir",
+          "ts": "client.sandboxes.files.makeDir",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.files.make_dir",
+          "ts": "client.sandboxes.files.makeDir",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.files.make_dir",
+          "ts": "client.sandboxes.files.makeDir",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.files.make_dir",
+          "ts": "client.sandboxes.files.makeDir",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.files.read",
+      "adapter": "platform",
+      "name": "sandboxes.files.read",
+      "method": "GET",
+      "path": "/workspace/sandboxes/{id}/files/{path}",
+      "path_params": [
+        "id",
+        "path"
+      ],
+      "idempotent": false,
+      "retry": "http-idempotent",
+      "content_type": null,
+      "stream": null,
+      "pagination": null,
+      "operation_id": "readWorkspaceSandboxFile",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "file": {
+          "outcome": "content",
+          "path": "fixture",
+          "encoding": "utf8",
+          "content": "fixture",
+          "bytes": 1,
+          "truncated": true
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.files.read",
+          "ts": "client.sandboxes.files.read",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "max_bytes"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.maxBytes"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.files.read",
+          "ts": "client.sandboxes.files.read",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "max_bytes"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.maxBytes"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.files.read",
+          "ts": "client.sandboxes.files.read",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "max_bytes"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.maxBytes"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.files.read",
+          "ts": "client.sandboxes.files.read",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "max_bytes"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.maxBytes"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.files.remove",
+      "adapter": "platform",
+      "name": "sandboxes.files.remove",
+      "method": "DELETE",
+      "path": "/workspace/sandboxes/{id}/files/{path}",
+      "path_params": [
+        "id",
+        "path"
+      ],
+      "idempotent": false,
+      "retry": "http-idempotent",
+      "content_type": null,
+      "stream": null,
+      "pagination": null,
+      "operation_id": "deleteWorkspaceSandboxPath",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v2",
+        "deleted": {
+          "path": "fixture",
+          "recursive": true
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.files.remove",
+          "ts": "client.sandboxes.files.remove",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "recursive"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.recursive"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.files.remove",
+          "ts": "client.sandboxes.files.remove",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "recursive"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.recursive"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.files.remove",
+          "ts": "client.sandboxes.files.remove",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "recursive"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.recursive"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.files.remove",
+          "ts": "client.sandboxes.files.remove",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "recursive"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.recursive"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.files.rename",
+      "adapter": "platform",
+      "name": "sandboxes.files.rename",
+      "method": "POST",
+      "path": "/workspace/sandboxes/{id}/move",
+      "path_params": [
+        "id"
+      ],
+      "idempotent": false,
+      "retry": "unsafe",
+      "content_type": "application/json",
+      "stream": null,
+      "pagination": null,
+      "operation_id": "moveWorkspaceSandboxPath",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {
+        "from": "fixture",
+        "to": "fixture"
+      },
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v2",
+        "moved": {
+          "from": "fixture",
+          "to": "fixture"
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.files.rename",
+          "ts": "client.sandboxes.files.rename",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.files.rename",
+          "ts": "client.sandboxes.files.rename",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.files.rename",
+          "ts": "client.sandboxes.files.rename",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.files.rename",
+          "ts": "client.sandboxes.files.rename",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.files.upload",
+      "adapter": "platform",
+      "name": "sandboxes.files.upload",
+      "method": "PUT",
+      "path": "/workspace/sandboxes/{id}/upload/{path}",
+      "path_params": [
+        "id",
+        "path"
+      ],
+      "idempotent": false,
+      "retry": "http-idempotent",
+      "content_type": "application/octet-stream",
+      "stream": null,
+      "pagination": null,
+      "operation_id": "uploadWorkspaceSandboxFile",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": "fixture",
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v2",
+        "file": {
+          "path": "fixture",
+          "bytes": 1,
+          "modifiedAt": "2026-01-01T00:00:00+00:00"
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.files.upload",
+          "ts": "client.sandboxes.files.upload",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.body"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.files.upload",
+          "ts": "client.sandboxes.files.upload",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.body"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.files.upload",
+          "ts": "client.sandboxes.files.upload",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.body"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.files.upload",
+          "ts": "client.sandboxes.files.upload",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.body"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.files.write",
+      "adapter": "platform",
+      "name": "sandboxes.files.write",
+      "method": "PUT",
+      "path": "/workspace/sandboxes/{id}/files/{path}",
+      "path_params": [
+        "id",
+        "path"
+      ],
+      "idempotent": false,
+      "retry": "http-idempotent",
+      "content_type": "application/json",
+      "stream": null,
+      "pagination": null,
+      "operation_id": "writeWorkspaceSandboxFile",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {
+        "content": "fixture"
+      },
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "file": {
+          "path": "fixture",
+          "bytes": 1,
+          "modifiedAt": "2026-01-01T00:00:00+00:00"
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.files.write",
+          "ts": "client.sandboxes.files.write",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.body"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.files.write",
+          "ts": "client.sandboxes.files.write",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.body"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.files.write",
+          "ts": "client.sandboxes.files.write",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.body"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.files.write",
+          "ts": "client.sandboxes.files.write",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.body"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.getInfo",
+      "adapter": "platform",
+      "name": "sandboxes.getInfo",
+      "method": "GET",
+      "path": "/workspace/sandboxes/{id}",
+      "path_params": [
+        "id"
+      ],
+      "idempotent": false,
+      "retry": "http-idempotent",
+      "content_type": null,
+      "stream": null,
+      "pagination": null,
+      "operation_id": "getWorkspaceSandbox",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "sandbox": {
+          "id": "fixture",
+          "name": "fixture",
+          "origin": "created",
+          "state": "active",
+          "createdAt": "2026-01-01T00:00:00+00:00",
+          "updatedAt": "2026-01-01T00:00:00+00:00",
+          "lastActivityAt": "2026-01-01T00:00:00+00:00",
+          "image": "fixture",
+          "limits": {
+            "cpus": 1,
+            "memoryMb": 1,
+            "pidsLimit": 1
+          },
+          "network": "none",
+          "idleTtlSeconds": 1,
+          "generation": 1,
+          "meter": {
+            "execCount": 1
+          },
+          "readOnly": true,
+          "usedBy": [
+            {
+              "runId": "fixture",
+              "taskId": "fixture"
+            }
+          ],
+          "provider": {
+            "kind": "container",
+            "bindingId": "fixture",
+            "isolationStatement": "fixture",
+            "snapshotKind": "files",
+            "snapshotStatement": "fixture",
+            "isolation": {
+              "image": "fixture",
+              "network": "none",
+              "memory": "fixture",
+              "cpus": "fixture",
+              "pidsLimit": 1,
+              "readOnlyRootfs": true,
+              "capDrop": "all",
+              "noNewPrivileges": true,
+              "workspaceMount": "fixture"
+            }
+          }
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.get_info",
+          "ts": "client.sandboxes.getInfo",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        {
+          "py": "Sandbox.refresh",
+          "ts": "Sandbox.refresh",
+          "handle": "Sandbox",
+          "py_args": [],
+          "ts_args": []
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.get_info",
+          "ts": "client.sandboxes.getInfo",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.get_info",
+          "ts": "client.sandboxes.getInfo",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.get_info",
+          "ts": "client.sandboxes.getInfo",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.hibernate",
+      "adapter": "platform",
+      "name": "sandboxes.hibernate",
+      "method": "POST",
+      "path": "/workspace/sandboxes/{id}/hibernate",
+      "path_params": [
+        "id"
+      ],
+      "idempotent": false,
+      "retry": "unsafe",
+      "content_type": null,
+      "stream": null,
+      "pagination": null,
+      "operation_id": "hibernateWorkspaceSandbox",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "sandbox": {
+          "id": "fixture",
+          "name": "fixture",
+          "origin": "created",
+          "state": "active",
+          "createdAt": "2026-01-01T00:00:00+00:00",
+          "updatedAt": "2026-01-01T00:00:00+00:00",
+          "lastActivityAt": "2026-01-01T00:00:00+00:00",
+          "image": "fixture",
+          "limits": {
+            "cpus": 1,
+            "memoryMb": 1,
+            "pidsLimit": 1
+          },
+          "network": "none",
+          "idleTtlSeconds": 1,
+          "generation": 1,
+          "meter": {
+            "execCount": 1
+          },
+          "readOnly": true,
+          "usedBy": [
+            {
+              "runId": "fixture",
+              "taskId": "fixture"
+            }
+          ],
+          "provider": {
+            "kind": "container",
+            "bindingId": "fixture",
+            "isolationStatement": "fixture",
+            "snapshotKind": "files",
+            "snapshotStatement": "fixture",
+            "isolation": {
+              "image": "fixture",
+              "network": "none",
+              "memory": "fixture",
+              "cpus": "fixture",
+              "pidsLimit": 1,
+              "readOnlyRootfs": true,
+              "capDrop": "all",
+              "noNewPrivileges": true,
+              "workspaceMount": "fixture"
+            }
+          }
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.hibernate",
+          "ts": "client.sandboxes.hibernate",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.hibernate",
+          "ts": "client.sandboxes.hibernate",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.hibernate",
+          "ts": "client.sandboxes.hibernate",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.hibernate",
+          "ts": "client.sandboxes.hibernate",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.kill",
+      "adapter": "platform",
+      "name": "sandboxes.kill",
+      "method": "DELETE",
+      "path": "/workspace/sandboxes/{id}",
+      "path_params": [
+        "id"
+      ],
+      "idempotent": false,
+      "retry": "http-idempotent",
+      "content_type": null,
+      "stream": null,
+      "pagination": null,
+      "operation_id": "destroyWorkspaceSandbox",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "sandbox": {
+          "id": "fixture",
+          "name": "fixture",
+          "origin": "created",
+          "state": "active",
+          "createdAt": "2026-01-01T00:00:00+00:00",
+          "updatedAt": "2026-01-01T00:00:00+00:00",
+          "lastActivityAt": "2026-01-01T00:00:00+00:00",
+          "image": "fixture",
+          "limits": {
+            "cpus": 1,
+            "memoryMb": 1,
+            "pidsLimit": 1
+          },
+          "network": "none",
+          "idleTtlSeconds": 1,
+          "generation": 1,
+          "meter": {
+            "execCount": 1
+          },
+          "readOnly": true,
+          "usedBy": [
+            {
+              "runId": "fixture",
+              "taskId": "fixture"
+            }
+          ],
+          "provider": {
+            "kind": "container",
+            "bindingId": "fixture",
+            "isolationStatement": "fixture",
+            "snapshotKind": "files",
+            "snapshotStatement": "fixture",
+            "isolation": {
+              "image": "fixture",
+              "network": "none",
+              "memory": "fixture",
+              "cpus": "fixture",
+              "pidsLimit": 1,
+              "readOnlyRootfs": true,
+              "capDrop": "all",
+              "noNewPrivileges": true,
+              "workspaceMount": "fixture"
+            }
+          }
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.kill",
+          "ts": "client.sandboxes.kill",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.kill",
+          "ts": "client.sandboxes.kill",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.kill",
+          "ts": "client.sandboxes.kill",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.kill",
+          "ts": "client.sandboxes.kill",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.list",
+      "adapter": "platform",
+      "name": "sandboxes.list",
+      "method": "GET",
+      "path": "/workspace/sandboxes",
+      "path_params": [],
+      "idempotent": false,
+      "retry": "http-idempotent",
+      "content_type": null,
+      "stream": null,
+      "pagination": {
+        "style": "single-page",
+        "itemsField": "sandboxes"
+      },
+      "operation_id": "listWorkspaceSandboxes",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "sandboxes": [
+          {
+            "id": "fixture",
+            "name": "fixture",
+            "origin": "created",
+            "state": "active",
+            "createdAt": "2026-01-01T00:00:00+00:00",
+            "updatedAt": "2026-01-01T00:00:00+00:00",
+            "lastActivityAt": "2026-01-01T00:00:00+00:00",
+            "image": "fixture",
+            "limits": {
+              "cpus": 1,
+              "memoryMb": 1,
+              "pidsLimit": 1
+            },
+            "network": "none",
+            "idleTtlSeconds": 1,
+            "generation": 1,
+            "meter": {
+              "execCount": 1
+            },
+            "readOnly": true,
+            "usedBy": [
+              {
+                "runId": "fixture",
+                "taskId": "fixture"
+              }
+            ],
+            "provider": {
+              "kind": "container",
+              "bindingId": "fixture",
+              "isolationStatement": "fixture",
+              "snapshotKind": "files",
+              "snapshotStatement": "fixture",
+              "isolation": {
+                "image": "fixture",
+                "network": "none",
+                "memory": "fixture",
+                "cpus": "fixture",
+                "pidsLimit": 1,
+                "readOnlyRootfs": true,
+                "capDrop": "all",
+                "noNewPrivileges": true,
+                "workspaceMount": "fixture"
+              }
+            }
+          }
+        ],
+        "caps": {
+          "defaultImage": "fixture",
+          "images": [
+            "fixture"
+          ],
+          "limits": {
+            "default": {
+              "cpus": 1,
+              "memoryMb": 1,
+              "pidsLimit": 1
+            },
+            "min": {
+              "cpus": 1,
+              "memoryMb": 1,
+              "pidsLimit": 1
+            },
+            "max": {
+              "cpus": 1,
+              "memoryMb": 1,
+              "pidsLimit": 1
+            }
+          },
+          "sizes": [
+            {
+              "id": "small",
+              "label": "fixture",
+              "cpus": 1,
+              "memoryMb": 1,
+              "pidsLimit": 1,
+              "goodFor": "fixture",
+              "available": true
+            }
+          ],
+          "defaultSize": "small",
+          "customLimits": true,
+          "templates": [
+            {
+              "id": "fixture",
+              "name": "fixture",
+              "description": "fixture",
+              "contents": [
+                "fixture"
+              ],
+              "sizeHint": "small",
+              "minSize": "small",
+              "image": "fixture",
+              "imageId": "fixture",
+              "available": true
+            }
+          ],
+          "defaultTemplate": "fixture",
+          "networkModes": [
+            "none"
+          ],
+          "defaultNetwork": "none",
+          "networkUnavailableReason": "fixture",
+          "networkUnavailableCode": "egress_firewall_missing",
+          "egressAllowList": {
+            "supported": false,
+            "reason": "fixture"
+          },
+          "idleTtlSeconds": {
+            "default": 1,
+            "min": 1,
+            "max": 1
+          },
+          "exec": {
+            "defaultTimeoutSeconds": 1,
+            "maxTimeoutSeconds": 1,
+            "maxOutputBytes": 1
+          },
+          "files": {
+            "maxReadBytes": 1,
+            "maxWriteBytes": 1
+          },
+          "maxActiveSandboxes": 1,
+          "settings": {
+            "canEdit": true
+          },
+          "createRefusal": {
+            "field": "size",
+            "reason": "fixture"
+          }
+        },
+        "provider": {
+          "kind": "container",
+          "bindingId": "fixture",
+          "isolationStatement": "fixture",
+          "snapshotKind": "files",
+          "snapshotStatement": "fixture",
+          "isolation": {
+            "image": "fixture",
+            "network": "none",
+            "memory": "fixture",
+            "cpus": "fixture",
+            "pidsLimit": 1,
+            "readOnlyRootfs": true,
+            "capDrop": "all",
+            "noNewPrivileges": true,
+            "workspaceMount": "fixture"
+          }
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.list",
+          "ts": "client.sandboxes.list",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.list",
+          "ts": "client.sandboxes.list",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        },
+        "py_async": {
+          "py": "client.sandboxes.list",
+          "ts": "client.sandboxes.list",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        },
+        "ts": {
+          "py": "client.sandboxes.list",
+          "ts": "client.sandboxes.list",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.networkPolicy.get",
+      "adapter": "platform",
+      "name": "sandboxes.networkPolicy.get",
+      "method": "GET",
+      "path": "/workspace/sandboxes/{id}/network-policy",
+      "path_params": [
+        "id"
+      ],
+      "idempotent": false,
+      "retry": "http-idempotent",
+      "content_type": null,
+      "stream": null,
+      "pagination": null,
+      "operation_id": "getWorkspaceSandboxNetworkPolicy",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "policy": {
+          "desired": {
+            "version": 1,
+            "revision": 1,
+            "mode": "off",
+            "allow": [
+              {
+                "cidr": "fixture",
+                "protocol": "tcp"
+              }
+            ],
+            "deny": [
+              {
+                "cidr": "fixture",
+                "protocol": "tcp"
+              }
+            ]
+          },
+          "desiredRevision": 1,
+          "appliedRevision": "fixture",
+          "applyStatus": "pending"
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.network_policy.get",
+          "ts": "client.sandboxes.networkPolicy.get",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.network_policy.get",
+          "ts": "client.sandboxes.networkPolicy.get",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.network_policy.get",
+          "ts": "client.sandboxes.networkPolicy.get",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.network_policy.get",
+          "ts": "client.sandboxes.networkPolicy.get",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.networkPolicy.update",
+      "adapter": "platform",
+      "name": "sandboxes.networkPolicy.update",
+      "method": "PUT",
+      "path": "/workspace/sandboxes/{id}/network-policy",
+      "path_params": [
+        "id"
+      ],
+      "idempotent": false,
+      "retry": "http-idempotent",
+      "content_type": "application/json",
+      "stream": null,
+      "pagination": null,
+      "operation_id": "putWorkspaceSandboxNetworkPolicy",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "policy": {
+          "desired": {
+            "version": 1,
+            "revision": 1,
+            "mode": "off",
+            "allow": [
+              {
+                "cidr": "fixture",
+                "protocol": "tcp"
+              }
+            ],
+            "deny": [
+              {
+                "cidr": "fixture",
+                "protocol": "tcp"
+              }
+            ]
+          },
+          "desiredRevision": 1,
+          "appliedRevision": "fixture",
+          "applyStatus": "pending"
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.network_policy.update",
+          "ts": "client.sandboxes.networkPolicy.update",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body",
+            "if_match"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body",
+            "options.ifMatch"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.network_policy.update",
+          "ts": "client.sandboxes.networkPolicy.update",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body",
+            "if_match"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body",
+            "options.ifMatch"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.network_policy.update",
+          "ts": "client.sandboxes.networkPolicy.update",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body",
+            "if_match"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body",
+            "options.ifMatch"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.network_policy.update",
+          "ts": "client.sandboxes.networkPolicy.update",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body",
+            "if_match"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body",
+            "options.ifMatch"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.resume",
+      "adapter": "platform",
+      "name": "sandboxes.resume",
+      "method": "POST",
+      "path": "/workspace/sandboxes/{id}/resume",
+      "path_params": [
+        "id"
+      ],
+      "idempotent": false,
+      "retry": "unsafe",
+      "content_type": null,
+      "stream": null,
+      "pagination": null,
+      "operation_id": "resumeWorkspaceSandbox",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "sandbox": {
+          "id": "fixture",
+          "name": "fixture",
+          "origin": "created",
+          "state": "active",
+          "createdAt": "2026-01-01T00:00:00+00:00",
+          "updatedAt": "2026-01-01T00:00:00+00:00",
+          "lastActivityAt": "2026-01-01T00:00:00+00:00",
+          "image": "fixture",
+          "limits": {
+            "cpus": 1,
+            "memoryMb": 1,
+            "pidsLimit": 1
+          },
+          "network": "none",
+          "idleTtlSeconds": 1,
+          "generation": 1,
+          "meter": {
+            "execCount": 1
+          },
+          "readOnly": true,
+          "usedBy": [
+            {
+              "runId": "fixture",
+              "taskId": "fixture"
+            }
+          ],
+          "provider": {
+            "kind": "container",
+            "bindingId": "fixture",
+            "isolationStatement": "fixture",
+            "snapshotKind": "files",
+            "snapshotStatement": "fixture",
+            "isolation": {
+              "image": "fixture",
+              "network": "none",
+              "memory": "fixture",
+              "cpus": "fixture",
+              "pidsLimit": 1,
+              "readOnlyRootfs": true,
+              "capDrop": "all",
+              "noNewPrivileges": true,
+              "workspaceMount": "fixture"
+            }
+          }
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.resume",
+          "ts": "client.sandboxes.resume",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.resume",
+          "ts": "client.sandboxes.resume",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.resume",
+          "ts": "client.sandboxes.resume",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.resume",
+          "ts": "client.sandboxes.resume",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.settings.get",
+      "adapter": "platform",
+      "name": "sandboxes.settings.get",
+      "method": "GET",
+      "path": "/workspace/sandboxes/settings",
+      "path_params": [],
+      "idempotent": false,
+      "retry": "http-idempotent",
+      "content_type": null,
+      "stream": null,
+      "pagination": null,
+      "operation_id": "getWorkspaceSandboxSettings",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "settings": {},
+        "operator": {
+          "templates": [
+            "fixture"
+          ],
+          "defaultTemplate": "fixture",
+          "images": [
+            "fixture"
+          ],
+          "sizes": [
+            "small"
+          ],
+          "defaultSize": "small",
+          "allowNetwork": true,
+          "maxActivePerWorkspace": 1,
+          "idleTtlSeconds": 60,
+          "customLimits": true
+        },
+        "canEdit": true,
+        "caps": {
+          "defaultImage": "fixture",
+          "images": [
+            "fixture"
+          ],
+          "limits": {
+            "default": {
+              "cpus": 1,
+              "memoryMb": 1,
+              "pidsLimit": 1
+            },
+            "min": {
+              "cpus": 1,
+              "memoryMb": 1,
+              "pidsLimit": 1
+            },
+            "max": {
+              "cpus": 1,
+              "memoryMb": 1,
+              "pidsLimit": 1
+            }
+          },
+          "sizes": [
+            {
+              "id": "small",
+              "label": "fixture",
+              "cpus": 1,
+              "memoryMb": 1,
+              "pidsLimit": 1,
+              "goodFor": "fixture",
+              "available": true
+            }
+          ],
+          "defaultSize": "small",
+          "customLimits": true,
+          "templates": [
+            {
+              "id": "fixture",
+              "name": "fixture",
+              "description": "fixture",
+              "contents": [
+                "fixture"
+              ],
+              "sizeHint": "small",
+              "minSize": "small",
+              "image": "fixture",
+              "imageId": "fixture",
+              "available": true
+            }
+          ],
+          "defaultTemplate": "fixture",
+          "networkModes": [
+            "none"
+          ],
+          "defaultNetwork": "none",
+          "networkUnavailableReason": "fixture",
+          "networkUnavailableCode": "egress_firewall_missing",
+          "egressAllowList": {
+            "supported": false,
+            "reason": "fixture"
+          },
+          "idleTtlSeconds": {
+            "default": 1,
+            "min": 1,
+            "max": 1
+          },
+          "exec": {
+            "defaultTimeoutSeconds": 1,
+            "maxTimeoutSeconds": 1,
+            "maxOutputBytes": 1
+          },
+          "files": {
+            "maxReadBytes": 1,
+            "maxWriteBytes": 1
+          },
+          "maxActiveSandboxes": 1,
+          "settings": {
+            "canEdit": true
+          },
+          "createRefusal": {
+            "field": "size",
+            "reason": "fixture"
+          }
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.settings.get",
+          "ts": "client.sandboxes.settings.get",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.settings.get",
+          "ts": "client.sandboxes.settings.get",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        },
+        "py_async": {
+          "py": "client.sandboxes.settings.get",
+          "ts": "client.sandboxes.settings.get",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        },
+        "ts": {
+          "py": "client.sandboxes.settings.get",
+          "ts": "client.sandboxes.settings.get",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.snapshots.create",
+      "adapter": "platform",
+      "name": "sandboxes.snapshots.create",
+      "method": "POST",
+      "path": "/workspace/sandboxes/{id}/snapshots",
+      "path_params": [
+        "id"
+      ],
+      "idempotent": false,
+      "retry": "unsafe",
+      "content_type": null,
+      "stream": null,
+      "pagination": null,
+      "operation_id": "snapshotWorkspaceSandbox",
+      "namespace": "sandboxes",
+      "success_status": 201,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "snapshot": {
+          "id": "fixture",
+          "sandboxId": "fixture",
+          "createdAt": "2026-01-01T00:00:00+00:00",
+          "kind": "files",
+          "statement": "fixture",
+          "contentAddress": {
+            "artifactId": "fixture"
+          }
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.snapshots.create",
+          "ts": "client.sandboxes.snapshots.create",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.snapshots.create",
+          "ts": "client.sandboxes.snapshots.create",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.snapshots.create",
+          "ts": "client.sandboxes.snapshots.create",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.snapshots.create",
+          "ts": "client.sandboxes.snapshots.create",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.snapshots.list",
+      "adapter": "platform",
+      "name": "sandboxes.snapshots.list",
+      "method": "GET",
+      "path": "/workspace/sandboxes/{id}/snapshots",
+      "path_params": [
+        "id"
+      ],
+      "idempotent": false,
+      "retry": "http-idempotent",
+      "content_type": null,
+      "stream": null,
+      "pagination": {
+        "style": "single-page",
+        "itemsField": "snapshots"
+      },
+      "operation_id": "listWorkspaceSandboxSnapshots",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "snapshots": [
+          {
+            "id": "fixture",
+            "sandboxId": "fixture",
+            "createdAt": "2026-01-01T00:00:00+00:00",
+            "kind": "files",
+            "statement": "fixture",
+            "contentAddress": {
+              "artifactId": "fixture"
+            }
+          }
+        ]
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.snapshots.list",
+          "ts": "client.sandboxes.snapshots.list",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.snapshots.list",
+          "ts": "client.sandboxes.snapshots.list",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.snapshots.list",
+          "ts": "client.sandboxes.snapshots.list",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.snapshots.list",
+          "ts": "client.sandboxes.snapshots.list",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.snapshots.restore",
+      "adapter": "platform",
+      "name": "sandboxes.snapshots.restore",
+      "method": "POST",
+      "path": "/workspace/sandboxes/{id}/snapshots/{snapshotId}/restore",
+      "path_params": [
+        "id",
+        "snapshotId"
+      ],
+      "idempotent": false,
+      "retry": "unsafe",
+      "content_type": "application/json",
+      "stream": null,
+      "pagination": null,
+      "operation_id": "restoreWorkspaceSandboxSnapshot",
+      "namespace": "sandboxes",
+      "success_status": 201,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "sandbox": {
+          "id": "fixture",
+          "name": "fixture",
+          "origin": "created",
+          "state": "active",
+          "createdAt": "2026-01-01T00:00:00+00:00",
+          "updatedAt": "2026-01-01T00:00:00+00:00",
+          "lastActivityAt": "2026-01-01T00:00:00+00:00",
+          "image": "fixture",
+          "limits": {
+            "cpus": 1,
+            "memoryMb": 1,
+            "pidsLimit": 1
+          },
+          "network": "none",
+          "idleTtlSeconds": 1,
+          "generation": 1,
+          "meter": {
+            "execCount": 1
+          },
+          "readOnly": true,
+          "usedBy": [
+            {
+              "runId": "fixture",
+              "taskId": "fixture"
+            }
+          ],
+          "provider": {
+            "kind": "container",
+            "bindingId": "fixture",
+            "isolationStatement": "fixture",
+            "snapshotKind": "files",
+            "snapshotStatement": "fixture",
+            "isolation": {
+              "image": "fixture",
+              "network": "none",
+              "memory": "fixture",
+              "cpus": "fixture",
+              "pidsLimit": 1,
+              "readOnlyRootfs": true,
+              "capDrop": "all",
+              "noNewPrivileges": true,
+              "workspaceMount": "fixture"
+            }
+          }
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.snapshots.restore",
+          "ts": "client.sandboxes.snapshots.restore",
+          "handle": null,
+          "returns": "Sandbox",
+          "py_args": [
+            "sandbox_id",
+            "snapshot_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "snapshotId",
+            "options.body"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.snapshots.restore",
+          "ts": "client.sandboxes.snapshots.restore",
+          "handle": null,
+          "returns": "Sandbox",
+          "py_args": [
+            "sandbox_id",
+            "snapshot_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "snapshotId",
+            "options.body"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.snapshots.restore",
+          "ts": "client.sandboxes.snapshots.restore",
+          "handle": null,
+          "returns": "Sandbox",
+          "py_args": [
+            "sandbox_id",
+            "snapshot_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "snapshotId",
+            "options.body"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.snapshots.restore",
+          "ts": "client.sandboxes.snapshots.restore",
+          "handle": null,
+          "returns": "Sandbox",
+          "py_args": [
+            "sandbox_id",
+            "snapshot_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "snapshotId",
+            "options.body"
+          ]
+        }
+      }
+    },
+    {
+      "id": "platform:sandboxes.update",
+      "adapter": "platform",
+      "name": "sandboxes.update",
+      "method": "PATCH",
+      "path": "/workspace/sandboxes/{id}",
+      "path_params": [
+        "id"
+      ],
+      "idempotent": false,
+      "retry": "unsafe",
+      "content_type": "application/json",
+      "stream": null,
+      "pagination": null,
+      "operation_id": "updateWorkspaceSandbox",
+      "namespace": "sandboxes",
+      "success_status": 200,
+      "request_example": {},
+      "response_example": {
+        "schemaVersion": "omega-workspace-sandboxes/v1",
+        "sandbox": {
+          "id": "fixture",
+          "name": "fixture",
+          "origin": "created",
+          "state": "active",
+          "createdAt": "2026-01-01T00:00:00+00:00",
+          "updatedAt": "2026-01-01T00:00:00+00:00",
+          "lastActivityAt": "2026-01-01T00:00:00+00:00",
+          "image": "fixture",
+          "limits": {
+            "cpus": 1,
+            "memoryMb": 1,
+            "pidsLimit": 1
+          },
+          "network": "none",
+          "idleTtlSeconds": 1,
+          "generation": 1,
+          "meter": {
+            "execCount": 1
+          },
+          "readOnly": true,
+          "usedBy": [
+            {
+              "runId": "fixture",
+              "taskId": "fixture"
+            }
+          ],
+          "provider": {
+            "kind": "container",
+            "bindingId": "fixture",
+            "isolationStatement": "fixture",
+            "snapshotKind": "files",
+            "snapshotStatement": "fixture",
+            "isolation": {
+              "image": "fixture",
+              "network": "none",
+              "memory": "fixture",
+              "cpus": "fixture",
+              "pidsLimit": 1,
+              "readOnlyRootfs": true,
+              "capDrop": "all",
+              "noNewPrivileges": true,
+              "workspaceMount": "fixture"
+            }
+          }
+        }
+      },
+      "query_example": {},
+      "path_values": {},
+      "wrappers": [
+        {
+          "py": "client.sandboxes.update",
+          "ts": "client.sandboxes.update",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body"
+          ]
+        }
+      ],
+      "handle_fixtures": {},
+      "public_wrappers": {
+        "py_sync": {
+          "py": "client.sandboxes.update",
+          "ts": "client.sandboxes.update",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body"
+          ]
+        },
+        "py_async": {
+          "py": "client.sandboxes.update",
+          "ts": "client.sandboxes.update",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body"
+          ]
+        },
+        "ts": {
+          "py": "client.sandboxes.update",
+          "ts": "client.sandboxes.update",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body"
+          ]
         }
       }
     },

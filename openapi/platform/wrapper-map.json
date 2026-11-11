@@ -1,6 +1,6 @@
 {
   "about": "One public path per platform method, in both languages. Each contract operation is either wrapped (methods with py and ts paths, the owning handle, arguments and any rename) or unwrapped with a reason. py_args: positional names, then \"*\", then keywords. ts_args: positional names, then options.<key>. Arguments here are the contract's path and query parameters plus the SDK's own (idempotency_key, wait, timeout, callbacks); each namespace adds its request-body keywords when its methods are written. \"internal\" names query parameters the wrapper fills itself. scripts/platform/wrapper_map.py and python/tests/platform/test_gates_wrapper_map.py enforce the rules.",
-  "contract_sha256": "8e391c6c54f6eec68270e11b753ffaa85f965e21dad0aaea04239da73557ab11",
+  "contract_sha256": "40e72815c848f254ceecad57650150c4556b87eae004ff73aa9eb2439ee145a7",
   "not_offered": {
     "deployments": {
       "status": "NOT-OFFERED",
@@ -15,17 +15,10 @@
   },
   "handles": {
     "Deployment": "a deployed project bundle with a URL",
-    "Run": "one multi-turn conversation with an agent"
+    "Run": "one multi-turn conversation with an agent",
+    "Sandbox": "one hosted sandbox: an isolated computer that runs commands and keeps files"
   },
   "families": {
-    "sandboxes": {
-      "unwrapped": "The entire Sandbox namespace is not offered in this SDK release, including network policy operations in the pinned contract.",
-      "until": "if-needed",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
-    },
     "deployments": {
       "availability": {
         "py": "NOT-OFFERED",
@@ -1520,148 +1513,429 @@
       ]
     },
     "sandboxes.activity.list": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "listWorkspaceSandboxActivity",
+      "response": "ListWorkspaceSandboxActivityResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.activity.list",
+          "ts": "client.sandboxes.activity.list",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      ]
     },
     "sandboxes.commands.cancel": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "cancelWorkspaceSandboxExec",
+      "response": "CancelWorkspaceSandboxExecResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.commands.cancel",
+          "ts": "client.sandboxes.commands.cancel",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "exec_id"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "execId"
+          ]
+        }
+      ]
     },
     "sandboxes.commands.run": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "execInWorkspaceSandbox",
+      "body": {
+        "kind": "json",
+        "schema": "ExecInWorkspaceSandboxRequest"
+      },
+      "response": "stream",
+      "methods": [
+        {
+          "py": "client.sandboxes.commands.run",
+          "ts": "client.sandboxes.commands.run",
+          "handle": null,
+          "returns": "stream",
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body"
+          ]
+        },
+        {
+          "py": "Sandbox.commands.stream",
+          "ts": "Sandbox.commands.stream",
+          "handle": "Sandbox",
+          "returns": "stream",
+          "py_args": [
+            "command",
+            "*",
+            "cwd",
+            "env",
+            "timeout_seconds"
+          ],
+          "ts_args": [
+            "command",
+            "options.cwd",
+            "options.env",
+            "options.timeoutSeconds"
+          ]
+        }
+      ]
     },
     "sandboxes.create": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "createWorkspaceSandbox",
+      "body": {
+        "kind": "json",
+        "schema": "CreateWorkspaceSandboxRequest"
+      },
+      "response": "CreateWorkspaceSandboxResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.create",
+          "ts": "client.sandboxes.create",
+          "handle": null,
+          "returns": "Sandbox",
+          "py_args": [
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "options.body"
+          ]
+        }
+      ]
     },
     "sandboxes.files.download": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "downloadWorkspaceSandboxFile",
+      "response": "binary",
+      "methods": [
+        {
+          "py": "client.sandboxes.files.download",
+          "ts": "client.sandboxes.files.download",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path"
+          ]
+        }
+      ]
     },
     "sandboxes.files.list": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "listWorkspaceSandboxFiles",
+      "response": "ListWorkspaceSandboxFilesResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.files.list",
+          "ts": "client.sandboxes.files.list",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "path"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.path"
+          ]
+        }
+      ]
     },
     "sandboxes.files.makeDir": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "createWorkspaceSandboxFolder",
+      "response": "CreateWorkspaceSandboxFolderResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.files.make_dir",
+          "ts": "client.sandboxes.files.makeDir",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path"
+          ]
+        }
+      ]
     },
     "sandboxes.files.read": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "readWorkspaceSandboxFile",
+      "response": "ReadWorkspaceSandboxFileResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.files.read",
+          "ts": "client.sandboxes.files.read",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "max_bytes"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.maxBytes"
+          ]
+        }
+      ]
     },
     "sandboxes.files.remove": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "deleteWorkspaceSandboxPath",
+      "response": "DeleteWorkspaceSandboxPathResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.files.remove",
+          "ts": "client.sandboxes.files.remove",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "recursive"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.recursive"
+          ]
+        }
+      ]
     },
     "sandboxes.files.rename": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "moveWorkspaceSandboxPath",
+      "body": {
+        "kind": "json",
+        "schema": "MoveWorkspaceSandboxPathRequest"
+      },
+      "response": "MoveWorkspaceSandboxPathResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.files.rename",
+          "ts": "client.sandboxes.files.rename",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body"
+          ]
+        }
+      ]
     },
     "sandboxes.files.upload": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "uploadWorkspaceSandboxFile",
+      "body": {
+        "kind": "bundle",
+        "content_type": "application/octet-stream"
+      },
+      "response": "UploadWorkspaceSandboxFileResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.files.upload",
+          "ts": "client.sandboxes.files.upload",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.body"
+          ]
+        }
+      ]
     },
     "sandboxes.files.write": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "writeWorkspaceSandboxFile",
+      "body": {
+        "kind": "bundle",
+        "schema": "WriteWorkspaceSandboxFileRequest"
+      },
+      "response": "WriteWorkspaceSandboxFileResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.files.write",
+          "ts": "client.sandboxes.files.write",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "path",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "path",
+            "options.body"
+          ]
+        }
+      ]
     },
     "sandboxes.getInfo": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "getWorkspaceSandbox",
+      "response": "GetWorkspaceSandboxResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.get_info",
+          "ts": "client.sandboxes.getInfo",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        },
+        {
+          "py": "Sandbox.refresh",
+          "ts": "Sandbox.refresh",
+          "handle": "Sandbox",
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
     },
     "sandboxes.hibernate": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "hibernateWorkspaceSandbox",
+      "response": "HibernateWorkspaceSandboxResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.hibernate",
+          "ts": "client.sandboxes.hibernate",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      ]
     },
     "sandboxes.kill": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "destroyWorkspaceSandbox",
+      "response": "DestroyWorkspaceSandboxResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.kill",
+          "ts": "client.sandboxes.kill",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      ]
     },
     "sandboxes.list": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "listWorkspaceSandboxes",
+      "response": "ListWorkspaceSandboxesResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.list",
+          "ts": "client.sandboxes.list",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
+    },
+    "sandboxes.networkPolicy.get": {
+      "operation_id": "getWorkspaceSandboxNetworkPolicy",
+      "response": "GetWorkspaceSandboxNetworkPolicyResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.network_policy.get",
+          "ts": "client.sandboxes.networkPolicy.get",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      ]
+    },
+    "sandboxes.networkPolicy.update": {
+      "operation_id": "putWorkspaceSandboxNetworkPolicy",
+      "body": {
+        "kind": "json",
+        "schema": "PutWorkspaceSandboxNetworkPolicyRequest"
+      },
+      "response": "PutWorkspaceSandboxNetworkPolicyResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.network_policy.update",
+          "ts": "client.sandboxes.networkPolicy.update",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body",
+            "if_match"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body",
+            "options.ifMatch"
+          ]
+        }
+      ]
     },
     "sandboxes.resume": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "resumeWorkspaceSandbox",
+      "response": "ResumeWorkspaceSandboxResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.resume",
+          "ts": "client.sandboxes.resume",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      ]
     },
     "sandboxes.settings.get": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "getWorkspaceSandboxSettings",
+      "response": "GetWorkspaceSandboxSettingsResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.settings.get",
+          "ts": "client.sandboxes.settings.get",
+          "handle": null,
+          "py_args": [],
+          "ts_args": []
+        }
+      ]
     },
     "sandboxes.settings.update": {
       "unwrapped": "human-only: a person decides it in the Console; the SDK never wraps it",
@@ -1672,36 +1946,89 @@
       }
     },
     "sandboxes.snapshots.create": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "snapshotWorkspaceSandbox",
+      "response": "SnapshotWorkspaceSandboxResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.snapshots.create",
+          "ts": "client.sandboxes.snapshots.create",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      ]
     },
     "sandboxes.snapshots.list": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "listWorkspaceSandboxSnapshots",
+      "response": "ListWorkspaceSandboxSnapshotsResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.snapshots.list",
+          "ts": "client.sandboxes.snapshots.list",
+          "handle": null,
+          "py_args": [
+            "sandbox_id"
+          ],
+          "ts_args": [
+            "sandboxId"
+          ]
+        }
+      ]
     },
     "sandboxes.snapshots.restore": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "restoreWorkspaceSandboxSnapshot",
+      "body": {
+        "kind": "json",
+        "schema": "RestoreWorkspaceSandboxSnapshotRequest"
+      },
+      "response": "RestoreWorkspaceSandboxSnapshotResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.snapshots.restore",
+          "ts": "client.sandboxes.snapshots.restore",
+          "handle": null,
+          "returns": "Sandbox",
+          "py_args": [
+            "sandbox_id",
+            "snapshot_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "snapshotId",
+            "options.body"
+          ]
+        }
+      ]
     },
     "sandboxes.update": {
-      "unwrapped": "Hosted sandboxes are not available in this release; no SDK or CLI surface is offered.",
-      "until": "later",
-      "languages": {
-        "py": "NOT-OFFERED",
-        "ts": "NOT-OFFERED"
-      }
+      "operation_id": "updateWorkspaceSandbox",
+      "body": {
+        "kind": "json",
+        "schema": "UpdateWorkspaceSandboxRequest"
+      },
+      "response": "UpdateWorkspaceSandboxResponse",
+      "methods": [
+        {
+          "py": "client.sandboxes.update",
+          "ts": "client.sandboxes.update",
+          "handle": null,
+          "py_args": [
+            "sandbox_id",
+            "*",
+            "body"
+          ],
+          "ts_args": [
+            "sandboxId",
+            "options.body"
+          ]
+        }
+      ]
     }
   },
   "composite_methods": [

@@ -1,11 +1,11 @@
 {
   "contract": "Future AGI platform customer contract (OpenAPI 3.1)",
   "source_label": "enterprise customer contract",
-  "source_digest": "sha256:8e391c6c54f6eec68270e11b753ffaa85f965e21dad0aaea04239da73557ab11",
-  "pinned": "2026-11-02",
+  "source_digest": "sha256:40e72815c848f254ceecad57650150c4556b87eae004ff73aa9eb2439ee145a7",
+  "pinned": "2026-11-11",
   "scope": "openapi/platform/scope.json",
   "scoped": {
     "path": "openapi/platform/generated/futureagi-platform.openapi.json",
-    "sha256": "cd952ca478a5b21e92ee8cbbcc534fd28e1367ffd1a3175ae7a79509d7a348dc"
+    "sha256": "5d6f229a92c970d9ff869b4b488ac28c079d1a1f3d3dc16f2b69e62ad75c45a8"
   }
 }
