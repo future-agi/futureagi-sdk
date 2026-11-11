@@ -7,7 +7,8 @@ a different authorized person still reviews and releases each exact parent.
 
 CLI: python -m fi.context.release plan-publish CONTEXT_ID [CONTEXT_ID ...] --out plan.json
          Reads each saved draft's complete comparison and prints every changed file, the
-         reviewed publication head, the static-check summary and one plan digest.
+         accepted dependency lock, the reviewed publication head, the static-check summary
+         and one plan digest.
      python -m fi.context.release publish-set --plan plan.json --reviewed-plan DIGEST
          --reviewed-changes [--acknowledge-warnings] [--note TEXT]
          Records the reviewed head, then publishes, for each context separately.
@@ -97,6 +98,9 @@ def plan_publish(client: Client, context_ids: list[str]) -> dict:
             "candidate_digest": review["candidate_digest"], "base_version": review["base_version"],
             "expected_head_version": review["expected_head_version"], "head_digest": review.get("head_digest"),
             "review_fingerprint": review["review_fingerprint"],
+            "accepted_lock": [{"mount": link["mount"], "version": link["version"], "version_id": link["version_id"],
+                               "digest": link["digest"], "requested": link.get("requested")}
+                              for link in (draft.get("resolved_lock") or {}).get("links", [])],
             "changed_from_origin": _changed(found["origin"]), "changed_from_head": _changed(found["head"]),
             "errors": summary["errors"], "warnings": summary["warnings"],
         })

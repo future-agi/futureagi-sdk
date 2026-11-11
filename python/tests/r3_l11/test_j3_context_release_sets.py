@@ -20,7 +20,7 @@ class Fake:
         self.calls.append((method, path, body, options))
         context = A if A in path else B
         if path.endswith("/draft/"):
-            return {"revision": 4}
+            return {"revision": 4, "resolved_lock": {"links": [{"mount": "skills/p/", "version": 8, "version_id": "v8", "digest": "d8", "requested": {"label": "production"}}]}}
         if path.endswith("/release/review/"):
             fingerprint = "fp-" + context[:4] + ("-moved" if self.moved else "")
             file = {"path": "AGENTS.md", "status": "modified", "from_sha256": "x", "to_sha256": "y"}
@@ -53,6 +53,7 @@ def test_publish_set_reviews_each_context_then_acknowledges_and_publishes_it_sep
     plan = release.plan_publish(fake, [A, B])
     assert [row["changed_from_origin"][0]["path"] for row in plan["contexts"]] == ["AGENTS.md", "AGENTS.md"]
     assert all(len(row["changed_from_origin"]) == 1 for row in plan["contexts"])
+    assert plan["contexts"][0]["accepted_lock"] == [{"mount": "skills/p/", "version": 8, "version_id": "v8", "digest": "d8", "requested": {"label": "production"}}]
     result = release.publish_set(fake, plan, **publish_args(plan))
     assert [row["version"] for row in result["published"]] == [2, 2]
     writes = [(path.rsplit("/", 2)[-2], body) for method, path, body, _ in fake.calls if method == "POST" and not path.endswith("/release/review/")]
