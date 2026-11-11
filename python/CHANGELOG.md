@@ -2,12 +2,16 @@
 
 ## Unreleased
 
-### Fixed: refused evaluations
+### Fixed: refused and timed-out evaluations
 - When the eval endpoint refuses an evaluation, `Evaluator.evaluate()` still returns a result,
-  and its reason now leads with the server's own message and ends with the HTTP status (for
-  example `Validation failed: inputs: ... (HTTP 400)`) instead of the raw response body; a
-  body without a message gives a short excerpt. `evaluate(..., engine="turing")` reports the
-  refusal as status `failed` with that text as `error` instead of a completed result with no score.
+  and its reason now leads with the server's own message, then the HTTP status (for example
+  `Validation failed: inputs: ... (HTTP 400)`), instead of the raw response body; a body
+  without a message gives a short excerpt. A 403 reads the same way, followed by
+  `Check your API key and secret key.`, instead of one fixed sentence about the keys.
+- A request that timed out has the reason `Evaluation timed out after <n>s`, also when the
+  HTTP request itself timed out. `evaluate(..., engine="turing")` reports a refused, failed or
+  timed-out request as status `failed` with that text as `error` instead of a completed result
+  with no score.
 
 ### Fixed: dependency floors
 - Raise the base dependency minimums to anyio 4.14.2, certifi 2026.10.18,

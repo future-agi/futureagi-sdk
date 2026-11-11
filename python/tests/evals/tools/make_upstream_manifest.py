@@ -48,8 +48,8 @@ DEVIATIONS = {
         "closed sessions never serve cached entries and failures are never cached"
     ),
     "fi/evals/core/engines.py": (
-        "the Turing engine reports an evaluation the server refused, or a request the cloud client could "
-        "not complete, as status failed with its error instead of a completed result without a score"
+        "the Turing engine reports an evaluation the server refused, or whose request failed or timed "
+        "out, as status failed with its error instead of a completed result without a score"
     ),
     "fi/evals/framework/backends/_utils.py": (
         "the missing-dependency message gives only the dependency's own install command, not an "

@@ -6,6 +6,8 @@ from fi.evals.evaluator import (Any, BatchRunResult, Dict, Response)
 # The keys of the platform's error body that carry its sentence, in the order they are read.
 _SENTENCE_KEYS = ("message", "detail", "error")
 _EXCERPT_CHARS = 200
+# What a 403 adds after the server's sentence and the status.
+_KEY_HINT = "Check your API key and secret key."
 
 
 def _server_sentence(body: Any) -> str:
@@ -55,9 +57,10 @@ class _EvalResponseHandlerParseSuccessMethods:
     @classmethod
     def _handle_error(cls, response: Response) -> None:
         from fi.evals.evaluator import (InvalidAuthError, Response)
+        reason = _refusal_reason(response)
         if response.status_code == 403:
-            raise InvalidAuthError()
-        raise Exception(_refusal_reason(response))
+            raise InvalidAuthError(message=f"{reason} {_KEY_HINT}")
+        raise Exception(reason)
 
 
     @classmethod

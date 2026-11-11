@@ -292,8 +292,9 @@ class TuringEngine(Engine):
                 inputs=mapped_inputs,
                 model_name=model,
             )
-            # Evaluator.evaluate returns a refused or failed request as a result carrying its
-            # error instead of raising: that evaluation failed, it did not complete.
+            # Evaluator.evaluate returns a request that was refused, failed or timed out as a
+            # result carrying its error instead of raising: that evaluation failed, it did not
+            # complete.
             first = batch.eval_results[0] if batch.eval_results else None
             error = getattr(first, "error", None)
             if error:
