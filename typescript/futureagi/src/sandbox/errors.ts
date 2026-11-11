@@ -126,8 +126,8 @@ export class SandboxStateError extends Core.SandboxStateError implements StatusF
   declare readonly detail?: unknown;
   declare readonly retryAfterSeconds?: number;
 }
-/** 409 with `detail.state` `hibernated`: resume the sandbox first (the SDK never resumes it for you). Also the
- * shared `SandboxStateError`, and a `ConflictError` here. */
+/** 409 with `detail.state` `hibernated`: a read, a sandbox created with autoResume off, or a resume refused at the
+ * active cap (`detail.reason` `quota_exceeded`); call `resume()` and retry. Also the shared `SandboxStateError`. */
 export class SandboxHibernatedError extends SandboxStateError {}
 /** 409 `quota_exceeded`: the workspace's (or, with `detail.scope` `org`, the organization's) active-sandbox limit. */
 export class QuotaExceededError extends ConflictError {}

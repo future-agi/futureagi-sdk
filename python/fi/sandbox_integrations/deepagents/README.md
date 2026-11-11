@@ -104,9 +104,9 @@ templates). A file upload is limited to 64 MiB on hosted.
 ## Lifecycle
 
 You create and delete the sandbox; the backend never does. `with Sandbox.create(...) as sbx:` deletes it when the
-block ends. Nothing resumes a hibernated sandbox for you: building a backend on one raises the handle's
-`SandboxHibernatedError`, and a command or file call on a sandbox that hibernated later answers with an error that
-says to resume it (`sbx.resume()`).
+block ends. Building a backend on a hibernated sandbox raises the handle's `SandboxHibernatedError`. If it hibernates
+later, its creator's next command or file change resumes it (unless it was created with autoResume off); a read, or a
+resume refused at the active cap, answers with an error that says to resume it (`sbx.resume()`).
 
 ## Errors
 

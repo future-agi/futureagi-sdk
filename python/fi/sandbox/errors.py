@@ -135,7 +135,7 @@ class ConflictError(SandboxAPIError, e.ConflictError):
 
 
 class SandboxHibernatedError(ConflictError, e.SandboxStateError):
-    """409 on a hibernated sandbox. Nothing resumes it for you: call ``resume()`` first."""
+    """409 on a hibernated sandbox (a read, autoResume off, or the active cap): call ``resume()`` and retry."""
 
     _error_code = "SANDBOX_HIBERNATED"
 

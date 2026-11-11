@@ -124,9 +124,9 @@ server itself dropped output beyond its own cap.
 
 A refused or failed call comes back as a tool error whose text is `code: message` and what to do next, for example
 `quota_exceeded: ... delete a sandbox you no longer need (sandbox_list shows them) or ask an admin to raise the limit`.
-A folder passed to `sandbox_read_file` is refused with a pointer to `sandbox_list_files`; a hibernated sandbox is
-refused with the command a person runs to resume it (`futureagi-py sandbox resume SANDBOX_ID`): nothing resumes it
-on its own.
+A folder passed to `sandbox_read_file` is refused with a pointer to `sandbox_list_files`; a hibernated sandbox the
+server does not resume (a read, autoResume off, or the active cap) is refused with the command a person runs to
+resume it (`futureagi-py sandbox resume SANDBOX_ID`).
 
 ## Pinned mode and cleanup on exit
 

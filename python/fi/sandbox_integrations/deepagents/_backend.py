@@ -12,7 +12,7 @@ three calls on the sandbox handle (:class:`fi.sandbox.Sandbox`) and nothing else
 - ``upload_files`` and ``download_files`` report a failure per file and go on with the others.
   They use the sandbox's files API, whose paths are relative to ``/workspace``, so they reach
   files under ``/workspace`` only; a path elsewhere gets ``permission_denied`` without a request.
-- Nothing is retried and nothing resumes a hibernated sandbox. A setup problem
+- Nothing is retried and the backend never resumes a hibernated sandbox. A setup problem
   (:class:`fi.sandbox.ConfigurationError`) is raised, never turned into a result.
 
 Building the backend reads the workspace's exec time limit (unless ``max_timeout=`` gives it) and

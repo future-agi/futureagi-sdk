@@ -11,7 +11,7 @@ build ``FutureAGIClient(...)`` and call ``client.sandboxes.create(...)`` /
 ``client.sandboxes.connect(id)``, which return this same handle.
 
 Every method calls the generated layer (``fi.sandbox._resource``); none re-implements the wire.
-Nothing that changes a sandbox is retried, and nothing resumes a hibernated sandbox for you.
+Nothing that changes a sandbox is retried. The SDK never resumes a hibernated sandbox; the server may.
 """
 
 from __future__ import annotations
