@@ -24,7 +24,7 @@ SUBMITTED = "h6-synthetic-private-input"
 SID = "sbx_" + "a" * 24
 ACTIONS = ("json", "create", "sse", "upload", "download")
 SANDBOX_ABSENT = not any(name.startswith("sandboxes.") for name in OPERATIONS)
-NOT_APPLICABLE_AT_FOLD = 'NOT_APPLICABLE_AT_FOLD: sandbox surface absent (python/tests/platform/test_sandboxes_absent.py); runs automatically when it returns'
+NOT_APPLICABLE_AT_FOLD = 'NOT_APPLICABLE_AT_FOLD: no sandboxes.* operation in fi.generated.platform.policy; runs automatically when it is there'
 
 
 def success(request):
@@ -44,6 +44,10 @@ class Wire:
 
     def client(self, asynchronous=False, mode="keys", retries=None, **options):
         auth = {"api_key": API_KEY, "secret_key": SECRET_KEY} if mode == "keys" else {"platform_token": TOKEN}
+        if mode != "keys":
+            # client.sandboxes sends a self-host token to a host that is not loopback only with the
+            # constructor-only opt-in (the sandbox contract, v2 item 1); it changes nothing else.
+            auth["allow_custom_base_url"] = True
         kwargs = {**auth, **options}
         if retries is not None:
             kwargs["retries"] = retries
@@ -77,8 +81,22 @@ def wire(monkeypatch, _no_egress):
 
 
 def invoke(c, asynchronous, action):
-    if action in ACTIONS:
-        raise AssertionError(NOT_APPLICABLE_AT_FOLD)
+    if action == "json":
+        return c.sandboxes.list()
+    if action == "create":
+        return c.sandboxes.create(body={"name": SUBMITTED})
+    if action == "upload":
+        return c.sandboxes.files.upload(SID, "private-path", body=SUBMITTED.encode())
+    if action == "download":
+        return c.sandboxes.files.download(SID, "private-path")
+    if action == "sse":
+        stream = c.sandboxes.commands.run(SID, body={"command": SUBMITTED})
+        if not asynchronous:
+            return list(stream)
+
+        async def frames():
+            return [frame async for frame in stream]
+        return frames()
     if action == "console":
         return c.environments.list()
     if action == "core":

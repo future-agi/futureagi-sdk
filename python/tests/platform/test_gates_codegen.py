@@ -146,12 +146,12 @@ def test_policy_counts(policy: ModuleType) -> None:
         "keyed": 13,
         "keyed-not-durable": 3,
         "http-idempotent": HTTP_IDEMPOTENT_COUNT,
-        "unsafe": 6,
+        "unsafe": 15,
         "idempotent": 16,
         "durable_unstated": 4,
-        "streams": 2,
+        "streams": 3,
         "paginated": PAGINATED_COUNT,
-        "not_found_means_applied": 0,
+        "not_found_means_applied": 1,
     }
     names = set(policy.OPERATIONS)
     assert_credential_scope(names)
@@ -166,9 +166,14 @@ def test_policy_counts(policy: ModuleType) -> None:
         "platform.environments.create",
         "platform.environments.revise",
     }
-    assert not any(name.startswith("sandboxes.") for name in names)
+    # Hosted sandboxes are offered: the 24 operations of the sandbox contract v2.1 (the human-only
+    # settings PUT stays out of scope), and only sandboxes.kill treats a 404 on a retry as done.
+    assert len([name for name in names if name.startswith("sandboxes.")]) == 24
+    assert "sandboxes.settings.update" not in names
     assert policy.OPERATIONS["platform.agents.create"].retry_class == "unsafe"
-    assert all(not op.not_found_means_applied for op in policy.OPERATIONS.values())
+    assert {n for n, op in policy.OPERATIONS.items() if op.not_found_means_applied} == {
+        "sandboxes.kill"
+    }
     assert policy.EXTRAS["deployments.rotateAccessToken"]["replay_omits"] == (
         "accessToken",
     )
@@ -181,10 +186,19 @@ def test_policy_counts(policy: ModuleType) -> None:
     }
     assert len(unstated) == counts["durable_unstated"]
     assert all(policy.OPERATIONS[n].durable is True for n in unstated)
+    # The exec stream's frames joined the run and deployment-log streams with sandboxes.
     assert set(policy.KNOWN_EVENTS) == {
         "OmegaRunEventFrame",
         "OmegaDeploymentLogFrame",
+        "OmegaExecFrame",
     }
+    assert policy.KNOWN_EVENTS["OmegaExecFrame"] == (
+        "started",
+        "stdout",
+        "stderr",
+        "exit",
+        "error",
+    )
 
 
 def test_generated_types_import_and_resolve() -> None:

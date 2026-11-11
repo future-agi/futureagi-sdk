@@ -40,6 +40,7 @@ PKG = REPO / "python" / "fi"
 NAMESPACES = (
     "deployments",
     "sandboxes",
+    "sandbox",
     "agents",
     "environments",
     "workspace",
@@ -68,6 +69,9 @@ NAMES = {
     "alist_page": "list_page",
     "apoll_until": "poll_until",
     "resumable_events": "resumable_events_sync",
+    # fi.sandbox: AsyncSandbox.create / connect also work in ``async with``; the sync ones return
+    # the handle itself.
+    "awaitable_handle": "ready_handle",
 }
 
 TEXT = (

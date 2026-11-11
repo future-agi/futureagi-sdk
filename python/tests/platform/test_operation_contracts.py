@@ -18,8 +18,19 @@ from ._gates_support import REPO
 DATA = json.loads((REPO / "tests/fixtures/contracts/operations.json").read_text())
 EE_RESOURCE_ERROR = json.loads((REPO / "tests/fixtures/server-contracts/console-404.json").read_text())["ee"][0]["body"]
 ROWS = DATA["operations"]
+
+
+def own_oracle(row):
+    """Sandbox rows are checked by their own oracle (test_sandboxes_operations.py and
+    test_sandboxes_errors.py, against the same scoped spec): contract section 4 names the error
+    classes, the contract forbids retrying the PUT/DELETE writes this oracle would retry, exec
+    yields typed frames, and create/restore return a Sandbox handle."""
+    return row["adapter"] == "platform" and row["namespace"] == "sandboxes"
+
+
 PUBLIC = [(row, mode) for mode in ("sync", "async") for row in ROWS
-          if row["id"] in DATA["public_cases"]["py_" + mode] or row.get("public_absence")]
+          if (row["id"] in DATA["public_cases"]["py_" + mode] or row.get("public_absence"))
+          and not own_oracle(row)]
 PUBLIC_IDS = [mode + ":" + row["id"] for row, mode in PUBLIC]
 
 
@@ -90,8 +101,6 @@ async def error_case(row, mode):
             return
         for status, code, cls in answers:
             current[0] = (status, code)
-            if status == 409 and code in (None, "conflict") and row["adapter"] == "platform" and row["namespace"] == "sandboxes":
-                cls = "SandboxStateError"
             with pytest.raises((errors.FutureAGIAPIError, errors.StreamInterruptedError)) as caught:
                 await resolve(runtime.call())
             error = caught.value

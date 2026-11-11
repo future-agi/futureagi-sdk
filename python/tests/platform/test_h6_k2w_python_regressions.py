@@ -9,6 +9,7 @@ from uuid import uuid4
 import httpx
 import pytest
 from fi import errors
+from fi.sandbox import errors as sandbox_errors
 
 from ._h6_k2w_transport import (
     ACTIONS,
@@ -131,7 +132,9 @@ def test_noncanonical_region_envelopes_keep_ordinary_permission_error(wire, asyn
     try:
         with pytest.raises(errors.PermissionDeniedError) as caught:
             run(asynchronous, lambda: invoke(c, asynchronous, action))
-        assert type(caught.value) is errors.PermissionDeniedError
+        # client.sandboxes raises the fi.sandbox subclass of the same class.
+        expected = sandbox_errors.PermissionDeniedError if action in ACTIONS else errors.PermissionDeniedError
+        assert type(caught.value) is expected
         assert US not in str(caught.value) and EU not in str(caught.value)
         assert_private(caught.value)
         assert_selected_only(wire, EU, "keys", 1)

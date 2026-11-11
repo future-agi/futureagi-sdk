@@ -22,7 +22,7 @@ CLASSES = (
 COMMON = {
     "agents", "annotation_labels", "connectors", "credentials", "environments",
     "experiment_runs", "gateway", "integrations", "knowledge_bases", "models",
-    "optimizations", "prompts", "scores", "tracing", "workspaces",
+    "optimizations", "prompts", "sandboxes", "scores", "tracing", "workspaces",
 }
 SYNC_ONLY = {"alerts", "annotation_queues", "datasets", "evals", "experiments", "experiments_v2", "users"}
 

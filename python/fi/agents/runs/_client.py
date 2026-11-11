@@ -62,7 +62,9 @@ class Runs:
         """Fetch a run and its detail envelope."""
         return Run(self, self._core.call("runs.get", path={"id": run_id}))
 
-    def delete(self, run_id: str) -> wire.OmegaDeleteWorkspaceConversationsByIdResponse:
+    def delete(
+        self, run_id: str
+    ) -> wire.OmegaDeleteWorkspaceConversationsByIdResponse:
         """Delete one run, retaining the server's deletion receipt in the return value."""
         return self._core.call("runs.delete", path={"id": run_id})
 

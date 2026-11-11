@@ -183,7 +183,7 @@ def who_info(args: Any) -> dict:
 
 
 def register(subparsers: Any) -> None:
-    p = subparsers.add_parser("login", help="save one login (keys bound to their server) for every command")
+    p = subparsers.add_parser("login", help="save one login (keys bound to their server) for every command except sandbox")
     p.add_argument("--base-url", dest="base_url", metavar="URL",
                    help=f"the server (default {BASE_URL_ENV}, else {DEFAULT_BASE_URL})")
     p.add_argument("--platform-base-url", dest="platform_base_url", metavar="URL",

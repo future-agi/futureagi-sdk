@@ -105,6 +105,7 @@ experiments = "fi.experiments._cli.commands"
 webhooks = "fi.webhooks._cli"
 agent_runs = "fi.agents.runs._cli"
 agents = "fi.agents.cli"
+sandbox = "fi._cli.sandbox"
 
 [tool.poetry.group.dev.dependencies]
 # Agent adapter test toolchain; resolve alongside the evals OpenAI dependency.

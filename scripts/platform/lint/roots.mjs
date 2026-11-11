@@ -7,7 +7,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
-export const NAMESPACES = ["deployments", "sandboxes", "agents", "environments", "workspace", "gateway", "connectors"];
+export const NAMESPACES = ["deployments", "sandboxes", "sandbox", "agents", "environments", "workspace", "gateway", "connectors"];
 
 /** Hand-written platform modules, both languages (no generated code, no tests). */
 export const SOURCE_ROOTS = [

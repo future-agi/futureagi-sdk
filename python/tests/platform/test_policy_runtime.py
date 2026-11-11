@@ -94,7 +94,7 @@ def test_the_emitter_writes_every_field_of_the_cores_dataclasses() -> None:
             written = [k.arg for k in node.keywords]
             assert not node.args, node.func.id
             assert written == [f.name for f in dataclasses.fields(cls)], node.func.id
-    assert seen == {"Op": OPERATION_COUNT, "Stream": 2, "Page": PAGINATED_COUNT}
+    assert seen == {"Op": OPERATION_COUNT, "Stream": 3, "Page": PAGINATED_COUNT}
     assert_credential_scope(read_json(REPO / "openapi/platform/scope.json")["operations"])
 
 
@@ -112,8 +112,8 @@ def test_the_core_derives_the_contracts_retry_class_for_every_operation() -> Non
         "keyed": 13,
         "keyed-not-durable": 3,
         "http-idempotent": HTTP_IDEMPOTENT_COUNT,
-        "unsafe": 6,
-        "stream": 2,
+        "unsafe": 15,
+        "stream": 3,
         "paginated": PAGINATED_COUNT,
     }
 

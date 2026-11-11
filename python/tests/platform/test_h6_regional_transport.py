@@ -12,6 +12,7 @@ import re
 import httpx
 import pytest
 from fi import errors
+from fi.sandbox import errors as sandbox_errors
 
 from ._h6_k2w_transport import (
     ACTIONS,
@@ -69,9 +70,10 @@ def test_h6_frozen_refusal_never_discovers_or_retries_another_region(
         with pytest.raises(errors.FutureAGIAPIError) as caught:
             run(asynchronous, lambda: invoke(c, asynchronous, action))
         error = caught.value
-        # Same-origin retries on safe GET/PUT are not regional fallback. Exec and
-        # creation remain one-shot even when a client uses normal default retries.
-        count = 4 if status == 503 and retries is None and action in ("json", "upload", "download") else 1
+        # Same-origin retries on safe GETs are not regional fallback. Exec, creation and
+        # upload remain one-shot even when a client uses normal default retries (the sandbox
+        # contract marks upload non-idempotent, v1 section 3).
+        count = 4 if status == 503 and retries is None and action in ("json", "download") else 1
         assert_selected_only(wire, base, mode, count)
         assert len(wire.sleeps) == count - 1
         assert error.status_code == status
@@ -82,7 +84,9 @@ def test_h6_frozen_refusal_never_discovers_or_retries_another_region(
         if status == 403:
             regional_guidance(error)
         else:
-            assert type(error) is (errors.AuthenticationError if status == 401 else errors.ServerError)
+            # client.sandboxes raises the fi.sandbox status classes, which subclass these.
+            assert isinstance(error, errors.AuthenticationError if status == 401 else errors.ServerError)
+            assert type(error) is (sandbox_errors.AuthenticationError if status == 401 else sandbox_errors.UnavailableError)
             assert US not in str(error) and EU not in str(error)
             assert "wrong_region" not in str(error)
     finally:
@@ -111,6 +115,7 @@ def test_h6_all_regional_redirects_and_downgrades_are_single_send(
         assert wire.sleeps == []
         assert caught.value.status_code == status
         assert caught.value.target_host is None  # stronger sandbox privacy boundary
+        assert httpx.URL(target).host not in str(caught.value)
         assert_private(caught.value, caplog.text, extra=(target,))
     finally:
         close(c, asynchronous)
@@ -146,20 +151,20 @@ def test_h6_guidance_is_fixed_not_a_reflected_response_destination(wire, caplog,
 
 
 @pytest.mark.parametrize("asynchronous", [False, True], ids=["sync", "async"])
-@pytest.mark.parametrize("status,body,kind", [
-    (401, b'{"error":"wrong_region"}', errors.AuthenticationError),
-    (503, b'{"error":"wrong_region"}', errors.ServerError),
-    (403, b'{"error":"role_forbidden"}', errors.PermissionDeniedError),
+@pytest.mark.parametrize("status,body,kind,sandbox_kind", [
+    (401, b'{"error":"wrong_region"}', errors.AuthenticationError, sandbox_errors.AuthenticationError),
+    (503, b'{"error":"wrong_region"}', errors.ServerError, sandbox_errors.UnavailableError),
+    (403, b'{"error":"role_forbidden"}', errors.PermissionDeniedError, sandbox_errors.PermissionDeniedError),
 ])
 @pytest.mark.skipif(SANDBOX_ABSENT, reason=NOT_APPLICABLE_AT_FOLD)
-def test_h6_specialization_does_not_guess_from_code_or_status_alone(wire, asynchronous, status, body, kind):
+def test_h6_specialization_does_not_guess_from_code_or_status_alone(wire, asynchronous, status, body, kind, sandbox_kind):
     # Deliberately non-contract combinations: ordinary status semantics still win.
     wire.respond = lambda r: httpx.Response(status, content=body)
     c = wire.client(asynchronous, retries=0, base_url=EU)
     try:
         with pytest.raises(kind) as caught:
             run(asynchronous, lambda: c.sandboxes.list())
-        assert type(caught.value) is kind
+        assert type(caught.value) is sandbox_kind  # the fi.sandbox subclass, never WrongRegionError
         assert US not in str(caught.value) and EU not in str(caught.value)
         assert_selected_only(wire, EU, "keys", 1)
     finally:
@@ -168,7 +173,7 @@ def test_h6_specialization_does_not_guess_from_code_or_status_alone(wire, asynch
 
 @pytest.mark.parametrize("asynchronous", [False, True], ids=["sync", "async"])
 @pytest.mark.parametrize("base", [US, EU])
-@pytest.mark.parametrize("action", ["json", "upload", "download"])
+@pytest.mark.parametrize("action", ["json", "download"])  # upload is sent once (contract section 3)
 @pytest.mark.skipif(SANDBOX_ABSENT, reason=NOT_APPLICABLE_AT_FOLD)
 def test_h6_safe_same_origin_retry_is_not_regional_fallback(wire, asynchronous, base, action):
     from ._h6_k2w_transport import success

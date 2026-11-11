@@ -14,13 +14,6 @@ import subprocess
 import tarfile
 import zipfile
 
-_sandbox_spec = importlib.util.spec_from_file_location(
-    "check_sandbox_absence", Path(__file__).with_name("check_sandbox_absence.py")
-)
-_sandbox_gate = importlib.util.module_from_spec(_sandbox_spec)
-_sandbox_spec.loader.exec_module(_sandbox_gate)
-check_sandbox_absence = _sandbox_gate.check_sandbox_absence
-
 # The gateway data-plane client ships in both SDKs:
 # five subpaths resolved with the default import/require conditions only.
 GATEWAY_SUBPATHS = ("./gateway", "./gateway/testing", "./gateway/express", "./gateway/nextjs", "./gateway/react")
@@ -135,6 +128,8 @@ def main(repo, wheel, sdist, tarball, output):
                 assert not any(name.encode() in content for name in hidden_types), f"Hidden credential declaration in {fmt}"
     if (repo / "typescript/futureagi/src/agents/runs/index.ts").is_file():
         expected_exports.add("./agents/runs")
+    if (repo / "typescript/futureagi/src/sandbox/index.ts").is_file():
+        expected_exports.add("./sandbox")
     assert set(pkg["exports"]) == expected_exports, "Exact feature-derived exports"
     boundary_spec = importlib.util.spec_from_file_location(
         "check_gateway_boundaries", Path(__file__).with_name("check_gateway_boundaries.py")
@@ -174,12 +169,11 @@ def main(repo, wheel, sdist, tarball, output):
         for condition in ("import", "require"):
             for target in entry[condition].values():
                 assert "package/" + target.removeprefix("./") in npm, target
-    check_sandbox_absence(whl, source, npm)
     subprocess.run([
         sys.executable, "-I", str(repo / "scripts/packaging/check_deployments_absent.py"),
         str(wheel), str(sdist), str(tarball),
     ], check=True)
-    result = {"gateway": "on", "sandboxes": "off", "deployments": "off", "artifacts": [
+    result = {"gateway": "on", "sandboxes": "on", "deployments": "off", "artifacts": [
         {"name": str(path.name), "digest": digest(path), "files": sorted(files)}
         for path, files in ((wheel, whl), (sdist, source), (tarball, npm))
     ]}

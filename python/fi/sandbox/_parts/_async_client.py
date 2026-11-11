@@ -1,0 +1,288 @@
+"""The parts of a sandbox handle (async): ``sbx.commands``, ``sbx.files``, ``sbx.snapshots`` and
+``sbx.network_policy``. Each calls the generated layer; none re-implements the wire."""
+
+from __future__ import annotations
+
+import base64
+import os
+import tempfile
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, Union
+
+from .._resource._stream._async_client import AsyncCommandStream
+from .._wire import UploadBody, policy_info, present
+from ..errors import (
+    CommandFailedError,
+    CommandIncompleteError,
+    ConfigurationError,
+    ConnectionError,
+)
+from ..frames import ErrorFrame, ExitFrame, StderrFrame, StdoutFrame
+from ..types import CommandResult, NetworkPolicyInfo
+
+if TYPE_CHECKING:
+    from .._async_client import AsyncSandbox
+
+OutputCallback = Callable[[str], Any]
+
+
+class AsyncCommands:
+    """``sbx.commands``: run, stream and cancel commands."""
+
+    def __init__(self, sandbox: AsyncSandbox) -> None:
+        self._sandbox = sandbox
+
+    def stream(
+        self,
+        command: str,
+        *,
+        cwd: Optional[str] = None,
+        env: Optional[Mapping[str, str]] = None,
+        timeout_seconds: Optional[int] = None,
+    ) -> AsyncCommandStream:
+        """Typed frames (``started``, ``stdout``, ``stderr``, ``exit``, ``error``) as they
+        arrive. Use ``async with``: closing the stream cancels the command. ``env`` is for
+        plain, non-secret variables only."""
+        body = present(
+            command=command,
+            cwd=cwd,
+            env=dict(env) if env is not None else None,
+            timeoutSeconds=timeout_seconds,
+        )
+        return self._sandbox._sandboxes.commands.run(self._sandbox.id, body=body)
+
+    async def run(
+        self,
+        command: str,
+        *,
+        cwd: Optional[str] = None,
+        env: Optional[Mapping[str, str]] = None,
+        timeout_seconds: Optional[int] = None,
+        on_stdout: Optional[OutputCallback] = None,
+        on_stderr: Optional[OutputCallback] = None,
+    ) -> CommandResult:
+        """Run a command to its end and return the whole exit record.
+
+        A non-zero exit code, a timeout (``timed_out``), a signal (``signal``, with
+        ``exit_code`` None), a cancel (``cancelled``) and a command that never started
+        (``error``, with ``exit_code`` None) are all returned, not raised. Raises only
+        ``CommandFailedError`` on an ``error`` frame and ``CommandIncompleteError`` when the
+        stream ends (or the connection drops) without an ``exit`` frame. Never retried:
+        whether an incomplete command ran is unknown, so it is not sent again."""
+        out: List[str] = []
+        err: List[str] = []
+        stream = self.stream(command, cwd=cwd, env=env, timeout_seconds=timeout_seconds)
+        last: Optional[ExitFrame] = None
+        failure: Optional[BaseException] = None
+        async with stream:
+            try:
+                async for frame in stream:
+                    if isinstance(frame, StdoutFrame):
+                        out.append(frame.data)
+                        if on_stdout is not None:
+                            on_stdout(frame.data)
+                    elif isinstance(frame, StderrFrame):
+                        err.append(frame.data)
+                        if on_stderr is not None:
+                            on_stderr(frame.data)
+                    elif isinstance(frame, ExitFrame):
+                        last = frame
+                        break
+                    elif isinstance(frame, ErrorFrame):
+                        failure = CommandFailedError(
+                            f"sandboxes.commands.run: {frame.message}",
+                            exec_id=stream.exec_id,
+                            stdout="".join(out),
+                            stderr="".join(err),
+                        )
+                        break
+            except ConnectionError as error:
+                if not stream.opened:
+                    raise
+                raise CommandIncompleteError(
+                    "sandboxes.commands.run: the stream broke before the exit frame; "
+                    f"whether the command finished is unknown ({error})",
+                    exec_id=stream.exec_id,
+                    stdout="".join(out),
+                    stderr="".join(err),
+                ) from error
+        if failure is not None:
+            raise failure
+        if last is None:
+            raise CommandIncompleteError(
+                "sandboxes.commands.run: the stream ended without an exit frame; "
+                "whether the command finished is unknown",
+                exec_id=stream.exec_id,
+                stdout="".join(out),
+                stderr="".join(err),
+            )
+        return CommandResult.from_exit(last, "".join(out), "".join(err), stream.exec_id)
+
+    async def cancel(self, exec_id: str) -> Dict[str, Any]:
+        """Cancel a running command by the ``exec_id`` of its ``started`` frame."""
+        api = self._sandbox._sandboxes.commands
+        return await api.cancel(self._sandbox.id, exec_id)
+
+
+class AsyncFiles:
+    """``sbx.files``: list, read, write, upload and download files inside the sandbox."""
+
+    def __init__(self, sandbox: AsyncSandbox) -> None:
+        self._sandbox = sandbox
+
+    @property
+    def _api(self) -> Any:
+        return self._sandbox._sandboxes.files
+
+    async def list(self, path: str = ".") -> List[Dict[str, Any]]:
+        """The entries (``name``, ``size``, ``mode``, ``directory``) of one folder."""
+        raw = await self._api.list(self._sandbox.id, path=path)
+        return list(raw.get("entries", []))
+
+    async def read(
+        self,
+        path: str,
+        max_bytes: Optional[int] = None,
+    ) -> Union[str, bytes]:
+        """A bounded read: ``str`` for a UTF-8 file, ``bytes`` for anything else."""
+        raw = await self._api.read(self._sandbox.id, path, max_bytes=max_bytes)
+        file = raw.get("file", {})
+        content = file.get("content", "")
+        if file.get("encoding") == "base64":
+            return base64.b64decode(content)
+        return content
+
+    async def write(self, path: str, data: Union[str, bytes]) -> Dict[str, Any]:
+        """Write a small text (``str``) or binary (``bytes``) file, audited."""
+        if isinstance(data, str):
+            body = {"content": data, "encoding": "utf8"}
+        else:
+            encoded = base64.b64encode(bytes(data)).decode("ascii")
+            body = {"content": encoded, "encoding": "base64"}
+        return await self._api.write(self._sandbox.id, path, body=body)
+
+    async def upload(self, path: str, data_or_file: UploadBody) -> Dict[str, Any]:
+        """Upload raw bytes, a path or a binary file (at most 64 MiB). The folder must exist."""
+        return await self._api.upload(self._sandbox.id, path, body=data_or_file)
+
+    async def download(self, path: str) -> bytes:
+        """A file's raw bytes."""
+        return await self._api.download(self._sandbox.id, path)
+
+    async def download_to(
+        self,
+        path: str,
+        local_path: Union[str, "os.PathLike[str]"],
+    ) -> str:
+        """Stream a file to ``local_path``: written to a temporary file beside it and renamed
+        only once every byte arrived, so a failure never leaves a partial file there."""
+        target = os.fspath(local_path)
+        folder = os.path.dirname(os.path.abspath(target))
+        handle = tempfile.NamedTemporaryFile(
+            dir=folder, prefix=".sandbox-download-", delete=False
+        )
+        try:
+            with handle:
+                async for chunk in self._api._stream(self._sandbox.id, path):
+                    handle.write(chunk)
+            os.replace(handle.name, target)
+        except BaseException:
+            try:
+                os.unlink(handle.name)
+            except OSError:
+                pass
+            raise
+        return target
+
+    async def remove(self, path: str, *, recursive: bool = False) -> Dict[str, Any]:
+        """Delete a file, or a folder and its contents with ``recursive=True``."""
+        flag = True if recursive else None
+        return await self._api.remove(self._sandbox.id, path, recursive=flag)
+
+    async def move(self, src: str, dst: str) -> Dict[str, Any]:
+        """Move or rename a file or folder."""
+        return await self._api.rename(self._sandbox.id, body={"from": src, "to": dst})
+
+    async def make_dir(self, path: str) -> Dict[str, Any]:
+        """Create a folder (and its parents)."""
+        return await self._api.make_dir(self._sandbox.id, path)
+
+
+class AsyncSnapshots:
+    """``sbx.snapshots``: file snapshots; ``restore`` makes a new sandbox."""
+
+    def __init__(self, sandbox: AsyncSandbox) -> None:
+        self._sandbox = sandbox
+
+    async def create(self) -> Dict[str, Any]:
+        """Snapshot the files; returns the snapshot record."""
+        raw = await self._sandbox._sandboxes.snapshots.create(self._sandbox.id)
+        return dict(raw.get("snapshot", {}))
+
+    async def list(self) -> List[Dict[str, Any]]:
+        """The sandbox's snapshot records."""
+        raw = await self._sandbox._sandboxes.snapshots.list(self._sandbox.id)
+        return list(raw.get("snapshots", []))
+
+    async def restore(
+        self,
+        snapshot_id: str,
+        *,
+        name: Optional[str] = None,
+        size: Optional[str] = None,
+        limits: Optional[Mapping[str, Any]] = None,
+        network: Optional[str] = None,
+        network_policy: Optional[Mapping[str, Any]] = None,
+        idle_ttl_seconds: Optional[int] = None,
+    ) -> AsyncSandbox:
+        """A NEW sandbox from the snapshot; this one is unchanged. Never retried. The new handle
+        shares this one's connection (and closes it on exit if this one would)."""
+        body = present(
+            name=name,
+            size=size,
+            limits=dict(limits) if limits is not None else None,
+            network=network,
+            networkPolicy=dict(network_policy) if network_policy is not None else None,
+            idleTtlSeconds=idle_ttl_seconds,
+        )
+        api = self._sandbox._sandboxes.snapshots
+        restored = await api.restore(self._sandbox.id, snapshot_id, body=body)
+        restored._owns_pool = self._sandbox._owns_pool
+        return restored
+
+
+class AsyncNetworkPolicy:
+    """``sbx.network_policy`` (needs the network-on release part)."""
+
+    def __init__(self, sandbox: AsyncSandbox) -> None:
+        self._sandbox = sandbox
+
+    async def get(self) -> NetworkPolicyInfo:
+        """The desired and applied policy with its ``etag`` (the response's ``ETag``)."""
+        api = self._sandbox._sandboxes.network_policy.with_raw_response
+        raw = await api.get(self._sandbox.id)
+        return policy_info(raw.data, raw.headers)
+
+    async def set(
+        self, policy: Mapping[str, Any], *, if_match: Union[str, int, None] = None
+    ) -> NetworkPolicyInfo:
+        """Replace the whole policy; returns it with its new ``etag``.
+
+        ``if_match`` is the ETag you read (``info.etag``; an int revision is quoted for you).
+        Without it, the current policy is read first and its ETag sent. A policy changed in
+        between is a 412 ``ConflictError`` (``network_policy_revision_mismatch``), never
+        retried: read it again and decide."""
+        if if_match is None:
+            if_match = (await self.get()).etag
+            if if_match is None:
+                raise ConfigurationError(
+                    "sandboxes.networkPolicy.update: the current policy came back without "
+                    "an ETag or a desiredRevision; pass if_match=",
+                    code="missing_if_match",
+                    operation="sandboxes.networkPolicy.update",
+                )
+        api = self._sandbox._sandboxes.network_policy.with_raw_response
+        raw = await api.update(self._sandbox.id, body=dict(policy), if_match=if_match)
+        return policy_info(raw.data, raw.headers)
+
+
+__all__ = ["AsyncCommands", "AsyncFiles", "AsyncSnapshots", "AsyncNetworkPolicy"]

@@ -10,7 +10,7 @@ documentation are considered; bytes/newlines outside matches stay unchanged.
 No imports of the SDK, installed metadata, installer or network calls.
 
 The top-level commands were checked against _cli/main.py, _cli/registry.py and
-all five modules in [tool.poetry.plugins."futureagi.cli"]. agent_runs contributes
+all six modules in [tool.poetry.plugins."futureagi.cli"]. agent_runs contributes
 agents runs, not a top-level agent-runs command. Legacy/documented spellings are
 also covered. Bare "the futureagi version" is a distribution noun, not a command.
 """
@@ -31,7 +31,7 @@ SCOPE = (
 )
 COMMANDS = (
     "doctor", "login", "logout", "webhooks", "agents", "evals", "run", "upload",
-    "agent-runs", "experiments", "auth", "--help", "-h", "--version",
+    "agent-runs", "experiments", "auth", "sandbox", "--help", "-h", "--version",
 )
 # Keep nested commands/aliases reserved too: `tool webhooks list --help` must
 # never become `tool webhooks NEXT --help` on a subsequent swap from `list`.
@@ -44,6 +44,8 @@ RESERVED_NAMES = frozenset((*COMMANDS, "version",
     "interrupt", "resume", "retry", "fork", "tree", "observations", "evidence",
     "proof-pack", "control-status", "approvals", "list-approvals", "rating-get",
     "rating-set", "ratings-summary", "ratings-trajectory", "wait", "wait-for-approval",
+    "exec", "cp", "cat", "mv", "mkdir", "snapshot", "restore", "hibernate", "settings",
+    "network-policy", "set",
 ))
 NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\Z")
 

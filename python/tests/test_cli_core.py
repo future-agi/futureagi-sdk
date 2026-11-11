@@ -246,7 +246,7 @@ def test_help_lists_commands_by_section(groups, capsys):
         "Evaluate:\n  run          run help\n  upload       upload help",
         "Platform:\n  deployments  deployments help\n  sandboxes    sandboxes help",
         "Setup:\n  doctor       check the host, the keys and each command group's setup"
-        "\n  login        save one login (keys bound to their server) for every command"
+        "\n  login        save one login (keys bound to their server) for every command except sandbox"
         "\n  logout       remove the saved login",
         "Other:\n  misc         misc help\n",
     ]

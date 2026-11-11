@@ -58,7 +58,9 @@ class AgentCode:
         return {"origin": origin.base, "organizationId": org, "workspaceId": workspace}
 
     def _call(self, operation: str, **kwargs: Any) -> Any:
-        return self.client._platform.call("platform.agents." + operation, **kwargs)
+        return self.client._platform.call(
+            "platform.agents." + operation, **kwargs
+        )
 
     def _read(self, agent_id: str) -> tuple:
         return project(self._call("get", path={"id": agent_id}), agent_id)

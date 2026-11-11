@@ -39,7 +39,7 @@ SURFACES = {
     "agents": (["agents", "environments"], ["agents", "environments"], ["agents", "environments"], ["agents.list", "agents.list"]),
     "runs": (["runs", "agents.runs"], ["agents.runs"], ["runs"], ["agents.runs.list", "agents.runs.list"]),
     "agent_code": (["agents.code"], ["agents.code"], ["agents/code"], ["agents.code.list", "agents.code.list"]),
-    "sandboxes": (["sandboxes"], ["sandboxes"], ["sandboxes"], ["sandboxes.list", "sandboxes.list"]),
+    "sandboxes": (["sandbox"], ["sandboxes"], ["sandboxes"], ["sandboxes.list", "sandboxes.list"]),
     "deployments": (["deployments"], ["deployments"], ["deployments"], ["deployments.list", "deployments.list"]),
     "connectors": (["connectors", "integrations", "credentials"], ["connectors", "integrations", "credentials"], ["connectors", "integrations", "credentials"], ["connectors.catalog.list", "connectors.catalog.list"]),
     "webhooks": (["webhooks"], ["webhooks"], ["webhooks"], []),

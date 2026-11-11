@@ -353,6 +353,9 @@ class FutureAGIClient:
     - Nonloopback HTTP with a platform Bearer token requires ``allow_insecure_http=True``
       (else ``FI_ALLOW_INSECURE_HTTP=1``); explicit False overrides the environment. Keys-mode
       HTTP warns about future refusal.
+    - ``client.sandboxes`` (``fi.sandbox``) sends a self-host ``platform_token`` to a host that
+      is not loopback only with the constructor-only ``allow_custom_base_url=True`` (no
+      environment variable sets it), and never uses plain HTTP to a host that is not loopback.
     - Errors are typed on every namespace (``fi.errors``): each status maps to one class, and a
       failure with no response raises ``APIConnectionError`` / ``APITimeoutError``.
     - ``with_options(timeout=..., retries=...)`` returns a copy that shares the connection pool.
@@ -385,6 +388,7 @@ class FutureAGIClient:
         allow_custom_platform_url: bool | None = None,
         allow_insecure_http: bool | None = None,
         extra_headers: Mapping[str, str] | str | None = None,
+        allow_custom_base_url: bool | None = None,
     ) -> None:
         explicit_api = api_key or fi_api_key
         explicit_secret = secret_key or fi_secret_key
@@ -402,6 +406,8 @@ class FutureAGIClient:
             platform_token,
             allow_custom_platform_url,
             allow_insecure_http=allow_insecure_http,
+            allow_custom_base_url=allow_custom_base_url,
+            base_url_given=resolved.base_url_source != "default",
         )
         # FI_EXTRA_HEADERS, with extra_headers= winning per name: every request to base_url, never another host
         self._extra_headers = ExtraHeaders(self.base_url, extra_headers)
@@ -439,6 +445,7 @@ class FutureAGIClient:
         )
         from fi.environments import Environments
         self.__dict__.pop("agents", None)
+        self.__dict__.pop("sandboxes", None)
         self.environments = Environments(self)
         self.knowledge_bases = KnowledgeBasesClient(self.generated_client)
         self.prompts = PromptsClient(self.generated_client)
@@ -534,6 +541,18 @@ class FutureAGIClient:
         return Agents(self)
 
     @functools.cached_property
+    def sandboxes(self) -> Any:
+        """Hosted sandboxes on this client's platform origin, credentials and scope (``fi.sandbox``):
+        the generated layer, whose ``create`` / ``connect`` return a ``Sandbox`` handle. There is no
+        default host: without ``base_url`` / ``platform_base_url`` (or ``FI_BASE_URL`` /
+        ``FI_PLATFORM_BASE_URL``) a call is refused before anything is sent."""
+        from fi.sandbox import Sandboxes
+        from fi.sandbox._connection import OriginRule
+        o = self._options
+        rule = OriginRule(allow_custom_base_url=bool(o.allow_custom_base_url), no_base_url=not o.base_url_given)
+        return Sandboxes(self._platform, rule=rule)
+
+    @functools.cached_property
     def _platform(self) -> Any:
         """The platform executor (``fi._core.platform_base``), built on first use; namespaces call it."""
         from fi._core.platform_base import PlatformCore
@@ -624,6 +643,10 @@ class _ClientOptions:
     allow_custom_platform_url: bool | None = None
     copy: bool = False
     allow_insecure_http: bool | None = None
+    #: Constructor-only: lets ``client.sandboxes`` send a self-host token to a nonloopback host.
+    allow_custom_base_url: bool | None = None
+    #: A base URL was given (argument, ``FI_BASE_URL`` or the saved login), not the default host.
+    base_url_given: bool = False
 
 
 def _as_timeout(timeout: float | httpx.Timeout | None) -> httpx.Timeout:
