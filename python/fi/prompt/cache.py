@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import atexit
+import copy
+import hashlib
+import json
 import logging
 import threading
 import time
@@ -32,10 +35,11 @@ logger = logging.getLogger("fi.prompt.cache")
 class _CacheItem:
     """A wrapper around the cached PromptTemplate with expiry metadata."""
 
-    __slots__ = ("value", "expiry")
+    __slots__ = ("value", "expiry", "snapshot")
 
-    def __init__(self, value: "PromptTemplate", ttl_sec: int):
-        self.value: "PromptTemplate" = value
+    def __init__(self, value: "PromptTemplate", ttl_sec: int, *, snapshot: bool = False):
+        self.snapshot = snapshot
+        self.value: "PromptTemplate" = copy.deepcopy(value) if snapshot else value
         self.expiry: float = time.time() + ttl_sec
 
     def is_stale(self) -> bool:
@@ -134,32 +138,85 @@ class PromptCache:
             parts.append(f"label:{label}")
         return "|".join(parts)
 
+    @staticmethod
+    def scope_for(client, *, headers: Optional[Dict[str, str]] = None) -> str:
+        """Fingerprint the resolved origin and effective authentication/workspace headers."""
+        if headers is None:
+            headers = client._platform_headers(
+                client._base_url + "/", dict(client._default_headers)
+            )
+        identity = [client._base_url, sorted(
+            (name.lower(), value) for name, value in headers.items()
+        )]
+        return hashlib.sha256(json.dumps(identity, separators=(",", ":")).encode()).hexdigest()
+
+    @staticmethod
+    def make_scoped_key(name: str, *, scope: str, version: Optional[str] = None,
+                        label: Optional[str] = None) -> str:
+        """Separate authenticated entries from legacy keys without storing header values."""
+        selector = [name, version, label if version is None else None]
+        return scope + "|" + json.dumps(selector, separators=(",", ":"))
+
     # ------------------------------- CRUD ------------------------------
 
     def get(self, key: str) -> Optional["PromptTemplate"]:
         with self._lock:
             item = self._store.get(key)
             if item and not item.is_stale():
-                return item.value
+                return copy.deepcopy(item.value) if item.snapshot else item.value
             return None
 
     def get_stale(self, key: str) -> Optional["PromptTemplate"]:
         """Return cached value even if stale (used for fallback)."""
         with self._lock:
             item = self._store.get(key)
-            return item.value if item else None
+            if item is None:
+                return None
+            return copy.deepcopy(item.value) if item.snapshot else item.value
 
-    def set(self, key: str, template: "PromptTemplate", ttl_sec: Optional[int] = None):
+    def set(self, key: str, template: "PromptTemplate", ttl_sec: Optional[int] = None, *, snapshot: bool = False):
+        """Cache a value; snapshots isolate both stored and retrieved templates.
+
+        Direct cache users retain reference semantics unless they opt in.
+        """
         if ttl_sec is None:
             ttl_sec = self._ttl_sec
         with self._lock:
-            self._store[key] = _CacheItem(template, ttl_sec)
+            self._store[key] = _CacheItem(template, ttl_sec, snapshot=snapshot)
 
     def invalidate(self, key_prefix: str):
         with self._lock:
             to_delete = [k for k in self._store if k.startswith(key_prefix)]
             for k in to_delete:
                 del self._store[k]
+
+    def invalidate_template(self, name: str):
+        """Remove one template's exact key and version/label selector keys."""
+        selector_prefixes = (f"{name}|v:", f"{name}|label:")
+        with self._lock:
+            # Valid template names can contain selector syntax, so keys alone
+            # cannot distinguish a selector from a different template's name.
+            to_delete = [
+                key for key, item in self._store.items()
+                if item.value.name == name
+                and (key == name or key.startswith(selector_prefixes))
+            ]
+            for key in to_delete:
+                del self._store[key]
+
+    def invalidate_scoped_template(self, name: str, *, scope: str):
+        """Evict this identity's selectors, leaving other authenticated scopes intact."""
+        prefix = scope + "|"
+        with self._lock:
+            to_delete = [
+                key for key, item in self._store.items()
+                if key.startswith(prefix) and item.value.name == name
+            ]
+            for key in to_delete:
+                del self._store[key]
+        # Retain cleanup for direct legacy cache users. Public fetches never
+        # consume these identity-free entries, and this cannot match scoped keys.
+        self.invalidate_template(name)
 
     # -------------------------- refresh management ---------------------
 
