@@ -9,7 +9,14 @@ import tempfile
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, Union
 
 from .._resource._stream._async_client import AsyncCommandStream
-from .._wire import DOWNLOAD_LIMIT, UploadBody, policy_info, present
+from .._wire import (
+    DOWNLOAD,
+    DOWNLOAD_LIMIT,
+    UploadBody,
+    files_path,
+    policy_info,
+    present,
+)
 from ..errors import (
     CommandFailedError,
     CommandIncompleteError,
@@ -124,7 +131,12 @@ class AsyncCommands:
 
 
 class AsyncFiles:
-    """``sbx.files``: list, read, write, upload and download files inside the sandbox."""
+    """``sbx.files``: list, read, write, upload and download files inside the sandbox.
+
+    Every path is relative to /workspace (``src/app.py``); an absolute path under it is sent
+    in that form (/workspace/src/app.py as ``src/app.py``). A path outside /workspace, or
+    with a ``.`` or ``..`` segment, a backslash or a control character, raises
+    ``ConfigurationError`` (``invalid_path``) before any request."""
 
     def __init__(self, sandbox: AsyncSandbox) -> None:
         self._sandbox = sandbox
@@ -134,8 +146,10 @@ class AsyncFiles:
         return self._sandbox._sandboxes.files
 
     async def list(self, path: str = ".") -> List[Dict[str, Any]]:
-        """The entries (``name``, ``size``, ``mode``, ``directory``) of one folder."""
-        raw = await self._api.list(self._sandbox.id, path=path)
+        """The entries (``name``, ``size``, ``mode``, ``directory``) of one folder; ``"."`` (the
+        default) or /workspace is the root."""
+        folder = files_path(path, "sandboxes.files.list", root=True)
+        raw = await self._api.list(self._sandbox.id, path=folder)
         return list(raw.get("entries", []))
 
     async def read(
@@ -144,7 +158,8 @@ class AsyncFiles:
         max_bytes: Optional[int] = None,
     ) -> Union[str, bytes]:
         """A bounded read: ``str`` for a UTF-8 file, ``bytes`` for anything else."""
-        raw = await self._api.read(self._sandbox.id, path, max_bytes=max_bytes)
+        where = files_path(path, "sandboxes.files.read")
+        raw = await self._api.read(self._sandbox.id, where, max_bytes=max_bytes)
         file = raw.get("file", {})
         content = file.get("content", "")
         if file.get("encoding") == "base64":
@@ -153,21 +168,24 @@ class AsyncFiles:
 
     async def write(self, path: str, data: Union[str, bytes]) -> Dict[str, Any]:
         """Write a small text (``str``) or binary (``bytes``) file, audited."""
+        where = files_path(path, "sandboxes.files.write")
         if isinstance(data, str):
             body = {"content": data, "encoding": "utf8"}
         else:
             encoded = base64.b64encode(bytes(data)).decode("ascii")
             body = {"content": encoded, "encoding": "base64"}
-        return await self._api.write(self._sandbox.id, path, body=body)
+        return await self._api.write(self._sandbox.id, where, body=body)
 
     async def upload(self, path: str, data_or_file: UploadBody) -> Dict[str, Any]:
         """Upload raw bytes, a path or a binary file (at most 64 MiB). The folder must exist."""
-        return await self._api.upload(self._sandbox.id, path, body=data_or_file)
+        where = files_path(path, "sandboxes.files.upload")
+        return await self._api.upload(self._sandbox.id, where, body=data_or_file)
 
     async def download(self, path: str, *, max_bytes: int = DOWNLOAD_LIMIT) -> bytes:
         """A file's raw bytes, at most ``max_bytes`` (64 MiB unless raised or lowered): a larger
         file raises ``PayloadTooLargeError`` and nothing past the limit is kept."""
-        stream = self._api._stream(self._sandbox.id, path, max_bytes)
+        where = files_path(path, DOWNLOAD)
+        stream = self._api._stream(self._sandbox.id, where, max_bytes)
         return b"".join([chunk async for chunk in stream])
 
     async def download_to(
@@ -181,6 +199,7 @@ class AsyncFiles:
         only once every byte arrived, so a failure never leaves a partial file there. At most
         ``max_bytes`` (64 MiB unless raised or lowered): a larger file raises
         ``PayloadTooLargeError`` and its partial file is removed."""
+        where = files_path(path, DOWNLOAD)
         target = os.fspath(local_path)
         folder = os.path.dirname(os.path.abspath(target))
         handle = tempfile.NamedTemporaryFile(
@@ -188,7 +207,8 @@ class AsyncFiles:
         )
         try:
             with handle:
-                async for chunk in self._api._stream(self._sandbox.id, path, max_bytes):
+                stream = self._api._stream(self._sandbox.id, where, max_bytes)
+                async for chunk in stream:
                     handle.write(chunk)
             os.replace(handle.name, target)
         except BaseException:
@@ -201,16 +221,22 @@ class AsyncFiles:
 
     async def remove(self, path: str, *, recursive: bool = False) -> Dict[str, Any]:
         """Delete a file, or a folder and its contents with ``recursive=True``."""
+        where = files_path(path, "sandboxes.files.remove")
         flag = True if recursive else None
-        return await self._api.remove(self._sandbox.id, path, recursive=flag)
+        return await self._api.remove(self._sandbox.id, where, recursive=flag)
 
     async def move(self, src: str, dst: str) -> Dict[str, Any]:
         """Move or rename a file or folder."""
-        return await self._api.rename(self._sandbox.id, body={"from": src, "to": dst})
+        move = "sandboxes.files.rename"
+        source = files_path(src, move, name="src")
+        target = files_path(dst, move, name="dst")
+        body = {"from": source, "to": target}
+        return await self._api.rename(self._sandbox.id, body=body)
 
     async def make_dir(self, path: str) -> Dict[str, Any]:
         """Create a folder (and its parents)."""
-        return await self._api.make_dir(self._sandbox.id, path)
+        where = files_path(path, "sandboxes.files.makeDir")
+        return await self._api.make_dir(self._sandbox.id, where)
 
 
 class AsyncSnapshots:

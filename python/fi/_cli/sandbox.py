@@ -898,9 +898,12 @@ def _cat(args, api, out: _Output) -> int:
     import base64
     import sys
 
+    from fi.sandbox._wire import files_path
     from fi.sandbox.types import EXIT_OK
 
-    raw = api.files.read(args.id, args.path, max_bytes=args.max_bytes)
+    # the generated read, for the record's truncated and encoding; its path as every files call sends it
+    where = files_path(args.path, "sandboxes.files.read")
+    raw = api.files.read(args.id, where, max_bytes=args.max_bytes)
     file = raw.get("file") or {}
     if out.json:
         out.record(file)

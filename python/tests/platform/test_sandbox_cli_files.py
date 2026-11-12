@@ -86,7 +86,7 @@ def test_ls_text_and_json(server, capsys):
     assert server.last.request.url.params["path"] == "src"
     assert run("ls", SBX, "--json") == 0
     assert json.loads(capsys.readouterr().out) == entries
-    assert server.last.request.url.params["path"] == "."
+    assert "path" not in server.last.request.url.params  # the top folder: no path (the route refuses ".")
 
 
 

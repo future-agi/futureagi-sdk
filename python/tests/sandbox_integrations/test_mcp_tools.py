@@ -1,8 +1,9 @@
 """The MCP server's tool bodies (``fi.sandbox_integrations.mcp_server._tools``), framework-free, over the
 frozen-OpenAPI mock: each tool's result shape, the whole exit record, output clipping, the time-limit
 clamp (1 to the workspace's ``caps.exec.maxTimeoutSeconds``), the command's folder sent relative to
-``/workspace`` (the mock's exec route refuses an absolute one, as the service does), writes that rely
-on the write creating folders, pinned mode, the ``created`` set and cleanup (its deletes sent
+``/workspace`` (the mock's exec route refuses an absolute one, as the service does), file paths sent
+relative to ``/workspace`` too (one outside it refused before any request), writes that rely on the
+write creating folders, pinned mode, the ``created`` set and cleanup (its deletes sent
 together), and error texts with a next step and no key. Fake credentials only; no ``mcp`` package
 needed."""
 
@@ -11,6 +12,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import inspect
+from urllib.parse import unquote
 
 import httpx
 import pytest
@@ -208,6 +210,51 @@ def test_read_file_text_and_base64(server):
     assert str(error).startswith("validation: ") and "sandbox_list_files" in str(error)
 
 
+def file_path(seen):
+    """The decoded path a read or write carried: what follows ``files/`` in its URL."""
+    raw = seen.request.url.raw_path.decode("ascii").split("?", 1)[0]
+    return unquote(raw.split(f"/{SBX}/files/", 1)[1])
+
+
+@pytest.mark.parametrize("path,sent", [
+    ("/workspace/notes.txt", "notes.txt"), ("notes.txt", "notes.txt"), ("/workspace/src/a.py", "src/a.py"),
+])
+def test_read_file_sends_the_path_relative_to_the_workspace(server, path, sent):
+    """The mock refuses ``workspace/notes.txt`` (an absolute path whose slash was lost), as the service
+    would put it at /workspace/workspace/notes.txt: a read sent that way fails here."""
+    server.on("sandboxes.files.read", file_answer("hello"))
+    assert call(server, "sandbox_read_file", path, SBX)["content"] == "hello"
+    assert server.last.name == "sandboxes.files.read" and file_path(server.last) == sent
+
+
+def test_write_then_read_reach_the_same_file(server):
+    server.on("sandboxes.files.read", file_answer("hello"))
+    tools = tools_for(server)
+
+    async def go():
+        await tools.sandbox_write_file("/workspace/out/a.txt", "hello", SBX)
+        return await tools.sandbox_read_file("/workspace/out/a.txt", SBX)
+
+    assert run(go())["content"] == "hello"
+    files = [seen for seen in server.seen if seen.name.startswith("sandboxes.files.")]
+    assert [(seen.name, file_path(seen)) for seen in files] == [
+        ("sandboxes.files.write", "out/a.txt"), ("sandboxes.files.read", "out/a.txt")]
+
+
+@pytest.mark.parametrize("method,args", [
+    ("sandbox_read_file", ("/tmp/notes.txt",)), ("sandbox_read_file", ("/workspace/../etc/passwd",)),
+    ("sandbox_read_file", ("a\\b.txt",)), ("sandbox_read_file", ("/workspace",)),
+    ("sandbox_write_file", ("/tmp/notes.txt", "x")), ("sandbox_list_files", ("/etc",)),
+])
+def test_file_tools_refuse_a_path_outside_the_workspace_before_any_request(server, method, args):
+    error = refused(server, method, *args, sandbox_id=SBX)
+    text = str(error)
+    assert error.code == "invalid_path" and text.startswith("invalid_path: sandboxes.files.")
+    assert repr(args[0]) in text and "relative to /workspace" in text and "sandbox_exec" in text
+    assert "setup problem" not in text and "OMEGA_BASE_URL" not in text  # a path, not the server's setup
+    assert server.seen == []  # not the connect, not the file call
+
+
 def test_write_file_creates_folders_by_the_write_utf8_and_base64(server):
     """Replaces "makes parent then writes": the JSON write creates missing folders itself, and
     make_dir on an existing folder is refused, so no make_dir is sent."""
@@ -235,7 +282,7 @@ def test_list_files_entries(server):
         {"name": "lib", "size": 0, "directory": True, "mode": "0755"}]}
     assert server.last.request.url.params["path"] == "src"
     call(server, "sandbox_list_files", sandbox_id=SBX)
-    assert server.last.request.url.params["path"] == "."
+    assert "path" not in server.last.request.url.params  # the root: no path (the route refuses ".")
 
 
 def test_delete_removes_from_created_and_404_is_ok(server):

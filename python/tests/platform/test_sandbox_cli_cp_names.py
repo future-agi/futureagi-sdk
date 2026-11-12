@@ -2,7 +2,9 @@
 and ``\\`` as separators on every system, and refuses (exit 2, before any request or write) a name
 that is empty, ``.`` or ``..``, names a drive, or resolves outside LOCAL_DIR. A script that copies
 names a sandbox listed (Linux allows a backslash in a name) can then never write outside the
-folder. Fake credentials only."""
+folder. A sandbox path with a backslash is refused too (``invalid_path``, exit 2, before any
+request or write): the files routes take only ``/workspace``-relative paths, with ``/`` between
+folders. Fake credentials only."""
 
 from __future__ import annotations
 
@@ -21,11 +23,8 @@ from ._sandbox_mock import SBX
 
 @pytest.mark.parametrize("remote,name", [
     ("out/result.bin", "result.bin"),
-    ("dir\\evil.txt", "evil.txt"),
-    ("..\\..\\evil.txt", "evil.txt"),
-    ("a\\b/c\\d.txt", "d.txt"),
-    ("\\abs\\evil.txt", "evil.txt"),
-    ("x:y\\evil.txt", "evil.txt"),
+    ("/workspace/out/result.bin", "result.bin"),
+    ("x:y/evil.txt", "evil.txt"),
 ])
 def test_the_last_part_lands_inside_the_folder(server, capsys, tmp_path, remote, name):
     folder = tmp_path / "into"
@@ -35,6 +34,18 @@ def test_the_last_part_lands_inside_the_folder(server, capsys, tmp_path, remote,
     assert sorted(p.name for p in tmp_path.iterdir()) == ["into"]
     assert (folder / name).read_bytes() == b"file-bytes"
     assert names(server) == ["sandboxes.files.download"]
+
+
+@pytest.mark.parametrize("remote", [
+    "dir\\evil.txt", "..\\..\\evil.txt", "a\\b/c\\d.txt", "\\abs\\evil.txt", "x:y\\evil.txt",
+])
+def test_a_backslash_in_the_sandbox_path_is_refused_before_any_request(server, capsys, tmp_path, remote):
+    folder = tmp_path / "into"
+    folder.mkdir()
+    assert run("cp", f"{SBX}:{remote}", str(folder)) == 2
+    captured = capsys.readouterr()
+    assert captured.err.startswith("invalid_path: ") and "relative to /workspace" in captured.err
+    assert server.seen == [] and list(folder.iterdir()) == []
 
 
 @pytest.mark.parametrize("remote", [
@@ -62,7 +73,7 @@ def test_a_link_in_the_folder_that_points_outside_is_refused(server, capsys, tmp
 
 def test_a_named_local_file_is_written_as_given(server, capsys, tmp_path):
     target = tmp_path / "chosen.bin"
-    assert run("cp", f"{SBX}:dir\\..\\x", str(target)) == 0
+    assert run("cp", f"{SBX}:x/D:evil.txt", str(target)) == 0  # an unsafe name, but the file is named
     assert target.read_bytes() == b"file-bytes" and [p.name for p in tmp_path.iterdir()] == ["chosen.bin"]
 
 

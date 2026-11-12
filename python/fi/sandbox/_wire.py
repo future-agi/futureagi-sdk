@@ -1,10 +1,11 @@
-"""Helpers both modes share: the no-retry count, upload bodies, the download limit, the scrubber
-for a stream's failure text, If-Match values, records, and what ``create`` / ``connect`` return in
-each mode."""
+"""Helpers both modes share: the no-retry count, upload bodies, the download limit, files paths
+(relative to /workspace), the scrubber for a stream's failure text, If-Match values, records,
+and what ``create`` / ``connect`` return in each mode."""
 
 from __future__ import annotations
 
 import os
+import re
 from typing import (
     IO,
     Any,
@@ -13,6 +14,7 @@ from typing import (
     Dict,
     Generator,
     Mapping,
+    Optional,
     TypeVar,
     Union,
 )
@@ -32,6 +34,11 @@ UploadBody = Union[bytes, bytearray, memoryview, str, "os.PathLike[str]", IO[byt
 #: The most bytes a download keeps unless ``max_bytes=`` says otherwise: the upload limit.
 DOWNLOAD_LIMIT = BODY_LIMITS["bundle"]
 DOWNLOAD = "sandboxes.files.download"
+#: The folder every files path is relative to: the files routes' root. Built from its name, as in
+#: TypeScript, so no module spells an API path.
+_WORKSPACE_NAME = "workspace"
+WORKSPACE = f"/{_WORKSPACE_NAME}"
+_CONTROL = re.compile(r"[\x00-\x1f\x7f]")
 
 
 class DownloadBudget:
@@ -126,6 +133,46 @@ def payload(body: UploadBody) -> bytes:
         "sandboxes.files.upload: the body must be bytes, str, a path or a binary file",
         code="invalid_body",
         operation="sandboxes.files.upload",
+    )
+
+
+def files_path(
+    path: Any, operation: str, *, root: bool = False, name: str = "path"
+) -> Optional[str]:
+    """``path`` as the files routes take it: relative to /workspace. A relative path is sent as
+    it is and an absolute one under /workspace without that prefix (/workspace/src/a.py as
+    ``src/a.py``); repeated and trailing slashes are dropped. /workspace itself and ``"."`` are
+    its root, which only a listing takes (``root=True``: None, so no path is sent). A path outside
+    /workspace, or with a ``.`` or ``..`` segment, a backslash, a NUL or another control
+    character, raises ``ConfigurationError`` (``invalid_path``) before any request."""
+    text = os.fspath(path) if isinstance(path, os.PathLike) else path
+    if text is None and root:  # no path at all: the root
+        return None
+    if not isinstance(text, str):
+        raise _bad_path(operation, f"{name} must be text, not {type(path).__name__}")
+    parts = [part for part in text.split("/") if part]
+    if "\\" in text or _CONTROL.search(text):
+        problem = "has a backslash, a NUL or another control character"
+    elif text.startswith("/") and parts[:1] != ["workspace"]:
+        problem = f"is outside {WORKSPACE}"
+    else:
+        parts = parts[1:] if text.startswith("/") else parts
+        parts = [] if parts == ["."] else parts
+        if "." in parts or ".." in parts:
+            problem = 'has a "." or ".." segment'
+        elif parts or root:
+            return "/".join(parts) or None
+        else:
+            problem = f"is {WORKSPACE} itself, and this call needs a file or folder under it"
+    raise _bad_path(operation, f"{name} {text!r} {problem}")
+
+
+def _bad_path(operation: str, problem: str) -> ConfigurationError:
+    return ConfigurationError(
+        f"{operation}: {problem}; sandbox paths are relative to {WORKSPACE} (src/app.py, or "
+        f"{WORKSPACE}/src/app.py, is the file {WORKSPACE}/src/app.py)",
+        code="invalid_path",
+        operation=operation,
     )
 
 

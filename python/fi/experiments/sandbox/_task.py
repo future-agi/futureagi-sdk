@@ -30,6 +30,7 @@ from fi.experiments.sandbox._spec import (
     REWARD_MAX_BYTES,
     ROW_FILE,
     SandboxEval,
+    checked_files,
     command_record,
     describe,
     fit_name,
@@ -253,11 +254,10 @@ class _Batch:
         spec = self.spec
         _stop_if_cancelled(ctx, "setup")
         with phases.phase("setup"):
+            # a function's files are checked as a static mapping is when the spec is made: all before any write
+            files = checked_files(spec.files(row) if callable(spec.files) else (spec.files or {}))
             await sbx.files.write(ROW_FILE, row_json(row))  # a write creates missing parent folders
-            files = spec.files(row) if callable(spec.files) else (spec.files or {})
-            for path, data in dict(files).items():
-                if not isinstance(path, str) or not path.startswith("/") or not isinstance(data, (str, bytes)):
-                    raise UsageError("files= maps an absolute path to text or bytes")
+            for path, data in files.items():
                 await sbx.files.write(path, data)
         _stop_if_cancelled(ctx, "the agent")
         ran: Optional[Dict[str, Any]] = None  # the last command's record, for reward_from_exit

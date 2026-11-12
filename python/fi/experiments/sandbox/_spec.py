@@ -37,7 +37,8 @@ class SandboxEval:
     handle) is set. ``agent_command``, ``verifier`` and ``files`` may be functions of the row;
     ``env`` may be a function of ``(row, ctx)``. ``env`` holds plain, non-secret variables only.
     ``cwd`` is the commands' folder: ``/workspace``, a folder under it, or a path relative to it
-    (``app`` is ``/workspace/app``).
+    (``app`` is ``/workspace/app``). The keys of ``files`` and ``reward_path`` are absolute paths of
+    files under ``/workspace`` (the sandbox's files API reaches only that folder).
     """
 
     agent_command: Optional[Text] = None
@@ -67,8 +68,11 @@ class SandboxEval:
             value = getattr(self, name)
             if value is not None and not callable(value) and not (isinstance(value, str) and value.strip()):
                 raise UsageError(f"{name}= takes a command (a non-empty string) or a function of the row")
-        if self.files is not None and not callable(self.files) and not isinstance(self.files, Mapping):
-            raise UsageError("files= takes a mapping of absolute path to text or bytes, or a function of the row")
+        if self.files is not None and not callable(self.files):
+            if not isinstance(self.files, Mapping):
+                raise UsageError("files= takes a mapping of absolute path under /workspace to text or bytes, "
+                                 "or a function of the row")
+            checked_files(self.files)
         if self.env is not None and not callable(self.env) and not isinstance(self.env, Mapping):
             raise UsageError("env= takes a mapping of plain, non-secret variables, or a function of (row, ctx)")
         for name in ("agent_timeout_s", "verifier_timeout_s"):
@@ -79,8 +83,7 @@ class SandboxEval:
                 or self.max_output_chars < 0:
             raise UsageError("max_output_chars must be a whole number, 0 or more")
         exec_cwd(self.cwd)
-        if not isinstance(self.reward_path, str) or not self.reward_path.startswith("/"):
-            raise UsageError("reward_path must be an absolute path inside the sandbox")
+        workspace_file(self.reward_path, "reward_path")
         prefix = self.name_prefix
         if not isinstance(prefix, str) or not 1 <= len(prefix) <= 32 or not prefix.isprintable() \
                 or prefix != prefix.strip():
@@ -113,6 +116,35 @@ def exec_cwd(path: Any) -> Optional[str]:
         return full[len(WORKSPACE) + 1:]
     raise UsageError(f"cwd {path!r} is outside {WORKSPACE}: sandbox commands run in {WORKSPACE} or a folder "
                      f"under it, so pass one of those (or a path relative to {WORKSPACE})")
+
+
+def workspace_file(path: Any, name: str) -> str:
+    """A file a trial writes or reads, as given: an absolute path under ``/workspace``, which is all the
+    sandbox's files API reaches. ``/workspace`` itself, a path outside it, and one with a ``.`` or ``..``
+    segment, a backslash or a control character raise ``UsageError`` before any file is written."""
+    text = path if isinstance(path, str) else ""
+    parts = [part for part in text.split("/") if part]
+    if text.startswith("/") and parts[:1] == ["workspace"] and len(parts) > 1 and not {".", ".."} & set(parts) \
+            and "\\" not in text and not any(ord(char) < 32 or ord(char) == 127 for char in text):
+        return text
+    raise UsageError(f"{name} {path!r} is not a file under {WORKSPACE}: a trial writes and reads its files "
+                     f"through the sandbox's files API, which reaches only {WORKSPACE}, so give an absolute "
+                     f'path under it with no "." or ".." part (for example {WORKSPACE}/task.md)')
+
+
+def checked_files(files: Any) -> Dict[str, Union[str, bytes]]:
+    """``files=`` (the mapping, or what its function returned for a row) as it is written: each key a file
+    under ``/workspace`` (:func:`workspace_file`) and each value text or bytes, else ``UsageError``."""
+    try:
+        given = dict(files)
+    except (TypeError, ValueError):
+        raise UsageError("files= maps an absolute path under /workspace to text or bytes") from None
+    for path, data in given.items():
+        workspace_file(path, "files= key")
+        if not isinstance(data, (str, bytes)):
+            raise UsageError(f"files= maps each path to text or bytes, not {type(data).__name__} "
+                             f"(for {path!r})")
+    return given
 
 
 # ---- what a trial writes and reads (pure: no sandbox, no loop) ----------------------------------

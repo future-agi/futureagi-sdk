@@ -184,7 +184,7 @@ def test_files_write_upload_and_the_path_helpers(mode, tmp_path):
         assert server.last.name == "sandboxes.files.upload" and server.last.body == sent
     server.on("sandboxes.files.list", httpx.Response(200, json={"path": ".", "entries": [{"name": "x"}]}))
     assert run(resolve(files.list())) == [{"name": "x"}]
-    assert dict(server.last.request.url.params) == {"path": "."}
+    assert dict(server.last.request.url.params) == {}  # the root: no path (the route refuses ".")
     run(resolve(files.remove("old")))
     assert "recursive" not in server.last.request.url.params
     run(resolve(files.remove("tree", recursive=True)))

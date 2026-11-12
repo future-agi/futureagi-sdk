@@ -197,7 +197,7 @@ class FutureAGISandbox(BaseSandbox):
             self._make_parents(posixpath.dirname(where))
             self._sandbox.files.upload(where, bytes(data))
         except ConfigurationError as error:
-            if error.code == "invalid_path_param":
+            if error.code in ("invalid_path_param", "invalid_path"):
                 return "invalid_path"
             raise
         except SandboxError as error:
@@ -237,7 +237,7 @@ class FutureAGISandbox(BaseSandbox):
         try:
             return FileDownloadResponse(path=path, content=self._sandbox.files.download(where))
         except ConfigurationError as error:
-            if error.code == "invalid_path_param":
+            if error.code in ("invalid_path_param", "invalid_path"):
                 return FileDownloadResponse(path=path, error="invalid_path")
             raise
         except SandboxError as error:

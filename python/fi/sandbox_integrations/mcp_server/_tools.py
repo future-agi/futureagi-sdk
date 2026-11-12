@@ -79,6 +79,9 @@ def _reason(error: BaseException) -> Optional[str]:
 def _next_step(error: BaseException, code: str, tool: str, sandbox_id: Optional[str]) -> str:
     from fi import sandbox as sb
 
+    if code == "invalid_path":
+        return (". The file tools reach only /workspace: for a file elsewhere, run a command with "
+                "sandbox_exec (for example cat /tmp/notes.txt)")
     if isinstance(error, sb.ConfigurationError):
         return (". This is a setup problem of the server, so trying again will not help: fix its "
                 "environment (OMEGA_BASE_URL and the credentials) and restart it")
@@ -302,11 +305,16 @@ class SandboxTools:
     async def sandbox_read_file(
         self, path: str, sandbox_id: Optional[str] = None, max_bytes: Optional[int] = None
     ) -> Dict[str, Any]:
-        """A file: UTF-8 text as it is, anything else as base64; ``truncated`` when cut at the limit."""
+        """A file: UTF-8 text as it is, anything else as base64; ``truncated`` when cut at the limit.
+        ``path`` is relative to ``/workspace``; an absolute path under it is sent in that form, and a
+        path outside it is refused before any request."""
+        from fi.sandbox._wire import files_path
+
         target = self._target(sandbox_id)
         try:
+            where = files_path(path, "sandboxes.files.read")
             await self._sandbox(target)
-            raw = await self._api.files.read(target, path, max_bytes=max_bytes)
+            raw = await self._api.files.read(target, where, max_bytes=max_bytes)
         except FutureAGIError as error:
             raise _wrapped(error, "sandbox_read_file", target) from error
         file = raw.get("file") or {}
@@ -321,7 +329,10 @@ class SandboxTools:
     async def sandbox_write_file(
         self, path: str, content: str, sandbox_id: Optional[str] = None, encoding: str = "utf8"
     ) -> Dict[str, Any]:
-        """Write a file (missing folders are created by the write itself)."""
+        """Write a file (missing folders are created by the write itself). ``path`` follows
+        :meth:`sandbox_read_file`'s rule."""
+        from fi.sandbox._wire import files_path
+
         target = self._target(sandbox_id)
         data: Any = content
         if encoding == "base64":
@@ -332,6 +343,7 @@ class SandboxTools:
         elif encoding != "utf8":
             raise _refuse("invalid_encoding", "encoding is utf8 (text) or base64 (any bytes)")
         try:
+            files_path(path, "sandboxes.files.write")  # a refused path costs no request
             sbx = await self._sandbox(target)
             raw = await sbx.files.write(path, data)
         except FutureAGIError as error:
@@ -343,9 +355,13 @@ class SandboxTools:
         return {"path": file.get("path", path), "bytes": size}
 
     async def sandbox_list_files(self, path: str = ".", sandbox_id: Optional[str] = None) -> Dict[str, Any]:
-        """The entries of one folder (relative paths start at the sandbox's files)."""
+        """The entries of one folder (relative paths start at ``/workspace``, the sandbox's files;
+        ``"."`` is that folder itself)."""
+        from fi.sandbox._wire import files_path
+
         target = self._target(sandbox_id)
         try:
+            files_path(path, "sandboxes.files.list", root=True)  # a refused path costs no request
             sbx = await self._sandbox(target)
             entries = await sbx.files.list(path)
         except FutureAGIError as error:

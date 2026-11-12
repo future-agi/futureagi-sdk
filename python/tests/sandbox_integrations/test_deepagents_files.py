@@ -96,6 +96,18 @@ def test_upload_relative_path_is_invalid_path_without_request(adapter):
     assert server.seen == []
 
 
+def test_a_path_the_files_api_refuses_is_that_files_invalid_path_and_the_others_still_go(adapter):
+    """A backslash or a control character in a /workspace path is refused by the handle before any
+    request; that file gets invalid_path, as the service's refusal would give it, and the batch goes on."""
+    server = MockServer()
+    backend = make(adapter, server)
+    uploads = backend.upload_files([("/workspace/a\\b.txt", b"x"), ("/workspace/ok.txt", b"ok")])
+    assert [r.error for r in uploads] == ["invalid_path", None]
+    downloads = backend.download_files(["/workspace/a\x00b.txt", "/workspace/ok.txt"])
+    assert [r.error for r in downloads] == ["invalid_path", None] and downloads[1].content == b"file-bytes"
+    assert sent(server) == ["upload/ok.txt", "download/ok.txt"]  # nothing sent for the refused paths
+
+
 def test_upload_maps_403_404_400_413_per_file_and_continues(adapter):
     server = MockServer()
     backend = make(adapter, server)
@@ -176,7 +188,7 @@ def test_download_directory_probe_gives_is_directory(adapter):
     assert [r.error for r in responses] == ["is_directory", "invalid_path"]
     assert [seen.name for seen in server.seen] == [
         "sandboxes.files.download", "sandboxes.files.list"] * 2
-    assert server.seen[1].request.url.params["path"] == "."
+    assert "path" not in server.seen[1].request.url.params  # the root: no path (the route refuses ".")
 
 
 def test_download_wrong_type_is_directory_without_probe(adapter):

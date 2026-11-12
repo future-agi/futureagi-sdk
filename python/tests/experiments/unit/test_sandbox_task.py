@@ -2,14 +2,15 @@
 
 Handles are built from the environment (a self-hosted EE on loopback, Bearer), with the mock as the
 transport, and the task closure is called directly with a real ``TaskContext``. The mock's exec route
-refuses an absolute ``cwd`` with a 400, as the sandbox service does. The quota wait runs on a fake
-clock. Fake credentials only.
+refuses an absolute ``cwd`` with a 400, and its files routes an absolute or dotted path, as the sandbox
+service does. The quota wait runs on a fake clock. Fake credentials only.
 """
 
 from __future__ import annotations
 
 import asyncio
 import json
+from urllib.parse import unquote
 
 import httpx
 import pytest
@@ -39,8 +40,8 @@ STARTED = ("started", {"execId": EXEC, "sandboxId": SBX})
 @pytest.fixture(name="sandbox_env")
 def sandbox_env_fixture(monkeypatch):
     """A self-hosted EE on loopback (Bearer) with the mock as its transport; settings allow 2 sandboxes
-    and an hour per command; the reward file is missing unless a test answers it; an absolute cwd gets
-    the service's 400."""
+    and an hour per command; the reward file is missing unless a test answers it; an absolute cwd or
+    files path gets the service's 400."""
     mock = strict(MockServer())
     for name in ENV:
         monkeypatch.delenv(name, raising=False)
@@ -86,6 +87,16 @@ def names(server):
 
 def bodies(server, name):
     return [seen.json() for seen in server.seen if seen.name == name]
+
+
+def file_path(seen):
+    """The path a files request carried in its URL, as the service reads it (relative to /workspace)."""
+    raw = seen.request.url.raw_path.decode("ascii").split("?", 1)[0]
+    return unquote(raw.split(f"/{SBX}/", 1)[1].split("/", 1)[1])
+
+
+def file_paths(server, prefix="sandboxes.files."):
+    return [(seen.name, file_path(seen)) for seen in server.seen if seen.name.startswith(prefix)]
 
 
 def context(example_id="ex-1", trial=1):
@@ -145,10 +156,61 @@ def test_row_file_and_files_written_before_agent(sandbox_env):
     order = names(sandbox_env)
     writes = [s for s in sandbox_env.seen if s.name == "sandboxes.files.write"]
     assert order.index("sandboxes.commands.run") > max(i for i, n in enumerate(order) if n == "sandboxes.files.write")
-    assert "row.json" in str(writes[0].request.url) and EVAL_DIR.endswith(".fi-eval")
+    # the files routes take paths relative to /workspace: /workspace/task.md is sent as task.md
+    assert [file_path(w) for w in writes] == [".fi-eval/row.json", "task.md", "data.bin"]
+    assert EVAL_DIR == "/workspace/.fi-eval"
     assert json.loads(writes[0].json()["content"]) == {"data": {"q": 7}}
-    assert "task.md" in str(writes[1].request.url) and writes[1].json() == {"content": "solve 7", "encoding": "utf8"}
-    assert "data.bin" in str(writes[2].request.url) and writes[2].json()["encoding"] == "base64"
+    assert writes[1].json() == {"content": "solve 7", "encoding": "utf8"}
+    assert writes[2].json()["encoding"] == "base64"
+
+
+@pytest.mark.parametrize("reward_path,sent", [
+    (None, ".fi-eval/reward"),
+    ("/workspace/out/score.json", "out/score.json"),
+])
+def test_reward_file_is_removed_and_read_relative_to_the_workspace(sandbox_env, reward_path, sent):
+    given = {} if reward_path is None else {"reward_path": reward_path}
+    out = call(sandbox_task(SandboxEval(agent_command="true", verifier="true", **given)))
+    assert file_paths(sandbox_env) == [("sandboxes.files.write", ".fi-eval/row.json"),
+                                       ("sandboxes.files.remove", sent), ("sandboxes.files.read", sent)]
+    assert out["rewards"] == {"reward": 1.0} and out["deleted"] is True
+
+
+NOT_UNDER_WORKSPACE = ["/tmp/task.md", "/workspace/../etc/task.md", "/workspace/a/./b.md", "/workspace/a\\b.md",
+                       "/workspace/a\x00b.md", "/workspace", "/workspace/", "/workspacex/a.md", "task.md", 7]
+
+
+@pytest.mark.parametrize("path", NOT_UNDER_WORKSPACE)
+def test_a_files_key_outside_the_workspace_is_refused_when_the_spec_is_made(sandbox_env, path):
+    with pytest.raises(UsageError) as info:
+        SandboxEval(agent_command="true", files={"/workspace/ok.md": "ok", path: "x"})
+    assert str(info.value).startswith(f"files= key {path!r} is not a file under /workspace: ")
+    assert sandbox_env.seen == []  # no spec, so no trial: nothing was created or written
+
+
+@pytest.mark.parametrize("path", NOT_UNDER_WORKSPACE)
+def test_a_reward_path_outside_the_workspace_is_refused_when_the_spec_is_made(sandbox_env, path):
+    with pytest.raises(UsageError) as info:
+        SandboxEval(agent_command="true", verifier="true", reward_path=path)
+    assert str(info.value).startswith(f"reward_path {path!r} is not a file under /workspace: ")
+    assert sandbox_env.seen == []
+
+
+def test_a_static_files_value_that_is_not_text_or_bytes_is_refused_when_the_spec_is_made():
+    with pytest.raises(UsageError) as info:
+        SandboxEval(agent_command="true", files={"/workspace/n.txt": 7})
+    assert str(info.value) == "files= maps each path to text or bytes, not int (for '/workspace/n.txt')"
+
+
+@pytest.mark.parametrize("path", ["/tmp/task.md", "/workspace/../etc/task.md", "/workspace/a\\b.md", "task.md"])
+def test_a_files_key_from_a_function_is_refused_before_any_file_is_written(sandbox_env, path):
+    spec = SandboxEval(agent_command="true", files=lambda row: {"/workspace/ok.md": "ok", path: "x"})
+    with pytest.raises(UsageError) as info:
+        call(sandbox_task(spec))
+    assert str(info.value).startswith(f"files= key {path!r} is not a file under /workspace: ")
+    assert file_paths(sandbox_env) == []  # not row.json, not ok.md
+    assert "sandboxes.commands.run" not in names(sandbox_env)
+    assert names(sandbox_env).count("sandboxes.kill") == 1
 
 
 def test_agent_env_has_eval_names_and_no_fi_names(sandbox_env):

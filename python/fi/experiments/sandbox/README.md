@@ -50,12 +50,12 @@ Exactly one of the two is set.
 | `agent_command` | None | the agent as a command inside the sandbox, or `lambda row: "..."` |
 | `agent` | None | `async def agent(row, sbx, ctx)`, run here; its return value is the output's `agent.result` |
 | `verifier` | None | a command (or `lambda row: "..."`) run after the agent |
-| `files` | None | `{absolute path: text or bytes}`, or `lambda row: {...}`, written before the agent |
+| `files` | None | `{absolute path under /workspace: text or bytes}`, or `lambda row: {...}`, written before the agent |
 | `env` | None | plain, non-secret variables for both commands, or `lambda row, ctx: {...}` |
 | `template`, `size`, `image` | the workspace's defaults | passed to the create |
 | `cwd` | `/workspace` | the commands' folder: `/workspace`, a folder under it, or a path relative to it (`app` is `/workspace/app`); a folder outside `/workspace` is refused |
 | `agent_timeout_s` / `verifier_timeout_s` | 900 / 300 | each command's own limit (at least 1; at most the workspace's `caps.exec.maxTimeoutSeconds`) |
-| `reward_path` | `/workspace/.fi-eval/reward` | where the verifier writes the reward |
+| `reward_path` | `/workspace/.fi-eval/reward` | where the verifier writes the reward: a file under `/workspace` |
 | `reward_from_exit` | True | without a reward file: 1.0 when the last command exited 0, else 0.0 |
 | `trace_env` | True | pass `TRACEPARENT` / `TRACESTATE` to the commands (section 8) |
 | `name_prefix` | `fi-eval` | the start of every sandbox name |
