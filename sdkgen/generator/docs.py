@@ -193,7 +193,8 @@ def _example_for(
     as a placeholder string the compiler rejects.
     """
     if is_file(schema):
-        return '"path/to/file"'
+        # A repeated file field (file[]) takes a list, even of one file.
+        return '["path/to/file"]' if schema.get("type") == "array" else '"path/to/file"'
     if "$ref" in schema and depth < 3:
         target = definitions.get(class_name(schema["$ref"]), {})
         props = target.get("properties", {})

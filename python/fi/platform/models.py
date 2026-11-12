@@ -29,6 +29,14 @@ class _Model(BaseModel):
         return self
 
 
+class AddEvalConfigsResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_eval_configs', 'message', 'run_test_id'])
+    message: Optional[str] = Field(default=None)
+    created_eval_configs: Optional[List[Optional[EvalConfigResponse]]] = Field(default=None)
+    run_test_id: Optional[str] = Field(default=None)
+    warnings: Optional[List[Optional[str]]] = Field(default=None)
+
+
 class AgentDefinitionCreateResponse(_Model):
     message: Optional[str] = Field(default=None)
     agent: Optional[AgentDefinitionResponse] = Field(default=None)
@@ -144,9 +152,19 @@ class AgentFlowGraph(_Model):
     edges: Optional[List[Optional[Any]]] = Field(default=None)
 
 
+class AgentRunsResponse(_Model):
+    results: Optional[List[Optional[HarnessRunSummary]]] = Field(default=None)
+
+
 class AgentVersionCreateResponse(_Model):
     message: Optional[str] = Field(default=None)
     version: Optional[AgentVersionResponse] = Field(default=None)
+
+
+class AgentVersionRef(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'version_number'])
+    id: Optional[str] = Field(default=None)
+    version_number: Optional[int] = Field(default=None)
 
 
 class AgentVersionResponse(_Model):
@@ -755,10 +773,103 @@ class DatasetTableRow(_Model):
     row_id: Optional[str] = Field(default=None)
 
 
+class DebugAnalysisCluster(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['cluster_id', 'error_type', 'id'])
+    id: Optional[str] = Field(default=None)
+    cluster_id: Optional[str] = Field(default=None)
+    title: Optional[str] = Field(default=None)
+    error_type: Optional[str] = Field(default=None)
+
+
+class DebugAnalysisCoverage(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['observed_call_count', 'read_complete', 'scope'])
+    scope: Optional[str] = Field(default=None)
+    observed_call_count: Optional[int] = Field(default=None)
+    read_complete: Optional[bool] = Field(default=None)
+
+
+class DebugAnalysisEvidence(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['evidence_id', 'excerpt'])
+    evidence_id: Optional[str] = Field(default=None)
+    call_execution_id: Optional[str] = Field(default=None)
+    excerpt: Optional[str] = Field(default=None)
+
+
+class DebugAnalysisFinding(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['cluster', 'evidence', 'id', 'statement'])
+    id: Optional[str] = Field(default=None)
+    kind: Optional[str] = Field(default=None)
+    statement: Optional[str] = Field(default=None)
+    recovery: Optional[str] = Field(default=None)
+    category: Optional[str] = Field(default=None)
+    group_label: Optional[str] = Field(default=None)
+    fix_layer: Optional[str] = Field(default=None)
+    confidence: Optional[str] = Field(default=None)
+    goal: Optional[str] = Field(default=None)
+    cluster: Optional[DebugAnalysisCluster] = Field(default=None)
+    evidence: Optional[List[Optional[DebugAnalysisEvidence]]] = Field(default=None)
+
+
+class DebugAnalysisGoal(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['broken_call_ids', 'goal', 'label', 'tested_call_count', 'unexplained_call_ids', 'ways'])
+    goal: Optional[str] = Field(default=None)
+    label: Optional[str] = Field(default=None)
+    criteria: Optional[str] = Field(default=None)
+    broken_call_ids: Optional[List[Optional[str]]] = Field(default=None)
+    tested_call_count: Optional[int] = Field(default=None)
+    ways: Optional[List[Optional[DebugAnalysisWay]]] = Field(default=None)
+    unexplained_call_ids: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class DebugAnalysisReport(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['coverage', 'execution_status', 'grouping_status', 'id', 'outcome', 'recorded_at'])
+    id: Optional[str] = Field(default=None)
+    execution_status: Optional[str] = Field(default=None)
+    outcome: Optional[str] = Field(default=None)
+    coverage: Optional[DebugAnalysisCoverage] = Field(default=None)
+    error_message: Optional[str] = Field(default=None)
+    grouping_status: Optional[str] = Field(default=None)
+    recorded_at: Optional[str] = Field(default=None)
+
+
+class DebugAnalysisSummary(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['broken_call_count', 'broken_goal_count', 'excluded_call_ids', 'measured_call_count', 'one_off_count', 'unanalyzed_call_ids'])
+    measured_call_count: Optional[int] = Field(default=None)
+    broken_goal_count: Optional[int] = Field(default=None)
+    broken_call_count: Optional[int] = Field(default=None)
+    one_off_count: Optional[int] = Field(default=None)
+    excluded_call_ids: Optional[List[Optional[str]]] = Field(default=None)
+    unanalyzed_call_ids: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class DebugAnalysisWay(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['call_ids', 'id', 'phrase', 'title'])
+    id: Optional[str] = Field(default=None)
+    title: Optional[str] = Field(default=None)
+    phrase: Optional[str] = Field(default=None)
+    call_ids: Optional[List[Optional[str]]] = Field(default=None)
+
+
 class ErrorName(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['name', 'type'])
     name: Optional[str] = Field(default=None)
     type: Optional[str] = Field(default=None)
+
+
+class EvalConfigResponse(_Model):
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    config: Optional[Any] = Field(default=None)
+    mapping: Optional[Any] = Field(default=None)
+    filters: Optional[Any] = Field(default=None)
+    error_localizer: Optional[bool] = Field(default=None)
+    model: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: NotStarted, Queued, Running, Completed, Editing, Inactive, Failed, PartialRun, ExperimentEvaluation, Uploading, PartialExtracted, Processing, Deleting, PartialCompleted, OptimizationEvaluation, Error, Cancelled
+    eval_group: Optional[Any] = Field(default=None)
+    template_id: Optional[str] = Field(default=None)
+    eval_type: Optional[str] = Field(default=None)
+    regradable: Optional[bool] = Field(default=None)
+    editable: Optional[bool] = Field(default=None)
 
 
 class EvalExecutionResponseResult(_Model):
@@ -980,6 +1091,12 @@ class ExperimentListV2(_Model):
     dataset: Optional[str] = Field(default=None)
 
 
+class FailedRerunItem(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['call_execution_id', 'error'])
+    call_execution_id: Optional[str] = Field(default=None)
+    error: Optional[str] = Field(default=None)
+
+
 class FeedDetailCore(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['representative_trace', 'row', 'success_trace'])
     row: Optional[FeedListRow] = Field(default=None)
@@ -1085,6 +1202,544 @@ class GatewaySummaryResult(_Model):
     status: Optional[str] = Field(default=None)
     provider_count: Optional[int] = Field(default=None)
     model_count: Optional[int] = Field(default=None)
+
+
+class HarnessDraftItem(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['changes', 'created_at', 'created_by', 'id', 'is_default', 'last_edited_by', 'revision', 'stale', 'status', 'summary', 'updated_at'])
+    id: Optional[str] = Field(default=None)
+    label: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: draft, active, discarded
+    is_default: Optional[bool] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    created_by: Optional[HarnessVersionPerson] = Field(default=None)
+    origin: Optional[str] = Field(default=None)
+    summary: Optional[str] = Field(default=None)
+    hash: Optional[str] = Field(default=None)
+    parent_id: Optional[str] = Field(default=None)
+    derived_from_agent_version_id: Optional[str] = Field(default=None)
+    scenario_count: Optional[int] = Field(default=None)
+    source: Optional[Any] = Field(default=None)
+    prompt: Optional[str] = Field(default=None)
+    preflight_status: Optional[str] = Field(default=None)
+    preflight_report: Optional[Any] = Field(default=None)
+    preflighted_at: Optional[str] = Field(default=None)
+    check_started_at: Optional[str] = Field(default=None)
+    credential_names: Optional[List[Optional[str]]] = Field(default=None)
+    required_variable_names: Optional[List[Optional[str]]] = Field(default=None)
+    activation_outcome: Optional[str] = Field(default=None)
+    requested_here: Optional[bool] = Field(default=None)
+    pickable: Optional[bool] = Field(default=None)
+    discardable: Optional[bool] = Field(default=None)
+    stale: Optional[bool] = Field(default=None)
+    revision: Optional[int] = Field(default=None)
+    last_edited_by: Optional[HarnessVersionPerson] = Field(default=None)
+    updated_at: Optional[str] = Field(default=None)
+    parent_label: Optional[str] = Field(default=None)
+    default_label: Optional[str] = Field(default=None)
+    changes: Optional[Any] = Field(default=None)
+
+
+class HarnessDraftSaveResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['saved', 'versions'])
+    saved: Optional[Any] = Field(default=None)
+    versions: Optional[HarnessVersions] = Field(default=None)
+
+
+class HarnessDrafts(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['environment', 'set_aside', 'suite'])
+    environment: Optional[HarnessDraftItem] = Field(default=None)
+    suite: Optional[HarnessDraftItem] = Field(default=None)
+    set_aside: Optional[List[Optional[HarnessDraftItem]]] = Field(default=None)
+
+
+class HarnessEnvironment(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent_type', 'created_at', 'id', 'last_run', 'name', 'runs_count', 'scenario_count', 'source_kind', 'stage', 'status'])
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    domain: Optional[str] = Field(default=None)
+    source_kind: Optional[str] = Field(default=None)
+    agent_type: Optional[str] = Field(default=None)  # one of: voice, chat
+    status: Optional[str] = Field(default=None)  # one of: building, running, completed, failed
+    stage: Optional[str] = Field(default=None)
+    scenario_count: Optional[int] = Field(default=None)
+    sub_goals_count: Optional[int] = Field(default=None)
+    tools_count: Optional[int] = Field(default=None)
+    runs_count: Optional[int] = Field(default=None)
+    last_updated: Optional[str] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    last_run: Optional[HarnessRunSummary] = Field(default=None)
+
+
+class HarnessEnvironmentAgent(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'versions_count'])
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    provider: Optional[str] = Field(default=None)
+    versions_count: Optional[int] = Field(default=None)
+    active_version: Optional[str] = Field(default=None)
+
+
+class HarnessEnvironmentAgentSettings(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['config', 'credential_files', 'secret_refs', 'secrets'])
+    connector: Optional[str] = Field(default=None)
+    mode: Optional[str] = Field(default=None)
+    call_direction: Optional[str] = Field(default=None)
+    config: Optional[Any] = Field(default=None)
+    secret_refs: Optional[List[Optional[str]]] = Field(default=None)
+    secrets: Optional[List[Optional[str]]] = Field(default=None)
+    credential_files: Optional[List[Optional[HarnessEnvironmentCredentialFile]]] = Field(default=None)
+
+
+class HarnessEnvironmentAmendment(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['note', 'subject'])
+    subject: Optional[str] = Field(default=None)
+    note: Optional[str] = Field(default=None)
+
+
+class HarnessEnvironmentAvailableEvals(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['evaluations'])
+    evaluations: Optional[List[Optional[HarnessEnvironmentOfferedEval]]] = Field(default=None)
+
+
+class HarnessEnvironmentCatalogueSubGoal(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['check', 'claim', 'kind', 'name', 'what'])
+    name: Optional[str] = Field(default=None)
+    what: Optional[str] = Field(default=None)
+    kind: Optional[str] = Field(default=None)  # one of: checkpoint, judge
+    claim: Optional[str] = Field(default=None)
+    check: Optional[str] = Field(default=None)
+
+
+class HarnessEnvironmentContract(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['amendments', 'end_conditions', 'provenance', 'sub_goals'])
+    agent: Optional[str] = Field(default=None)
+    one_liner: Optional[str] = Field(default=None)
+    modality: Optional[str] = Field(default=None)
+    call_direction: Optional[str] = Field(default=None)
+    system_prompt_excerpt: Optional[str] = Field(default=None)
+    tools: Optional[List[Optional[Any]]] = Field(default=None)
+    real_use_cases: Optional[List[Optional[str]]] = Field(default=None)
+    hard_constraints: Optional[List[Optional[str]]] = Field(default=None)
+    runtime: Optional[Any] = Field(default=None)
+    dependencies: Optional[List[Optional[Any]]] = Field(default=None)
+    runtime_dependencies: Optional[List[Optional[Any]]] = Field(default=None)
+    implementation: Optional[str] = Field(default=None)
+    tool_entrypoints: Optional[List[Optional[Any]]] = Field(default=None)
+    data_store: Optional[Any] = Field(default=None)
+    open_questions: Optional[List[Optional[str]]] = Field(default=None)
+    amendments: Optional[List[Optional[HarnessEnvironmentAmendment]]] = Field(default=None)
+    sub_goals: Optional[List[Optional[HarnessEnvironmentCatalogueSubGoal]]] = Field(default=None)
+    end_conditions: Optional[HarnessEnvironmentEndConditions] = Field(default=None)
+    notes: Optional[str] = Field(default=None)
+    chosen_evals: Optional[List[Optional[str]]] = Field(default=None)
+    provenance: Optional[HarnessEnvironmentProvenance] = Field(default=None)
+
+
+class HarnessEnvironmentCredentialFile(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['environment_name'])
+    environment_name: Optional[str] = Field(default=None)
+
+
+class HarnessEnvironmentDetail(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['contract', 'evaluations', 'id', 'overview', 'scenarios', 'settings', 'world'])
+    id: Optional[str] = Field(default=None)
+    overview: Optional[HarnessEnvironmentOverview] = Field(default=None)
+    contract: Optional[HarnessEnvironmentContract] = Field(default=None)
+    world: Optional[HarnessEnvironmentWorld] = Field(default=None)
+    scenarios: Optional[List[Optional[HarnessEnvironmentScenario]]] = Field(default=None)
+    evaluations: Optional[HarnessEnvironmentEvaluations] = Field(default=None)
+    settings: Optional[HarnessEnvironmentSettings] = Field(default=None)
+
+
+class HarnessEnvironmentEndConditions(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['clock', 'ended_reasons'])
+    max_turns: Optional[int] = Field(default=None)
+    max_duration_seconds: Optional[int] = Field(default=None)
+    clock: Optional[str] = Field(default=None)  # one of: real-time, stepped
+    ended_reasons: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class HarnessEnvironmentEvalInput(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['key', 'label', 'source'])
+    key: Optional[str] = Field(default=None)
+    source: Optional[str] = Field(default=None)
+    label: Optional[str] = Field(default=None)
+
+
+class HarnessEnvironmentEvaluations(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['results', 'selected'])
+    selected: Optional[List[Optional[HarnessEnvironmentSelectedEval]]] = Field(default=None)
+    results: Optional[List[Optional[HarnessEnvironmentResult]]] = Field(default=None)
+
+
+class HarnessEnvironmentOfferedEval(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent_type', 'charges_judge_tokens', 'credits_per_run', 'description', 'inputs', 'modality', 'name', 'required_keys', 'source', 'tags'])
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    source: Optional[str] = Field(default=None)  # one of: system, custom
+    tags: Optional[List[Optional[str]]] = Field(default=None)
+    required_keys: Optional[List[Optional[str]]] = Field(default=None)
+    agent_type: Optional[str] = Field(default=None)  # one of: voice, chat
+    modality: Optional[str] = Field(default=None)  # one of: voice, text, any
+    credits_per_run: Optional[float] = Field(default=None)
+    charges_judge_tokens: Optional[bool] = Field(default=None)
+    inputs: Optional[List[Optional[HarnessEnvironmentEvalInput]]] = Field(default=None)
+
+
+class HarnessEnvironmentOverview(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent', 'agent_type', 'created_at', 'evaluations_count', 'id', 'name', 'run', 'runs_count', 'scenario_count', 'source_kind', 'stage', 'status'])
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    domain: Optional[str] = Field(default=None)
+    source_kind: Optional[str] = Field(default=None)
+    agent_type: Optional[str] = Field(default=None)  # one of: voice, chat
+    status: Optional[str] = Field(default=None)  # one of: building, running, completed, failed
+    stage: Optional[str] = Field(default=None)
+    scenario_count: Optional[int] = Field(default=None)
+    sub_goals_count: Optional[int] = Field(default=None)
+    tools_count: Optional[int] = Field(default=None)
+    runs_count: Optional[int] = Field(default=None)
+    last_updated: Optional[str] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    flows_count: Optional[int] = Field(default=None)
+    guardrails_count: Optional[int] = Field(default=None)
+    personas_count: Optional[int] = Field(default=None)
+    evaluations_count: Optional[int] = Field(default=None)
+    run: Optional[HarnessEnvironmentRunLink] = Field(default=None)
+    agent: Optional[HarnessEnvironmentAgent] = Field(default=None)
+
+
+class HarnessEnvironmentPersona(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['scenario_keys'])
+    name: Optional[str] = Field(default=None)
+    scenario_keys: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class HarnessEnvironmentProvenance(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['authored_at', 'digests', 'source'])
+    source: Optional[Any] = Field(default=None)
+    built_by: Optional[str] = Field(default=None)  # one of: alk, repository
+    attempt: Optional[int] = Field(default=None)
+    snapshot: Optional[str] = Field(default=None)
+    digests: Optional[Any] = Field(default=None)
+    authored_at: Optional[Any] = Field(default=None)
+
+
+class HarnessEnvironmentResult(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['attempt_number', 'coverage', 'evaluations', 'scenario_key', 'status'])
+    scenario_key: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)
+    attempt_number: Optional[int] = Field(default=None)
+    evaluations: Optional[List[Optional[Any]]] = Field(default=None)
+    coverage: Optional[Any] = Field(default=None)
+
+
+class HarnessEnvironmentRunLink(_Model):
+    run_test_id: Optional[str] = Field(default=None)
+    test_execution_id: Optional[str] = Field(default=None)
+    simulation_url: Optional[str] = Field(default=None)
+
+
+class HarnessEnvironmentScenario(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['instruction', 'name', 'scenario_id', 'scenario_key', 'status', 'sub_goals'])
+    scenario_key: Optional[str] = Field(default=None)
+    scenario_id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    instruction: Optional[str] = Field(default=None)
+    use_case: Optional[str] = Field(default=None)
+    branch: Optional[str] = Field(default=None)
+    tests: Optional[str] = Field(default=None)
+    fixture: Optional[Any] = Field(default=None)
+    steps: Optional[int] = Field(default=None)
+    sub_goals: Optional[List[Optional[HarnessEnvironmentSubGoal]]] = Field(default=None)
+    persona: Optional[Any] = Field(default=None)
+    situation: Optional[str] = Field(default=None)
+    outcome: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)
+    call_execution_id: Optional[str] = Field(default=None)
+
+
+class HarnessEnvironmentSelectedEval(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent_type', 'charges_judge_tokens', 'credits_per_run', 'description', 'editable', 'id', 'inputs', 'modality', 'name', 'required_keys', 'runnable', 'source', 'tags'])
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    source: Optional[str] = Field(default=None)  # one of: system, custom
+    tags: Optional[List[Optional[str]]] = Field(default=None)
+    required_keys: Optional[List[Optional[str]]] = Field(default=None)
+    agent_type: Optional[str] = Field(default=None)  # one of: voice, chat
+    modality: Optional[str] = Field(default=None)  # one of: voice, text, any
+    credits_per_run: Optional[float] = Field(default=None)
+    charges_judge_tokens: Optional[bool] = Field(default=None)
+    inputs: Optional[List[Optional[HarnessEnvironmentEvalInput]]] = Field(default=None)
+    id: Optional[str] = Field(default=None)
+    runnable: Optional[bool] = Field(default=None)
+    editable: Optional[bool] = Field(default=None)
+
+
+class HarnessEnvironmentSettings(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent', 'enable_tool_evaluation', 'source'])
+    schema_version: Optional[str] = Field(default=None)
+    source: Optional[Any] = Field(default=None)
+    agent: Optional[HarnessEnvironmentAgentSettings] = Field(default=None)
+    runtime: Optional[Any] = Field(default=None)
+    security: Optional[Any] = Field(default=None)
+    artifacts: Optional[Any] = Field(default=None)
+    scenario_count: Optional[int] = Field(default=None)
+    seed: Optional[int] = Field(default=None)
+    enable_tool_evaluation: Optional[bool] = Field(default=None)
+
+
+class HarnessEnvironmentStore(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['capability', 'engine', 'strategy', 'tables', 'total_rows'])
+    capability: Optional[str] = Field(default=None)
+    engine: Optional[str] = Field(default=None)
+    strategy: Optional[str] = Field(default=None)
+    tables: Optional[List[Optional[HarnessEnvironmentStoreTable]]] = Field(default=None)
+    total_rows: Optional[int] = Field(default=None)
+
+
+class HarnessEnvironmentStoreTable(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name', 'rows'])
+    name: Optional[str] = Field(default=None)
+    rows: Optional[int] = Field(default=None)
+
+
+class HarnessEnvironmentSubGoal(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name'])
+    name: Optional[str] = Field(default=None)
+    what: Optional[str] = Field(default=None)
+    kind: Optional[str] = Field(default=None)  # one of: checkpoint, judge
+    claim: Optional[str] = Field(default=None)
+
+
+class HarnessEnvironmentWorld(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['personas', 'runtime', 'stores'])
+    runtime: Optional[Any] = Field(default=None)
+    personas: Optional[List[Optional[HarnessEnvironmentPersona]]] = Field(default=None)
+    stores: Optional[List[Optional[HarnessEnvironmentStore]]] = Field(default=None)
+
+
+class HarnessNudge(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['answered_by', 'base_agent_version', 'base_environment_version', 'base_suite_version', 'can_stop', 'created_at', 'error', 'facts', 'id', 'queued_behind_input', 'replaced_by', 'result_environment_version', 'result_suite_version', 'state', 'target', 'trigger_agent_version'])
+    id: Optional[str] = Field(default=None)
+    target: Optional[str] = Field(default=None)  # one of: environment, suite
+    state: Optional[str] = Field(default=None)  # one of: pending, answered_no, queued, running, applied, no_change, replaced, failed
+    facts: Optional[HarnessNudgeFacts] = Field(default=None)
+    trigger_agent_version: Optional[RunVersionLabel] = Field(default=None)
+    base_agent_version: Optional[RunVersionLabel] = Field(default=None)
+    base_environment_version: Optional[RunVersionLabel] = Field(default=None)
+    base_suite_version: Optional[RunVersionLabel] = Field(default=None)
+    result_environment_version: Optional[RunVersionLabel] = Field(default=None)
+    result_suite_version: Optional[RunVersionLabel] = Field(default=None)
+    summary: Optional[Any] = Field(default=None)
+    error: Optional[HarnessNudgeError] = Field(default=None)
+    closed_at: Optional[str] = Field(default=None)
+    queued_behind_input: Optional[bool] = Field(default=None)
+    can_stop: Optional[bool] = Field(default=None)
+    replaced_by: Optional[HarnessNudgeReplacement] = Field(default=None)
+    card_message_id: Optional[str] = Field(default=None)
+    answered_by: Optional[HarnessVersionPerson] = Field(default=None)
+    answered_at: Optional[str] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+
+
+class HarnessNudgeError(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['code'])
+    code: Optional[str] = Field(default=None)
+    message: Optional[str] = Field(default=None)
+    problems: Optional[List[Optional[HarnessNudgeProblem]]] = Field(default=None)
+
+
+class HarnessNudgeFacts(_Model):
+    source: Optional[Any] = Field(default=None)
+    changed_files: Optional[List[Optional[HarnessNudgeFile]]] = Field(default=None)
+    files_total: Optional[int] = Field(default=None)
+    files_truncated: Optional[bool] = Field(default=None)
+    reversed: Optional[bool] = Field(default=None)
+    files_unavailable: Optional[str] = Field(default=None)
+    prompt_changed: Optional[bool] = Field(default=None)
+    variables: Optional[HarnessNudgeVariables] = Field(default=None)
+    settings_changed: Optional[List[Optional[str]]] = Field(default=None)
+    agent_default_moved: Optional[bool] = Field(default=None)
+    environment_diff: Optional[Any] = Field(default=None)
+    environment_summary: Optional[str] = Field(default=None)
+    from_environment_version_id: Optional[str] = Field(default=None)
+
+
+class HarnessNudgeFile(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['has_patch', 'path', 'status'])
+    path: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: added, removed, modified, renamed, copied
+    previous_path: Optional[str] = Field(default=None)
+    additions: Optional[int] = Field(default=None)
+    deletions: Optional[int] = Field(default=None)
+    has_patch: Optional[bool] = Field(default=None)
+    patch_omitted: Optional[str] = Field(default=None)
+
+
+class HarnessNudgeProblem(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['in_your_unsaved_edits', 'item', 'kind', 'message'])
+    item: Optional[str] = Field(default=None)
+    kind: Optional[str] = Field(default=None)
+    message: Optional[str] = Field(default=None)
+    in_your_unsaved_edits: Optional[bool] = Field(default=None)
+
+
+class HarnessNudgeReplacement(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id'])
+    id: Optional[str] = Field(default=None)
+    trigger_label: Optional[str] = Field(default=None)
+
+
+class HarnessNudgeVariables(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['added', 'changed', 'removed', 'unknown'])
+    added: Optional[List[Optional[str]]] = Field(default=None)
+    removed: Optional[List[Optional[str]]] = Field(default=None)
+    changed: Optional[List[Optional[str]]] = Field(default=None)
+    unknown: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class HarnessPreflightCheck(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['detail', 'id', 'label', 'missing', 'status'])
+    id: Optional[str] = Field(default=None)
+    label: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: passed, failed, skipped
+    detail: Optional[str] = Field(default=None)
+    missing: Optional[List[Optional[str]]] = Field(default=None)
+    fix: Optional[str] = Field(default=None)
+
+
+class HarnessPreflightCredentials(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['credential_choices', 'detected_connectors', 'probe', 'requirements', 'scanned_files'])
+    scanned_files: Optional[int] = Field(default=None)
+    detected_connectors: Optional[List[Optional[str]]] = Field(default=None)
+    requirements: Optional[List[Optional[Any]]] = Field(default=None)
+    credential_choices: Optional[List[Optional[Any]]] = Field(default=None)
+    probe: Optional[List[Optional[Any]]] = Field(default=None)
+
+
+class HarnessPreflightResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['checks', 'credentials', 'effective_parallelism', 'parallelism_enabled', 'ready_to_submit', 'snapshot', 'state'])
+    ready_to_submit: Optional[bool] = Field(default=None)
+    state: Optional[str] = Field(default=None)  # one of: connected, failed
+    checks: Optional[List[Optional[HarnessPreflightCheck]]] = Field(default=None)
+    credentials: Optional[HarnessPreflightCredentials] = Field(default=None)
+    parallelism_enabled: Optional[bool] = Field(default=None)
+    effective_parallelism: Optional[int] = Field(default=None)
+    resource_profile: Optional[Any] = Field(default=None)
+    snapshot: Optional[Any] = Field(default=None)
+
+
+class HarnessRunPinnedVersions(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent', 'environment', 'suite'])
+    agent: Optional[RunVersionLabel] = Field(default=None)
+    environment: Optional[RunVersionLabel] = Field(default=None)
+    suite: Optional[RunVersionLabel] = Field(default=None)
+
+
+class HarnessRunPlan(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['versions', 'warnings'])
+    versions: Optional[HarnessRunPinnedVersions] = Field(default=None)
+    warnings: Optional[List[Optional[HarnessRunWarning]]] = Field(default=None)
+    bundle_cached: Optional[bool] = Field(default=None)
+
+
+class HarnessRunSummary(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent_version', 'environment', 'kind', 'run_test_id', 'run_test_name', 'status', 'test_execution_id'])
+    kind: Optional[str] = Field(default=None)  # one of: environment, simulate
+    test_execution_id: Optional[str] = Field(default=None)
+    run_test_id: Optional[str] = Field(default=None)
+    run_test_name: Optional[str] = Field(default=None)
+    run_number: Optional[int] = Field(default=None)
+    status: Optional[str] = Field(default=None)
+    environment: Optional[RunEnvironmentRef] = Field(default=None)
+    agent_version: Optional[AgentVersionRef] = Field(default=None)
+    outcome_passed: Optional[int] = Field(default=None)
+    outcome_failed: Optional[int] = Field(default=None)
+    outcome_skipped: Optional[int] = Field(default=None)
+    started_at: Optional[str] = Field(default=None)
+    completed_at: Optional[str] = Field(default=None)
+
+
+class HarnessRunWarning(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['code', 'message'])
+    code: Optional[str] = Field(default=None)
+    message: Optional[str] = Field(default=None)
+    piece: Optional[str] = Field(default=None)  # one of: agent, environment, suite
+
+
+class HarnessSecretFileUploadResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['environment_name', 'secret_ref', 'size'])
+    environment_name: Optional[str] = Field(default=None)
+    secret_ref: Optional[SecretReference] = Field(default=None)
+    size: Optional[int] = Field(default=None)
+
+
+class HarnessSourceUploadResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['file_count', 'name', 'source_id', 'total_bytes'])
+    source_id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    file_count: Optional[int] = Field(default=None)
+    total_bytes: Optional[int] = Field(default=None)
+
+
+class HarnessSuiteMember(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name', 'number', 'scenario_key', 'use_case'])
+    scenario_key: Optional[str] = Field(default=None)
+    number: Optional[int] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    use_case: Optional[str] = Field(default=None)
+
+
+class HarnessVersion(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'created_by', 'id', 'is_default', 'status', 'summary'])
+    id: Optional[str] = Field(default=None)
+    label: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: draft, active, discarded
+    is_default: Optional[bool] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    created_by: Optional[HarnessVersionPerson] = Field(default=None)
+    origin: Optional[str] = Field(default=None)
+    summary: Optional[str] = Field(default=None)
+    hash: Optional[str] = Field(default=None)
+    parent_id: Optional[str] = Field(default=None)
+    derived_from_agent_version_id: Optional[str] = Field(default=None)
+    scenario_count: Optional[int] = Field(default=None)
+    source: Optional[Any] = Field(default=None)
+    prompt: Optional[str] = Field(default=None)
+    preflight_status: Optional[str] = Field(default=None)
+    preflight_report: Optional[Any] = Field(default=None)
+    preflighted_at: Optional[str] = Field(default=None)
+    check_started_at: Optional[str] = Field(default=None)
+    credential_names: Optional[List[Optional[str]]] = Field(default=None)
+    required_variable_names: Optional[List[Optional[str]]] = Field(default=None)
+    activation_outcome: Optional[str] = Field(default=None)
+    requested_here: Optional[bool] = Field(default=None)
+    pickable: Optional[bool] = Field(default=None)
+    discardable: Optional[bool] = Field(default=None)
+
+
+class HarnessVersionDiff(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['summary'])
+    summary: Optional[str] = Field(default=None)
+    diff: Optional[Any] = Field(default=None)
+    includes_draft_edits: Optional[bool] = Field(default=None)
+    snapshot_diff: Optional[Any] = Field(default=None)
+
+
+class HarnessVersionPerson(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'name'])
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+
+
+class HarnessVersions(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent', 'environment', 'suite'])
+    agent: Optional[List[Optional[HarnessVersion]]] = Field(default=None)
+    environment: Optional[List[Optional[HarnessVersion]]] = Field(default=None)
+    suite: Optional[List[Optional[HarnessVersion]]] = Field(default=None)
 
 
 class KeyMoment(_Model):
@@ -1268,6 +1923,45 @@ class PatternSummary(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['insights', 'key_moments'])
     insights: Optional[List[Optional[PatternInsight]]] = Field(default=None)
     key_moments: Optional[List[Optional[KeyMoment]]] = Field(default=None)
+
+
+class Persona(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name'])
+    id: Optional[str] = Field(default=None)
+    persona_type: Optional[str] = Field(default=None)  # one of: system, workspace
+    persona_type_display: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    gender: Optional[Any] = Field(default=None)
+    age_group: Optional[Any] = Field(default=None)
+    occupation: Optional[Any] = Field(default=None)
+    location: Optional[Any] = Field(default=None)
+    personality: Optional[Any] = Field(default=None)
+    communication_style: Optional[Any] = Field(default=None)
+    multilingual: Optional[bool] = Field(default=None)
+    languages: Optional[Any] = Field(default=None)
+    accent: Optional[Any] = Field(default=None)
+    conversation_speed: Optional[Any] = Field(default=None)
+    background_sound: Optional[bool] = Field(default=None)
+    finished_speaking_sensitivity: Optional[Any] = Field(default=None)
+    interrupt_sensitivity: Optional[Any] = Field(default=None)
+    keywords: Optional[Any] = Field(default=None)
+    metadata: Optional[Any] = Field(default=None)
+    additional_instruction: Optional[str] = Field(default=None)
+    is_default: Optional[bool] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    updated_at: Optional[str] = Field(default=None)
+    profession: Optional[List[Optional[str]]] = Field(default=None)
+    language: Optional[List[Optional[str]]] = Field(default=None)
+    custom_properties: Optional[Any] = Field(default=None)
+    simulation_type: Optional[str] = Field(default=None)  # one of: voice, text
+    punctuation: Optional[str] = Field(default=None)  # one of: clean, minimal, expressive, erratic
+    slang_usage: Optional[str] = Field(default=None)  # one of: none, moderate, heavy, light
+    typos_frequency: Optional[str] = Field(default=None)  # one of: none, rare, occasional, frequent
+    regional_mix: Optional[str] = Field(default=None)  # one of: none, moderate, heavy, light
+    emoji_usage: Optional[str] = Field(default=None)  # one of: never, light, regular, heavy
+    tone: Optional[str] = Field(default=None)  # one of: formal, casual, neutral
+    verbosity: Optional[str] = Field(default=None)  # one of: brief, balanced, detailed
 
 
 class ProjectDetailResult(_Model):
@@ -1629,6 +2323,19 @@ class RepresentativeTrace(_Model):
     what_changed: Optional[Any] = Field(default=None)
 
 
+class RerunCallsResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['failed_reruns', 'failure_count', 'message', 'rerun_type', 'success_count', 'successful_reruns', 'test_execution_id', 'total_processed'])
+    message: Optional[str] = Field(default=None)
+    test_execution_id: Optional[str] = Field(default=None)
+    rerun_type: Optional[str] = Field(default=None)
+    total_processed: Optional[int] = Field(default=None)
+    successful_reruns: Optional[List[Optional[str]]] = Field(default=None)
+    failed_reruns: Optional[List[Optional[FailedRerunItem]]] = Field(default=None)
+    success_count: Optional[int] = Field(default=None)
+    failure_count: Optional[int] = Field(default=None)
+    dispatch_error: Optional[str] = Field(default=None)
+
+
 class RunEnvironmentRef(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'name'])
     id: Optional[str] = Field(default=None)
@@ -1673,6 +2380,11 @@ class RunTestResponse(_Model):
     last_run_at: Optional[str] = Field(default=None)
     deleted: Optional[bool] = Field(default=None)
     deleted_at: Optional[str] = Field(default=None)
+
+
+class RunVersionLabel(_Model):
+    id: Optional[str] = Field(default=None)
+    label: Optional[str] = Field(default=None)
 
 
 class ScenarioDetailResponse(_Model):
@@ -1757,6 +2469,14 @@ class Score(_Model):
     updated_at: Optional[str] = Field(default=None)
 
 
+class SecretReference(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['key', 'manager', 'purpose'])
+    manager: Optional[str] = Field(default=None)  # one of: platform-vault, platform-config
+    key: Optional[str] = Field(default=None)
+    version: Optional[str] = Field(default=None)
+    purpose: Optional[str] = Field(default=None)  # one of: target_provider, simulator_provider, source_checkout
+
+
 class SimulateEvalConfigResponse(_Model):
     id: Optional[str] = Field(default=None)
     name: Optional[str] = Field(default=None)
@@ -1824,6 +2544,86 @@ class SpanObserveListResult(_Model):
     config: Optional[List[Optional[SpanListColumnConfig]]] = Field(default=None)
 
 
+class StoredAgent(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['behaviour', 'gaps', 'instrumentation', 'kind', 'model', 'name', 'provider_ref', 'schema_version', 'setup_hash', 'supports', 'telephony', 'tools', 'type', 'voice'])
+    schema_version: Optional[str] = Field(default=None)
+    type: Optional[str] = Field(default=None)
+    kind: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    provider_ref: Optional[StoredProviderRef] = Field(default=None)
+    behaviour: Optional[List[Optional[StoredBehaviourUnit]]] = Field(default=None)
+    tools: Optional[List[Optional[StoredTool]]] = Field(default=None)
+    model: Optional[StoredModel] = Field(default=None)
+    voice: Optional[StoredVoice] = Field(default=None)
+    telephony: Optional[List[Optional[StoredTelephony]]] = Field(default=None)
+    supports: Optional[List[Optional[str]]] = Field(default=None)
+    direction_answer: Optional[str] = Field(default=None)
+    gaps: Optional[List[Optional[str]]] = Field(default=None)
+    instrumentation: Optional[str] = Field(default=None)
+    setup_hash: Optional[str] = Field(default=None)
+
+
+class StoredAgentResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent', 'sdk_version', 'setup_stale', 'stored_at'])
+    agent: Optional[StoredAgent] = Field(default=None)
+    sdk_version: Optional[str] = Field(default=None)
+    stored_at: Optional[str] = Field(default=None)
+    setup_stale: Optional[bool] = Field(default=None)
+
+
+class StoredBehaviourUnit(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'shape', 'tools', 'transitions'])
+    id: Optional[str] = Field(default=None)
+    shape: Optional[str] = Field(default=None)
+    instructions: Optional[str] = Field(default=None)
+    tools: Optional[List[Optional[str]]] = Field(default=None)
+    transitions: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class StoredModel(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name'])
+    provider: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    temperature: Optional[float] = Field(default=None)
+    max_tokens: Optional[int] = Field(default=None)
+
+
+class StoredProviderRef(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'provider'])
+    provider: Optional[str] = Field(default=None)
+    id: Optional[str] = Field(default=None)
+    version: Optional[str] = Field(default=None)
+
+
+class StoredTelephony(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['direction_supported', 'number'])
+    number: Optional[str] = Field(default=None)
+    provider: Optional[str] = Field(default=None)
+    direction_supported: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class StoredTool(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['endpoint', 'kind', 'name'])
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    kind: Optional[str] = Field(default=None)
+    parameters: Optional[Any] = Field(default=None)
+    endpoint: Optional[StoredToolEndpoint] = Field(default=None)
+
+
+class StoredToolEndpoint(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['url'])
+    url: Optional[str] = Field(default=None)
+
+
+class StoredVoice(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['voice_id'])
+    provider: Optional[str] = Field(default=None)
+    voice_id: Optional[str] = Field(default=None)
+    language: Optional[str] = Field(default=None)
+    speed: Optional[float] = Field(default=None)
+
+
 class TestExecution(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['run_test'])
     id: Optional[str] = Field(default=None)
@@ -1857,6 +2657,56 @@ class TestExecutionAnalytics(_Model):
     fail_rate_over_test_runs: Optional[Any] = Field(default=None)
     evaluation_categories_over_test_runs: Optional[Any] = Field(default=None)
     metadata: Optional[Any] = Field(default=None)
+
+
+class TestExecutionDebugAnalysisResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['findings', 'goals', 'one_offs', 'report', 'status', 'summary', 'test_execution_id'])
+    test_execution_id: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: not_requested, pending, running, completed, failed
+    generation: Optional[int] = Field(default=None)
+    job_id: Optional[str] = Field(default=None)
+    error_message: Optional[str] = Field(default=None)
+    report: Optional[DebugAnalysisReport] = Field(default=None)
+    findings: Optional[List[Optional[DebugAnalysisFinding]]] = Field(default=None)
+    summary: Optional[DebugAnalysisSummary] = Field(default=None)
+    goals: Optional[List[Optional[DebugAnalysisGoal]]] = Field(default=None)
+    one_offs: Optional[List[Optional[DebugAnalysisWay]]] = Field(default=None)
+
+
+class TestExecutionItemResponse(_Model):
+    id: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)
+    scenarios: Optional[str] = Field(default=None)
+    start_time: Optional[str] = Field(default=None)
+    duration: Optional[int] = Field(default=None)
+    error_reason: Optional[str] = Field(default=None)
+    success_rate: Optional[float] = Field(default=None)
+    avg_response_time: Optional[float] = Field(default=None)
+    calls: Optional[int] = Field(default=None)
+    calls_attempted: Optional[int] = Field(default=None)
+    connected_calls: Optional[int] = Field(default=None)
+    agent_version: Optional[str] = Field(default=None)
+    agent_definition: Optional[str] = Field(default=None)
+    calls_connected_percentage: Optional[float] = Field(default=None)
+    total_chats: Optional[int] = Field(default=None)
+    agent_type: Optional[str] = Field(default=None)
+    total_number_of_fagi_agent_turns: Optional[int] = Field(default=None)
+    source_type: Optional[str] = Field(default=None)
+    scenario_keys: Optional[List[Optional[str]]] = Field(default=None)
+    selected_scenarios: Optional[int] = Field(default=None)
+    trials: Optional[int] = Field(default=None)
+    total_calls: Optional[int] = Field(default=None)
+    completed_calls: Optional[int] = Field(default=None)
+    failed_calls: Optional[int] = Field(default=None)
+    pending_calls: Optional[int] = Field(default=None)
+    completed_at: Optional[str] = Field(default=None)
+    outcome_passed: Optional[int] = Field(default=None)
+    outcome_failed: Optional[int] = Field(default=None)
+    outcome_skipped: Optional[int] = Field(default=None)
+    environment_version: Optional[RunVersionLabel] = Field(default=None)
+    suite_version: Optional[RunVersionLabel] = Field(default=None)
+    pinned_agent_version: Optional[RunVersionLabel] = Field(default=None)
+    agent_differs: Optional[bool] = Field(default=None)
 
 
 class TraceDetailResult(_Model):
@@ -2250,13 +3100,16 @@ class _EvalTaskListRowResponse(_Model):
     last_run: Optional[str] = Field(default=None)
 
 
+AddEvalConfigsResponse.model_rebuild()
 AgentDefinitionCreateResponse.model_rebuild()
 AgentDefinitionDetailResponse.model_rebuild()
 AgentDefinitionEditResponse.model_rebuild()
 AgentDefinitionListResponse.model_rebuild()
 AgentDefinitionResponse.model_rebuild()
 AgentFlowGraph.model_rebuild()
+AgentRunsResponse.model_rebuild()
 AgentVersionCreateResponse.model_rebuild()
+AgentVersionRef.model_rebuild()
 AgentVersionResponse.model_rebuild()
 AgentccRequestLog.model_rebuild()
 AgentccSession.model_rebuild()
@@ -2301,7 +3154,16 @@ DatasetTableColumn.model_rebuild()
 DatasetTableMetadata.model_rebuild()
 DatasetTableResult.model_rebuild()
 DatasetTableRow.model_rebuild()
+DebugAnalysisCluster.model_rebuild()
+DebugAnalysisCoverage.model_rebuild()
+DebugAnalysisEvidence.model_rebuild()
+DebugAnalysisFinding.model_rebuild()
+DebugAnalysisGoal.model_rebuild()
+DebugAnalysisReport.model_rebuild()
+DebugAnalysisSummary.model_rebuild()
+DebugAnalysisWay.model_rebuild()
 ErrorName.model_rebuild()
+EvalConfigResponse.model_rebuild()
 EvalExecutionResponseResult.model_rebuild()
 EvalGroup.model_rebuild()
 EvalListResult.model_rebuild()
@@ -2322,6 +3184,7 @@ EvalsConfigsCreateResult.model_rebuild()
 EventsOverTimePoint.model_rebuild()
 ExperimentDetailV2.model_rebuild()
 ExperimentListV2.model_rebuild()
+FailedRerunItem.model_rebuild()
 FeedDetailCore.model_rebuild()
 FeedListResponse.model_rebuild()
 FeedListRow.model_rebuild()
@@ -2329,6 +3192,55 @@ GatewayConfigProvider.model_rebuild()
 GatewayConfigResult.model_rebuild()
 GatewayStatus.model_rebuild()
 GatewaySummaryResult.model_rebuild()
+HarnessDraftItem.model_rebuild()
+HarnessDraftSaveResponse.model_rebuild()
+HarnessDrafts.model_rebuild()
+HarnessEnvironment.model_rebuild()
+HarnessEnvironmentAgent.model_rebuild()
+HarnessEnvironmentAgentSettings.model_rebuild()
+HarnessEnvironmentAmendment.model_rebuild()
+HarnessEnvironmentAvailableEvals.model_rebuild()
+HarnessEnvironmentCatalogueSubGoal.model_rebuild()
+HarnessEnvironmentContract.model_rebuild()
+HarnessEnvironmentCredentialFile.model_rebuild()
+HarnessEnvironmentDetail.model_rebuild()
+HarnessEnvironmentEndConditions.model_rebuild()
+HarnessEnvironmentEvalInput.model_rebuild()
+HarnessEnvironmentEvaluations.model_rebuild()
+HarnessEnvironmentOfferedEval.model_rebuild()
+HarnessEnvironmentOverview.model_rebuild()
+HarnessEnvironmentPersona.model_rebuild()
+HarnessEnvironmentProvenance.model_rebuild()
+HarnessEnvironmentResult.model_rebuild()
+HarnessEnvironmentRunLink.model_rebuild()
+HarnessEnvironmentScenario.model_rebuild()
+HarnessEnvironmentSelectedEval.model_rebuild()
+HarnessEnvironmentSettings.model_rebuild()
+HarnessEnvironmentStore.model_rebuild()
+HarnessEnvironmentStoreTable.model_rebuild()
+HarnessEnvironmentSubGoal.model_rebuild()
+HarnessEnvironmentWorld.model_rebuild()
+HarnessNudge.model_rebuild()
+HarnessNudgeError.model_rebuild()
+HarnessNudgeFacts.model_rebuild()
+HarnessNudgeFile.model_rebuild()
+HarnessNudgeProblem.model_rebuild()
+HarnessNudgeReplacement.model_rebuild()
+HarnessNudgeVariables.model_rebuild()
+HarnessPreflightCheck.model_rebuild()
+HarnessPreflightCredentials.model_rebuild()
+HarnessPreflightResponse.model_rebuild()
+HarnessRunPinnedVersions.model_rebuild()
+HarnessRunPlan.model_rebuild()
+HarnessRunSummary.model_rebuild()
+HarnessRunWarning.model_rebuild()
+HarnessSecretFileUploadResponse.model_rebuild()
+HarnessSourceUploadResponse.model_rebuild()
+HarnessSuiteMember.model_rebuild()
+HarnessVersion.model_rebuild()
+HarnessVersionDiff.model_rebuild()
+HarnessVersionPerson.model_rebuild()
+HarnessVersions.model_rebuild()
 KeyMoment.model_rebuild()
 KnowledgeBaseItem.model_rebuild()
 LegacyKnowledgeBaseCreateResult.model_rebuild()
@@ -2350,6 +3262,7 @@ OverviewResponse.model_rebuild()
 PatternInsight.model_rebuild()
 PatternInsightEvidence.model_rebuild()
 PatternSummary.model_rebuild()
+Persona.model_rebuild()
 ProjectDetailResult.model_rebuild()
 PromptHistoryExecution.model_rebuild()
 PromptLabel.model_rebuild()
@@ -2385,20 +3298,34 @@ QueueSubmitAnnotationsResult.model_rebuild()
 RcaSummary.model_rebuild()
 RcaTrailStep.model_rebuild()
 RepresentativeTrace.model_rebuild()
+RerunCallsResponse.model_rebuild()
 RunEnvironmentRef.model_rebuild()
 RunTestExecutionResponse.model_rebuild()
 RunTestResponse.model_rebuild()
+RunVersionLabel.model_rebuild()
 ScenarioDetailResponse.model_rebuild()
 ScenarioEditResponse.model_rebuild()
 ScenarioPromptItem.model_rebuild()
 ScenarioResponse.model_rebuild()
 Score.model_rebuild()
+SecretReference.model_rebuild()
 SimulateEvalConfigResponse.model_rebuild()
 SpanListColumnConfig.model_rebuild()
 SpanListMetadata.model_rebuild()
 SpanObserveListResult.model_rebuild()
+StoredAgent.model_rebuild()
+StoredAgentResponse.model_rebuild()
+StoredBehaviourUnit.model_rebuild()
+StoredModel.model_rebuild()
+StoredProviderRef.model_rebuild()
+StoredTelephony.model_rebuild()
+StoredTool.model_rebuild()
+StoredToolEndpoint.model_rebuild()
+StoredVoice.model_rebuild()
 TestExecution.model_rebuild()
 TestExecutionAnalytics.model_rebuild()
+TestExecutionDebugAnalysisResponse.model_rebuild()
+TestExecutionItemResponse.model_rebuild()
 TraceDetailResult.model_rebuild()
 TraceDetailSpan.model_rebuild()
 TraceErrorAnalysisResult.model_rebuild()
@@ -2435,13 +3362,16 @@ _EvalTaskListResultResponse.model_rebuild()
 _EvalTaskListRowResponse.model_rebuild()
 
 __all__ = [
+    'AddEvalConfigsResponse',
     'AgentDefinitionCreateResponse',
     'AgentDefinitionDetailResponse',
     'AgentDefinitionEditResponse',
     'AgentDefinitionListResponse',
     'AgentDefinitionResponse',
     'AgentFlowGraph',
+    'AgentRunsResponse',
     'AgentVersionCreateResponse',
+    'AgentVersionRef',
     'AgentVersionResponse',
     'AgentccRequestLog',
     'AgentccSession',
@@ -2486,7 +3416,16 @@ __all__ = [
     'DatasetTableMetadata',
     'DatasetTableResult',
     'DatasetTableRow',
+    'DebugAnalysisCluster',
+    'DebugAnalysisCoverage',
+    'DebugAnalysisEvidence',
+    'DebugAnalysisFinding',
+    'DebugAnalysisGoal',
+    'DebugAnalysisReport',
+    'DebugAnalysisSummary',
+    'DebugAnalysisWay',
     'ErrorName',
+    'EvalConfigResponse',
     'EvalExecutionResponseResult',
     'EvalGroup',
     'EvalListResult',
@@ -2507,6 +3446,7 @@ __all__ = [
     'EventsOverTimePoint',
     'ExperimentDetailV2',
     'ExperimentListV2',
+    'FailedRerunItem',
     'FeedDetailCore',
     'FeedListResponse',
     'FeedListRow',
@@ -2514,6 +3454,55 @@ __all__ = [
     'GatewayConfigResult',
     'GatewayStatus',
     'GatewaySummaryResult',
+    'HarnessDraftItem',
+    'HarnessDraftSaveResponse',
+    'HarnessDrafts',
+    'HarnessEnvironment',
+    'HarnessEnvironmentAgent',
+    'HarnessEnvironmentAgentSettings',
+    'HarnessEnvironmentAmendment',
+    'HarnessEnvironmentAvailableEvals',
+    'HarnessEnvironmentCatalogueSubGoal',
+    'HarnessEnvironmentContract',
+    'HarnessEnvironmentCredentialFile',
+    'HarnessEnvironmentDetail',
+    'HarnessEnvironmentEndConditions',
+    'HarnessEnvironmentEvalInput',
+    'HarnessEnvironmentEvaluations',
+    'HarnessEnvironmentOfferedEval',
+    'HarnessEnvironmentOverview',
+    'HarnessEnvironmentPersona',
+    'HarnessEnvironmentProvenance',
+    'HarnessEnvironmentResult',
+    'HarnessEnvironmentRunLink',
+    'HarnessEnvironmentScenario',
+    'HarnessEnvironmentSelectedEval',
+    'HarnessEnvironmentSettings',
+    'HarnessEnvironmentStore',
+    'HarnessEnvironmentStoreTable',
+    'HarnessEnvironmentSubGoal',
+    'HarnessEnvironmentWorld',
+    'HarnessNudge',
+    'HarnessNudgeError',
+    'HarnessNudgeFacts',
+    'HarnessNudgeFile',
+    'HarnessNudgeProblem',
+    'HarnessNudgeReplacement',
+    'HarnessNudgeVariables',
+    'HarnessPreflightCheck',
+    'HarnessPreflightCredentials',
+    'HarnessPreflightResponse',
+    'HarnessRunPinnedVersions',
+    'HarnessRunPlan',
+    'HarnessRunSummary',
+    'HarnessRunWarning',
+    'HarnessSecretFileUploadResponse',
+    'HarnessSourceUploadResponse',
+    'HarnessSuiteMember',
+    'HarnessVersion',
+    'HarnessVersionDiff',
+    'HarnessVersionPerson',
+    'HarnessVersions',
     'KeyMoment',
     'KnowledgeBaseItem',
     'LegacyKnowledgeBaseCreateResult',
@@ -2535,6 +3524,7 @@ __all__ = [
     'PatternInsight',
     'PatternInsightEvidence',
     'PatternSummary',
+    'Persona',
     'ProjectDetailResult',
     'PromptHistoryExecution',
     'PromptLabel',
@@ -2570,20 +3560,34 @@ __all__ = [
     'RcaSummary',
     'RcaTrailStep',
     'RepresentativeTrace',
+    'RerunCallsResponse',
     'RunEnvironmentRef',
     'RunTestExecutionResponse',
     'RunTestResponse',
+    'RunVersionLabel',
     'ScenarioDetailResponse',
     'ScenarioEditResponse',
     'ScenarioPromptItem',
     'ScenarioResponse',
     'Score',
+    'SecretReference',
     'SimulateEvalConfigResponse',
     'SpanListColumnConfig',
     'SpanListMetadata',
     'SpanObserveListResult',
+    'StoredAgent',
+    'StoredAgentResponse',
+    'StoredBehaviourUnit',
+    'StoredModel',
+    'StoredProviderRef',
+    'StoredTelephony',
+    'StoredTool',
+    'StoredToolEndpoint',
+    'StoredVoice',
     'TestExecution',
     'TestExecutionAnalytics',
+    'TestExecutionDebugAnalysisResponse',
+    'TestExecutionItemResponse',
     'TraceDetailResult',
     'TraceDetailSpan',
     'TraceErrorAnalysisResult',

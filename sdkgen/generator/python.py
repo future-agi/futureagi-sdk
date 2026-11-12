@@ -199,7 +199,11 @@ def _signature(op: Op) -> tuple[list[str], list[tuple[Param, str]]]:
     for p in rest:
         py = py_type(p.schema, for_input=True)
         # Optional: NOT_GIVEN is left out of the request, an explicit None is sent as null.
-        args.append(f"{arg_name(p)}: {py}" if p.required else f"{arg_name(p)}: {py} | None | NotGiven = NOT_GIVEN")
+        # Required but nullable (x-nullable): must be passed, and None is a valid answer.
+        if p.required:
+            args.append(f"{arg_name(p)}: {py} | None" if (p.schema or {}).get("x-nullable") else f"{arg_name(p)}: {py}")
+        else:
+            args.append(f"{arg_name(p)}: {py} | None | NotGiven = NOT_GIVEN")
         named.append((p, arg_name(p)))
     # Escape hatches: fields the contract does not (yet) describe, and per-call request options.
     args.append("extra_query: dict[str, Any] | None = None")

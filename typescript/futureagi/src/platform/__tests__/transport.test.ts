@@ -315,4 +315,13 @@ describe("multipart", () => {
     expect(files.map((f) => f.name)).toEqual(["notes.txt", "inline.txt", "upload"]);
     expect(await Promise.all(files.map((f) => f.text()))).toEqual(["from a path", "from a string", "hi"]);
   });
+
+  test("a list of plain values is a repeated form field; a list of objects stays one JSON field", async () => {
+    const { fetch, calls } = fake(json(200, { status: true, result: { kb_id: "kb1", kb_name: "x", file_ids: [] } }));
+    await client(fetch).fileKnowledgeBases.create({ name: "x" }, { extraBody: { paths: ["a/b.py", "c.txt", null], flags: [true, 2], meta: [{ k: 1 }] } });
+    const form = calls[0].body as FormData;
+    expect(form.getAll("paths")).toEqual(["a/b.py", "c.txt"]); // DRF's getlist("paths")
+    expect(form.getAll("flags")).toEqual(["true", "2"]);
+    expect(form.getAll("meta")).toEqual(['[{"k":1}]']);
+  });
 });

@@ -475,6 +475,34 @@ def test_multipart_needs_a_method_that_sends_a_body():
         generate.load(CONTRACT, catalog)
 
 
+def test_a_form_data_contract_becomes_multipart_body_params():
+    """drf-yasg writes a real multipart view as formData params: form fields and files are
+    body params, and the file field still needs `operation.multipart: true`."""
+    ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
+    secret = {p.name: p for p in ops["simulation.jobs.upload_secret_file"].params}
+    assert secret["file"].location == "body" and secret["file"].schema["type"] == "file"
+    assert secret["environment_name"].location == "body" and secret["environment_name"].required
+    # body_fields: the contract declares one file and one path; the server reads lists.
+    sources = {p.name: p for p in ops["simulation.jobs.upload_sources"].params}
+    assert sources["files"].schema == {"type": "array", "items": {"type": "file"}}
+    assert sources["paths"].schema == {"type": "array", "items": {"type": "string"}}
+    catalog = _with(
+        "simulation.jobs.upload_secret_file",
+        operation={"method": "POST", "path": "/simulate/api/harness-jobs/secret-files/"},
+    )
+    with pytest.raises(generate.CatalogError, match="need `operation.multipart: true`"):
+        generate.load(CONTRACT, catalog)
+
+
+def test_a_required_nullable_input_must_be_passed_and_may_be_null():
+    ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
+    op = ops["simulation.environments.versions.set_default"]
+    args, _ = pygen._signature(op)
+    assert "expected_default_id: str | None" in args  # required: no default
+    iface, _ = tsgen._params_interface(op)
+    assert "  expected_default_id: string | null;\n" in iface
+
+
 def test_docs_reference_covers_every_sdk_operation_once():
     """The docs site's SDK reference (docs/sdk-reference) is generated from the same catalog."""
     from sdkgen.generator import docs as docsgen

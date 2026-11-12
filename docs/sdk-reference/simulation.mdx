@@ -1,9 +1,9 @@
 ---
 title: "Simulation"
-description: "Reference for client.simulation in the Future AGI Python and TypeScript SDKs: simulation.executions.analytics, simulation.executions.get, simulation.executions.list, simulation.scenarios.create, simulation.scenarios.get, simulation.scenarios.list and 5 more."
+description: "Reference for client.simulation in the Future AGI Python and TypeScript SDKs: simulation.calls.get, simulation.environments.get, simulation.environments.list, simulation.environments.rename, simulation.environments.run, simulation.environments.run_plan and 51 more."
 ---
 
-`client.simulation` on `fi.Client` (Python) and `client.simulation` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.simulation.executions`, `client.simulation.scenarios`, `client.simulation.tests`. The models these methods return are on [Simulation response models](/docs/sdk/reference/simulation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+`client.simulation` on `fi.Client` (Python) and `client.simulation` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.simulation.calls`, `client.simulation.environments`, `client.simulation.environments.drafts`, `client.simulation.environments.evaluations`, `client.simulation.environments.nudges`, `client.simulation.environments.runs`, `client.simulation.environments.versions`, `client.simulation.executions`, `client.simulation.executions.insights`, `client.simulation.jobs`, `client.simulation.jobs.scenarios`, `client.simulation.personas`, `client.simulation.scenarios`, `client.simulation.tests`. The models these methods return are on [Simulation response models](/docs/sdk/reference/simulation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
 
 ## Methods
 
@@ -11,21 +11,1362 @@ description: "Reference for client.simulation in the Future AGI Python and TypeS
 
 | Method | Description |
 |---|---|
+| [`simulation.calls.get`](#simulationcallsget) | Return one call (trial) of a run with its input, transcript, tool calls, checks and rerun snapshots. |
+| [`simulation.environments.get`](#simulationenvironmentsget) | Return a simulation environment with its contract, world, scenarios and evaluations. |
+| [`simulation.environments.list`](#simulationenvironmentslist) | List simulation environments in the current workspace, optionally for one agent definition. |
+| [`simulation.environments.rename`](#simulationenvironmentsrename) | Rename a simulation environment (the only editable field); returns the environment. |
+| [`simulation.environments.run`](#simulationenvironmentsrun) | Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults). |
+| [`simulation.environments.run_plan`](#simulationenvironmentsrun_plan) | Resolve the agent, environment and suite versions a run would pin, with warnings. |
+| [`simulation.environments.drafts.list`](#simulationenvironmentsdraftslist) | Return an environment's unsaved environment and suite drafts (with parent_id and revision for a save) and the drafts a rebuild set aside. |
+| [`simulation.environments.drafts.save`](#simulationenvironmentsdraftssave) | Save the named drafts together as new default versions; each needs expected_parent_id, and the body's idempotency_key replays an earlier save. |
+| [`simulation.environments.evaluations.add`](#simulationenvironmentsevaluationsadd) | Add one catalogue eval to an environment by exact name; it grades calls from now on (no backfill). |
+| [`simulation.environments.evaluations.available`](#simulationenvironmentsevaluationsavailable) | List the catalogue evals an environment can still add (its modality, minus those selected); 409 until the environment finishes building. |
+| [`simulation.environments.evaluations.set_tool_call`](#simulationenvironmentsevaluationsset_tool_call) | Turn the tool-call judge on or off for an environment (enable_tool_evaluation); returns the environment. |
+| [`simulation.environments.evaluations.update`](#simulationenvironmentsevaluationsupdate) | Change one of an environment's evals (name, config, mapping, model, filters, error_localizer, kb_id); never grades. |
+| [`simulation.environments.nudges.answer`](#simulationenvironmentsnudgesanswer) | Answer a rebuild offer; answer yes queues a rebuild (pending or failed nudges), no skips a pending one. |
+| [`simulation.environments.nudges.list`](#simulationenvironmentsnudgeslist) | List an environment's rebuild offers, newest first (at most 100), optionally filtered by comma-separated states (pending, answered_no, queued, running, applied, no_change, replaced, failed). |
+| [`simulation.environments.nudges.stop`](#simulationenvironmentsnudgesstop) | Stop a queued or running rebuild; it can be answered again later. |
+| [`simulation.environments.runs.add_evaluation`](#simulationenvironmentsrunsadd_evaluation) | Add an eval by name from inside a finished run and grade that run's finished calls that have no verdict for it; returns the queued and skipped counts. |
+| [`simulation.environments.runs.regrade`](#simulationenvironmentsrunsregrade) | Grade a completed run's calls again with the environment's evals (eval_config_ids), replacing their previous scores; the calls are not rerun. |
+| [`simulation.environments.versions.create_agent`](#simulationenvironmentsversionscreate_agent) | Make an environment's next agent version from an uploaded folder (archive_artifact_id from simulation.jobs.upload_sources, alone), a prompt or agent_payload settings; it is checked next, then made the default. |
+| [`simulation.environments.versions.diff`](#simulationenvironmentsversionsdiff) | Show what one agent, environment or suite version (piece), or an open draft, changed against its parent, or against the version named by `against`. |
+| [`simulation.environments.versions.list`](#simulationenvironmentsversionslist) | List an environment's saved agent, environment and suite versions, and which of each is the default. |
+| [`simulation.environments.versions.retry_agent`](#simulationenvironmentsversionsretry_agent) | Check again an environment's agent version whose check failed or is stuck pending (422 otherwise); returns every version. |
+| [`simulation.environments.versions.set_default`](#simulationenvironmentsversionsset_default) | Make an agent, environment or suite version (piece) the environment's default; expected_default_id is the default you saw (null for none), and a newer one returns 409. |
+| [`simulation.environments.versions.suite_members`](#simulationenvironmentsversionssuite_members) | List the scenarios in a saved suite version. |
 | [`simulation.executions.analytics`](#simulationexecutionsanalytics) | Return aggregated analytics for a simulation test execution. |
 | [`simulation.executions.get`](#simulationexecutionsget) | Return a simulation test execution by its identifier. |
 | [`simulation.executions.list`](#simulationexecutionslist) | List simulation test executions. |
+| [`simulation.executions.list_calls`](#simulationexecutionslist_calls) | List a run's calls (a test execution's results) with the run's pinned versions and outcome summary, 50 per page by default. |
+| [`simulation.executions.rerun_calls`](#simulationexecutionsrerun_calls) | Re-run chosen calls of a finished run (rerun_type call_and_eval, call_execution_ids) as a new attempt of the same run, or re-grade them (eval_only). |
+| [`simulation.executions.insights.get`](#simulationexecutionsinsightsget) | Return a run's Insights (debug analysis) state and findings; status is not_requested until one is requested. |
+| [`simulation.executions.insights.start`](#simulationexecutionsinsightsstart) | Request Insights (debug analysis) of a completed run; a repeat re-arms only failed calls. |
+| [`simulation.jobs.adjust`](#simulationjobsadjust) | Send a correction to a builder job that is still authoring, applied at its next stage boundary (409 once authoring has finished); client_request_id deduplicates a resend. |
+| [`simulation.jobs.cancel`](#simulationjobscancel) | Request cancellation of a harness job (a build or a run). |
+| [`simulation.jobs.create`](#simulationjobscreate) | Start a builder job (a new environment) from an uploaded source and an agent; artifacts.level is required. |
+| [`simulation.jobs.extend`](#simulationjobsextend) | Ask the builder for count (1-50) more scenarios, steered by optional guidance; with versioning they land in the suite draft, otherwise the environment is rebuilt. |
+| [`simulation.jobs.get`](#simulationjobsget) | Return a harness job's state, stage, events, scenarios and consumption (a builder job, or a run's job). |
+| [`simulation.jobs.preflight`](#simulationjobspreflight) | Check a builder job body without creating a job; missing credentials show as failed checks. |
+| [`simulation.jobs.send_message`](#simulationjobssend_message) | Send a message to a builder job's chat (a question's answer needs kind user_response or approval, and reply_to); client_request_id deduplicates a resend. |
+| [`simulation.jobs.set_secret_values`](#simulationjobsset_secret_values) | Make an environment's next agent version from credential values (environment_values) and files staged with simulation.jobs.upload_secret_file; it is checked next, then made the default. |
+| [`simulation.jobs.upload_secret_file`](#simulationjobsupload_secret_file) | Stage a credential file for an environment (today only a GOOGLE_APPLICATION_CREDENTIALS service-account JSON, as environment_name GOOGLE_APPLICATION_CREDENTIALS; anything else returns 422); pass the returned secret_ref in simulation.jobs.set_secret_values files. |
+| [`simulation.jobs.upload_sources`](#simulationjobsupload_sources) | Upload an agent's source files (one `paths` entry per file, the file's path inside the folder) for simulation.jobs.create or simulation.environments.versions.create_agent; returns the source_id to pass on. |
+| [`simulation.jobs.scenarios.amend`](#simulationjobsscenariosamend) | Drop or edit an environment's authored scenarios, or set a scenario's persona (as a draft where versioning applies); one receipt per change. |
+| [`simulation.jobs.scenarios.list`](#simulationjobsscenarioslist) | List one page of an environment's (or run's) authored scenarios, by number; group_by defaults to goal when omitted (empty for a flat list). |
+| [`simulation.personas.create`](#simulationpersonascreate) | Create a workspace persona; a name already used by a system or workspace persona returns 400. |
+| [`simulation.personas.duplicate`](#simulationpersonasduplicate) | Copy a system or workspace persona into the workspace under a new name; a name already used by a workspace persona returns 400. |
+| [`simulation.personas.get`](#simulationpersonasget) | Return one system or workspace persona you can use. |
+| [`simulation.personas.list`](#simulationpersonaslist) | List the system and workspace personas you can use, newest first, 10 per page by default; filter by type (prebuilt or custom), search or simulation_type (voice or text). |
+| [`simulation.personas.update`](#simulationpersonasupdate) | Update a workspace persona; name is required on every update, other fields left out are kept, and so is simulation_type; system personas return 403. |
 | [`simulation.scenarios.create`](#simulationscenarioscreate) | Create an agent or prompt simulation scenario of kind dataset, script or graph. |
 | [`simulation.scenarios.get`](#simulationscenariosget) | Return a simulation scenario by its identifier. |
 | [`simulation.scenarios.list`](#simulationscenarioslist) | List simulation scenarios in the current workspace. |
 | [`simulation.scenarios.update`](#simulationscenariosupdate) | Edit supported scenario fields such as name, description, graph or prompt. |
+| [`simulation.tests.add_eval_configs`](#simulationtestsadd_eval_configs) | Add evals with your own mapping to a run test, such as an environment run's run_test_id (\{evaluations_config: [\{template_id, name, mapping, config, model\}]\}). |
 | [`simulation.tests.create`](#simulationtestscreate) | Save a simulation test using name, agent_definition_id and scenario_ids, optionally agent_version and evaluations_config. |
 | [`simulation.tests.get`](#simulationtestsget) | Read a saved simulation test configuration, its agent/version and scenarios. |
 | [`simulation.tests.list`](#simulationtestslist) | List saved simulation test configurations. |
+| [`simulation.tests.list_executions`](#simulationtestslist_executions) | List the runs (test executions) of a run test, such as an environment run's run_test_id, 10 per page by default. |
 | [`simulation.tests.run`](#simulationtestsrun) | Start a saved simulation test asynchronously. |
 
 </div>
 
 ## client.simulation
+
+## client.simulation.calls
+
+TypeScript: `client.simulation.calls`.
+
+### simulation.calls.get
+
+Return one call (trial) of a run with its input, transcript, tool calls, checks and rerun snapshots.
+
+<ApiEndpoint method="GET" path="/simulate/v3/call-executions/{call_execution_id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.calls.get("your-call-execution-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.calls.get("your-call-execution-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.calls.get(
+    call_execution_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.calls.get(callExecutionId: string, options?: RequestOptions): Promise<unknown>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="call_execution_id" type="string" required>
+  Positional argument `call_execution_id`.
+</ParamField>
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+## client.simulation.environments
+
+TypeScript: `client.simulation.environments`.
+
+### simulation.environments.get
+
+Return a simulation environment with its contract, world, scenarios and evaluations.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.get(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessEnvironmentDetail
+```
+
+```typescript TypeScript
+client.simulation.environments.get(id: string, options?: RequestOptions): Promise<models.HarnessEnvironmentDetail>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`HarnessEnvironmentDetail`](/docs/sdk/reference/simulation-models#harnessenvironmentdetail).
+
+### simulation.environments.list
+
+List simulation environments in the current workspace, optionally for one agent definition.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination))
+
+<CodeGroup>
+
+```python Python
+for item in client.simulation.environments.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.simulation.environments.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.list(
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    agent_definition_id: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.HarnessEnvironment]
+```
+
+```typescript TypeScript
+client.simulation.environments.list(params: SimulationEnvironmentsListParams = {}, options?: RequestOptions): Pager<models.HarnessEnvironment>
+
+export interface SimulationEnvironmentsListParams {
+  limit?: number | null;
+  agent_definition_id?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="limit" type="integer" optional />
+<ParamField query="agent_definition_id" type="string" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`HarnessEnvironment`](/docs/sdk/reference/simulation-models#harnessenvironment) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### simulation.environments.rename
+
+Rename a simulation environment (the only editable field); returns the environment.
+
+<ApiEndpoint method="PATCH" path="/simulate/api/harness-environments/{id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.rename("your-id", name="your-name")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.rename("your-id", { name: "your-name" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.rename(
+    id: str,
+    *,
+    name: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessEnvironmentDetail
+```
+
+```typescript TypeScript
+client.simulation.environments.rename(id: string, params: SimulationEnvironmentsRenameParams, options?: RequestOptions): Promise<models.HarnessEnvironmentDetail>
+
+export interface SimulationEnvironmentsRenameParams {
+  name: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="name" type="string" required />
+
+#### Returns
+
+[`HarnessEnvironmentDetail`](/docs/sdk/reference/simulation-models#harnessenvironmentdetail).
+
+### simulation.environments.run
+
+Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults). Send the same Idempotency-Key header (options headers) to get the same run back on a retry.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/run/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.run("your-id", scenario_ids=[])
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.run("your-id", { scenario_ids: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.run(
+    id: str,
+    *,
+    scenario_ids: list[str],
+    trials: int | None | NotGiven = NOT_GIVEN,
+    agent_version_id: str | None | NotGiven = NOT_GIVEN,
+    environment_version_id: str | None | NotGiven = NOT_GIVEN,
+    suite_version_id: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.environments.run(id: string, params: SimulationEnvironmentsRunParams, options?: RequestOptions): Promise<unknown>
+
+export interface SimulationEnvironmentsRunParams {
+  scenario_ids: Array<string>;
+  trials?: number | null;
+  agent_version_id?: string | null;
+  environment_version_id?: string | null;
+  suite_version_id?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="scenario_ids" type="string[]" required />
+<ParamField body="trials" type="integer" optional />
+<ParamField body="agent_version_id" type="string" optional />
+<ParamField body="environment_version_id" type="string" optional />
+<ParamField body="suite_version_id" type="string" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.environments.run_plan
+
+Resolve the agent, environment and suite versions a run would pin, with warnings. Starts nothing.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/run-plan/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.run_plan("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.runPlan("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.run_plan(
+    id: str,
+    *,
+    agent_version_id: str | None | NotGiven = NOT_GIVEN,
+    environment_version_id: str | None | NotGiven = NOT_GIVEN,
+    suite_version_id: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessRunPlan
+```
+
+```typescript TypeScript
+client.simulation.environments.runPlan(id: string, params: SimulationEnvironmentsRunPlanParams = {}, options?: RequestOptions): Promise<models.HarnessRunPlan>
+
+export interface SimulationEnvironmentsRunPlanParams {
+  agent_version_id?: string | null;
+  environment_version_id?: string | null;
+  suite_version_id?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField query="agent_version_id" type="string" optional />
+<ParamField query="environment_version_id" type="string" optional />
+<ParamField query="suite_version_id" type="string" optional />
+
+#### Returns
+
+[`HarnessRunPlan`](/docs/sdk/reference/simulation-models#harnessrunplan).
+
+## client.simulation.environments.drafts
+
+TypeScript: `client.simulation.environments.drafts`.
+
+### simulation.environments.drafts.list
+
+Return an environment's unsaved environment and suite drafts (with parent_id and revision for a save) and the drafts a rebuild set aside.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/drafts/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.drafts.list("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.drafts.list("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.drafts.list(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessDrafts
+```
+
+```typescript TypeScript
+client.simulation.environments.drafts.list(id: string, options?: RequestOptions): Promise<models.HarnessDrafts>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`HarnessDrafts`](/docs/sdk/reference/simulation-models#harnessdrafts).
+
+### simulation.environments.drafts.save
+
+Save the named drafts together as new default versions; each needs expected_parent_id, and the body's idempotency_key replays an earlier save.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/drafts/save/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.drafts.save(
+    "your-id",
+    drafts=[],
+    idempotency_key="your-idempotency-key",
+)
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.drafts.save("your-id", {
+  drafts: [],
+  idempotency_key: "your-idempotency-key",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.drafts.save(
+    id: str,
+    *,
+    drafts: list[dict[str, Any]],
+    idempotency_key: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessDraftSaveResponse
+```
+
+```typescript TypeScript
+client.simulation.environments.drafts.save(id: string, params: SimulationEnvironmentsDraftsSaveParams, options?: RequestOptions): Promise<models.HarnessDraftSaveResponse>
+
+export interface SimulationEnvironmentsDraftsSaveParams {
+  drafts: Array<Record<string, unknown>>;
+  idempotency_key: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="drafts" type="object[]" required />
+<ParamField body="idempotency_key" type="string" required />
+
+#### Returns
+
+[`HarnessDraftSaveResponse`](/docs/sdk/reference/simulation-models#harnessdraftsaveresponse).
+
+## client.simulation.environments.evaluations
+
+TypeScript: `client.simulation.environments.evaluations`.
+
+### simulation.environments.evaluations.add
+
+Add one catalogue eval to an environment by exact name; it grades calls from now on (no backfill). Returns the environment.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/evaluations/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.evaluations.add("your-id", name="your-name")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.evaluations.add("your-id", { name: "your-name" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.evaluations.add(
+    id: str,
+    *,
+    name: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessEnvironmentDetail
+```
+
+```typescript TypeScript
+client.simulation.environments.evaluations.add(id: string, params: SimulationEnvironmentsEvaluationsAddParams, options?: RequestOptions): Promise<models.HarnessEnvironmentDetail>
+
+export interface SimulationEnvironmentsEvaluationsAddParams {
+  name: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="name" type="string" required />
+
+#### Returns
+
+[`HarnessEnvironmentDetail`](/docs/sdk/reference/simulation-models#harnessenvironmentdetail).
+
+### simulation.environments.evaluations.available
+
+List the catalogue evals an environment can still add (its modality, minus those selected); 409 until the environment finishes building.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/evaluations/available/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.evaluations.available("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.evaluations.available("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.evaluations.available(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessEnvironmentAvailableEvals
+```
+
+```typescript TypeScript
+client.simulation.environments.evaluations.available(id: string, options?: RequestOptions): Promise<models.HarnessEnvironmentAvailableEvals>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`HarnessEnvironmentAvailableEvals`](/docs/sdk/reference/simulation-models#harnessenvironmentavailableevals).
+
+### simulation.environments.evaluations.set_tool_call
+
+Turn the tool-call judge on or off for an environment (enable_tool_evaluation); returns the environment.
+
+<ApiEndpoint method="PUT" path="/simulate/api/harness-environments/{id}/evaluations/tool-call/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.evaluations.set_tool_call("your-id", enable_tool_evaluation=True)
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.evaluations.setToolCall("your-id", { enable_tool_evaluation: true });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.evaluations.set_tool_call(
+    id: str,
+    *,
+    enable_tool_evaluation: bool,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessEnvironmentDetail
+```
+
+```typescript TypeScript
+client.simulation.environments.evaluations.setToolCall(id: string, params: SimulationEnvironmentsEvaluationsSetToolCallParams, options?: RequestOptions): Promise<models.HarnessEnvironmentDetail>
+
+export interface SimulationEnvironmentsEvaluationsSetToolCallParams {
+  enable_tool_evaluation: boolean;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="enable_tool_evaluation" type="boolean" required />
+
+#### Returns
+
+[`HarnessEnvironmentDetail`](/docs/sdk/reference/simulation-models#harnessenvironmentdetail).
+
+### simulation.environments.evaluations.update
+
+Change one of an environment's evals (name, config, mapping, model, filters, error_localizer, kb_id); never grades. The server refuses an empty body.
+
+<ApiEndpoint method="PATCH" path="/simulate/api/harness-environments/{id}/evaluations/{eval_config_id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.evaluations.update("your-id", "your-eval-config-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.evaluations.update("your-id", "your-eval-config-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.evaluations.update(
+    id: str,
+    eval_config_id: str,
+    *,
+    config: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    mapping: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    model: str | None | NotGiven = NOT_GIVEN,
+    error_localizer: bool | None | NotGiven = NOT_GIVEN,
+    kb_id: str | None | NotGiven = NOT_GIVEN,
+    filters: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    name: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.environments.evaluations.update(id: string, evalConfigId: string, params: SimulationEnvironmentsEvaluationsUpdateParams = {}, options?: RequestOptions): Promise<unknown>
+
+export interface SimulationEnvironmentsEvaluationsUpdateParams {
+  config?: Record<string, unknown> | null;
+  mapping?: Record<string, unknown> | null;
+  model?: string | null;
+  error_localizer?: boolean | null;
+  kb_id?: string | null;
+  filters?: Array<Record<string, unknown>> | null;
+  name?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="eval_config_id" type="string" required>
+  Positional argument `eval_config_id`.
+</ParamField>
+<ParamField body="config" type="object" optional />
+<ParamField body="mapping" type="object" optional />
+<ParamField body="model" type="string" optional />
+<ParamField body="error_localizer" type="boolean" optional />
+<ParamField body="kb_id" type="string" optional />
+<ParamField body="filters" type="object[]" optional />
+<ParamField body="name" type="string" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+## client.simulation.environments.nudges
+
+TypeScript: `client.simulation.environments.nudges`.
+
+### simulation.environments.nudges.answer
+
+Answer a rebuild offer; answer yes queues a rebuild (pending or failed nudges), no skips a pending one. Returns the nudge.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/nudges/{nudge_id}/answer/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.nudges.answer(
+    "your-id",
+    "your-nudge-id",
+    answer="yes",
+)
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.nudges.answer("your-id", "your-nudge-id", { answer: "yes" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.nudges.answer(
+    id: str,
+    nudge_id: str,
+    *,
+    answer: Literal['yes', 'no'],
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessNudge
+```
+
+```typescript TypeScript
+client.simulation.environments.nudges.answer(id: string, nudgeId: string, params: SimulationEnvironmentsNudgesAnswerParams, options?: RequestOptions): Promise<models.HarnessNudge>
+
+export interface SimulationEnvironmentsNudgesAnswerParams {
+  answer: "yes" | "no";
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="nudge_id" type="string" required>
+  Positional argument `nudge_id`.
+</ParamField>
+<ParamField body="answer" type="string" required enum={["yes", "no"]} />
+
+#### Returns
+
+[`HarnessNudge`](/docs/sdk/reference/simulation-models#harnessnudge).
+
+### simulation.environments.nudges.list
+
+List an environment's rebuild offers, newest first (at most 100), optionally filtered by comma-separated states (pending, answered_no, queued, running, applied, no_change, replaced, failed).
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/nudges/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.nudges.list("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.nudges.list("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.nudges.list(
+    id: str,
+    *,
+    state: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> List[models.HarnessNudge]
+```
+
+```typescript TypeScript
+client.simulation.environments.nudges.list(id: string, params: SimulationEnvironmentsNudgesListParams = {}, options?: RequestOptions): Promise<Array<models.HarnessNudge>>
+
+export interface SimulationEnvironmentsNudgesListParams {
+  /** Comma-separated nudge states to list. */
+  state?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField query="state" type="string" optional>
+  Comma-separated nudge states to list.
+</ParamField>
+
+#### Returns
+
+A list of [`HarnessNudge`](/docs/sdk/reference/simulation-models#harnessnudge).
+
+### simulation.environments.nudges.stop
+
+Stop a queued or running rebuild; it can be answered again later. Returns the nudge.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/nudges/{nudge_id}/stop/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.nudges.stop("your-id", "your-nudge-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.nudges.stop("your-id", "your-nudge-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.nudges.stop(
+    id: str,
+    nudge_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessNudge
+```
+
+```typescript TypeScript
+client.simulation.environments.nudges.stop(id: string, nudgeId: string, options?: RequestOptions): Promise<models.HarnessNudge>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="nudge_id" type="string" required>
+  Positional argument `nudge_id`.
+</ParamField>
+
+#### Returns
+
+[`HarnessNudge`](/docs/sdk/reference/simulation-models#harnessnudge).
+
+## client.simulation.environments.runs
+
+TypeScript: `client.simulation.environments.runs`.
+
+### simulation.environments.runs.add_evaluation
+
+Add an eval by name from inside a finished run and grade that run's finished calls that have no verdict for it; returns the queued and skipped counts. Spends judge credits.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.runs.add_evaluation(
+    "your-id",
+    "your-execution-id",
+    name="your-name",
+)
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.runs.addEvaluation("your-id", "your-execution-id", { name: "your-name" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.runs.add_evaluation(
+    id: str,
+    execution_id: str,
+    *,
+    name: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.environments.runs.addEvaluation(id: string, executionId: string, params: SimulationEnvironmentsRunsAddEvaluationParams, options?: RequestOptions): Promise<unknown>
+
+export interface SimulationEnvironmentsRunsAddEvaluationParams {
+  name: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="execution_id" type="string" required>
+  Positional argument `execution_id`.
+</ParamField>
+<ParamField body="name" type="string" required />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.environments.runs.regrade
+
+Grade a completed run's calls again with the environment's evals (eval_config_ids), replacing their previous scores; the calls are not rerun. Spends judge credits.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/run/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.runs.regrade(
+    "your-id",
+    "your-execution-id",
+    eval_config_ids=[],
+)
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.runs.regrade("your-id", "your-execution-id", { eval_config_ids: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.runs.regrade(
+    id: str,
+    execution_id: str,
+    *,
+    eval_config_ids: list[str],
+    enable_tool_evaluation: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.environments.runs.regrade(id: string, executionId: string, params: SimulationEnvironmentsRunsRegradeParams, options?: RequestOptions): Promise<unknown>
+
+export interface SimulationEnvironmentsRunsRegradeParams {
+  eval_config_ids: Array<string>;
+  enable_tool_evaluation?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="execution_id" type="string" required>
+  Positional argument `execution_id`.
+</ParamField>
+<ParamField body="eval_config_ids" type="string[]" required />
+<ParamField body="enable_tool_evaluation" type="boolean" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+## client.simulation.environments.versions
+
+TypeScript: `client.simulation.environments.versions`.
+
+### simulation.environments.versions.create_agent
+
+Make an environment's next agent version from an uploaded folder (archive_artifact_id from simulation.jobs.upload_sources, alone), a prompt or agent_payload settings; it is checked next, then made the default. The server refuses an empty body.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/versions/agent/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.versions.create_agent("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.versions.createAgent("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.versions.create_agent(
+    id: str,
+    *,
+    archive_artifact_id: str | None | NotGiven = NOT_GIVEN,
+    prompt: str | None | NotGiven = NOT_GIVEN,
+    agent_payload: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.environments.versions.createAgent(id: string, params: SimulationEnvironmentsVersionsCreateAgentParams = {}, options?: RequestOptions): Promise<unknown>
+
+export interface SimulationEnvironmentsVersionsCreateAgentParams {
+  archive_artifact_id?: string | null;
+  prompt?: string | null;
+  agent_payload?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="archive_artifact_id" type="string" optional />
+<ParamField body="prompt" type="string" optional />
+<ParamField body="agent_payload" type="object" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.environments.versions.diff
+
+Show what one agent, environment or suite version (piece), or an open draft, changed against its parent, or against the version named by `against`.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/versions/{piece}/{version_id}/diff/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.versions.diff(
+    "your-id",
+    "your-piece",
+    "your-version-id",
+)
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.versions.diff("your-id", "your-piece", "your-version-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.versions.diff(
+    id: str,
+    piece: str,
+    version_id: str,
+    *,
+    against: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessVersionDiff
+```
+
+```typescript TypeScript
+client.simulation.environments.versions.diff(id: string, piece: string, versionId: string, params: SimulationEnvironmentsVersionsDiffParams = {}, options?: RequestOptions): Promise<models.HarnessVersionDiff>
+
+export interface SimulationEnvironmentsVersionsDiffParams {
+  against?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="piece" type="string" required>
+  Positional argument `piece`.
+</ParamField>
+<ParamField path="version_id" type="string" required>
+  Positional argument `version_id`.
+</ParamField>
+<ParamField query="against" type="string" optional />
+
+#### Returns
+
+[`HarnessVersionDiff`](/docs/sdk/reference/simulation-models#harnessversiondiff).
+
+### simulation.environments.versions.list
+
+List an environment's saved agent, environment and suite versions, and which of each is the default.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/versions/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.versions.list("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.versions.list("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.versions.list(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessVersions
+```
+
+```typescript TypeScript
+client.simulation.environments.versions.list(id: string, options?: RequestOptions): Promise<models.HarnessVersions>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`HarnessVersions`](/docs/sdk/reference/simulation-models#harnessversions).
+
+### simulation.environments.versions.retry_agent
+
+Check again an environment's agent version whose check failed or is stuck pending (422 otherwise); returns every version.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/versions/agent/{version_id}/retry/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.versions.retry_agent("your-id", "your-version-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.versions.retryAgent("your-id", "your-version-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.versions.retry_agent(
+    id: str,
+    version_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.environments.versions.retryAgent(id: string, versionId: string, options?: RequestOptions): Promise<unknown>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="version_id" type="string" required>
+  Positional argument `version_id`.
+</ParamField>
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.environments.versions.set_default
+
+Make an agent, environment or suite version (piece) the environment's default; expected_default_id is the default you saw (null for none), and a newer one returns 409. Returns every version.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/versions/{piece}/{version_id}/default/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.versions.set_default(
+    "your-id",
+    "your-piece",
+    "your-version-id",
+    expected_default_id="your-expected-default-id",
+)
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.versions.setDefault("your-id", "your-piece", "your-version-id", { expected_default_id: "your-expected-default-id" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.versions.set_default(
+    id: str,
+    piece: str,
+    version_id: str,
+    *,
+    expected_default_id: str | None,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessVersions
+```
+
+```typescript TypeScript
+client.simulation.environments.versions.setDefault(id: string, piece: string, versionId: string, params: SimulationEnvironmentsVersionsSetDefaultParams, options?: RequestOptions): Promise<models.HarnessVersions>
+
+export interface SimulationEnvironmentsVersionsSetDefaultParams {
+  expected_default_id: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="piece" type="string" required>
+  Positional argument `piece`.
+</ParamField>
+<ParamField path="version_id" type="string" required>
+  Positional argument `version_id`.
+</ParamField>
+<ParamField body="expected_default_id" type="string" required />
+
+#### Returns
+
+[`HarnessVersions`](/docs/sdk/reference/simulation-models#harnessversions).
+
+### simulation.environments.versions.suite_members
+
+List the scenarios in a saved suite version.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/versions/suite/{version_id}/members/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.versions.suite_members("your-id", "your-version-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.versions.suiteMembers("your-id", "your-version-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.versions.suite_members(
+    id: str,
+    version_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> List[models.HarnessSuiteMember]
+```
+
+```typescript TypeScript
+client.simulation.environments.versions.suiteMembers(id: string, versionId: string, options?: RequestOptions): Promise<Array<models.HarnessSuiteMember>>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="version_id" type="string" required>
+  Positional argument `version_id`.
+</ParamField>
+
+#### Returns
+
+A list of [`HarnessSuiteMember`](/docs/sdk/reference/simulation-models#harnesssuitemember).
 
 ## client.simulation.executions
 
@@ -207,6 +1548,1432 @@ The pager sends `page` itself; pass `limit` to change the page size.
 #### Returns
 
 A pager of [`TestExecution`](/docs/sdk/reference/simulation-models#testexecution) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### simulation.executions.list_calls
+
+List a run's calls (a test execution's results) with the run's pinned versions and outcome summary, 50 per page by default. filters is a JSON object of string lists, such as \{"status": ["failed"]\}.
+
+<ApiEndpoint method="GET" path="/simulate/v3/test-executions/{test_execution_id}/calls/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination))
+
+<CodeGroup>
+
+```python Python
+for item in client.simulation.executions.list_calls("your-test-execution-id"):
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.simulation.executions.listCalls("your-test-execution-id")) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.executions.list_calls(
+    test_execution_id: str,
+    *,
+    search: str | None | NotGiven = NOT_GIVEN,
+    filters: str | None | NotGiven = NOT_GIVEN,
+    ordering: Literal['started_at', '-started_at', 'duration_seconds', '-duration_seconds', 'latency_ms', '-latency_ms', 'turn_count', '-turn_count', 'tokens', '-tokens', 'cost_cents', '-cost_cents', 'scenario', '-scenario', 'goal', '-goal', 'outcome', '-outcome'] | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    group_by: Literal['goal', 'sub_goal', 'accent', 'age', 'attack', 'task', 'status'] | None | NotGiven = NOT_GIVEN,
+    group_key: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[Any]
+```
+
+```typescript TypeScript
+client.simulation.executions.listCalls(testExecutionId: string, params: SimulationExecutionsListCallsParams = {}, options?: RequestOptions): Pager<unknown>
+
+export interface SimulationExecutionsListCallsParams {
+  search?: string | null;
+  filters?: string | null;
+  ordering?: "started_at" | "-started_at" | "duration_seconds" | "-duration_seconds" | "latency_ms" | "-latency_ms" | "turn_count" | "-turn_count" | "tokens" | "-tokens" | "cost_cents" | "-cost_cents" | "scenario" | "-scenario" | "goal" | "-goal" | "outcome" | "-outcome" | null;
+  page_size?: number | null;
+  group_by?: "goal" | "sub_goal" | "accent" | "age" | "attack" | "task" | "status" | null;
+  group_key?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="test_execution_id" type="string" required>
+  Positional argument `test_execution_id`.
+</ParamField>
+<ParamField query="search" type="string" optional />
+<ParamField query="filters" type="string" optional />
+<ParamField query="ordering" type="string" optional enum={["started_at", "-started_at", "duration_seconds", "-duration_seconds", "latency_ms", "-latency_ms", "turn_count", "-turn_count", "tokens", "-tokens", "cost_cents", "-cost_cents", "scenario", "-scenario", "goal", "-goal", "outcome", "-outcome"]} />
+<ParamField query="page_size" type="integer" optional />
+<ParamField query="group_by" type="string" optional enum={["goal", "sub_goal", "accent", "age", "attack", "task", "status"]} />
+<ParamField query="group_key" type="string" optional />
+
+The pager sends `page` itself; pass `page_size` to change the page size.
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.executions.rerun_calls
+
+Re-run chosen calls of a finished run (rerun_type call_and_eval, call_execution_ids) as a new attempt of the same run, or re-grade them (eval_only).
+
+<ApiEndpoint method="POST" path="/simulate/test-executions/{test_execution_id}/rerun-calls/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.executions.rerun_calls("your-test-execution-id", rerun_type="eval_only")
+```
+
+```typescript TypeScript
+const result = await client.simulation.executions.rerunCalls("your-test-execution-id", { rerun_type: "eval_only" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.executions.rerun_calls(
+    test_execution_id: str,
+    *,
+    rerun_type: Literal['eval_only', 'call_and_eval'],
+    call_execution_ids: list[str] | None | NotGiven = NOT_GIVEN,
+    select_all: bool | None | NotGiven = NOT_GIVEN,
+    environment_values: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.RerunCallsResponse
+```
+
+```typescript TypeScript
+client.simulation.executions.rerunCalls(testExecutionId: string, params: SimulationExecutionsRerunCallsParams, options?: RequestOptions): Promise<models.RerunCallsResponse>
+
+export interface SimulationExecutionsRerunCallsParams {
+  rerun_type: "eval_only" | "call_and_eval";
+  call_execution_ids?: Array<string> | null;
+  select_all?: boolean | null;
+  environment_values?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="test_execution_id" type="string" required>
+  Positional argument `test_execution_id`.
+</ParamField>
+<ParamField body="rerun_type" type="string" required enum={["eval_only", "call_and_eval"]} />
+<ParamField body="call_execution_ids" type="string[]" optional />
+<ParamField body="select_all" type="boolean" optional />
+<ParamField body="environment_values" type="object" optional />
+
+#### Returns
+
+[`RerunCallsResponse`](/docs/sdk/reference/simulation-models#reruncallsresponse).
+
+## client.simulation.executions.insights
+
+TypeScript: `client.simulation.executions.insights`.
+
+### simulation.executions.insights.get
+
+Return a run's Insights (debug analysis) state and findings; status is not_requested until one is requested.
+
+<ApiEndpoint method="GET" path="/simulate/test-executions/{test_execution_id}/debug-analysis/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.executions.insights.get("your-test-execution-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.executions.insights.get("your-test-execution-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.executions.insights.get(
+    test_execution_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.TestExecutionDebugAnalysisResponse
+```
+
+```typescript TypeScript
+client.simulation.executions.insights.get(testExecutionId: string, options?: RequestOptions): Promise<models.TestExecutionDebugAnalysisResponse>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="test_execution_id" type="string" required>
+  Positional argument `test_execution_id`.
+</ParamField>
+
+#### Returns
+
+[`TestExecutionDebugAnalysisResponse`](/docs/sdk/reference/simulation-models#testexecutiondebuganalysisresponse).
+
+### simulation.executions.insights.start
+
+Request Insights (debug analysis) of a completed run; a repeat re-arms only failed calls.
+
+<ApiEndpoint method="POST" path="/simulate/test-executions/{test_execution_id}/debug-analysis/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.executions.insights.start("your-test-execution-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.executions.insights.start("your-test-execution-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.executions.insights.start(
+    test_execution_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.executions.insights.start(testExecutionId: string, options?: RequestOptions): Promise<unknown>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="test_execution_id" type="string" required>
+  Positional argument `test_execution_id`.
+</ParamField>
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+## client.simulation.jobs
+
+TypeScript: `client.simulation.jobs`.
+
+### simulation.jobs.adjust
+
+Send a correction to a builder job that is still authoring, applied at its next stage boundary (409 once authoring has finished); client_request_id deduplicates a resend.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-jobs/{id}/adjust/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.jobs.adjust("your-id", instruction="your-instruction")
+```
+
+```typescript TypeScript
+const result = await client.simulation.jobs.adjust("your-id", { instruction: "your-instruction" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.jobs.adjust(
+    id: str,
+    *,
+    instruction: str,
+    client_request_id: str | None | NotGiven = NOT_GIVEN,
+    target_stage: Literal['understand', 'environment', 'scenarios'] | None | NotGiven = NOT_GIVEN,
+    scenario_delta: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.jobs.adjust(id: string, params: SimulationJobsAdjustParams, options?: RequestOptions): Promise<unknown>
+
+export interface SimulationJobsAdjustParams {
+  instruction: string;
+  client_request_id?: string | null;
+  target_stage?: "understand" | "environment" | "scenarios" | null;
+  scenario_delta?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="instruction" type="string" required />
+<ParamField body="client_request_id" type="string" optional />
+<ParamField body="target_stage" type="string" optional enum={["understand", "environment", "scenarios"]} />
+<ParamField body="scenario_delta" type="integer" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.jobs.cancel
+
+Request cancellation of a harness job (a build or a run). Completed work is kept; cleanup may still be pending.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-jobs/{id}/cancel/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.jobs.cancel("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.jobs.cancel("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.jobs.cancel(
+    id: str,
+    *,
+    reason: Literal['user_canceled', 'ttl_exceeded'] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.jobs.cancel(id: string, params: SimulationJobsCancelParams = {}, options?: RequestOptions): Promise<unknown>
+
+export interface SimulationJobsCancelParams {
+  reason?: "user_canceled" | "ttl_exceeded" | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="reason" type="string" optional enum={["user_canceled", "ttl_exceeded"]} />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.jobs.create
+
+Start a builder job (a new environment) from an uploaded source and an agent; artifacts.level is required. Send the same Idempotency-Key header (options headers) with the same body to get the same job back.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-jobs/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.jobs.create(agent={"connector": "livekit"}, artifacts={"level": "metadata-only"})
+```
+
+```typescript TypeScript
+const result = await client.simulation.jobs.create({
+  agent: { connector: "livekit" },
+  artifacts: { level: "metadata-only" },
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.jobs.create(
+    *,
+    agent: dict[str, Any],
+    artifacts: dict[str, Any],
+    schema_version: Literal['futureagi.harness-job.v1'] | None | NotGiven = NOT_GIVEN,
+    run_id: str | None | NotGiven = NOT_GIVEN,
+    source: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    scenario_count: int | None | NotGiven = NOT_GIVEN,
+    seed: int | None | NotGiven = NOT_GIVEN,
+    runtime: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    security: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    retry: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    platform_run_id: str | None | NotGiven = NOT_GIVEN,
+    metadata: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    credential_values: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.jobs.create(params: SimulationJobsCreateParams, options?: RequestOptions): Promise<unknown>
+
+export interface SimulationJobsCreateParams {
+  agent: Record<string, unknown>;
+  artifacts: Record<string, unknown>;
+  schema_version?: "futureagi.harness-job.v1" | null;
+  run_id?: string | null;
+  source?: Record<string, unknown> | null;
+  scenario_count?: number | null;
+  seed?: number | null;
+  runtime?: Record<string, unknown> | null;
+  security?: Record<string, unknown> | null;
+  retry?: Record<string, unknown> | null;
+  platform_run_id?: string | null;
+  metadata?: Record<string, unknown> | null;
+  credential_values?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="agent" type="object" required />
+<ParamField body="artifacts" type="object" required />
+<ParamField body="schema_version" type="string" optional enum={["futureagi.harness-job.v1"]} />
+<ParamField body="run_id" type="string" optional />
+<ParamField body="source" type="object" optional />
+<ParamField body="scenario_count" type="integer" optional />
+<ParamField body="seed" type="integer" optional />
+<ParamField body="runtime" type="object" optional />
+<ParamField body="security" type="object" optional />
+<ParamField body="retry" type="object" optional />
+<ParamField body="platform_run_id" type="string" optional />
+<ParamField body="metadata" type="object" optional />
+<ParamField body="credential_values" type="object" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.jobs.extend
+
+Ask the builder for count (1-50) more scenarios, steered by optional guidance; with versioning they land in the suite draft, otherwise the environment is rebuilt. Spends builder credits.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-jobs/{id}/extend/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.jobs.extend("your-id", count=1)
+```
+
+```typescript TypeScript
+const result = await client.simulation.jobs.extend("your-id", { count: 1 });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.jobs.extend(
+    id: str,
+    *,
+    count: int,
+    guidance: str | None | NotGiven = NOT_GIVEN,
+    client_request_id: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.jobs.extend(id: string, params: SimulationJobsExtendParams, options?: RequestOptions): Promise<unknown>
+
+export interface SimulationJobsExtendParams {
+  count: number;
+  guidance?: string | null;
+  client_request_id?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="count" type="integer" required />
+<ParamField body="guidance" type="string" optional />
+<ParamField body="client_request_id" type="string" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.jobs.get
+
+Return a harness job's state, stage, events, scenarios and consumption (a builder job, or a run's job).
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-jobs/{id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.jobs.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.jobs.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.jobs.get(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.jobs.get(id: string, options?: RequestOptions): Promise<unknown>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.jobs.preflight
+
+Check a builder job body without creating a job; missing credentials show as failed checks.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-jobs/preflight/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.jobs.preflight(agent={"connector": "livekit"}, artifacts={"level": "metadata-only"})
+```
+
+```typescript TypeScript
+const result = await client.simulation.jobs.preflight({
+  agent: { connector: "livekit" },
+  artifacts: { level: "metadata-only" },
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.jobs.preflight(
+    *,
+    agent: dict[str, Any],
+    artifacts: dict[str, Any],
+    schema_version: Literal['futureagi.harness-job.v1'] | None | NotGiven = NOT_GIVEN,
+    run_id: str | None | NotGiven = NOT_GIVEN,
+    source: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    scenario_count: int | None | NotGiven = NOT_GIVEN,
+    seed: int | None | NotGiven = NOT_GIVEN,
+    runtime: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    security: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    retry: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    platform_run_id: str | None | NotGiven = NOT_GIVEN,
+    metadata: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    credential_values: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessPreflightResponse
+```
+
+```typescript TypeScript
+client.simulation.jobs.preflight(params: SimulationJobsPreflightParams, options?: RequestOptions): Promise<models.HarnessPreflightResponse>
+
+export interface SimulationJobsPreflightParams {
+  agent: Record<string, unknown>;
+  artifacts: Record<string, unknown>;
+  schema_version?: "futureagi.harness-job.v1" | null;
+  run_id?: string | null;
+  source?: Record<string, unknown> | null;
+  scenario_count?: number | null;
+  seed?: number | null;
+  runtime?: Record<string, unknown> | null;
+  security?: Record<string, unknown> | null;
+  retry?: Record<string, unknown> | null;
+  platform_run_id?: string | null;
+  metadata?: Record<string, unknown> | null;
+  credential_values?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="agent" type="object" required />
+<ParamField body="artifacts" type="object" required />
+<ParamField body="schema_version" type="string" optional enum={["futureagi.harness-job.v1"]} />
+<ParamField body="run_id" type="string" optional />
+<ParamField body="source" type="object" optional />
+<ParamField body="scenario_count" type="integer" optional />
+<ParamField body="seed" type="integer" optional />
+<ParamField body="runtime" type="object" optional />
+<ParamField body="security" type="object" optional />
+<ParamField body="retry" type="object" optional />
+<ParamField body="platform_run_id" type="string" optional />
+<ParamField body="metadata" type="object" optional />
+<ParamField body="credential_values" type="object" optional />
+
+#### Returns
+
+[`HarnessPreflightResponse`](/docs/sdk/reference/simulation-models#harnesspreflightresponse).
+
+### simulation.jobs.send_message
+
+Send a message to a builder job's chat (a question's answer needs kind user_response or approval, and reply_to); client_request_id deduplicates a resend.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-jobs/{id}/conversation/messages/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.jobs.send_message(
+    "your-id",
+    content="your-content",
+    client_request_id="your-client-request-id",
+)
+```
+
+```typescript TypeScript
+const result = await client.simulation.jobs.sendMessage("your-id", {
+  content: "your-content",
+  client_request_id: "your-client-request-id",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.jobs.send_message(
+    id: str,
+    *,
+    content: str,
+    client_request_id: str,
+    kind: Literal['user_message', 'user_response', 'approval', 'interrupt', 'cancel_operation'] | None | NotGiven = NOT_GIVEN,
+    reply_to: str | None | NotGiven = NOT_GIVEN,
+    payload: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.jobs.sendMessage(id: string, params: SimulationJobsSendMessageParams, options?: RequestOptions): Promise<unknown>
+
+export interface SimulationJobsSendMessageParams {
+  content: string;
+  client_request_id: string;
+  kind?: "user_message" | "user_response" | "approval" | "interrupt" | "cancel_operation" | null;
+  reply_to?: string | null;
+  payload?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="content" type="string" required />
+<ParamField body="client_request_id" type="string" required />
+<ParamField body="kind" type="string" optional enum={["user_message", "user_response", "approval", "interrupt", "cancel_operation"]} />
+<ParamField body="reply_to" type="string" optional />
+<ParamField body="payload" type="object" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.jobs.set_secret_values
+
+Make an environment's next agent version from credential values (environment_values) and files staged with simulation.jobs.upload_secret_file; it is checked next, then made the default.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-jobs/secret-values/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.jobs.set_secret_values(environment_values={}, environment_id="your-environment-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.jobs.setSecretValues({
+  environment_values: {},
+  environment_id: "your-environment-id",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.jobs.set_secret_values(
+    *,
+    environment_values: dict[str, Any],
+    environment_id: str,
+    files: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.jobs.setSecretValues(params: SimulationJobsSetSecretValuesParams, options?: RequestOptions): Promise<unknown>
+
+export interface SimulationJobsSetSecretValuesParams {
+  environment_values: Record<string, unknown>;
+  environment_id: string;
+  files?: Array<Record<string, unknown>> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="environment_values" type="object" required />
+<ParamField body="environment_id" type="string" required />
+<ParamField body="files" type="object[]" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.jobs.upload_secret_file
+
+Stage a credential file for an environment (today only a GOOGLE_APPLICATION_CREDENTIALS service-account JSON, as environment_name GOOGLE_APPLICATION_CREDENTIALS; anything else returns 422); pass the returned secret_ref in simulation.jobs.set_secret_values files.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-jobs/secret-files/" />
+
+**Multipart upload**: file parameters take a path, bytes or an open file
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.jobs.upload_secret_file(file="path/to/file", environment_name="your-environment-name")
+```
+
+```typescript TypeScript
+const result = await client.simulation.jobs.uploadSecretFile({
+  file: "path/to/file",
+  environment_name: "your-environment-name",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.jobs.upload_secret_file(
+    *,
+    file: FileInput,
+    environment_name: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessSecretFileUploadResponse
+```
+
+```typescript TypeScript
+client.simulation.jobs.uploadSecretFile(params: SimulationJobsUploadSecretFileParams, options?: RequestOptions): Promise<models.HarnessSecretFileUploadResponse>
+
+export interface SimulationJobsUploadSecretFileParams {
+  /** Credential file; transferred without entering job JSON. */
+  file: FileInput;
+  /** Environment variable that will point to the mounted file. */
+  environment_name: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="file" type="file" required>
+  Credential file; transferred without entering job JSON.
+</ParamField>
+<ParamField body="environment_name" type="string" required>
+  Environment variable that will point to the mounted file.
+</ParamField>
+
+#### Returns
+
+[`HarnessSecretFileUploadResponse`](/docs/sdk/reference/simulation-models#harnesssecretfileuploadresponse).
+
+### simulation.jobs.upload_sources
+
+Upload an agent's source files (one `paths` entry per file, the file's path inside the folder) for simulation.jobs.create or simulation.environments.versions.create_agent; returns the source_id to pass on.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-jobs/sources/" />
+
+**Multipart upload**: file parameters take a path, bytes or an open file
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.jobs.upload_sources(files=["path/to/file"], paths=[])
+```
+
+```typescript TypeScript
+const result = await client.simulation.jobs.uploadSources({
+  files: ["path/to/file"],
+  paths: [],
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.jobs.upload_sources(
+    *,
+    files: list[FileInput],
+    paths: list[str],
+    name: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessSourceUploadResponse
+```
+
+```typescript TypeScript
+client.simulation.jobs.uploadSources(params: SimulationJobsUploadSourcesParams, options?: RequestOptions): Promise<models.HarnessSourceUploadResponse>
+
+export interface SimulationJobsUploadSourcesParams {
+  /** Repeat this field once for every source file. */
+  files: Array<FileInput>;
+  /** Repeat in file order with each repository-relative path. */
+  paths: Array<string>;
+  name?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="files" type="file[]" required>
+  Repeat this field once for every source file.
+</ParamField>
+<ParamField body="paths" type="string[]" required>
+  Repeat in file order with each repository-relative path.
+</ParamField>
+<ParamField body="name" type="string" optional />
+
+#### Returns
+
+[`HarnessSourceUploadResponse`](/docs/sdk/reference/simulation-models#harnesssourceuploadresponse).
+
+## client.simulation.jobs.scenarios
+
+TypeScript: `client.simulation.jobs.scenarios`.
+
+### simulation.jobs.scenarios.amend
+
+Drop or edit an environment's authored scenarios, or set a scenario's persona (as a draft where versioning applies); one receipt per change.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-jobs/{id}/scenarios/amend/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.jobs.scenarios.amend("your-id", changes=[])
+```
+
+```typescript TypeScript
+const result = await client.simulation.jobs.scenarios.amend("your-id", { changes: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.jobs.scenarios.amend(
+    id: str,
+    *,
+    changes: list[dict[str, Any]],
+    rework: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.jobs.scenarios.amend(id: string, params: SimulationJobsScenariosAmendParams, options?: RequestOptions): Promise<unknown>
+
+export interface SimulationJobsScenariosAmendParams {
+  changes: Array<Record<string, unknown>>;
+  rework?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="changes" type="object[]" required />
+<ParamField body="rework" type="boolean" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.jobs.scenarios.list
+
+List one page of an environment's (or run's) authored scenarios, by number; group_by defaults to goal when omitted (empty for a flat list).
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-jobs/{id}/scenarios/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.jobs.scenarios.list("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.jobs.scenarios.list("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.jobs.scenarios.list(
+    id: str,
+    *,
+    page: int | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    ordering: str | None | NotGiven = NOT_GIVEN,
+    group_by: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.jobs.scenarios.list(id: string, params: SimulationJobsScenariosListParams = {}, options?: RequestOptions): Promise<unknown>
+
+export interface SimulationJobsScenariosListParams {
+  page?: number | null;
+  limit?: number | null;
+  search?: string | null;
+  ordering?: string | null;
+  group_by?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField query="page" type="integer" optional />
+<ParamField query="limit" type="integer" optional />
+<ParamField query="search" type="string" optional />
+<ParamField query="ordering" type="string" optional />
+<ParamField query="group_by" type="string" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+## client.simulation.personas
+
+TypeScript: `client.simulation.personas`.
+
+### simulation.personas.create
+
+Create a workspace persona; a name already used by a system or workspace persona returns 400.
+
+<ApiEndpoint method="POST" path="/simulate/api/personas/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.personas.create(name="your-name", description="your-description")
+```
+
+```typescript TypeScript
+const result = await client.simulation.personas.create({
+  name: "your-name",
+  description: "your-description",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.personas.create(
+    *,
+    name: str,
+    description: str,
+    gender: list[str] | None | NotGiven = NOT_GIVEN,
+    age_group: list[str] | None | NotGiven = NOT_GIVEN,
+    location: list[str] | None | NotGiven = NOT_GIVEN,
+    profession: list[str] | None | NotGiven = NOT_GIVEN,
+    personality: list[str] | None | NotGiven = NOT_GIVEN,
+    communication_style: list[str] | None | NotGiven = NOT_GIVEN,
+    accent: list[str] | None | NotGiven = NOT_GIVEN,
+    multilingual: bool | None | NotGiven = NOT_GIVEN,
+    language: list[str] | None | NotGiven = NOT_GIVEN,
+    conversation_speed: list[str] | None | NotGiven = NOT_GIVEN,
+    background_sound: bool | None | NotGiven = NOT_GIVEN,
+    finished_speaking_sensitivity: list[str] | None | NotGiven = NOT_GIVEN,
+    interrupt_sensitivity: list[str] | None | NotGiven = NOT_GIVEN,
+    keywords: list[str] | None | NotGiven = NOT_GIVEN,
+    custom_properties: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    additional_instruction: str | None | NotGiven = NOT_GIVEN,
+    simulation_type: str | None | NotGiven = NOT_GIVEN,
+    tone: str | None | NotGiven = NOT_GIVEN,
+    punctuation: str | None | NotGiven = NOT_GIVEN,
+    slang_usage: str | None | NotGiven = NOT_GIVEN,
+    typos_frequency: str | None | NotGiven = NOT_GIVEN,
+    regional_mix: str | None | NotGiven = NOT_GIVEN,
+    emoji_usage: str | None | NotGiven = NOT_GIVEN,
+    verbosity: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.Persona
+```
+
+```typescript TypeScript
+client.simulation.personas.create(params: SimulationPersonasCreateParams, options?: RequestOptions): Promise<models.Persona>
+
+export interface SimulationPersonasCreateParams {
+  name: string;
+  description: string;
+  gender?: Array<string> | null;
+  age_group?: Array<string> | null;
+  location?: Array<string> | null;
+  profession?: Array<string> | null;
+  personality?: Array<string> | null;
+  communication_style?: Array<string> | null;
+  accent?: Array<string> | null;
+  multilingual?: boolean | null;
+  language?: Array<string> | null;
+  conversation_speed?: Array<string> | null;
+  background_sound?: boolean | null;
+  finished_speaking_sensitivity?: Array<string> | null;
+  interrupt_sensitivity?: Array<string> | null;
+  keywords?: Array<string> | null;
+  custom_properties?: Record<string, unknown> | null;
+  additional_instruction?: string | null;
+  simulation_type?: string | null;
+  tone?: string | null;
+  punctuation?: string | null;
+  slang_usage?: string | null;
+  typos_frequency?: string | null;
+  regional_mix?: string | null;
+  emoji_usage?: string | null;
+  verbosity?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="name" type="string" required />
+<ParamField body="description" type="string" required />
+<ParamField body="gender" type="string[]" optional />
+<ParamField body="age_group" type="string[]" optional />
+<ParamField body="location" type="string[]" optional />
+<ParamField body="profession" type="string[]" optional />
+<ParamField body="personality" type="string[]" optional />
+<ParamField body="communication_style" type="string[]" optional />
+<ParamField body="accent" type="string[]" optional />
+<ParamField body="multilingual" type="boolean" optional />
+<ParamField body="language" type="string[]" optional />
+<ParamField body="conversation_speed" type="string[]" optional />
+<ParamField body="background_sound" type="boolean" optional />
+<ParamField body="finished_speaking_sensitivity" type="string[]" optional />
+<ParamField body="interrupt_sensitivity" type="string[]" optional />
+<ParamField body="keywords" type="string[]" optional />
+<ParamField body="custom_properties" type="object" optional />
+<ParamField body="additional_instruction" type="string" optional />
+<ParamField body="simulation_type" type="string" optional />
+<ParamField body="tone" type="string" optional />
+<ParamField body="punctuation" type="string" optional />
+<ParamField body="slang_usage" type="string" optional />
+<ParamField body="typos_frequency" type="string" optional />
+<ParamField body="regional_mix" type="string" optional />
+<ParamField body="emoji_usage" type="string" optional />
+<ParamField body="verbosity" type="string" optional />
+
+#### Returns
+
+[`Persona`](/docs/sdk/reference/simulation-models#persona).
+
+### simulation.personas.duplicate
+
+Copy a system or workspace persona into the workspace under a new name; a name already used by a workspace persona returns 400.
+
+<ApiEndpoint method="POST" path="/simulate/api/personas/{id}/duplicate/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.personas.duplicate("your-id", name="your-name")
+```
+
+```typescript TypeScript
+const result = await client.simulation.personas.duplicate("your-id", { name: "your-name" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.personas.duplicate(
+    id: str,
+    *,
+    name: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.Persona
+```
+
+```typescript TypeScript
+client.simulation.personas.duplicate(id: string, params: SimulationPersonasDuplicateParams, options?: RequestOptions): Promise<models.Persona>
+
+export interface SimulationPersonasDuplicateParams {
+  name: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="name" type="string" required />
+
+#### Returns
+
+[`Persona`](/docs/sdk/reference/simulation-models#persona).
+
+### simulation.personas.get
+
+Return one system or workspace persona you can use.
+
+<ApiEndpoint method="GET" path="/simulate/api/personas/{id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.personas.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.personas.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.personas.get(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.Persona
+```
+
+```typescript TypeScript
+client.simulation.personas.get(id: string, options?: RequestOptions): Promise<models.Persona>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`Persona`](/docs/sdk/reference/simulation-models#persona).
+
+### simulation.personas.list
+
+List the system and workspace personas you can use, newest first, 10 per page by default; filter by type (prebuilt or custom), search or simulation_type (voice or text).
+
+<ApiEndpoint method="GET" path="/simulate/api/personas/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination))
+
+<CodeGroup>
+
+```python Python
+for item in client.simulation.personas.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.simulation.personas.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.personas.list(
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    type: str | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    simulation_type: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[Any]
+```
+
+```typescript TypeScript
+client.simulation.personas.list(params: SimulationPersonasListParams = {}, options?: RequestOptions): Pager<unknown>
+
+export interface SimulationPersonasListParams {
+  /** Number of results to return per page. */
+  limit?: number | null;
+  type?: string | null;
+  search?: string | null;
+  simulation_type?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+<ParamField query="type" type="string" optional />
+<ParamField query="search" type="string" optional />
+<ParamField query="simulation_type" type="string" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.personas.update
+
+Update a workspace persona; name is required on every update, other fields left out are kept, and so is simulation_type; system personas return 403.
+
+<ApiEndpoint method="PUT" path="/simulate/api/personas/{id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.personas.update("your-id", name="your-name")
+```
+
+```typescript TypeScript
+const result = await client.simulation.personas.update("your-id", { name: "your-name" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.personas.update(
+    id: str,
+    *,
+    name: str,
+    description: str | None | NotGiven = NOT_GIVEN,
+    gender: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    age_group: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    occupation: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    location: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    personality: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    communication_style: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    multilingual: bool | None | NotGiven = NOT_GIVEN,
+    languages: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    accent: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    conversation_speed: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    background_sound: bool | None | NotGiven = NOT_GIVEN,
+    finished_speaking_sensitivity: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    interrupt_sensitivity: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    keywords: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    metadata: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    additional_instruction: str | None | NotGiven = NOT_GIVEN,
+    profession: list[str] | None | NotGiven = NOT_GIVEN,
+    language: list[str] | None | NotGiven = NOT_GIVEN,
+    custom_properties: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    punctuation: Literal['clean', 'minimal', 'expressive', 'erratic'] | None | NotGiven = NOT_GIVEN,
+    slang_usage: Literal['none', 'moderate', 'heavy', 'light'] | None | NotGiven = NOT_GIVEN,
+    typos_frequency: Literal['none', 'rare', 'occasional', 'frequent'] | None | NotGiven = NOT_GIVEN,
+    regional_mix: Literal['none', 'moderate', 'heavy', 'light'] | None | NotGiven = NOT_GIVEN,
+    emoji_usage: Literal['never', 'light', 'regular', 'heavy'] | None | NotGiven = NOT_GIVEN,
+    tone: Literal['formal', 'casual', 'neutral'] | None | NotGiven = NOT_GIVEN,
+    verbosity: Literal['brief', 'balanced', 'detailed'] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.Persona
+```
+
+```typescript TypeScript
+client.simulation.personas.update(id: string, params: SimulationPersonasUpdateParams, options?: RequestOptions): Promise<models.Persona>
+
+export interface SimulationPersonasUpdateParams {
+  name: string;
+  description?: string | null;
+  gender?: Record<string, unknown> | null;
+  age_group?: Record<string, unknown> | null;
+  occupation?: Record<string, unknown> | null;
+  location?: Record<string, unknown> | null;
+  personality?: Record<string, unknown> | null;
+  communication_style?: Record<string, unknown> | null;
+  multilingual?: boolean | null;
+  languages?: Record<string, unknown> | null;
+  accent?: Record<string, unknown> | null;
+  conversation_speed?: Record<string, unknown> | null;
+  background_sound?: boolean | null;
+  finished_speaking_sensitivity?: Record<string, unknown> | null;
+  interrupt_sensitivity?: Record<string, unknown> | null;
+  keywords?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown> | null;
+  additional_instruction?: string | null;
+  profession?: Array<string> | null;
+  language?: Array<string> | null;
+  custom_properties?: Record<string, unknown> | null;
+  punctuation?: "clean" | "minimal" | "expressive" | "erratic" | null;
+  slang_usage?: "none" | "moderate" | "heavy" | "light" | null;
+  typos_frequency?: "none" | "rare" | "occasional" | "frequent" | null;
+  regional_mix?: "none" | "moderate" | "heavy" | "light" | null;
+  emoji_usage?: "never" | "light" | "regular" | "heavy" | null;
+  tone?: "formal" | "casual" | "neutral" | null;
+  verbosity?: "brief" | "balanced" | "detailed" | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="name" type="string" required />
+<ParamField body="description" type="string" optional />
+<ParamField body="gender" type="object" optional />
+<ParamField body="age_group" type="object" optional />
+<ParamField body="occupation" type="object" optional />
+<ParamField body="location" type="object" optional />
+<ParamField body="personality" type="object" optional />
+<ParamField body="communication_style" type="object" optional />
+<ParamField body="multilingual" type="boolean" optional />
+<ParamField body="languages" type="object" optional />
+<ParamField body="accent" type="object" optional />
+<ParamField body="conversation_speed" type="object" optional />
+<ParamField body="background_sound" type="boolean" optional />
+<ParamField body="finished_speaking_sensitivity" type="object" optional />
+<ParamField body="interrupt_sensitivity" type="object" optional />
+<ParamField body="keywords" type="object" optional />
+<ParamField body="metadata" type="object" optional />
+<ParamField body="additional_instruction" type="string" optional />
+<ParamField body="profession" type="string[]" optional />
+<ParamField body="language" type="string[]" optional />
+<ParamField body="custom_properties" type="object" optional />
+<ParamField body="punctuation" type="string" optional enum={["clean", "minimal", "expressive", "erratic"]} />
+<ParamField body="slang_usage" type="string" optional enum={["none", "moderate", "heavy", "light"]} />
+<ParamField body="typos_frequency" type="string" optional enum={["none", "rare", "occasional", "frequent"]} />
+<ParamField body="regional_mix" type="string" optional enum={["none", "moderate", "heavy", "light"]} />
+<ParamField body="emoji_usage" type="string" optional enum={["never", "light", "regular", "heavy"]} />
+<ParamField body="tone" type="string" optional enum={["formal", "casual", "neutral"]} />
+<ParamField body="verbosity" type="string" optional enum={["brief", "balanced", "detailed"]} />
+
+#### Returns
+
+[`Persona`](/docs/sdk/reference/simulation-models#persona).
 
 ## client.simulation.scenarios
 
@@ -523,6 +3290,58 @@ export interface SimulationScenariosUpdateParams {
 
 TypeScript: `client.simulation.tests`.
 
+### simulation.tests.add_eval_configs
+
+Add evals with your own mapping to a run test, such as an environment run's run_test_id (\{evaluations_config: [\{template_id, name, mapping, config, model\}]\}).
+
+<ApiEndpoint method="POST" path="/simulate/run-tests/{run_test_id}/eval-configs/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.tests.add_eval_configs("your-run-test-id", evaluations_config=[])
+```
+
+```typescript TypeScript
+const result = await client.simulation.tests.addEvalConfigs("your-run-test-id", { evaluations_config: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.tests.add_eval_configs(
+    run_test_id: str,
+    *,
+    evaluations_config: list[dict[str, Any]],
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AddEvalConfigsResponse
+```
+
+```typescript TypeScript
+client.simulation.tests.addEvalConfigs(runTestId: string, params: SimulationTestsAddEvalConfigsParams, options?: RequestOptions): Promise<models.AddEvalConfigsResponse>
+
+export interface SimulationTestsAddEvalConfigsParams {
+  evaluations_config: Array<Record<string, unknown>>;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="run_test_id" type="string" required>
+  Positional argument `run_test_id`.
+</ParamField>
+<ParamField body="evaluations_config" type="object[]" required />
+
+#### Returns
+
+[`AddEvalConfigsResponse`](/docs/sdk/reference/simulation-models#addevalconfigsresponse).
+
 ### simulation.tests.create
 
 Save a simulation test using name, agent_definition_id and scenario_ids, optionally agent_version and evaluations_config. Does not execute it; pass the returned test ID to run_simulation.
@@ -723,6 +3542,70 @@ The pager sends `page` itself; pass `limit` to change the page size.
 #### Returns
 
 A pager of [`RunTestResponse`](/docs/sdk/reference/simulation-models#runtestresponse) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### simulation.tests.list_executions
+
+List the runs (test executions) of a run test, such as an environment run's run_test_id, 10 per page by default.
+
+<ApiEndpoint method="GET" path="/simulate/run-tests/{run_test_id}/executions/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination))
+
+<CodeGroup>
+
+```python Python
+for item in client.simulation.tests.list_executions("your-run-test-id"):
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.simulation.tests.listExecutions("your-run-test-id")) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.tests.list_executions(
+    run_test_id: str,
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    status: str | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.TestExecutionItemResponse]
+```
+
+```typescript TypeScript
+client.simulation.tests.listExecutions(runTestId: string, params: SimulationTestsListExecutionsParams = {}, options?: RequestOptions): Pager<models.TestExecutionItemResponse>
+
+export interface SimulationTestsListExecutionsParams {
+  limit?: number | null;
+  status?: string | null;
+  search?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="run_test_id" type="string" required>
+  Positional argument `run_test_id`.
+</ParamField>
+<ParamField query="limit" type="integer" optional />
+<ParamField query="status" type="string" optional />
+<ParamField query="search" type="string" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`TestExecutionItemResponse`](/docs/sdk/reference/simulation-models#testexecutionitemresponse) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
 
 ### simulation.tests.run
 

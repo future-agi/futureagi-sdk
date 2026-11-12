@@ -379,6 +379,12 @@ def test_agents_and_simulation(client, request):
     assert client.agents.update(agent_id, description="updated").agent.description == "updated"
     assert client.agents.versions.create(agent_id, commit_message="v2").version.version_number == 2
     assert agent_id in [a.id for a in client.agents.list(search=agent.agent.agent_name)]
+    versions = client.agents.versions.list(agent_id).to_list()
+    assert sorted(v["version_number"] for v in versions) == [1, 2]
+    assert client.agents.versions.get(agent_id, versions[0]["id"])["id"] == versions[0]["id"]
+    # A version made from settings has no stored agent document.
+    allow(lambda: client.agents.versions.get_definition(agent_id, versions[0]["id"]), 404)
+    assert client.agents.runs.list(agent_id).results == []
 
     ds = client.datasets.create(new_dataset_name=_name("scenario-src"))
     request.addfinalizer(lambda: allow(lambda: client.datasets.delete(dataset_ids=[ds.dataset_id]), 400, 404))
@@ -403,6 +409,92 @@ def test_agents_and_simulation(client, request):
     # Backend bug: an unknown execution id returns 500 instead of 404.
     allow(lambda: client.simulation.executions.get(execution_id).first_page(), 404, 500)
     allow(lambda: client.simulation.executions.analytics(execution_id), 404, 500)
+    executions = client.simulation.tests.list_executions(test.id).to_list()
+    assert not execution or execution.execution_id in [e.id for e in executions]
+    # Empty lists are refused before anything is created (no judge credits).
+    allow(lambda: client.simulation.tests.add_eval_configs(test.id, evaluations_config=[]), 400)
+    allow(lambda: client.simulation.executions.list_calls(execution_id).first_page(), 404)
+    allow(lambda: client.simulation.executions.insights.get(execution_id), 404)
+    allow(lambda: client.simulation.executions.insights.start(execution_id), 400, 404, 409)
+    allow(lambda: client.simulation.executions.rerun_calls(execution_id, rerun_type="eval_only", call_execution_ids=[str(uuid.uuid4())]), 400, 404)
+    allow(lambda: client.simulation.calls.get(str(uuid.uuid4())), 404)
+
+
+def test_simulation_personas(client, request):
+    """Workspace personas: the whole write path, cleaned up through client.request (the SDK
+    deliberately exposes no delete)."""
+    name = _name("persona")
+    persona = client.simulation.personas.create(name=name, description="A patient caller")
+    request.addfinalizer(lambda: allow(lambda: client.request("DELETE", f"/simulate/api/personas/{persona.id}/"), 404))
+    assert persona.persona_type == "workspace"
+    assert client.simulation.personas.get(persona.id).name == name
+    assert client.simulation.personas.update(persona.id, name=name, description="updated").description == "updated"
+    copy = client.simulation.personas.duplicate(persona.id, name=f"{name}-copy")
+    request.addfinalizer(lambda: allow(lambda: client.request("DELETE", f"/simulate/api/personas/{copy.id}/"), 404))
+    assert copy.id != persona.id and copy.description == "updated"
+    assert {name, f"{name}-copy"} <= {p["name"] for p in client.simulation.personas.list(search=name)}
+
+
+def test_simulation_environments_and_jobs(client):
+    """The environment-era surface (the CLI's `fi sim`). Building an environment runs a builder
+    agent and spends credits, so a fresh stack has none: every per-environment call is made
+    against an id that does not exist, which still proves the route, the method, the body and
+    the typed error. Builder writes get invalid bodies that the server refuses before creating
+    anything."""
+    assert isinstance(client.simulation.environments.list().first_page().items, list)
+    env, other = str(uuid.uuid4()), str(uuid.uuid4())
+    environments = client.simulation.environments
+    for call in (
+        lambda: environments.get(env),
+        lambda: environments.rename(env, name="renamed"),
+        lambda: environments.run_plan(env),
+        lambda: environments.run(env, scenario_ids=["1"]),
+        lambda: environments.versions.list(env),
+        lambda: environments.versions.suite_members(env, other),
+        lambda: environments.versions.create_agent(env, prompt="You are a support agent."),
+        lambda: environments.versions.retry_agent(env, other),
+        lambda: environments.versions.set_default(env, "agent", other, expected_default_id=None),
+        lambda: environments.versions.diff(env, "agent", other),
+        lambda: environments.drafts.list(env),
+        lambda: environments.drafts.save(env, drafts=[{"piece": "suite", "expected_parent_id": None}], idempotency_key="sdk-live"),
+        lambda: environments.nudges.list(env),
+        lambda: environments.nudges.answer(env, other, answer="no"),
+        lambda: environments.nudges.stop(env, other),
+        lambda: environments.evaluations.available(env),
+        lambda: environments.evaluations.add(env, name="task_completion"),
+        lambda: environments.evaluations.update(env, other, model="turing_large"),
+        lambda: environments.evaluations.set_tool_call(env, enable_tool_evaluation=True),
+        lambda: environments.runs.add_evaluation(env, other, name="task_completion"),
+        lambda: environments.runs.regrade(env, other, eval_config_ids=[other]),
+    ):
+        with pytest.raises(fi.NotFoundError):
+            call()
+
+    jobs = client.simulation.jobs
+    for call in (
+        lambda: jobs.get(env),
+        lambda: jobs.send_message(env, content="Docker", client_request_id="sdk-live"),
+        lambda: jobs.adjust(env, instruction="Add a refund scenario."),
+        lambda: jobs.extend(env, count=1),
+        lambda: jobs.cancel(env),
+        lambda: jobs.scenarios.list(env),
+    ):
+        with pytest.raises(fi.NotFoundError):
+            call()
+    for call in (
+        lambda: jobs.create(agent={}, artifacts={}),  # connector and level are required
+        lambda: jobs.preflight(agent={}, artifacts={}),
+        lambda: jobs.set_secret_values(environment_id=env, environment_values={}),
+        lambda: jobs.scenarios.amend(env, changes=[]),
+    ):
+        with pytest.raises(fi.BadRequestError):
+            call()
+    staged = jobs.upload_sources(files=[("agent/main.py", b"print('hi')\n"), ("README.md", b"# agent\n")], paths=["agent/main.py", "README.md"], name=_name("source"))
+    assert staged.source_id and staged.file_count == 2  # both repeated form fields arrived
+    # Only a GOOGLE_APPLICATION_CREDENTIALS service-account JSON is accepted today.
+    with pytest.raises(fi.APIError) as refused:
+        jobs.upload_secret_file(file=("creds.json", b"{}"), environment_name="NOT_A_SUPPORTED_NAME")
+    assert refused.value.status_code in (400, 422)
 
 
 def test_gateway_management(client):
