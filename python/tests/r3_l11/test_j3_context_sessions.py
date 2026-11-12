@@ -5,7 +5,6 @@ from uuid import uuid4
 
 import httpx
 import pytest
-
 from fi.context.sessions import ContextSessionClient
 from fi.context.snapshot import SnapshotIntegrityError
 from fi.platform import Client

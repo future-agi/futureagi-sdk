@@ -5,7 +5,6 @@ from uuid import uuid4
 
 import httpx
 import pytest
-
 from fi.context import testing
 from fi.platform import Client
 

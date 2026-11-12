@@ -35,7 +35,7 @@ import re
 import sys
 import time
 from pathlib import Path
-from uuid import UUID, uuid5, NAMESPACE_URL
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 from fi.platform import Client, RequestOptions
 from fi.platform._errors import APIConnectionError, APIError

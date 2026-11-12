@@ -4,7 +4,6 @@ import json
 from uuid import uuid4
 
 import pytest
-
 from fi.context import authoring
 
 SKILLS = [{"id": f"s{n}", "name": f"leaf-{n}", "latest_version": 1 if n < 3 else None} for n in range(4)]

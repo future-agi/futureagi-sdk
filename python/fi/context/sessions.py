@@ -10,8 +10,9 @@ from __future__ import annotations
 from uuid import UUID
 
 from fi.platform import Client, RequestOptions
+
 from .client import ContextSnapshot
-from .snapshot import ManifestCollector, PAGE_SIZE, SnapshotIntegrityError
+from .snapshot import PAGE_SIZE, ManifestCollector, SnapshotIntegrityError
 from .source import ConsumptionSource, validate_access
 
 

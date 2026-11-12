@@ -4,7 +4,6 @@ import json
 from uuid import uuid4
 
 import pytest
-
 from fi.context import release
 
 A, B, REVIEWER = str(uuid4()), str(uuid4()), str(uuid4())

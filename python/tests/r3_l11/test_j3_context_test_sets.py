@@ -4,7 +4,6 @@ import json
 from uuid import uuid4
 
 import pytest
-
 from fi.context import testing
 
 A, B = str(uuid4()), str(uuid4())
