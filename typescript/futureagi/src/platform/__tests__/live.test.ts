@@ -94,7 +94,10 @@ live("platform client against a live backend", () => {
       expect(await client.datasets.delete({ dataset_ids: [ds.dataset_id!] })).toBeTruthy();
       warn.mockRestore();
     }
-    await expect(client.datasets.get(ds.dataset_id!)).rejects.toBeInstanceOf(BadRequestError); // backend answers 400, not 404
+    const gone = await client.datasets.get(ds.dataset_id!).catch((e) => e);
+    // A deleted dataset is not found: newer backends answer 404, older ones 400.
+    expect(gone instanceof NotFoundError || gone instanceof BadRequestError).toBe(true);
+    expect(gone.status).toBe(gone instanceof NotFoundError ? 404 : 400);
   });
 
   test("datasets: multipart upload from bytes", async () => {
