@@ -1,14 +1,14 @@
 /**
  * The AI SDK sandbox tools (src/sandbox-integrations/ai-sdk/tools.ts) over the contract-driven mock API: names,
- * input schemas, results (the Python MCP server's, design 3.4), clipping, timeouts, paths and errors. `ai` is
- * mocked (its `tool` is the identity and `jsonSchema` keeps the schema), so the package is never loaded here.
- * Synthetic credentials only; no socket.
+ * input schemas, results (the Python MCP server's, design 3.4), clipping, timeouts, paths and errors. The mock's
+ * exec route refuses an absolute `cwd` with a 400, as the service does. `ai` is mocked (its `tool` is the identity
+ * and `jsonSchema` keeps the schema), so the package is never loaded here. Synthetic credentials only; no socket.
  */
 import type { Tool } from "ai";
 
 import { FutureAGIClient } from "../../../futureagi-client";
-import { CommandIncompleteError, QuotaExceededError, Sandbox, SandboxError } from "../../../sandbox";
-import { EXEC, SID, SandboxApi, json, sseText, streamed } from "../../../sandbox/__fixtures__/openapi-mock";
+import { CommandIncompleteError, QuotaExceededError, Sandbox, SandboxError, ValidationError } from "../../../sandbox";
+import { EXEC, SID, SandboxApi, json, sseText, streamed, type Handler } from "../../../sandbox/__fixtures__/openapi-mock";
 import { clipOutput, DEFAULT_MAX_OUTPUT_CHARS, sandboxTools, type SandboxTools, type SandboxToolsOptions } from "../tools";
 
 jest.mock("ai", () => ({
@@ -28,12 +28,33 @@ const ENV = [
   "OMEGA_BASE_URL", "FUTUREAGI_OMEGA_API_KEY", "OMEGA_OS_API_KEY",
 ];
 
+/**
+ * The mock API with the exec route's working-folder rule: `cwd` is relative to /workspace, so an absolute folder,
+ * or a `.` or `..` segment, is answered with a 400 (no `cwd`, or an empty one, means /workspace). The rule wraps
+ * every exec answer, scripted or default.
+ */
+class WorkspaceApi extends SandboxApi {
+  constructor(base?: string) {
+    super(base);
+    this.on("execInWorkspaceSandbox", () => streamed([sseText([START, ["stdout", { data: "hello\n" }, "2"], ["exit", { ...EXIT, stdoutBytes: 6 }, "3"]])]));
+  }
+
+  override on(operationId: string, ...handlers: Handler[]): this {
+    if (operationId !== "execInWorkspaceSandbox") return super.on(operationId, ...handlers);
+    return super.on(operationId, ...handlers.map((handler): Handler => (call) => {
+      const cwd = (call.json as { cwd?: unknown } | undefined)?.cwd;
+      const refused = typeof cwd === "string" && (cwd.startsWith("/") || cwd.split("/").some((part) => part === "." || part === ".."));
+      return refused ? json(400, { code: "validation_error", message: "cwd is relative to /workspace" }) : handler(call);
+    }));
+  }
+}
+
 let saved: [string, string | undefined][] = [];
 let api: SandboxApi;
 beforeEach(() => {
   saved = ENV.map((key) => [key, process.env[key]]);
   for (const key of ENV) delete process.env[key];
-  api = new SandboxApi();
+  api = new WorkspaceApi();
 });
 afterEach(() => {
   for (const [key, value] of saved) {
@@ -115,7 +136,7 @@ describe("sandbox_exec", () => {
       exit_code: null, signal: "SIGKILL", timed_out: true, cancelled: false, truncated: false, duration_ms: 30_000,
       error: null, exec_id: EXEC, stdout: "so far", stderr: "", stdout_clipped: false, stderr_clipped: false,
     });
-    expect(execBodies()).toEqual([{ command: "sleep 99", cwd: "/workspace", timeoutSeconds: 30 }]);
+    expect(execBodies()).toEqual([{ command: "sleep 99", timeoutSeconds: 30 }]);
   });
 
   it("a non-zero exit and a spawn error are results too", async () => {
@@ -127,16 +148,49 @@ describe("sandbox_exec", () => {
     expect(await call(set.sandbox_exec, { command: "nope" })).toMatchObject({ exit_code: null, error: "spawn ENOENT" });
   });
 
-  it("cwd resolves against the working folder; timeouts are at least 1 and capped to maxTimeoutSeconds", async () => {
+  it("cwd resolves against the working folder and is sent relative to /workspace; timeouts are at least 1 and capped", async () => {
     const set = await tools({ workingDirectory: "/workspace/app", timeoutSeconds: 60, maxTimeoutSeconds: 3600 });
     await call(set.sandbox_exec, { command: "ls" });
     await call(set.sandbox_exec, { command: "ls", cwd: "src", timeout_seconds: 0 });
-    await call(set.sandbox_exec, { command: "ls", cwd: "/tmp", timeout_seconds: 5000 });
+    await call(set.sandbox_exec, { command: "ls", cwd: "/workspace/lib", timeout_seconds: 5000 });
+    await call(set.sandbox_exec, { command: "ls", cwd: ".." });
     expect(execBodies()).toEqual([
-      { command: "ls", cwd: "/workspace/app", timeoutSeconds: 60 },
-      { command: "ls", cwd: "/workspace/app/src", timeoutSeconds: 1 },
-      { command: "ls", cwd: "/tmp", timeoutSeconds: 3600 },
+      { command: "ls", cwd: "app", timeoutSeconds: 60 },
+      { command: "ls", cwd: "app/src", timeoutSeconds: 1 },
+      { command: "ls", cwd: "lib", timeoutSeconds: 3600 },
+      { command: "ls", timeoutSeconds: 60 },
     ]);
+  });
+
+  it("a cwd outside /workspace is refused before anything is sent, with the next step", async () => {
+    const set = await tools({ workingDirectory: "/workspace/app" });
+    for (const cwd of ["/tmp", "../..", "/workspace/../etc", "/workspacex"]) {
+      const error = await failure(() => call(set.sandbox_exec, { command: "ls", cwd }));
+      expect(error).toBeInstanceOf(SandboxError);
+      expect(error).toMatchObject({ code: "outside_workspace" });
+      expect((error as Error).message).toContain("cd");
+    }
+    expect(execBodies()).toHaveLength(0);
+  });
+
+  it("the working folder must be inside /workspace; a relative one is under it", async () => {
+    const error = await failure(() => tools({ workingDirectory: "/tmp" }));
+    expect(error).toBeInstanceOf(SandboxError);
+    expect(error).toMatchObject({ code: "outside_workspace" });
+    const set = await tools({ workingDirectory: "app" });
+    expect(set.sandbox_exec.description).toContain("/workspace/app");
+    await call(set.sandbox_exec, { command: "ls" });
+    expect(execBodies()).toEqual([{ command: "ls", cwd: "app" }]);
+  });
+
+  it("the mock exec route refuses an absolute cwd with a 400 (as the service does)", async () => {
+    const client = new FutureAGIClient({ apiKey: API_KEY, secretKey: SECRET_KEY, platformBaseUrl: api.base, fetch: api.fetch });
+    const sbx = await client.sandboxes.connect(SID);
+    const error = await failure(() => sbx.commands.run("pwd", { cwd: "/workspace" }));
+    expect(error).toBeInstanceOf(ValidationError);
+    expect(error).toMatchObject({ status: 400 });
+    expect((await sbx.commands.run("pwd", { cwd: "app" })).stdout).toBe("hello\n");
+    expect(execBodies()).toEqual([{ command: "pwd", cwd: "/workspace" }, { command: "pwd", cwd: "app" }]);
   });
 
   it("keeps the newest maxOutputChars of each stream and says how many were dropped", async () => {
@@ -166,17 +220,33 @@ describe("sandbox_exec", () => {
 });
 
 describe("file tools", () => {
-  it("sandbox_read_file returns text as utf8 and other files as base64, bounded by max_bytes", async () => {
+  it("sandbox_read_file returns text as utf8 and other files as base64, bounded by max_bytes, with bytes and truncated", async () => {
     api.on("readWorkspaceSandboxFile",
-      () => api.ok("readWorkspaceSandboxFile", { file: { path: "a.txt", encoding: "utf8", content: "hello" } }),
-      () => api.ok("readWorkspaceSandboxFile", { file: { path: "a.bin", encoding: "base64", content: "AAEC/w==", bytes: 4 } }));
+      () => api.ok("readWorkspaceSandboxFile", { file: { path: "a.txt", encoding: "utf8", content: "hello", bytes: 5, truncated: false } }),
+      () => api.ok("readWorkspaceSandboxFile", { file: { path: "a.bin", encoding: "base64", content: "AAEC/w==", bytes: 4, truncated: false } }));
     const set = await tools();
-    expect(await call(set.sandbox_read_file, { path: "a.txt", max_bytes: 100 })).toEqual({ path: "/workspace/a.txt", encoding: "utf8", content: "hello" });
-    expect(await call(set.sandbox_read_file, { path: "/workspace/a.bin" })).toEqual({ path: "/workspace/a.bin", encoding: "base64", content: "AAEC/w==" });
+    expect(await call(set.sandbox_read_file, { path: "a.txt", max_bytes: 100 })).toEqual({
+      path: "/workspace/a.txt", encoding: "utf8", content: "hello", bytes: 5, truncated: false,
+    });
+    expect(await call(set.sandbox_read_file, { path: "/workspace/a.bin" })).toEqual({
+      path: "/workspace/a.bin", encoding: "base64", content: "AAEC/w==", bytes: 4, truncated: false,
+    });
     const reads = api.callsTo("readWorkspaceSandboxFile");
     expect(reads.map((c) => c.params.path)).toEqual(["a.txt", "a.bin"]);
     expect(reads[0]!.query.get("maxBytes")).toBe("100");
     expect(reads[1]!.query.get("maxBytes")).toBeNull();
+  });
+
+  it("sandbox_read_file says when the content was cut, at max_bytes or the server's own read limit", async () => {
+    api.on("readWorkspaceSandboxFile",
+      () => api.ok("readWorkspaceSandboxFile", { file: { path: "big.log", encoding: "utf8", content: "abc", bytes: 3, truncated: true } }),
+      () => api.ok("readWorkspaceSandboxFile", { file: { path: "big.bin", encoding: "base64", content: "AAEC", bytes: 3, truncated: true } }));
+    const set = await tools();
+    expect(await call(set.sandbox_read_file, { path: "big.log", max_bytes: 3 })).toEqual({
+      path: "/workspace/big.log", encoding: "utf8", content: "abc", bytes: 3, truncated: true,
+    });
+    expect(await call(set.sandbox_read_file, { path: "big.bin" })).toMatchObject({ encoding: "base64", content: "AAEC", truncated: true });
+    expect(api.callsTo("readWorkspaceSandboxFile").map((c) => c.query.get("maxBytes"))).toEqual(["3", null]);
   });
 
   it("sandbox_write_file writes text or base64 once, with no folder call, and returns the path and byte count", async () => {

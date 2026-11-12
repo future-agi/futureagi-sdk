@@ -41,7 +41,7 @@ The session is the AI SDK's `Experimental_SandboxSession`:
 
 | Member | What it does |
 |---|---|
-| `run({ command, workingDirectory, env, abortSignal })` | Runs the command with `/bin/sh -c` and waits for it to end. Resolves with `{ exitCode, stdout, stderr }` for every ending (see Exit codes). |
+| `run({ command, workingDirectory, env, abortSignal })` | Runs the command with `/bin/sh -c` in a folder inside `/workspace` and waits for it to end. Resolves with `{ exitCode, stdout, stderr }` for every ending (see Exit codes). |
 | `readFile`, `readBinaryFile`, `readTextFile` | Read a file in `/workspace` (`readTextFile` takes `encoding`, `startLine`, `endLine`). A missing file is `null`. |
 | `writeFile`, `writeBinaryFile`, `writeTextFile` | Write a file in `/workspace`, creating missing folders and replacing an existing file. Text is UTF-8. |
 | `spawn` | Not offered: it rejects before anything is sent. Use `run`. |
@@ -72,7 +72,7 @@ The four tools have the names, inputs and results of the Python SDK's MCP server
 | Tool | Input | Result |
 |---|---|---|
 | `sandbox_exec` | `command`, `cwd?`, `timeout_seconds?` | `exit_code`, `signal`, `timed_out`, `cancelled`, `truncated`, `duration_ms`, `error`, `exec_id`, `stdout`, `stderr`, `stdout_clipped`, `stderr_clipped` |
-| `sandbox_read_file` | `path`, `max_bytes?` | `path`, `encoding` (`utf8` for text, else `base64`), `content` |
+| `sandbox_read_file` | `path`, `max_bytes?` | `path`, `encoding` (`utf8` for text, else `base64`), `content`, `bytes`, `truncated` (the file is longer than `content`: cut at `max_bytes` or the workspace's `caps.files.maxReadBytes`) |
 | `sandbox_write_file` | `path`, `content`, `encoding?` (`utf8` or `base64`) | `path`, `bytes` |
 | `sandbox_list_files` | `path?` | `path`, `entries` (`name`, `size`, `directory`, `mode`) |
 
@@ -81,20 +81,25 @@ ended the command or it never started. `stdout` and `stderr` keep their newest `
 20000) after a first line `[... N earlier characters dropped ...]`. A refusal (a hibernated sandbox, a full quota) is
 thrown, and the AI SDK hands the error to the model.
 
+`cwd` is a folder inside `/workspace`, relative to the working folder or absolute (`/workspace/app`). The exec API
+takes the folder relative to `/workspace`, so the tool sends `/workspace/app` as `app` and `/workspace` itself as no
+folder at all. A `cwd` outside `/workspace` is refused before anything is sent; to work there, begin the command with
+`cd`. The session's `run` treats its `workingDirectory` the same way.
+
 ## Options
 
 | `createFutureAGISandboxSession` | Default | |
 |---|---|---|
 | `sandbox` | - | An existing handle (`Sandbox.connect`, `Sandbox.create`, `client.sandboxes`). |
 | `create` | `{}` | `Sandbox.create` options, used when `sandbox` is absent. Not both. |
-| `workingDirectory` | `/workspace` | Where commands run and relative paths resolve. A per-call `workingDirectory` wins. |
+| `workingDirectory` | `/workspace` | Where commands run and relative paths resolve: a folder inside `/workspace` (a relative one is under it). A folder outside `/workspace` is refused before a sandbox is created. A per-call `workingDirectory` wins. |
 | `timeoutSeconds` | the workspace default | Each command stops after this many seconds (at least 1). |
 | `maxTimeoutSeconds` | - | The workspace's limit, `caps.exec.maxTimeoutSeconds` from `Sandbox.list()`; `timeoutSeconds` is capped to it. |
 | `description` | generated | The session's `description`. |
 | `deleteOnDispose` | `true` only for a sandbox the function created | Whether `dispose()` deletes the sandbox. |
 
-`sandboxTools(sandbox, options)` takes `workingDirectory`, `timeoutSeconds` (used when the model gives none),
-`maxTimeoutSeconds` and `maxOutputChars`.
+`sandboxTools(sandbox, options)` takes `workingDirectory` (inside `/workspace`, as above), `timeoutSeconds` (used
+when the model gives none), `maxTimeoutSeconds` and `maxOutputChars`.
 
 ## Exit codes
 
@@ -125,6 +130,7 @@ command that may have run is never sent again. An `abortSignal` closes the strea
 ## Hosted limits
 
 - File calls reach `/workspace` only; read or copy anything else with a command (`cat`, `cp`).
+- Commands start in a folder inside `/workspace`; a command that needs another folder begins with `cd`.
 - A file written through the session or `sandbox_write_file` goes in one request, up to the workspace's
   `caps.files.maxWriteBytes`; use `sandbox.files.upload` for larger files (its folder must exist).
 - Commands stop at the workspace's `caps.exec.maxTimeoutSeconds`, and output beyond `caps.exec.maxOutputBytes` is

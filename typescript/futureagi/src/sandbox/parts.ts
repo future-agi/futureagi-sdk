@@ -56,11 +56,19 @@ export class Files {
     return response.entries;
   }
 
-  /** A file's content, bounded by `maxBytes`: a string for text, bytes for anything else. Check `truncated`
-   * on `client.sandboxes.files.read` when the size matters. */
+  /** A file's content, bounded by `maxBytes`: a string for text, bytes for anything else. Use `readRecord`
+   * when the size matters: it also says whether the content was cut (`truncated`). */
   async read(path: string, options: { maxBytes?: number } = {}): Promise<string | Uint8Array> {
+    const file = await this.readRecord(path, options);
+    return file.encoding === "base64" ? fromBase64(file.content) : file.content;
+  }
+
+  /** The read as the server sent it: `content` (the text when `encoding` is `utf8`, else base64), `bytes`, and
+   * `truncated` when the content stops before the end of the file (at `maxBytes` or the workspace's
+   * `caps.files.maxReadBytes`). One call, like `read`. */
+  async readRecord(path: string, options: { maxBytes?: number } = {}): Promise<T.ReadWorkspaceSandboxFileResponse["file"]> {
     const response = await mapped(() => this.#api.files.read(this.#sandbox.id, path, options));
-    return response.file.encoding === "base64" ? fromBase64(response.file.content) : response.file.content;
+    return response.file;
   }
 
   /** Write a small text or binary file (audited; up to the JSON body limit). Never retried. */

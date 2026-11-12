@@ -10,8 +10,11 @@
  * Every call goes through the `Sandbox` handle of `@future-agi/sdk`. Nothing is retried: a command that may have
  * run is never sent again. `run` resolves with an exit code for every ending (./exit.ts); it throws only what the
  * handle throws (`CommandIncompleteError` when no exit frame came, `CommandFailedError` on an error frame, or the
- * request's own refusal). The file methods reach `/workspace` only (the files API takes paths relative to it); a
- * missing file reads as null. `spawn` is not offered: it rejects before anything is sent.
+ * request's own refusal) and a folder outside `/workspace`. Commands start in a folder inside `/workspace`: the
+ * exec API takes that folder relative to `/workspace` and refuses an absolute one, so `/workspace/app` is sent as
+ * `app` and `/workspace` itself as no folder at all; a folder outside `/workspace` is refused before anything is
+ * sent (a command can still `cd` there). The file methods reach `/workspace` only (the files API takes paths
+ * relative to it); a missing file reads as null. `spawn` is not offered: it rejects before anything is sent.
  */
 
 import type { Experimental_SandboxSession } from "ai";
@@ -35,7 +38,8 @@ export interface FutureAGISandboxSessionOptions {
   readonly sandbox?: Sandbox;
   /** The create options used when `sandbox` is absent (`Sandbox.create`, which reads the environment). */
   readonly create?: CreateSandboxOptions;
-  /** Where commands run and relative file paths resolve (default `/workspace`). */
+  /** Where commands run and relative file paths resolve (default `/workspace`): a folder inside `/workspace`,
+   * absolute or relative to it. A folder outside `/workspace` is refused before a sandbox is created. */
   readonly workingDirectory?: string;
   /** The server stops each command after this many seconds (at least 1); absent, the workspace default applies. */
   readonly timeoutSeconds?: number;
@@ -51,7 +55,7 @@ export interface FutureAGISandboxSessionOptions {
 export interface FutureAGISandboxSession extends Experimental_SandboxSession {
   /** The sandbox handle, for anything the session does not cover. */
   readonly sandbox: Sandbox;
-  /** Where commands run and relative file paths resolve. */
+  /** Where commands run and relative file paths resolve: an absolute folder inside `/workspace`. */
   readonly workingDirectory: string;
   /** Delete the sandbox when the session owns it (see `deleteOnDispose`); a second call does nothing. */
   dispose(): Promise<void>;
@@ -95,6 +99,43 @@ export function filesPath(base: string, path: string): string {
     `${resolved} is outside ${DEFAULT_WORKING_DIRECTORY}: the sandbox's file calls reach only that folder (use a command such as cat or cp)`,
     { code: "outside_workspace", operation: "sandbox.files" },
   );
+}
+
+/** `folder` (absolute) relative to `/workspace`: "" for `/workspace` itself, undefined for a folder outside it. */
+function underWorkspace(folder: string): string | undefined {
+  if (folder === DEFAULT_WORKING_DIRECTORY) return "";
+  return folder.startsWith(`${DEFAULT_WORKING_DIRECTORY}/`) ? folder.slice(DEFAULT_WORKING_DIRECTORY.length + 1) : undefined;
+}
+
+function outsideFolder(folder: string): SandboxError {
+  return new SandboxError(
+    `${folder} is outside ${DEFAULT_WORKING_DIRECTORY}: commands start in a folder inside it (to work in ${folder}, ` +
+      "begin the command with cd)",
+    { code: "outside_workspace", operation: "sandbox.commands" },
+  );
+}
+
+/**
+ * A working folder as an absolute folder inside `/workspace` (a relative one is under `/workspace`). A folder
+ * outside `/workspace` is refused: commands cannot start there.
+ */
+export function workingFolder(path: string = DEFAULT_WORKING_DIRECTORY): string {
+  const folder = resolvePath(DEFAULT_WORKING_DIRECTORY, path);
+  if (underWorkspace(folder) === undefined) throw outsideFolder(folder);
+  return folder;
+}
+
+/**
+ * The exec API's `cwd` for the folder `path` resolved against `base` (a relative `base` is under `/workspace`).
+ * The exec API takes the folder relative to `/workspace` and refuses an absolute one, so `/workspace/app` is sent
+ * as `app` and `/workspace` itself as no `cwd` at all (undefined). A folder outside `/workspace` is refused before
+ * anything is sent.
+ */
+export function execCwd(base: string, path: string): string | undefined {
+  const folder = resolvePath(resolvePath(DEFAULT_WORKING_DIRECTORY, base), path);
+  const inside = underWorkspace(folder);
+  if (inside === undefined) throw outsideFolder(folder);
+  return inside === "" ? undefined : inside;
 }
 
 /** `text` followed by `line` on a line of its own. */
@@ -147,9 +188,9 @@ class Session implements FutureAGISandboxSession {
   readonly #deleteOnDispose: boolean;
   #disposed = false;
 
-  constructor(sandbox: Sandbox, options: FutureAGISandboxSessionOptions, deleteOnDispose: boolean) {
+  constructor(sandbox: Sandbox, options: FutureAGISandboxSessionOptions, workingDirectory: string, deleteOnDispose: boolean) {
     this.sandbox = sandbox;
-    this.workingDirectory = options.workingDirectory ?? DEFAULT_WORKING_DIRECTORY;
+    this.workingDirectory = workingDirectory;
     this.#timeoutSeconds = clampTimeout(options.timeoutSeconds, options.maxTimeoutSeconds);
     this.#deleteOnDispose = deleteOnDispose;
     this.description =
@@ -162,8 +203,9 @@ class Session implements FutureAGISandboxSession {
   readonly run = async (options: RunOptions): Promise<{ exitCode: number; stdout: string; stderr: string }> => {
     options.abortSignal?.throwIfAborted();
     const timeoutSeconds = this.#timeoutSeconds;
+    const cwd = execCwd(this.workingDirectory, options.workingDirectory ?? ".");
     const result = await this.sandbox.commands.run(options.command, {
-      cwd: resolvePath(this.workingDirectory, options.workingDirectory ?? "."),
+      ...(cwd !== undefined ? { cwd } : {}),
       ...(options.env !== undefined ? { env: options.env } : {}),
       ...(timeoutSeconds !== undefined ? { timeoutSeconds } : {}),
       ...(options.abortSignal !== undefined ? { signal: options.abortSignal } : {}),
@@ -242,13 +284,15 @@ class Session implements FutureAGISandboxSession {
 /**
  * A sandbox session for the AI SDK. With `sandbox`, it wraps that handle; otherwise it creates a sandbox with
  * `Sandbox.create(create)` (the environment's credentials). `dispose()` deletes the sandbox only when this
- * function created it, unless `deleteOnDispose` says otherwise. Never retried.
+ * function created it, unless `deleteOnDispose` says otherwise. A `workingDirectory` outside `/workspace` is
+ * refused before anything is sent. Never retried.
  */
 export async function createFutureAGISandboxSession(options: FutureAGISandboxSessionOptions = {}): Promise<FutureAGISandboxSession> {
   if (options.sandbox !== undefined && options.create !== undefined) {
     throw new TypeError("createFutureAGISandboxSession takes sandbox or create, not both");
   }
+  const workingDirectory = workingFolder(options.workingDirectory);
   const created = options.sandbox === undefined;
   const sandbox = options.sandbox ?? (await Sandbox.create(options.create ?? {}));
-  return new Session(sandbox, options, options.deleteOnDispose ?? created);
+  return new Session(sandbox, options, workingDirectory, options.deleteOnDispose ?? created);
 }

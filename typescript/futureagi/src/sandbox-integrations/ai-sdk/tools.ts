@@ -10,20 +10,23 @@
  * `sandbox_list_files`. A non-zero exit, a timeout, a signal and a cancel are results the model reads; a refusal
  * or a stream with no exit frame is thrown, and the AI SDK hands the error to the model. No tool takes an `env`
  * (exec variables must never carry credentials), and nothing is retried. The file tools reach `/workspace` only,
- * like the files API; `sandbox_exec` runs anywhere.
+ * like the files API. `sandbox_exec` starts a command in a folder inside `/workspace` (the exec API takes that
+ * folder relative to `/workspace`); a `cwd` outside it is refused before anything is sent, and a command can still
+ * `cd` elsewhere.
  */
 
 import { jsonSchema, tool, type Tool } from "ai";
 
 import type { Sandbox } from "../../sandbox";
-import { clampTimeout, DEFAULT_WORKING_DIRECTORY, filesPath, resolvePath } from "./session";
+import { clampTimeout, execCwd, filesPath, resolvePath, workingFolder } from "./session";
 
 /** Output characters each of stdout and stderr keeps (the newest ones), as in the Python MCP server. */
 export const DEFAULT_MAX_OUTPUT_CHARS = 20_000;
 
 /** How the tools run commands and resolve paths. */
 export interface SandboxToolsOptions {
-  /** Where commands run and relative paths resolve (default `/workspace`). */
+  /** Where commands run and relative paths resolve (default `/workspace`): a folder inside `/workspace`, absolute
+   * or relative to it. A folder outside `/workspace` is refused when the tools are built. */
   readonly workingDirectory?: string;
   /** The default limit in seconds for `sandbox_exec` when the model gives none; absent, the workspace default. */
   readonly timeoutSeconds?: number;
@@ -62,11 +65,14 @@ export interface SandboxReadFileInput {
   readonly max_bytes?: number;
 }
 
-/** `sandbox_read_file` result: text as UTF-8, anything else as base64. */
+/** `sandbox_read_file` result: text as UTF-8, anything else as base64, with the server's `bytes`; `truncated`
+ * when the content stops before the end of the file (at `max_bytes` or the workspace's read limit). */
 export interface SandboxReadFileResult {
   readonly path: string;
   readonly encoding: "utf8" | "base64";
   readonly content: string;
+  readonly bytes: number;
+  readonly truncated: boolean;
 }
 
 /** `sandbox_write_file` input. */
@@ -111,14 +117,6 @@ export function clipOutput(text: string, max: number): { text: string; clipped: 
   return { text: `[... ${start} earlier characters dropped ...]\n${text.slice(start)}`, clipped: true };
 }
 
-const CHUNK = 0x8000;
-
-function toBase64(bytes: Uint8Array): string {
-  let binary = "";
-  for (let i = 0; i < bytes.length; i += CHUNK) binary += String.fromCharCode(...Array.from(bytes.subarray(i, i + CHUNK)));
-  return btoa(binary);
-}
-
 function fromBase64(text: string): Uint8Array {
   const binary = atob(text);
   const out = new Uint8Array(binary.length);
@@ -128,7 +126,7 @@ function fromBase64(text: string): Uint8Array {
 
 /** AI SDK tools that run commands and edit files in `sandbox`. */
 export function sandboxTools(sandbox: Sandbox, options: SandboxToolsOptions = {}): SandboxTools {
-  const workingDirectory = options.workingDirectory ?? DEFAULT_WORKING_DIRECTORY;
+  const workingDirectory = workingFolder(options.workingDirectory);
   const maxOutputChars = Math.max(1, Math.floor(options.maxOutputChars ?? DEFAULT_MAX_OUTPUT_CHARS));
   const at = (path: string): string => resolvePath(workingDirectory, path);
 
@@ -141,7 +139,12 @@ export function sandboxTools(sandbox: Sandbox, options: SandboxToolsOptions = {}
       type: "object",
       properties: {
         command: { type: "string", description: "The shell command to run." },
-        cwd: { type: "string", description: `The folder to run it in (default ${workingDirectory}).` },
+        cwd: {
+          type: "string",
+          description:
+            `The folder to run it in (default ${workingDirectory}): a folder inside /workspace, relative to ` +
+            `${workingDirectory} or absolute. To work outside /workspace, begin the command with cd.`,
+        },
         timeout_seconds: { type: "integer", minimum: 1, description: "Stop the command after this many seconds (the workspace limit applies)." },
       },
       required: ["command"],
@@ -149,8 +152,9 @@ export function sandboxTools(sandbox: Sandbox, options: SandboxToolsOptions = {}
     }),
     execute: async (input: SandboxExecInput, { abortSignal }): Promise<SandboxExecResult> => {
       const timeoutSeconds = clampTimeout(input.timeout_seconds ?? options.timeoutSeconds, options.maxTimeoutSeconds);
+      const cwd = execCwd(workingDirectory, input.cwd ?? ".");
       const result = await sandbox.commands.run(input.command, {
-        cwd: at(input.cwd ?? "."),
+        ...(cwd !== undefined ? { cwd } : {}),
         ...(timeoutSeconds !== undefined ? { timeoutSeconds } : {}),
         ...(abortSignal !== undefined ? { signal: abortSignal } : {}),
       });
@@ -174,7 +178,9 @@ export function sandboxTools(sandbox: Sandbox, options: SandboxToolsOptions = {}
   });
 
   const sandbox_read_file = tool({
-    description: "Read a file from the sandbox (text as UTF-8, other files as base64).",
+    description:
+      "Read a file from the sandbox (text as UTF-8, other files as base64; encoding says which). max_bytes reads at " +
+      "most that many bytes; truncated says the file is longer than the content returned.",
     inputSchema: jsonSchema<SandboxReadFileInput>({
       type: "object",
       properties: {
@@ -187,10 +193,8 @@ export function sandboxTools(sandbox: Sandbox, options: SandboxToolsOptions = {}
     execute: async (input: SandboxReadFileInput): Promise<SandboxReadFileResult> => {
       const path = at(input.path);
       const maxBytes = input.max_bytes !== undefined ? Math.max(1, Math.floor(input.max_bytes)) : undefined;
-      const content = await sandbox.files.read(filesPath(workingDirectory, path), maxBytes !== undefined ? { maxBytes } : {});
-      return typeof content === "string"
-        ? { path, encoding: "utf8", content }
-        : { path, encoding: "base64", content: toBase64(content) };
+      const file = await sandbox.files.readRecord(filesPath(workingDirectory, path), maxBytes !== undefined ? { maxBytes } : {});
+      return { path, encoding: file.encoding, content: file.content, bytes: file.bytes, truncated: file.truncated };
     },
   });
 

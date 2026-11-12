@@ -1,8 +1,8 @@
 /**
  * The AI SDK sandbox session (src/sandbox-integrations/ai-sdk/session.ts) over the contract-driven mock API: the
  * exit-code table, the working folder and timeout rules, abort, the errors that propagate, dispose, and the file
- * methods. The session imports only types from `ai`, so the package is never loaded here. Synthetic credentials
- * only; no socket.
+ * methods. The mock's exec route refuses an absolute `cwd` with a 400, as the service does. The session imports
+ * only types from `ai`, so the package is never loaded here. Synthetic credentials only; no socket.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -10,8 +10,8 @@ import { join } from "node:path";
 import type { Experimental_SandboxSession } from "ai";
 
 import { FutureAGIClient } from "../../../futureagi-client";
-import { CommandFailedError, CommandIncompleteError, Sandbox, SandboxError } from "../../../sandbox";
-import { EXEC, SID, SandboxApi, json, sseText, streamed } from "../../../sandbox/__fixtures__/openapi-mock";
+import { CommandFailedError, CommandIncompleteError, Sandbox, SandboxError, ValidationError } from "../../../sandbox";
+import { EXEC, SID, SandboxApi, json, sseText, streamed, type Handler } from "../../../sandbox/__fixtures__/openapi-mock";
 
 // Environment keys go only to Future AGI hosts, so the mock answers on a Future AGI fixture host.
 const HOSTED = "https://sandbox-fixture.futureagi.com/omega/api";
@@ -28,8 +28,10 @@ import {
 import {
   clampTimeout,
   createFutureAGISandboxSession,
+  execCwd,
   filesPath,
   resolvePath,
+  workingFolder,
   type FutureAGISandboxSession,
   type FutureAGISandboxSessionOptions,
 } from "../session";
@@ -47,13 +49,34 @@ const exitFrame = (fields: Record<string, unknown> = {}) => ["exit", { ...EXIT, 
 const ending = (fields: Partial<{ exitCode: number | null; signal: string; timedOut: boolean; cancelled: boolean; error: string }>) =>
   ({ exitCode: null, timedOut: false, cancelled: false, ...fields });
 
+/**
+ * The mock API with the exec route's working-folder rule: `cwd` is relative to /workspace, so an absolute folder,
+ * or a `.` or `..` segment, is answered with a 400 (no `cwd`, or an empty one, means /workspace). The rule wraps
+ * every exec answer, scripted or default.
+ */
+class WorkspaceApi extends SandboxApi {
+  constructor(base?: string) {
+    super(base);
+    this.on("execInWorkspaceSandbox", () => streamed([sseText([START, ["stdout", { data: "hello\n" }, "2"], exitFrame({ stdoutBytes: 6 })])]));
+  }
+
+  override on(operationId: string, ...handlers: Handler[]): this {
+    if (operationId !== "execInWorkspaceSandbox") return super.on(operationId, ...handlers);
+    return super.on(operationId, ...handlers.map((handler): Handler => (call) => {
+      const cwd = (call.json as { cwd?: unknown } | undefined)?.cwd;
+      const refused = typeof cwd === "string" && (cwd.startsWith("/") || cwd.split("/").some((part) => part === "." || part === ".."));
+      return refused ? json(400, { code: "validation_error", message: "cwd is relative to /workspace" }) : handler(call);
+    }));
+  }
+}
+
 let saved: [string, string | undefined][] = [];
 let api: SandboxApi;
 let globalFetch: jest.SpyInstance;
 beforeEach(() => {
   saved = ENV.map((key) => [key, process.env[key]]);
   for (const key of ENV) delete process.env[key];
-  api = new SandboxApi(HOSTED);
+  api = new WorkspaceApi(HOSTED);
   globalFetch = jest.spyOn(globalThis, "fetch").mockImplementation((input, init) => api.fetch(input as RequestInfo, init));
 });
 afterEach(() => {
@@ -143,21 +166,62 @@ describe("run", () => {
     expect(execBodies()).toHaveLength(1);
   });
 
-  it("runs in /workspace by default; a per-call workingDirectory wins, and env passes through", async () => {
+  it("runs in /workspace by default with no cwd sent; a per-call workingDirectory wins, sent relative to /workspace", async () => {
     const sbx = await session();
     await sbx.run({ command: "pwd" });
-    await sbx.run({ command: "pwd", workingDirectory: "/tmp/build", env: { MODE: "test" } });
+    await sbx.run({ command: "pwd", workingDirectory: "/workspace/build", env: { MODE: "test" } });
     await sbx.run({ command: "pwd", workingDirectory: "src/../lib" });
+    await sbx.run({ command: "pwd", workingDirectory: "/workspace/./app/.." });
     expect(execBodies()).toEqual([
-      { command: "pwd", cwd: "/workspace" },
-      { command: "pwd", cwd: "/tmp/build", env: { MODE: "test" } },
-      { command: "pwd", cwd: "/workspace/lib" },
+      { command: "pwd" },
+      { command: "pwd", cwd: "build", env: { MODE: "test" } },
+      { command: "pwd", cwd: "lib" },
+      { command: "pwd" },
     ]);
   });
 
-  it("the session's own workingDirectory is the default", async () => {
-    await (await session({ workingDirectory: "/workspace/app" })).run({ command: "ls" });
-    expect(execBodies()).toEqual([{ command: "ls", cwd: "/workspace/app" }]);
+  it("the session's own workingDirectory is the default; a relative one is under /workspace", async () => {
+    const app = await session({ workingDirectory: "/workspace/app" });
+    await app.run({ command: "ls" });
+    await app.run({ command: "ls", workingDirectory: ".." });
+    const relative = await session({ workingDirectory: "app/src" });
+    expect(relative.workingDirectory).toBe("/workspace/app/src");
+    expect(relative.description).toContain("/workspace/app/src");
+    await relative.run({ command: "ls" });
+    expect(execBodies()).toEqual([{ command: "ls", cwd: "app" }, { command: "ls" }, { command: "ls", cwd: "app/src" }]);
+  });
+
+  it("a folder outside /workspace is refused before anything is sent", async () => {
+    const sbx = await session({ workingDirectory: "/workspace/app" });
+    for (const workingDirectory of ["/tmp/build", "../..", "/workspace/../etc", "/workspacex"]) {
+      const error = await failure(() => sbx.run({ command: "pwd", workingDirectory }));
+      expect(error).toBeInstanceOf(SandboxError);
+      expect(error).toMatchObject({ code: "outside_workspace" });
+      expect((error as Error).message).toContain("cd");
+    }
+    expect(execBodies()).toHaveLength(0);
+  });
+
+  it("a workingDirectory outside /workspace is refused before a sandbox is created", async () => {
+    hostedEnv();
+    const error = await failure(() => createFutureAGISandboxSession({ workingDirectory: "/tmp" }));
+    expect(error).toBeInstanceOf(SandboxError);
+    expect(error).toMatchObject({ code: "outside_workspace" });
+    expect(await failure(() => session({ workingDirectory: "/workspace/../etc" }))).toMatchObject({ code: "outside_workspace" });
+    expect(api.callsTo("createWorkspaceSandbox")).toHaveLength(0);
+    expect(execBodies()).toHaveLength(0);
+  });
+
+  it("the mock exec route refuses an absolute cwd, or a . or .. segment, with a 400 (as the service does)", async () => {
+    const sbx = await connect();
+    for (const cwd of ["/workspace", "/tmp", "./app", "app/../lib"]) {
+      const error = await failure(() => sbx.commands.run("pwd", { cwd }));
+      expect(error).toBeInstanceOf(ValidationError);
+      expect(error).toMatchObject({ status: 400 });
+    }
+    expect((await sbx.commands.run("pwd", { cwd: "app" })).exitCode).toBe(0);
+    expect((await sbx.commands.run("pwd")).stdout).toBe("hello\n");
+    expect(execBodies()).toHaveLength(6);
   });
 
   it("timeoutSeconds is an integer of at least 1, capped to maxTimeoutSeconds; absent, none is sent", async () => {
@@ -289,6 +353,20 @@ describe("files", () => {
     expect(filesPath("/workspace/app", "/workspace/b.txt")).toBe("b.txt");
     expect(filesPath("/workspace", ".")).toBe(".");
     expect(() => filesPath("/workspace", "/etc/hosts")).toThrow(SandboxError);
+  });
+
+  it("a command folder is sent relative to /workspace, none for /workspace itself, and refused outside it", () => {
+    expect(execCwd("/workspace", ".")).toBeUndefined();
+    expect(execCwd("/workspace/app", "/workspace")).toBeUndefined();
+    expect(execCwd("/workspace", "/workspace/app/src")).toBe("app/src");
+    expect(execCwd("/workspace/app", "../lib")).toBe("lib");
+    expect(execCwd("app", "src")).toBe("app/src");
+    for (const path of ["/tmp", "..", "/workspacex", "/workspace/../etc"]) expect(() => execCwd("/workspace", path)).toThrow(SandboxError);
+    expect(() => execCwd("app", "../..")).toThrow(SandboxError);
+    expect(workingFolder()).toBe("/workspace");
+    expect(workingFolder("app/")).toBe("/workspace/app");
+    expect(workingFolder("/workspace/a/../b")).toBe("/workspace/b");
+    expect(() => workingFolder("/tmp")).toThrow(SandboxError);
   });
 
   it("readTextFile decodes the file and keeps a 1-based inclusive line range", async () => {
