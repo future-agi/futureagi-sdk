@@ -24,8 +24,9 @@ the ``futureagi.com`` zone) or to loopback, and a self-host token only to loopba
 ``--allow-custom-base-url`` (the command-line form of ``allow_custom_base_url``) is passed: a
 ``--base-url`` copied from a document cannot send the exported keys anywhere else. For an
 ``OMEGA_BASE_URL`` from the environment, ``FI_ALLOW_CUSTOM_PLATFORM_URL=1`` also lets the key pair
-go to another host, as for ``Sandbox.create``; it never applies to ``--base-url``. Either prints the
-core's one-time notice.
+go to another host, as for ``Sandbox.create``; it never applies to ``--base-url``. Either way,
+sending the key pair to such a host prints the core's notice on stderr, once per address; a
+self-host token goes there without a notice. ``mcp`` follows the same rule, flag included.
 
 Output: ``--format text`` (the default) is for people. ``--format json`` (or ``--json``) prints the
 API record: the list response for ``list``; the sandbox record for ``create``, ``get``,
@@ -184,7 +185,8 @@ def _add_globals(parser: argparse.ArgumentParser, *, nested: bool) -> None:
         "--allow-custom-base-url", action="store_true",
         default=argparse.SUPPRESS if nested else False,
         help="send the credentials to a host outside Future AGI's and loopback: a self-hosted "
-             "EE, or a host you trust (prints a notice)",
+             "EE, or a host you trust. Sending the key pair (FI_API_KEY, FI_SECRET_KEY) there "
+             "prints a notice on stderr; a FUTUREAGI_OMEGA_API_KEY token is sent with no notice",
     )
     parser.add_argument(
         "--format", choices=("text", "json"), default=argparse.SUPPRESS if nested else "text",
@@ -439,13 +441,16 @@ def _main(args: argparse.Namespace) -> int:
         return EXIT_USAGE
 
 
-def _open(args: argparse.Namespace):
-    """``client.sandboxes`` for the environment's settings, with ``--base-url`` in place of
-    ``OMEGA_BASE_URL``; the environment itself is never changed."""
+def _connect(args: argparse.Namespace, connection):
+    """``(core, rule)``: the executor ``connection`` (``SandboxConnection`` or
+    ``AsyncSandboxConnection``) builds for the environment's settings, with ``--base-url`` in place
+    of ``OMEGA_BASE_URL`` (the environment itself is never changed), and the :class:`OriginRule`
+    every call through it passes. Every command, ``mcp`` included, connects here, so one host rule
+    covers them all. Raises :class:`_Usage` without an address, and the core's configuration error
+    for a refused credential or host."""
     import os
 
-    from fi.sandbox import Sandboxes
-    from fi.sandbox._connection import BASE_URL_ENV, OriginRule, SandboxConnection
+    from fi.sandbox._connection import BASE_URL_ENV, OriginRule
 
     env = dict(os.environ)
     typed = getattr(args, "base_url", None) is not None
@@ -463,8 +468,16 @@ def _open(args: argparse.Namespace):
     # allows it for OMEGA_BASE_URL never applies to a --base-url copied from a document.
     allow = True if flag else (False if typed else None)
     hint = _KEYS_HINT if typed else _ENV_KEYS_HINT
-    core = SandboxConnection(environ=env, allow_custom_base_url=allow, keys_hint=hint).core()
-    rule = OriginRule(allow_custom_base_url=flag, hint=_CLI_HINT, setting=_SETTING)
+    core = connection(environ=env, allow_custom_base_url=allow, keys_hint=hint).core()
+    return core, OriginRule(allow_custom_base_url=flag, hint=_CLI_HINT, setting=_SETTING)
+
+
+def _open(args: argparse.Namespace):
+    """``client.sandboxes`` for the environment's settings (:func:`_connect`)."""
+    from fi.sandbox import Sandboxes
+    from fi.sandbox._connection import SandboxConnection
+
+    core, rule = _connect(args, SandboxConnection)
     return Sandboxes(core, rule=rule), core
 
 
@@ -1058,33 +1071,28 @@ def _mcp(args: argparse.Namespace) -> int:
     """``sandbox mcp``: serve the sandbox tools over MCP on stdin and stdout until the client
     disconnects or sends SIGTERM (exit 0 after the cleanup). Stdout is the protocol's, so a refusal
     goes to stderr (``code: message``, exit 2); without the ``mcp`` package the import raises
-    ``MissingExtraError`` and the core prints the install line (exit 3)."""
+    ``MissingExtraError`` and the core prints the install line (exit 3). The address, credential
+    and host rule are every other command's (:func:`_connect`), ``--allow-custom-base-url``
+    included."""
     import asyncio
-    import os
     import sys
 
     from fi import errors
     from fi.sandbox import AsyncSandboxes
-    from fi.sandbox._connection import BASE_URL_ENV, AsyncSandboxConnection, OriginRule
+    from fi.sandbox._connection import AsyncSandboxConnection
     from fi.sandbox.types import EXIT_OK, EXIT_USAGE
 
     def refuse(code: str, message: str) -> int:
         print(f"{code}: {message}", file=sys.stderr)
         return EXIT_USAGE
 
-    env = dict(os.environ)
-    base = args.base_url if getattr(args, "base_url", None) is not None else env.get(BASE_URL_ENV, "")
-    if not base.strip():
-        return refuse("missing_base_url", f"no sandbox address: pass --base-url URL or set {BASE_URL_ENV} "
-                                          "(hosted: https://<gateway-host>/omega/api; self-hosted: your "
-                                          "EE's address with its port). There is no default.")
-    env[BASE_URL_ENV] = base
     try:
-        core = AsyncSandboxConnection(environ=env).core()
+        core, rule = _connect(args, AsyncSandboxConnection)
+    except _Usage as usage:
+        return refuse(usage.code, usage.message)
     except errors.ConfigurationError as error:
         return refuse(_code(error), _configuration(error))
     try:
-        rule = OriginRule(allow_custom_base_url=False, hint=_CLI_HINT, setting=_SETTING)
         problem = rule.problem(core.shared.origin())
         if problem is not None:
             return refuse(_code(problem), str(problem))

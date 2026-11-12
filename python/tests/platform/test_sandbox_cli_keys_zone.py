@@ -4,12 +4,16 @@ any request, with exit 2 and one line naming the flag that allows it and the sel
 unless ``--allow-custom-base-url`` is also passed; FI_ALLOW_CUSTOM_PLATFORM_URL never opens a typed
 address, only OMEGA_BASE_URL, as for ``Sandbox.create``. The flag is the command-line form of
 ``allow_custom_base_url``, so it also lets a self-host token reach an EE that is not on loopback.
-Fake credentials only."""
+Sending the key pair off the zone prints the core's notice on stderr; a self-host token prints none.
+``sandbox mcp`` follows the same rule with the same refusal text (``mcp`` is faked). Fake
+credentials only."""
 
 from __future__ import annotations
 
 import pytest
 from fi._core import origins
+
+from tests.sandbox_integrations import _fake_mcp
 
 from ._sandbox_cli_support import (  # noqa: F401 (registers the server fixture)
     LOCAL,
@@ -127,3 +131,97 @@ def test_exec_accepts_the_flag_before_the_dashes(server, capsys):
     assert run("exec", "--allow-custom-base-url", SBX, "--", "true") == 0
     assert names(server) == ["sandboxes.commands.run"]
     assert LOCAL in str(server.last.request.url)
+
+
+def test_help_says_when_the_flag_prints_a_notice(server, capsys, monkeypatch):
+    monkeypatch.setenv("COLUMNS", "100")  # argparse wraps help to the terminal: keep each name whole
+    for argv in (("--help",), ("mcp", "--help")):
+        assert run(*argv) == 0
+        out = " ".join(capsys.readouterr().out.split())
+        assert "(prints a notice)" not in out
+        assert "(FI_API_KEY, FI_SECRET_KEY) there prints a notice on stderr" in out
+        assert "FUTUREAGI_OMEGA_API_KEY token is sent with no notice" in out
+
+
+# --- sandbox mcp --------------------------------------------------------------------------------
+
+
+@pytest.fixture(name="mcp")
+def mcp_fixture(monkeypatch):
+    """The fake MCP framework, with the server module imported afresh; the fake client lists the
+    sandboxes once while the server runs."""
+    restore = _fake_mcp.isolate_server()
+    fake = _fake_mcp.install(monkeypatch)
+
+    async def client(srv):
+        await srv.tools["sandbox_list"]()
+
+    fake.on_run = client
+    yield fake
+    restore()
+
+
+@pytest.mark.parametrize("argv", [
+    ("mcp", "--base-url", ATTACKER),
+    ("--base-url", ATTACKER, "mcp"),
+])
+def test_mcp_refuses_a_typed_base_url_outside_the_zone_before_any_request(hosted, mcp, capsys, argv):
+    assert run("--base-url", ATTACKER, "list") == 2
+    listed = refusal_line(capsys)
+    assert run(*argv) == 2
+    assert refusal_line(capsys) == listed
+    assert listed.startswith("custom_base_url_not_allowed: ") and "--allow-custom-base-url" in listed
+    assert "FI_ALLOW_CUSTOM_PLATFORM_URL" not in listed
+    assert hosted.seen == [] and mcp.instances == []
+
+
+def test_mcp_never_lets_the_environment_opt_in_open_a_typed_base_url(hosted, mcp, capsys, monkeypatch):
+    monkeypatch.setenv("FI_ALLOW_CUSTOM_PLATFORM_URL", "1")
+    assert run("mcp", "--base-url", ATTACKER) == 2
+    assert refusal_line(capsys).startswith("custom_base_url_not_allowed: ")
+    assert hosted.seen == [] and mcp.instances == []
+
+
+def test_mcp_follows_the_variable_for_an_omega_base_url(hosted, mcp, capsys, monkeypatch):
+    monkeypatch.setenv("OMEGA_BASE_URL", ATTACKER)
+    assert run("list") == 2
+    listed = refusal_line(capsys)
+    assert run("mcp") == 2
+    assert refusal_line(capsys) == listed
+    assert "--allow-custom-base-url" in listed and "FI_ALLOW_CUSTOM_PLATFORM_URL=1" in listed
+    assert hosted.seen == [] and mcp.instances == []
+    monkeypatch.setenv("FI_ALLOW_CUSTOM_PLATFORM_URL", "1")
+    assert run("mcp") == 0
+    assert names(hosted) == ["sandboxes.list"]
+    assert str(hosted.last.request.url).startswith(ATTACKER + "/")
+    captured = capsys.readouterr()
+    assert captured.out == "" and captured.err.count(NOTICE) == 1
+    no_secret(captured.out, captured.err)
+
+
+@pytest.mark.parametrize("argv", [
+    ("mcp", "--base-url", ATTACKER, "--allow-custom-base-url"),
+    ("--allow-custom-base-url", "mcp", "--base-url", ATTACKER),
+    ("--base-url", ATTACKER, "--allow-custom-base-url", "mcp"),
+])
+def test_mcp_passes_the_flag_through_for_the_key_pair(hosted, mcp, capsys, argv):
+    assert run(*argv) == 0
+    assert [srv.runs for srv in mcp.instances] == [1]
+    assert names(hosted) == ["sandboxes.list"]
+    assert str(hosted.last.request.url).startswith(ATTACKER + "/")
+    assert hosted.last.request.headers["x-api-key"] == FAKE_KEY
+    captured = capsys.readouterr()
+    assert captured.out == "" and captured.err.count(NOTICE) == 1
+    no_secret(captured.out, captured.err)
+
+
+def test_mcp_passes_the_flag_through_for_a_self_host_token(server, mcp, capsys):
+    assert run("mcp", "--base-url", "https://ee.example.test") == 2
+    line = refusal_line(capsys)
+    assert line.startswith("custom_base_url_not_allowed: ") and "--allow-custom-base-url" in line
+    assert server.seen == [] and mcp.instances == []
+    assert run("mcp", "--base-url", "https://ee.example.test", "--allow-custom-base-url") == 0
+    assert names(server) == ["sandboxes.list"]
+    assert server.last.request.headers["authorization"] == f"Bearer {FAKE_TOKEN}"
+    assert str(server.last.request.url).startswith("https://ee.example.test/workspace/sandboxes")
+    assert capsys.readouterr() == ("", "")  # a token gets no notice
