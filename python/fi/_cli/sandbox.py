@@ -25,8 +25,9 @@ the ``futureagi.com`` zone) or to loopback, and a self-host token only to loopba
 ``--base-url`` copied from a document cannot send the exported keys anywhere else. For an
 ``OMEGA_BASE_URL`` from the environment, ``FI_ALLOW_CUSTOM_PLATFORM_URL=1`` also lets the key pair
 go to another host, as for ``Sandbox.create``; it never applies to ``--base-url``. Either way,
-sending the key pair to such a host prints the core's notice on stderr, once per address; a
-self-host token goes there without a notice. ``mcp`` follows the same rule, flag included.
+sending the key pair to such a host prints the core's notice on stderr, once per address, naming
+the flag when it was given and the variable otherwise; a self-host token goes there without a
+notice. ``mcp`` follows the same rule, flag included.
 
 Output: ``--format text`` (the default) is for people. ``--format json`` (or ``--json``) prints the
 API record: the list response for ``list``; the sandbox record for ``create``, ``get``,
@@ -448,8 +449,10 @@ def _connect(args: argparse.Namespace, connection):
     every call through it passes. Every command, ``mcp`` included, connects here, so one host rule
     covers them all. Raises :class:`_Usage` without an address, and the core's configuration error
     for a refused credential or host."""
+    import contextlib
     import os
 
+    from fi._core.origins import keys_notice_cause
     from fi.sandbox._connection import BASE_URL_ENV, OriginRule
 
     env = dict(os.environ)
@@ -468,7 +471,11 @@ def _connect(args: argparse.Namespace, connection):
     # allows it for OMEGA_BASE_URL never applies to a --base-url copied from a document.
     allow = True if flag else (False if typed else None)
     hint = _KEYS_HINT if typed else _ENV_KEYS_HINT
-    core = connection(environ=env, allow_custom_base_url=allow, keys_hint=hint).core()
+    # The core's key-pair notice names what sent the keys: the flag when it is given (it wins over
+    # the variable), else FI_ALLOW_CUSTOM_PLATFORM_URL.
+    cause = keys_notice_cause("--allow-custom-base-url was given") if flag else contextlib.nullcontext()
+    with cause:
+        core = connection(environ=env, allow_custom_base_url=allow, keys_hint=hint).core()
     return core, OriginRule(allow_custom_base_url=flag, hint=_CLI_HINT, setting=_SETTING)
 
 

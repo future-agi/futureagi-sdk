@@ -1,6 +1,6 @@
 /**
  * The AI SDK sandbox tools (src/sandbox-integrations/ai-sdk/tools.ts) over the contract-driven mock API: names,
- * input schemas, results (the Python MCP server's, design 3.4), clipping, timeouts, paths and errors. The mock's
+ * input schemas, results (the same as the Python MCP server's), clipping, timeouts, paths and errors. The mock's
  * exec route refuses an absolute `cwd` with a 400, as the service does. `ai` is mocked (its `tool` is the identity
  * and `jsonSchema` keeps the schema), so the package is never loaded here. Synthetic credentials only; no socket.
  */

@@ -205,9 +205,12 @@ class AsyncSandboxFiles(_Part):
             raise failure
 
     async def _refused(self, prep: Any, response: httpx.Response) -> BaseException:
-        """The sandbox error for a download that answered with an error status."""
+        """The sandbox error for a download that answered with an error status. Its body is
+        read, up to the error-body cap, only when it is not encoded (the download asked for
+        identity), so nothing is decompressed: an encoded one gives the status alone."""
         core, chunks = self._core, []
-        complete = not response.is_redirect
+        encoding = response.headers.get("content-encoding", "").strip().lower()
+        complete = not response.is_redirect and encoding in ("", "identity")
         if complete:
             async for chunk in response.aiter_bytes():
                 chunks.append(chunk)
