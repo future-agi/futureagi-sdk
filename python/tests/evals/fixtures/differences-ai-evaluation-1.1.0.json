@@ -165,7 +165,7 @@
    "id": "refusal-reason",
    "area": "evaluation errors",
    "ai_evaluation": "When the eval endpoint refused an evaluation, Evaluator.evaluate() returned a result with no output whose reason was \"Evaluation failed with a 400 Bad Request. Please check your input data and evaluation configuration. Response: <the whole response body>\" for a 400, \"Invalid FI Client Authentication, please check your API key and secret key.\" for a 403 whatever the server said, or \"Error in evaluation: <status>, response: <the whole response body>\" for any other status. A request that timed out had the reason \"Evaluation timed out after <n>s\" when the wait for it timed out, or the transport's own exception text when the HTTP request timed out. evaluate(<template>, engine=\"turing\") returned each of these, and any other request Evaluator.evaluate() could not complete, as status \"completed\" with no score, no error and the text only in reason.",
-   "futureagi": "The reason leads with the server's own sentence (the message, detail or error of its error body, then the field errors it lists under details) and then the status, for example \"Validation failed: inputs: Unexpected keys provided: answer. Accepted keys are: output (HTTP 400)\". A 403 reads the same way, followed by \"Check your API key and secret key.\", for example \"Authentication credentials were not provided. (HTTP 403) Check your API key and secret key.\"; EvalResponseHandler still raises it as InvalidAuthError. A body without a sentence gives a short excerpt of itself, at most 200 characters, instead of the whole body (a 403 adds the same hint). A request that timed out, whether the wait for it or the HTTP request itself, has the reason \"Evaluation timed out after <n>s\". Evaluator.evaluate() still returns the result instead of raising; the result is still an EvalResult, and for a request that was refused, failed or timed out it also carries the reason as error. evaluate(engine=\"turing\") reports such a result as status \"failed\" with that text as error (and still as reason), so BatchResult.success_rate no longer counts it as completed. The source contract of Evaluator.evaluate listed here also covers its log-privacy changes.",
+   "futureagi": "The reason leads with the server's own sentence (the message, detail or error of its error body, then the field errors it lists under details) and then the status, for example \"Validation failed: inputs: Unexpected keys provided: answer. Accepted keys are: output (HTTP 400)\". A 403 reads the same way, followed by \"Check your API key and secret key.\", for example \"Authentication credentials were not provided. (HTTP 403) Check your API key and secret key.\"; EvalResponseHandler still raises it as InvalidAuthError. A body without a sentence gives a short excerpt of itself, at most 200 characters, instead of the whole body (a 403 adds the same hint). A request that timed out, whether the wait for it or the HTTP request itself, has the reason \"Evaluation timed out after <n>s\". Evaluator.evaluate() still returns the result instead of raising; the result is still an EvalResult, and for a request that was refused, failed or timed out it also carries the reason as error. evaluate(engine=\"turing\") reports such a result as status \"failed\" with that text as error (and still as reason), so BatchResult.success_rate no longer counts it as completed.",
    "docs": "Code that detected a refused or timed-out evaluation from evaluate(engine=\"turing\") by a missing score checks result.status == \"failed\" and reads result.error. A refused Evaluator.evaluate() result shows the server's sentence and the status as its reason, not the raw response body; code that matched the fixed 403 sentence matches InvalidAuthError or the \"(HTTP 403)\" status instead.",
    "tests": [
     "tests/evals/test_refused_evaluations.py::test_evaluator_reason_leads_with_the_server_sentence_and_status",
@@ -184,10 +184,6 @@
     "fi/evals/evaluator.py:EvalResponseHandler._handle_error": {
      "upstream_ast_sha256": "185ec0c68055f5845b9f3d1bce5ca7269d542ab6cb134281939993350bbc451d",
      "ast_sha256": "ffd7363b0ba4072e0f60bba63a528087fc249b037d14da1f1a6a0bf85fe3f224"
-    },
-    "fi/evals/evaluator.py:Evaluator.evaluate": {
-     "upstream_ast_sha256": "dc1f24c471429d9b0f3c57ecd241d0bd1de5ddd3bef5e13e5b6f504831d68043",
-     "ast_sha256": "485d843334c15965fdd421a3740dc0b0a74252344a2d4809b73a97478c3671ce"
     }
    }
   },
@@ -208,6 +204,27 @@
     "fi/evals/evaluator.py:Evaluator._configure_evaluations": {
      "upstream_ast_sha256": "29c6b61989a256c7c7a4b7155c6d48e7cf88df174a6d1386f1a12f3d831dfdf7",
      "ast_sha256": "feecee32b74eab7f66faa0254bac162c6c6df5ee395cb25e983fcdf95b23478e"
+    }
+   }
+  },
+  {
+   "id": "trace-eval-needs-opentelemetry",
+   "area": "installation",
+   "ai_evaluation": "Evaluator.evaluate(..., trace_eval=True, custom_eval_name=...) attaches the evaluation to the current span, which it reads with OpenTelemetry. When OpenTelemetry could not be imported, the call logged an error asking for fi-instrumentation-otel and returned None without sending the evaluation, so the caller saw no error and got no result.",
+   "futureagi": "OpenTelemetry comes with `pip install \"futureagi[evals]\"`, not the base install. When it is not installed, the call raises fi.errors.MissingExtraError before any request is sent, with extra \"evals\", module \"opentelemetry\", install_hint `pip install \"futureagi[evals]\"` and the message \"Evaluator.evaluate(trace_eval=True) reads the current span with OpenTelemetry, which is not installed. Run: pip install \"futureagi[evals]\"\". Without custom_eval_name the call still logs a warning and runs the evaluation untraced. With OpenTelemetry installed the call is unchanged: outside a span, or when the tracer provider names no project_name, it logs a warning and sends the evaluation untraced; inside a span of a project it sends the evaluation with that span's id. The source contract of Evaluator.evaluate listed here also covers its log-privacy and refusal-reason changes.",
+   "docs": "Pages that trace evaluations with evaluate(..., trace_eval=True, custom_eval_name=...) install `pip install \"futureagi[evals]\"`. Code that checked that call for None catches fi.errors.MissingExtraError instead.",
+   "tests": [
+    "tests/evals/test_trace_eval_without_opentelemetry.py::test_trace_eval_without_opentelemetry_names_the_evals_extra_and_sends_nothing",
+    "tests/evals/test_trace_eval_without_opentelemetry.py::test_trace_eval_without_a_name_still_evaluates_untraced_without_opentelemetry",
+    "tests/evals/test_trace_eval_without_opentelemetry.py::test_trace_eval_outside_a_span_sends_the_evaluation_untraced",
+    "tests/evals/test_trace_eval_without_opentelemetry.py::test_trace_eval_inside_a_project_span_sends_that_span",
+    "tests/evals/test_evaluator_log_privacy.py::test_trace_import_error_omits_exception_traceback",
+    "tests/evals/test_module_extractions.py::test_extracted_functions_keep_the_published_signature_and_body"
+   ],
+   "source_contract": {
+    "fi/evals/evaluator.py:Evaluator.evaluate": {
+     "upstream_ast_sha256": "dc1f24c471429d9b0f3c57ecd241d0bd1de5ddd3bef5e13e5b6f504831d68043",
+     "ast_sha256": "0980976b4701dc70de25629534b98ee537e8f04b3df605e782182df276d1d06b"
     }
    }
   }

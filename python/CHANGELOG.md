@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Fixed: tracing evaluations without OpenTelemetry
+- `Evaluator.evaluate(..., trace_eval=True, custom_eval_name=...)` reads the current span with
+  OpenTelemetry, which comes with `futureagi[evals]`. When it is not installed, the call now
+  raises `fi.errors.MissingExtraError` naming `trace_eval` and `pip install "futureagi[evals]"`
+  before sending anything, instead of logging an error and returning `None`. Without
+  `custom_eval_name`, or with OpenTelemetry installed, the call is unchanged.
+
 ### Fixed: configuring evaluations without OpenTelemetry
 - `Evaluator.evaluate(..., platform=..., custom_eval_name=...)` reads the current span with
   OpenTelemetry, which comes with `futureagi[evals]`. When it is not installed, the call now

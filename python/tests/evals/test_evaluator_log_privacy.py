@@ -7,6 +7,7 @@ from unittest.mock import Mock
 
 import pytest
 
+from fi.errors import MissingExtraError
 from fi.evals.core import cloud_registry
 from fi.evals.evaluator import Evaluator
 from fi.evals.otel import enrichment as span_enrichment
@@ -141,16 +142,24 @@ def test_trace_import_error_omits_exception_traceback(evaluator, inputs, caplog,
         trace=SimpleNamespace(get_current_span=get_current_span),
     ))
 
-    result = client.evaluate(
-        "toxicity", inputs, trace_eval=True, custom_eval_name="privacy-test",
-        skip_input_mapping=True,
-    )
+    with pytest.raises(MissingExtraError) as raised:
+        client.evaluate(
+            "toxicity", inputs, trace_eval=True, custom_eval_name="privacy-test",
+            skip_input_mapping=True,
+        )
 
-    assert result is None
+    assert raised.value.extra == "evals"
+    assert raised.value.module == "opentelemetry"
+    assert raised.value.install_hint == 'pip install "futureagi[evals]"'
+    assert isinstance(raised.value.__cause__, ImportError)
     get_current_span.assert_called_once()
     client.request.assert_not_called()
-    assert_private_logs(caplog, "Future AGI SDK not found")
-    assert "error type: ImportError" in caplog.text
+    for sentinel in (INPUT_SENTINEL, OUTPUT_SENTINEL, ERROR_SENTINEL):
+        assert sentinel not in str(raised.value)
+        assert sentinel not in caplog.text
+        assert all(sentinel not in str(record.args) for record in caplog.records)
+    assert all(record.exc_info is None for record in caplog.records)
+    assert all(record.exc_text is None for record in caplog.records)
 
 
 def configure(client, inputs):
