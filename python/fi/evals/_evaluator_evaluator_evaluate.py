@@ -47,6 +47,8 @@ class _EvaluatorEvaluateMethods:
         Raises:
             ValidationError: If the inputs do not match the evaluation templates
             Exception: If the API request fails
+            MissingExtraError: ``trace_eval`` with ``custom_eval_name`` needs OpenTelemetry, which
+                reads the current span, and it is not installed; nothing is sent.
         """
         from fi.evals.evaluator import (
             Any, BatchRunResult, Dict, EvalResponseHandler, EvalResult, EvalTemplate, HttpMethod,
@@ -108,13 +110,13 @@ class _EvaluatorEvaluateMethods:
                         )
 
                 except ImportError as exc:
-                    logging.error(
-                        "Future AGI SDK not found. "
-                        "Please install 'fi-instrumentation-otel' to automatically enrich the evaluation with project context. "
-                        "Evaluation: %s; error type: %s",
-                        eval_name, type(exc).__name__,
-                    )
-                    return
+                    from fi.errors import MissingExtraError
+
+                    raise MissingExtraError(
+                        "Evaluator.evaluate(trace_eval=True) reads the current span with OpenTelemetry, "
+                        'which is not installed. Run: pip install "futureagi[evals]"',
+                        exc, extra="evals", module="opentelemetry",
+                    ) from exc
 
         if eval_name is None:
             raise TypeError(

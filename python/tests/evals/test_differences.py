@@ -24,7 +24,7 @@ PYTHON = Path(__file__).resolve().parents[2]
 DIFFERENCES = Path(__file__).parent / "fixtures/differences-ai-evaluation-1.1.0.json"
 KNOWN = {"cli", "evals-extra", "http-error-retries", "missing-keys-message", "per-instance-keys",
          "success-status", "patch-targets", "registry-session", "ground-truth-setup", "log-privacy",
-         "refusal-reason", "configure-needs-opentelemetry"}
+         "refusal-reason", "configure-needs-opentelemetry", "trace-eval-needs-opentelemetry"}
 FIELDS = ("id", "area", "ai_evaluation", "futureagi", "docs", "tests")
 
 
