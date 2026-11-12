@@ -4,17 +4,18 @@
 path outside it, never over the SDK's own headers, read when each request is sent, a malformed
 value refused before anything is sent, and a reflected value never in an error. A scope header of
 either mode named there is dropped on every sandbox request, on this path and on
-``client.sandboxes`` alike, while the shared parser (and so every other client) still accepts it.
+``client.sandboxes`` alike, with one line on stderr per name that names the header (never its
+value), while the shared parser (and so every other client) still accepts it.
 No network (the frozen-OpenAPI mock); every header value here is made up."""
 
 from __future__ import annotations
 
 import pytest
-from fi import AsyncFutureAGIClient, FutureAGIClient
+from fi import AsyncFutureAGIClient, FutureAGIClient, _extra_headers
 from fi._core.platform_async import AsyncPlatformCore
 from fi._core.platform_base import SCOPE_HEADERS, PlatformCore
 from fi._core.transport import PlatformShared
-from fi._extra_headers import ExtraHeaders, ExtraHeadersError, parse
+from fi._extra_headers import ExtraHeaders, ExtraHeadersError, drop_scope, parse
 from fi.sandbox import (
     AsyncSandbox,
     AsyncSandboxes,
@@ -160,6 +161,16 @@ def scope_sent(seen):
     return SCOPE & {name.lower() for name in seen.request.headers.keys()}
 
 
+@pytest.fixture
+def notices(monkeypatch):
+    """A fresh one-time budget: each test sees the dropped-header notice afresh."""
+    monkeypatch.setattr(_extra_headers, "_dropped", set())
+
+
+def notice_lines(err):
+    return [line for line in err.splitlines() if line.startswith("futureagi: ") and SETTING in line]
+
+
 def bearer_env(monkeypatch):
     """The self-host token on loopback instead of the autouse key pair."""
     monkeypatch.delenv("FI_API_KEY")
@@ -205,6 +216,42 @@ def test_the_sdks_own_scope_is_the_only_scope_sent(mode, auth, server, monkeypat
     workspace, _ = OWN[auth]
     assert headers.get_list(workspace) == ["ws_own"] and headers["x-team"] == "env-team"
     assert scope_sent(server.last) == {workspace}
+
+
+def test_a_dropped_scope_header_is_named_once_on_stderr(notices, capsys):
+    headers = {"X-Team": "t1", "X-Workspace-Id": SCOPE_VALUE, "x-omega-org": SCOPE_VALUE}
+    assert drop_scope(headers, SCOPE_HEADERS) == {"X-Team": "t1"}
+    assert drop_scope(headers, SCOPE_HEADERS) == {"X-Team": "t1"}  # dropped again, said once
+    err = capsys.readouterr().err
+    lines = notice_lines(err)
+    assert len(err.splitlines()) == len(lines) == 2
+    assert [line.split()[1] for line in lines] == ["X-Workspace-Id", "x-omega-org"]
+    assert all("FI_WORKSPACE_ID" in line and "default workspace" in line for line in lines)
+    assert SCOPE_VALUE not in err
+    assert drop_scope({"X-Team": "t1"}, SCOPE_HEADERS) == {"X-Team": "t1"}
+    assert capsys.readouterr().err == ""  # nothing dropped, nothing said
+
+
+@pytest.mark.parametrize("mode", MODES)
+@pytest.mark.parametrize("auth", ["keys", "bearer"])
+def test_every_sandbox_call_drops_a_scope_header_with_one_notice_per_name(mode, auth, server, monkeypatch,
+                                                                          notices, capsys):
+    if auth == "bearer":
+        bearer_env(monkeypatch)
+    monkeypatch.setenv(SETTING, f"X-Team=env-team;{SCOPE_SETTING}")
+
+    async def go():
+        await resolve(cls(mode).list())
+        sbx = await resolve(cls(mode).connect(SBX))
+        await resolve(sbx.files.download("a.bin"))
+
+    run(go())
+    assert {seen.name for seen in server.seen} >= {"sandboxes.list", "sandboxes.getInfo", "sandboxes.files.download"}
+    assert all(scope_sent(seen) == set() for seen in server.seen)
+    err = capsys.readouterr().err
+    lines = notice_lines(err)
+    assert sorted(line.split()[1] for line in lines) == sorted(SCOPE_NAMES)
+    assert SCOPE_VALUE not in err
 
 
 @pytest.mark.parametrize("name", SCOPE_NAMES)

@@ -121,17 +121,24 @@ SDK's own `ExposedPortUnavailableError`):
 ## The MCP alternative
 
 An agent can also reach a sandbox through MCP tools, with no client code: run the SDK's MCP server and give it
-to any `Agent`:
+to any `Agent`. Pass the server its settings through `env`: the stdio client does not hand your environment to
+the server it starts, and without an address and a credential the server exits (code 2) before serving.
 
 ```python
+import os
+
 from agents import Agent
 from agents.mcp import MCPServerStdio
 
-async with MCPServerStdio(params={"command": "futureagi-py", "args": ["sandbox", "mcp"]}) as server:
+settings = {name: os.environ[name] for name in ("OMEGA_BASE_URL", "FI_API_KEY", "FI_SECRET_KEY")}
+async with MCPServerStdio(
+    params={"command": "futureagi-py", "args": ["sandbox", "mcp"], "env": settings},
+) as server:
     agent = Agent(name="assistant", instructions="...", mcp_servers=[server])
 ```
 
-That needs `pip install "futureagi[sandbox-mcp]"`; see `fi/sandbox_integrations/mcp_server/README.md`.
+That needs `pip install "futureagi[sandbox-mcp]"`. `fi/sandbox_integrations/mcp_server/README.md` lists every
+setting the server reads (a self-hosted EE gives `FUTUREAGI_OMEGA_API_KEY` instead of the key pair).
 
 ## Hosted limits
 

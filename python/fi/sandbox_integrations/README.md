@@ -57,8 +57,15 @@ hibernated sandbox on its own: the error says to resume it first.
   `FUTUREAGI_OMEGA_API_KEY`, `FI_PLATFORM_TOKEN` and `OMEGA_OS_API_KEY` with a `ConfigurationError` whose code is
   `secret_in_env`.
 - Nothing here logs, prints, records or puts into a trace a key or an `env` value.
-- A setup problem (no base URL, both kinds of credential) is raised as `fi.sandbox.ConfigurationError` and never
-  turned into a tool result, so an agent does not retry a call that cannot work.
+- A setup problem (no base URL, both kinds of credential) is a `fi.sandbox.ConfigurationError`. What each
+  integration does with it:
+  - Deep Agents backend, OpenAI Agents sandbox client and the trace context helpers: raised to your code, never
+    turned into a command or tool result.
+  - MCP server: `futureagi-py sandbox mcp` checks the address and the credentials before it serves; a problem
+    there is printed on stderr as `code: message` and the command exits 2. One that shows up during a tool call
+    (for example from `SandboxTools` built in code over a client whose settings are refused on its first call)
+    becomes a tool error the model reads: `code: message`, then a note that trying again will not help and that
+    the server's settings need fixing and a restart.
 
 ## Names
 

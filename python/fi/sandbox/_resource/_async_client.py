@@ -180,6 +180,7 @@ class AsyncSandboxFiles(_Part):
         if failure is not None:
             raise failure
         prep.request.headers["Accept"] = "application/octet-stream"
+        prep.request.headers["Accept-Encoding"] = "identity"  # an encoded answer is refused unread
         try:
             response = await http.send(
                 prep.request, stream=True, auth=None, follow_redirects=False
@@ -193,7 +194,7 @@ class AsyncSandboxFiles(_Part):
                 failure = await self._refused(prep, response)
             else:
                 core._meta(prep, response, 0)
-                budget.start(response)
+                budget.start(response, core, name, prep.request)
                 async for chunk in response.aiter_bytes():
                     yield budget.take(chunk)
         except httpx.HTTPError as error:

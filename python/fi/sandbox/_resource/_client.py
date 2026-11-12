@@ -181,6 +181,7 @@ class SandboxFiles(_Part):
         if failure is not None:
             raise failure
         prep.request.headers["Accept"] = "application/octet-stream"
+        prep.request.headers["Accept-Encoding"] = "identity"  # an encoded answer is refused unread
         try:
             response = http.send(
                 prep.request, stream=True, auth=None, follow_redirects=False
@@ -194,7 +195,7 @@ class SandboxFiles(_Part):
                 failure = self._refused(prep, response)
             else:
                 core._meta(prep, response, 0)
-                budget.start(response)
+                budget.start(response, core, name, prep.request)
                 for chunk in response.iter_bytes():
                     yield budget.take(chunk)
         except httpx.HTTPError as error:

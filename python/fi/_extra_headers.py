@@ -26,6 +26,11 @@ The rules:
 - **Scope.** The headers go only to the client's own base URL: the same scheme, host and port, and
   a path under the base URL's path. Never to any other URL: a judge model, a webhook receiver, a
   redirect to another host.
+- **Workspace and organization.** Platform API calls (``client.sandboxes``, ``Sandbox.create`` and
+  the other platform namespaces) never send a workspace or organization header given here: the
+  executor drops it (:func:`drop_scope`) and says so once per process on stderr, naming the header
+  but never its value. Only ``FI_WORKSPACE_ID`` / ``FI_ORGANIZATION_ID`` (or the client's
+  ``workspace_id=`` / ``organization_id=``) choose where those calls act.
 - **Secrecy.** Values are never logged, printed, journaled or traced. Errors name the setting, the
   entry's number and, for a valid name, the header's name; never a value.
 - **When it is read.** The environment is read when each request is sent, so a script that refreshes
@@ -40,7 +45,9 @@ from __future__ import annotations
 import functools
 import os
 import re
-from typing import Any, Iterable, Mapping, MutableMapping, Optional, Union
+import sys
+import threading
+from typing import Any, Collection, Iterable, Mapping, MutableMapping, Optional, Union
 from urllib.parse import urlsplit
 
 from fi._sdk_exception import SDKException
@@ -54,6 +61,9 @@ _VALUE = re.compile(r"[\x20-\x7e]+")
 _CONTROL = re.compile(r"[\x00-\x1f\x7f]")
 _BARE_SCHEME = re.compile(r"(bearer|basic|token)", re.IGNORECASE)
 _SEPARATORS = re.compile(r"[;\r\n]")
+#: Scope header names (lower case) already reported as dropped: one notice per name per process.
+_dropped: set[str] = set()
+_lock = threading.Lock()
 
 ExtraHeadersInput = Union[Mapping[str, str], str, None]
 
@@ -203,6 +213,11 @@ class ExtraHeaders:
     def resolve(self) -> dict[str, str]:
         return merge(from_env(), self._argument)
 
+    def without_scope(self, headers: Mapping[str, str], names: Collection[str]) -> dict[str, str]:
+        """:func:`drop_scope` for headers this setting gave a platform call (platform modules reach
+        it through this object, so they import nothing from this module)."""
+        return drop_scope(headers, names)
+
     def for_url(self, url: Any) -> dict[str, str]:
         """The headers for a request to ``url``: ``{}`` off the base URL (the setting is not even read)."""
         if not on_platform(url, self.base_url):
@@ -219,6 +234,29 @@ class ExtraHeaders:
     def names(self) -> list[str]:
         """The header names a platform request would carry (raises on a malformed setting)."""
         return sorted(self.resolve())
+
+
+def drop_scope(headers: Mapping[str, str], names: Collection[str]) -> dict[str, str]:
+    """``headers`` without the workspace and organization headers in ``names`` (lower case), which
+    platform calls never take from here. The first time a name is dropped in this process, one line
+    on stderr names the header (never its value) and says what chooses the workspace instead."""
+    kept: dict[str, str] = {}
+    for name, value in headers.items():
+        key = name.lower()
+        if key not in names:
+            kept[name] = value
+            continue
+        with _lock:
+            if key in _dropped:
+                continue
+            _dropped.add(key)
+        sys.stderr.write(
+            f"futureagi: {name} in {ENV_VAR} / {ARGUMENT} is not sent on platform API calls "
+            "(sandboxes included), so the call acts in the credential's default workspace and "
+            "organization unless FI_WORKSPACE_ID / FI_ORGANIZATION_ID (or the client's workspace_id= / "
+            "organization_id=) choose them.\n"
+        )
+    return kept
 
 
 def describe(environ: Optional[Mapping[str, str]] = None) -> dict[str, Any]:

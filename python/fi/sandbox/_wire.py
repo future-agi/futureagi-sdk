@@ -50,11 +50,17 @@ class DownloadBudget:
             )
         self.limit, self.size = limit, 0
 
-    def start(self, response: Any) -> None:
-        """Refuse a response whose ``Content-Length`` is over the limit, before reading it."""
+    def start(self, response: Any, core: Any, name: str, request: Any) -> None:
+        """Refuse a response whose ``Content-Length`` is over the limit, or that is encoded (a
+        download asks for identity, so the limit counts the bytes received), before reading it."""
         declared = response.headers.get("content-length", "").strip()
         if declared.isdigit() and int(declared) > self.limit:
             raise self._over()
+        encoding = response.headers.get("content-encoding", "").strip()
+        if encoding.lower() not in ("", "identity"):
+            said = failure_text(core, name, request, None)(encoding)
+            text = f"{name}: refused Content-Encoding {said!r}; downloads ask for identity"
+            raise SandboxError(text, code="download_encoded", operation=name)
 
     def take(self, chunk: bytes) -> bytes:
         """``chunk``, or the refusal once the bytes so far are over the limit."""

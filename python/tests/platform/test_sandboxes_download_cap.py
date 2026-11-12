@@ -1,24 +1,34 @@
 """Downloads are capped (sync and async): by default at the 64 MiB upload limit, and by
-``max_bytes=`` on ``sbx.files.download`` / ``download_to`` to raise or lower it. A declared
-``Content-Length`` over the limit is refused before a byte is read; a body that grows past it is
-refused as it arrives; the error names the limit and the keyword; ``download_to`` leaves no partial
-or temporary file; the command line's ``cp`` keeps the default. Fake credentials only."""
+``max_bytes=`` on ``sbx.files.download`` / ``download_to`` to raise or lower it. A download asks
+for the bytes uncompressed (``Accept-Encoding: identity``) and refuses an answer with any other
+``Content-Encoding`` before a byte is read (the error names it, scrubbed), so the limit counts the
+bytes as sent. A declared ``Content-Length`` over the limit is refused before a byte is read; a body
+that grows past it is refused as it arrives; the error names the limit and the keyword;
+``download_to`` leaves no partial or temporary file; the command line's ``cp`` keeps the default.
+Fake credentials only."""
 
 from __future__ import annotations
 
 import asyncio
+import gzip
 import inspect
 
 import httpx
 import pytest
 from fi._core.request import BODY_LIMITS
-from fi.sandbox import AsyncSandbox, ConfigurationError, PayloadTooLargeError, Sandbox
+from fi.sandbox import (
+    AsyncSandbox,
+    ConfigurationError,
+    PayloadTooLargeError,
+    Sandbox,
+    SandboxError,
+)
 
 from ._sandbox_cli_support import (  # noqa: F401 (registers the server fixture)
     run,
     server_fixture,
 )
-from ._sandbox_mock import MODES, SBX, Chunks, MockServer, api, resolve
+from ._sandbox_mock import FAKE_SECRET, MODES, SBX, Chunks, MockServer, api, resolve
 
 LIMIT = BODY_LIMITS["bundle"]
 
@@ -54,12 +64,69 @@ def body(chunks, length=None):
     return stream, (lambda request: httpx.Response(200, headers=headers, stream=stream))
 
 
+def encoded(encoding, chunks):
+    stream = Counted(chunks)
+    headers = {"content-type": "application/octet-stream", "content-encoding": encoding}
+    return stream, (lambda request: httpx.Response(200, headers=headers, stream=stream))
+
+
 @pytest.mark.parametrize("mode", MODES)
 def test_the_default_limit_is_the_upload_limit(mode):
     cls = AsyncSandbox if mode == "async" else Sandbox
     files = cls(api(MockServer(), mode), {"id": SBX}).files
     for method in (files.download, files.download_to):
         assert inspect.signature(method).parameters["max_bytes"].default == LIMIT == 64 * 1024 * 1024
+
+
+@pytest.mark.parametrize("mode", MODES)
+def test_every_download_asks_for_the_bytes_uncompressed(mode, tmp_path):
+    server = MockServer()
+    sbx = handle(server, mode)
+    calls = (lambda: sbx.files.download("a.bin"), lambda: sbx.files.download_to("a.bin", tmp_path / "a.bin"),
+             lambda: api(server, mode).files.download(SBX, "a.bin"))
+    for call in calls:
+        asyncio.run(resolve(call()))
+    assert [seen.name for seen in server.seen] == ["sandboxes.files.download"] * 3
+    for seen in server.seen:  # only identity, never the HTTP client's default gzip / br / zstd list
+        assert seen.request.headers.get_list("accept-encoding") == ["identity"]
+        assert seen.request.headers["accept"] == "application/octet-stream"
+
+
+def test_the_command_line_cp_asks_for_the_bytes_uncompressed(server, tmp_path):
+    assert run("cp", f"{SBX}:a.bin", str(tmp_path)) == 0
+    assert server.last.name == "sandboxes.files.download"
+    assert server.last.request.headers.get_list("accept-encoding") == ["identity"]
+
+
+@pytest.mark.parametrize("mode", MODES)
+@pytest.mark.parametrize("encoding", ["gzip", "GZIP, gzip", "br", "x-unknown", f"gzip, {FAKE_SECRET}"])
+def test_an_encoded_answer_is_refused_before_a_byte_is_read(mode, encoding, tmp_path):
+    bomb = gzip.compress(b"\0" * (1 << 20))  # 1 MiB once decoded, about 1 KiB as sent
+    server = MockServer()
+    sbx = handle(server, mode)
+    calls = (lambda: sbx.files.download("a.bin", max_bytes=1024),
+             lambda: sbx.files.download_to("a.bin", tmp_path / "a.bin", max_bytes=1024),
+             lambda: api(server, mode).files.download(SBX, "a.bin"))
+    for call in calls:
+        stream, answer = encoded(encoding, [bomb])
+        server.on("sandboxes.files.download", answer)
+        with pytest.raises(SandboxError) as caught:
+            asyncio.run(resolve(call()))
+        error = caught.value
+        assert error.code == "download_encoded" and stream.read == 0
+        assert "Content-Encoding" in str(error) and FAKE_SECRET not in str(error)
+        if FAKE_SECRET not in encoding:
+            assert repr(encoding) in str(error)
+    assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.parametrize("mode", MODES)
+def test_an_identity_answer_is_kept(mode):
+    server = MockServer()
+    stream, answer = encoded("Identity", [b"abcd", b"efgh"])
+    server.on("sandboxes.files.download", answer)
+    assert asyncio.run(resolve(handle(server, mode).files.download("a.bin"))) == b"abcdefgh"
+    assert stream.read == 2
 
 
 @pytest.mark.parametrize("mode", MODES)
