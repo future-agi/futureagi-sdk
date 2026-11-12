@@ -30,7 +30,9 @@ def _segment(value: str, name: str, op: OperationSpec) -> str:
 
 def build_path(op: OperationSpec, params: Optional[Mapping[str, Any]] = None) -> str:
     """The request path with every parameter percent-encoded. Raises on a missing, unknown, empty,
-    ``.`` or ``..`` parameter, so a value can never climb out of its path segment."""
+    ``.`` or ``..`` parameter, so a value can never climb out of its path segment. A multi-segment
+    parameter is checked segment by segment, so a leading, trailing or repeated slash in it is
+    refused, never dropped."""
     params = params or {}
     path = op.path
     for name in op.path_params:
@@ -40,7 +42,7 @@ def build_path(op: OperationSpec, params: Optional[Mapping[str, Any]] = None) ->
             )
         value = str(params[name])
         if name in op.multi_segment:
-            encoded = "/".join(_segment(part, name, op) for part in value.lstrip("/").split("/"))
+            encoded = "/".join(_segment(part, name, op) for part in value.split("/"))
         else:
             encoded = _segment(value, name, op)
         path = path.replace("{" + name + "}", encoded, 1)

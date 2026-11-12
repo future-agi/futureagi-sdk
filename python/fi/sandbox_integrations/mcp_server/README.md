@@ -111,10 +111,16 @@ Call `await tools.cleanup()` when you stop serving it, to delete the sandboxes i
 | `sandbox_list` | Lists your sandboxes and the workspace's limits. | none | `{"sandboxes": [{"id", "name", "state", "template", "size", "lastActivityAt"}], "caps": {"maxActiveSandboxes", "templates", "defaultTemplate", "sizes", "defaultSize", "idleTtlSeconds", "exec": {"defaultTimeoutSeconds", "maxTimeoutSeconds", "maxOutputBytes"}}}` |
 | `sandbox_create` | Creates a sandbox. | `name` (1 to 120 bytes), `template`, `size`, `idle_ttl_seconds`; all optional | `{"id", "name", "state", "template", "size"}` |
 | `sandbox_exec` | Runs a shell command and waits for it to end. | `command`, `sandbox_id`, `cwd` (relative to `/workspace`), `timeout_seconds` | `{"exit_code", "signal", "timed_out", "cancelled", "truncated", "duration_ms", "error", "exec_id", "stdout", "stderr", "stdout_clipped", "stderr_clipped"}` |
-| `sandbox_read_file` | Reads a file: UTF-8 text as it is, anything else as base64. | `path`, `sandbox_id`, `max_bytes` | `{"path", "encoding", "content", "bytes", "truncated"}` |
-| `sandbox_write_file` | Writes a file; missing folders are created. | `path`, `content`, `sandbox_id`, `encoding` (`utf8` or `base64`) | `{"path", "bytes"}` |
-| `sandbox_list_files` | Lists a folder (default: the top folder of the sandbox's files). | `path`, `sandbox_id` | `{"path", "entries": [{"name", "size", "directory", "mode"}]}` |
+| `sandbox_read_file` | Reads a file: UTF-8 text as it is, anything else as base64. | `path` (relative to `/workspace`), `sandbox_id`, `max_bytes` | `{"path", "encoding", "content", "bytes", "truncated"}` |
+| `sandbox_write_file` | Writes a file; missing folders are created. | `path` (relative to `/workspace`), `content`, `sandbox_id`, `encoding` (`utf8` or `base64`) | `{"path", "bytes"}` |
+| `sandbox_list_files` | Lists a folder (default: `/workspace` itself, the top folder of the sandbox's files). | `path` (relative to `/workspace`), `sandbox_id` | `{"path", "entries": [{"name", "size", "directory", "mode"}]}` |
 | `sandbox_delete` | Deletes a sandbox and its files for good. A sandbox already gone is not an error. | `sandbox_id` | `{"id", "state"}` |
+
+The file tools take `path` relative to the sandbox folder `/workspace` (`src/app.py` is `/workspace/src/app.py`);
+an absolute path under `/workspace` also works, and any other path is refused before any request. A path outside
+`/workspace` gets `outside_workspace` (read or copy such a file with `sandbox_exec`); a `.` or `..` part (never
+folded), a backslash, a control character, a path over 4096 characters, or `/workspace` itself anywhere but
+`sandbox_list_files`, gets `invalid_path`.
 
 `sandbox_exec` runs the command in `cwd`, a folder relative to `/workspace` (`src` is `/workspace/src`; left out,
 `/workspace` itself). An absolute folder under `/workspace` is sent in that relative form; a folder outside

@@ -1,9 +1,9 @@
-"""``sbx.files`` paths (contract ``files.md``, Path rules): every files route takes a path relative to
-``/workspace``. The handle sends an absolute path under ``/workspace`` in that form, sends the root to the
-listing only (as no ``path`` at all), and refuses a path outside ``/workspace``, or with a ``.`` or ``..``
-segment, a backslash or a control character, with ``ConfigurationError`` (``invalid_path``) before any
-request. The mock answers the files routes as the sandbox service does (``_strict_exec``), so a wrong path
-fails here. Fake credentials only."""
+"""``sbx.files`` paths: every files route takes a path relative to the sandbox folder ``/workspace``, and
+a leading slash or a ``.`` or ``..`` segment gets a 400 from the service. The handle sends an absolute path
+under ``/workspace`` in that form, sends the root to the listing only (as no ``path`` at all), and refuses a
+path outside ``/workspace``, or with a ``.`` or ``..`` segment, a backslash or a control character, with
+``ConfigurationError`` (``invalid_path``) before any request. The mock answers the files routes as the
+sandbox service does (``_strict_exec``), so a wrong path fails here. Fake credentials only."""
 
 from __future__ import annotations
 
@@ -142,11 +142,12 @@ def test_the_refusal_names_the_path_and_the_workspace_rule(mode):
 def test_the_strict_mock_refuses_absolute_and_dotted_files_paths_as_the_service_does(mode):
     server = strict(MockServer())
     files = api(server, mode).files
+    listing = "sandboxes.files.list"  # sent as given: files.list itself sends the root as no path
     refused = (
-        lambda: files.read(SBX, "/workspace/a.txt"),  # sent as workspace/a.txt: its leading slash is lost
-        lambda: files.make_dir(SBX, "/workspace/sub"),
-        lambda: files.list(SBX, path="/workspace"),
-        lambda: files.list(SBX, path="."),
+        lambda: files.read(SBX, "workspace/a.txt"),  # a doubled /workspace prefix (stricter than the service)
+        lambda: files.make_dir(SBX, "workspace/sub"),
+        lambda: files._call(listing, path={"id": SBX}, query={"path": "/workspace"}),
+        lambda: files._call(listing, path={"id": SBX}, query={"path": "."}),
         lambda: files.rename(SBX, body={"from": "/workspace/a.txt", "to": "b.txt"}),
         lambda: files.rename(SBX, body={"from": "a.txt", "to": "sub/../b.txt"}),
     )
@@ -156,8 +157,10 @@ def test_the_strict_mock_refuses_absolute_and_dotted_files_paths_as_the_service_
         assert info.value.status == 400 and info.value.code == "validation"
     assert len(server.seen) == len(refused)  # each one reached the mock and was refused there
     for call in (lambda: files.read(SBX, "a.txt"), lambda: files.list(SBX), lambda: files.list(SBX, path=""),
+                 lambda: files.read(SBX, "/workspace/a.txt"), lambda: files.make_dir(SBX, "/workspace/sub"),
                  lambda: files.rename(SBX, body={"from": "a.txt", "to": "sub/b.txt"})):
         run(resolve(call()))
+    assert [sent(seen) for seen in server.seen[len(refused):]] == ["a.txt", None, None, "a.txt", "sub", "a.txt"]
     assert path_refusal("/workspace/a", "path") == "path must be a workspace-relative path."
     assert path_refusal("a/./b", '"to"').startswith('"to" must not contain "." or ".." path segments.')
     assert path_refusal("", "path", root=True) is None and path_refusal("", "path") is not None

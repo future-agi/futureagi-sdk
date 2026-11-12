@@ -12,7 +12,7 @@ on them:
   saying so appended to stderr. A command whose outcome is unknown, or that the server failed after it started, raises the
   SDK's ``ExecTransportError`` (not retryable); it is never sent again.
 - ``read`` / ``write`` use the sandbox files API, which reaches files under ``/workspace`` only.
-  ``write`` makes the missing parent folders first.
+  ``write`` checks the path, then makes the missing parent folders, then uploads.
 - ``running`` reads the sandbox record: True while it is ``active``.
 - ``persist_workspace`` / ``hydrate_workspace`` move the workspace as a tar stream with
   workspace-relative members, through a temporary ``/workspace/.fi-ws-<id>.tar`` that is removed
@@ -52,6 +52,7 @@ try:
 except ImportError as exc:
     raise missing_agents_sandbox(exc) from exc
 
+from fi.sandbox._wire import files_path as checked_files_path
 from fi.sandbox.errors import (
     CommandFailedError,
     CommandIncompleteError,
@@ -236,6 +237,7 @@ class FutureAGISandboxSession(BaseSandboxSession):
         target = files_path(where)
         if not target:
             raise IsADirectoryError(f"{where} is a folder")
+        checked_files_path(target, "sandboxes.files.upload")  # a refused name makes no folder
         await self._make_dirs(posixpath.dirname(target))
         await self._sandbox.files.upload(target, bytes(payload))
 

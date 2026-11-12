@@ -90,6 +90,12 @@ configuration problem. exec exits with the command's own code: 124 when it ran o
 time, 128+N when signal N ended it, 130 when it was cancelled (Ctrl-C cancels it), and 1
 when the server failed or it is unknown whether the command finished."""
 
+#: The path rule of the file commands (cp, ls, cat, rm, mv, mkdir), shown under each one's help.
+_PATHS_EPILOG = (
+    "Sandbox paths are relative to the sandbox folder /workspace (src/app.py is "
+    "/workspace/src/app.py); an absolute path under /workspace also works, and any other path is "
+    "refused before anything is sent."
+)
 _EXEC_USAGE = "%(prog)s [options] SANDBOX_ID -- COMMAND..."
 _EXEC_EPILOG = """\
 examples:
@@ -292,32 +298,35 @@ def register(subparsers) -> None:
                    help="the command, after --. One quoted string runs as written (pipes and && "
                         "work); several words are each quoted for you")
 
-    p = add(commands, "cp", "copy a file into or out of a sandbox", _cp)
+    p = add(commands, "cp", "copy a file into or out of a sandbox", _cp, epilog=_PATHS_EPILOG)
     p.add_argument("source", metavar="FROM", help="a local file, or SANDBOX_ID:PATH in a sandbox")
     p.add_argument("destination", metavar="TO",
                    help="SANDBOX_ID:PATH in a sandbox (a PATH ending in / keeps the file's name), "
                         "or a local file or folder")
 
-    p = add(commands, "ls", "list a folder in a sandbox", _ls)
+    p = add(commands, "ls", "list a folder in a sandbox", _ls, epilog=_PATHS_EPILOG)
     _add_id(p)
-    p.add_argument("path", nargs="?", default=".", help="the folder (default: the top folder)")
+    p.add_argument("path", nargs="?", default=".", help="the folder (default: /workspace itself)")
 
-    p = add(commands, "cat", "print a file from a sandbox", _cat)
+    p = add(commands, "cat", "print a file from a sandbox", _cat, epilog=_PATHS_EPILOG)
     _add_id(p)
     p.add_argument("path", help="the file")
     p.add_argument("--max-bytes", type=_positive, metavar="N", help="print at most N bytes")
 
-    p = add(commands, "rm", "delete a file (or, with -r, a folder) in a sandbox", _rm)
+    p = add(commands, "rm", "delete a file (or, with -r, a folder) in a sandbox", _rm,
+            epilog=_PATHS_EPILOG)
     _add_id(p)
     p.add_argument("path", help="the file or folder")
     p.add_argument("-r", "--recursive", action="store_true", help="delete a folder and everything in it")
 
-    p = add(commands, "mv", "move or rename a file or folder in a sandbox", _mv)
+    p = add(commands, "mv", "move or rename a file or folder in a sandbox", _mv,
+            epilog=_PATHS_EPILOG)
     _add_id(p)
     p.add_argument("src", metavar="FROM", help="the current path")
     p.add_argument("dst", metavar="TO", help="the new path")
 
-    p = add(commands, "mkdir", "create a folder (and any missing parents) in a sandbox", _mkdir)
+    p = add(commands, "mkdir", "create a folder (and any missing parents) in a sandbox", _mkdir,
+            epilog=_PATHS_EPILOG)
     _add_id(p)
     p.add_argument("path", help="the folder")
 

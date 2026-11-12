@@ -67,6 +67,10 @@ def _framework() -> Tuple[Any, Any]:
 
 ServerClass, ToolError = _framework()
 
+#: The path rule the three file tools share, in one sentence a model reads.
+_PATHS = ("The path is relative to the sandbox folder /workspace (src/app.py is /workspace/src/app.py); "
+          "an absolute path under /workspace also works, and any other path is refused (use "
+          "sandbox_exec for files elsewhere).")
 DESCRIPTIONS = {
     "sandbox_list": "List your sandboxes and the workspace's sandbox limits (templates, sizes, the most "
                     "active sandboxes, and caps.exec: the default and longest command time limits).",
@@ -86,11 +90,13 @@ DESCRIPTIONS = {
                     "command inside it (export NAME=value; ...), never credentials.",
     "sandbox_read_file": "Read a file from a sandbox: UTF-8 text as it is, any other file as base64 "
                          "(encoding says which). max_bytes reads at most that many bytes; truncated "
-                         "says the file is longer.",
+                         "says the file is longer. " + _PATHS,
     "sandbox_write_file": "Write a file in a sandbox; missing folders are created. encoding is utf8 "
-                          "(content is the text) or base64 (content is the bytes, base64-encoded).",
-    "sandbox_list_files": "List a folder in a sandbox (default: the top folder of its files): each "
-                          "entry's name, size, mode and whether it is a folder.",
+                          "(content is the text) or base64 (content is the bytes, base64-encoded). "
+                          + _PATHS,
+    "sandbox_list_files": "List a folder in a sandbox (default: /workspace itself, the top folder of "
+                          "its files): each entry's name, size, mode and whether it is a folder. "
+                          + _PATHS,
     "sandbox_delete": "Delete a sandbox and its files for good.",
 }
 #: The tools pinned mode keeps (it hands an agent one sandbox and no power to create or delete).

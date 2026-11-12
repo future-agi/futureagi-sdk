@@ -2,7 +2,8 @@
 frozen-OpenAPI mock: each tool's result shape, the whole exit record, output clipping, the time-limit
 clamp (1 to the workspace's ``caps.exec.maxTimeoutSeconds``), the command's folder sent relative to
 ``/workspace`` (the mock's exec route refuses an absolute one, as the service does), file paths sent
-relative to ``/workspace`` too (one outside it refused before any request), writes that rely on the
+relative to ``/workspace`` too (one outside it refused before any request with ``outside_workspace``,
+a dotted or otherwise unusable one with ``invalid_path``), writes that rely on the
 write creating folders, pinned mode, the ``created`` set and cleanup (its deletes sent
 together), and error texts with a next step and no key. Fake credentials only; no ``mcp`` package
 needed."""
@@ -242,17 +243,34 @@ def test_write_then_read_reach_the_same_file(server):
 
 
 @pytest.mark.parametrize("method,args", [
-    ("sandbox_read_file", ("/tmp/notes.txt",)), ("sandbox_read_file", ("/workspace/../etc/passwd",)),
-    ("sandbox_read_file", ("a\\b.txt",)), ("sandbox_read_file", ("/workspace",)),
+    ("sandbox_read_file", ("/tmp/notes.txt",)), ("sandbox_read_file", ("/workspacex/a.txt",)),
     ("sandbox_write_file", ("/tmp/notes.txt", "x")), ("sandbox_list_files", ("/etc",)),
+    ("sandbox_read_file", ("/tmp/a\\b.txt",)), ("sandbox_read_file", ("/etc/x\ny",)),
 ])
 def test_file_tools_refuse_a_path_outside_the_workspace_before_any_request(server, method, args):
     error = refused(server, method, *args, sandbox_id=SBX)
     text = str(error)
-    assert error.code == "invalid_path" and text.startswith("invalid_path: sandboxes.files.")
+    assert error.code == "outside_workspace" and text.startswith("outside_workspace: sandboxes.files.")
     assert repr(args[0]) in text and "relative to /workspace" in text and "sandbox_exec" in text
     assert "setup problem" not in text and "OMEGA_BASE_URL" not in text  # a path, not the server's setup
     assert server.seen == []  # not the connect, not the file call
+
+
+@pytest.mark.parametrize("method,args", [
+    ("sandbox_read_file", ("/workspace/../etc/passwd",)), ("sandbox_read_file", ("src/../a.txt",)),
+    ("sandbox_read_file", ("a\\b.txt",)), ("sandbox_read_file", ("/workspace",)),
+    ("sandbox_write_file", ("a/./b.txt", "x")), ("sandbox_list_files", ("/workspace/.",)),
+])
+def test_file_tools_refuse_other_unusable_paths_as_invalid_path_without_a_command_hint(server, method, args):
+    """A dotted path is refused, never folded; the next step for a file elsewhere is not given, as the
+    path is not elsewhere."""
+    error = refused(server, method, *args, sandbox_id=SBX)
+    text = str(error)
+    assert error.code == "invalid_path" and text.startswith("invalid_path: sandboxes.files.")
+    assert repr(args[0]) in text and "relative to /workspace" in text
+    assert "sandbox_exec" not in text and "elsewhere" not in text
+    assert "setup problem" not in text and "OMEGA_BASE_URL" not in text
+    assert server.seen == []
 
 
 def test_write_file_creates_folders_by_the_write_utf8_and_base64(server):

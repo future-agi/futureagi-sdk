@@ -1,9 +1,10 @@
 """The ``sandbox`` file commands send every sandbox path relative to ``/workspace``, as the files routes take
-it (contract ``files.md``, Path rules): ``cat``, which reads through the generated layer for the record's
-``truncated`` and ``encoding``, as well as ``ls``, ``rm``, ``mv``, ``mkdir`` and ``cp``, which go through the
-handle. So ``/workspace/a.txt`` written by one command is the file another reads. A path outside
-``/workspace`` is refused (``invalid_path``, exit 2) before any request. The mock answers the files routes as
-the sandbox service does (``_strict_exec``), so a wrong path fails here. Fake credentials only."""
+it (an absolute path under ``/workspace`` is sent relative; a leading slash would get a 400): ``cat``, which
+reads through the generated layer for the record's ``truncated`` and ``encoding``, as well as ``ls``, ``rm``,
+``mv``, ``mkdir`` and ``cp``, which go through the handle. So ``/workspace/a.txt`` written by one command is
+the file another reads. A path outside ``/workspace`` is refused (``invalid_path``, exit 2) before any
+request. The mock answers the files routes as the sandbox service does (``_strict_exec``), so a wrong path
+fails here. Fake credentials only."""
 
 from __future__ import annotations
 

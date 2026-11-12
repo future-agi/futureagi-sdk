@@ -54,7 +54,11 @@ def _refuse(code: str, message: str) -> SandboxToolError:
 
 
 def _code(error: BaseException) -> str:
+    """The error's code; a refused files path outside ``/workspace`` is ``outside_workspace`` (any
+    other refused path stays ``invalid_path``)."""
     code = getattr(error, "code", None)
+    if code == "invalid_path" and _reason(error) == "outside_workspace":
+        return "outside_workspace"
     if isinstance(code, str) and code:
         return code
     get = getattr(error, "get_error_code", None)
@@ -79,9 +83,11 @@ def _reason(error: BaseException) -> Optional[str]:
 def _next_step(error: BaseException, code: str, tool: str, sandbox_id: Optional[str]) -> str:
     from fi import sandbox as sb
 
-    if code == "invalid_path":
+    if code == "outside_workspace":
         return (". The file tools reach only /workspace: for a file elsewhere, run a command with "
                 "sandbox_exec (for example cat /tmp/notes.txt)")
+    if code == "invalid_path":  # the message names what is wrong with the path; no next step
+        return ""
     if isinstance(error, sb.ConfigurationError):
         return (". This is a setup problem of the server, so trying again will not help: fix its "
                 "environment (OMEGA_BASE_URL and the credentials) and restart it")
@@ -306,8 +312,10 @@ class SandboxTools:
         self, path: str, sandbox_id: Optional[str] = None, max_bytes: Optional[int] = None
     ) -> Dict[str, Any]:
         """A file: UTF-8 text as it is, anything else as base64; ``truncated`` when cut at the limit.
-        ``path`` is relative to ``/workspace``; an absolute path under it is sent in that form, and a
-        path outside it is refused before any request."""
+        ``path`` is relative to ``/workspace``; an absolute path under it is sent in that form. A
+        path outside it is refused before any request with ``outside_workspace``, and one with a
+        ``.`` or ``..`` segment (never folded), a backslash or a control character with
+        ``invalid_path``."""
         from fi.sandbox._wire import files_path
 
         target = self._target(sandbox_id)

@@ -23,12 +23,13 @@ from fi._core.transport import MAX_ERROR_BODY
 from fi.generated.platform import types as T
 
 from .._connection import OriginRule, http_of, sandbox_core
-from .._wire import NO_RETRY, DownloadBudget, UploadBody, etag, payload, sandbox_record
+from .._wire import NO_RETRY, DownloadBudget, etag, files_path, payload, sandbox_record
 from ..errors import CORE_ERRORS, stream_failure, translate
 from ._stream._client import CommandStream
 
 if TYPE_CHECKING:
     from .._client import Sandbox
+    from .._wire import UploadBody
 
 
 class _Part(Namespace):
@@ -74,46 +75,48 @@ class SandboxSettings(_Part):
 
 
 class SandboxFiles(_Part):
-    """``client.sandboxes.files``: files and folders inside a sandbox."""
+    """``client.sandboxes.files``: files and folders inside a sandbox. Paths are relative to
+    /workspace; an absolute path under it is sent relative (as ``sbx.files`` sends it), and any
+    other path is refused before any request (``ConfigurationError``, ``invalid_path``).
+    ``rename`` sends its body as given."""
+
+    def _file_call(self, name: str, sandbox_id: str, path: Any, **kw: Any) -> Any:
+        """One call on a file or folder; a path the files rule refuses sends nothing."""
+        where = files_path(path, name)
+        return self._call(name, path={"id": sandbox_id, "path": where}, **kw)
 
     def list(
         self, sandbox_id: str, *, path: Optional[str] = None
     ) -> T.ListWorkspaceSandboxFilesResponse:
-        """The entries of one folder (``path`` relative to the workspace, default its root)."""
+        """The entries of one folder (``path`` None, ``"."`` or /workspace itself: the root)."""
+        folder = files_path(path, "sandboxes.files.list", root=True)
         return self._call(
-            "sandboxes.files.list", path={"id": sandbox_id}, query={"path": path}
+            "sandboxes.files.list", path={"id": sandbox_id}, query={"path": folder}
         )
 
     def read(
         self, sandbox_id: str, path: str, *, max_bytes: Optional[int] = None
     ) -> T.ReadWorkspaceSandboxFileResponse:
         """A bounded read: ``file.content`` in ``file.encoding`` (utf8 or base64)."""
-        return self._call(
-            "sandboxes.files.read",
-            path={"id": sandbox_id, "path": path},
-            query={"maxBytes": max_bytes},
+        return self._file_call(
+            "sandboxes.files.read", sandbox_id, path, query={"maxBytes": max_bytes}
         )
 
     def write(
         self, sandbox_id: str, path: str, *, body: T.WriteWorkspaceSandboxFileRequest
     ) -> T.WriteWorkspaceSandboxFileResponse:
         """Write a small text or base64 file (audited). Sent once, never retried."""
-        return self._call(
-            "sandboxes.files.write",
-            path={"id": sandbox_id, "path": path},
-            body=dict(body),
-            retries=NO_RETRY,
+        return self._file_call(
+            "sandboxes.files.write", sandbox_id, path, body=dict(body), retries=NO_RETRY
         )
 
     def remove(
         self, sandbox_id: str, path: str, *, recursive: Optional[bool] = None
     ) -> T.DeleteWorkspaceSandboxPathResponse:
         """Delete a file, or a folder with ``recursive=True``. Sent once, never retried."""
-        return self._call(
-            "sandboxes.files.remove",
-            path={"id": sandbox_id, "path": path},
-            query={"recursive": recursive},
-            retries=NO_RETRY,
+        query = {"recursive": recursive}
+        return self._file_call(
+            "sandboxes.files.remove", sandbox_id, path, query=query, retries=NO_RETRY
         )
 
     def download(self, sandbox_id: str, path: str) -> bytes:
@@ -125,11 +128,10 @@ class SandboxFiles(_Part):
     ) -> T.UploadWorkspaceSandboxFileResponse:
         """Upload raw bytes (bytes, str, a path or a binary file; at most 64 MiB, read into
         memory first). The folder must exist. Never retried."""
-        return self._call(
-            "sandboxes.files.upload",
-            path={"id": sandbox_id, "path": path},
-            body=payload(body),
-            retries=NO_RETRY,
+        files_path(path, "sandboxes.files.upload")  # a refused path reads no body
+        sent = payload(body)
+        return self._file_call(
+            "sandboxes.files.upload", sandbox_id, path, body=sent, retries=NO_RETRY
         )
 
     def rename(
@@ -147,17 +149,15 @@ class SandboxFiles(_Part):
         self, sandbox_id: str, path: str
     ) -> T.CreateWorkspaceSandboxFolderResponse:
         """Create a folder (and its parents). Sent once, never retried."""
-        return self._call(
-            "sandboxes.files.makeDir",
-            path={"id": sandbox_id, "path": path},
-            retries=NO_RETRY,
-        )
+        name = "sandboxes.files.makeDir"
+        return self._file_call(name, sandbox_id, path, retries=NO_RETRY)
 
     def _stream(self, sandbox_id: str, path: str, max_bytes: Any) -> Iterator[bytes]:
         """The file's bytes as they arrive, never more than ``max_bytes`` (None: 64 MiB; the
         executor has no binary call, so this sends the prepared request itself with the
         executor's own error mapping)."""
         name, core, setting = "sandboxes.files.download", self._core, self._rule.setting
+        where = files_path(path, name)
         budget = DownloadBudget(max_bytes)
         failure = self._refusal(name)
         http = http_of(core)
@@ -166,7 +166,7 @@ class SandboxFiles(_Part):
                 prep = core._prepare(
                     http,
                     name,
-                    path={"id": sandbox_id, "path": path},
+                    path={"id": sandbox_id, "path": where},
                     query=None,
                     body=None,
                     key=None,

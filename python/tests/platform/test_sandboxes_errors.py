@@ -206,7 +206,7 @@ def test_a_path_that_climbs_out_is_refused_before_sending(mode):
     server = MockServer()
     with pytest.raises(se.ConfigurationError) as caught:
         run(resolve(api(server, mode).files.read(SBX, "a/../../etc/passwd")))
-    assert caught.value.code == "invalid_path_param" and server.seen == []
+    assert caught.value.code == "invalid_path" and server.seen == []  # the files rule refuses it first
 
 
 @pytest.mark.parametrize("mode", MODES)

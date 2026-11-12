@@ -5,10 +5,12 @@ The exec route takes ``cwd`` relative to ``/workspace`` (absent or empty: ``/wor
 case ``sandboxes.exec.absolute-cwd``). The files routes take every path relative to ``/workspace`` as well:
 a leading slash, a backslash or a NUL gets 400 ``validation`` "<field> must be a workspace-relative path.",
 a ``.`` or ``..`` segment gets 400 ``validation`` too, and the root (an empty path, or none) is taken by the
-listing only. A path in the URL loses its leading slash on the way (``/workspace/a`` is sent as
-``workspace/a``, which the service would put at ``/workspace/workspace/a``), so a first folder named
-``workspace`` there is refused as the absolute path it was. With the rules in front of a mock server, code
-that sends a wrong path fails its test instead of passing against a server that takes anything.
+listing only. On the routes that carry the path in the URL, a relative path whose first folder is
+``workspace`` is refused too: that is what ``/workspace/a`` looks like once its leading slash is lost, and
+the service would put it at ``/workspace/workspace/a``. This one rule is stricter than the service, which
+takes ``workspace/a`` as that folder, and than the TypeScript mock, which accepts it; it is here to catch a
+doubled ``/workspace`` prefix. With the rules in front of a mock server, code that sends a wrong path fails
+its test instead of passing against a server that takes anything.
 
 :func:`enforce_everywhere` turns the rules on for every mock server made during a test (the conftest in this
 folder does that for each test here); :func:`strict` turns them on for one server, before any transport or
@@ -87,7 +89,7 @@ def refused_file_path(route: Route, request: httpx.Request) -> Optional[str]:
         return path_refusal(body.get("from"), '"from"') or path_refusal(body.get("to"), '"to"')
     if route.name in URL_PATH_ROUTES:
         value = _url_path(route, request)
-        if value.split("/", 1)[0] == "workspace":  # /workspace/... with its leading slash dropped
+        if value.split("/", 1)[0] == "workspace":  # stricter than the service: a doubled /workspace
             return "path must be a workspace-relative path."
         return path_refusal(value, "path")
     return None

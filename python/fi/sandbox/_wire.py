@@ -38,6 +38,10 @@ DOWNLOAD = "sandboxes.files.download"
 #: TypeScript, so no module spells an API path.
 _WORKSPACE_NAME = "workspace"
 WORKSPACE = f"/{_WORKSPACE_NAME}"
+#: The longest files path the files API takes, in characters (after the /workspace prefix).
+MAX_PATH_CHARS = 4096
+#: How much of a refused path its error shows, in characters.
+_SHOWN_CHARS = 200
 _CONTROL = re.compile(r"[\x00-\x1f\x7f]")
 
 
@@ -141,39 +145,54 @@ def files_path(
 ) -> Optional[str]:
     """``path`` as the files routes take it: relative to /workspace. A relative path is sent as
     it is and an absolute one under /workspace without that prefix (/workspace/src/a.py as
-    ``src/a.py``); repeated and trailing slashes are dropped. /workspace itself and ``"."`` are
-    its root, which only a listing takes (``root=True``: None, so no path is sent). A path outside
-    /workspace, or with a ``.`` or ``..`` segment, a backslash, a NUL or another control
-    character, raises ``ConfigurationError`` (``invalid_path``) before any request."""
+    ``src/a.py``); repeated and trailing slashes are dropped. /workspace itself (with or without
+    a trailing slash), ``"."`` and ``""`` are its root, which only a listing takes (``root=True``:
+    None, so no path is sent). A path outside /workspace, a ``.`` or ``..`` segment anywhere
+    (/workspace/. included; nothing is folded), a backslash, a NUL or another control character,
+    or a path over :data:`MAX_PATH_CHARS` raises ``ConfigurationError`` (``invalid_path``) before
+    any request; its text shows the path as given, cut to 200 characters. A path outside
+    /workspace also gets ``detail={"reason": "outside_workspace"}``, whatever else it has."""
     text = os.fspath(path) if isinstance(path, os.PathLike) else path
     if text is None and root:  # no path at all: the root
         return None
     if not isinstance(text, str):
         raise _bad_path(operation, f"{name} must be text, not {type(path).__name__}")
-    parts = [part for part in text.split("/") if part]
+    parts, absolute = [part for part in text.split("/") if part], text.startswith("/")
+    outside = absolute and parts[:1] != [_WORKSPACE_NAME]
     if "\\" in text or _CONTROL.search(text):
         problem = "has a backslash, a NUL or another control character"
-    elif text.startswith("/") and parts[:1] != ["workspace"]:
+    elif outside:
         problem = f"is outside {WORKSPACE}"
     else:
-        parts = parts[1:] if text.startswith("/") else parts
-        parts = [] if parts == ["."] else parts
+        if absolute:
+            parts = parts[1:]
+        elif parts == ["."]:  # "." is the root; after /workspace it is a "." segment
+            parts = []
+        relative = "/".join(parts)
         if "." in parts or ".." in parts:
             problem = 'has a "." or ".." segment'
+        elif len(relative) > MAX_PATH_CHARS:
+            problem = (
+                f"is {len(relative)} characters long; the files API takes at most "
+                f"{MAX_PATH_CHARS}"
+            )
         elif parts or root:
-            return "/".join(parts) or None
+            return relative or None
         else:
             problem = f"is {WORKSPACE} itself, and this call needs a file or folder under it"
-    raise _bad_path(operation, f"{name} {text!r} {problem}")
+    shown = text if len(text) <= _SHOWN_CHARS else text[:_SHOWN_CHARS] + "..."
+    raise _bad_path(operation, f"{name} {shown!r} {problem}", outside=outside)
 
 
-def _bad_path(operation: str, problem: str) -> ConfigurationError:
-    return ConfigurationError(
+def _bad_path(operation: str, problem: str, *, outside: bool = False) -> ConfigurationError:
+    error = ConfigurationError(
         f"{operation}: {problem}; sandbox paths are relative to {WORKSPACE} (src/app.py, or "
         f"{WORKSPACE}/src/app.py, is the file {WORKSPACE}/src/app.py)",
         code="invalid_path",
         operation=operation,
     )
+    error.detail = {"reason": "outside_workspace"} if outside else None
+    return error
 
 
 def etag(value: Union[str, int]) -> str:

@@ -46,6 +46,7 @@ import inspect
 import posixpath
 from typing import TYPE_CHECKING, Any, Final, List, Mapping, Optional, Tuple
 
+from fi.sandbox._wire import files_path as checked_files_path
 from fi.sandbox.errors import (
     CommandFailedError,
     CommandIncompleteError,
@@ -194,6 +195,7 @@ class FutureAGISandbox(BaseSandbox):
         if where is None or where == ".":
             return _outside(path, where)
         try:
+            checked_files_path(where, "sandboxes.files.upload")  # a refused name makes no folder
             self._make_parents(posixpath.dirname(where))
             self._sandbox.files.upload(where, bytes(data))
         except ConfigurationError as error:
