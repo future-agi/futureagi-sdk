@@ -9,7 +9,7 @@ from uuid import UUID
 import httpx
 import pytest
 from fi.context import __main__ as cli
-from fi.context.lock import CONTEXT_LOCK
+from fi.context.lock import CONTEXT_LOCK, parse_lock
 from fi.platform import Client
 from fi.skills.__main__ import main as skills_main
 from test_materializer import apply, bundle, plan
@@ -154,3 +154,60 @@ def test_scope_uuids_are_canonicalized(monkeypatch):
     assert registry.organization_id == "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
     assert captured["default_headers"] == {"X-Organization-Id": registry.organization_id}
     assert captured["workspace_id"] == str(UUID(int=2))
+
+
+def git(project, *args):
+    return subprocess.run(
+        ["git", "-C", str(project), "-c", "user.name=t", "-c", "user.email=t@example.invalid", *args],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+
+
+def stub_registry(monkeypatch, source):
+    monkeypatch.setattr(cli.Registry, "__init__", lambda self: None)
+    monkeypatch.setattr(cli.Registry, "check_scope", lambda self, identity: None)
+    monkeypatch.setattr(cli.Registry, "resolve", lambda self, *a, **kw: source)
+    monkeypatch.setattr(cli.Registry, "authorize", lambda self, auth: None)
+    monkeypatch.setattr(cli.Registry, "close", lambda self: None)
+
+
+def test_restore_applies_and_verifies_the_lock_of_one_reviewed_commit(project, monkeypatch, capsys):
+    source = bundle()
+    apply(plan(source, project))
+    git(project, "init", "-q")
+    git(project, "add", "-A")
+    git(project, "commit", "-qm", "reviewed")
+    reviewed = git(project, "rev-parse", "HEAD")
+    reviewed_lock = (project / CONTEXT_LOCK).read_bytes()
+    apply(plan(bundle(version=2), project, operation="update"))
+    assert (project / CONTEXT_LOCK).read_bytes() != reviewed_lock
+    stub_registry(monkeypatch, source)
+    args = ["restore", "--project", str(project), "--lock-from-git", reviewed, "--allow-preview"]
+    # Without a plan file the restore must state quiescence; nothing is written before that.
+    changed = (project / CONTEXT_LOCK).read_bytes()
+    assert cli.main([*args, "--apply"]) == 2
+    assert json.loads(capsys.readouterr().out)["error"]["code"] == "quiescence_required"
+    assert (project / CONTEXT_LOCK).read_bytes() == changed
+    assert cli.main([*args, "--apply", "--quiescent"]) == 0
+    result = json.loads(capsys.readouterr().out)
+    assert result["state"] == "restored" and result["verification"]["verified"] is True
+    assert parse_lock((project / CONTEXT_LOCK).read_bytes()).version == 1
+    assert not list(project.glob("*.plan*"))
+
+
+@pytest.mark.parametrize("ref", ["main", "--output=x", "abc123", "0" * 40])
+def test_restore_from_git_refuses_unvalidated_or_unknown_commits(project, monkeypatch, capsys, ref):
+    source = bundle()
+    apply(plan(source, project))
+    git(project, "init", "-q")
+    stub_registry(monkeypatch, source)
+    before = (project / CONTEXT_LOCK).read_bytes()
+    code = cli.main(["restore", "--project", str(project), f"--lock-from-git={ref}", "--allow-preview", "--apply", "--quiescent"])
+    assert code == 2
+    assert json.loads(capsys.readouterr().out)["error"]["code"] in {"invalid_commit", "input_missing"}
+    assert (project / CONTEXT_LOCK).read_bytes() == before
+
+
+def test_lock_from_git_cannot_be_combined_with_an_explicit_lock(project, capsys):
+    assert cli.main(["restore", "--project", str(project), "--lock", "x.json", "--lock-from-git", "0" * 40, "--apply", "--quiescent"]) == 2
+    assert json.loads(capsys.readouterr().out)["error"]["code"] == "invalid_arguments"

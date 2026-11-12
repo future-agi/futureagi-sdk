@@ -10,6 +10,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -247,12 +248,59 @@ def parser() -> argparse.ArgumentParser:
             command.add_argument("--plan", "--out", dest="out")
         if name in ("update", "restore"):
             command.add_argument("--allow-preview", action="store_true")
+        if name == "restore":
+            command.add_argument(
+                "--lock-from-git",
+                metavar="COMMIT",
+                help="Retained lock of this exact commit of --project (read-only git show).",
+            )
+            command.add_argument(
+                "--apply",
+                action="store_true",
+                help="Plan, apply and verify in one step; needs --quiescent.",
+            )
+            command.add_argument("--quiescent", action="store_true")
         if name == "update":
             command.add_argument("--check", action="store_true")
     recovery = commands.add_parser("recover")
     recovery.add_argument("--project", required=True)
     recovery.add_argument("--quiescent", action="store_true")
     return result
+
+
+def _apply_with_registry(plan, registry: Registry | None, quiescent: bool) -> None:
+    def authorize(auth: Authorization) -> None:
+        if registry is None:
+            raise InstallationError(
+                "configuration_required", "Live authorization is required.", 3
+            )
+        registry.authorize(auth)
+
+    apply_plan(plan, authorize=authorize, quiescent=quiescent)
+
+
+def _lock_from_git(project: Path, commit: str) -> bytes:
+    """The reviewed lock of one exact commit, read without a shell or a write."""
+    if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", commit):
+        raise InstallationError(
+            "invalid_commit", "Use the full lowercase commit id of the reviewed lock.", 2
+        )
+    try:
+        done = subprocess.run(  # noqa: S603 - fixed argv, validated commit id, no shell
+            ["git", "-C", str(project), "show", f"{commit}:{CONTEXT_LOCK}"],  # noqa: S607
+            capture_output=True,
+            check=False,
+            timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise InstallationError(
+            "input_missing", "The retained lock could not be read from git.", 2
+        ) from exc
+    if done.returncode != 0 or not done.stdout:
+        raise InstallationError(
+            "input_missing", "That commit does not contain a retained lock.", 2
+        )
+    return done.stdout
 
 
 def execute(args: argparse.Namespace) -> tuple[dict[str, object], int]:
@@ -282,15 +330,7 @@ def execute(args: argparse.Namespace) -> tuple[dict[str, object], int]:
             plan = parse_plan(read_local(args.plan))
             if plan.authorizations:
                 registry = Registry()
-
-            def authorize(auth: Authorization) -> None:
-                if registry is None:
-                    raise InstallationError(
-                        "configuration_required", "Live authorization is required.", 3
-                    )
-                registry.authorize(auth)
-
-            apply_plan(plan, authorize=authorize, quiescent=args.quiescent)
+            _apply_with_registry(plan, registry, args.quiescent)
             return {
                 "schema": 1,
                 "state": "removed" if plan.operation == "remove" else "installed",
@@ -324,7 +364,17 @@ def execute(args: argparse.Namespace) -> tuple[dict[str, object], int]:
             )
             if args.command == "doctor":
                 return doctor(project=project), 0
-            lock_bytes = read_local(lock_path)
+            from_git = getattr(args, "lock_from_git", None)
+            if from_git is not None:
+                if args.lock is not None or args.command != "restore":
+                    raise InstallationError(
+                        "invalid_arguments",
+                        "--lock-from-git replaces --lock and applies to restore only.",
+                        2,
+                    )
+                lock_bytes = _lock_from_git(project, from_git)
+            else:
+                lock_bytes = read_local(lock_path)
             lock = parse_lock(lock_bytes)
             if args.command == "verify":
                 outcome = verify(project=project, lock=lock)
@@ -391,6 +441,34 @@ def execute(args: argparse.Namespace) -> tuple[dict[str, object], int]:
                     allow_preview=args.allow_preview,
                     operation=args.command,
                 )
+        if getattr(args, "apply", False):
+            if args.out:
+                raise InstallationError(
+                    "invalid_arguments", "--apply replaces the plan file.", 2
+                )
+            if not args.quiescent:
+                raise InstallationError(
+                    "quiescence_required",
+                    "State that the project is quiescent to apply the restore.",
+                    2,
+                )
+            review = plan.review()
+            if plan.authorizations and registry is None:
+                registry = Registry()
+            _apply_with_registry(plan, registry, True)
+            outcome = verify(
+                project=project, lock=parse_lock(read_local(project / CONTEXT_LOCK))
+            )
+            return {
+                "schema": 1,
+                "state": "restored" if outcome["verified"] else "restored_unverified",
+                "plan_digest": plan.plan_digest,
+                "review": review,
+                "verification": outcome,
+                "preserved": plan.preserved,
+                "discovery": "not_observed",
+                "delivery": "not_observed",
+            }, 0 if outcome["verified"] else 6
         if not args.out:
             raise InstallationError(
                 "plan_path_required",
