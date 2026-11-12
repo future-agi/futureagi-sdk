@@ -161,13 +161,39 @@
     "tests/evals/test_evaluator_log_privacy.py::test_real_auto_enrichment_never_logs_evaluation_output"
    ],
    "source_contract": {
-    "fi/evals/evaluator.py:Evaluator.evaluate": {
-     "upstream_ast_sha256": "dc1f24c471429d9b0f3c57ecd241d0bd1de5ddd3bef5e13e5b6f504831d68043",
-     "ast_sha256": "a53b1c8ff44f4a3560dd6d64c47f889fa48f80a67fd0bf9ff506a2476b798e70"
-    },
     "fi/evals/evaluator.py:Evaluator._configure_evaluations": {
      "upstream_ast_sha256": "29c6b61989a256c7c7a4b7155c6d48e7cf88df174a6d1386f1a12f3d831dfdf7",
      "ast_sha256": "6a9d3221a3860687c872a3b8f2c7bfadc6c6415f8515b53078ab5734a7737d21"
+    }
+   }
+  },
+  {
+   "id": "refusal-reason",
+   "area": "evaluation errors",
+   "ai_evaluation": "When the eval endpoint refused an evaluation, Evaluator.evaluate() returned a result with no output whose reason was \"Evaluation failed with a 400 Bad Request. Please check your input data and evaluation configuration. Response: <the whole response body>\" for a 400, \"Invalid FI Client Authentication, please check your API key and secret key.\" for a 403 whatever the server said, or \"Error in evaluation: <status>, response: <the whole response body>\" for any other status. A request that timed out had the reason \"Evaluation timed out after <n>s\" when the wait for it timed out, or the transport's own exception text when the HTTP request timed out. evaluate(<template>, engine=\"turing\") returned each of these, and any other request Evaluator.evaluate() could not complete, as status \"completed\" with no score, no error and the text only in reason.",
+   "futureagi": "The reason leads with the server's own sentence (the message, detail or error of its error body, then the field errors it lists under details) and then the status, for example \"Validation failed: inputs: Unexpected keys provided: answer. Accepted keys are: output (HTTP 400)\". A 403 reads the same way, followed by \"Check your API key and secret key.\", for example \"Authentication credentials were not provided. (HTTP 403) Check your API key and secret key.\"; EvalResponseHandler still raises it as InvalidAuthError. A body without a sentence gives a short excerpt of itself, at most 200 characters, instead of the whole body (a 403 adds the same hint). A request that timed out, whether the wait for it or the HTTP request itself, has the reason \"Evaluation timed out after <n>s\". Evaluator.evaluate() still returns the result instead of raising; the result is still an EvalResult, and for a request that was refused, failed or timed out it also carries the reason as error. evaluate(engine=\"turing\") reports such a result as status \"failed\" with that text as error (and still as reason), so BatchResult.success_rate no longer counts it as completed. The source contract of Evaluator.evaluate listed here also covers its log-privacy changes.",
+   "docs": "Code that detected a refused or timed-out evaluation from evaluate(engine=\"turing\") by a missing score checks result.status == \"failed\" and reads result.error. A refused Evaluator.evaluate() result shows the server's sentence and the status as its reason, not the raw response body; code that matched the fixed 403 sentence matches InvalidAuthError or the \"(HTTP 403)\" status instead.",
+   "tests": [
+    "tests/evals/test_refused_evaluations.py::test_evaluator_reason_leads_with_the_server_sentence_and_status",
+    "tests/evals/test_refused_evaluations.py::test_evaluator_reason_for_a_body_that_is_not_json_is_a_short_excerpt",
+    "tests/evals/test_refused_evaluations.py::test_a_403_still_raises_invalid_auth_error_with_the_server_sentence_first",
+    "tests/evals/test_refused_evaluations.py::test_turing_evaluate_reports_a_refused_evaluation_as_failed",
+    "tests/evals/test_refused_evaluations.py::test_refused_turing_evaluations_are_not_counted_as_completed",
+    "tests/evals/test_refused_evaluations.py::test_evaluator_reports_a_timed_out_request_as_failed_with_a_plain_sentence",
+    "tests/evals/test_refused_evaluations.py::test_turing_evaluate_reports_a_timed_out_request_as_failed",
+    "tests/evals/test_compat_examples.py::test_a_403_reason_leads_with_the_server_sentence_then_the_key_hint",
+    "tests/evals/test_evaluator_log_privacy.py::test_request_failure_logs_no_inputs_or_exception_text",
+    "tests/evals/test_module_extractions.py::test_extracted_functions_keep_the_published_signature_and_body",
+    "tests/evals/test_provenance.py::test_every_upstream_file_is_present_and_identical_unless_listed"
+   ],
+   "source_contract": {
+    "fi/evals/evaluator.py:EvalResponseHandler._handle_error": {
+     "upstream_ast_sha256": "185ec0c68055f5845b9f3d1bce5ca7269d542ab6cb134281939993350bbc451d",
+     "ast_sha256": "ffd7363b0ba4072e0f60bba63a528087fc249b037d14da1f1a6a0bf85fe3f224"
+    },
+    "fi/evals/evaluator.py:Evaluator.evaluate": {
+     "upstream_ast_sha256": "dc1f24c471429d9b0f3c57ecd241d0bd1de5ddd3bef5e13e5b6f504831d68043",
+     "ast_sha256": "485d843334c15965fdd421a3740dc0b0a74252344a2d4809b73a97478c3671ce"
     }
    }
   }

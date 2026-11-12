@@ -1,7 +1,17 @@
 """Evaluator evaluate operations."""
 from __future__ import annotations
 
-from fi.evals.evaluator import (Any, BatchRunResult, Dict, EvalTemplate, Optional, Union)
+from requests.exceptions import Timeout as _RequestTimeout
+
+from fi.evals.evaluator import (Any, BatchRunResult, Dict, EvalResult, EvalTemplate, Optional, Union)
+
+
+class _FailedEvalResult(EvalResult):
+    """The result ``evaluate`` returns, instead of raising, for a request that was refused, failed or
+    timed out. ``error`` repeats the reason, so ``fi.evals.evaluate`` can report it as a failed
+    evaluation."""
+
+    error: Optional[str] = None
 
 
 class _EvaluatorEvaluateMethods:
@@ -182,12 +192,14 @@ class _EvaluatorEvaluateMethods:
                         eval_name, timeout or self._default_timeout, type(exc).__name__,
                     )
                     failed_inputs.append(input_case)
+                    timed_out = f"Evaluation timed out after {timeout or self._default_timeout}s"
                     all_results.append(
-                        EvalResult(
+                        _FailedEvalResult(
                             name=eval_name,
                             output=None,
-                            reason=f"Evaluation timed out after {timeout or self._default_timeout}s",
+                            reason=timed_out,
                             runtime=0,
+                            error=timed_out,
                         )
                     )
                 except Exception as exc:
@@ -197,12 +209,16 @@ class _EvaluatorEvaluateMethods:
                         eval_name, type(exc).__name__,
                     )
                     failed_inputs.append(input_case)
+                    # A request the transport gave up on reads like the timeout above.
+                    reason = (f"Evaluation timed out after {timeout or self._default_timeout}s"
+                              if isinstance(exc, _RequestTimeout) else str(exc))
                     all_results.append(
-                        EvalResult(
+                        _FailedEvalResult(
                             name=eval_name,
                             output=None,
-                            reason=str(exc),
+                            reason=reason,
                             runtime=0,
+                            error=reason,
                         )
                     )
 

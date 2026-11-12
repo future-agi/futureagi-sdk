@@ -3,6 +3,47 @@ from __future__ import annotations
 
 from fi.evals.evaluator import (Any, BatchRunResult, Dict, Response)
 
+# The keys of the platform's error body that carry its sentence, in the order they are read.
+_SENTENCE_KEYS = ("message", "detail", "error")
+_EXCERPT_CHARS = 200
+# What a 403 adds after the server's sentence and the status.
+_KEY_HINT = "Check your API key and secret key."
+
+
+def _server_sentence(body: Any) -> str:
+    """The sentence of an error body ``{"status": false, "message"/"detail"/"error": ...}``, then the
+    field errors it lists under ``details`` (or ``errors``); "" when the body has neither."""
+    if not isinstance(body, dict):
+        return ""
+    sentence = next((body[key].strip() for key in _SENTENCE_KEYS
+                     if isinstance(body.get(key), str) and body[key].strip()), "")
+    fields = body.get("details") if isinstance(body.get("details"), dict) else body.get("errors")
+    reasons = []
+    for field, messages in (fields.items() if isinstance(fields, dict) else ()):
+        texts = [m.strip() for m in (messages if isinstance(messages, list) else [messages])
+                 if isinstance(m, str) and m.strip() and m.strip() != sentence]
+        if texts and field not in _SENTENCE_KEYS:
+            text = " ".join(texts)
+            reasons.append(text if field == "non_field_errors" else f"{field}: {text}")
+    return ": ".join(part for part in (sentence, "; ".join(reasons)) if part)
+
+
+def _refusal_reason(response: Response) -> str:
+    """What a refused evaluation tells the caller: the server's sentence, then the HTTP status. A body
+    without a sentence gives a short excerpt of itself, never the whole body."""
+    try:
+        sentence = _server_sentence(response.json())
+    except ValueError:
+        sentence = ""
+    if sentence:
+        return f"{sentence} (HTTP {response.status_code})"
+    excerpt = " ".join((response.text or "").split())
+    if not excerpt:
+        return f"The evaluation request failed with HTTP {response.status_code} and an empty body."
+    if len(excerpt) > _EXCERPT_CHARS:
+        excerpt = excerpt[:_EXCERPT_CHARS].rstrip() + "..."
+    return f"The evaluation request failed with HTTP {response.status_code}: {excerpt}"
+
 
 class _EvalResponseHandlerParseSuccessMethods:
     __slots__ = ()
@@ -16,16 +57,10 @@ class _EvalResponseHandlerParseSuccessMethods:
     @classmethod
     def _handle_error(cls, response: Response) -> None:
         from fi.evals.evaluator import (InvalidAuthError, Response)
-        if response.status_code == 400:
-            raise Exception(
-                f"Evaluation failed with a 400 Bad Request. Please check your input data and evaluation configuration. Response: {response.text}"
-            )
-        elif response.status_code == 403:
-            raise InvalidAuthError()
-        else:
-            raise Exception(
-                f"Error in evaluation: {response.status_code}, response: {response.text}"
-            )
+        reason = _refusal_reason(response)
+        if response.status_code == 403:
+            raise InvalidAuthError(message=f"{reason} {_KEY_HINT}")
+        raise Exception(reason)
 
 
     @classmethod
