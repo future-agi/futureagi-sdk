@@ -278,7 +278,9 @@ describe("file tools", () => {
       ],
     });
     await call(set.sandbox_list_files, { path: "src" });
-    expect(api.callsTo("listWorkspaceSandboxFiles").map((c) => c.query.get("path"))).toEqual([".", "src"]);
+    await call(set.sandbox_list_files, { path: "/workspace/src/lib" });
+    // /workspace itself is listed with no path sent (the files API refuses "."); a folder under it, relative to it
+    expect(api.callsTo("listWorkspaceSandboxFiles").map((c) => c.query.get("path"))).toEqual([null, "src", "src/lib"]);
   });
 
   it("a path outside /workspace is refused before anything is sent", async () => {

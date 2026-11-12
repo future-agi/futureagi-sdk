@@ -521,7 +521,7 @@ describe("files", () => {
     await sbx.files.remove("old", { recursive: true });
     await sbx.files.move("a.txt", "b.txt");
     await sbx.files.makeDir("dir/sub");
-    expect(api.callsTo("listWorkspaceSandboxFiles")[0]!.query.get("path")).toBe(".");
+    expect(api.callsTo("listWorkspaceSandboxFiles")[0]!.query.get("path")).toBeNull();
     expect(api.callsTo("deleteWorkspaceSandboxPath")[0]!.query.get("recursive")).toBe("true");
     expect(api.callsTo("moveWorkspaceSandboxPath")[0]!.json).toEqual({ from: "a.txt", to: "b.txt" });
     expect(api.callsTo("createWorkspaceSandboxFolder")[0]!.params.path).toBe("dir/sub");

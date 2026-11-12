@@ -5,11 +5,15 @@
  * required headers, the request body's media type and schema); every JSON response, canned or scripted, is
  * checked against the operation's response schema for its status. A violation is recorded in `problems`, never
  * thrown into the SDK (a throw would surface as a connection error); tests assert `problems` is empty.
- * No socket is opened.
+ * The files routes keep the service's path rule before any answer, scripted or default: a file path is relative to
+ * `/workspace`, so an absolute one, a `.` or `..` segment, a backslash or a NUL is answered with a 400 (see
+ * `files-path-rule.ts`). No socket is opened.
  */
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+
+import { refusedFilePath } from "./files-path-rule";
 
 type Json = Record<string, unknown>;
 
@@ -288,7 +292,7 @@ export class SandboxApi {
     const script = this.#scripts.get(operation.operationId);
     const used = this.callsTo(operation.operationId).length - 1;
     const handler = script !== undefined && script.length > 0 ? script[Math.min(used, script.length - 1)]! : (c: MockCall) => this.#default(c);
-    const response = await handler(call);
+    const response = refusedFilePath(call) ?? (await handler(call));
     await this.#checkResponse(operation, response);
     return response;
   }) as typeof fetch;
