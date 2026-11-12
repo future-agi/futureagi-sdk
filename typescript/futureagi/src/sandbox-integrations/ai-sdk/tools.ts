@@ -10,9 +10,11 @@
  * `sandbox_list_files`. A non-zero exit, a timeout, a signal and a cancel are results the model reads; a refusal
  * or a stream with no exit frame is thrown, and the AI SDK hands the error to the model. No tool takes an `env`
  * (exec variables must never carry credentials), and nothing is retried. The file tools reach `/workspace` only,
- * like the files API. `sandbox_exec` starts a command in a folder inside `/workspace` (the exec API takes that
- * folder relative to `/workspace`); a `cwd` outside it is refused before anything is sent, and a command can still
- * `cd` elsewhere.
+ * like the files API, and take a path as written, as the Python MCP server's do: a path with a `.` or `..` segment,
+ * a backslash or a control character is refused (`invalid_path`), and so is an absolute path outside `/workspace`
+ * (`outside_workspace`), before anything is sent. `sandbox_exec` starts a command in a folder inside `/workspace`
+ * (the exec API takes that folder relative to `/workspace`); a `cwd` outside it is refused before anything is sent,
+ * and a command can still `cd` elsewhere.
  */
 
 import { jsonSchema, tool, type Tool } from "ai";
@@ -191,9 +193,10 @@ export function sandboxTools(sandbox: Sandbox, options: SandboxToolsOptions = {}
       additionalProperties: false,
     }),
     execute: async (input: SandboxReadFileInput): Promise<SandboxReadFileResult> => {
+      const target = filesPath(workingDirectory, input.path);
       const path = at(input.path);
       const maxBytes = input.max_bytes !== undefined ? Math.max(1, Math.floor(input.max_bytes)) : undefined;
-      const file = await sandbox.files.readRecord(filesPath(workingDirectory, path), maxBytes !== undefined ? { maxBytes } : {});
+      const file = await sandbox.files.readRecord(target, maxBytes !== undefined ? { maxBytes } : {});
       return { path, encoding: file.encoding, content: file.content, bytes: file.bytes, truncated: file.truncated };
     },
   });
@@ -211,8 +214,8 @@ export function sandboxTools(sandbox: Sandbox, options: SandboxToolsOptions = {}
       additionalProperties: false,
     }),
     execute: async (input: SandboxWriteFileInput): Promise<SandboxWriteFileResult> => {
+      const target = filesPath(workingDirectory, input.path);
       const path = at(input.path);
-      const target = filesPath(workingDirectory, path);
       const data = input.encoding === "base64" ? fromBase64(input.content) : input.content;
       const response = await sandbox.files.write(target, data);
       return { path, bytes: response.file.bytes };
@@ -229,8 +232,9 @@ export function sandboxTools(sandbox: Sandbox, options: SandboxToolsOptions = {}
       additionalProperties: false,
     }),
     execute: async (input: SandboxListFilesInput): Promise<SandboxListFilesResult> => {
+      const target = filesPath(workingDirectory, input.path ?? ".", true);
       const path = at(input.path ?? ".");
-      const entries = await sandbox.files.list(filesPath(workingDirectory, path));
+      const entries = await sandbox.files.list(target);
       return {
         path,
         entries: entries.map((entry) => ({ name: entry.name, size: entry.size, directory: entry.directory === true, mode: entry.mode })),

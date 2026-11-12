@@ -291,6 +291,63 @@ describe("file tools", () => {
     expect(api.callsTo("writeWorkspaceSandboxFile")).toHaveLength(0);
   });
 
+  it("a file path is never folded: a . or .. segment is invalid_path, an absolute path outside /workspace is outside_workspace", async () => {
+    const set = await tools({ workingDirectory: "/workspace/app" });
+    const runs = (path: string): (() => Promise<unknown>)[] => [
+      () => call(set.sandbox_read_file, { path }),
+      () => call(set.sandbox_write_file, { path, content: "x" }),
+      () => call(set.sandbox_list_files, { path }),
+    ];
+    for (const path of ["src/../a.txt", "../a.txt", "./a.txt", "/workspace/../etc/passwd", "/workspace/./a.txt", "/workspace/.", "a\\b.txt"]) {
+      for (const run of runs(path)) {
+        const error = await failure(run);
+        expect([path, error]).toEqual([path, expect.any(SandboxError)]);
+        expect([path, (error as SandboxError).code]).toEqual([path, "invalid_path"]);
+        expect((error as Error).message).toContain(`path ${JSON.stringify(path)} `);
+      }
+    }
+    for (const path of ["/tmp/x", "/etc/passwd", "/", "/workspacex/a"]) {
+      for (const run of runs(path)) {
+        const error = await failure(run);
+        expect([path, (error as SandboxError).code]).toEqual([path, "outside_workspace"]);
+        expect((error as Error).message).toContain(`path ${JSON.stringify(path)} is outside /workspace`);
+      }
+    }
+    expect(api.calls.filter((c) => c.operation.operationId !== "getWorkspaceSandbox")).toEqual([]);
+  });
+
+  it("/workspace itself is a folder only sandbox_list_files takes; a refusal names the path as given", async () => {
+    const set = await tools();
+    for (const path of ["/workspace", "/workspace/", ".", ""]) {
+      for (const run of [() => call(set.sandbox_read_file, { path }), () => call(set.sandbox_write_file, { path, content: "x" })]) {
+        const error = await failure(run);
+        expect(error).toMatchObject({ code: "invalid_path" });
+        expect((error as Error).message).toContain(`path ${JSON.stringify(path)} names no file or folder under /workspace`);
+      }
+    }
+    expect(await call(set.sandbox_list_files, { path: "/workspace" })).toMatchObject({ path: "/workspace" });
+    expect(api.callsTo("listWorkspaceSandboxFiles").map((c) => c.query.get("path"))).toEqual([null]);
+    expect(api.callsTo("readWorkspaceSandboxFile")).toHaveLength(0);
+    expect(api.callsTo("writeWorkspaceSandboxFile")).toHaveLength(0);
+  });
+
+  it("under another working folder, an empty path, . or ./ is refused for a read or write and lists that folder", async () => {
+    const set = await tools({ workingDirectory: "/workspace/app" });
+    for (const path of ["", ".", "./"]) {
+      for (const run of [() => call(set.sandbox_read_file, { path }), () => call(set.sandbox_write_file, { path, content: "x" })]) {
+        const error = await failure(run);
+        expect([path, error]).toEqual([path, expect.any(SandboxError)]);
+        expect([path, (error as SandboxError).code]).toEqual([path, "invalid_path"]);
+        expect((error as Error).message).toContain(`path ${JSON.stringify(path)} names no file or folder`);
+      }
+    }
+    expect(api.calls.filter((c) => c.operation.operationId !== "getWorkspaceSandbox")).toEqual([]);
+    expect(await call(set.sandbox_list_files, { path: "." })).toMatchObject({ path: "/workspace/app" });
+    expect(api.callsTo("listWorkspaceSandboxFiles").map((c) => c.query.get("path"))).toEqual(["app"]);
+    expect(api.callsTo("readWorkspaceSandboxFile")).toHaveLength(0);
+    expect(api.callsTo("writeWorkspaceSandboxFile")).toHaveLength(0);
+  });
+
   it("a missing file is the handle's NotFoundError", async () => {
     api.on("readWorkspaceSandboxFile", () => json(404, { code: "not_found", message: "no such file" }));
     const error = await failure(async () => call((await tools()).sandbox_read_file, { path: "gone.txt" }));

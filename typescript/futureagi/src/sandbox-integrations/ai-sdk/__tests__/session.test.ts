@@ -350,9 +350,77 @@ describe("files", () => {
     expect(resolvePath("/workspace", "a/./b/../c.txt")).toBe("/workspace/a/c.txt");
     expect(resolvePath("/workspace/app", "/etc/hosts")).toBe("/etc/hosts");
     expect(filesPath("/workspace", "src/a.ts")).toBe("src/a.ts");
+    expect(filesPath("/workspace/app", "src/a.ts")).toBe("app/src/a.ts");
     expect(filesPath("/workspace/app", "/workspace/b.txt")).toBe("b.txt");
-    expect(filesPath("/workspace", ".")).toBe(".");
+    expect(filesPath("/workspace", "workspace/notes.md")).toBe("workspace/notes.md");
+    expect(filesPath("/workspace", ".", true)).toBe("");
+    expect(filesPath("/workspace", "/workspace/", true)).toBe("");
+    expect(filesPath("/workspace/app", ".", true)).toBe("app");
     expect(() => filesPath("/workspace", "/etc/hosts")).toThrow(SandboxError);
+  });
+
+  it("a file path is never folded: a . or .. segment is invalid_path, an absolute path outside /workspace is outside_workspace", () => {
+    const refusal = (base: string, path: string, root = false): unknown => {
+      try {
+        filesPath(base, path, root);
+      } catch (error) {
+        return error;
+      }
+      return undefined;
+    };
+    for (const path of ["src/../a.txt", "../a.txt", "./a.txt", "a/./b", "/workspace/../etc/passwd", "/workspace/./a.txt", "/workspace/.", "a\\b.txt", "a\u0000b"]) {
+      for (const [base, root] of [["/workspace", false], ["/workspace/app", false], ["/workspace", true]] as const) {
+        const error = refusal(base, path, root);
+        expect([path, error]).toEqual([path, expect.any(SandboxError)]);
+        expect([path, (error as SandboxError).code]).toEqual([path, "invalid_path"]);
+        expect((error as Error).message).toContain(`path ${JSON.stringify(path)} `);
+      }
+    }
+    for (const path of ["/tmp/x", "/etc/passwd", "/", "//", "/workspacex/a", "/tmp/../workspace/a"]) {
+      const error = refusal("/workspace/app", path);
+      expect([path, (error as SandboxError).code]).toEqual([path, "outside_workspace"]);
+      expect((error as Error).message).toContain(`path ${JSON.stringify(path)} is outside /workspace`);
+    }
+    const long = refusal("/workspace", `/tmp/${"a".repeat(5000)}`) as Error;
+    expect(long.message).toContain(`path "/tmp/${"a".repeat(195)}..." is outside /workspace`);
+    expect(long.message.length).toBeLessThan(400);
+  });
+
+  it("a refusal names the path as the caller gave it, /workspace itself included", async () => {
+    const sbx = await session();
+    for (const path of ["/workspace", "/workspace/", ".", ""]) {
+      for (const run of [() => sbx.readTextFile({ path }), () => sbx.writeTextFile({ path, content: "x" })]) {
+        const error = await failure(run);
+        expect([path, error]).toEqual([path, expect.any(SandboxError)]);
+        expect(error).toMatchObject({ code: "invalid_path" });
+        expect((error as Error).message).toContain(`path ${JSON.stringify(path)} names no file or folder under /workspace`);
+      }
+    }
+    const dotted = await failure(() => sbx.readBinaryFile({ path: "src/../a.txt" }));
+    expect(dotted).toMatchObject({ code: "invalid_path" });
+    expect((dotted as Error).message).toContain('path "src/../a.txt" has a "." or ".." segment');
+    expect(api.callsTo("downloadWorkspaceSandboxFile")).toHaveLength(0);
+    expect(api.callsTo("writeWorkspaceSandboxFile")).toHaveLength(0);
+  });
+
+  it("under another working folder, an empty path, . or ./ names no file to read or write", async () => {
+    const sbx = await session({ workingDirectory: "/workspace/app" });
+    for (const path of ["", ".", "./"]) {
+      expect([path, filesPath("/workspace/app", path, true)]).toEqual([path, "app"]);
+      const runs = [
+        () => sbx.readTextFile({ path }),
+        () => sbx.readBinaryFile({ path }),
+        () => sbx.writeTextFile({ path, content: "x" }),
+        () => sbx.writeBinaryFile({ path, content: new Uint8Array([1]) }),
+      ];
+      for (const run of runs) {
+        const error = await failure(run);
+        expect([path, error]).toEqual([path, expect.any(SandboxError)]);
+        expect([path, (error as SandboxError).code]).toEqual([path, "invalid_path"]);
+        expect((error as Error).message).toContain(`path ${JSON.stringify(path)} names no file or folder`);
+      }
+    }
+    expect(api.calls.filter((c) => c.operation.operationId !== "getWorkspaceSandbox")).toEqual([]);
   });
 
   it("a command folder is sent relative to /workspace, none for /workspace itself, and refused outside it", () => {

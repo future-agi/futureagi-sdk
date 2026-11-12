@@ -86,6 +86,13 @@ takes the folder relative to `/workspace`, so the tool sends `/workspace/app` as
 folder at all. A `cwd` outside `/workspace` is refused before anything is sent; to work there, begin the command with
 `cd`. The session's `run` treats its `workingDirectory` the same way.
 
+A file `path` is relative to the working folder, or absolute under `/workspace` (`/workspace/src/a.ts` is sent as
+`src/a.ts`), and is taken as written, never folded. A path with a `.` or `..` part, a backslash or a control
+character, or one over 4096 characters, is refused with `invalid_path`, and an absolute path outside `/workspace`
+with `outside_workspace`, before anything is sent; the error names the path as given. `/workspace` itself, and the
+working folder written as `.`, `./` or an empty path, are paths only for `sandbox_list_files`; reading or writing
+one is refused with `invalid_path`. The session's file methods take paths the same way.
+
 ## Options
 
 | `createFutureAGISandboxSession` | Default | |

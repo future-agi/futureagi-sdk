@@ -12,6 +12,7 @@ import { join } from "node:path";
 
 import { FutureAGIClient } from "../../futureagi-client";
 import { Sandbox, SandboxError, ValidationError } from "../index";
+import { call as sandboxCall } from "../wire";
 import { SID, SandboxApi } from "../__fixtures__/openapi-mock";
 
 const API_KEY = "sbx-test-api-key-not-valid";
@@ -206,8 +207,11 @@ describe("the mock files routes refuse what the service refuses", () => {
   it("answers an absolute or dotted list path, or move path, with a 400, before any scripted answer", async () => {
     api.on("listWorkspaceSandboxFiles", () => api.ok("listWorkspaceSandboxFiles"));
     const files = client().sandboxes.files;
+    // the list path goes out as given here, past the path rule of client.sandboxes.files
+    const bound = { host: client(), allowCustomBaseUrl: false, baseUrlGiven: false };
+    const list = (path?: string) => sandboxCall<{ entries: unknown[] }>(bound, "sandboxes.files.list", { path: { id: SID }, query: { path } }, {});
     for (const path of ["/workspace/sub", ".", "a/../b", "/etc"]) {
-      const error = await failure(() => files.list(SID, { path }));
+      const error = await failure(() => list(path));
       expect([path, error]).toEqual([path, expect.any(ValidationError)]);
       expect(error).toMatchObject({ status: 400, code: "validation" });
       expect((error as Error).message).toContain("path must");
@@ -215,8 +219,8 @@ describe("the mock files routes refuse what the service refuses", () => {
     for (const body of [{ from: "/workspace/a.txt", to: "b.txt" }, { from: "a.txt", to: "./b.txt" }]) {
       expect(await failure(() => files.rename(SID, { body }))).toMatchObject({ status: 400, code: "validation" });
     }
-    expect((await files.list(SID, { path: "sub" })).entries).toEqual([]);
-    expect((await files.list(SID)).entries).toEqual([]);
+    expect((await list("sub")).entries).toEqual([]);
+    expect((await list()).entries).toEqual([]);
     expect((await files.rename(SID, { body: { from: "a.txt", to: "sub/b.txt" } })).schemaVersion).toBeDefined();
     expect(api.callsTo("listWorkspaceSandboxFiles")).toHaveLength(6);
     expect(api.callsTo("moveWorkspaceSandboxPath")).toHaveLength(3);

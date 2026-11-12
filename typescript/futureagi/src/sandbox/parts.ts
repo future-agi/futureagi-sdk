@@ -59,22 +59,35 @@ function invalidPath(message: string, operation: string): SandboxError {
   return new SandboxError(message, { code: "invalid_path", operation });
 }
 
+/** `path` as a refusal shows it: as given, JSON-quoted (so a control character is escaped) and cut to 200
+ * characters with an ellipsis. */
+export function shownPath(path: string): string {
+  return JSON.stringify(path.length > 200 ? `${path.slice(0, 200)}...` : path);
+}
+
+/** Whether `path` is absolute and outside `/workspace` (`/tmp/a`, `/`, `/workspacex/a`). `/workspace/../a` is not:
+ * it is under `/workspace` with a `..` segment, which `filesPath` refuses as such (nothing is folded). */
+export function outsideWorkspace(path: string): boolean {
+  return path.startsWith("/") && path.split("/").find((part) => part !== "") !== WORKSPACE_NAME;
+}
+
 /**
  * `path` as the files API takes it: relative to `/workspace`, so `/workspace/src/a.ts` is sent as `src/a.ts` (sent
  * as it is, an absolute path is refused, or lands under `/workspace` a second time as `/workspace/workspace/src/a.ts`);
- * repeated and trailing slashes are dropped. `""` stands for `/workspace` itself, which only a listing (`root`)
- * takes, and there `.` names it too. Anything the API would refuse is refused here with `invalid_path`, before
- * anything is sent.
+ * repeated and trailing slashes are dropped. `""` and `.` stand for `/workspace` itself, which only a listing
+ * (`root`) takes; `""` is returned for it. Anything the API would refuse is refused here with `invalid_path`, before
+ * anything is sent, and the message names the path as given. `sbx.files` and `client.sandboxes.files` both take
+ * their paths through it.
  */
-function filesPath(path: unknown, what: string, operation: string, root = false): string {
+export function filesPath(path: unknown, what: string, operation: string, root = false): string {
   if (typeof path !== "string") throw invalidPath(`${what} must be a path string, not ${typeof path}`, operation);
-  const shown = JSON.stringify(path.length > 200 ? `${path.slice(0, 200)}...` : path);
+  const shown = shownPath(path);
   if (hasControl(path) || path.includes("\\")) {
     throw invalidPath(`${what} ${shown} contains a control character or a backslash, which the files API refuses`, operation);
   }
   let parts = path.split("/").filter((part) => part !== "");
   if (path.startsWith("/")) {
-    if (parts[0] !== WORKSPACE_NAME) {
+    if (outsideWorkspace(path)) {
       throw invalidPath(
         `${what} ${shown} is outside ${WORKSPACE}: the sandbox's file calls reach only ${WORKSPACE} and what is under ` +
           `it, so pass a path under ${WORKSPACE} (or one relative to it); read anything else with a command such as cat`,
@@ -82,7 +95,7 @@ function filesPath(path: unknown, what: string, operation: string, root = false)
       );
     }
     parts = parts.slice(1);
-  } else if (root && parts.length === 1 && parts[0] === ".") {
+  } else if (parts.length === 1 && parts[0] === ".") {
     parts = [];
   }
   if (parts.some((part) => part === "." || part === "..")) {

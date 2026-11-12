@@ -14,12 +14,14 @@
  * exec API takes that folder relative to `/workspace` and refuses an absolute one, so `/workspace/app` is sent as
  * `app` and `/workspace` itself as no folder at all; a folder outside `/workspace` is refused before anything is
  * sent (a command can still `cd` there). The file methods reach `/workspace` only (the files API takes paths
- * relative to it); a missing file reads as null. `spawn` is not offered: it rejects before anything is sent.
+ * relative to it) and take a path as written, never folded (see `filesPath`); a missing file reads as null. `spawn`
+ * is not offered: it rejects before anything is sent.
  */
 
 import type { Experimental_SandboxSession } from "ai";
 
 import { NotFoundError, Sandbox, SandboxError, type CreateSandboxOptions } from "../../sandbox";
+import { filesPath as workspacePath, outsideWorkspace, shownPath } from "../../sandbox/parts";
 import { endingNote, shellExitCode } from "./exit";
 
 type RunOptions = Parameters<Experimental_SandboxSession["run"]>[0];
@@ -72,7 +74,8 @@ export function clampTimeout(seconds: number | undefined, max?: number): number 
   return cap !== undefined ? Math.min(whole, cap) : whole;
 }
 
-/** `path` resolved against `base` (POSIX rules: `.` and `..` segments folded); an absolute path keeps its root. */
+/** `path` resolved against `base` (POSIX rules: `.` and `..` segments folded); an absolute path keeps its root. For
+ * command folders and the paths the tools report; a file path is never folded (`filesPath`). */
 export function resolvePath(base: string, path: string): string {
   const joined = path.startsWith("/") ? path : `${base}/${path}`;
   const parts: string[] = [];
@@ -85,26 +88,37 @@ export function resolvePath(base: string, path: string): string {
   return parts.length > 0 ? parts.join("/") : ".";
 }
 
-/**
- * The files-API path for `path` resolved against `base`. The files API takes paths relative to the sandbox's
- * `/workspace` folder, so `/workspace/src/a.ts` is sent as `src/a.ts`; a path outside `/workspace` is refused
- * before anything is sent (read or copy it with a command instead).
- */
-export function filesPath(base: string, path: string): string {
-  const resolved = resolvePath(base, path);
-  if (!resolved.startsWith("/")) return resolved;
-  if (resolved === DEFAULT_WORKING_DIRECTORY) return ".";
-  if (resolved.startsWith(`${DEFAULT_WORKING_DIRECTORY}/`)) return resolved.slice(DEFAULT_WORKING_DIRECTORY.length + 1);
-  throw new SandboxError(
-    `${resolved} is outside ${DEFAULT_WORKING_DIRECTORY}: the sandbox's file calls reach only that folder (use a command such as cat or cp)`,
-    { code: "outside_workspace", operation: "sandbox.files" },
-  );
-}
-
 /** `folder` (absolute) relative to `/workspace`: "" for `/workspace` itself, undefined for a folder outside it. */
 function underWorkspace(folder: string): string | undefined {
   if (folder === DEFAULT_WORKING_DIRECTORY) return "";
   return folder.startsWith(`${DEFAULT_WORKING_DIRECTORY}/`) ? folder.slice(DEFAULT_WORKING_DIRECTORY.length + 1) : undefined;
+}
+
+function outsideFiles(path: string): SandboxError {
+  return new SandboxError(
+    `path ${shownPath(path)} is outside ${DEFAULT_WORKING_DIRECTORY}: the sandbox's file calls reach only that folder ` +
+      "(use a command such as cat or cp)",
+    { code: "outside_workspace", operation: "sandbox.files" },
+  );
+}
+
+/**
+ * The files-API path for `path`, which is relative to the working folder `base` or absolute under `/workspace`. The
+ * files API takes paths relative to `/workspace`, so `/workspace/src/a.ts` is sent as `src/a.ts`. The path is taken
+ * as written, by the rule of `sbx.files`, and nothing is folded: a `.` or `..` segment, a backslash, a control
+ * character, a path over 4096 characters, and a path that names no file (`/workspace` itself, or the working folder
+ * as `.`, `./` or `""`) are refused with `invalid_path`; an absolute path outside `/workspace` is refused with
+ * `outside_workspace` (read or copy it with a command instead). Every refusal comes before anything is sent and
+ * names the path as given. For a listing (`root`), those folders are paths too: `/workspace` itself is returned as
+ * `""`, and a lone `.` (or `""`) is the working folder.
+ */
+export function filesPath(base: string, path: string, root = false): string {
+  if (typeof path === "string" && outsideWorkspace(path)) throw outsideFiles(path);
+  const folder = underWorkspace(resolvePath(DEFAULT_WORKING_DIRECTORY, base));
+  if (folder === undefined) throw outsideFiles(base);
+  if (folder === "" || typeof path !== "string" || path.startsWith("/")) return workspacePath(path, "path", "sandbox.files", root);
+  const relative = workspacePath(path, "path", "sandbox.files", root);
+  return relative === "" ? folder : `${folder}/${relative}`;
 }
 
 function outsideFolder(folder: string): SandboxError {

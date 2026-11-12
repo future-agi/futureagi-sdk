@@ -2,6 +2,9 @@
  * Test fixture (not shipped API): the sandbox service's rule for file paths, which the mock files routes in
  * `openapi-mock.ts` keep before any answer, scripted or default. A file path is relative to `/workspace`, so an
  * absolute one, a `.` or `..` segment, a backslash, a NUL or one over 4096 characters is answered with a 400.
+ * A relative path whose first folder is named `workspace` (`workspace/notes.md`, which is
+ * `/workspace/workspace/notes.md`) is accepted here as the rule allows, while Python's strict test fake
+ * (python/tests/sandbox_integrations/_strict_exec.py) refuses one, to catch a `/workspace` prefix sent twice.
  */
 
 /** What the rule reads of a mock call (a `MockCall` of `openapi-mock.ts`). */
@@ -31,9 +34,9 @@ function pathRefusal(field: string, value: string): Response | undefined {
 /**
  * The 400 the service answers for a files call whose path it would refuse: the list route's `path` query, the move
  * body's `from` and `to`, and every `{path}` route parameter, each relative to `/workspace`. Undefined when the call
- * is not a files call or its paths are workspace-relative. (A `{path}` parameter reaches the mock already
- * normalised: the SDK drops leading slashes and refuses `.` and `..` segments before sending, and the URL folds dot
- * segments, so a misplaced absolute path shows here as `workspace/...`, which is a valid relative path.)
+ * is not a files call or its paths are workspace-relative. (A `{path}` parameter reaches the mock relative to
+ * `/workspace`: `client.sandboxes.files` and `sbx.files` send a path under `/workspace` relative to it and refuse any
+ * other absolute path, and any `.` or `..` segment, before sending.)
  */
 export function refusedFilePath(call: FilesCall): Response | undefined {
   const id = call.operation.operationId;

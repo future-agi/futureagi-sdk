@@ -14,6 +14,9 @@
 // - a self-hosted origin (Bearer token) that is not loopback, a Future AGI host included, needs the
 //   constructor-only `allowCustomBaseUrl: true` (OpenAPI servers[1]); `FI_ALLOW_CUSTOM_PLATFORM_URL` and
 //   `allowCustomPlatformUrl` do not stand in for it;
+// - a files path is taken by the rule `sbx.files` keeps (src/sandbox/parts.ts): relative to `/workspace`, so an
+//   absolute path under it is sent relative to it, and a path the files API would refuse or misplace is refused
+//   with `invalid_path` before anything is sent;
 // - a download is read up to `maxBytes` (default 64 MiB, the upload limit); a larger file throws
 //   `PayloadTooLargeError` (code `download_too_large`) and nothing is kept;
 // - every call the contract marks non-idempotent is sent once, with no retry at all (not on a 429, not after a
@@ -29,7 +32,8 @@
 
 import type * as T from "../../generated/platform/types.gen";
 import type { Opened } from "../../_core/platform-base";
-import type { APIPromise } from "../../_core/raw";
+import { APIPromise } from "../../_core/raw";
+import { filesPath } from "../../sandbox/parts";
 import { Sandbox } from "../../sandbox/sandbox";
 import {
   type Bound,
@@ -53,50 +57,87 @@ export {
   type UploadBody,
 } from "../../sandbox/wire";
 
-/** `client.sandboxes.files`: files and folders by path inside a sandbox. */
+/**
+ * `send` with `path` as the files API takes it, by the rule `sbx.files` keeps (src/sandbox/parts.ts `filesPath`):
+ * relative to `/workspace`, so an absolute path under it is sent relative to it. A path the files API would refuse
+ * or misplace is refused inside the returned call (a `SandboxError` with code `invalid_path`), so nothing is sent and
+ * nothing throws synchronously. `root` lets the path name `/workspace` itself, given to `send` as `""`.
+ */
+function inWorkspace<R>(path: unknown, operation: string, send: (relative: string) => APIPromise<R>, root = false): APIPromise<R> {
+  return new APIPromise(async () => {
+    const { data, meta } = await send(filesPath(path, "path", operation, root)).withResponse();
+    return { data, meta };
+  });
+}
+
+/**
+ * `client.sandboxes.files`: files and folders by path inside a sandbox's `/workspace`, the only folder the files API
+ * reaches. A path is relative to `/workspace` (`src/a.ts`) or absolute under it (`/workspace/src/a.ts`, sent as
+ * `src/a.ts`); `/workspace` itself (or `.`) is a path only for `list`. A path outside `/workspace`, one with a `.` or
+ * `..` segment, a backslash or a control character, and one over 4096 characters is refused before anything is
+ * sent: a `SandboxError` with code `invalid_path`, as `sbx.files` refuses it. `rename` sends its body as given.
+ */
 export class SandboxFiles {
   readonly #bound: Bound;
   /** @internal Built by `client.sandboxes`. */
   constructor(bound: Bound) { this.#bound = bound; }
-  /** List a folder's entries (`path` defaults to the server's working folder). Returns the complete response envelope. */
+  /** List a folder's entries (`path` defaults to `/workspace` itself, which `.` and `/workspace` also name: for it
+   * no path is sent). Returns the complete response envelope. */
   list(sandboxId: string, options: SandboxCallOptions & { path?: string } = {}): APIPromise<T.ListWorkspaceSandboxFilesResponse> {
     const { path, ...rest } = options;
-    return call(this.#bound, "sandboxes.files.list", { path: { id: sandboxId }, query: { path } }, rest);
+    const name = "sandboxes.files.list";
+    // the files API lists /workspace itself when no path is sent (it refuses ".")
+    const send = (folder = ""): APIPromise<T.ListWorkspaceSandboxFilesResponse> =>
+      call(this.#bound, name, { path: { id: sandboxId }, query: { path: folder === "" ? undefined : folder } }, rest);
+    return path === undefined ? send() : inWorkspace(path, name, send, true);
   }
   /** Read one file, bounded by `maxBytes`; `file.encoding` says utf8 or base64. Returns the complete response envelope. */
   read(sandboxId: string, path: string, options: SandboxCallOptions & { maxBytes?: number } = {}): APIPromise<T.ReadWorkspaceSandboxFileResponse> {
     const { maxBytes, ...rest } = options;
-    return call(this.#bound, "sandboxes.files.read", { path: { id: sandboxId, path }, query: { maxBytes } }, rest);
+    const name = "sandboxes.files.read";
+    return inWorkspace(path, name, (file: string) =>
+      call<T.ReadWorkspaceSandboxFileResponse>(this.#bound, name, { path: { id: sandboxId, path: file }, query: { maxBytes } }, rest));
   }
   /** Write a small text or base64 file (audited). Sent once, never retried. Returns the complete response envelope. */
   write(sandboxId: string, path: string, options: SandboxCallOptions & { body: T.WriteWorkspaceSandboxFileRequest }): APIPromise<T.WriteWorkspaceSandboxFileResponse> {
     const { body, ...rest } = options;
-    return call(this.#bound, "sandboxes.files.write", { path: { id: sandboxId, path }, body }, rest, true);
+    const name = "sandboxes.files.write";
+    return inWorkspace(path, name, (file: string) =>
+      call<T.WriteWorkspaceSandboxFileResponse>(this.#bound, name, { path: { id: sandboxId, path: file }, body }, rest, true));
   }
-  /** Delete a file, or a folder with `recursive`. Sent once, never retried. Returns the complete response envelope. */
+  /** Delete a file, or a folder with `recursive` (never `/workspace` itself). Sent once, never retried. Returns the
+   * complete response envelope. */
   remove(sandboxId: string, path: string, options: SandboxCallOptions & { recursive?: boolean } = {}): APIPromise<T.DeleteWorkspaceSandboxPathResponse> {
     const { recursive, ...rest } = options;
-    return call(this.#bound, "sandboxes.files.remove", { path: { id: sandboxId, path }, query: { recursive } }, rest, true);
+    const name = "sandboxes.files.remove";
+    return inWorkspace(path, name, (file: string) =>
+      call<T.DeleteWorkspaceSandboxPathResponse>(this.#bound, name, { path: { id: sandboxId, path: file }, query: { recursive } }, rest, true));
   }
   /** A file's raw bytes, up to `maxBytes` (default 64 MiB, the upload limit): a larger file throws
    * `PayloadTooLargeError` (code `download_too_large`) and nothing is kept. */
   download(sandboxId: string, path: string, options: DownloadOptions = {}): APIPromise<Uint8Array> {
-    return bytes(this.#bound, "sandboxes.files.download", { path: { id: sandboxId, path } }, options);
+    const name = "sandboxes.files.download";
+    return inWorkspace(path, name, (file: string) => bytes(this.#bound, name, { path: { id: sandboxId, path: file } }, options));
   }
   /** Upload raw bytes; the target is replaced only once every byte arrived, and its folder must exist. Sent once, never retried. */
   upload(sandboxId: string, path: string, options: SandboxCallOptions & { body: UploadBody }): APIPromise<T.UploadWorkspaceSandboxFileResponse> {
     const { body, ...rest } = options;
     const raw = body instanceof ArrayBuffer ? new Uint8Array(body) : body;
-    return call(this.#bound, "sandboxes.files.upload", { path: { id: sandboxId, path }, body: raw }, rest, true);
+    const name = "sandboxes.files.upload";
+    return inWorkspace(path, name, (file: string) =>
+      call<T.UploadWorkspaceSandboxFileResponse>(this.#bound, name, { path: { id: sandboxId, path: file }, body: raw }, rest, true));
   }
-  /** Move or rename a file or folder (`body.from` to `body.to`). Sent once, never retried. Returns the complete response envelope. */
+  /** Move or rename a file or folder (`body.from` to `body.to`, each relative to `/workspace`; sent as given). Sent
+   * once, never retried. Returns the complete response envelope. */
   rename(sandboxId: string, options: SandboxCallOptions & { body: T.MoveWorkspaceSandboxPathRequest }): APIPromise<T.MoveWorkspaceSandboxPathResponse> {
     const { body, ...rest } = options;
     return call(this.#bound, "sandboxes.files.rename", { path: { id: sandboxId }, body }, rest, true);
   }
   /** Create a folder and its parents. Sent once, never retried. Returns the complete response envelope. */
   makeDir(sandboxId: string, path: string, options: SandboxCallOptions = {}): APIPromise<T.CreateWorkspaceSandboxFolderResponse> {
-    return call(this.#bound, "sandboxes.files.makeDir", { path: { id: sandboxId, path } }, options, true);
+    const name = "sandboxes.files.makeDir";
+    return inWorkspace(path, name, (folder: string) =>
+      call<T.CreateWorkspaceSandboxFolderResponse>(this.#bound, name, { path: { id: sandboxId, path: folder } }, options, true));
   }
 }
 
