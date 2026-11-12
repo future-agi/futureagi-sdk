@@ -1369,3 +1369,322 @@ operations:
   description: Import existing annotations onto a queue item, optionally on behalf of an annotator.
   operation: {method: POST, path: '/model-hub/annotation-queues/{queue_id}/items/{id}/annotations/import/'}
   surfaces: {sdk: {}, mcp: false}
+
+# ---------------------------------------------------------------------------
+# Simulation, environment era: parity with the futureagi-cli `fi api` agents and
+# simulation groups (its catalog/extensions.yaml and cli.yaml). SDK-only: these
+# are not MCP tools. Deletes are deliberately left out (persona delete, draft
+# discard, evaluation remove), as is discarding an agent version; verify
+# (/harness-environments/{id}/verify/) waits for a backend release that has it.
+# ---------------------------------------------------------------------------
+
+- id: agents.versions.list
+  description: List the versions of an agent definition, newest first, 10 per page by default.
+  operation: {method: GET, path: '/simulate/agent-definitions/{agent_id}/versions/'}
+  contract_fix:
+    query: {page: integer, limit: integer}
+    untyped: true
+    note: 'contract says a bare array with no paging params; server returns a DRF page {count, next, results} and is_active/is_latest are booleans, not strings'
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: agents.versions.get
+  description: Return one version of an agent definition.
+  operation: {method: GET, path: '/simulate/agent-definitions/{agent_id}/versions/{version_id}/'}
+  contract_fix:
+    untyped: true
+    note: contract types is_active/is_latest as strings; the server returns booleans
+  surfaces: {sdk: {}, mcp: false}
+
+- id: agents.versions.get_definition
+  description: Return the agent document stored with an agent version (404 when the version has none).
+  operation: {method: GET, path: '/simulate/agent-definitions/{agent_id}/versions/{version_id}/agent/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: agents.runs.list
+  description: List recent simulation runs of an agent across its environments.
+  operation: {method: GET, path: '/simulate/agent-definitions/{agent_id}/runs/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.list
+  description: List simulation environments in the current workspace, optionally for one agent definition.
+  operation: {method: GET, path: /simulate/api/harness-environments/}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.get
+  description: Return a simulation environment with its contract, world, scenarios and evaluations.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.rename
+  description: Rename a simulation environment (the only editable field); returns the environment.
+  operation: {method: PATCH, path: '/simulate/api/harness-environments/{id}/'}
+  contract_fix:
+    body_required: [name]
+    note: 'the view needs the new name, though a PATCH body is otherwise optional'
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.run_plan
+  description: Resolve the agent, environment and suite versions a run would pin, with warnings. Starts nothing.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/run-plan/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.run
+  description: Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults). Send the same Idempotency-Key header (options headers) to get the same run back on a retry.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/run/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.versions.list
+  description: List an environment's saved agent, environment and suite versions, and which of each is the default.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/versions/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.versions.suite_members
+  description: List the scenarios in a saved suite version.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/versions/suite/{version_id}/members/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.versions.create_agent
+  description: Make an environment's next agent version from an uploaded folder (archive_artifact_id from simulation.jobs.upload_sources, alone), a prompt or agent_payload settings; it is checked next, then made the default. The server refuses an empty body.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/versions/agent/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.versions.retry_agent
+  description: Check again an environment's agent version whose check failed or is stuck pending (422 otherwise); returns every version.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/versions/agent/{version_id}/retry/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.versions.set_default
+  description: Make an agent, environment or suite version (piece) the environment's default; expected_default_id is the default you saw (null for none), and a newer one returns 409. Returns every version.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/versions/{piece}/{version_id}/default/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.versions.diff
+  description: Show what one agent, environment or suite version (piece), or an open draft, changed against its parent, or against the version named by `against`.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/versions/{piece}/{version_id}/diff/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.drafts.list
+  description: Return an environment's unsaved environment and suite drafts (with parent_id and revision for a save) and the drafts a rebuild set aside.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/drafts/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.drafts.save
+  description: Save the named drafts together as new default versions; each needs expected_parent_id, and the body's idempotency_key replays an earlier save.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/drafts/save/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.nudges.list
+  description: List an environment's rebuild offers, newest first (at most 100), optionally filtered by comma-separated states (pending, answered_no, queued, running, applied, no_change, replaced, failed).
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/nudges/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.nudges.answer
+  description: Answer a rebuild offer; answer yes queues a rebuild (pending or failed nudges), no skips a pending one. Returns the nudge.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/nudges/{nudge_id}/answer/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.nudges.stop
+  description: Stop a queued or running rebuild; it can be answered again later. Returns the nudge.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/nudges/{nudge_id}/stop/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.evaluations.available
+  description: List the catalogue evals an environment can still add (its modality, minus those selected); 409 until the environment finishes building.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/evaluations/available/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.evaluations.add
+  description: Add one catalogue eval to an environment by exact name; it grades calls from now on (no backfill). Returns the environment.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/evaluations/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.evaluations.update
+  description: Change one of an environment's evals (name, config, mapping, model, filters, error_localizer, kb_id); never grades. The server refuses an empty body.
+  operation: {method: PATCH, path: '/simulate/api/harness-environments/{id}/evaluations/{eval_config_id}/'}
+  contract_fix:
+    untyped: true
+    note: contract types filters as a list; the server returns an object
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.evaluations.set_tool_call
+  description: Turn the tool-call judge on or off for an environment (enable_tool_evaluation); returns the environment.
+  operation: {method: PUT, path: '/simulate/api/harness-environments/{id}/evaluations/tool-call/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.runs.add_evaluation
+  description: Add an eval by name from inside a finished run and grade that run's finished calls that have no verdict for it; returns the queued and skipped counts. Spends judge credits.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.runs.regrade
+  description: Grade a completed run's calls again with the environment's evals (eval_config_ids), replacing their previous scores; the calls are not rerun. Spends judge credits.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/run/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.jobs.create
+  description: Start a builder job (a new environment) from an uploaded source and an agent; artifacts.level is required. Send the same Idempotency-Key header (options headers) with the same body to get the same job back.
+  operation: {method: POST, path: /simulate/api/harness-jobs/}
+  contract_fix:
+    untyped: true
+    note: contract types stage_outputs[].data as an object; the server also returns arrays
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.jobs.get
+  description: Return a harness job's state, stage, events, scenarios and consumption (a builder job, or a run's job).
+  operation: {method: GET, path: '/simulate/api/harness-jobs/{id}/'}
+  contract_fix:
+    untyped: true
+    note: contract types stage_outputs[].data as an object; the server also returns arrays
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.jobs.preflight
+  description: Check a builder job body without creating a job; missing credentials show as failed checks.
+  operation: {method: POST, path: /simulate/api/harness-jobs/preflight/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.jobs.send_message
+  description: Send a message to a builder job's chat (a question's answer needs kind user_response or approval, and reply_to); client_request_id deduplicates a resend.
+  operation: {method: POST, path: '/simulate/api/harness-jobs/{id}/conversation/messages/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.jobs.adjust
+  description: Send a correction to a builder job that is still authoring, applied at its next stage boundary (409 once authoring has finished); client_request_id deduplicates a resend.
+  operation: {method: POST, path: '/simulate/api/harness-jobs/{id}/adjust/'}
+  contract_fix:
+    untyped: true
+    note: contract documents the HarnessJobAdjustment input as the (201) response; the server returns the job read (200)
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.jobs.extend
+  description: Ask the builder for count (1-50) more scenarios, steered by optional guidance; with versioning they land in the suite draft, otherwise the environment is rebuilt. Spends builder credits.
+  operation: {method: POST, path: '/simulate/api/harness-jobs/{id}/extend/'}
+  contract_fix:
+    untyped: true
+    note: contract documents the HarnessJobExtend input as the response; the server returns the job document
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.jobs.cancel
+  description: Request cancellation of a harness job (a build or a run). Completed work is kept; cleanup may still be pending.
+  operation: {method: POST, path: '/simulate/api/harness-jobs/{id}/cancel/'}
+  contract_fix:
+    untyped: true
+    note: contract types stage_outputs[].data as an object; the server also returns arrays
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.jobs.set_secret_values
+  description: Make an environment's next agent version from credential values (environment_values) and files staged with simulation.jobs.upload_secret_file; it is checked next, then made the default.
+  operation: {method: POST, path: /simulate/api/harness-jobs/secret-values/}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.jobs.upload_sources
+  description: Upload an agent's source files (one `paths` entry per file, the file's path inside the folder) for simulation.jobs.create or simulation.environments.versions.create_agent; returns the source_id to pass on.
+  operation: {method: POST, path: /simulate/api/harness-jobs/sources/, multipart: true}
+  contract_fix:
+    body_fields:
+      files: file[]
+      paths: string[]
+    note: 'the contract declares one file and one path; the server reads every repeated `files` and `paths` form field (getlist), one path per file'
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.jobs.upload_secret_file
+  description: Stage a credential file for an environment (today only a GOOGLE_APPLICATION_CREDENTIALS service-account JSON, as environment_name GOOGLE_APPLICATION_CREDENTIALS; anything else returns 422); pass the returned secret_ref in simulation.jobs.set_secret_values files.
+  operation: {method: POST, path: /simulate/api/harness-jobs/secret-files/, multipart: true}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.jobs.scenarios.list
+  description: List one page of an environment's (or run's) authored scenarios, by number; group_by defaults to goal when omitted (empty for a flat list).
+  operation: {method: GET, path: '/simulate/api/harness-jobs/{id}/scenarios/'}
+  contract_fix:
+    query: {page: integer, limit: integer, search: string, ordering: string, group_by: string}
+    untyped: true
+    note: contract declares neither the view's query parameters nor its response
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.jobs.scenarios.amend
+  description: Drop or edit an environment's authored scenarios, or set a scenario's persona (as a draft where versioning applies); one receipt per change.
+  operation: {method: POST, path: '/simulate/api/harness-jobs/{id}/scenarios/amend/'}
+  contract_fix:
+    untyped: true
+    note: 'contract documents the request body as the response; the server returns {receipts, draft}'
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.tests.list_executions
+  description: List the runs (test executions) of a run test, such as an environment run's run_test_id, 10 per page by default.
+  operation: {method: GET, path: '/simulate/run-tests/{run_test_id}/executions/'}
+  contract_fix:
+    query: {page: integer, limit: integer, status: string, search: string}
+    note: contract declares none of the view's query parameters
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, next: next}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.tests.add_eval_configs
+  description: 'Add evals with your own mapping to a run test, such as an environment run''s run_test_id ({evaluations_config: [{template_id, name, mapping, config, model}]}).'
+  operation: {method: POST, path: '/simulate/run-tests/{run_test_id}/eval-configs/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.executions.list_calls
+  description: 'List a run''s calls (a test execution''s results) with the run''s pinned versions and outcome summary, 50 per page by default. filters is a JSON object of string lists, such as {"status": ["failed"]}.'
+  operation: {method: GET, path: '/simulate/v3/test-executions/{test_execution_id}/calls/'}
+  contract_fix:
+    untyped: true
+    note: contract types evaluations[].value (a JSONField) as an object; the server also returns strings and numbers
+  pagination: {page_param: page, size_param: page_size, first_page: 1, items: results, total_pages: total_pages}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.executions.rerun_calls
+  description: Re-run chosen calls of a finished run (rerun_type call_and_eval, call_execution_ids) as a new attempt of the same run, or re-grade them (eval_only).
+  operation: {method: POST, path: '/simulate/test-executions/{test_execution_id}/rerun-calls/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.executions.insights.get
+  description: Return a run's Insights (debug analysis) state and findings; status is not_requested until one is requested.
+  operation: {method: GET, path: '/simulate/test-executions/{test_execution_id}/debug-analysis/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.executions.insights.start
+  description: Request Insights (debug analysis) of a completed run; a repeat re-arms only failed calls.
+  operation: {method: POST, path: '/simulate/test-executions/{test_execution_id}/debug-analysis/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.calls.get
+  description: Return one call (trial) of a run with its input, transcript, tool calls, checks and rerun snapshots.
+  operation: {method: GET, path: '/simulate/v3/call-executions/{call_execution_id}/'}
+  contract_fix:
+    untyped: true
+    note: contract types evaluations[].value as an object and function_calls[] with fixed fields; the server returns strings and numbers and the recorded tool trace
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.personas.list
+  description: List the system and workspace personas you can use, newest first, 10 per page by default; filter by type (prebuilt or custom), search or simulation_type (voice or text).
+  operation: {method: GET, path: /simulate/api/personas/}
+  contract_fix:
+    query: {type: string, search: string, simulation_type: string}
+    untyped: true
+    note: contract declares an untyped object and none of the view's filters; the server returns a page {count, results}
+  pagination: {page_param: page, size_param: limit, first_page: 1, items: results, total_items: count}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.personas.get
+  description: Return one system or workspace persona you can use.
+  operation: {method: GET, path: '/simulate/api/personas/{id}/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.personas.create
+  description: Create a workspace persona; a name already used by a system or workspace persona returns 400.
+  operation: {method: POST, path: /simulate/api/personas/}
+  contract_fix:
+    returns: Persona
+    note: contract documents the PersonaCreate input as the response; the server answers with the created Persona
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.personas.update
+  description: Update a workspace persona; name is required on every update, other fields left out are kept, and so is simulation_type; system personas return 403.
+  operation: {method: PUT, path: '/simulate/api/personas/{id}/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.personas.duplicate
+  description: Copy a system or workspace persona into the workspace under a new name; a name already used by a workspace persona returns 400.
+  operation: {method: POST, path: '/simulate/api/personas/{id}/duplicate/'}
+  surfaces: {sdk: {}, mcp: false}

@@ -124,6 +124,10 @@ export interface AgentsUpdateParams {
   livekit_max_concurrency?: number | null;
 }
 
+export interface AgentsRunsListParams {
+  limit?: number | null;
+}
+
 export interface AgentsVersionsCreateParams {
   /** Agent name */
   agent_name?: string | null;
@@ -170,6 +174,10 @@ export interface AgentsVersionsCreateParams {
   commit_message?: string | null;
   /** Observability enabled */
   observability_enabled?: boolean | null;
+}
+
+export interface AgentsVersionsListParams {
+  limit?: number | null;
 }
 
 export interface AlertsLogsListParams {
@@ -1348,6 +1356,104 @@ export interface SessionsListParams {
   allow_sampled?: boolean | null;
 }
 
+export interface SimulationEnvironmentsListParams {
+  limit?: number | null;
+  agent_definition_id?: string | null;
+}
+
+export interface SimulationEnvironmentsRenameParams {
+  /** Name */
+  name: string;
+}
+
+export interface SimulationEnvironmentsRunParams {
+  scenario_ids: Array<string>;
+  /** Trials */
+  trials?: number | null;
+  /** Agent version id */
+  agent_version_id?: string | null;
+  /** Environment version id */
+  environment_version_id?: string | null;
+  /** Suite version id */
+  suite_version_id?: string | null;
+}
+
+export interface SimulationEnvironmentsRunPlanParams {
+  agent_version_id?: string | null;
+  environment_version_id?: string | null;
+  suite_version_id?: string | null;
+}
+
+export interface SimulationEnvironmentsDraftsSaveParams {
+  drafts: Array<Record<string, unknown>>;
+  /** Idempotency key */
+  idempotency_key: string;
+}
+
+export interface SimulationEnvironmentsEvaluationsAddParams {
+  /** Name */
+  name: string;
+}
+
+export interface SimulationEnvironmentsEvaluationsSetToolCallParams {
+  /** Enable tool evaluation */
+  enable_tool_evaluation: boolean;
+}
+
+export interface SimulationEnvironmentsEvaluationsUpdateParams {
+  /** Config */
+  config?: Record<string, unknown> | null;
+  /** Mapping */
+  mapping?: Record<string, unknown> | null;
+  /** Model */
+  model?: string | null;
+  /** Error localizer */
+  error_localizer?: boolean | null;
+  /** Kb id */
+  kb_id?: string | null;
+  filters?: Array<Record<string, unknown>> | null;
+  /** Name */
+  name?: string | null;
+}
+
+export interface SimulationEnvironmentsNudgesAnswerParams {
+  /** Answer */
+  answer: "yes" | "no";
+}
+
+export interface SimulationEnvironmentsNudgesListParams {
+  /** Comma-separated nudge states to list. */
+  state?: string | null;
+}
+
+export interface SimulationEnvironmentsRunsAddEvaluationParams {
+  /** Name */
+  name: string;
+}
+
+export interface SimulationEnvironmentsRunsRegradeParams {
+  eval_config_ids: Array<string>;
+  /** Enable tool evaluation */
+  enable_tool_evaluation?: boolean | null;
+}
+
+export interface SimulationEnvironmentsVersionsCreateAgentParams {
+  /** Archive artifact id */
+  archive_artifact_id?: string | null;
+  /** Prompt */
+  prompt?: string | null;
+  agent_payload?: Record<string, unknown> | null;
+}
+
+export interface SimulationEnvironmentsVersionsDiffParams {
+  against?: string | null;
+}
+
+export interface SimulationEnvironmentsVersionsSetDefaultParams {
+  /** Expected default id */
+  expected_default_id: string | null;
+}
+
 export interface SimulationExecutionsGetParams {
   search?: string | null;
   filters?: string | null;
@@ -1360,6 +1466,259 @@ export interface SimulationExecutionsListParams {
   search?: string | null;
   status?: string | null;
   limit?: number | null;
+}
+
+export interface SimulationExecutionsListCallsParams {
+  search?: string | null;
+  filters?: string | null;
+  ordering?: "started_at" | "-started_at" | "duration_seconds" | "-duration_seconds" | "latency_ms" | "-latency_ms" | "turn_count" | "-turn_count" | "tokens" | "-tokens" | "cost_cents" | "-cost_cents" | "scenario" | "-scenario" | "goal" | "-goal" | "outcome" | "-outcome" | null;
+  page_size?: number | null;
+  group_by?: "goal" | "sub_goal" | "accent" | "age" | "attack" | "task" | "status" | null;
+  group_key?: string | null;
+}
+
+export interface SimulationExecutionsRerunCallsParams {
+  /** Rerun type */
+  rerun_type: "eval_only" | "call_and_eval";
+  call_execution_ids?: Array<string> | null;
+  /** Select all */
+  select_all?: boolean | null;
+  /** Environment values */
+  environment_values?: Record<string, unknown> | null;
+}
+
+export interface SimulationJobsAdjustParams {
+  /** Instruction */
+  instruction: string;
+  /** Client request id */
+  client_request_id?: string | null;
+  /** Target stage */
+  target_stage?: "understand" | "environment" | "scenarios" | null;
+  /** Scenario delta */
+  scenario_delta?: number | null;
+}
+
+export interface SimulationJobsCancelParams {
+  /** Reason */
+  reason?: "user_canceled" | "ttl_exceeded" | null;
+}
+
+export interface SimulationJobsCreateParams {
+  agent: Record<string, unknown>;
+  artifacts: Record<string, unknown>;
+  /** Schema version */
+  schema_version?: "futureagi.harness-job.v1" | null;
+  /** Run id */
+  run_id?: string | null;
+  source?: Record<string, unknown> | null;
+  /** Scenario count */
+  scenario_count?: number | null;
+  /** Seed */
+  seed?: number | null;
+  runtime?: Record<string, unknown> | null;
+  security?: Record<string, unknown> | null;
+  retry?: Record<string, unknown> | null;
+  /** Platform run id */
+  platform_run_id?: string | null;
+  /** Metadata */
+  metadata?: Record<string, unknown> | null;
+  /** Credential values */
+  credential_values?: Record<string, unknown> | null;
+}
+
+export interface SimulationJobsExtendParams {
+  /** Count */
+  count: number;
+  /** Guidance */
+  guidance?: string | null;
+  /** Client request id */
+  client_request_id?: string | null;
+}
+
+export interface SimulationJobsPreflightParams {
+  agent: Record<string, unknown>;
+  artifacts: Record<string, unknown>;
+  /** Schema version */
+  schema_version?: "futureagi.harness-job.v1" | null;
+  /** Run id */
+  run_id?: string | null;
+  source?: Record<string, unknown> | null;
+  /** Scenario count */
+  scenario_count?: number | null;
+  /** Seed */
+  seed?: number | null;
+  runtime?: Record<string, unknown> | null;
+  security?: Record<string, unknown> | null;
+  retry?: Record<string, unknown> | null;
+  /** Platform run id */
+  platform_run_id?: string | null;
+  /** Metadata */
+  metadata?: Record<string, unknown> | null;
+  /** Credential values */
+  credential_values?: Record<string, unknown> | null;
+}
+
+export interface SimulationJobsSendMessageParams {
+  /** Content */
+  content: string;
+  /** Client request id */
+  client_request_id: string;
+  /** Kind */
+  kind?: "user_message" | "user_response" | "approval" | "interrupt" | "cancel_operation" | null;
+  /** Reply to */
+  reply_to?: string | null;
+  /** Payload */
+  payload?: Record<string, unknown> | null;
+}
+
+export interface SimulationJobsSetSecretValuesParams {
+  /** Environment values */
+  environment_values: Record<string, unknown>;
+  /** Environment id */
+  environment_id: string;
+  files?: Array<Record<string, unknown>> | null;
+}
+
+export interface SimulationJobsUploadSecretFileParams {
+  /** Credential file; transferred without entering job JSON. */
+  file: FileInput;
+  /** Environment variable that will point to the mounted file. */
+  environment_name: string;
+}
+
+export interface SimulationJobsUploadSourcesParams {
+  /** Repeat this field once for every source file. */
+  files: Array<FileInput>;
+  /** Repeat in file order with each repository-relative path. */
+  paths: Array<string>;
+  name?: string | null;
+}
+
+export interface SimulationJobsScenariosAmendParams {
+  changes: Array<Record<string, unknown>>;
+  /** Rework */
+  rework?: boolean | null;
+}
+
+export interface SimulationJobsScenariosListParams {
+  page?: number | null;
+  limit?: number | null;
+  search?: string | null;
+  ordering?: string | null;
+  group_by?: string | null;
+}
+
+export interface SimulationPersonasCreateParams {
+  /** Name */
+  name: string;
+  /** Description */
+  description: string;
+  gender?: Array<string> | null;
+  age_group?: Array<string> | null;
+  location?: Array<string> | null;
+  profession?: Array<string> | null;
+  personality?: Array<string> | null;
+  communication_style?: Array<string> | null;
+  accent?: Array<string> | null;
+  /** Multilingual */
+  multilingual?: boolean | null;
+  language?: Array<string> | null;
+  conversation_speed?: Array<string> | null;
+  /** Background sound */
+  background_sound?: boolean | null;
+  finished_speaking_sensitivity?: Array<string> | null;
+  interrupt_sensitivity?: Array<string> | null;
+  keywords?: Array<string> | null;
+  /** Custom properties */
+  custom_properties?: Record<string, unknown> | null;
+  /** Additional instruction */
+  additional_instruction?: string | null;
+  /** Simulation type */
+  simulation_type?: string | null;
+  /** Tone */
+  tone?: string | null;
+  /** Punctuation */
+  punctuation?: string | null;
+  /** Slang usage */
+  slang_usage?: string | null;
+  /** Typos frequency */
+  typos_frequency?: string | null;
+  /** Regional mix */
+  regional_mix?: string | null;
+  /** Emoji usage */
+  emoji_usage?: string | null;
+  /** Verbosity */
+  verbosity?: string | null;
+}
+
+export interface SimulationPersonasDuplicateParams {
+  /** Name */
+  name: string;
+}
+
+export interface SimulationPersonasListParams {
+  /** Number of results to return per page. */
+  limit?: number | null;
+  type?: string | null;
+  search?: string | null;
+  simulation_type?: string | null;
+}
+
+export interface SimulationPersonasUpdateParams {
+  /** Name */
+  name: string;
+  /** Description */
+  description?: string | null;
+  /** Gender */
+  gender?: Record<string, unknown> | null;
+  /** Age group */
+  age_group?: Record<string, unknown> | null;
+  /** Occupation */
+  occupation?: Record<string, unknown> | null;
+  /** Location */
+  location?: Record<string, unknown> | null;
+  /** Personality */
+  personality?: Record<string, unknown> | null;
+  /** Communication style */
+  communication_style?: Record<string, unknown> | null;
+  /** Multilingual */
+  multilingual?: boolean | null;
+  /** Languages */
+  languages?: Record<string, unknown> | null;
+  /** Accent */
+  accent?: Record<string, unknown> | null;
+  /** Conversation speed */
+  conversation_speed?: Record<string, unknown> | null;
+  /** Background sound */
+  background_sound?: boolean | null;
+  /** Finished speaking sensitivity */
+  finished_speaking_sensitivity?: Record<string, unknown> | null;
+  /** Interrupt sensitivity */
+  interrupt_sensitivity?: Record<string, unknown> | null;
+  /** Keywords */
+  keywords?: Record<string, unknown> | null;
+  /** Metadata */
+  metadata?: Record<string, unknown> | null;
+  /** Additional instruction */
+  additional_instruction?: string | null;
+  profession?: Array<string> | null;
+  language?: Array<string> | null;
+  /** Custom properties */
+  custom_properties?: Record<string, unknown> | null;
+  /** Punctuation */
+  punctuation?: "clean" | "minimal" | "expressive" | "erratic" | null;
+  /** Slang usage */
+  slang_usage?: "none" | "moderate" | "heavy" | "light" | null;
+  /** Typos frequency */
+  typos_frequency?: "none" | "rare" | "occasional" | "frequent" | null;
+  /** Regional mix */
+  regional_mix?: "none" | "moderate" | "heavy" | "light" | null;
+  /** Emoji usage */
+  emoji_usage?: "never" | "light" | "regular" | "heavy" | null;
+  /** Tone */
+  tone?: "formal" | "casual" | "neutral" | null;
+  /** Verbosity */
+  verbosity?: "brief" | "balanced" | "detailed" | null;
 }
 
 export interface SimulationScenariosCreateParams {
@@ -1439,6 +1798,10 @@ export interface SimulationScenariosUpdateParams {
   prompt?: string | null;
 }
 
+export interface SimulationTestsAddEvalConfigsParams {
+  evaluations_config: Array<Record<string, unknown>>;
+}
+
 export interface SimulationTestsCreateParams {
   /** Name */
   name: string;
@@ -1465,6 +1828,12 @@ export interface SimulationTestsListParams {
   limit?: number | null;
   /** Return the bounded list-card representation instead of the full nested run-test detail payload. */
   summary?: boolean | null;
+}
+
+export interface SimulationTestsListExecutionsParams {
+  limit?: number | null;
+  status?: string | null;
+  search?: string | null;
 }
 
 export interface SimulationTestsRunParams {
@@ -1554,6 +1923,252 @@ export interface UsageOverviewParams {
 }
 
 /**
+ * `client.simulation.environments.drafts`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationEnvironmentsDraftsResource extends Resource {
+
+  /**
+   * Return an environment's unsaved environment and suite drafts (with parent_id and revision for a save) and the drafts a rebuild set aside.
+   *
+   * GET /simulate/api/harness-environments/{id}/drafts/
+   */
+  list(id: string, options?: RequestOptions): Promise<models.HarnessDrafts> {
+    return this._t.call<models.HarnessDrafts>(ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_LIST, { path: { id: id }, query: {} }, options);
+  }
+
+  /**
+   * Save the named drafts together as new default versions; each needs expected_parent_id, and the body's idempotency_key replays an earlier save.
+   *
+   * POST /simulate/api/harness-environments/{id}/drafts/save/
+   */
+  save(id: string, params: SimulationEnvironmentsDraftsSaveParams, options?: RequestOptions): Promise<models.HarnessDraftSaveResponse> {
+    return this._t.call<models.HarnessDraftSaveResponse>(ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_SAVE, { path: { id: id }, query: {}, body: { drafts: params.drafts, idempotency_key: params.idempotency_key } }, options);
+  }
+}
+
+/**
+ * `client.simulation.environments.evaluations`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationEnvironmentsEvaluationsResource extends Resource {
+
+  /**
+   * Add one catalogue eval to an environment by exact name; it grades calls from now on (no backfill). Returns the environment.
+   *
+   * POST /simulate/api/harness-environments/{id}/evaluations/
+   */
+  add(id: string, params: SimulationEnvironmentsEvaluationsAddParams, options?: RequestOptions): Promise<models.HarnessEnvironmentDetail> {
+    return this._t.call<models.HarnessEnvironmentDetail>(ops.OP_SIMULATION_ENVIRONMENTS_EVALUATIONS_ADD, { path: { id: id }, query: {}, body: { name: params.name } }, options);
+  }
+
+  /**
+   * List the catalogue evals an environment can still add (its modality, minus those selected); 409 until the environment finishes building.
+   *
+   * GET /simulate/api/harness-environments/{id}/evaluations/available/
+   */
+  available(id: string, options?: RequestOptions): Promise<models.HarnessEnvironmentAvailableEvals> {
+    return this._t.call<models.HarnessEnvironmentAvailableEvals>(ops.OP_SIMULATION_ENVIRONMENTS_EVALUATIONS_AVAILABLE, { path: { id: id }, query: {} }, options);
+  }
+
+  /**
+   * Turn the tool-call judge on or off for an environment (enable_tool_evaluation); returns the environment.
+   *
+   * PUT /simulate/api/harness-environments/{id}/evaluations/tool-call/
+   */
+  setToolCall(id: string, params: SimulationEnvironmentsEvaluationsSetToolCallParams, options?: RequestOptions): Promise<models.HarnessEnvironmentDetail> {
+    return this._t.call<models.HarnessEnvironmentDetail>(ops.OP_SIMULATION_ENVIRONMENTS_EVALUATIONS_SET_TOOL_CALL, { path: { id: id }, query: {}, body: { enable_tool_evaluation: params.enable_tool_evaluation } }, options);
+  }
+
+  /**
+   * Change one of an environment's evals (name, config, mapping, model, filters, error_localizer, kb_id); never grades. The server refuses an empty body.
+   *
+   * PATCH /simulate/api/harness-environments/{id}/evaluations/{eval_config_id}/
+   */
+  update(id: string, evalConfigId: string, params: SimulationEnvironmentsEvaluationsUpdateParams = {}, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_ENVIRONMENTS_EVALUATIONS_UPDATE, { path: { id: id, eval_config_id: evalConfigId }, query: {}, body: { config: params.config, mapping: params.mapping, model: params.model, error_localizer: params.error_localizer, kb_id: params.kb_id, filters: params.filters, name: params.name } }, options);
+  }
+}
+
+/**
+ * `client.simulation.environments.nudges`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationEnvironmentsNudgesResource extends Resource {
+
+  /**
+   * Answer a rebuild offer; answer yes queues a rebuild (pending or failed nudges), no skips a pending one. Returns the nudge.
+   *
+   * POST /simulate/api/harness-environments/{id}/nudges/{nudge_id}/answer/
+   */
+  answer(id: string, nudgeId: string, params: SimulationEnvironmentsNudgesAnswerParams, options?: RequestOptions): Promise<models.HarnessNudge> {
+    return this._t.call<models.HarnessNudge>(ops.OP_SIMULATION_ENVIRONMENTS_NUDGES_ANSWER, { path: { id: id, nudge_id: nudgeId }, query: {}, body: { answer: params.answer } }, options);
+  }
+
+  /**
+   * List an environment's rebuild offers, newest first (at most 100), optionally filtered by comma-separated states (pending, answered_no, queued, running, applied, no_change, replaced, failed).
+   *
+   * GET /simulate/api/harness-environments/{id}/nudges/
+   */
+  list(id: string, params: SimulationEnvironmentsNudgesListParams = {}, options?: RequestOptions): Promise<Array<models.HarnessNudge>> {
+    return this._t.call<Array<models.HarnessNudge>>(ops.OP_SIMULATION_ENVIRONMENTS_NUDGES_LIST, { path: { id: id }, query: { state: params.state } }, options);
+  }
+
+  /**
+   * Stop a queued or running rebuild; it can be answered again later. Returns the nudge.
+   *
+   * POST /simulate/api/harness-environments/{id}/nudges/{nudge_id}/stop/
+   */
+  stop(id: string, nudgeId: string, options?: RequestOptions): Promise<models.HarnessNudge> {
+    return this._t.call<models.HarnessNudge>(ops.OP_SIMULATION_ENVIRONMENTS_NUDGES_STOP, { path: { id: id, nudge_id: nudgeId }, query: {}, body: {} }, options);
+  }
+}
+
+/**
+ * `client.simulation.environments.runs`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationEnvironmentsRunsResource extends Resource {
+
+  /**
+   * Add an eval by name from inside a finished run and grade that run's finished calls that have no verdict for it; returns the queued and skipped counts. Spends judge credits.
+   *
+   * POST /simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/
+   */
+  addEvaluation(id: string, executionId: string, params: SimulationEnvironmentsRunsAddEvaluationParams, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_ENVIRONMENTS_RUNS_ADD_EVALUATION, { path: { id: id, execution_id: executionId }, query: {}, body: { name: params.name } }, options);
+  }
+
+  /**
+   * Grade a completed run's calls again with the environment's evals (eval_config_ids), replacing their previous scores; the calls are not rerun. Spends judge credits.
+   *
+   * POST /simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/run/
+   */
+  regrade(id: string, executionId: string, params: SimulationEnvironmentsRunsRegradeParams, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_ENVIRONMENTS_RUNS_REGRADE, { path: { id: id, execution_id: executionId }, query: {}, body: { eval_config_ids: params.eval_config_ids, enable_tool_evaluation: params.enable_tool_evaluation } }, options);
+  }
+}
+
+/**
+ * `client.simulation.environments.versions`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationEnvironmentsVersionsResource extends Resource {
+
+  /**
+   * Make an environment's next agent version from an uploaded folder (archive_artifact_id from simulation.jobs.upload_sources, alone), a prompt or agent_payload settings; it is checked next, then made the default. The server refuses an empty body.
+   *
+   * POST /simulate/api/harness-environments/{id}/versions/agent/
+   */
+  createAgent(id: string, params: SimulationEnvironmentsVersionsCreateAgentParams = {}, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_CREATE_AGENT, { path: { id: id }, query: {}, body: { archive_artifact_id: params.archive_artifact_id, prompt: params.prompt, agent_payload: params.agent_payload } }, options);
+  }
+
+  /**
+   * Show what one agent, environment or suite version (piece), or an open draft, changed against its parent, or against the version named by `against`.
+   *
+   * GET /simulate/api/harness-environments/{id}/versions/{piece}/{version_id}/diff/
+   */
+  diff(id: string, piece: string, versionId: string, params: SimulationEnvironmentsVersionsDiffParams = {}, options?: RequestOptions): Promise<models.HarnessVersionDiff> {
+    return this._t.call<models.HarnessVersionDiff>(ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_DIFF, { path: { id: id, piece: piece, version_id: versionId }, query: { against: params.against } }, options);
+  }
+
+  /**
+   * List an environment's saved agent, environment and suite versions, and which of each is the default.
+   *
+   * GET /simulate/api/harness-environments/{id}/versions/
+   */
+  list(id: string, options?: RequestOptions): Promise<models.HarnessVersions> {
+    return this._t.call<models.HarnessVersions>(ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_LIST, { path: { id: id }, query: {} }, options);
+  }
+
+  /**
+   * Check again an environment's agent version whose check failed or is stuck pending (422 otherwise); returns every version.
+   *
+   * POST /simulate/api/harness-environments/{id}/versions/agent/{version_id}/retry/
+   */
+  retryAgent(id: string, versionId: string, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_RETRY_AGENT, { path: { id: id, version_id: versionId }, query: {}, body: {} }, options);
+  }
+
+  /**
+   * Make an agent, environment or suite version (piece) the environment's default; expected_default_id is the default you saw (null for none), and a newer one returns 409. Returns every version.
+   *
+   * POST /simulate/api/harness-environments/{id}/versions/{piece}/{version_id}/default/
+   */
+  setDefault(id: string, piece: string, versionId: string, params: SimulationEnvironmentsVersionsSetDefaultParams, options?: RequestOptions): Promise<models.HarnessVersions> {
+    return this._t.call<models.HarnessVersions>(ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_SET_DEFAULT, { path: { id: id, piece: piece, version_id: versionId }, query: {}, body: { expected_default_id: params.expected_default_id } }, options);
+  }
+
+  /**
+   * List the scenarios in a saved suite version.
+   *
+   * GET /simulate/api/harness-environments/{id}/versions/suite/{version_id}/members/
+   */
+  suiteMembers(id: string, versionId: string, options?: RequestOptions): Promise<Array<models.HarnessSuiteMember>> {
+    return this._t.call<Array<models.HarnessSuiteMember>>(ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_SUITE_MEMBERS, { path: { id: id, version_id: versionId }, query: {} }, options);
+  }
+}
+
+/**
+ * `client.simulation.executions.insights`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationExecutionsInsightsResource extends Resource {
+
+  /**
+   * Return a run's Insights (debug analysis) state and findings; status is not_requested until one is requested.
+   *
+   * GET /simulate/test-executions/{test_execution_id}/debug-analysis/
+   */
+  get(testExecutionId: string, options?: RequestOptions): Promise<models.TestExecutionDebugAnalysisResponse> {
+    return this._t.call<models.TestExecutionDebugAnalysisResponse>(ops.OP_SIMULATION_EXECUTIONS_INSIGHTS_GET, { path: { test_execution_id: testExecutionId }, query: {} }, options);
+  }
+
+  /**
+   * Request Insights (debug analysis) of a completed run; a repeat re-arms only failed calls.
+   *
+   * POST /simulate/test-executions/{test_execution_id}/debug-analysis/
+   */
+  start(testExecutionId: string, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_EXECUTIONS_INSIGHTS_START, { path: { test_execution_id: testExecutionId }, query: {}, body: {} }, options);
+  }
+}
+
+/**
+ * `client.simulation.jobs.scenarios`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationJobsScenariosResource extends Resource {
+
+  /**
+   * Drop or edit an environment's authored scenarios, or set a scenario's persona (as a draft where versioning applies); one receipt per change.
+   *
+   * POST /simulate/api/harness-jobs/{id}/scenarios/amend/
+   */
+  amend(id: string, params: SimulationJobsScenariosAmendParams, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_JOBS_SCENARIOS_AMEND, { path: { id: id }, query: {}, body: { changes: params.changes, rework: params.rework } }, options);
+  }
+
+  /**
+   * List one page of an environment's (or run's) authored scenarios, by number; group_by defaults to goal when omitted (empty for a flat list).
+   *
+   * GET /simulate/api/harness-jobs/{id}/scenarios/
+   */
+  list(id: string, params: SimulationJobsScenariosListParams = {}, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_JOBS_SCENARIOS_LIST, { path: { id: id }, query: { page: params.page, limit: params.limit, search: params.search, ordering: params.ordering, group_by: params.group_by } }, options);
+  }
+}
+
+/**
+ * `client.agents.runs`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class AgentsRunsResource extends Resource {
+
+  /**
+   * List recent simulation runs of an agent across its environments.
+   *
+   * GET /simulate/agent-definitions/{agent_id}/runs/
+   */
+  list(agentId: string, params: AgentsRunsListParams = {}, options?: RequestOptions): Promise<models.AgentRunsResponse> {
+    return this._t.call<models.AgentRunsResponse>(ops.OP_AGENTS_RUNS_LIST, { path: { agent_id: agentId }, query: { limit: params.limit } }, options);
+  }
+}
+
+/**
  * `client.agents.versions`. Subclass to add methods; reassign a child in the constructor to swap it.
  */
 export class AgentsVersionsResource extends Resource {
@@ -1565,6 +2180,33 @@ export class AgentsVersionsResource extends Resource {
    */
   create(agentId: string, params: AgentsVersionsCreateParams = {}, options?: RequestOptions): Promise<models.AgentVersionCreateResponse> {
     return this._t.call<models.AgentVersionCreateResponse>(ops.OP_AGENTS_VERSIONS_CREATE, { path: { agent_id: agentId }, query: {}, body: { agent_name: params.agent_name, agent_type: params.agent_type, description: params.description, provider: params.provider, api_key: params.api_key, assistant_id: params.assistant_id, authentication_method: params.authentication_method, language: params.language, languages: params.languages, contact_number: params.contact_number, inbound: params.inbound, target_speaks_first: params.target_speaks_first, knowledge_base: params.knowledge_base, model: params.model, model_details: params.model_details, livekit_url: params.livekit_url, livekit_api_key: params.livekit_api_key, livekit_api_secret: params.livekit_api_secret, livekit_agent_name: params.livekit_agent_name, livekit_config_json: params.livekit_config_json, livekit_max_concurrency: params.livekit_max_concurrency, commit_message: params.commit_message, observability_enabled: params.observability_enabled } }, options);
+  }
+
+  /**
+   * Return one version of an agent definition.
+   *
+   * GET /simulate/agent-definitions/{agent_id}/versions/{version_id}/
+   */
+  get(agentId: string, versionId: string, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_AGENTS_VERSIONS_GET, { path: { agent_id: agentId, version_id: versionId }, query: {} }, options);
+  }
+
+  /**
+   * Return the agent document stored with an agent version (404 when the version has none).
+   *
+   * GET /simulate/agent-definitions/{agent_id}/versions/{version_id}/agent/
+   */
+  getDefinition(agentId: string, versionId: string, options?: RequestOptions): Promise<models.StoredAgentResponse> {
+    return this._t.call<models.StoredAgentResponse>(ops.OP_AGENTS_VERSIONS_GET_DEFINITION, { path: { agent_id: agentId, version_id: versionId }, query: {} }, options);
+  }
+
+  /**
+   * List the versions of an agent definition, newest first, 10 per page by default.
+   *
+   * GET /simulate/agent-definitions/{agent_id}/versions/
+   */
+  list(agentId: string, params: AgentsVersionsListParams = {}, options?: RequestOptions): Pager<unknown> {
+    return this._t.paginate<unknown>(ops.OP_AGENTS_VERSIONS_LIST, { path: { agent_id: agentId }, query: { limit: params.limit } }, options);
   }
 }
 
@@ -2264,9 +2906,95 @@ export class PromptsVersionsResource extends Resource {
 }
 
 /**
+ * `client.simulation.calls`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationCallsResource extends Resource {
+
+  /**
+   * Return one call (trial) of a run with its input, transcript, tool calls, checks and rerun snapshots.
+   *
+   * GET /simulate/v3/call-executions/{call_execution_id}/
+   */
+  get(callExecutionId: string, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_CALLS_GET, { path: { call_execution_id: callExecutionId }, query: {} }, options);
+  }
+}
+
+/**
+ * `client.simulation.environments`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationEnvironmentsResource extends Resource {
+  drafts: SimulationEnvironmentsDraftsResource;
+  evaluations: SimulationEnvironmentsEvaluationsResource;
+  nudges: SimulationEnvironmentsNudgesResource;
+  runs: SimulationEnvironmentsRunsResource;
+  versions: SimulationEnvironmentsVersionsResource;
+
+  constructor(transport: Transport) {
+    super(transport);
+    this.drafts = new SimulationEnvironmentsDraftsResource(transport);
+    this.evaluations = new SimulationEnvironmentsEvaluationsResource(transport);
+    this.nudges = new SimulationEnvironmentsNudgesResource(transport);
+    this.runs = new SimulationEnvironmentsRunsResource(transport);
+    this.versions = new SimulationEnvironmentsVersionsResource(transport);
+  }
+
+  /**
+   * Return a simulation environment with its contract, world, scenarios and evaluations.
+   *
+   * GET /simulate/api/harness-environments/{id}/
+   */
+  get(id: string, options?: RequestOptions): Promise<models.HarnessEnvironmentDetail> {
+    return this._t.call<models.HarnessEnvironmentDetail>(ops.OP_SIMULATION_ENVIRONMENTS_GET, { path: { id: id }, query: {} }, options);
+  }
+
+  /**
+   * List simulation environments in the current workspace, optionally for one agent definition.
+   *
+   * GET /simulate/api/harness-environments/
+   */
+  list(params: SimulationEnvironmentsListParams = {}, options?: RequestOptions): Pager<models.HarnessEnvironment> {
+    return this._t.paginate<models.HarnessEnvironment>(ops.OP_SIMULATION_ENVIRONMENTS_LIST, { path: {}, query: { limit: params.limit, agent_definition_id: params.agent_definition_id } }, options);
+  }
+
+  /**
+   * Rename a simulation environment (the only editable field); returns the environment.
+   *
+   * PATCH /simulate/api/harness-environments/{id}/
+   */
+  rename(id: string, params: SimulationEnvironmentsRenameParams, options?: RequestOptions): Promise<models.HarnessEnvironmentDetail> {
+    return this._t.call<models.HarnessEnvironmentDetail>(ops.OP_SIMULATION_ENVIRONMENTS_RENAME, { path: { id: id }, query: {}, body: { name: params.name } }, options);
+  }
+
+  /**
+   * Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults). Send the same Idempotency-Key header (options headers) to get the same run back on a retry.
+   *
+   * POST /simulate/api/harness-environments/{id}/run/
+   */
+  run(id: string, params: SimulationEnvironmentsRunParams, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_ENVIRONMENTS_RUN, { path: { id: id }, query: {}, body: { scenario_ids: params.scenario_ids, trials: params.trials, agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id } }, options);
+  }
+
+  /**
+   * Resolve the agent, environment and suite versions a run would pin, with warnings. Starts nothing.
+   *
+   * GET /simulate/api/harness-environments/{id}/run-plan/
+   */
+  runPlan(id: string, params: SimulationEnvironmentsRunPlanParams = {}, options?: RequestOptions): Promise<models.HarnessRunPlan> {
+    return this._t.call<models.HarnessRunPlan>(ops.OP_SIMULATION_ENVIRONMENTS_RUN_PLAN, { path: { id: id }, query: { agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id } }, options);
+  }
+}
+
+/**
  * `client.simulation.executions`. Subclass to add methods; reassign a child in the constructor to swap it.
  */
 export class SimulationExecutionsResource extends Resource {
+  insights: SimulationExecutionsInsightsResource;
+
+  constructor(transport: Transport) {
+    super(transport);
+    this.insights = new SimulationExecutionsInsightsResource(transport);
+  }
 
   /**
    * Return aggregated analytics for a simulation test execution.
@@ -2293,6 +3021,177 @@ export class SimulationExecutionsResource extends Resource {
    */
   list(params: SimulationExecutionsListParams = {}, options?: RequestOptions): Pager<models.TestExecution> {
     return this._t.paginate<models.TestExecution>(ops.OP_SIMULATION_EXECUTIONS_LIST, { path: {}, query: { search: params.search, status: params.status, limit: params.limit } }, options);
+  }
+
+  /**
+   * List a run's calls (a test execution's results) with the run's pinned versions and outcome summary, 50 per page by default. filters is a JSON object of string lists, such as {"status": ["failed"]}.
+   *
+   * GET /simulate/v3/test-executions/{test_execution_id}/calls/
+   */
+  listCalls(testExecutionId: string, params: SimulationExecutionsListCallsParams = {}, options?: RequestOptions): Pager<unknown> {
+    return this._t.paginate<unknown>(ops.OP_SIMULATION_EXECUTIONS_LIST_CALLS, { path: { test_execution_id: testExecutionId }, query: { search: params.search, filters: params.filters, ordering: params.ordering, page_size: params.page_size, group_by: params.group_by, group_key: params.group_key } }, options);
+  }
+
+  /**
+   * Re-run chosen calls of a finished run (rerun_type call_and_eval, call_execution_ids) as a new attempt of the same run, or re-grade them (eval_only).
+   *
+   * POST /simulate/test-executions/{test_execution_id}/rerun-calls/
+   */
+  rerunCalls(testExecutionId: string, params: SimulationExecutionsRerunCallsParams, options?: RequestOptions): Promise<models.RerunCallsResponse> {
+    return this._t.call<models.RerunCallsResponse>(ops.OP_SIMULATION_EXECUTIONS_RERUN_CALLS, { path: { test_execution_id: testExecutionId }, query: {}, body: { rerun_type: params.rerun_type, call_execution_ids: params.call_execution_ids, select_all: params.select_all, environment_values: params.environment_values } }, options);
+  }
+}
+
+/**
+ * `client.simulation.jobs`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationJobsResource extends Resource {
+  scenarios: SimulationJobsScenariosResource;
+
+  constructor(transport: Transport) {
+    super(transport);
+    this.scenarios = new SimulationJobsScenariosResource(transport);
+  }
+
+  /**
+   * Send a correction to a builder job that is still authoring, applied at its next stage boundary (409 once authoring has finished); client_request_id deduplicates a resend.
+   *
+   * POST /simulate/api/harness-jobs/{id}/adjust/
+   */
+  adjust(id: string, params: SimulationJobsAdjustParams, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_JOBS_ADJUST, { path: { id: id }, query: {}, body: { instruction: params.instruction, client_request_id: params.client_request_id, target_stage: params.target_stage, scenario_delta: params.scenario_delta } }, options);
+  }
+
+  /**
+   * Request cancellation of a harness job (a build or a run). Completed work is kept; cleanup may still be pending.
+   *
+   * POST /simulate/api/harness-jobs/{id}/cancel/
+   */
+  cancel(id: string, params: SimulationJobsCancelParams = {}, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_JOBS_CANCEL, { path: { id: id }, query: {}, body: { reason: params.reason } }, options);
+  }
+
+  /**
+   * Start a builder job (a new environment) from an uploaded source and an agent; artifacts.level is required. Send the same Idempotency-Key header (options headers) with the same body to get the same job back.
+   *
+   * POST /simulate/api/harness-jobs/
+   */
+  create(params: SimulationJobsCreateParams, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_JOBS_CREATE, { path: {}, query: {}, body: { agent: params.agent, artifacts: params.artifacts, schema_version: params.schema_version, run_id: params.run_id, source: params.source, scenario_count: params.scenario_count, seed: params.seed, runtime: params.runtime, security: params.security, retry: params.retry, platform_run_id: params.platform_run_id, metadata: params.metadata, credential_values: params.credential_values } }, options);
+  }
+
+  /**
+   * Ask the builder for count (1-50) more scenarios, steered by optional guidance; with versioning they land in the suite draft, otherwise the environment is rebuilt. Spends builder credits.
+   *
+   * POST /simulate/api/harness-jobs/{id}/extend/
+   */
+  extend(id: string, params: SimulationJobsExtendParams, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_JOBS_EXTEND, { path: { id: id }, query: {}, body: { count: params.count, guidance: params.guidance, client_request_id: params.client_request_id } }, options);
+  }
+
+  /**
+   * Return a harness job's state, stage, events, scenarios and consumption (a builder job, or a run's job).
+   *
+   * GET /simulate/api/harness-jobs/{id}/
+   */
+  get(id: string, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_JOBS_GET, { path: { id: id }, query: {} }, options);
+  }
+
+  /**
+   * Check a builder job body without creating a job; missing credentials show as failed checks.
+   *
+   * POST /simulate/api/harness-jobs/preflight/
+   */
+  preflight(params: SimulationJobsPreflightParams, options?: RequestOptions): Promise<models.HarnessPreflightResponse> {
+    return this._t.call<models.HarnessPreflightResponse>(ops.OP_SIMULATION_JOBS_PREFLIGHT, { path: {}, query: {}, body: { agent: params.agent, artifacts: params.artifacts, schema_version: params.schema_version, run_id: params.run_id, source: params.source, scenario_count: params.scenario_count, seed: params.seed, runtime: params.runtime, security: params.security, retry: params.retry, platform_run_id: params.platform_run_id, metadata: params.metadata, credential_values: params.credential_values } }, options);
+  }
+
+  /**
+   * Send a message to a builder job's chat (a question's answer needs kind user_response or approval, and reply_to); client_request_id deduplicates a resend.
+   *
+   * POST /simulate/api/harness-jobs/{id}/conversation/messages/
+   */
+  sendMessage(id: string, params: SimulationJobsSendMessageParams, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_JOBS_SEND_MESSAGE, { path: { id: id }, query: {}, body: { content: params.content, client_request_id: params.client_request_id, kind: params.kind, reply_to: params.reply_to, payload: params.payload } }, options);
+  }
+
+  /**
+   * Make an environment's next agent version from credential values (environment_values) and files staged with simulation.jobs.upload_secret_file; it is checked next, then made the default.
+   *
+   * POST /simulate/api/harness-jobs/secret-values/
+   */
+  setSecretValues(params: SimulationJobsSetSecretValuesParams, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SIMULATION_JOBS_SET_SECRET_VALUES, { path: {}, query: {}, body: { environment_values: params.environment_values, environment_id: params.environment_id, files: params.files } }, options);
+  }
+
+  /**
+   * Stage a credential file for an environment (today only a GOOGLE_APPLICATION_CREDENTIALS service-account JSON, as environment_name GOOGLE_APPLICATION_CREDENTIALS; anything else returns 422); pass the returned secret_ref in simulation.jobs.set_secret_values files.
+   *
+   * POST /simulate/api/harness-jobs/secret-files/
+   */
+  uploadSecretFile(params: SimulationJobsUploadSecretFileParams, options?: RequestOptions): Promise<models.HarnessSecretFileUploadResponse> {
+    return this._t.call<models.HarnessSecretFileUploadResponse>(ops.OP_SIMULATION_JOBS_UPLOAD_SECRET_FILE, { path: {}, query: {}, body: { environment_name: params.environment_name }, files: { file: params.file } }, options);
+  }
+
+  /**
+   * Upload an agent's source files (one `paths` entry per file, the file's path inside the folder) for simulation.jobs.create or simulation.environments.versions.create_agent; returns the source_id to pass on.
+   *
+   * POST /simulate/api/harness-jobs/sources/
+   */
+  uploadSources(params: SimulationJobsUploadSourcesParams, options?: RequestOptions): Promise<models.HarnessSourceUploadResponse> {
+    return this._t.call<models.HarnessSourceUploadResponse>(ops.OP_SIMULATION_JOBS_UPLOAD_SOURCES, { path: {}, query: {}, body: { paths: params.paths, name: params.name }, files: { files: params.files } }, options);
+  }
+}
+
+/**
+ * `client.simulation.personas`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationPersonasResource extends Resource {
+
+  /**
+   * Create a workspace persona; a name already used by a system or workspace persona returns 400.
+   *
+   * POST /simulate/api/personas/
+   */
+  create(params: SimulationPersonasCreateParams, options?: RequestOptions): Promise<models.Persona> {
+    return this._t.call<models.Persona>(ops.OP_SIMULATION_PERSONAS_CREATE, { path: {}, query: {}, body: { name: params.name, description: params.description, gender: params.gender, age_group: params.age_group, location: params.location, profession: params.profession, personality: params.personality, communication_style: params.communication_style, accent: params.accent, multilingual: params.multilingual, language: params.language, conversation_speed: params.conversation_speed, background_sound: params.background_sound, finished_speaking_sensitivity: params.finished_speaking_sensitivity, interrupt_sensitivity: params.interrupt_sensitivity, keywords: params.keywords, custom_properties: params.custom_properties, additional_instruction: params.additional_instruction, simulation_type: params.simulation_type, tone: params.tone, punctuation: params.punctuation, slang_usage: params.slang_usage, typos_frequency: params.typos_frequency, regional_mix: params.regional_mix, emoji_usage: params.emoji_usage, verbosity: params.verbosity } }, options);
+  }
+
+  /**
+   * Copy a system or workspace persona into the workspace under a new name; a name already used by a workspace persona returns 400.
+   *
+   * POST /simulate/api/personas/{id}/duplicate/
+   */
+  duplicate(id: string, params: SimulationPersonasDuplicateParams, options?: RequestOptions): Promise<models.Persona> {
+    return this._t.call<models.Persona>(ops.OP_SIMULATION_PERSONAS_DUPLICATE, { path: { id: id }, query: {}, body: { name: params.name } }, options);
+  }
+
+  /**
+   * Return one system or workspace persona you can use.
+   *
+   * GET /simulate/api/personas/{id}/
+   */
+  get(id: string, options?: RequestOptions): Promise<models.Persona> {
+    return this._t.call<models.Persona>(ops.OP_SIMULATION_PERSONAS_GET, { path: { id: id }, query: {} }, options);
+  }
+
+  /**
+   * List the system and workspace personas you can use, newest first, 10 per page by default; filter by type (prebuilt or custom), search or simulation_type (voice or text).
+   *
+   * GET /simulate/api/personas/
+   */
+  list(params: SimulationPersonasListParams = {}, options?: RequestOptions): Pager<unknown> {
+    return this._t.paginate<unknown>(ops.OP_SIMULATION_PERSONAS_LIST, { path: {}, query: { limit: params.limit, type: params.type, search: params.search, simulation_type: params.simulation_type } }, options);
+  }
+
+  /**
+   * Update a workspace persona; name is required on every update, other fields left out are kept, and so is simulation_type; system personas return 403.
+   *
+   * PUT /simulate/api/personas/{id}/
+   */
+  update(id: string, params: SimulationPersonasUpdateParams, options?: RequestOptions): Promise<models.Persona> {
+    return this._t.call<models.Persona>(ops.OP_SIMULATION_PERSONAS_UPDATE, { path: { id: id }, query: {}, body: { name: params.name, description: params.description, gender: params.gender, age_group: params.age_group, occupation: params.occupation, location: params.location, personality: params.personality, communication_style: params.communication_style, multilingual: params.multilingual, languages: params.languages, accent: params.accent, conversation_speed: params.conversation_speed, background_sound: params.background_sound, finished_speaking_sensitivity: params.finished_speaking_sensitivity, interrupt_sensitivity: params.interrupt_sensitivity, keywords: params.keywords, metadata: params.metadata, additional_instruction: params.additional_instruction, profession: params.profession, language: params.language, custom_properties: params.custom_properties, punctuation: params.punctuation, slang_usage: params.slang_usage, typos_frequency: params.typos_frequency, regional_mix: params.regional_mix, emoji_usage: params.emoji_usage, tone: params.tone, verbosity: params.verbosity } }, options);
   }
 }
 
@@ -2344,6 +3243,15 @@ export class SimulationScenariosResource extends Resource {
 export class SimulationTestsResource extends Resource {
 
   /**
+   * Add evals with your own mapping to a run test, such as an environment run's run_test_id ({evaluations_config: [{template_id, name, mapping, config, model}]}).
+   *
+   * POST /simulate/run-tests/{run_test_id}/eval-configs/
+   */
+  addEvalConfigs(runTestId: string, params: SimulationTestsAddEvalConfigsParams, options?: RequestOptions): Promise<models.AddEvalConfigsResponse> {
+    return this._t.call<models.AddEvalConfigsResponse>(ops.OP_SIMULATION_TESTS_ADD_EVAL_CONFIGS, { path: { run_test_id: runTestId }, query: {}, body: { evaluations_config: params.evaluations_config } }, options);
+  }
+
+  /**
    * Save a simulation test using name, agent_definition_id and scenario_ids, optionally agent_version and evaluations_config. Does not execute it; pass the returned test ID to run_simulation.
    *
    * POST /simulate/run-tests/create/
@@ -2368,6 +3276,15 @@ export class SimulationTestsResource extends Resource {
    */
   list(params: SimulationTestsListParams = {}, options?: RequestOptions): Pager<models.RunTestResponse> {
     return this._t.paginate<models.RunTestResponse>(ops.OP_SIMULATION_TESTS_LIST, { path: {}, query: { search: params.search, simulation_type: params.simulation_type, prompt_template_id: params.prompt_template_id, limit: params.limit, summary: params.summary } }, options);
+  }
+
+  /**
+   * List the runs (test executions) of a run test, such as an environment run's run_test_id, 10 per page by default.
+   *
+   * GET /simulate/run-tests/{run_test_id}/executions/
+   */
+  listExecutions(runTestId: string, params: SimulationTestsListExecutionsParams = {}, options?: RequestOptions): Pager<models.TestExecutionItemResponse> {
+    return this._t.paginate<models.TestExecutionItemResponse>(ops.OP_SIMULATION_TESTS_LIST_EXECUTIONS, { path: { run_test_id: runTestId }, query: { limit: params.limit, status: params.status, search: params.search } }, options);
   }
 
   /**
@@ -2414,10 +3331,12 @@ export class AccountResource extends Resource {
  * `client.agents`. Subclass to add methods; reassign a child in the constructor to swap it.
  */
 export class AgentsResource extends Resource {
+  runs: AgentsRunsResource;
   versions: AgentsVersionsResource;
 
   constructor(transport: Transport) {
     super(transport);
+    this.runs = new AgentsRunsResource(transport);
     this.versions = new AgentsVersionsResource(transport);
   }
 
@@ -3323,13 +4242,21 @@ export class SessionsResource extends Resource {
  * `client.simulation`. Subclass to add methods; reassign a child in the constructor to swap it.
  */
 export class SimulationResource extends Resource {
+  calls: SimulationCallsResource;
+  environments: SimulationEnvironmentsResource;
   executions: SimulationExecutionsResource;
+  jobs: SimulationJobsResource;
+  personas: SimulationPersonasResource;
   scenarios: SimulationScenariosResource;
   tests: SimulationTestsResource;
 
   constructor(transport: Transport) {
     super(transport);
+    this.calls = new SimulationCallsResource(transport);
+    this.environments = new SimulationEnvironmentsResource(transport);
     this.executions = new SimulationExecutionsResource(transport);
+    this.jobs = new SimulationJobsResource(transport);
+    this.personas = new SimulationPersonasResource(transport);
     this.scenarios = new SimulationScenariosResource(transport);
     this.tests = new SimulationTestsResource(transport);
   }
