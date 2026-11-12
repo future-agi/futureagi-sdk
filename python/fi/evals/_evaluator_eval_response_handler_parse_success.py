@@ -10,9 +10,17 @@ _EXCERPT_CHARS = 200
 _KEY_HINT = "Check your API key and secret key."
 
 
+def _says(sentence: str, field: str, text: str) -> bool:
+    """Whether the sentence already is this field error: its text alone, or the text after the field's
+    path without ``non_field_errors`` segments (``eval_config.non_field_errors`` reads ``eval_config``)."""
+    path = ".".join(part for part in str(field).split(".") if part != "non_field_errors")
+    return sentence == text or (bool(path) and sentence == f"{path}: {text}")
+
+
 def _server_sentence(body: Any) -> str:
     """The sentence of an error body ``{"status": false, "message"/"detail"/"error": ...}``, then the
-    field errors it lists under ``details`` (or ``errors``); "" when the body has neither."""
+    field errors it lists under ``details`` (or ``errors``) that the sentence does not already say;
+    "" when the body has neither."""
     if not isinstance(body, dict):
         return ""
     sentence = next((body[key].strip() for key in _SENTENCE_KEYS
@@ -21,7 +29,7 @@ def _server_sentence(body: Any) -> str:
     reasons = []
     for field, messages in (fields.items() if isinstance(fields, dict) else ()):
         texts = [m.strip() for m in (messages if isinstance(messages, list) else [messages])
-                 if isinstance(m, str) and m.strip() and m.strip() != sentence]
+                 if isinstance(m, str) and m.strip() and not _says(sentence, field, m.strip())]
         if texts and field not in _SENTENCE_KEYS:
             text = " ".join(texts)
             reasons.append(text if field == "non_field_errors" else f"{field}: {text}")

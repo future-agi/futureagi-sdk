@@ -3,9 +3,9 @@
 The eval endpoint refuses with an error status and a body such as ``{"status": false, "message":
 ..., "details": {field: [...]}}``. ``Evaluator.evaluate()`` still returns a result instead of
 raising; its reason leads with that sentence and the status, never the whole body, and a 403
-adds the key hint after them. ``evaluate()`` on the Turing engine reports the refusal as failed, with
-the same text as its error. A request that timed out reads the same way: failed, with a plain
-sentence.
+adds the key hint after them. A field error the sentence already says is not repeated after it.
+``evaluate()`` on the Turing engine reports the refusal as failed, with the same text as its
+error. A request that timed out reads the same way: failed, with a plain sentence.
 """
 
 from __future__ import annotations
@@ -27,6 +27,9 @@ REFUSED = (400, {
     "attr": "inputs", "details": {"inputs": [UNEXPECTED_KEYS]}, "errors": {"inputs": [UNEXPECTED_KEYS]},
 })
 REFUSED_TEXT = "Validation failed: inputs: " + UNEXPECTED_KEYS + " (HTTP 400)"
+NO_MODEL = "Choose a model for this evaluation."
+REQUIRED = "This field is required."
+MISSING_KEYS = "Missing required keys: input."
 FAILED_RUN = "Failed to run the evaluation."
 SERVER_ERROR = (500, {"status": False, "type": "server_error", "code": "server_error",
                       "detail": FAILED_RUN, "message": FAILED_RUN, "error": FAILED_RUN, "result": FAILED_RUN})
@@ -115,6 +118,37 @@ def _evaluator_result(backend: _mock_http.FakeBackend):
 def test_evaluator_reason_leads_with_the_server_sentence_and_status(answer, text) -> None:
     result = _evaluator_result(_mock_http.FakeBackend({NEW_EVAL: lambda call: answer}))
     assert (result.output, result.reason) == (None, text)
+
+
+def _field_refusal(sentence: str, details: dict) -> tuple:
+    """A 400 whose sentence is the first field error after that field's path, the details unchanged."""
+    return (400, {"status": False, "type": "validation_error", "code": "invalid", "detail": sentence,
+                  "message": sentence, "error": sentence, "result": sentence, "attr": next(iter(details)),
+                  "details": details, "errors": details})
+
+
+@pytest.mark.parametrize(("answer", "text"), [
+    (_field_refusal("inputs: " + UNEXPECTED_KEYS, {"inputs": [UNEXPECTED_KEYS]}),
+     "inputs: " + UNEXPECTED_KEYS + " (HTTP 400)"),
+    (_field_refusal("eval_config: " + NO_MODEL, {"eval_config.non_field_errors": [NO_MODEL]}),
+     "eval_config: " + NO_MODEL + " (HTTP 400)"),
+    (_field_refusal("eval_data.0.eval_template: " + REQUIRED, {"eval_data.0.eval_template": [REQUIRED]}),
+     "eval_data.0.eval_template: " + REQUIRED + " (HTTP 400)"),
+    (REFUSED, REFUSED_TEXT),
+], ids=["field-sentence", "nested-non-field-error", "dotted-path", "validation-failed"])
+def test_evaluator_reason_does_not_repeat_the_field_error_its_sentence_says(answer, text) -> None:
+    result = _evaluator_result(_mock_http.FakeBackend({NEW_EVAL: lambda call: answer}))
+    assert (result.output, result.reason) == (None, text)
+
+
+def test_evaluator_reason_still_lists_another_error_of_the_field_its_sentence_names() -> None:
+    sentence = "inputs: " + UNEXPECTED_KEYS
+    answer = _field_refusal(sentence, {"inputs": [UNEXPECTED_KEYS, MISSING_KEYS]})
+    result = _evaluator_result(_mock_http.FakeBackend({NEW_EVAL: lambda call: answer}))
+    assert result.output is None
+    assert result.reason.startswith(sentence + ": ")
+    assert result.reason.endswith(MISSING_KEYS + " (HTTP 400)")
+    assert result.reason.count(MISSING_KEYS) == 1
 
 
 @pytest.mark.parametrize(("status", "body", "text"), [
