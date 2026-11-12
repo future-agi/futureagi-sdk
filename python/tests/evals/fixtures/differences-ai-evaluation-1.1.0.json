@@ -159,13 +159,7 @@
     "tests/evals/test_evaluator_log_privacy.py::test_configuration_warning_omits_response_body",
     "tests/evals/test_evaluator_log_privacy.py::test_registry_failure_inside_evaluate_omits_exception_text",
     "tests/evals/test_evaluator_log_privacy.py::test_real_auto_enrichment_never_logs_evaluation_output"
-   ],
-   "source_contract": {
-    "fi/evals/evaluator.py:Evaluator._configure_evaluations": {
-     "upstream_ast_sha256": "29c6b61989a256c7c7a4b7155c6d48e7cf88df174a6d1386f1a12f3d831dfdf7",
-     "ast_sha256": "6a9d3221a3860687c872a3b8f2c7bfadc6c6415f8515b53078ab5734a7737d21"
-    }
-   }
+   ]
   },
   {
    "id": "refusal-reason",
@@ -194,6 +188,26 @@
     "fi/evals/evaluator.py:Evaluator.evaluate": {
      "upstream_ast_sha256": "dc1f24c471429d9b0f3c57ecd241d0bd1de5ddd3bef5e13e5b6f504831d68043",
      "ast_sha256": "485d843334c15965fdd421a3740dc0b0a74252344a2d4809b73a97478c3671ce"
+    }
+   }
+  },
+  {
+   "id": "configure-needs-opentelemetry",
+   "area": "installation",
+   "ai_evaluation": "Evaluator.evaluate(..., platform=..., custom_eval_name=...) sends the evaluation's configuration for another tracing platform, tagged with the current span and trace, which it reads with OpenTelemetry. When OpenTelemetry could not be imported, the call logged an error asking for fi-instrumentation-otel and returned None without sending anything, so the caller saw no error.",
+   "futureagi": "OpenTelemetry comes with `pip install \"futureagi[evals]\"`, not the base install. When it is not installed, the call raises fi.errors.MissingExtraError before any request is sent, with extra \"evals\", module \"opentelemetry\", install_hint `pip install \"futureagi[evals]\"` and the message \"Evaluator.evaluate(platform=...) reads the current span with OpenTelemetry, which is not installed. Run: pip install \"futureagi[evals]\"\". With OpenTelemetry installed the call is unchanged: it sends the configuration, with the span and trace ids the caller passed or those of the current span, and returns the response. The source contract of Evaluator._configure_evaluations listed here also covers its log-privacy changes.",
+   "docs": "Pages that configure evaluations for another platform with evaluate(..., platform=...) install `pip install \"futureagi[evals]\"`. Code that checked that call for None catches fi.errors.MissingExtraError instead.",
+   "tests": [
+    "tests/evals/test_configure_without_opentelemetry.py::test_configure_without_opentelemetry_names_the_evals_extra_and_sends_nothing",
+    "tests/evals/test_configure_without_opentelemetry.py::test_configure_with_opentelemetry_sends_the_request_and_returns_the_response",
+    "tests/evals/test_configure_without_opentelemetry.py::test_configure_inside_a_span_sends_that_span_and_its_trace",
+    "tests/evals/test_evaluator_log_privacy.py::test_configuration_warning_omits_response_body",
+    "tests/evals/test_module_extractions.py::test_extracted_functions_keep_the_published_signature_and_body"
+   ],
+   "source_contract": {
+    "fi/evals/evaluator.py:Evaluator._configure_evaluations": {
+     "upstream_ast_sha256": "29c6b61989a256c7c7a4b7155c6d48e7cf88df174a6d1386f1a12f3d831dfdf7",
+     "ast_sha256": "feecee32b74eab7f66faa0254bac162c6c6df5ee395cb25e983fcdf95b23478e"
     }
    }
   }

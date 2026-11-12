@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Fixed: configuring evaluations without OpenTelemetry
+- `Evaluator.evaluate(..., platform=..., custom_eval_name=...)` reads the current span with
+  OpenTelemetry, which comes with `futureagi[evals]`. When it is not installed, the call now
+  raises `fi.errors.MissingExtraError` naming `pip install "futureagi[evals]"` before sending
+  anything, instead of logging an error and returning `None`. With OpenTelemetry installed the
+  call is unchanged.
+
 ### Fixed: refused and timed-out evaluations
 - When the eval endpoint refuses an evaluation, `Evaluator.evaluate()` still returns a result,
   and its reason now leads with the server's own message, then the HTTP status (for example

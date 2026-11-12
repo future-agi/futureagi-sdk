@@ -193,13 +193,25 @@ class _EvaluatorSubmitMethods:
 
         Returns:
             A dictionary containing the backend's response message.
+
+        Raises:
+            MissingExtraError: OpenTelemetry, which reads the current span, is not installed;
+                nothing is sent.
         """
         from fi.evals.evaluator import (
             Any, Dict, HttpMethod, Optional, RequestConfig, Routes, logging,
         )
         try:
             from fi.evals.otel_utils import _get_current_otel_span
+        except ImportError as exc:
+            from fi.errors import MissingExtraError
 
+            raise MissingExtraError(
+                "Evaluator.evaluate(platform=...) reads the current span with OpenTelemetry, "
+                'which is not installed. Run: pip install "futureagi[evals]"',
+                exc, extra="evals", module="opentelemetry",
+            ) from exc
+        try:
             if platform == "langfuse":
                 kwargs["langfuse_secret_key"] = self.langfuse_secret_key
                 kwargs["langfuse_public_key"] = self.langfuse_public_key
