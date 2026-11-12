@@ -280,7 +280,7 @@ class _Batch:
 
     async def _command(self, command: str, row: Any, ctx: Any, sbx: Any, timeout_s: int,
                        span: Any) -> Dict[str, Any]:
-        result = await sbx.commands.run(command, cwd=self.spec.cwd, env=self.env(row, ctx, span),
+        result = await sbx.commands.run(command, cwd=self.spec.command_cwd, env=self.env(row, ctx, span),
                                         timeout_seconds=timeout_s)
         record = command_record(result, self.spec.max_output_chars)
         if span is not None:

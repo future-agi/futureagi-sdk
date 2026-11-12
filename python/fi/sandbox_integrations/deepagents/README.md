@@ -44,12 +44,12 @@ with Sandbox.create(name="agent-scratch") as sbx:          # deleted when the bl
 | Argument | Meaning |
 |---|---|
 | `sandbox` | A sync `fi.sandbox.Sandbox` handle. `AsyncSandbox` is not supported (async agents work: Deep Agents runs the backend in worker threads). |
-| `workdir` | The folder commands run in. Default `/workspace`. |
+| `workdir` | The folder commands run in: `/workspace` (the default), a folder under it, or a path relative to it (`src` is `/workspace/src`). A folder outside `/workspace` raises `ValueError` before any request. |
 | `timeout` | The default time limit of a command, in seconds. Default 30 minutes, or your workspace's maximum when that is lower. |
 | `max_timeout` | Your workspace's exec maximum, in seconds (`caps.exec.maxTimeoutSeconds` of its sandbox settings). Default: read from the settings. |
 
 Building the backend makes two requests: it reads your workspace's sandbox settings for the exec time limit (not
-when you pass `max_timeout`), and runs `command -v python3` in `workdir`. Deep Agents runs `python3` inside the
+when you pass `max_timeout`), and runs `command -v python3`. Deep Agents runs `python3` inside the
 sandbox for `ls`, `read_file`, `edit_file` and `glob`, so a sandbox without it is refused with `ConfigurationError` (code `python3_missing`).
 Every catalog template ships `python3`; an image of your own must have it on its `PATH`.
 
@@ -58,7 +58,8 @@ Every catalog template ships `python3`; an image of your own must have it on its
 The agent gets Deep Agents' sandbox tools: `ls`, `read_file`, `write_file`, `edit_file`, `delete`, `glob`, `grep` and
 `execute`. Deep Agents builds all of them on three backend calls:
 
-- `execute(command, *, timeout=None)` runs a shell command in `workdir`, once.
+- `execute(command, *, timeout=None)` runs a shell command in `workdir`, once. The sandbox API takes a command's
+  folder relative to `/workspace`, so `/workspace/src` is sent as `src` and `/workspace` itself as no folder.
 - `upload_files(files)` writes files, creating each file's folder first.
 - `download_files(paths)` reads files as bytes.
 
@@ -140,7 +141,8 @@ call, so an agent does not retry a call that cannot work.
 
 - The constructor takes the handle by keyword, as theirs do: `FutureAGISandbox(sandbox=sbx)`. Lifecycle stays
   with you in all three.
-- The default `workdir` is `/workspace` (E2B uses `/home/user`).
+- The default `workdir` is `/workspace` (E2B uses `/home/user`), and `workdir` must be under `/workspace`: to run
+  a command elsewhere, `cd` inside it (`cd /tmp && ...`).
 - stderr is tagged `<stderr>...</stderr>`, as Daytona and LangChain's backend template do; E2B joins it with a
   newline.
 - A timeout gives exit code 124 in all three. `timeout=0` means "wait without limit" on Daytona and the workspace's

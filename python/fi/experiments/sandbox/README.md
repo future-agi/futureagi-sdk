@@ -53,7 +53,7 @@ Exactly one of the two is set.
 | `files` | None | `{absolute path: text or bytes}`, or `lambda row: {...}`, written before the agent |
 | `env` | None | plain, non-secret variables for both commands, or `lambda row, ctx: {...}` |
 | `template`, `size`, `image` | the workspace's defaults | passed to the create |
-| `cwd` | `/workspace` | the commands' folder |
+| `cwd` | `/workspace` | the commands' folder: `/workspace`, a folder under it, or a path relative to it (`app` is `/workspace/app`); a folder outside `/workspace` is refused |
 | `agent_timeout_s` / `verifier_timeout_s` | 900 / 300 | each command's own limit (at least 1; at most the workspace's `caps.exec.maxTimeoutSeconds`) |
 | `reward_path` | `/workspace/.fi-eval/reward` | where the verifier writes the reward |
 | `reward_from_exit` | True | without a reward file: 1.0 when the last command exited 0, else 0.0 |

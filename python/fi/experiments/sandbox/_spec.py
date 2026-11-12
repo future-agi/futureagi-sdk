@@ -8,6 +8,7 @@ is read from the sandbox settings when the run starts.
 from __future__ import annotations
 
 import json
+import posixpath
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, Final, Mapping, Optional, Tuple, Union
 
@@ -17,8 +18,10 @@ if TYPE_CHECKING:  # pragma: no cover
     from fi.experiments._context import TaskContext
     from fi.sandbox import AsyncSandbox
 
+#: The sandbox's writable folder: commands run here, or in a folder under it.
+WORKSPACE: Final = "/workspace"
 #: The folder each trial's own files live in: ``row.json`` and the default reward file.
-EVAL_DIR: Final = "/workspace/.fi-eval"
+EVAL_DIR: Final = WORKSPACE + "/.fi-eval"
 
 Files = Mapping[str, Union[str, bytes]]
 Text = Union[str, Callable[[Any], str]]
@@ -33,6 +36,8 @@ class SandboxEval:
     function ``agent(row, sbx, ctx)`` run in this process, acting on the sandbox through its
     handle) is set. ``agent_command``, ``verifier`` and ``files`` may be functions of the row;
     ``env`` may be a function of ``(row, ctx)``. ``env`` holds plain, non-secret variables only.
+    ``cwd`` is the commands' folder: ``/workspace``, a folder under it, or a path relative to it
+    (``app`` is ``/workspace/app``).
     """
 
     agent_command: Optional[Text] = None
@@ -73,9 +78,9 @@ class SandboxEval:
         if isinstance(self.max_output_chars, bool) or not isinstance(self.max_output_chars, int) \
                 or self.max_output_chars < 0:
             raise UsageError("max_output_chars must be a whole number, 0 or more")
-        for name in ("cwd", "reward_path"):
-            if not isinstance(getattr(self, name), str) or not getattr(self, name).startswith("/"):
-                raise UsageError(f"{name} must be an absolute path inside the sandbox")
+        exec_cwd(self.cwd)
+        if not isinstance(self.reward_path, str) or not self.reward_path.startswith("/"):
+            raise UsageError("reward_path must be an absolute path inside the sandbox")
         prefix = self.name_prefix
         if not isinstance(prefix, str) or not 1 <= len(prefix) <= 32 or not prefix.isprintable() \
                 or prefix != prefix.strip():
@@ -86,6 +91,28 @@ class SandboxEval:
     def mode(self) -> str:
         """``"command"`` (the agent runs inside the sandbox) or ``"callable"`` (it runs here)."""
         return "command" if self.agent_command is not None else "callable"
+
+    @property
+    def command_cwd(self) -> Optional[str]:
+        """``cwd`` as the exec API takes it: relative to ``/workspace``, None for ``/workspace``."""
+        return exec_cwd(self.cwd)
+
+
+def exec_cwd(path: Any) -> Optional[str]:
+    """A command's folder as the exec API takes it. The API takes a folder relative to ``/workspace``
+    and refuses an absolute one, so ``/workspace/app`` is sent as ``app`` and ``/workspace`` itself as
+    no cwd (None). A relative ``path`` is relative to ``/workspace``. A folder outside ``/workspace``,
+    or one that leaves it through ``..``, raises ``UsageError``."""
+    if not isinstance(path, str):
+        raise UsageError(f"cwd must be a folder path, not {path!r}")
+    joined = path if path.startswith("/") else f"{WORKSPACE}/{path}"
+    full = posixpath.normpath("/" + joined.lstrip("/"))
+    if full == WORKSPACE:
+        return None
+    if full.startswith(WORKSPACE + "/"):
+        return full[len(WORKSPACE) + 1:]
+    raise UsageError(f"cwd {path!r} is outside {WORKSPACE}: sandbox commands run in {WORKSPACE} or a folder "
+                     f"under it, so pass one of those (or a path relative to {WORKSPACE})")
 
 
 # ---- what a trial writes and reads (pure: no sandbox, no loop) ----------------------------------

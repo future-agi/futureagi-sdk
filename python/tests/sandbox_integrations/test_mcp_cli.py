@@ -1,5 +1,6 @@
 """``futureagi-py sandbox mcp``: a sub-command of the one ``sandbox`` group (no plugin entry of its
-own), ``--help`` without ``mcp`` installed, exit 3 with the install line when ``mcp`` is missing, exit 2
+own), ``--help`` without ``mcp`` installed, exit 3 with the install line when ``mcp`` is missing (and on
+Python 3.14 or later, a message naming the Pythons the extra covers), exit 2
 on stderr for a setup problem, the tools it registers (all seven, or four when pinned), serving stdio
 and deleting what it created on exit (unless ``--keep``), also when stopped by SIGTERM or a cancel and
 when a SIGTERM arrives during the deletes, tool errors handed to the framework as its ``ToolError``, and
@@ -146,7 +147,48 @@ def test_all_tools_are_registered_with_their_parameters(server, fake, capsys):
     assert {name: srv.parameters(name) for name in srv.tools} == ALL_TOOLS
     assert all(srv.descriptions[name] for name in srv.tools)
     assert "900" not in srv.descriptions["sandbox_exec"]  # the limit is the workspace's, read from caps
+    assert "relative to /workspace" in srv.descriptions["sandbox_exec"]
     assert capsys.readouterr().out == ""
+
+
+def test_exec_tool_sends_a_folder_under_the_workspace_relative_to_it(server, fake, capsys):
+    server.on("sandboxes.getInfo", answer(200, json=record()))
+    server.on("sandboxes.commands.run", exec_body(("exit", EXIT0)))
+    seen = {}
+
+    async def client(srv):
+        seen["ran"] = await srv.tools["sandbox_exec"](command="pwd", sandbox_id=SBX, cwd="/workspace/src")
+        with pytest.raises(_fake_mcp.ToolError) as caught:
+            await srv.tools["sandbox_exec"](command="pwd", sandbox_id=SBX, cwd="/etc")
+        seen["refused"] = str(caught.value)
+
+    fake.on_run = client
+    assert run("mcp") == 0
+    assert seen["ran"]["exit_code"] == 0
+    bodies = [s.json() for s in server.seen if s.name == "sandboxes.commands.run"]
+    assert bodies == [{"command": "pwd", "cwd": "src"}]  # the refused one sent nothing
+    assert seen["refused"].startswith("invalid_cwd: ")
+    assert capsys.readouterr().out == ""
+
+
+@pytest.mark.parametrize("version", [(3, 14, 0), (3, 15, 2, "final", 0)])
+def test_missing_mcp_on_a_python_the_extra_skips_names_the_supported_range(fake, version):
+    from fi.sandbox_integrations.mcp_server import _server
+
+    error = _server.missing_mcp(version)
+    text = str(error)
+    assert "Python 3.10 to 3.13" in text and f"this is Python {version[0]}.{version[1]}" in text
+    assert INSTALL in text and "\n" not in text
+    assert error.extra == "sandbox-mcp" and error.install_hint == INSTALL
+
+
+@pytest.mark.parametrize("version", [(3, 10, 0), (3, 13, 9)])
+def test_missing_mcp_on_a_supported_python_gives_the_install_line(fake, version):
+    from fi.sandbox_integrations.mcp_server import _server
+
+    text = str(_server.missing_mcp(version))
+    assert text.startswith(f"mcp is not installed. Run: {INSTALL}") and "Python 3.10 to 3.13" in text
+    assert "this is Python" not in text
 
 
 def test_pinned_mode_registers_four_tools(server, fake, capsys):

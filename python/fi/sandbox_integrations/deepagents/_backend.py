@@ -8,7 +8,9 @@ three calls on the sandbox handle (:class:`fi.sandbox.Sandbox`) and nothing else
 - ``execute`` never raises for how a command ended. The exit code is the one the ``sandbox exec``
   command uses (124 timed out, 128+N signal N, 130 cancelled, 1 could not start), and a failure of
   the call itself comes back as output with exit code 1, or None when whether the command finished
-  is unknown.
+  is unknown. Commands run in ``workdir``, ``/workspace`` or a folder under it: the exec API takes
+  the folder relative to ``/workspace`` and refuses an absolute one, so it is sent that way (no
+  folder at all for ``/workspace`` itself).
 - ``upload_files`` and ``download_files`` report a failure per file and go on with the others.
   They use the sandbox's files API, whose paths are relative to ``/workspace``, so they reach
   files under ``/workspace`` only; a path elsewhere gets ``permission_denied`` without a request.
@@ -86,16 +88,18 @@ class FutureAGISandbox(BaseSandbox):
 
     ``sandbox`` is a handle you created or connected (``Sandbox.create(...)``,
     ``client.sandboxes.connect(id)``); you keep its lifecycle. ``workdir`` is the folder commands run
-    in. ``timeout`` is the default time limit in seconds; 0, or anything above the workspace's exec
-    maximum, means that maximum (sandboxes have no unlimited run). ``max_timeout`` is that maximum
-    in seconds when you know it (``caps.exec.maxTimeoutSeconds`` of the workspace's sandbox
-    settings); without it the backend reads the settings.
+    in: ``/workspace``, a folder under it, or a path relative to it (``src`` is ``/workspace/src``).
+    A folder outside ``/workspace`` raises ``ValueError`` before any request. ``timeout`` is the
+    default time limit in seconds; 0, or anything above the workspace's exec maximum, means that
+    maximum (sandboxes have no unlimited run). ``max_timeout`` is that maximum in seconds when you
+    know it (``caps.exec.maxTimeoutSeconds`` of the workspace's sandbox settings); without it the
+    backend reads the settings.
 
     Building it makes up to two requests: it reads the workspace's sandbox settings for the exec
-    maximum (not when ``max_timeout`` is given), and runs ``command -v python3`` in ``workdir``. It
-    raises ``ConfigurationError`` (code ``python3_missing``) when the sandbox has no ``python3``,
-    and any error of those two calls as the handle raised it (a hibernated sandbox included: resume
-    it first)."""
+    maximum (not when ``max_timeout`` is given), and runs ``command -v python3``. It raises
+    ``ConfigurationError`` (code ``python3_missing``) when the sandbox has no ``python3``, and any
+    error of those two calls as the handle raised it (a hibernated sandbox included: resume it
+    first)."""
 
     def __init__(
         self,
@@ -111,10 +115,10 @@ class FutureAGISandbox(BaseSandbox):
                 "supported (Deep Agents runs the sync backend in worker threads for async agents)"
             )
         self._sandbox = sandbox
-        self._workdir = workdir
+        self._workdir, self._cwd = _exec_folder(workdir)
         self._max_timeout = _exec_maximum(sandbox) if max_timeout is None else _given(max_timeout)
         self._timeout = self._limit(DEFAULT_TIMEOUT_S if timeout is None else timeout)
-        _require_python3(sandbox, workdir, self._limit(CHECK_TIMEOUT_S))
+        _require_python3(sandbox, self._limit(CHECK_TIMEOUT_S))
 
     @property
     def id(self) -> str:
@@ -127,6 +131,7 @@ class FutureAGISandbox(BaseSandbox):
 
     @property
     def workdir(self) -> str:
+        """The folder commands run in, as an absolute path under ``/workspace``."""
         return self._workdir
 
     @property
@@ -150,9 +155,7 @@ class FutureAGISandbox(BaseSandbox):
         backend's default, 0 and anything above the workspace's maximum use that maximum."""
         limit = self._timeout if timeout is None else self._limit(timeout)
         try:
-            result = self._sandbox.commands.run(
-                command, cwd=self._workdir, timeout_seconds=limit
-            )
+            result = self._sandbox.commands.run(command, cwd=self._cwd, timeout_seconds=limit)
         except ConfigurationError:
             raise
         except SandboxHibernatedError:
@@ -312,8 +315,29 @@ def _given(max_timeout: Any) -> int:
     return max_timeout
 
 
-def _require_python3(sandbox: Sandbox, workdir: str, limit: int) -> None:
-    result = sandbox.commands.run("command -v python3", cwd=workdir, timeout_seconds=limit)
+def _exec_folder(workdir: Any) -> Tuple[str, Optional[str]]:
+    """``workdir`` as (the absolute folder, the cwd the exec API takes). The API takes a folder
+    relative to ``/workspace`` and refuses an absolute one, so ``/workspace/src`` is sent as ``src``
+    and ``/workspace`` itself as no cwd. A relative ``workdir`` is relative to ``/workspace``. A
+    folder outside ``/workspace``, or one that leaves it through ``..``, raises ``ValueError``."""
+    if not isinstance(workdir, str):
+        raise ValueError(f"workdir must be a folder path, not {workdir!r}")
+    joined = workdir if workdir.startswith("/") else f"{FILES_ROOT}/{workdir}"
+    full = posixpath.normpath("/" + joined.lstrip("/"))
+    if full == FILES_ROOT:
+        return full, None
+    if full.startswith(FILES_ROOT + "/"):
+        return full, full[len(FILES_ROOT) + 1 :]
+    raise ValueError(
+        f"workdir {workdir!r} is outside {FILES_ROOT}: sandbox commands run in {FILES_ROOT} or a "
+        f"folder under it, so pass one of those (or a path relative to {FILES_ROOT})"
+    )
+
+
+def _require_python3(sandbox: Sandbox, limit: int) -> None:
+    """``command -v python3`` with no cwd: it checks the PATH, so it runs in ``/workspace`` whatever
+    ``workdir`` is (a ``workdir`` the agent has yet to make must not read as a missing ``python3``)."""
+    result = sandbox.commands.run("command -v python3", timeout_seconds=limit)
     if shell_exit_code(result) == 0:
         return
     note = ending_note(result, limit)

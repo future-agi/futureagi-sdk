@@ -18,6 +18,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import binascii
+import posixpath
 import re
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Set, Tuple
 
@@ -33,6 +34,8 @@ MAX_NAME_BYTES = 120
 MIN_TIMEOUT_SECONDS = 1
 #: The command a message suggests for things only a person can do (the console script's name today).
 CLI = "futureagi-py sandbox"
+#: The sandbox's writable folder; a command's folder is given relative to it.
+WORKSPACE = "/workspace"
 
 _CAPS_FIELDS = ("maxActiveSandboxes", "defaultTemplate", "defaultSize", "idleTtlSeconds")
 _EXEC_CAPS = ("defaultTimeoutSeconds", "maxTimeoutSeconds", "maxOutputBytes")
@@ -143,6 +146,23 @@ def _whole_number(value: Any) -> Optional[int]:
     return value if isinstance(value, int) and not isinstance(value, bool) else None
 
 
+def _exec_cwd(cwd: Optional[str]) -> Optional[str]:
+    """A command's folder as the exec API takes it: relative to ``/workspace``, None for ``/workspace``
+    itself (or no folder). The API refuses an absolute folder, so ``/workspace/src`` is sent as ``src``.
+    A folder outside ``/workspace``, or one that leaves it through ``..``, is refused before any request."""
+    if cwd is None:
+        return None
+    joined = cwd if cwd.startswith("/") else f"{WORKSPACE}/{cwd}"
+    full = posixpath.normpath("/" + joined.lstrip("/"))
+    if full == WORKSPACE:
+        return None
+    if full.startswith(WORKSPACE + "/"):
+        return full[len(WORKSPACE) + 1:]
+    raise _refuse("invalid_cwd", f"cwd {cwd!r} is outside {WORKSPACE}: commands run in {WORKSPACE} or a "
+                                 f"folder under it. Give cwd relative to {WORKSPACE} (for example src), or "
+                                 "change folder inside the command (cd /tmp && ...)")
+
+
 class SandboxTools:
     """The sandbox tools, over ``client.sandboxes`` (async). ``created`` holds the ids this object
     created and has not deleted; ``cleanup_failures`` the ``(id, text)`` of each delete that
@@ -248,8 +268,10 @@ class SandboxTools:
         cwd: Optional[str] = None,
         timeout_seconds: Optional[int] = None,
     ) -> Dict[str, Any]:
-        """Run ``command`` to its end; the whole exit record, with each output's last characters."""
+        """Run ``command`` to its end; the whole exit record, with each output's last characters.
+        ``cwd`` is relative to ``/workspace``; an absolute folder under it is sent in that form."""
         target = self._target(sandbox_id)
+        folder = _exec_cwd(cwd)
         try:
             if timeout_seconds is not None:
                 timeout_seconds = max(MIN_TIMEOUT_SECONDS, int(timeout_seconds))
@@ -257,7 +279,7 @@ class SandboxTools:
                 if limit is not None:
                     timeout_seconds = min(timeout_seconds, limit)
             sbx = await self._sandbox(target)
-            result = await sbx.commands.run(command, cwd=cwd, timeout_seconds=timeout_seconds)
+            result = await sbx.commands.run(command, cwd=folder, timeout_seconds=timeout_seconds)
         except FutureAGIError as error:
             raise _wrapped(error, "sandbox_exec", target) from error
         stdout, stdout_clipped = _clip(result.stdout, self.max_output_chars)

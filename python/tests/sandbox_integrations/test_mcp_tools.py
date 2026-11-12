@@ -1,8 +1,10 @@
 """The MCP server's tool bodies (``fi.sandbox_integrations.mcp_server._tools``), framework-free, over the
 frozen-OpenAPI mock: each tool's result shape, the whole exit record, output clipping, the time-limit
-clamp (1 to the workspace's ``caps.exec.maxTimeoutSeconds``), writes that rely on the write creating
-folders, pinned mode, the ``created`` set and cleanup (its deletes sent together), and error texts with
-a next step and no key. Fake credentials only; no ``mcp`` package needed."""
+clamp (1 to the workspace's ``caps.exec.maxTimeoutSeconds``), the command's folder sent relative to
+``/workspace`` (the mock's exec route refuses an absolute one, as the service does), writes that rely
+on the write creating folders, pinned mode, the ``created`` set and cleanup (its deletes sent
+together), and error texts with a next step and no key. Fake credentials only; no ``mcp`` package
+needed."""
 
 from __future__ import annotations
 
@@ -162,6 +164,34 @@ def test_exec_sends_one_request_and_no_env(server):
     assert error.code == "command_incomplete" or "unknown" in str(error)
     assert "not run again" in str(error)
     assert names(server).count("sandboxes.commands.run") == 2  # one more call, one more request
+
+
+@pytest.mark.parametrize("cwd,sent", [
+    ("/workspace/src", "src"),
+    ("/workspace", None),
+    ("/workspace/", None),
+    ("/workspace/a/../b", "b"),
+    ("//workspace/src", "src"),
+    ("src", "src"),
+    ("./src/", "src"),
+    (".", None),
+    ("", None),
+    (None, None),
+])
+def test_exec_sends_cwd_relative_to_the_workspace(server, cwd, sent):
+    server.on("sandboxes.commands.run", exec_body(("exit", EXIT0)))
+    assert call(server, "sandbox_exec", "pwd", SBX, cwd=cwd)["exit_code"] == 0
+    body = server.last.json()
+    assert body.get("cwd") == sent and ("cwd" in body) == (sent is not None)
+
+
+@pytest.mark.parametrize("cwd", ["/tmp", "/", "/workspacex/a", "/workspace/../etc", "..", "../x", "src/../../x"])
+def test_exec_refuses_a_folder_outside_the_workspace_before_any_request(server, cwd):
+    server.on("sandboxes.list", listing())
+    error = refused(server, "sandbox_exec", "ls", SBX, cwd=cwd, timeout_seconds=30)
+    assert error.code == "invalid_cwd" and str(error).startswith("invalid_cwd: ")
+    assert "relative to /workspace" in str(error) and "cd /tmp" in str(error)
+    assert server.seen == []  # not the limit read, the connect or the exec
 
 
 def test_read_file_text_and_base64(server):

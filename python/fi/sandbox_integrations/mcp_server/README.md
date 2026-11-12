@@ -14,8 +14,9 @@ sandboxes it created, within the short time clients give a server to stop.
 pip install "futureagi[sandbox-mcp]"
 ```
 
-The extra installs the official MCP Python SDK (`mcp` 1.30 or later, or 2.2 and later). Without it the command
-prints that install line and exits 3.
+The extra installs the official MCP Python SDK (`mcp` 1.30 or later, or 2.2 and later) on Python 3.10 to 3.13; on
+Python 3.14 or later it installs nothing. Without `mcp` the command prints that install line and exits 3; on Python
+3.14 or later the message says the extra covers Python 3.10 to 3.13 and names the running version.
 
 ## Run it
 
@@ -109,11 +110,16 @@ Call `await tools.cleanup()` when you stop serving it, to delete the sandboxes i
 |---|---|---|---|
 | `sandbox_list` | Lists your sandboxes and the workspace's limits. | none | `{"sandboxes": [{"id", "name", "state", "template", "size", "lastActivityAt"}], "caps": {"maxActiveSandboxes", "templates", "defaultTemplate", "sizes", "defaultSize", "idleTtlSeconds", "exec": {"defaultTimeoutSeconds", "maxTimeoutSeconds", "maxOutputBytes"}}}` |
 | `sandbox_create` | Creates a sandbox. | `name` (1 to 120 bytes), `template`, `size`, `idle_ttl_seconds`; all optional | `{"id", "name", "state", "template", "size"}` |
-| `sandbox_exec` | Runs a shell command and waits for it to end. | `command`, `sandbox_id`, `cwd`, `timeout_seconds` | `{"exit_code", "signal", "timed_out", "cancelled", "truncated", "duration_ms", "error", "exec_id", "stdout", "stderr", "stdout_clipped", "stderr_clipped"}` |
+| `sandbox_exec` | Runs a shell command and waits for it to end. | `command`, `sandbox_id`, `cwd` (relative to `/workspace`), `timeout_seconds` | `{"exit_code", "signal", "timed_out", "cancelled", "truncated", "duration_ms", "error", "exec_id", "stdout", "stderr", "stdout_clipped", "stderr_clipped"}` |
 | `sandbox_read_file` | Reads a file: UTF-8 text as it is, anything else as base64. | `path`, `sandbox_id`, `max_bytes` | `{"path", "encoding", "content", "bytes", "truncated"}` |
 | `sandbox_write_file` | Writes a file; missing folders are created. | `path`, `content`, `sandbox_id`, `encoding` (`utf8` or `base64`) | `{"path", "bytes"}` |
 | `sandbox_list_files` | Lists a folder (default: the top folder of the sandbox's files). | `path`, `sandbox_id` | `{"path", "entries": [{"name", "size", "directory", "mode"}]}` |
 | `sandbox_delete` | Deletes a sandbox and its files for good. A sandbox already gone is not an error. | `sandbox_id` | `{"id", "state"}` |
+
+`sandbox_exec` runs the command in `cwd`, a folder relative to `/workspace` (`src` is `/workspace/src`; left out,
+`/workspace` itself). An absolute folder under `/workspace` is sent in that relative form; a folder outside
+`/workspace` is refused (`invalid_cwd`) before any request, so a command that must run elsewhere changes folder
+itself (`cd /tmp && ...`).
 
 `sandbox_exec` returns the whole exit record: a non-zero exit, a timeout, a signal and a cancel are results, not
 errors. `exit_code` is null after a signal or when the command could not start (`error` says why). `stdout` and
@@ -153,7 +159,7 @@ and is not deleted on exit.
 |---|---|
 | 0 | The client disconnected, or stopped the server with SIGTERM, and the server stopped after the cleanup above. |
 | 2 | A setup problem before serving: no address, no credential, both credentials, or an address the command line does not allow (`code: message` on stderr). |
-| 3 | The `mcp` package is missing (the message is the install line). |
+| 3 | The `mcp` package is missing (the message is the install line; on Python 3.14 or later it says why the extra installed nothing). |
 | 4 | Interrupted (Ctrl-C), after the cleanup above. |
 
 `timeout_seconds` is kept between 1 and the workspace's longest limit (`caps.exec.maxTimeoutSeconds` from

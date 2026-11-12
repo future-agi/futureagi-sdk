@@ -1,5 +1,5 @@
 """Packaging of the sandbox integrations: the extras pyproject declares (each installs its framework at the
-approved range and Python marker, and its import root names that extra), ``sandbox mcp`` living inside the one
+supported range and Python marker, and its import root names that extra), ``sandbox mcp`` living inside the one
 ``sandbox`` command group (no plugin entry of its own), and the rename tool keeping ``mcp`` reserved. Reads
 files only: no framework is imported and nothing is installed."""
 
@@ -50,6 +50,19 @@ def test_extras_declared_with_ranges_and_markers(extra, distribution, version, p
     if pin is not None:
         pinned = pin["version"] if isinstance(pin, dict) else pin
         assert pinned in SpecifierSet(version), f"dev pin {distribution}=={pinned} is outside {version}"
+
+
+def test_missing_mcp_message_names_the_pythons_the_marker_covers():
+    # The message for a missing mcp names the Pythons the extra installs it on; read from the source,
+    # so no framework is imported.
+    source = (PYTHON / "fi" / "sandbox_integrations" / "mcp_server" / "_server.py").read_text()
+    found = [ast.literal_eval(node.value) for node in ast.walk(ast.parse(source))
+             if isinstance(node, ast.Assign)
+             and any(getattr(target, "id", None) == "SUPPORTED_PYTHONS" for target in node.targets)]
+    assert len(found) == 1
+    (low, high), marker = found[0], SpecifierSet(POETRY["dependencies"]["mcp"]["python"])
+    assert f"{low[0]}.{low[1]}" in marker and f"{high[0]}.{high[1]}" in marker
+    assert f"{low[0]}.{low[1] - 1}" not in marker and f"{high[0]}.{high[1] + 1}" not in marker
 
 
 def _sub_commands(tree: ast.AST) -> set[str]:

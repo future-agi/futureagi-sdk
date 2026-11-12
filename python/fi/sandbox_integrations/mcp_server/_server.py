@@ -28,6 +28,23 @@ INSTRUCTIONS = (
     "to), run commands with sandbox_exec, and move files with sandbox_write_file and "
     "sandbox_read_file. A non-zero exit code is a result, not an error."
 )
+#: The line that installs ``mcp``.
+INSTALL_LINE = 'pip install "futureagi[sandbox-mcp]"'
+#: The oldest and newest Python the ``sandbox-mcp`` extra installs ``mcp`` on (its pyproject.toml marker).
+SUPPORTED_PYTHONS = ((3, 10), (3, 13))
+
+
+def missing_mcp(version: Tuple[Any, ...]) -> MissingExtraError:
+    """The error for a missing ``mcp`` on Python ``version``: the install line, and on a Python newer than the
+    extra covers (3.14 or later), that the extra installs nothing there."""
+    low, high = SUPPORTED_PYTHONS
+    span = f"Python {low[0]}.{low[1]} to {high[0]}.{high[1]}"
+    if tuple(version[:2]) > high:
+        message = (f"mcp is not installed: the sandbox-mcp extra installs it on {span} only, and this is "
+                   f"Python {version[0]}.{version[1]}. Use {span}, then run: {INSTALL_LINE}")
+    else:
+        message = f"mcp is not installed. Run: {INSTALL_LINE} (the extra supports {span})"
+    return MissingExtraError(message, extra="sandbox-mcp", module="mcp")
 
 
 def _framework() -> Tuple[Any, Any]:
@@ -45,7 +62,7 @@ def _framework() -> Tuple[Any, Any]:
 
         return FastMCP, LegacyToolError
     except ImportError:
-        raise MissingExtraError(extra="sandbox-mcp", module="mcp") from None
+        raise missing_mcp(tuple(sys.version_info)) from None
 
 
 ServerClass, ToolError = _framework()
@@ -58,6 +75,9 @@ DESCRIPTIONS = {
                       "shows the choices), idle_ttl_seconds (hibernate after that long without activity). "
                       "Returns its id.",
     "sandbox_exec": "Run a shell command in a sandbox and wait for it to end (pipes and && work). "
+                    "cwd is the folder to run in, relative to /workspace (src means /workspace/src; left "
+                    "out, /workspace itself); an absolute path under /workspace also works, and a folder "
+                    "outside it is refused (cd inside the command instead). "
                     "timeout_seconds defaults to the workspace's default and is kept between 1 and the "
                     "workspace's longest limit (sandbox_list shows both). Returns the whole exit record: "
                     "exit_code (None after a signal or when it could not start), signal, timed_out, "

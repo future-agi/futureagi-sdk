@@ -1,8 +1,9 @@
 """FutureAGISandbox.execute over the frozen-OpenAPI mock, with Deep Agents faked: the exit-code rule
 (124 timed out, 128+N signal, 130 cancelled, 1 could not start), stderr tagged, a failure of the
 call itself as a result (None when whether the command finished is unknown), one request per call,
-the time limit read from the workspace's caps, the python3 check, and the import guards (Python
-3.10, a missing Deep Agents). Fake credentials only."""
+the time limit read from the workspace's caps, the python3 check, the working folder sent relative
+to /workspace (the mock's exec route refuses an absolute one, as the service does), and the import
+guards (Python 3.10, a missing Deep Agents). Fake credentials only."""
 
 from __future__ import annotations
 
@@ -15,6 +16,7 @@ import pytest
 
 from fi.errors import MissingExtraError
 from fi.sandbox import ConfigurationError
+from fi.sandbox.errors import ValidationError
 from tests.platform._sandbox_mock import (
     EXEC,
     EXIT0,
@@ -79,8 +81,31 @@ def test_building_reads_the_exec_limit_and_checks_python3(adapter):
     backend = adapter.FutureAGISandbox(sandbox=sbx)
     assert [seen.name for seen in server.seen] == [
         "sandboxes.getInfo", "sandboxes.settings.get", "sandboxes.commands.run"]
-    assert server.last.json() == {"command": "command -v python3", "cwd": "/workspace", "timeoutSeconds": 30}
+    assert server.last.json() == {"command": "command -v python3", "timeoutSeconds": 30}  # no cwd: /workspace
     assert backend.id == SBX and backend.sandbox is sbx and backend.max_timeout == 900
+
+
+def test_the_mock_exec_route_refuses_an_absolute_cwd_as_the_service_does():
+    server = MockServer()
+    sbx = api(server, "sync").connect(SBX)
+    with pytest.raises(ValidationError):
+        sbx.commands.run("pwd", cwd="/workspace")
+    with pytest.raises(ValidationError):
+        sbx.commands.run("pwd", cwd="src/../lib")
+    assert sbx.commands.run("pwd", cwd="src").exit_code == 0
+    assert sbx.commands.run("pwd").exit_code == 0
+
+
+def test_the_python3_check_sends_no_cwd_whatever_the_workdir(adapter):
+    """The check is about the PATH: a workdir the agent has yet to make must not read as no python3."""
+    server = MockServer()
+    server.on("sandboxes.settings.get", settings(server))
+    sbx = api(server, "sync").connect(SBX)
+    backend = adapter.FutureAGISandbox(sandbox=sbx, workdir="/workspace/not/made/yet")
+    assert runs(server)[0].json() == {"command": "command -v python3", "timeoutSeconds": 30}
+    server.seen.clear()
+    backend.execute("pwd")
+    assert runs(server)[0].json()["cwd"] == "not/made/yet"
 
 
 def test_max_timeout_given_skips_the_settings_read(adapter):
@@ -264,15 +289,43 @@ def test_constructor_timeout_is_clamped_too(adapter):
     assert runs(server)[0].json()["timeoutSeconds"] == 900
 
 
-def test_cwd_defaults_to_workspace_and_follows_workdir(adapter):
+def test_default_workdir_is_the_workspace_sent_as_no_cwd(adapter):
     server = MockServer()
     backend, _ = make(adapter, server)
-    backend.execute("pwd")
-    assert runs(server)[0].json() == {"command": "pwd", "cwd": "/workspace", "timeoutSeconds": 900}
+    assert backend.execute("pwd").exit_code == 0
+    assert runs(server)[0].json() == {"command": "pwd", "timeoutSeconds": 900}
+    assert backend.workdir == "/workspace"
+
+
+@pytest.mark.parametrize(("workdir", "folder", "cwd"), [
+    ("/workspace/", "/workspace", None),
+    (".", "/workspace", None),
+    ("", "/workspace", None),
+    ("/workspace/src", "/workspace/src", "src"),
+    ("/workspace/./my proj/", "/workspace/my proj", "my proj"),
+    ("/workspace/a/../b", "/workspace/b", "b"),
+    ("//workspace/src", "/workspace/src", "src"),
+    ("src", "/workspace/src", "src"),
+    ("./src/lib/", "/workspace/src/lib", "src/lib"),
+])
+def test_workdir_is_sent_relative_to_the_workspace(adapter, workdir, folder, cwd):
     server = MockServer()
-    backend, _ = make(adapter, server, workdir="/tmp/job")
-    backend.execute("pwd")
-    assert runs(server)[0].json()["cwd"] == "/tmp/job" and backend.workdir == "/tmp/job"
+    backend, _ = make(adapter, server, workdir=workdir)
+    assert backend.workdir == folder
+    assert backend.execute("pwd").exit_code == 0
+    body = runs(server)[0].json()
+    assert body.get("cwd") == cwd and ("cwd" in body) == (cwd is not None)
+
+
+@pytest.mark.parametrize("workdir", [
+    "/tmp/job", "/", "/workspacex", "/workspace/..", "/workspace/../etc", "..", "../x", "src/../../x", None,
+])
+def test_workdir_outside_the_workspace_is_refused_before_any_request(adapter, workdir):
+    server = MockServer()
+    sbx = api(server, "sync").connect(SBX)
+    with pytest.raises(ValueError, match="workdir"):
+        adapter.FutureAGISandbox(sandbox=sbx, workdir=workdir)
+    assert [seen.name for seen in server.seen] == ["sandboxes.getInfo"]  # the connect only
 
 
 def test_configuration_error_propagates(adapter, monkeypatch):

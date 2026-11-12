@@ -1,8 +1,9 @@
 """``fi.experiments.sandbox.sandbox_task``: one trial over the frozen-OpenAPI mock sandbox server.
 
 Handles are built from the environment (a self-hosted EE on loopback, Bearer), with the mock as the
-transport, and the task closure is called directly with a real ``TaskContext``. The quota wait runs
-on a fake clock. Fake credentials only.
+transport, and the task closure is called directly with a real ``TaskContext``. The mock's exec route
+refuses an absolute ``cwd`` with a 400, as the sandbox service does. The quota wait runs on a fake
+clock. Fake credentials only.
 """
 
 from __future__ import annotations
@@ -15,12 +16,15 @@ import pytest
 
 from fi.experiments._context import TaskContext
 from fi.experiments._log_results import RecordedTrialError
+from fi.experiments.errors import UsageError
 from fi.experiments.sandbox import EVAL_DIR, SandboxEval, sandbox_task
 from fi.experiments.sandbox import _task
 from fi.sandbox import _connection
 from fi.sandbox.errors import CommandIncompleteError, ConfigurationError, ConnectionError, QuotaExceededError
+from fi.sandbox.errors import ValidationError
 from tests.platform._sandbox_mock import EXEC, EXIT0, FAKE_KEY, FAKE_SECRET, FAKE_TOKEN, SBX, MockServer, error, example
 from tests.platform._sandbox_mock import sse, stream_response
+from tests.sandbox_integrations._strict_exec import strict
 
 LOCAL = "http://127.0.0.1:8787"
 ENV = ("OMEGA_BASE_URL", "FI_API_KEY", "FI_SECRET_KEY", "FUTUREAGI_OMEGA_API_KEY", "OMEGA_OS_API_KEY",
@@ -35,8 +39,9 @@ STARTED = ("started", {"execId": EXEC, "sandboxId": SBX})
 @pytest.fixture(name="sandbox_env")
 def sandbox_env_fixture(monkeypatch):
     """A self-hosted EE on loopback (Bearer) with the mock as its transport; settings allow 2 sandboxes
-    and an hour per command; the reward file is missing unless a test answers it."""
-    mock = MockServer()
+    and an hour per command; the reward file is missing unless a test answers it; an absolute cwd gets
+    the service's 400."""
+    mock = strict(MockServer())
     for name in ENV:
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv("OMEGA_BASE_URL", LOCAL)
@@ -153,7 +158,45 @@ def test_agent_env_has_eval_names_and_no_fi_names(sandbox_env):
     assert run["env"] == {"MODEL": "small-model", "EVAL_ROW_FILE": EVAL_DIR + "/row.json", "EVAL_EXAMPLE_ID": "ex-9",
                           "EVAL_TRIAL": "3", "EVAL_RUN_ID": "run-1"}
     assert not any(name.startswith("FI_") for name in run["env"])
-    assert run["cwd"] == "/workspace" and run["timeoutSeconds"] == 900
+    assert "cwd" not in run and run["timeoutSeconds"] == 900  # /workspace itself: no cwd
+
+
+@pytest.mark.parametrize("cwd,sent", [
+    ("/workspace", None),
+    ("/workspace/", None),
+    (".", None),
+    ("/workspace/app", "app"),
+    ("/workspace/a/../b", "b"),
+    ("app/", "app"),
+    ("./app/src", "app/src"),
+])
+def test_agent_command_and_verifier_get_the_folder_relative_to_the_workspace(sandbox_env, cwd, sent):
+    spec = SandboxEval(agent_command="python3 solve.py", verifier="bash test.sh", cwd=cwd)
+    assert spec.command_cwd == sent
+    out = call(sandbox_task(spec))
+    agent, verifier = bodies(sandbox_env, "sandboxes.commands.run")
+    assert agent["command"] == "python3 solve.py" and verifier["command"] == "bash test.sh"
+    for body in (agent, verifier):
+        assert body.get("cwd") == sent and ("cwd" in body) == (sent is not None)
+    assert out["agent"]["shell_exit_code"] == 0 and out["verifier"]["shell_exit_code"] == 0
+    assert out["rewards"] == {"reward": 1.0} and out["deleted"] is True
+
+
+@pytest.mark.parametrize("cwd", ["/tmp", "/", "/workspacex", "/workspace/../etc", "..", "../x", "app/../../x", 7])
+def test_a_folder_outside_the_workspace_is_refused_when_the_spec_is_made(cwd):
+    with pytest.raises(UsageError, match="cwd"):
+        SandboxEval(agent_command="true", cwd=cwd)
+
+
+def test_the_mock_refuses_an_absolute_cwd_as_the_service_does(sandbox_env):
+    async def agent(row, sbx, ctx):
+        with pytest.raises(ValidationError):
+            await sbx.commands.run("pwd", cwd="/workspace")
+        return (await sbx.commands.run("pwd", cwd="app")).exit_code
+
+    out = call(sandbox_task(SandboxEval(agent=agent)))
+    assert out["agent"] == {"result": 0}
+    assert [b.get("cwd") for b in bodies(sandbox_env, "sandboxes.commands.run")] == ["/workspace", "app"]
 
 
 def test_refused_env_name_raises_and_still_deletes(sandbox_env):
@@ -410,11 +453,9 @@ def test_output_has_no_secret_and_no_env_values(sandbox_env):
 
 
 def test_spec_refuses_two_agents_and_bad_timeouts():
-    from fi.experiments.errors import UsageError
-
     for kwargs in ({}, {"agent_command": "a", "agent": lambda r, s, c: None},
-                   {"agent_command": "a", "agent_timeout_s": 0}, {"agent_command": "a", "cwd": "workspace"},
-                   {"agent_command": "a", "name_prefix": ""}):
+                   {"agent_command": "a", "agent_timeout_s": 0}, {"agent_command": "a", "cwd": "/tmp"},
+                   {"agent_command": "a", "reward_path": "reward"}, {"agent_command": "a", "name_prefix": ""}):
         with pytest.raises(UsageError):
             SandboxEval(**kwargs)
     assert SandboxEval(agent_command="a", agent_timeout_s=3600).mode == "command"
