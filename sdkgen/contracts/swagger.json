@@ -39,7 +39,7 @@
       "X-Secret-Key": []
     }
   ],
-  "x-source-sha256": "c06b8610ccba9ffe52b1a428e5f481f8a016cbb8f8f94250583d3ff47da58230",
+  "x-source-sha256": "0d34c29112eb3571cfc0d436d3e113127de1a07eddd112bd7fb3a69154cecbe7",
   "paths": {
     "/accounts/user-info/": {
       "parameters": [],
