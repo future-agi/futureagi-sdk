@@ -146,9 +146,8 @@ print(json.dumps({name: getattr(fi.evals, name) is not None for name in CLOUD}))
     assert result and all(result.values()), result
 
 
-def test_every_shipped_non_evals_module_imports_without_evals_dependencies(tmp_path):
-    # Install base plus all non-evals extras. Evals may also be installed in the
-    # test lane: the subprocess makes its exclusive imports unavailable anyway.
+def _evals_only_import_roots():
+    """The import roots of the evals-only distributions, which the subprocess blocks."""
     evals_only = _evals_only_distributions()
     import_roots = {
         "jinja2": {"jinja2"}, "litellm": {"litellm"}, "nltk": {"nltk"},
@@ -159,6 +158,13 @@ def test_every_shipped_non_evals_module_imports_without_evals_dependencies(tmp_p
     assert evals_only <= import_roots.keys(), "Map any new evals-only distribution's imports"
     blocked_modules = set().union(*(import_roots[name] for name in evals_only))
     assert {"rouge_score", "litellm", "nltk"} <= blocked_modules
+    return blocked_modules
+
+
+def test_every_shipped_non_evals_module_imports_without_evals_dependencies(tmp_path):
+    # Install base plus all non-evals extras. Evals may also be installed in the
+    # test lane: the subprocess makes its exclusive imports unavailable anyway.
+    blocked_modules = _evals_only_import_roots()
     result = _run(tmp_path, r'''
 blocked.update(json.loads(sys.argv[1]))
 import fi
@@ -171,6 +177,9 @@ for path in root.rglob("*.py"):
     relative = path.relative_to(root)
     parts = relative.with_suffix("").parts
     if parts[0] in excluded:
+        continue
+    # No extra can install this integration's dependency; see the note in python/pyproject.toml.
+    if parts[:2] == ("sandbox_integrations", "openai_agents"):
         continue
     # Archive exclusions from pyproject.toml, also applicable to editable installs.
     if relative.parts[0] == "alk" or relative.parts[0] in {"deployments", "deployments.py"}:
@@ -197,6 +206,33 @@ print(json.dumps({"enumerated": sorted(modules), "imported": imported, "failed":
 ''', json.dumps(sorted(blocked_modules)))
     assert result["failed"] == {}, result["failed"]
     assert result["imported"] == result["enumerated"]
+    assert set(result["blocked"]) == blocked_modules
+
+
+def test_openai_agents_sandbox_integration_raises_missing_extra_without_evals_dependencies(tmp_path):
+    # The sweep above skips this package: no extra installs openai-agents 0.24 (it requires
+    # openai>=3, the evals extra pins openai<3), so here its import must be a clear error.
+    blocked_modules = _evals_only_import_roots()
+    result = _run(tmp_path, r'''
+blocked.update(json.loads(sys.argv[1]))
+from fi.errors import MissingExtraError
+try:
+    importlib.import_module("fi.sandbox_integrations.openai_agents")
+except MissingExtraError as exc:
+    error = exc
+else:
+    raise AssertionError("fi.sandbox_integrations.openai_agents imported: agents.sandbox is installed")
+assert isinstance(error.__cause__, ImportError), repr(error.__cause__)
+# The failing import is the Agents SDK itself, not a blocked evals-only module it pulled in.
+assert (error.__cause__.name or "").split(".")[0] == "agents", error.__cause__.name
+assert "fi.sandbox_integrations.openai_agents" not in sys.modules
+# The module that defines the install line loads before the failing import and stays loaded.
+install_line = sys.modules["fi.sandbox_integrations.openai_agents._missing"].INSTALL_LINE
+assert not any(name.split(".")[0] in blocked for name in sys.modules)
+print(json.dumps({"install_hint": error.install_hint, "install_line": install_line,
+                  "blocked": sorted(blocked)}))
+''', json.dumps(sorted(blocked_modules)))
+    assert result["install_line"] and result["install_hint"] == result["install_line"]
     assert set(result["blocked"]) == blocked_modules
 
 

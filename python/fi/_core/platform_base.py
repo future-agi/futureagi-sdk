@@ -7,6 +7,7 @@ never breaks a core namespace. An attempt recorder tracks whether earlier sends 
 
 - ``FI_EXTRA_HEADERS`` / ``extra_headers=`` apply only under ``base_url``, are read on every call,
   never overwrite an existing header, fail before sending if malformed, and are scrubbed from errors.
+  Scope selectors of either mode (:data:`SCOPE_HEADERS`) are dropped, with one stderr notice per name.
 - One idempotency key is minted for all attempts (``fi._core.idempotency``).
 - A 409 ``idempotency_key_in_progress`` waits ``Retry-After`` (else 1 s) and resends the same key,
   up to ``IN_PROGRESS_BUDGET_S``; a ``not_found_means_applied`` 404 succeeds after a possibly-applied attempt.
@@ -59,6 +60,9 @@ from fi.errors import (
 # A namespace interprets decoded data while the request's scrub set is still local.
 # Credentials never become part of public response metadata.
 ResponseMapper = Callable[[Any, list[str], CallMeta], Any]
+
+#: Scope selectors of both credential modes (keys, Bearer), lower case; extra headers never send them.
+SCOPE_HEADERS = frozenset({"x-workspace-id", "x-organization-id", "x-omega-workspace", "x-omega-org"})
 
 
 @dataclass
@@ -166,9 +170,9 @@ class _Base:
             extensions={"fi.retry": retry, "timeout": t.as_dict(), ATTEMPTS_EXTENSION: []},
         )
         # FI_EXTRA_HEADERS / extra_headers=, as on the core namespaces: read now, only under the client's
-        # base_url, and never over a header already set (the SDK's own, a declared per-call one)
+        # base_url, never over a header already set, and never a scope selector (SCOPE_HEADERS; noted once)
         extra = {} if self.shared.extra_headers is None else self.shared.extra_headers.for_url(request.url)
-        for header, value in extra.items():
+        for header, value in (self.shared.extra_headers.without_scope(extra, SCOPE_HEADERS) if extra else {}).items():
             request.headers.setdefault(header, value)
         return Prepared(op, origin, request, key, [*origin.secrets, *_values(extra), *request_secret_values(body, op.secret_fields)])
 

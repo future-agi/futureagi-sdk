@@ -99,13 +99,16 @@ class AsyncFutureAGIClient:
         allow_custom_platform_url: bool | None = None,
         allow_insecure_http: bool | None = None,
         extra_headers: Mapping[str, str] | str | None = None,
+        allow_custom_base_url: bool | None = None,
     ) -> None:
         """``extra_headers=`` adds headers to every request to ``base_url`` and wins over
         ``FI_EXTRA_HEADERS`` for the same name (``fi._extra_headers``: never the SDK's own auth headers,
         never another host). ``allow_insecure_http`` explicitly permits nonloopback HTTP for a
         platform Bearer token (else ``FI_ALLOW_INSECURE_HTTP``); False overrides the environment.
-        Keys-mode HTTP warns about future refusal."""
-        self.base_url = resolve_credentials(api_key, secret_key, base_url).base_url
+        Keys-mode HTTP warns about future refusal. ``allow_custom_base_url`` (constructor-only)
+        lets ``client.sandboxes`` send a self-host token to a host that is not loopback."""
+        resolved = resolve_credentials(api_key, secret_key, base_url)
+        self.base_url = resolved.base_url
         self._options = _ClientOptions(
             api_key,
             secret_key,
@@ -118,6 +121,8 @@ class AsyncFutureAGIClient:
             platform_token,
             allow_custom_platform_url,
             allow_insecure_http=allow_insecure_http,
+            allow_custom_base_url=allow_custom_base_url,
+            base_url_given=resolved.base_url_source != "default",
         )
         self._extra_headers = ExtraHeaders(self.base_url, extra_headers)
         self._management_lock = threading.Lock()
@@ -147,6 +152,7 @@ class AsyncFutureAGIClient:
         )
         from fi.environments import AsyncEnvironments
         self.__dict__.pop("agents", None)
+        self.__dict__.pop("sandboxes", None)
         self.environments = AsyncEnvironments(self)
         self.knowledge_bases = AsyncKnowledgeBasesClient(self.generated_client)
         self.prompts = AsyncPromptsClient(self.generated_client)
@@ -180,6 +186,18 @@ class AsyncFutureAGIClient:
         """Managed agents and runs using this client's platform settings."""
         from fi.agents import AsyncAgents
         return AsyncAgents(self)
+
+    @functools.cached_property
+    def sandboxes(self) -> Any:
+        """Hosted sandboxes on this client's platform origin, credentials and scope (``fi.sandbox``):
+        the generated layer, whose ``create`` / ``connect`` return an ``AsyncSandbox`` handle. There
+        is no default host: without ``base_url`` / ``platform_base_url`` (or ``FI_BASE_URL`` /
+        ``FI_PLATFORM_BASE_URL``) a call is refused before anything is sent."""
+        from fi.sandbox import AsyncSandboxes
+        from fi.sandbox._connection import OriginRule
+        o = self._options
+        rule = OriginRule(allow_custom_base_url=bool(o.allow_custom_base_url), no_base_url=not o.base_url_given)
+        return AsyncSandboxes(self._platform, rule=rule)
 
     @property
     def gateway(self) -> Any:

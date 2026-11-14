@@ -36,6 +36,14 @@
       "import": { "types": "./dist/esm/credentials/index.d.ts", "default": "./dist/esm/credentials/index.js" },
       "require": { "types": "./dist/src/credentials/index.d.ts", "default": "./dist/src/credentials/index.js" }
     },
+    "./sandbox": {
+      "import": { "types": "./dist/esm/sandbox/index.d.ts", "default": "./dist/esm/sandbox/index.js" },
+      "require": { "types": "./dist/src/sandbox/index.d.ts", "default": "./dist/src/sandbox/index.js" }
+    },
+    "./sandbox/ai-sdk": {
+      "import": { "types": "./dist/esm/sandbox-integrations/ai-sdk/index.d.ts", "default": "./dist/esm/sandbox-integrations/ai-sdk/index.js" },
+      "require": { "types": "./dist/src/sandbox-integrations/ai-sdk/index.d.ts", "default": "./dist/src/sandbox-integrations/ai-sdk/index.js" }
+    },
     "./webhooks": {
       "import": { "types": "./dist/esm/webhooks/index.d.ts", "default": "./dist/esm/webhooks/index.js" },
       "require": { "types": "./dist/src/webhooks/index.d.ts", "default": "./dist/src/webhooks/index.js" }
@@ -69,6 +77,8 @@
       "connectors": ["./dist/src/connectors/index.d.ts"],
       "integrations": ["./dist/src/integrations/index.d.ts"],
       "credentials": ["./dist/src/credentials/index.d.ts"],
+      "sandbox": ["./dist/src/sandbox/index.d.ts"],
+      "sandbox/ai-sdk": ["./dist/src/sandbox-integrations/ai-sdk/index.d.ts"],
       "webhooks": ["./dist/src/webhooks/index.d.ts"],
       "gateway": ["./dist/gateway/cjs/index.d.ts"],
       "gateway/testing": ["./dist/gateway/cjs/testing.d.ts"],
@@ -115,8 +125,8 @@
   "homepage": "https://github.com/future-agi/futureagi-sdk#readme",
   "engines": { "node": ">=18.0.0", "pnpm": ">=8.0.0" },
   "packageManager": "pnpm@8.15.0",
-  "peerDependencies": { "react": ">=17.0.0 <20" },
-  "peerDependenciesMeta": { "react": { "optional": true } },
+  "peerDependencies": { "react": ">=17.0.0 <20", "ai": ">=7.0.156 <7.1.0" },
+  "peerDependenciesMeta": { "react": { "optional": true }, "ai": { "optional": true } },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@testing-library/react": "14.3.1",
@@ -125,6 +135,7 @@
     "@types/react": "18.3.12",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
+    "ai": "7.0.156",
     "esbuild": "0.25.5",
     "eslint": "^8.0.0",
     "eslint-config-prettier": "^9.0.0",

@@ -35,8 +35,26 @@ def test_gateway_registration_ships_and_resolves_by_default():
     assert {"LICENSE", "NOTICE", "CHANGELOG.md"} <= set(package["files"])
     assert package["scripts"]["build"].endswith("&& pnpm run build:gateway")
     assert package["scripts"]["build:gateway"] == "node gateway-client/scripts/build.cjs"
-    assert package["peerDependencies"] == {"react": ">=17.0.0 <20"}
-    assert package["peerDependenciesMeta"] == {"react": {"optional": True}}
+    assert package["peerDependencies"] == {"react": ">=17.0.0 <20", "ai": ">=7.0.156 <7.1.0"}
+    assert package["peerDependenciesMeta"] == {"react": {"optional": True}, "ai": {"optional": True}}
+
+
+def test_sandbox_ai_sdk_subpath_is_registered_with_an_optional_ai_peer():
+    package = json.loads((PACKAGE / "package.json").read_text())
+    entry = package["exports"]["./sandbox/ai-sdk"]
+    assert set(entry) == {"import", "require"}
+    for condition, build in (("import", "esm"), ("require", "src")):
+        assert entry[condition] == {
+            "types": f"./dist/{build}/sandbox-integrations/ai-sdk/index.d.ts",
+            "default": f"./dist/{build}/sandbox-integrations/ai-sdk/index.js",
+        }
+    assert package["typesVersions"]["*"]["sandbox/ai-sdk"] == ["./dist/src/sandbox-integrations/ai-sdk/index.d.ts"]
+    assert (PACKAGE / "src" / "sandbox-integrations" / "ai-sdk" / "index.ts").is_file()
+    # the adapter sits outside the platform root src/sandbox, so the platform gates never read it
+    assert not (PACKAGE / "src" / "sandbox" / "ai-sdk").exists()
+    # type checks and tests use one exact ai version; the peer range starts at it
+    assert package["devDependencies"]["ai"] == "7.0.156"
+    assert package["peerDependencies"]["ai"].startswith(">=" + package["devDependencies"]["ai"] + " ")
 
 
 def test_both_webhook_formats_have_declarations():

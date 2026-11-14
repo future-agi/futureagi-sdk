@@ -2,7 +2,8 @@
  * One request from an operation and its arguments (ported from the Omega runtime's `request-build`);
  * the twin of Python's `fi._core.request` and `fi._core.idempotency`. The path from the
  * generated template with every parameter encoded, only the query keys the contract declares, the body
- * with its size limit checked before anything is sent, and the idempotency key.
+ * with its size limit checked before anything is sent, and the idempotency key; and a file response body,
+ * read up to its size limit.
  */
 
 import { v4 as uuidv4 } from "uuid";
@@ -110,6 +111,46 @@ export function buildBody(op: OperationSpec, body: unknown): EncodedBody {
       operation: op.name,
       message: `${op.name}: the request body is ${out.size} bytes; the limit is ${limit} bytes (nothing was sent)`,
     });
+  }
+  return out;
+}
+
+/** A file response body, refused once it is larger than `limit` bytes (default `BODY_LIMITS.bundle`, the upload
+ * limit) with `PayloadTooLargeError` (`local`, code `download_too_large`), nothing kept: a Content-Length over the
+ * limit is refused before the body is read, and a body without one is counted as it arrives. */
+export async function readBytes(response: Response, operation: string, limit: number = BODY_LIMITS.bundle): Promise<Uint8Array> {
+  const tooLarge = (): PayloadTooLargeError =>
+    new PayloadTooLargeError(413, undefined, {
+      local: true,
+      limitBytes: limit,
+      code: "download_too_large",
+      operation,
+      message: `${operation}: the file is larger than ${limit} bytes, the download limit, so nothing was kept; pass maxBytes to raise the limit`,
+    });
+  const announced = Number(response.headers.get("content-length") ?? "");
+  if (Number.isFinite(announced) && announced > limit) {
+    await response.body?.cancel().catch(() => undefined);
+    throw tooLarge();
+  }
+  if (response.body === null) return new Uint8Array(0);
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const chunk = await reader.read();
+    if (chunk.done) break;
+    size += chunk.value.byteLength;
+    if (size > limit) {
+      await reader.cancel().catch(() => undefined);
+      throw tooLarge();
+    }
+    chunks.push(chunk.value);
+  }
+  const out = new Uint8Array(size);
+  let at = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, at);
+    at += chunk.byteLength;
   }
   return out;
 }

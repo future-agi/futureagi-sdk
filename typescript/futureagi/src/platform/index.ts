@@ -32,3 +32,16 @@ export * from "./resources";
 export { UsageOverviewUnavailableError } from "./resources/usage";
 // Response models, also importable on their own from "@future-agi/sdk/platform/models".
 export * as models from "./models";
+// Hosted sandboxes (`client.sandboxes` on FutureAGIClient) and the `Sandbox` handle; the whole module,
+// with its status errors, is "@future-agi/sdk/sandbox".
+export { ExecStream, Sandboxes, type ExecFrame, type SandboxCallOptions, type UploadBody } from "./resources/sandboxes";
+export {
+  CommandFailedError,
+  CommandIncompleteError,
+  CommandResult,
+  Sandbox,
+  SandboxConnectionError,
+  SandboxError,
+  type CreateSandboxOptions,
+  type SandboxInfo,
+} from "../sandbox";

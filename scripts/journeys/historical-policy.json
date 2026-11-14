@@ -23,7 +23,7 @@
     "agents": {"py": "OFF", "ts": "OFF"},
     "runs": {"py": "OFF", "ts": "OFF"},
     "agent_code": {"py": "OFF", "ts": "OFF"},
-    "sandboxes": {"py": "OFF", "ts": "OFF"},
+    "sandboxes": {"py": "ON", "ts": "ON"},
     "deployments": {"py": "OFF", "ts": "OFF"},
     "connectors": {"py": "OFF", "ts": "OFF"},
     "webhooks": {"py": "ON", "ts": "ON"}

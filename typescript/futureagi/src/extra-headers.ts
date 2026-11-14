@@ -12,6 +12,10 @@
  *   value never starts a second header line. A value that is only an auth scheme (`Bearer`) is
  *   refused.
  * - `X-Api-Key`, `X-Secret-Key` and `Authorization` are refused: the SDK sends its own.
+ * - The workspace and organization scope headers of both credential modes (`X-Workspace-Id`,
+ *   `X-Organization-Id`, `x-omega-workspace`, `x-omega-org`, any letter case) are refused too: the SDK
+ *   sends the scope from `FI_WORKSPACE_ID` / `FI_ORGANIZATION_ID` (or `workspaceId` / `organizationId`)
+ *   under the names of the mode in use, never the other mode's.
  * - `extraHeaders` (a record, or a string in the same format) is added to the setting and wins
  *   over it for the same name; a header set explicitly on the request wins over both.
  * - Sent only to URLs under the client's base URL (same scheme, host and port; a path under the
@@ -25,6 +29,7 @@
 export const EXTRA_HEADERS_ENV = "FI_EXTRA_HEADERS";
 const ARGUMENT = "extraHeaders";
 const RESERVED = new Set(["x-api-key", "x-secret-key", "authorization"]);
+const SCOPE = new Set(["x-workspace-id", "x-organization-id", "x-omega-workspace", "x-omega-org"]);
 const TOKEN = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
 const VALUE = /^[\x20-\x7e]+$/;
 // eslint-disable-next-line no-control-regex
@@ -57,6 +62,12 @@ function check(name: unknown, value: unknown, where: string, padded: boolean): [
   if (RESERVED.has(header.toLowerCase())) {
     throw new ExtraHeadersError(
       `${where}: ${header} cannot be set here; the SDK sends its own X-Api-Key, X-Secret-Key and Authorization`,
+    );
+  }
+  if (SCOPE.has(header.toLowerCase())) {
+    throw new ExtraHeadersError(
+      `${where}: ${header} cannot be set here; the SDK sends the workspace and organization scope itself ` +
+        "(set FI_WORKSPACE_ID and FI_ORGANIZATION_ID, or pass workspaceId and organizationId)",
     );
   }
   if (typeof value !== "string") throw new ExtraHeadersError(`${where} (${header}): the value must be a string`);

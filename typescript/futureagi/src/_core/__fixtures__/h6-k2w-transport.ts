@@ -72,7 +72,13 @@ export function isolate(): () => void {
 export async function invoke(c: FutureAGIClient, action: Action): Promise<unknown> {
   if (action === 'console') return c.environments.list();
   if (action === 'core') return c.prompts.list();
-  throw new Error(NOT_APPLICABLE_AT_FOLD);
+  if (action === 'json') return c.sandboxes.list();
+  if (action === 'create') return c.sandboxes.create({ body: { name: SUBMITTED } });
+  if (action === 'upload') return c.sandboxes.files.upload(SID, 'private-path', { body: SUBMITTED });
+  if (action === 'download') return c.sandboxes.files.download(SID, 'private-path');
+  const frames: unknown[] = [];
+  for await (const frame of await c.sandboxes.commands.run(SID, { body: { command: SUBMITTED } })) frames.push(frame);
+  return frames;
 }
 
 /** Never throw a test sentinel into the SDK catch branch. Success is asserted by the caller. */
@@ -112,7 +118,8 @@ export function foldEach<T>(rows: readonly T[], sandbox: (row: T) => boolean) {
   return (name: string, body: (row: T) => void | Promise<unknown>): void => {
     for (const row of rows) {
       const skipped = sandbox(row);
-      const title = `${name} ${JSON.stringify(row)}${skipped ? ` [${NOT_APPLICABLE_AT_FOLD}]` : ''}`;
+      // The fold marker names a skipped row only while the sandbox surface is absent.
+      const title = `${name} ${JSON.stringify(row)}${skipped && SANDBOX_ABSENT ? ` [${NOT_APPLICABLE_AT_FOLD}]` : ''}`;
       (skipped && SANDBOX_ABSENT ? test.skip : test)(title, async () => { await body(row); });
     }
   };

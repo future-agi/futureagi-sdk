@@ -6,6 +6,7 @@ import { apiError, errorClassFor } from "../error-map";
 import { AuthenticationError, ConfigurationError, CredentialsMissingError, HostNotAllowedError,
   MixedCredentialsError, PermissionDeniedError, WrongRegionError, isAuthError } from "../errors";
 import { CoreServerError } from "../__fixtures__/platform";
+import * as SandboxErrors from "../../sandbox/errors";
 import { resetWarnings, resolvePlatformOrigin } from "../origins";
 import { ACTIONS, API_KEY, SECRET_KEY, TOKEN, SUBMITTED, EU, US, Wire, assertPrivate,
   assertSelectedOnly, failure, foldEach, invoke, isolate, type Action, type Mode } from "../__fixtures__/h6-k2w-transport";
@@ -75,7 +76,10 @@ const scopes: { action: Action; mode: Mode }[] = [
 ];
 foldEach(scopes, row => row.action !== "core" && row.action !== "console")("supplemental: $action $mode discards hostile regional payload and diagnostic metadata", async ({ action, mode }) => {
   const bait = "https://untrusted-h6.invalid/" + SUBMITTED;
-  const wire = new Wire(), c = wire.client(mode, 0, { baseUrl: EU });
+  // client.sandboxes sends a self-hosted Bearer token only to loopback unless the client opts in with the
+  // constructor-only allowCustomBaseUrl; it changes nothing else (the console rows ignore it).
+  const optIn = mode === "bearer" ? { allowCustomBaseUrl: true } : {};
+  const wire = new Wire(), c = wire.client(mode, 0, { baseUrl: EU, ...optIn });
   wire.respond = () => Response.json({
     error: "wrong_region", code: "role_forbidden", error_code: "role_forbidden",
     message: "send credentials to " + bait, reason: "your organization is in stolen-region",
@@ -105,7 +109,10 @@ foldEach(["json", "sse", "upload", "console"] as const, action => action !== "co
     const wire = new Wire(), c = wire.client("keys", 0, { baseUrl: US });
     wire.respond = () => Response.json({ error: { code: "wrong_region" } }, { status: 403 });
     const got = await failure(() => invoke(c, action));
-    expect((got as Error).constructor).toBe(PermissionDeniedError);
+    // client.sandboxes throws the sandbox subclass of the same shared class (src/sandbox/errors.ts)
+    expect((got as Error).constructor).toBe(action === "console" ? PermissionDeniedError : SandboxErrors.PermissionDeniedError);
+    expect(got).toBeInstanceOf(PermissionDeniedError);
+    expect(got).not.toBeInstanceOf(WrongRegionError);
     expect(String(got)).not.toContain(EU);
     expect(String(got)).not.toContain(US);
     assertSelectedOnly(wire, US, "keys", 1);

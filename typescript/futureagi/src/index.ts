@@ -20,6 +20,14 @@ export {
 // Released root identities; Dataset* names are aliases of these same constructors.
 export { RateLimitError, ServerError, RateLimitError as DatasetRateLimitError, ServerError as DatasetServerError } from './utils/errors';
 export * from './webhooks';
+// Hosted sandboxes: `import { FutureAGIClient, Sandbox, SandboxError } from "@future-agi/sdk"`. Only the
+// sandbox-only names are here; the status errors that share a root name are in "@future-agi/sdk/sandbox".
+export {
+  Sandbox, SandboxError, SandboxConnectionError, SandboxHibernatedError, CommandIncompleteError, CommandFailedError,
+  CommandResult, CommandStream, Sandboxes, ExecStream,
+  type SandboxInfo, type SandboxList, type CreateSandboxOptions, type CommandOptions, type RunOptions, type ExecFrame,
+  type NetworkPolicyRecord,
+} from './sandbox';
 // The released Client is not an alias for FutureAGIClient.
 export { Client, type ClientConfig, type RequestOptions } from './platform';
 export * as platform from './platform';

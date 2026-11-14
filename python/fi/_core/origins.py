@@ -23,9 +23,11 @@ it comes from the **same explicit source** as the keys (both arguments, both the
 both the saved login), or when it is HTTPS in the ``futureagi.com`` zone or HTTP on loopback.
 Anything else raises :class:`~fi.errors.HostNotAllowedError`, unless
 ``allow_custom_platform_url=True`` or ``FI_ALLOW_CUSTOM_PLATFORM_URL=1`` is set, which prints one
-stderr warning per origin. Bearer mode does not use the keys' provenance exemption, but
-nonloopback HTTP requires ``allow_insecure_http=True`` / ``FI_ALLOW_INSECURE_HTTP=1`` and warns
-once per canonical origin. Keys-mode HTTP remains compatible and warns before transport.
+stderr warning per origin naming the one that allowed it (the argument wins over the variable; a
+caller such as the command line names its own flag with :func:`keys_notice_cause`). Bearer mode
+does not use the keys' provenance exemption, but nonloopback HTTP requires
+``allow_insecure_http=True`` / ``FI_ALLOW_INSECURE_HTTP=1`` and warns once per canonical origin.
+Keys-mode HTTP remains compatible and warns before transport.
 A saved login's keys are never sent to an origin from another source (the guard, plus the shared
 binding of the login to its base URL).
 """
@@ -35,8 +37,10 @@ from __future__ import annotations
 import os
 import re
 import sys
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass, field
-from typing import Mapping, Optional
+from typing import Iterator, Mapping, Optional
 
 import httpx
 
@@ -53,6 +57,8 @@ FUTURE_AGI_ZONE = "futureagi.com"
 LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "localhost"})
 _EXPLICIT_SOURCES = frozenset({"argument", "env", "login"})
 _warned: set[str] = set()
+#: What the key-pair notice says let the keys leave the zone, when its caller does not say.
+_cause: ContextVar[str] = ContextVar("fi_keys_notice_cause", default=f"{ALLOW_CUSTOM_ENV} is set")
 # Raw-string rules, the same in TypeScript's origins.ts (tests/fixtures/platform-origins): httpx and the
 # WHATWG URL parser disagree on these inputs, so neither parser decides them.
 _SCHEME_AUTHORITY = re.compile(r"^[A-Za-z][A-Za-z0-9+.\-]*://([^/?#]*)")
@@ -178,7 +184,21 @@ def _allow_flag(allow: Optional[bool], environ: Mapping[str, str]) -> bool:
     return environ.get(ALLOW_CUSTOM_ENV, "").strip().lower() in ("1", "true", "yes")
 
 
-def _warn_once(url: httpx.URL) -> None:
+@contextmanager
+def keys_notice_cause(cause: str) -> Iterator[None]:
+    """Inside this block, a key-pair notice printed without a cause names ``cause``: the command
+    line wraps its connection in it when ``--allow-custom-base-url`` is what sends the keys, so
+    the notice names the flag rather than ``FI_ALLOW_CUSTOM_PLATFORM_URL``."""
+    token = _cause.set(cause)
+    try:
+        yield
+    finally:
+        _cause.reset(token)
+
+
+def _warn_once(url: httpx.URL, cause: Optional[str] = None) -> None:
+    """The one notice per origin that the key pair goes outside the zone, naming what allowed it:
+    ``cause``, else the block's :func:`keys_notice_cause`, else the variable."""
     if is_insecure_http(url):
         # One cleartext warning also covers the custom-host exemption, without
         # duplicating it when the request reaches the shared platform executor.
@@ -191,7 +211,7 @@ def _warn_once(url: httpx.URL) -> None:
     _warned.add(key)
     sys.stderr.write(
         f"futureagi: sending your keys to {display_host(url)}, outside the Future AGI zone, because "
-        f"allow_custom_platform_url / {ALLOW_CUSTOM_ENV} is set.\n"
+        f"{cause or _cause.get()}.\n"
     )
 
 
@@ -236,7 +256,7 @@ def resolve_platform(
                 code="host_not_allowed",
             )
         custom = True
-        _warn_once(url)
+        _warn_once(url, None if allow_custom_platform_url is None else "allow_custom_platform_url=True was passed")
     check_http_security(url, "keys")
     headers = {"X-Api-Key": str(keys.api_key), "X-Secret-Key": str(keys.secret_key)}
     if keys.workspace_id:

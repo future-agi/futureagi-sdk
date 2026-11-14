@@ -7,7 +7,12 @@ import { envelopeAdapter, payloads } from "../__fixtures__/contract-payloads";
 
 const data = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../../../../tests/fixtures/contracts/operations.json"), "utf8"));
 const eeResourceError = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../../../../tests/fixtures/server-contracts/console-404.json"), "utf8")).ee[0].body;
-const rows: Case[] = data.operations.filter((row: Case) => data.public_cases.ts.includes(row.id) || row.public_absence);
+/** Sandbox rows are checked by their own oracle (src/platform/__tests__/sandboxes.test.ts and
+ * sandboxes-handle.test.ts, against the same scoped spec), as Python's own_oracle does: the contract names the
+ * sandbox error classes, forbids retrying the PUT/DELETE writes this oracle would retry, exec yields typed
+ * OmegaExecFrame records, and create/restore return a Sandbox handle. */
+const ownOracle = (row: Case): boolean => row.adapter === "platform" && row.namespace === "sandboxes";
+const rows: Case[] = data.operations.filter((row: Case) => (data.public_cases.ts.includes(row.id) || row.public_absence) && !ownOracle(row));
 
 describe.each(rows)("operation contract $id", (row) => {
   test("method, path, idempotency, retry policy, response and stream shape", async () => {
@@ -56,8 +61,7 @@ describe.each(rows)("operation contract $id", (row) => {
     const answers: Array<[number, string | undefined, string]> = Object.entries(data.status_classes).map(([s, cls]) => [Number(s), undefined, cls as string]);
     for (const [code, status] of Object.entries(data.fa_codes)) answers.push([Number(status), code, data.status_classes[String(status)]]);
     answers.push([404, "product_not_admitted", "ProductNotAvailableError"], [422, "idempotency_key_reused", "IdempotencyKeyReusedError"], [409, "idempotency_key_in_progress", "IdempotencyKeyInProgressError"]);
-    for (const [status, code, expected] of answers) {
-      const cls = status === 409 && (code === undefined || code === "conflict") && row.adapter === "platform" && row.namespace === "sandboxes" ? "SandboxStateError" : expected;
+    for (const [status, code, cls] of answers) {
       const subject = runtime(row, (request) => {
         // This oracle covers resource 404s, not the separately tested unserved Console origin.
         const body = status === 404 && code === undefined && new URL(request.url).pathname.startsWith("/omega/api/workspace/")

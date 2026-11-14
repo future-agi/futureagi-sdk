@@ -92,7 +92,7 @@ describe("extra headers on platform calls", () => {
     const script = new Script([json(200, {})]);
     const c = client(script, {
       workspaceId: "ws-own",
-      extraHeaders: { "x-workspace-id": "ws-extra", Accept: "text/plain", "X-Team": "argument-team" },
+      extraHeaders: { Accept: "text/plain", "X-Team": "argument-team" },
     });
     await c._platform.call("team.get", {}, { headers: { "X-Team": "caller-team" } });
     await c._platform.call("team.get");
@@ -103,6 +103,27 @@ describe("extra headers on platform calls", () => {
     expect(declared!.get("x-team")).toBe("caller-team");
     expect(plain!.get("x-team")).toBe("argument-team");
   });
+
+  it.each(["x-workspace-id", "X-Organization-Id", "X-OMEGA-WORKSPACE", "x-omega-org"])(
+    "a scope header (%s) is refused in extraHeaders and FI_EXTRA_HEADERS, before any request",
+    async (name) => {
+      expect(() => client(new Script([json(200, {})]), { extraHeaders: { [name]: "scope-extra-value" } })).toThrow(ExtraHeadersError);
+      process.env[EXTRA_HEADERS_ENV] = `${name}=scope-extra-value`;
+      const script = new Script([json(200, {})]);
+      const c = client(script, { workspaceId: "ws-own" });
+      let error: unknown;
+      try {
+        await c._platform.call(CAPABILITIES);
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeInstanceOf(ExtraHeadersError);
+      expect(String((error as Error).message)).toMatch(/cannot be set here/u);
+      expect(String((error as Error).message)).toMatch(/FI_WORKSPACE_ID/u);
+      expect(String((error as Error).message)).not.toContain("scope-extra-value");
+      expect(script.requests).toHaveLength(0);
+    },
+  );
 
   it.each<[string, string | undefined, boolean]>([
     [BASE, "http://platform.other.test/omega/api", false],

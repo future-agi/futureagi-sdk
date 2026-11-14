@@ -650,6 +650,155 @@ export type OmegaRunEventFrame = ({
 } & OmegaRunEventDoneFrame);
 
 /**
+ * OmegaExecStarted
+ */
+export type OmegaExecStarted = {
+    /**
+     * Pass to commands.cancel to stop it.
+     */
+    execId: string;
+    sandboxId: string;
+};
+
+/**
+ * OmegaExecStartedFrame
+ *
+ * The command started.
+ */
+export type OmegaExecStartedFrame = {
+    event: 'started';
+    /**
+     * The SSE `id:` sequence number (starting at 1 for each stream). The stream is not resumable; a reconnect does not replay events and starts a new command.
+     */
+    id: string;
+    data: OmegaExecStarted;
+};
+
+/**
+ * OmegaExecStdout
+ */
+export type OmegaExecStdout = {
+    /**
+     * Output text as the command wrote it (UTF-8). Concatenate in order.
+     */
+    data: string;
+};
+
+/**
+ * OmegaExecStdoutFrame
+ *
+ * Standard output.
+ */
+export type OmegaExecStdoutFrame = {
+    event: 'stdout';
+    /**
+     * The SSE `id:` sequence number (starting at 1 for each stream). The stream is not resumable; a reconnect does not replay events and starts a new command.
+     */
+    id: string;
+    data: OmegaExecStdout;
+};
+
+/**
+ * OmegaExecStderr
+ */
+export type OmegaExecStderr = {
+    /**
+     * Output text as the command wrote it (UTF-8). Concatenate in order.
+     */
+    data: string;
+};
+
+/**
+ * OmegaExecStderrFrame
+ *
+ * Standard error.
+ */
+export type OmegaExecStderrFrame = {
+    event: 'stderr';
+    /**
+     * The SSE `id:` sequence number (starting at 1 for each stream). The stream is not resumable; a reconnect does not replay events and starts a new command.
+     */
+    id: string;
+    data: OmegaExecStderr;
+};
+
+/**
+ * OmegaExecExit
+ */
+export type OmegaExecExit = {
+    /**
+     * null when the process ended by a signal or never started.
+     */
+    exitCode: number | null;
+    signal?: string;
+    timedOut: boolean;
+    cancelled: boolean;
+    /**
+     * Output beyond the server's cap was dropped.
+     */
+    truncated: boolean;
+    durationMs: number;
+    stdoutBytes: number;
+    stderrBytes: number;
+    /**
+     * Why the command could not run (a spawn failure).
+     */
+    error?: string;
+};
+
+/**
+ * OmegaExecExitFrame
+ *
+ * The command ended. Always the last frame of a stream that started.
+ */
+export type OmegaExecExitFrame = {
+    event: 'exit';
+    /**
+     * The SSE `id:` sequence number (starting at 1 for each stream). The stream is not resumable; a reconnect does not replay events and starts a new command.
+     */
+    id: string;
+    data: OmegaExecExit;
+};
+
+/**
+ * OmegaExecError
+ */
+export type OmegaExecError = {
+    message: string;
+};
+
+/**
+ * OmegaExecErrorFrame
+ *
+ * The server failed after the command started; the stream ends.
+ */
+export type OmegaExecErrorFrame = {
+    event: 'error';
+    /**
+     * The SSE `id:` sequence number (starting at 1 for each stream). The stream is not resumable; a reconnect does not replay events and starts a new command.
+     */
+    id: string;
+    data: OmegaExecError;
+};
+
+/**
+ * OmegaExecFrame
+ *
+ * One frame of a command's output stream. `started` comes first, then any number of `stdout`/`stderr`, then exactly one `exit` (or `error` if the server failed after starting). Not resumable: the stream is the command, and closing it cancels the command.
+ */
+export type OmegaExecFrame = ({
+    event: 'started';
+} & OmegaExecStartedFrame) | ({
+    event: 'stdout';
+} & OmegaExecStdoutFrame) | ({
+    event: 'stderr';
+} & OmegaExecStderrFrame) | ({
+    event: 'exit';
+} & OmegaExecExitFrame) | ({
+    event: 'error';
+} & OmegaExecErrorFrame);
+
+/**
  * OmegaDeploymentLogLine
  */
 export type OmegaDeploymentLogLine = {
@@ -751,9 +900,9 @@ export type GetWorkspaceCapabilitiesResponse = {
             enabled: boolean;
         };
         /**
-         * The hide switches the release declared for this server (OMEGA_RELEASED_PARTS). usage_spend: Usage shows amounts. unchecked_mark: an answer whose independent check did not run (abstained, not recorded, handed to an outside grader, pending) is marked Unverified with the reason; otherwise a mark shows only where the answer's check ran or the run has a defect (cut short, failed, stopped, check unreadable). Absent means every switch off.
+         * The hide switches the release declared for this server (OMEGA_RELEASED_PARTS). usage_spend: Usage shows amounts. unchecked_mark: an answer whose independent check did not run (abstained, not recorded, handed to an outside grader, pending) is marked Unverified with the reason; otherwise a mark shows only where the answer's check ran or the run has a defect (cut short, failed, stopped, check unreadable). learning_lessons is reported exactly when its release is declared and its lesson governance backend/routes are mounted. Other learning switches and server-only learning_capture are not advertised. Absent means every switch off.
          */
-        releasedParts?: Array<'usage_spend' | 'unchecked_mark' | 'agent_ownership' | 'console_otlp' | 'console_emergency_stop' | 'console_signed_triggers' | 'console_programmatic_runs'>;
+        releasedParts?: Array<'usage_spend' | 'unchecked_mark' | 'agent_ownership' | 'console_otlp' | 'console_emergency_stop' | 'console_signed_triggers' | 'console_programmatic_runs' | 'browser_takeover' | 'browser_takeover_supervisor_attach' | 'learning_lessons'>;
     };
     generatedAt: string;
     /**
@@ -2941,6 +3090,10 @@ export type ListWorkforceResponse = {
         status: 'idle' | 'working' | 'paused' | 'needs_attention' | 'offline';
         reason?: 'paused_by_operator' | 'hibernated_by_runtime' | 'awaiting_approval' | 'process_failed' | 'process_killed' | 'work_stalled' | 'last_task_failed' | 'never_started' | 'previously_stopped';
         currentWork: string | null;
+        /**
+         * Whether this agent has a task that is queued, running or waiting for approval, from any caller. No task details are included.
+         */
+        hasActiveWork: boolean;
         workMode: 'on_demand' | 'always_on';
         updatedAt: string;
         capabilities: {
@@ -3155,6 +3308,10 @@ export type CreateWorkforceAgentResponse = {
         status: 'idle' | 'working' | 'paused' | 'needs_attention' | 'offline';
         reason?: 'paused_by_operator' | 'hibernated_by_runtime' | 'awaiting_approval' | 'process_failed' | 'process_killed' | 'work_stalled' | 'last_task_failed' | 'never_started' | 'previously_stopped';
         currentWork: string | null;
+        /**
+         * Whether this agent has a task that is queued, running or waiting for approval, from any caller. No task details are included.
+         */
+        hasActiveWork: boolean;
         workMode: 'on_demand' | 'always_on';
         updatedAt: string;
         capabilities: {
@@ -3269,6 +3426,10 @@ export type GetWorkforceAgentResponse = {
         status: 'idle' | 'working' | 'paused' | 'needs_attention' | 'offline';
         reason?: 'paused_by_operator' | 'hibernated_by_runtime' | 'awaiting_approval' | 'process_failed' | 'process_killed' | 'work_stalled' | 'last_task_failed' | 'never_started' | 'previously_stopped';
         currentWork: string | null;
+        /**
+         * Whether this agent has a task that is queued, running or waiting for approval, from any caller. No task details are included.
+         */
+        hasActiveWork: boolean;
         workMode: 'on_demand' | 'always_on';
         updatedAt: string;
         capabilities: {
@@ -3452,6 +3613,10 @@ export type UpdateWorkforceAgentResponse = {
         status: 'idle' | 'working' | 'paused' | 'needs_attention' | 'offline';
         reason?: 'paused_by_operator' | 'hibernated_by_runtime' | 'awaiting_approval' | 'process_failed' | 'process_killed' | 'work_stalled' | 'last_task_failed' | 'never_started' | 'previously_stopped';
         currentWork: string | null;
+        /**
+         * Whether this agent has a task that is queued, running or waiting for approval, from any caller. No task details are included.
+         */
+        hasActiveWork: boolean;
         workMode: 'on_demand' | 'always_on';
         updatedAt: string;
         capabilities: {
@@ -3594,6 +3759,10 @@ export type ListWorkforceAgentRevisionsResponse = {
         status: 'idle' | 'working' | 'paused' | 'needs_attention' | 'offline';
         reason?: 'paused_by_operator' | 'hibernated_by_runtime' | 'awaiting_approval' | 'process_failed' | 'process_killed' | 'work_stalled' | 'last_task_failed' | 'never_started' | 'previously_stopped';
         currentWork: string | null;
+        /**
+         * Whether this agent has a task that is queued, running or waiting for approval, from any caller. No task details are included.
+         */
+        hasActiveWork: boolean;
         workMode: 'on_demand' | 'always_on';
         updatedAt: string;
         capabilities: {
@@ -3744,6 +3913,10 @@ export type RollbackWorkforceAgentRevisionResponse = {
         status: 'idle' | 'working' | 'paused' | 'needs_attention' | 'offline';
         reason?: 'paused_by_operator' | 'hibernated_by_runtime' | 'awaiting_approval' | 'process_failed' | 'process_killed' | 'work_stalled' | 'last_task_failed' | 'never_started' | 'previously_stopped';
         currentWork: string | null;
+        /**
+         * Whether this agent has a task that is queued, running or waiting for approval, from any caller. No task details are included.
+         */
+        hasActiveWork: boolean;
         workMode: 'on_demand' | 'always_on';
         updatedAt: string;
         capabilities: {
@@ -3858,6 +4031,10 @@ export type ListWorkforceAgentDeploymentsResponse = {
         status: 'idle' | 'working' | 'paused' | 'needs_attention' | 'offline';
         reason?: 'paused_by_operator' | 'hibernated_by_runtime' | 'awaiting_approval' | 'process_failed' | 'process_killed' | 'work_stalled' | 'last_task_failed' | 'never_started' | 'previously_stopped';
         currentWork: string | null;
+        /**
+         * Whether this agent has a task that is queued, running or waiting for approval, from any caller. No task details are included.
+         */
+        hasActiveWork: boolean;
         workMode: 'on_demand' | 'always_on';
         updatedAt: string;
         capabilities: {
@@ -4010,6 +4187,10 @@ export type RollbackWorkforceAgentDeploymentResponse = {
         status: 'idle' | 'working' | 'paused' | 'needs_attention' | 'offline';
         reason?: 'paused_by_operator' | 'hibernated_by_runtime' | 'awaiting_approval' | 'process_failed' | 'process_killed' | 'work_stalled' | 'last_task_failed' | 'never_started' | 'previously_stopped';
         currentWork: string | null;
+        /**
+         * Whether this agent has a task that is queued, running or waiting for approval, from any caller. No task details are included.
+         */
+        hasActiveWork: boolean;
         workMode: 'on_demand' | 'always_on';
         updatedAt: string;
         capabilities: {
@@ -5265,6 +5446,1380 @@ export type RunWorkspaceScheduleResponse2 = {
     /**
      * Unique id for this HTTP exchange.
      */
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * ListWorkspaceSandboxesResponse
+ */
+export type ListWorkspaceSandboxesResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    sandboxes: Array<{
+        id: string;
+        name: string;
+        origin: 'created' | 'restored' | 'agent_run';
+        state: 'active' | 'hibernated' | 'recovery_required' | 'destroyed';
+        createdAt: string;
+        updatedAt: string;
+        lastActivityAt: string;
+        hibernatesAt?: string;
+        image: string | null;
+        imageId?: string;
+        template?: string;
+        size?: 'small' | 'medium' | 'large' | 'xl';
+        limits: {
+            cpus: number;
+            memoryMb: number;
+            pidsLimit: number;
+        } | null;
+        network: 'none' | 'full' | 'host' | null;
+        idleTtlSeconds: number | null;
+        environmentId?: string;
+        restoredFrom?: {
+            sandboxId: string;
+            snapshotId: string;
+        };
+        container?: {
+            id: string;
+            name: string;
+            startedAt: string;
+        };
+        generation: number;
+        meter: {
+            execCount: number;
+            lastExecAt?: string;
+        };
+        readOnly: boolean;
+        usedBy: Array<{
+            runId: string;
+            taskId: string;
+            agentId?: string;
+            title?: string;
+        }>;
+        provider: {
+            kind: 'container';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: {
+                image: string;
+                network: 'none' | 'bridge' | 'host';
+                memory: string;
+                cpus: string;
+                pidsLimit: number;
+                readOnlyRootfs: boolean;
+                capDrop: 'all' | 'none';
+                noNewPrivileges: boolean;
+                workspaceMount: string;
+            } | null;
+        } | {
+            kind: 'local_process';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: null;
+        };
+    }>;
+    caps: {
+        defaultImage: string | null;
+        images: Array<string>;
+        limits: {
+            default: {
+                cpus: number;
+                memoryMb: number;
+                pidsLimit: number;
+            };
+            min: {
+                cpus: number;
+                memoryMb: number;
+                pidsLimit: number;
+            };
+            max: {
+                cpus: number;
+                memoryMb: number;
+                pidsLimit: number;
+            };
+        };
+        sizes: Array<{
+            id: 'small' | 'medium' | 'large' | 'xl';
+            label: string;
+            cpus: number;
+            memoryMb: number;
+            pidsLimit: number;
+            goodFor: string;
+            available: boolean;
+            reason?: string;
+            refusedBy?: 'ceiling' | 'host' | 'capacity' | 'runtime' | 'operator' | 'workspace';
+        }>;
+        defaultSize: 'small' | 'medium' | 'large' | 'xl' | null;
+        customLimits: boolean;
+        templates: Array<{
+            id: string;
+            name: string;
+            description: string;
+            contents: Array<string>;
+            sizeHint: 'small' | 'medium' | 'large' | 'xl';
+            minSize: 'small' | 'medium' | 'large' | 'xl';
+            image: string;
+            imageId: string;
+            available: boolean;
+            reason?: string;
+            refusedBy?: 'host' | 'operator' | 'workspace' | 'size';
+            scan?: {
+                scanner: string;
+                critical: number;
+                high: number;
+                fixableHighOrCritical: number;
+                scannedAt?: string;
+            };
+        }>;
+        defaultTemplate: string | null;
+        networkModes: Array<'none' | 'full'>;
+        defaultNetwork: 'none' | 'full';
+        networkUnavailableReason: string | null;
+        networkUnavailableCode: 'egress_firewall_missing' | 'runsc_required' | 'hosted_network_off' | null;
+        egressAllowList: {
+            supported: false;
+            reason: string;
+        };
+        idleTtlSeconds: {
+            default: number;
+            min: number;
+            max: number;
+        };
+        exec: {
+            defaultTimeoutSeconds: number;
+            maxTimeoutSeconds: number;
+            maxOutputBytes: number;
+        };
+        files: {
+            maxReadBytes: number;
+            maxWriteBytes: number;
+        };
+        maxActiveSandboxes: number;
+        settings: {
+            canEdit: boolean;
+        };
+        createRefusal: {
+            field: 'size' | 'template';
+            reason: string;
+        } | null;
+    };
+    provider: {
+        kind: 'container';
+        bindingId: string;
+        isolationStatement: string;
+        snapshotKind: 'files';
+        snapshotStatement: string;
+        isolation: {
+            image: string;
+            network: 'none' | 'bridge' | 'host';
+            memory: string;
+            cpus: string;
+            pidsLimit: number;
+            readOnlyRootfs: boolean;
+            capDrop: 'all' | 'none';
+            noNewPrivileges: boolean;
+            workspaceMount: string;
+        };
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * CreateWorkspaceSandboxRequest
+ */
+export type CreateWorkspaceSandboxRequest = {
+    name?: string;
+    template?: string;
+    image?: string;
+    environmentId?: string;
+    size?: 'small' | 'medium' | 'large' | 'xl';
+    limits?: {
+        cpus?: number;
+        memoryMb?: number;
+        pidsLimit?: number;
+    };
+    network?: 'none' | 'full';
+    /**
+     * CIDR policy. At most 1024 expanded CIDR/port rules across both lists; duplicate ports are normalized before counting. Mandatory denies override deny, then allow. Domains and proxy/credential fields return typed 422, not silently ignored. Explicit create/restore policy requires network=full and sandbox_network_on. Initial revision must be zero. The effective human-set ceiling is checked before allocation; kernel readback precedes a successful create. Omit the field on restore to retain default-off policy, not the source policy.
+     */
+    networkPolicy?: unknown & {
+        version?: 1;
+        revision?: 0;
+        mode?: 'off' | 'allow-all-public' | 'allow-list';
+        allow?: Array<unknown & {
+            /**
+             * IPv4 CIDR; normalized to its network address. IPv6 remains denied.
+             */
+            cidr: string;
+            protocol?: 'tcp' | 'udp' | 'all';
+            ports?: Array<number>;
+        }>;
+        deny?: Array<unknown & {
+            /**
+             * IPv4 CIDR; normalized to its network address. IPv6 remains denied.
+             */
+            cidr: string;
+            protocol?: 'tcp' | 'udp' | 'all';
+            ports?: Array<number>;
+        }>;
+    };
+    idleTtlSeconds?: number;
+};
+
+/**
+ * CreateWorkspaceSandboxResponse
+ */
+export type CreateWorkspaceSandboxResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    sandbox: {
+        id: string;
+        name: string;
+        origin: 'created' | 'restored' | 'agent_run';
+        state: 'active' | 'hibernated' | 'recovery_required' | 'destroyed';
+        createdAt: string;
+        updatedAt: string;
+        lastActivityAt: string;
+        hibernatesAt?: string;
+        image: string | null;
+        imageId?: string;
+        template?: string;
+        size?: 'small' | 'medium' | 'large' | 'xl';
+        limits: {
+            cpus: number;
+            memoryMb: number;
+            pidsLimit: number;
+        } | null;
+        network: 'none' | 'full' | 'host' | null;
+        idleTtlSeconds: number | null;
+        environmentId?: string;
+        restoredFrom?: {
+            sandboxId: string;
+            snapshotId: string;
+        };
+        container?: {
+            id: string;
+            name: string;
+            startedAt: string;
+        };
+        generation: number;
+        meter: {
+            execCount: number;
+            lastExecAt?: string;
+        };
+        readOnly: boolean;
+        usedBy: Array<{
+            runId: string;
+            taskId: string;
+            agentId?: string;
+            title?: string;
+        }>;
+        provider: {
+            kind: 'container';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: {
+                image: string;
+                network: 'none' | 'bridge' | 'host';
+                memory: string;
+                cpus: string;
+                pidsLimit: number;
+                readOnlyRootfs: boolean;
+                capDrop: 'all' | 'none';
+                noNewPrivileges: boolean;
+                workspaceMount: string;
+            } | null;
+        } | {
+            kind: 'local_process';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: null;
+        };
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * GetWorkspaceSandboxSettingsResponse
+ */
+export type GetWorkspaceSandboxSettingsResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    settings: {
+        templates?: Array<string>;
+        images?: Array<string>;
+        sizes?: Array<'small' | 'medium' | 'large' | 'xl'>;
+        defaultSize?: 'small' | 'medium' | 'large' | 'xl';
+        defaultTemplate?: string;
+        allowNetwork?: boolean;
+        maxActive?: number;
+        idleTtlSeconds?: number;
+        /**
+         * The runtime for curated templates and the operator's own images with the network off and a read-only root, the only sandboxes that may run on runc (plan D7). Every other sandbox runs on runsc whatever this says.
+         */
+        runtime?: 'runc' | 'runsc' | null;
+    };
+    updatedAt?: string;
+    updatedBy?: string;
+    operator: {
+        templates: Array<string>;
+        defaultTemplate: string | null;
+        images: Array<string>;
+        sizes: Array<'small' | 'medium' | 'large' | 'xl'>;
+        defaultSize: 'small' | 'medium' | 'large' | 'xl';
+        allowNetwork: boolean;
+        maxActivePerWorkspace: number;
+        idleTtlSeconds: number;
+        customLimits: boolean;
+        /**
+         * Share of the sandbox host's CPU and memory that active sandboxes may commit (the rest is the host's reserve).
+         */
+        capacityFraction?: number;
+        /**
+         * Memory (MiB) the capacity budget is taken from; null = the host's total. Never more than the host reports.
+         */
+        capacityMemoryMb?: number | null;
+        /**
+         * CPUs the capacity budget is taken from; null = the host's count. Never more than the host reports.
+         */
+        capacityCpus?: number | null;
+        /**
+         * Memory (MiB) always kept for everything that is not a sandbox; the budget is the smaller of the fraction and the capacity minus this.
+         */
+        capacityReserveMb?: number;
+        /**
+         * Most active sandboxes one organization may hold across all of its workspaces.
+         */
+        maxActivePerOrg?: number;
+        /**
+         * Free disk (MiB) a sandbox create, resume or file write must leave on the workspace and state filesystems; below it the request answers 507.
+         */
+        minFreeDiskMb?: number;
+        /**
+         * The OCI runtimes this deployment offers. Network-on sandboxes, images a tenant brings, Dockerfile templates and writable root always need runsc; without it they are refused.
+         */
+        runtimes?: Array<'runc' | 'runsc'>;
+        /**
+         * The runtime for curated templates and the operator's own images with the network off and a read-only root, the only sandboxes that may run on runc (plan D7). Every other sandbox runs on runsc whatever this says.
+         */
+        defaultRuntime?: 'runc' | 'runsc';
+    };
+    canEdit: boolean;
+    caps: {
+        defaultImage: string | null;
+        images: Array<string>;
+        limits: {
+            default: {
+                cpus: number;
+                memoryMb: number;
+                pidsLimit: number;
+            };
+            min: {
+                cpus: number;
+                memoryMb: number;
+                pidsLimit: number;
+            };
+            max: {
+                cpus: number;
+                memoryMb: number;
+                pidsLimit: number;
+            };
+        };
+        sizes: Array<{
+            id: 'small' | 'medium' | 'large' | 'xl';
+            label: string;
+            cpus: number;
+            memoryMb: number;
+            pidsLimit: number;
+            goodFor: string;
+            available: boolean;
+            reason?: string;
+            refusedBy?: 'ceiling' | 'host' | 'capacity' | 'runtime' | 'operator' | 'workspace';
+        }>;
+        defaultSize: 'small' | 'medium' | 'large' | 'xl' | null;
+        customLimits: boolean;
+        templates: Array<{
+            id: string;
+            name: string;
+            description: string;
+            contents: Array<string>;
+            sizeHint: 'small' | 'medium' | 'large' | 'xl';
+            minSize: 'small' | 'medium' | 'large' | 'xl';
+            image: string;
+            imageId: string;
+            available: boolean;
+            reason?: string;
+            refusedBy?: 'host' | 'operator' | 'workspace' | 'size';
+            scan?: {
+                scanner: string;
+                critical: number;
+                high: number;
+                fixableHighOrCritical: number;
+                scannedAt?: string;
+            };
+        }>;
+        defaultTemplate: string | null;
+        networkModes: Array<'none' | 'full'>;
+        defaultNetwork: 'none' | 'full';
+        networkUnavailableReason: string | null;
+        networkUnavailableCode: 'egress_firewall_missing' | 'runsc_required' | 'hosted_network_off' | null;
+        egressAllowList: {
+            supported: false;
+            reason: string;
+        };
+        idleTtlSeconds: {
+            default: number;
+            min: number;
+            max: number;
+        };
+        exec: {
+            defaultTimeoutSeconds: number;
+            maxTimeoutSeconds: number;
+            maxOutputBytes: number;
+        };
+        files: {
+            maxReadBytes: number;
+            maxWriteBytes: number;
+        };
+        maxActiveSandboxes: number;
+        settings: {
+            canEdit: boolean;
+        };
+        createRefusal: {
+            field: 'size' | 'template';
+            reason: string;
+        } | null;
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * GetWorkspaceSandboxResponse
+ */
+export type GetWorkspaceSandboxResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    sandbox: {
+        id: string;
+        name: string;
+        origin: 'created' | 'restored' | 'agent_run';
+        state: 'active' | 'hibernated' | 'recovery_required' | 'destroyed';
+        createdAt: string;
+        updatedAt: string;
+        lastActivityAt: string;
+        hibernatesAt?: string;
+        image: string | null;
+        imageId?: string;
+        template?: string;
+        size?: 'small' | 'medium' | 'large' | 'xl';
+        limits: {
+            cpus: number;
+            memoryMb: number;
+            pidsLimit: number;
+        } | null;
+        network: 'none' | 'full' | 'host' | null;
+        idleTtlSeconds: number | null;
+        environmentId?: string;
+        restoredFrom?: {
+            sandboxId: string;
+            snapshotId: string;
+        };
+        container?: {
+            id: string;
+            name: string;
+            startedAt: string;
+        };
+        generation: number;
+        meter: {
+            execCount: number;
+            lastExecAt?: string;
+        };
+        readOnly: boolean;
+        usedBy: Array<{
+            runId: string;
+            taskId: string;
+            agentId?: string;
+            title?: string;
+        }>;
+        provider: {
+            kind: 'container';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: {
+                image: string;
+                network: 'none' | 'bridge' | 'host';
+                memory: string;
+                cpus: string;
+                pidsLimit: number;
+                readOnlyRootfs: boolean;
+                capDrop: 'all' | 'none';
+                noNewPrivileges: boolean;
+                workspaceMount: string;
+            } | null;
+        } | {
+            kind: 'local_process';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: null;
+        };
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * UpdateWorkspaceSandboxRequest
+ */
+export type UpdateWorkspaceSandboxRequest = {
+    name?: string;
+    idleTtlSeconds?: number;
+};
+
+/**
+ * UpdateWorkspaceSandboxResponse
+ */
+export type UpdateWorkspaceSandboxResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    sandbox: {
+        id: string;
+        name: string;
+        origin: 'created' | 'restored' | 'agent_run';
+        state: 'active' | 'hibernated' | 'recovery_required' | 'destroyed';
+        createdAt: string;
+        updatedAt: string;
+        lastActivityAt: string;
+        hibernatesAt?: string;
+        image: string | null;
+        imageId?: string;
+        template?: string;
+        size?: 'small' | 'medium' | 'large' | 'xl';
+        limits: {
+            cpus: number;
+            memoryMb: number;
+            pidsLimit: number;
+        } | null;
+        network: 'none' | 'full' | 'host' | null;
+        idleTtlSeconds: number | null;
+        environmentId?: string;
+        restoredFrom?: {
+            sandboxId: string;
+            snapshotId: string;
+        };
+        container?: {
+            id: string;
+            name: string;
+            startedAt: string;
+        };
+        generation: number;
+        meter: {
+            execCount: number;
+            lastExecAt?: string;
+        };
+        readOnly: boolean;
+        usedBy: Array<{
+            runId: string;
+            taskId: string;
+            agentId?: string;
+            title?: string;
+        }>;
+        provider: {
+            kind: 'container';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: {
+                image: string;
+                network: 'none' | 'bridge' | 'host';
+                memory: string;
+                cpus: string;
+                pidsLimit: number;
+                readOnlyRootfs: boolean;
+                capDrop: 'all' | 'none';
+                noNewPrivileges: boolean;
+                workspaceMount: string;
+            } | null;
+        } | {
+            kind: 'local_process';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: null;
+        };
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * DestroyWorkspaceSandboxResponse
+ */
+export type DestroyWorkspaceSandboxResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    sandbox: {
+        id: string;
+        name: string;
+        origin: 'created' | 'restored' | 'agent_run';
+        state: 'active' | 'hibernated' | 'recovery_required' | 'destroyed';
+        createdAt: string;
+        updatedAt: string;
+        lastActivityAt: string;
+        hibernatesAt?: string;
+        image: string | null;
+        imageId?: string;
+        template?: string;
+        size?: 'small' | 'medium' | 'large' | 'xl';
+        limits: {
+            cpus: number;
+            memoryMb: number;
+            pidsLimit: number;
+        } | null;
+        network: 'none' | 'full' | 'host' | null;
+        idleTtlSeconds: number | null;
+        environmentId?: string;
+        restoredFrom?: {
+            sandboxId: string;
+            snapshotId: string;
+        };
+        container?: {
+            id: string;
+            name: string;
+            startedAt: string;
+        };
+        generation: number;
+        meter: {
+            execCount: number;
+            lastExecAt?: string;
+        };
+        readOnly: boolean;
+        usedBy: Array<{
+            runId: string;
+            taskId: string;
+            agentId?: string;
+            title?: string;
+        }>;
+        provider: {
+            kind: 'container';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: {
+                image: string;
+                network: 'none' | 'bridge' | 'host';
+                memory: string;
+                cpus: string;
+                pidsLimit: number;
+                readOnlyRootfs: boolean;
+                capDrop: 'all' | 'none';
+                noNewPrivileges: boolean;
+                workspaceMount: string;
+            } | null;
+        } | {
+            kind: 'local_process';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: null;
+        };
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * GetWorkspaceSandboxNetworkPolicyResponse
+ */
+export type GetWorkspaceSandboxNetworkPolicyResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    policy: {
+        desired: {
+            version: 1;
+            revision: number;
+            mode: 'off' | 'allow-all-public' | 'allow-list';
+            allow: Array<{
+                /**
+                 * IPv4 CIDR; normalized to its network address. IPv6 remains denied.
+                 */
+                cidr: string;
+                protocol: 'tcp' | 'udp' | 'all';
+                ports?: Array<number>;
+            }>;
+            deny: Array<{
+                /**
+                 * IPv4 CIDR; normalized to its network address. IPv6 remains denied.
+                 */
+                cidr: string;
+                protocol: 'tcp' | 'udp' | 'all';
+                ports?: Array<number>;
+            }>;
+        };
+        desiredRevision: number;
+        appliedRevision: number | null;
+        applyStatus: 'pending' | 'applied' | 'failed';
+        digest?: string;
+        reason?: string;
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * PutWorkspaceSandboxNetworkPolicyRequest
+ *
+ * CIDR policy. At most 1024 expanded CIDR/port rules across both lists; duplicate ports are normalized before counting. Mandatory denies override deny, then allow. Domains and proxy/credential fields return typed 422, not silently ignored.
+ */
+export type PutWorkspaceSandboxNetworkPolicyRequest = unknown & {
+    version?: 1;
+    revision?: number | null;
+    mode?: 'off' | 'allow-all-public' | 'allow-list';
+    allow?: Array<unknown & {
+        /**
+         * IPv4 CIDR; normalized to its network address. IPv6 remains denied.
+         */
+        cidr: string;
+        protocol?: 'tcp' | 'udp' | 'all';
+        ports?: Array<number>;
+    }>;
+    deny?: Array<unknown & {
+        /**
+         * IPv4 CIDR; normalized to its network address. IPv6 remains denied.
+         */
+        cidr: string;
+        protocol?: 'tcp' | 'udp' | 'all';
+        ports?: Array<number>;
+    }>;
+};
+
+/**
+ * PutWorkspaceSandboxNetworkPolicyResponse
+ */
+export type PutWorkspaceSandboxNetworkPolicyResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    policy: {
+        desired: {
+            version: 1;
+            revision: number;
+            mode: 'off' | 'allow-all-public' | 'allow-list';
+            allow: Array<{
+                /**
+                 * IPv4 CIDR; normalized to its network address. IPv6 remains denied.
+                 */
+                cidr: string;
+                protocol: 'tcp' | 'udp' | 'all';
+                ports?: Array<number>;
+            }>;
+            deny: Array<{
+                /**
+                 * IPv4 CIDR; normalized to its network address. IPv6 remains denied.
+                 */
+                cidr: string;
+                protocol: 'tcp' | 'udp' | 'all';
+                ports?: Array<number>;
+            }>;
+        };
+        desiredRevision: number;
+        appliedRevision: number | null;
+        applyStatus: 'pending' | 'applied' | 'failed';
+        digest?: string;
+        reason?: string;
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * ListWorkspaceSandboxFilesResponse
+ */
+export type ListWorkspaceSandboxFilesResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    path: string;
+    entries: Array<{
+        name: string;
+        size: number;
+        mode: string;
+        directory?: boolean;
+    }>;
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * ReadWorkspaceSandboxFileResponse
+ */
+export type ReadWorkspaceSandboxFileResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    file: {
+        outcome: 'content';
+        path: string;
+        encoding: 'utf8' | 'base64';
+        content: string;
+        bytes: number;
+        truncated: boolean;
+        modifiedAt?: string;
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * WriteWorkspaceSandboxFileRequest
+ */
+export type WriteWorkspaceSandboxFileRequest = {
+    content: string;
+    encoding?: 'utf8' | 'base64';
+};
+
+/**
+ * WriteWorkspaceSandboxFileResponse
+ */
+export type WriteWorkspaceSandboxFileResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    file: {
+        path: string;
+        bytes: number;
+        modifiedAt: string;
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * DeleteWorkspaceSandboxPathResponse
+ */
+export type DeleteWorkspaceSandboxPathResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v2';
+    deleted: {
+        path: string;
+        recursive: boolean;
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * UploadWorkspaceSandboxFileResponse
+ */
+export type UploadWorkspaceSandboxFileResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v2';
+    file: {
+        path: string;
+        bytes: number;
+        modifiedAt: string;
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * MoveWorkspaceSandboxPathRequest
+ */
+export type MoveWorkspaceSandboxPathRequest = {
+    from: string;
+    to: string;
+};
+
+/**
+ * MoveWorkspaceSandboxPathResponse
+ */
+export type MoveWorkspaceSandboxPathResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v2';
+    moved: {
+        from: string;
+        to: string;
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * CreateWorkspaceSandboxFolderResponse
+ */
+export type CreateWorkspaceSandboxFolderResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v2';
+    folder: {
+        path: string;
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * ListWorkspaceSandboxSnapshotsResponse
+ */
+export type ListWorkspaceSandboxSnapshotsResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    snapshots: Array<{
+        id: string;
+        sandboxId: string;
+        createdAt: string;
+        kind: 'files';
+        statement: string;
+        contentAddress: {
+            artifactId: string;
+            sha256?: string;
+        };
+    }>;
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * SnapshotWorkspaceSandboxResponse
+ */
+export type SnapshotWorkspaceSandboxResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    snapshot: {
+        id: string;
+        sandboxId: string;
+        createdAt: string;
+        kind: 'files';
+        statement: string;
+        contentAddress: {
+            artifactId: string;
+            sha256?: string;
+        };
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * RestoreWorkspaceSandboxSnapshotRequest
+ */
+export type RestoreWorkspaceSandboxSnapshotRequest = {
+    name?: string;
+    size?: 'small' | 'medium' | 'large' | 'xl';
+    limits?: {
+        cpus?: number;
+        memoryMb?: number;
+        pidsLimit?: number;
+    };
+    network?: 'none' | 'full';
+    /**
+     * CIDR policy. At most 1024 expanded CIDR/port rules across both lists; duplicate ports are normalized before counting. Mandatory denies override deny, then allow. Domains and proxy/credential fields return typed 422, not silently ignored. Explicit create/restore policy requires network=full and sandbox_network_on. Initial revision must be zero. The effective human-set ceiling is checked before allocation; kernel readback precedes a successful create. Omit the field on restore to retain default-off policy, not the source policy.
+     */
+    networkPolicy?: unknown & {
+        version?: 1;
+        revision?: 0;
+        mode?: 'off' | 'allow-all-public' | 'allow-list';
+        allow?: Array<unknown & {
+            /**
+             * IPv4 CIDR; normalized to its network address. IPv6 remains denied.
+             */
+            cidr: string;
+            protocol?: 'tcp' | 'udp' | 'all';
+            ports?: Array<number>;
+        }>;
+        deny?: Array<unknown & {
+            /**
+             * IPv4 CIDR; normalized to its network address. IPv6 remains denied.
+             */
+            cidr: string;
+            protocol?: 'tcp' | 'udp' | 'all';
+            ports?: Array<number>;
+        }>;
+    };
+    idleTtlSeconds?: number;
+};
+
+/**
+ * RestoreWorkspaceSandboxSnapshotResponse
+ */
+export type RestoreWorkspaceSandboxSnapshotResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    sandbox: {
+        id: string;
+        name: string;
+        origin: 'created' | 'restored' | 'agent_run';
+        state: 'active' | 'hibernated' | 'recovery_required' | 'destroyed';
+        createdAt: string;
+        updatedAt: string;
+        lastActivityAt: string;
+        hibernatesAt?: string;
+        image: string | null;
+        imageId?: string;
+        template?: string;
+        size?: 'small' | 'medium' | 'large' | 'xl';
+        limits: {
+            cpus: number;
+            memoryMb: number;
+            pidsLimit: number;
+        } | null;
+        network: 'none' | 'full' | 'host' | null;
+        idleTtlSeconds: number | null;
+        environmentId?: string;
+        restoredFrom?: {
+            sandboxId: string;
+            snapshotId: string;
+        };
+        container?: {
+            id: string;
+            name: string;
+            startedAt: string;
+        };
+        generation: number;
+        meter: {
+            execCount: number;
+            lastExecAt?: string;
+        };
+        readOnly: boolean;
+        usedBy: Array<{
+            runId: string;
+            taskId: string;
+            agentId?: string;
+            title?: string;
+        }>;
+        provider: {
+            kind: 'container';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: {
+                image: string;
+                network: 'none' | 'bridge' | 'host';
+                memory: string;
+                cpus: string;
+                pidsLimit: number;
+                readOnlyRootfs: boolean;
+                capDrop: 'all' | 'none';
+                noNewPrivileges: boolean;
+                workspaceMount: string;
+            } | null;
+        } | {
+            kind: 'local_process';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: null;
+        };
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * ListWorkspaceSandboxActivityResponse
+ */
+export type ListWorkspaceSandboxActivityResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    activity: Array<{
+        at: string;
+        sandboxId: string;
+        verb: string;
+        actor: string;
+        outcome: string;
+        detail?: {
+            [key: string]: string | number | boolean;
+        };
+    }>;
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * HibernateWorkspaceSandboxResponse
+ */
+export type HibernateWorkspaceSandboxResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    sandbox: {
+        id: string;
+        name: string;
+        origin: 'created' | 'restored' | 'agent_run';
+        state: 'active' | 'hibernated' | 'recovery_required' | 'destroyed';
+        createdAt: string;
+        updatedAt: string;
+        lastActivityAt: string;
+        hibernatesAt?: string;
+        image: string | null;
+        imageId?: string;
+        template?: string;
+        size?: 'small' | 'medium' | 'large' | 'xl';
+        limits: {
+            cpus: number;
+            memoryMb: number;
+            pidsLimit: number;
+        } | null;
+        network: 'none' | 'full' | 'host' | null;
+        idleTtlSeconds: number | null;
+        environmentId?: string;
+        restoredFrom?: {
+            sandboxId: string;
+            snapshotId: string;
+        };
+        container?: {
+            id: string;
+            name: string;
+            startedAt: string;
+        };
+        generation: number;
+        meter: {
+            execCount: number;
+            lastExecAt?: string;
+        };
+        readOnly: boolean;
+        usedBy: Array<{
+            runId: string;
+            taskId: string;
+            agentId?: string;
+            title?: string;
+        }>;
+        provider: {
+            kind: 'container';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: {
+                image: string;
+                network: 'none' | 'bridge' | 'host';
+                memory: string;
+                cpus: string;
+                pidsLimit: number;
+                readOnlyRootfs: boolean;
+                capDrop: 'all' | 'none';
+                noNewPrivileges: boolean;
+                workspaceMount: string;
+            } | null;
+        } | {
+            kind: 'local_process';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: null;
+        };
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * ResumeWorkspaceSandboxResponse
+ */
+export type ResumeWorkspaceSandboxResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    sandbox: {
+        id: string;
+        name: string;
+        origin: 'created' | 'restored' | 'agent_run';
+        state: 'active' | 'hibernated' | 'recovery_required' | 'destroyed';
+        createdAt: string;
+        updatedAt: string;
+        lastActivityAt: string;
+        hibernatesAt?: string;
+        image: string | null;
+        imageId?: string;
+        template?: string;
+        size?: 'small' | 'medium' | 'large' | 'xl';
+        limits: {
+            cpus: number;
+            memoryMb: number;
+            pidsLimit: number;
+        } | null;
+        network: 'none' | 'full' | 'host' | null;
+        idleTtlSeconds: number | null;
+        environmentId?: string;
+        restoredFrom?: {
+            sandboxId: string;
+            snapshotId: string;
+        };
+        container?: {
+            id: string;
+            name: string;
+            startedAt: string;
+        };
+        generation: number;
+        meter: {
+            execCount: number;
+            lastExecAt?: string;
+        };
+        readOnly: boolean;
+        usedBy: Array<{
+            runId: string;
+            taskId: string;
+            agentId?: string;
+            title?: string;
+        }>;
+        provider: {
+            kind: 'container';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: {
+                image: string;
+                network: 'none' | 'bridge' | 'host';
+                memory: string;
+                cpus: string;
+                pidsLimit: number;
+                readOnlyRootfs: boolean;
+                capDrop: 'all' | 'none';
+                noNewPrivileges: boolean;
+                workspaceMount: string;
+            } | null;
+        } | {
+            kind: 'local_process';
+            bindingId: string;
+            isolationStatement: string;
+            snapshotKind: 'files';
+            snapshotStatement: string;
+            isolation: null;
+        };
+    };
+    request_id?: string;
+    receipt?: {
+        auditEntryId: string;
+        hash?: string;
+        previousHash?: string | null;
+        recordedAt: string;
+    };
+};
+
+/**
+ * ExecInWorkspaceSandboxRequest
+ */
+export type ExecInWorkspaceSandboxRequest = {
+    command: string;
+    cwd?: string;
+    /**
+     * Plain, NON-secret variables for this command only. Values are not audited but are passed to the container runtime in clear; never put credentials here.
+     */
+    env?: {
+        [key: string]: string;
+    };
+    timeoutSeconds?: number;
+};
+
+/**
+ * CancelWorkspaceSandboxExecResponse
+ */
+export type CancelWorkspaceSandboxExecResponse = {
+    schemaVersion: 'omega-workspace-sandboxes/v1';
+    execId: string;
+    cancelled: true;
     request_id?: string;
     receipt?: {
         auditEntryId: string;
@@ -8898,6 +10453,1584 @@ export type RunWorkspaceScheduleResponses = {
 };
 
 export type RunWorkspaceScheduleResponse3 = RunWorkspaceScheduleResponses[keyof RunWorkspaceScheduleResponses];
+
+export type ListWorkspaceSandboxesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/workspace/sandboxes';
+};
+
+export type ListWorkspaceSandboxesErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type ListWorkspaceSandboxesError = ListWorkspaceSandboxesErrors[keyof ListWorkspaceSandboxesErrors];
+
+export type ListWorkspaceSandboxesResponses = {
+    /**
+     * List this workspace's sandboxes with the provider's caps
+     */
+    200: ListWorkspaceSandboxesResponse;
+};
+
+export type ListWorkspaceSandboxesResponse2 = ListWorkspaceSandboxesResponses[keyof ListWorkspaceSandboxesResponses];
+
+export type CreateWorkspaceSandboxData = {
+    body: CreateWorkspaceSandboxRequest;
+    path?: never;
+    query?: never;
+    url: '/workspace/sandboxes';
+};
+
+export type CreateWorkspaceSandboxErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Unsupported network policy: domain rules (`network_policy_domains_not_supported`) or proxy/credential rules (`network_policy_proxy_not_supported`). Use CIDRs and ports.
+     */
+    422: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type CreateWorkspaceSandboxError = CreateWorkspaceSandboxErrors[keyof CreateWorkspaceSandboxErrors];
+
+export type CreateWorkspaceSandboxResponses = {
+    /**
+     * Create a sandbox (network off by default, limits within the provider's caps)
+     */
+    201: CreateWorkspaceSandboxResponse;
+};
+
+export type CreateWorkspaceSandboxResponse2 = CreateWorkspaceSandboxResponses[keyof CreateWorkspaceSandboxResponses];
+
+export type GetWorkspaceSandboxSettingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/workspace/sandboxes/settings';
+};
+
+export type GetWorkspaceSandboxSettingsErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required, or (PUT) the caller is not an owner or admin (`role_forbidden`)
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type GetWorkspaceSandboxSettingsError = GetWorkspaceSandboxSettingsErrors[keyof GetWorkspaceSandboxSettingsErrors];
+
+export type GetWorkspaceSandboxSettingsResponses = {
+    /**
+     * Read this workspace's sandbox settings, the operator's layer they narrow, and the resulting caps
+     */
+    200: GetWorkspaceSandboxSettingsResponse;
+};
+
+export type GetWorkspaceSandboxSettingsResponse2 = GetWorkspaceSandboxSettingsResponses[keyof GetWorkspaceSandboxSettingsResponses];
+
+export type DestroyWorkspaceSandboxData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}';
+};
+
+export type DestroyWorkspaceSandboxErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type DestroyWorkspaceSandboxError = DestroyWorkspaceSandboxErrors[keyof DestroyWorkspaceSandboxErrors];
+
+export type DestroyWorkspaceSandboxResponses = {
+    /**
+     * Destroy a sandbox and remove its container
+     */
+    200: DestroyWorkspaceSandboxResponse;
+};
+
+export type DestroyWorkspaceSandboxResponse2 = DestroyWorkspaceSandboxResponses[keyof DestroyWorkspaceSandboxResponses];
+
+export type GetWorkspaceSandboxData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}';
+};
+
+export type GetWorkspaceSandboxErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type GetWorkspaceSandboxError = GetWorkspaceSandboxErrors[keyof GetWorkspaceSandboxErrors];
+
+export type GetWorkspaceSandboxResponses = {
+    /**
+     * Read one sandbox, including the runs that used it
+     */
+    200: GetWorkspaceSandboxResponse;
+};
+
+export type GetWorkspaceSandboxResponse2 = GetWorkspaceSandboxResponses[keyof GetWorkspaceSandboxResponses];
+
+export type UpdateWorkspaceSandboxData = {
+    body: UpdateWorkspaceSandboxRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}';
+};
+
+export type UpdateWorkspaceSandboxErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type UpdateWorkspaceSandboxError = UpdateWorkspaceSandboxErrors[keyof UpdateWorkspaceSandboxErrors];
+
+export type UpdateWorkspaceSandboxResponses = {
+    /**
+     * Rename a sandbox or change its idle TTL
+     */
+    200: UpdateWorkspaceSandboxResponse;
+};
+
+export type UpdateWorkspaceSandboxResponse2 = UpdateWorkspaceSandboxResponses[keyof UpdateWorkspaceSandboxResponses];
+
+export type GetWorkspaceSandboxNetworkPolicyData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}/network-policy';
+};
+
+export type GetWorkspaceSandboxNetworkPolicyErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * network_policy_revision_mismatch
+     */
+    412: OmegaError;
+    /**
+     * Domain lists, proxies and credential rules are not supported yet
+     */
+    422: OmegaError;
+    /**
+     * network_policy_precondition_required
+     */
+    428: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Policy apply or exact readback failed; the workload is stopped, never left executing with unproven policy
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type GetWorkspaceSandboxNetworkPolicyError = GetWorkspaceSandboxNetworkPolicyErrors[keyof GetWorkspaceSandboxNetworkPolicyErrors];
+
+export type GetWorkspaceSandboxNetworkPolicyResponses = {
+    /**
+     * Read sandbox egress policy and applied state
+     */
+    200: GetWorkspaceSandboxNetworkPolicyResponse;
+};
+
+export type GetWorkspaceSandboxNetworkPolicyResponse2 = GetWorkspaceSandboxNetworkPolicyResponses[keyof GetWorkspaceSandboxNetworkPolicyResponses];
+
+export type PutWorkspaceSandboxNetworkPolicyData = {
+    body: PutWorkspaceSandboxNetworkPolicyRequest;
+    headers: {
+        'If-Match': string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}/network-policy';
+};
+
+export type PutWorkspaceSandboxNetworkPolicyErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * network_policy_revision_mismatch
+     */
+    412: OmegaError;
+    /**
+     * Domain lists, proxies and credential rules are not supported yet
+     */
+    422: OmegaError;
+    /**
+     * network_policy_precondition_required
+     */
+    428: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Policy apply or exact readback failed; the workload is stopped, never left executing with unproven policy
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type PutWorkspaceSandboxNetworkPolicyError = PutWorkspaceSandboxNetworkPolicyErrors[keyof PutWorkspaceSandboxNetworkPolicyErrors];
+
+export type PutWorkspaceSandboxNetworkPolicyResponses = {
+    /**
+     * Atomically update sandbox egress policy
+     */
+    200: PutWorkspaceSandboxNetworkPolicyResponse;
+};
+
+export type PutWorkspaceSandboxNetworkPolicyResponse2 = PutWorkspaceSandboxNetworkPolicyResponses[keyof PutWorkspaceSandboxNetworkPolicyResponses];
+
+export type ListWorkspaceSandboxFilesData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        path?: string;
+    };
+    url: '/workspace/sandboxes/{id}/files';
+};
+
+export type ListWorkspaceSandboxFilesErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type ListWorkspaceSandboxFilesError = ListWorkspaceSandboxFilesErrors[keyof ListWorkspaceSandboxFilesErrors];
+
+export type ListWorkspaceSandboxFilesResponses = {
+    /**
+     * List files at a workspace-relative path
+     */
+    200: ListWorkspaceSandboxFilesResponse;
+};
+
+export type ListWorkspaceSandboxFilesResponse2 = ListWorkspaceSandboxFilesResponses[keyof ListWorkspaceSandboxFilesResponses];
+
+export type DeleteWorkspaceSandboxPathData = {
+    body?: never;
+    path: {
+        id: string;
+        path: string;
+    };
+    query?: {
+        recursive?: 'true' | 'false' | '1' | '0';
+    };
+    url: '/workspace/sandboxes/{id}/files/{path}';
+};
+
+export type DeleteWorkspaceSandboxPathErrors = {
+    /**
+     * Invalid request Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again) Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`disk_quota_exceeded` or `insufficient_storage`)
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type DeleteWorkspaceSandboxPathError = DeleteWorkspaceSandboxPathErrors[keyof DeleteWorkspaceSandboxPathErrors];
+
+export type DeleteWorkspaceSandboxPathResponses = {
+    /**
+     * Delete a file, link or folder inside the sandbox (a folder must be empty unless recursive=true; a link is removed, never followed)
+     */
+    200: DeleteWorkspaceSandboxPathResponse;
+};
+
+export type DeleteWorkspaceSandboxPathResponse2 = DeleteWorkspaceSandboxPathResponses[keyof DeleteWorkspaceSandboxPathResponses];
+
+export type ReadWorkspaceSandboxFileData = {
+    body?: never;
+    path: {
+        id: string;
+        path: string;
+    };
+    query?: {
+        maxBytes?: number;
+    };
+    url: '/workspace/sandboxes/{id}/files/{path}';
+};
+
+export type ReadWorkspaceSandboxFileErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type ReadWorkspaceSandboxFileError = ReadWorkspaceSandboxFileErrors[keyof ReadWorkspaceSandboxFileErrors];
+
+export type ReadWorkspaceSandboxFileResponses = {
+    /**
+     * Read one file (bounded; utf8 or base64)
+     */
+    200: ReadWorkspaceSandboxFileResponse;
+};
+
+export type ReadWorkspaceSandboxFileResponse2 = ReadWorkspaceSandboxFileResponses[keyof ReadWorkspaceSandboxFileResponses];
+
+export type WriteWorkspaceSandboxFileData = {
+    body: WriteWorkspaceSandboxFileRequest;
+    path: {
+        id: string;
+        path: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}/files/{path}';
+};
+
+export type WriteWorkspaceSandboxFileErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type WriteWorkspaceSandboxFileError = WriteWorkspaceSandboxFileErrors[keyof WriteWorkspaceSandboxFileErrors];
+
+export type WriteWorkspaceSandboxFileResponses = {
+    /**
+     * Write one file (audited, confined to the workspace)
+     */
+    200: WriteWorkspaceSandboxFileResponse;
+};
+
+export type WriteWorkspaceSandboxFileResponse2 = WriteWorkspaceSandboxFileResponses[keyof WriteWorkspaceSandboxFileResponses];
+
+export type DownloadWorkspaceSandboxFileData = {
+    body?: never;
+    headers?: {
+        /**
+         * One `bytes=` range; several ranges serve the whole file.
+         */
+        range?: string;
+        'if-none-match'?: string;
+    };
+    path: {
+        id: string;
+        path: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}/download/{path}';
+};
+
+export type DownloadWorkspaceSandboxFileErrors = {
+    /**
+     * Invalid request Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * The range starts past the end of the file (`content-range: bytes *size`)
+     */
+    416: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again) Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`disk_quota_exceeded` or `insufficient_storage`)
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type DownloadWorkspaceSandboxFileError = DownloadWorkspaceSandboxFileErrors[keyof DownloadWorkspaceSandboxFileErrors];
+
+export type DownloadWorkspaceSandboxFileResponses = {
+    /**
+     * The file's bytes. `content-type` is set from a short allowlist of extensions (otherwise `application/octet-stream`), with `x-content-type-options: nosniff`, `content-security-policy: sandbox`, `content-disposition: attachment`, `etag`, `last-modified`, `accept-ranges: bytes` and `cache-control: no-store`. A download is a receipt in Activity.
+     */
+    200: Blob | File;
+    /**
+     * The requested range (`content-range`).
+     */
+    206: Blob | File;
+};
+
+export type DownloadWorkspaceSandboxFileResponse = DownloadWorkspaceSandboxFileResponses[keyof DownloadWorkspaceSandboxFileResponses];
+
+export type UploadWorkspaceSandboxFileData = {
+    body: Blob | File;
+    path: {
+        id: string;
+        path: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}/upload/{path}';
+};
+
+export type UploadWorkspaceSandboxFileErrors = {
+    /**
+     * Invalid request Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * No Content-Length (`length_required`)
+     */
+    411: OmegaError;
+    /**
+     * Over the per-file cap (`too_large`); `detail.maxBytes` is the cap
+     */
+    413: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again) Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`disk_quota_exceeded` or `insufficient_storage`)
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type UploadWorkspaceSandboxFileError = UploadWorkspaceSandboxFileErrors[keyof UploadWorkspaceSandboxFileErrors];
+
+export type UploadWorkspaceSandboxFileResponses = {
+    /**
+     * Upload one file, streamed into the sandbox; it replaces the target only once every byte arrived
+     */
+    200: UploadWorkspaceSandboxFileResponse;
+};
+
+export type UploadWorkspaceSandboxFileResponse2 = UploadWorkspaceSandboxFileResponses[keyof UploadWorkspaceSandboxFileResponses];
+
+export type MoveWorkspaceSandboxPathData = {
+    body: MoveWorkspaceSandboxPathRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}/move';
+};
+
+export type MoveWorkspaceSandboxPathErrors = {
+    /**
+     * Invalid request Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again) Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`disk_quota_exceeded` or `insufficient_storage`)
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type MoveWorkspaceSandboxPathError = MoveWorkspaceSandboxPathErrors[keyof MoveWorkspaceSandboxPathErrors];
+
+export type MoveWorkspaceSandboxPathResponses = {
+    /**
+     * Move or rename a file, link or folder inside the sandbox; the target must not exist
+     */
+    200: MoveWorkspaceSandboxPathResponse;
+};
+
+export type MoveWorkspaceSandboxPathResponse2 = MoveWorkspaceSandboxPathResponses[keyof MoveWorkspaceSandboxPathResponses];
+
+export type CreateWorkspaceSandboxFolderData = {
+    body?: never;
+    path: {
+        id: string;
+        path: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}/folders/{path}';
+};
+
+export type CreateWorkspaceSandboxFolderErrors = {
+    /**
+     * Invalid request Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again) Refusals before file-handler dispatch use `omega-workspace-sandboxes/v1`; refusals inside a file handler use `omega-workspace-sandboxes/v2`.
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`disk_quota_exceeded` or `insufficient_storage`)
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type CreateWorkspaceSandboxFolderError = CreateWorkspaceSandboxFolderErrors[keyof CreateWorkspaceSandboxFolderErrors];
+
+export type CreateWorkspaceSandboxFolderResponses = {
+    /**
+     * Create one folder inside the sandbox; its parent must exist
+     */
+    201: CreateWorkspaceSandboxFolderResponse;
+};
+
+export type CreateWorkspaceSandboxFolderResponse2 = CreateWorkspaceSandboxFolderResponses[keyof CreateWorkspaceSandboxFolderResponses];
+
+export type ListWorkspaceSandboxSnapshotsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}/snapshots';
+};
+
+export type ListWorkspaceSandboxSnapshotsErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type ListWorkspaceSandboxSnapshotsError = ListWorkspaceSandboxSnapshotsErrors[keyof ListWorkspaceSandboxSnapshotsErrors];
+
+export type ListWorkspaceSandboxSnapshotsResponses = {
+    /**
+     * List files-only snapshots, newest first
+     */
+    200: ListWorkspaceSandboxSnapshotsResponse;
+};
+
+export type ListWorkspaceSandboxSnapshotsResponse2 = ListWorkspaceSandboxSnapshotsResponses[keyof ListWorkspaceSandboxSnapshotsResponses];
+
+export type SnapshotWorkspaceSandboxData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}/snapshots';
+};
+
+export type SnapshotWorkspaceSandboxErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type SnapshotWorkspaceSandboxError = SnapshotWorkspaceSandboxErrors[keyof SnapshotWorkspaceSandboxErrors];
+
+export type SnapshotWorkspaceSandboxResponses = {
+    /**
+     * Take a files-only, content-addressed snapshot
+     */
+    201: SnapshotWorkspaceSandboxResponse;
+};
+
+export type SnapshotWorkspaceSandboxResponse2 = SnapshotWorkspaceSandboxResponses[keyof SnapshotWorkspaceSandboxResponses];
+
+export type RestoreWorkspaceSandboxSnapshotData = {
+    body: RestoreWorkspaceSandboxSnapshotRequest;
+    path: {
+        id: string;
+        snapshotId: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}/snapshots/{snapshotId}/restore';
+};
+
+export type RestoreWorkspaceSandboxSnapshotErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Unsupported network policy: domain rules (`network_policy_domains_not_supported`) or proxy/credential rules (`network_policy_proxy_not_supported`). Use CIDRs and ports.
+     */
+    422: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type RestoreWorkspaceSandboxSnapshotError = RestoreWorkspaceSandboxSnapshotErrors[keyof RestoreWorkspaceSandboxSnapshotErrors];
+
+export type RestoreWorkspaceSandboxSnapshotResponses = {
+    /**
+     * Restore a snapshot as a NEW sandbox (the source is unchanged)
+     */
+    201: RestoreWorkspaceSandboxSnapshotResponse;
+};
+
+export type RestoreWorkspaceSandboxSnapshotResponse2 = RestoreWorkspaceSandboxSnapshotResponses[keyof RestoreWorkspaceSandboxSnapshotResponses];
+
+export type ListWorkspaceSandboxActivityData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}/activity';
+};
+
+export type ListWorkspaceSandboxActivityErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type ListWorkspaceSandboxActivityError = ListWorkspaceSandboxActivityErrors[keyof ListWorkspaceSandboxActivityErrors];
+
+export type ListWorkspaceSandboxActivityResponses = {
+    /**
+     * Audited activity for one sandbox, newest first
+     */
+    200: ListWorkspaceSandboxActivityResponse;
+};
+
+export type ListWorkspaceSandboxActivityResponse2 = ListWorkspaceSandboxActivityResponses[keyof ListWorkspaceSandboxActivityResponses];
+
+export type HibernateWorkspaceSandboxData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}/hibernate';
+};
+
+export type HibernateWorkspaceSandboxErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type HibernateWorkspaceSandboxError = HibernateWorkspaceSandboxErrors[keyof HibernateWorkspaceSandboxErrors];
+
+export type HibernateWorkspaceSandboxResponses = {
+    /**
+     * Snapshot the files and stop the sandbox's container
+     */
+    200: HibernateWorkspaceSandboxResponse;
+};
+
+export type HibernateWorkspaceSandboxResponse2 = HibernateWorkspaceSandboxResponses[keyof HibernateWorkspaceSandboxResponses];
+
+export type ResumeWorkspaceSandboxData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}/resume';
+};
+
+export type ResumeWorkspaceSandboxErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type ResumeWorkspaceSandboxError = ResumeWorkspaceSandboxErrors[keyof ResumeWorkspaceSandboxErrors];
+
+export type ResumeWorkspaceSandboxResponses = {
+    /**
+     * Rebuild the workspace from its snapshot and start a fresh container
+     */
+    200: ResumeWorkspaceSandboxResponse;
+};
+
+export type ResumeWorkspaceSandboxResponse2 = ResumeWorkspaceSandboxResponses[keyof ResumeWorkspaceSandboxResponses];
+
+export type ExecInWorkspaceSandboxData = {
+    body: ExecInWorkspaceSandboxRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}/exec';
+};
+
+export type ExecInWorkspaceSandboxErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type ExecInWorkspaceSandboxError = ExecInWorkspaceSandboxErrors[keyof ExecInWorkspaceSandboxErrors];
+
+export type ExecInWorkspaceSandboxResponses = {
+    /**
+     * Server-Sent Events. Each event is one OmegaExecFrame: its `event:` name, optional `id:` and JSON `data:`.
+     */
+    200: string;
+};
+
+export type ExecInWorkspaceSandboxResponse = ExecInWorkspaceSandboxResponses[keyof ExecInWorkspaceSandboxResponses];
+
+export type CancelWorkspaceSandboxExecData = {
+    body?: never;
+    path: {
+        id: string;
+        execId: string;
+    };
+    query?: never;
+    url: '/workspace/sandboxes/{id}/exec/{execId}/cancel';
+};
+
+export type CancelWorkspaceSandboxExecErrors = {
+    /**
+     * Invalid request
+     */
+    400: OmegaError;
+    /**
+     * Authentication required
+     */
+    401: OmegaError;
+    /**
+     * Current workspace authority required
+     */
+    403: OmegaError;
+    /**
+     * Unknown sandbox, snapshot or command
+     */
+    404: OmegaError;
+    /**
+     * Wrong state (for example hibernated), a read-only run sandbox, or the workspace's active-sandbox limit (`quota_exceeded`) is reached, or the organization's across all of its workspaces (`quota_exceeded`, `detail.scope` `org`); or (`conflict`) a sandbox larger than this host's sandbox capacity, which can never start here (`detail.reason` `exceeds_host_capacity`), or a network-on sandbox whose workspace no longer allows network (`detail.reason` `network_not_allowed`)
+     */
+    409: OmegaError;
+    /**
+     * Too many requests or commands for this member, workspace, sandbox or host (`rate_limited`); `detail.limit` names the limit and `Retry-After` (also `detail.retryAfterSeconds`) says when to try again
+     */
+    429: OmegaError;
+    /**
+     * The container provider refused
+     */
+    502: OmegaError;
+    /**
+     * Sandboxes are not enabled on this deployment, or a start cannot be made safe here (`sandboxes_unavailable`: for example network on without the gVisor runtime, `detail.reason` `runsc_required`; network on where this host cannot establish a sandbox's egress protection (its container engine remaps user namespaces, so sandboxes there are network-off only), `detail.reason` `egress_firewall_missing`; a workspace that could not be given its disk limit, `detail.reason` `disk_quota_unavailable`; a sandbox host that cannot keep code inside a sandbox from writing past its disk limit, `detail.reason` `disk_bound_unenforceable`, refused for every start on that host until an operator changes it; or a check that guards new sandboxes or the host's disk could not run, `detail.reason` `check_failed` or `timeout`, nothing started or written), or the sandbox host is at capacity (`capacity_exhausted`, `detail.reason` `host_busy`: the host is shared, so the refusal names only the caller's own ask and `detail.workspaceActive`, its own running sandboxes, never other tenants' numbers; `Retry-After`, also `detail.retryAfterSeconds`, says when to try again)
+     */
+    503: OmegaError;
+    /**
+     * There is not enough disk space for this operation (`insufficient_storage` or `disk_quota_exceeded`). The refusal can reflect the host free-disk floor, filesystem space or a disk quota; `detail.limitMb` may report the configured workspace limit
+     */
+    507: OmegaError;
+    /**
+     * An error from the gateway, Omega EE or the Hub. Non-JSON bodies (an ingress's HTML 502) are classified by status only.
+     */
+    default: OmegaError;
+};
+
+export type CancelWorkspaceSandboxExecError = CancelWorkspaceSandboxExecErrors[keyof CancelWorkspaceSandboxExecErrors];
+
+export type CancelWorkspaceSandboxExecResponses = {
+    /**
+     * Signal a running command's process group inside the container
+     */
+    202: CancelWorkspaceSandboxExecResponse;
+};
+
+export type CancelWorkspaceSandboxExecResponse2 = CancelWorkspaceSandboxExecResponses[keyof CancelWorkspaceSandboxExecResponses];
 
 export type ListWorkspaceDeploymentsData = {
     body?: never;

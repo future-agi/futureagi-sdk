@@ -101,7 +101,6 @@ test('K2W custom host optout is not the insecure HTTP optout', async () => {
     if (flag === 'environment') process.env.FI_ALLOW_INSECURE_HTTP = '1';
     const options = flag === 'argument' ? { allowInsecureHttp: true } : {};
     const wire = new Wire(), c = wire.client(mode, undefined, { baseUrl: 'http://sandbox-k2w.invalid', ...options });
-    // @ts-expect-error NOT_APPLICABLE_AT_FOLD: sandbox surface absent (python/tests/platform/test_sandboxes_absent.py); runs automatically when it returns
     const got = await failure(() => c.sandboxes.list());
     expect(got).toBeInstanceOf(errors.ConfigurationError);
     expect(got).toMatchObject({ code: 'insecure_sandbox_origin' });

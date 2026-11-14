@@ -16,6 +16,15 @@ test.each<Case>(inputs.namespace_absences)("hidden namespace $id requires real a
   for (const path of declaration.ts) expect(publicValueAt(subject.client, path)).toBeUndefined();
 });
 
+test("hosted sandboxes are offered: no sandbox absence is declared and client.sandboxes is public", () => {
+  const sandbox = (declaration: Case) => /sandbox/iu.test(JSON.stringify(
+    [declaration.id, declaration.owner, declaration.ts, declaration.py, declaration.ts_subpath, declaration.py_module]));
+  expect(inputs.namespace_absences.filter(sandbox)).toEqual([]);
+  expect((inputs.module_absences ?? []).filter(sandbox)).toEqual([]);
+  const subject = runtime(approvals(), () => { throw new Error("presence must not request"); });
+  expect(publicValueAt(subject.client, "client.sandboxes")).toBeDefined();
+});
+
 test("hidden connector features require real absence", () => {
   const subject = runtime(approvals(), () => { throw new Error("absence must not request"); });
   for (const declaration of data.feature_absences) {

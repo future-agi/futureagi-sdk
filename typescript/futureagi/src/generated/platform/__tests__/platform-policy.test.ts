@@ -36,9 +36,9 @@ const SPEC_FILE = join(
 const METHODS = ["get", "post", "put", "patch", "delete"] as const;
 const BASE = "http://127.0.0.1:9/omega/api";
 const credentialReads: boolean = JSON.parse(readFileSync(join(REPO, "openapi/connectors/features.json"), "utf8")).credential_reads;
-const operationCount = credentialReads ? 57 : 54;
-const httpIdempotentCount = credentialReads ? 35 : 32;
-const paginatedCount = credentialReads ? 5 : 4;
+const operationCount = credentialReads ? 81 : 78;
+const httpIdempotentCount = credentialReads ? 50 : 47;
+const paginatedCount = credentialReads ? 9 : 8;
 function expectCredentialScope(names: string[]) {
   expect(names.filter((name) => name.startsWith("platform.credentials.")).sort()).toEqual(
     credentialReads ? ["platform.credentials.bindings", "platform.credentials.get", "platform.credentials.list"] : [],
@@ -124,8 +124,8 @@ describe("platform policy table (generated)", () => {
       keyed: 13,
       "keyed-not-durable": 3,
       "http-idempotent": httpIdempotentCount,
-      unsafe: 6,
-      stream: 2,
+      unsafe: 15,
+      stream: 3,
       paginated: paginatedCount,
     });
   });
@@ -146,16 +146,23 @@ describe("platform policy table (generated)", () => {
       keyed: 13,
       "keyed-not-durable": 3,
       "http-idempotent": httpIdempotentCount,
-      unsafe: 6,
+      unsafe: 15,
       idempotent: 16,
       durableUnstated: 4,
-      streams: 2,
+      streams: 3,
       paginated: paginatedCount,
-      notFoundMeansApplied: 0,
+      notFoundMeansApplied: 1,
     });
-    expect(Object.keys(PLATFORM_OPERATIONS).some((name) => name.startsWith("sandboxes."))).toBe(false);
+    // Hosted sandboxes are offered: 24 operations (the human-only settings PUT stays out of scope).
+    expect(Object.keys(PLATFORM_OPERATIONS).filter((name) => name.startsWith("sandboxes."))).toHaveLength(24);
+    expect(Object.keys(PLATFORM_OPERATIONS)).not.toContain("sandboxes.settings.update");
     expect(retryClassOf(PLATFORM_OPERATIONS["platform.agents.create"])).toBe("unsafe");
-    expect(Object.values(PLATFORM_OPERATIONS).some((op) => op.notFoundMeansApplied)).toBe(false);
+    // Only sandboxes.kill treats a 404 on a retry as done.
+    expect(
+      Object.entries(PLATFORM_OPERATIONS)
+        .filter(([, op]) => op.notFoundMeansApplied)
+        .map(([name]) => name),
+    ).toEqual(["sandboxes.kill"]);
     expect(
       PLATFORM_OPERATION_EXTRAS["deployments.rotateAccessToken"].replayOmits,
     ).toEqual(["accessToken"]);
@@ -180,8 +187,12 @@ describe("platform policy table (generated)", () => {
     );
     expect(Object.keys(PLATFORM_KNOWN_EVENTS).sort()).toEqual([
       "OmegaDeploymentLogFrame",
+      "OmegaExecFrame",
       "OmegaRunEventFrame",
     ]);
+    expect(PLATFORM_OPERATIONS["sandboxes.commands.run"].stream?.knownEvents).toEqual(
+      PLATFORM_KNOWN_EVENTS.OmegaExecFrame,
+    );
   });
 });
 

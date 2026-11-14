@@ -37,7 +37,7 @@ describe("simulation withdrawal", () => {
         "agents", "alerts", "annotationLabels", "annotationQueues", "connectors", "credentials",
         "datasets", "environments", "evals", "experimentRuns", "experiments", "experimentsV2",
         "gateway", "integrations", "knowledgeBases", "models", "optimizations", "prompts",
-        "scores", "tracing", "users", "workspaces",
+        "sandboxes", "scores", "tracing", "users", "workspaces",
       ].sort());
     }
   });

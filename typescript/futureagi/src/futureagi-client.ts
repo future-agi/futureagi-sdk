@@ -26,6 +26,7 @@ import { CONNECTOR_OPERATIONS } from "./_core/connector-policy";
 import { Connectors } from "./connectors";
 import { Integrations } from "./integrations";
 import { Credentials } from "./credentials";
+import { Sandboxes } from "./platform/resources/sandboxes";
 import { DEFAULT_TIMEOUT_MS, resilientFetch } from "./transport";
 import { KnowledgeBasesClient } from "./knowledge-bases";
 import { PromptsClient } from "./prompts";
@@ -78,6 +79,12 @@ export type FutureAGIClientOptions = {
   platformToken?: string;
   /** Let the keys go to a platform origin outside the Future AGI zone (`FI_ALLOW_CUSTOM_PLATFORM_URL=1`). */
   allowCustomPlatformUrl?: boolean;
+  /**
+   * Constructor-only, no environment variable: let `client.sandboxes` send a self-hosted Bearer token
+   * (`platformToken`) to an Omega EE origin that is not loopback (OpenAPI servers[1]). Sandbox calls still
+   * need HTTPS there; `allowCustomPlatformUrl` and `FI_ALLOW_CUSTOM_PLATFORM_URL` do not stand in for it.
+   */
+  allowCustomBaseUrl?: boolean;
   /** Allow non-loopback HTTP for Bearer platform calls (FI_ALLOW_INSECURE_HTTP=1); false overrides env.
    * Keys mode warns without refusing; credential provenance is still required. */
   allowInsecureHttp?: boolean;
@@ -223,8 +230,11 @@ export class FutureAGIClient {
   readonly generatedClient: Client;
 
   readonly #options: FutureAGIClientOptions;
-  private platformShared: PlatformShared;
-  private platformCore?: PlatformCore;
+  /** A base URL was given (`baseUrl` or `FI_BASE_URL`); `client.sandboxes` has no default host. */
+  #baseUrlGiven: boolean;
+  // private fields: util.inspect and JSON.stringify of a client never reach the resolved origin's credential headers
+  #platformShared: PlatformShared;
+  #platformCore?: PlatformCore;
   private managementShared: PlatformShared;
   private managementCore?: PlatformCore;
 
@@ -256,12 +266,13 @@ export class FutureAGIClient {
    */
   constructor(options: FutureAGIClientOptions = {}) {
     this.#options = { ...options };
+    this.#baseUrlGiven = (options.baseUrl ?? readEnv("FI_BASE_URL")) !== undefined;
     const baseUrl =
       options.baseUrl ?? readEnv("FI_BASE_URL") ?? DEFAULT_BASE_URL;
     // checked now; the setting is read per request, before the retrying transport (an error is never retried).
     // Core and platform calls share it: a platform origin under baseUrl (the derived one) gets the headers.
     const extra = new ExtraHeaders(baseUrl, options.extraHeaders);
-    this.platformShared = {
+    this.#platformShared = {
       // Supplemental contracts never replace certified platform operation objects.
       table: { ...CONNECTOR_OPERATIONS, ...PLATFORM_OPERATIONS },
       resolveOrigin: () => {
@@ -279,7 +290,7 @@ export class FutureAGIClient {
     };
 
     this.managementShared = {
-      ...this.platformShared,
+      ...this.#platformShared,
       table: MANAGEMENT_OPERATIONS,
       errorScrubber: scrubManagementValue,
       resolveOrigin: () => managementOrigin(baseUrl, requireAuth(options), selectorHeaders(options), options.platformToken ?? readEnv("FI_PLATFORM_TOKEN")),
@@ -326,8 +337,9 @@ export class FutureAGIClient {
    */
   withOptions(options: { timeoutMs?: number; retries?: number }): FutureAGIClient {
     const copy = new FutureAGIClient({ ...this.#options, ...options });
-    copy.platformShared = this.platformShared; // one resolved origin; the copy's own settings carry the new defaults
+    copy.#platformShared = this.#platformShared; // one resolved origin; the copy's own settings carry the new defaults
     copy.managementShared = this.managementShared;
+    copy.#baseUrlGiven = this.#baseUrlGiven;
     return copy;
   }
 
@@ -340,14 +352,25 @@ export class FutureAGIClient {
   /** Read credential metadata; mutations remain in the Console. */
   get credentials(): Credentials { return new Credentials(this); }
 
+  /** Hosted sandboxes, one method per operation (`getInfo`, `kill`, `files.makeDir`, `commands.run`, ...);
+   * `create`, `connect` and `snapshots.restore` return a `Sandbox` handle, and every method throws the sandbox
+   * errors (`SandboxError` and its status classes). There is no default host: pass `baseUrl` or
+   * `platformBaseUrl`, or set `FI_BASE_URL` or `FI_PLATFORM_BASE_URL`. Plain HTTP to anything but loopback is
+   * refused, a self-hosted origin that is not loopback needs `allowCustomBaseUrl: true`, and a call the contract
+   * marks non-idempotent is sent once. Scope: `workspaceId` / `organizationId` go as `X-Workspace-Id` /
+   * `X-Organization-Id` with keys and as `x-omega-workspace` / `x-omega-org` with `platformToken`. */
+  get sandboxes(): Sandboxes {
+    return new Sandboxes(this, { allowCustomBaseUrl: this.#options.allowCustomBaseUrl === true, baseUrlGiven: this.#baseUrlGiven });
+  }
+
   /** @internal The platform executor (`src/_core/platform-base.ts`); platform namespaces call it. */
   get _platform(): PlatformCore {
-    this.platformCore ??= new PlatformCore(this.platformShared, {
+    this.#platformCore ??= new PlatformCore(this.#platformShared, {
       timeoutMs: this.#options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
       streamIdleTimeoutMs: DEFAULT_STREAM_IDLE_MS,
       ...(this.#options.retries !== undefined ? { retries: this.#options.retries } : {}),
     });
-    return this.platformCore;
+    return this.#platformCore;
   }
 
   /** @deprecated Renamed `experimentsV2`; this alias will be removed. */

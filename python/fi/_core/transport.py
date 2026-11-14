@@ -21,7 +21,7 @@ import platform as _platform
 import sys
 import threading
 from dataclasses import dataclass, field
-from typing import Any, Callable, Mapping, Optional, Protocol, Union
+from typing import Any, Callable, Collection, Mapping, Optional, Protocol, Union
 
 import httpx
 
@@ -128,9 +128,14 @@ class Settings:
 class HeaderSource(Protocol):
     """The shape of the client's ``fi._extra_headers.ExtraHeaders`` (not imported here: ``fi._core``
     imports only the shared base): the headers a request to ``url`` carries, read when it is called,
-    ``{}`` for a URL that is not under the client's ``base_url``; raises on a malformed setting."""
+    ``{}`` for a URL that is not under the client's ``base_url``; raises on a malformed setting.
+    A platform call sends them through ``without_scope``, which drops the workspace and
+    organization headers in ``names`` (lower case) and says so once per name on stderr."""
 
     def for_url(self, url: Any) -> Mapping[str, str]:
+        ...
+
+    def without_scope(self, headers: Mapping[str, str], names: Collection[str]) -> dict[str, str]:
         ...
 
 
