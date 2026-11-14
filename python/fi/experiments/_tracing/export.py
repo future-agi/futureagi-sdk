@@ -92,7 +92,15 @@ class ScrubbingExporter(SpanExporter):
         return bool(flush(timeout_millis)) if callable(flush) else True
 
 
-def _validate_collector_endpoint(endpoint: str) -> str:
+def _normalized_host(host: str) -> Any:
+    """Compare host identities without DNS; mapped IPv6 remains distinct from IPv4."""
+    try:
+        return ip_address(host)
+    except ValueError:
+        return host.encode("idna").decode("ascii").lower().removesuffix(".")
+
+
+def _validate_collector_endpoint(endpoint: str, *, base_url: str, legacy: bool = False) -> str:
     """Validate without normalizing the transport URL or disclosing any of its value."""
     from fi.experiments.errors import ExperimentError
 
@@ -120,14 +128,17 @@ def _validate_collector_endpoint(endpoint: str) -> str:
                     or not all(re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?", label)
                                for label in ascii_host.split("."))):
                 raise ValueError
-            loopback = host.lower() == "localhost"
+            loopback = ascii_host.lower() == "localhost"
         else:
             loopback = address.is_loopback
-        if parts.scheme == "http" and not loopback:
-            raise ValueError
+        if parts.scheme == "http" and not (legacy or loopback):
+            base = urlsplit(base_url)
+            if base.scheme != "http" or _normalized_host(base.hostname or "") != _normalized_host(host):
+                raise ValueError
     except (ValueError, UnicodeError):
         raise ExperimentError(
-            "FI_COLLECTOR_ENDPOINT must be a full HTTPS trace URL (HTTP is allowed only for loopback). "
+            "FI_COLLECTOR_ENDPOINT must be a full trace URL. Use HTTPS unless the collector is loopback "
+            "or uses the same host as an HTTP API base. "
             "Use a valid host and port, with no userinfo, query, fragment, whitespace or control characters."
         ) from None
     return endpoint
@@ -135,8 +146,9 @@ def _validate_collector_endpoint(endpoint: str) -> str:
 
 def collector_endpoint(base_url: str) -> str:
     """Resolve only the FI setting, never ambient OTEL endpoints; empty keeps the hosted route."""
-    endpoint = os.environ.get("FI_COLLECTOR_ENDPOINT") or base_url.rstrip("/") + "/tracer/v1/traces"
-    return _validate_collector_endpoint(endpoint)
+    explicit = os.environ.get("FI_COLLECTOR_ENDPOINT")
+    endpoint = explicit or base_url.rstrip("/") + "/tracer/v1/traces"
+    return _validate_collector_endpoint(endpoint, base_url=base_url, legacy=not explicit)
 
 
 def run_resource(project: str, run_name: str, run_id: str) -> Any:
@@ -176,7 +188,10 @@ def exporter_factory(*, base_url: str, api_key: str, secret_key: str, project: s
     queue flush alone does not mean the collector accepted any spans."""
     from fi.experiments._tracing.export_status import ExportSession, ExportStatus
 
-    endpoint = collector_endpoint(base_url) if _endpoint is None else _validate_collector_endpoint(_endpoint)
+    endpoint = collector_endpoint(base_url) if _endpoint is None else _validate_collector_endpoint(
+        _endpoint, base_url=base_url,
+        legacy=_endpoint == base_url.rstrip("/") + "/tracer/v1/traces",
+    )
     headers = {**(extra_headers or {}), "X-Api-Key": api_key, "X-Secret-Key": secret_key}
     if outcome is None:
         outcome = ExportStatus(run_id, endpoint, redactor)

@@ -170,8 +170,13 @@ keep using the API base URL (without trailing slashes) plus `/tracer/v1/traces`.
 do not select this run's destination or credentials. The effective endpoint and export headers are
 snapshotted when the run's exporter factory is created; later environment changes do not retarget it.
 
-Use HTTPS, except for HTTP loopback destinations (`localhost`, `127.0.0.0/8` or `::1`). URLs with
-userinfo, query strings (including noncredential queries), fragments, malformed hosts or ports, or
+The derived legacy route keeps the API's scheme, including HTTP LAN installations; it does not add
+TLS to API traffic. An explicit collector must use HTTPS unless it is loopback (`localhost`,
+`127.0.0.0/8` or `::1`), or both the API and collector use HTTP on the same host (ports may differ).
+Host comparison uses lowercase IDNA names with one trailing dot removed, or exact IP-address
+identity, without DNS. A hostname is not treated as its resolved IP, and IPv4-mapped IPv6 is not
+an alias for IPv4. URLs with userinfo, query strings (including noncredential queries), fragments,
+malformed hosts or ports, or
 control characters are refused. An invalid nonempty setting fails rather than falling back; the
 error names `FI_COLLECTOR_ENDPOINT` without displaying its value. Trace export diagnostics show only
 the collector's origin (scheme, host and port), not its path.
