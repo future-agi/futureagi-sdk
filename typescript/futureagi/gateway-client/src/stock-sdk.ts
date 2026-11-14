@@ -110,9 +110,8 @@ export interface AiSdkProviderSettings {
  * const gateway = createOpenAI(aiSdkProviderSettings({ sessionId: "s1" }));
  * ```
  *
- * There is no default URL. @agentcc/vercel 1.0 fell back to
- * https://api.agentcc.ai/v1, a host the gateway project does not name, so a
- * key set without a URL went there; here the URL must resolve or this throws.
+ * There is no default URL; pass baseURL or set FI_GATEWAY_BASE_URL.
+ * If the URL cannot be resolved, this throws.
  * The key must resolve too (createOpenAI would read OPENAI_API_KEY).
  */
 export function aiSdkProviderSettings(settings: AgentCCProviderSettings = {}): AiSdkProviderSettings {

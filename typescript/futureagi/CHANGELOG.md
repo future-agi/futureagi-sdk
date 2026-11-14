@@ -79,7 +79,7 @@
 ### Bug Fixes
 
 * custom eval resolution for evalId=0 and camelCase keys (TH-3610) ([866293e](https://github.com/future-agi/futureagi-sdk/commit/866293edb87362137bb2fc790f80d52a845bd3a8))
-* remove leaked credentials, restore null-safety and backward compat in dataset parsing ([8931496](https://github.com/future-agi/futureagi-sdk/commit/8931496fd3c9e0b3fe60925870e4079d8920a4a5))
+* remove local test scripts; restore null-safety and backward compatibility in dataset parsing ([8931496](https://github.com/future-agi/futureagi-sdk/commit/8931496fd3c9e0b3fe60925870e4079d8920a4a5))
 * resolve custom eval evalId=0 in TypeScript SDK ([2db015a](https://github.com/future-agi/futureagi-sdk/commit/2db015a2b612f735b00ac847aa3c854249349087))
 
 ### Fixed: dataset payloads (unreleased)

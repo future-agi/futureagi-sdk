@@ -206,9 +206,11 @@ Recorded facts about the 1.x releases, beyond the planned deltas:
    fails validation (`resource.rerank.*`).
 5. **Python, `create_mock_client`.** It does not mock anything: requests go to
    `https://mock.agentcc.test` (`mock.create_mock_client`).
-6. **TypeScript, `@agentcc/vercel` 1.0.0.** With no base URL it calls
-   `https://api.agentcc.ai/v1`, and with only `AGENTCC_API_KEY` set it sends that
-   key there (`integration.vercel.defaults`, `integration.vercel.key_env_only`).
+6. **TypeScript, `@agentcc/vercel` 1.0.0.** With no base URL it defaults to
+   `https://api.agentcc.ai/v1` (`integration.vercel.defaults`,
+   `integration.vercel.key_env_only`). In `@future-agi/sdk/gateway`, there is no
+   default URL for `aiSdkProviderSettings`; pass `baseURL` or set
+   `FI_GATEWAY_BASE_URL`.
 7. **TypeScript, 1.0.0 version.** The published 1.0.0 reports version `0.1.0` in
    `VERSION`, `User-Agent` and `x-agentcc-sdk-version` (fixed in 1.0.1, D-01c).
 8. **TypeScript, a late stream error.** In 1.0.0 and 1.0.1 a consumer that

@@ -174,7 +174,7 @@
 * custom eval resolution for evalId=0 and camelCase keys (TH-3610) ([7966bfa](https://github.com/future-agi/futureagi-sdk/commit/7966bfaa3ce6c7d45895f550282f9281cc40f92f))
 * **datasets:** stop orphan datasets + exact by-name resolution ([1607f12](https://github.com/future-agi/futureagi-sdk/commit/1607f129bf50ba36c5120b86c0b498711b3e3d21))
 * **datasets:** stop orphan datasets + exact by-name resolution (0.6.14) ([72cba35](https://github.com/future-agi/futureagi-sdk/commit/72cba3502206a3d5a114f52763c719dade4f589c))
-* remove leaked credentials, restore null-safety and backward compat in dataset parsing ([8931496](https://github.com/future-agi/futureagi-sdk/commit/8931496fd3c9e0b3fe60925870e4079d8920a4a5))
+* remove local test scripts; restore null-safety and backward compatibility in dataset parsing ([8931496](https://github.com/future-agi/futureagi-sdk/commit/8931496fd3c9e0b3fe60925870e4079d8920a4a5))
 
 ### Fixed: dataset payloads (unreleased)
 - `Dataset.add_run_prompt` sends `max_tokens`, `temperature`, `presence_penalty`,
