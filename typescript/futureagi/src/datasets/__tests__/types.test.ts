@@ -72,51 +72,51 @@ describe('createColumn', () => {
     test('should create a valid column with required fields', () => {
         const column = createColumn({
             name: 'test_column',
-            dataType: DataTypeChoices.TEXT,
+            data_type: DataTypeChoices.TEXT,
         });
 
         expect(column.id).toBeDefined();
         expect(column.name).toBe('test_column');
-        expect(column.dataType).toBe(DataTypeChoices.TEXT);
+        expect(column.data_type).toBe(DataTypeChoices.TEXT);
         expect(column.source).toBe(SourceChoices.OTHERS);
-        expect(column.isFrozen).toBe(false);
-        expect(column.isVisible).toBe(true);
-        expect(column.evalTags).toEqual([]);
+        expect(column.is_frozen).toBe(false);
+        expect(column.is_visible).toBe(true);
+        expect(column.eval_tags).toEqual([]);
         expect(column.metadata).toEqual({});
-        expect(column.orderIndex).toBe(0);
+        expect(column.order_index).toBe(0);
     });
 
     test('should create a column with all optional fields', () => {
         const column = createColumn({
             name: 'test_column',
-            dataType: DataTypeChoices.INTEGER,
+            data_type: DataTypeChoices.INTEGER,
             source: SourceChoices.EVALUATION,
-            sourceId: 'eval-123',
+            source_id: 'eval-123',
             metadata: { key: 'value' },
-            isFrozen: true,
-            isVisible: false,
-            evalTags: ['tag1', 'tag2'],
-            averageScore: 0.85,
-            orderIndex: 5,
+            is_frozen: true,
+            is_visible: false,
+            eval_tags: ['tag1', 'tag2'],
+            average_score: 0.85,
+            order_index: 5,
         });
 
         expect(column.name).toBe('test_column');
-        expect(column.dataType).toBe(DataTypeChoices.INTEGER);
+        expect(column.data_type).toBe(DataTypeChoices.INTEGER);
         expect(column.source).toBe(SourceChoices.EVALUATION);
-        expect(column.sourceId).toBe('eval-123');
+        expect(column.source_id).toBe('eval-123');
         expect(column.metadata).toEqual({ key: 'value' });
-        expect(column.isFrozen).toBe(true);
-        expect(column.isVisible).toBe(false);
-        expect(column.evalTags).toEqual(['tag1', 'tag2']);
-        expect(column.averageScore).toBe(0.85);
-        expect(column.orderIndex).toBe(5);
+        expect(column.is_frozen).toBe(true);
+        expect(column.is_visible).toBe(false);
+        expect(column.eval_tags).toEqual(['tag1', 'tag2']);
+        expect(column.average_score).toBe(0.85);
+        expect(column.order_index).toBe(5);
     });
 
     test('should throw error for empty column name', () => {
         expect(() => {
             createColumn({
                 name: '',
-                dataType: DataTypeChoices.TEXT,
+                data_type: DataTypeChoices.TEXT,
             });
         }).toThrow('Column name cannot be empty');
     });
@@ -126,7 +126,7 @@ describe('createColumn', () => {
         expect(() => {
             createColumn({
                 name: longName,
-                dataType: DataTypeChoices.TEXT,
+                data_type: DataTypeChoices.TEXT,
             });
         }).toThrow('Column name too long (max 255 characters)');
     });
@@ -134,7 +134,7 @@ describe('createColumn', () => {
     test('should trim column name', () => {
         const column = createColumn({
             name: '  test_column  ',
-            dataType: DataTypeChoices.TEXT,
+            data_type: DataTypeChoices.TEXT,
         });
 
         expect(column.name).toBe('test_column');
@@ -144,44 +144,44 @@ describe('createColumn', () => {
 describe('createCell', () => {
     test('should create a valid cell with required fields', () => {
         const cell = createCell({
-            columnId: 'col-123',
-            rowId: 'row-456',
+            column_id: 'col-123',
+            row_id: 'row-456',
         });
 
-        expect(cell.columnId).toBe('col-123');
-        expect(cell.rowId).toBe('row-456');
-        expect(cell.valueInfos).toEqual([]);
+        expect(cell.column_id).toBe('col-123');
+        expect(cell.row_id).toBe('row-456');
+        expect(cell.value_infos).toEqual([]);
         expect(cell.metadata).toEqual({});
     });
 
     test('should create a cell with all optional fields', () => {
         const cell = createCell({
-            columnId: 'col-123',
-            rowId: 'row-456',
-            columnName: 'test_column',
+            column_id: 'col-123',
+            row_id: 'row-456',
+            column_name: 'test_column',
             value: 'test_value',
-            valueInfos: [{ info: 'test' }],
+            value_infos: [{ info: 'test' }],
             metadata: { key: 'value' },
             status: 'completed',
-            failureReason: 'none',
+            failure_reason: 'none',
         });
 
-        expect(cell.columnId).toBe('col-123');
-        expect(cell.rowId).toBe('row-456');
-        expect(cell.columnName).toBe('test_column');
+        expect(cell.column_id).toBe('col-123');
+        expect(cell.row_id).toBe('row-456');
+        expect(cell.column_name).toBe('test_column');
         expect(cell.value).toBe('test_value');
-        expect(cell.valueInfos).toEqual([{ info: 'test' }]);
+        expect(cell.value_infos).toEqual([{ info: 'test' }]);
         expect(cell.metadata).toEqual({ key: 'value' });
         expect(cell.status).toBe('completed');
-        expect(cell.failureReason).toBe('none');
+        expect(cell.failure_reason).toBe('none');
     });
 
     test('should throw error for very long cell value', () => {
         const longValue = 'a'.repeat(65536);
         expect(() => {
             createCell({
-                columnId: 'col-123',
-                rowId: 'row-456',
+                column_id: 'col-123',
+                row_id: 'row-456',
                 value: longValue,
             });
         }).toThrow('Cell value too long (max 65535 characters)');
@@ -191,8 +191,8 @@ describe('createCell', () => {
 describe('createRow', () => {
     test('should create a valid row with cells', () => {
         const cells = [
-            createCell({ columnId: 'col-1', rowId: 'row-1' }),
-            createCell({ columnId: 'col-2', rowId: 'row-1' }),
+            createCell({ column_id: 'col-1', row_id: 'row-1' }),
+            createCell({ column_id: 'col-2', row_id: 'row-1' }),
         ];
 
         const row = createRow({ cells });
@@ -204,7 +204,7 @@ describe('createRow', () => {
 
     test('should create a row with custom order', () => {
         const cells = [
-            createCell({ columnId: 'col-1', rowId: 'row-1' }),
+            createCell({ column_id: 'col-1', row_id: 'row-1' }),
         ];
 
         const row = createRow({ cells, order: 5 });
@@ -220,7 +220,7 @@ describe('createRow', () => {
 
     test('should throw error for negative order', () => {
         const cells = [
-            createCell({ columnId: 'col-1', rowId: 'row-1' }),
+            createCell({ column_id: 'col-1', row_id: 'row-1' }),
         ];
 
         expect(() => {
@@ -236,24 +236,24 @@ describe('DatasetTableUtils', () => {
             {
                 id: 'col-1',
                 name: 'name',
-                dataType: DataTypeChoices.TEXT,
+                data_type: DataTypeChoices.TEXT,
                 source: SourceChoices.OTHERS,
                 metadata: {},
-                isFrozen: false,
-                isVisible: true,
-                evalTags: [],
-                orderIndex: 0,
+                is_frozen: false,
+                is_visible: true,
+                eval_tags: [],
+                order_index: 0,
             },
             {
                 id: 'col-2',
                 name: 'age',
-                dataType: DataTypeChoices.INTEGER,
+                data_type: DataTypeChoices.INTEGER,
                 source: SourceChoices.OTHERS,
                 metadata: {},
-                isFrozen: false,
-                isVisible: true,
-                evalTags: [],
-                orderIndex: 1,
+                is_frozen: false,
+                is_visible: true,
+                eval_tags: [],
+                order_index: 1,
             },
         ],
         rows: [
@@ -261,16 +261,16 @@ describe('DatasetTableUtils', () => {
                 id: 'row-1',
                 order: 0,
                 cells: [
-                    createCell({ columnId: 'col-1', rowId: 'row-1', value: 'John' }),
-                    createCell({ columnId: 'col-2', rowId: 'row-1', value: 25 }),
+                    createCell({ column_id: 'col-1', row_id: 'row-1', value: 'John' }),
+                    createCell({ column_id: 'col-2', row_id: 'row-1', value: 25 }),
                 ],
             },
             {
                 id: 'row-2',
                 order: 1,
                 cells: [
-                    createCell({ columnId: 'col-1', rowId: 'row-2', value: 'Jane' }),
-                    createCell({ columnId: 'col-2', rowId: 'row-2', value: 30 }),
+                    createCell({ column_id: 'col-1', row_id: 'row-2', value: 'Jane' }),
+                    createCell({ column_id: 'col-2', row_id: 'row-2', value: 30 }),
                 ],
             },
         ],
@@ -321,13 +321,13 @@ describe('DatasetTableUtils', () => {
                     {
                         id: 'col-1',
                         name: 'description',
-                        dataType: DataTypeChoices.TEXT,
+                        data_type: DataTypeChoices.TEXT,
                         source: SourceChoices.OTHERS,
                         metadata: {},
-                        isFrozen: false,
-                        isVisible: true,
-                        evalTags: [],
-                        orderIndex: 0,
+                        is_frozen: false,
+                        is_visible: true,
+                        eval_tags: [],
+                        order_index: 0,
                     },
                 ],
                 rows: [
@@ -335,7 +335,7 @@ describe('DatasetTableUtils', () => {
                         id: 'row-1',
                         order: 0,
                         cells: [
-                            createCell({ columnId: 'col-1', rowId: 'row-1', value: 'Hello, World!' }),
+                            createCell({ column_id: 'col-1', row_id: 'row-1', value: 'Hello, World!' }),
                         ],
                     },
                 ],

@@ -47,20 +47,20 @@ class PromptResponseHandler extends ResponseHandler<
     if (!cfgSrc) return new ModelConfig();
 
     return new ModelConfig({
-      model_name: cfgSrc.modelName ?? cfgSrc.model,
+      model_name: cfgSrc.model_name ?? cfgSrc.model,
       temperature: cfgSrc.temperature ?? 0,
-      frequency_penalty: cfgSrc.frequencyPenalty ?? cfgSrc.frequency_penalty ?? 0,
-      presence_penalty: cfgSrc.presencePenalty ?? cfgSrc.presence_penalty ?? 0,
-      max_tokens: cfgSrc.maxTokens ?? cfgSrc.max_tokens,
-      top_p: cfgSrc.topP ?? cfgSrc.top_p ?? 0,
-      response_format: cfgSrc.responseFormat ?? cfgSrc.response_format,
-      tool_choice: cfgSrc.toolChoice ?? cfgSrc.tool_choice,
+      frequency_penalty: cfgSrc.frequency_penalty ?? 0,
+      presence_penalty: cfgSrc.presence_penalty ?? 0,
+      max_tokens: cfgSrc.max_tokens,
+      top_p: cfgSrc.top_p ?? 0,
+      response_format: cfgSrc.response_format,
+      tool_choice: cfgSrc.tool_choice,
       tools: cfgSrc.tools ?? null,
     });
   }
 
   private static _toPromptTemplate(data: Record<string, any>): PromptTemplate {
-    const promptConfigRaw = data.promptConfig || data.prompt_config;
+    const promptConfigRaw = data.prompt_config;
     let modelConfiguration: ModelConfig | undefined;
     let messages: MessageBase[] = [];
 
@@ -76,12 +76,12 @@ class PromptResponseHandler extends ResponseHandler<
       description: data.description ?? '',
       messages,
       model_configuration: modelConfiguration,
-      variable_names: data.variableNames ?? data.variable_names ?? {},
+      variable_names: data.variable_names ?? {},
       version: data.version,
-      is_default: data.isDefault ?? true,
-      evaluation_configs: data.evaluationConfigs ?? [],
+      is_default: data.is_default ?? true,
+      evaluation_configs: data.evaluation_configs ?? [],
       status: data.status,
-      error_message: data.errorMessage,
+      error_message: data.error_message,
       // include labels metadata if provided by get-by-name endpoint
       ...(Array.isArray(data.labels) ? { labels: data.labels } : {}),
       placeholders: data.placeholders ?? {},
@@ -142,7 +142,7 @@ class PromptResponseHandler extends ResponseHandler<
     }
     if (response.status === 400) {
       const detail = response.data ?? {};
-      const errorCode = detail.errorCode;
+      const errorCode = detail.error_code;
       // Map "template not found" phrasing used by backend to our TemplateNotFound exception
       if (detail?.result && typeof detail.result === 'string') {
         const lowercase = detail.result.toLowerCase();
@@ -404,7 +404,7 @@ export class Prompt extends APIKeyAuth {
     // Update template with returned info
     this.template.id = response.id;
     this.template.name = response.name;
-    this.template.version = response.templateVersion ?? response.createdVersion ?? 'v1';
+    this.template.version = response.template_version ?? response.created_version ?? 'v1';
 
     return this;
   }
@@ -456,7 +456,7 @@ export class Prompt extends APIKeyAuth {
 
     // The backend typically returns { result: [ { templateVersion: 'vX', ... } ] }
     if (resp && typeof resp === 'object' && resp.result && Array.isArray(resp.result) && resp.result.length > 0) {
-      const newVersion = resp.result[0]?.templateVersion;
+      const newVersion = resp.result[0]?.template_version;
       if (newVersion && this.template) {
         this.template.version = newVersion;
       }
@@ -492,7 +492,7 @@ export class Prompt extends APIKeyAuth {
   /** Internal draft-status helper */
   private async _currentVersionIsDraft(): Promise<boolean> {
     const history = await this._fetchTemplateVersionHistory();
-    return history.some((e) => e.templateVersion === this.template?.version && e.isDraft === true);
+    return history.some((e) => e.template_version === this.template?.version && e.is_draft === true);
   }
 
   /** Apply selected fields from another PromptTemplate to current */

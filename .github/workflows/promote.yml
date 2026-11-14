@@ -1,0 +1,50 @@
+name: Promote dev to main
+
+# Prepare the promotion PR, but never authorize publication from a dev push.
+# A person chooses when to merge dev into main; main then releases automatically.
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: promote-dev-to-main
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.RELEASE_BOT_APP_ID || secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+          owner: future-agi
+          repositories: futureagi-sdk
+      - name: Prepare a promotion for human review
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          number=$(gh pr list --base main --head dev --state open --json number --jq '.[0].number // empty')
+          if [ -z "$number" ]; then
+            if [ "$(gh api "repos/$GH_REPO/compare/main...dev" --jq .ahead_by)" = '0' ]; then
+              echo 'Nothing to promote.'
+              exit 0
+            fi
+            gh pr create --base main --head dev \
+              --title 'chore: release dev to main' \
+              --body 'Promote reviewed changes with a merge commit to retain their Conventional Commit history. After main CI and E2E pass, SDK versioning and publication are automatic. This promotion requires human review and is never auto-approved by the release workflow.'
+            number=$(gh pr list --base main --head dev --state open --json number --jq '.[0].number')
+          fi
+          # Remove auto-merge left by the previous sync-only promotion policy.
+          enabled=$(gh pr view "$number" --json autoMergeRequest --jq '.autoMergeRequest != null')
+          if [ "$enabled" = 'true' ]; then
+            gh pr merge --disable-auto "$number"
+          fi
+          echo "Promotion #$number is ready for human review. No SDK was published."

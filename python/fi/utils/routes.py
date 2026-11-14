@@ -15,6 +15,29 @@ class Routes(str, Enum):
     get_eval_result = "sdk/api/v1/new-eval/"
     evaluate_pipeline = "sdk/api/v1/evaluate-pipeline/"
 
+    # eval template management (revamp, Phases 1–7)
+    eval_template_list = "model-hub/eval-templates/list/"
+    eval_template_create_v2 = "model-hub/eval-templates/create-v2/"
+    eval_template_detail = "model-hub/eval-templates/{template_id}/detail/"
+    eval_template_update_v2 = "model-hub/eval-templates/{template_id}/update/"
+    eval_template_delete = "model-hub/delete-eval-template/"
+    eval_template_bulk_delete = "model-hub/eval-templates/bulk-delete/"
+    eval_template_version_list = "model-hub/eval-templates/{template_id}/versions/"
+    eval_template_version_create = (
+        "model-hub/eval-templates/{template_id}/versions/create/"
+    )
+    eval_template_version_set_default = (
+        "model-hub/eval-templates/{template_id}/versions/{version_id}/set-default/"
+    )
+    eval_template_version_restore = (
+        "model-hub/eval-templates/{template_id}/versions/{version_id}/restore/"
+    )
+    composite_eval_create = "model-hub/eval-templates/create-composite/"
+    composite_eval_detail = "model-hub/eval-templates/{template_id}/composite/"
+    composite_eval_execute = (
+        "model-hub/eval-templates/{template_id}/composite/execute/"
+    )
+
     # dataset
     dataset = "model-hub/develops"
     dataset_names = "model-hub/develops/get-datasets-names/"

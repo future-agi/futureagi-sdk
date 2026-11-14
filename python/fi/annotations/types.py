@@ -29,11 +29,11 @@ class BulkAnnotationResponse(BaseModel):
     """Represents the success payload from bulk-annotation endpoint."""
 
     message: str
-    annotationsCreated: int
-    annotationsUpdated: int
-    notesCreated: int
-    succeededCount: int
-    errorsCount: int
-    warningsCount: int
+    annotations_created: int
+    annotations_updated: int
+    notes_created: int
+    succeeded_count: int
+    errors_count: int
+    warnings_count: int
     warnings: Optional[List[Dict[str, Any]]] = None
     errors: Optional[List[Dict[str, Any]]] = None

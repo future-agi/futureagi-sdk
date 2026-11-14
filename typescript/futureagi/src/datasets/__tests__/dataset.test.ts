@@ -53,7 +53,7 @@ describe('DatasetResponseHandler', () => {
                     result: {
                         datasets: [
                             {
-                                datasetId: 'dataset-123',
+                                dataset_id: 'dataset-123',
                                 name: 'test-dataset',
                             },
                         ],
@@ -95,8 +95,8 @@ describe('DatasetResponseHandler', () => {
                 data: {
                     result: {
                         datasets: [
-                            { datasetId: '1', name: 'dataset1', },
-                            { datasetId: '2', name: 'dataset2', },
+                            { dataset_id: '1', name: 'dataset1', },
+                            { dataset_id: '2', name: 'dataset2', },
                         ],
                     },
                 },
@@ -115,30 +115,30 @@ describe('DatasetResponseHandler', () => {
             const mockResponse: Partial<AxiosResponse> = {
                 data: {
                     result: {
-                        columnConfig: [
+                        column_config: [
                             {
                                 id: 'col-1',
                                 name: 'name',
-                                dataType: DataTypeChoices.TEXT,
-                                originType: SourceChoices.OTHERS,
-                                sourceId: null,
-                                isFrozen: { isFrozen: false },
-                                isVisible: true,
-                                evalTag: [],
-                                averageScore: null,
-                                orderIndex: 0,
+                                data_type: DataTypeChoices.TEXT,
+                                origin_type: SourceChoices.OTHERS,
+                                source_id: null,
+                                is_frozen: { is_frozen: false },
+                                is_visible: true,
+                                eval_tag: [],
+                                average_score: null,
+                                order_index: 0,
                             },
                         ],
                         table: [
                             {
-                                rowId: 'row-1',
+                                row_id: 'row-1',
                                 order: 0,
                                 'col-1': {
-                                    cellValue: 'John',
-                                    valueInfos: null,
+                                    cell_value: 'John',
+                                    value_infos: null,
                                     metadata: null,
                                     status: 'completed',
-                                    failureReason: null,
+                                    failure_reason: null,
                                 },
                             },
                         ],
@@ -163,8 +163,8 @@ describe('DatasetResponseHandler', () => {
             const mockResponse: Partial<AxiosResponse> = {
                 data: {
                     result: {
-                        datasetId: 'dataset-123',
-                        datasetName: 'test-dataset',
+                        dataset_id: 'dataset-123',
+                        dataset_name: 'test-dataset',
                     },
                 },
                 config: {
@@ -320,7 +320,7 @@ describe('Dataset', () => {
                 name: 'squad',
                 subset: 'plain_text',
                 split: 'train',
-                numRows: 1000,
+                num_rows: 1000,
             };
 
             (dataset as any)._datasetConfig = config;
@@ -449,8 +449,8 @@ describe('Dataset', () => {
             };
 
             const columns = [
-                createColumn({ name: 'col1', dataType: DataTypeChoices.TEXT }),
-                createColumn({ name: 'col2', dataType: DataTypeChoices.INTEGER }),
+                createColumn({ name: 'col1', data_type: DataTypeChoices.TEXT }),
+                createColumn({ name: 'col2', data_type: DataTypeChoices.INTEGER }),
             ];
 
             (dataset as any)._datasetConfig = config;
@@ -469,7 +469,7 @@ describe('Dataset', () => {
 
         test('should throw error when dataset ID is not set', async () => {
             const columns = [
-                createColumn({ name: 'col1', dataType: DataTypeChoices.TEXT }),
+                createColumn({ name: 'col1', data_type: DataTypeChoices.TEXT }),
             ];
 
             await expect(dataset.addColumns(columns)).rejects.toThrow(DatasetError);
@@ -496,7 +496,7 @@ describe('Dataset', () => {
             const rows = [
                 createRow({
                     cells: [
-                        createCell({ columnId: 'col-1', rowId: 'row-1', value: 'test' }),
+                        createCell({ column_id: 'col-1', row_id: 'row-1', value: 'test' }),
                     ],
                 }),
             ];
@@ -519,7 +519,7 @@ describe('Dataset', () => {
             const rows = [
                 createRow({
                     cells: [
-                        createCell({ columnId: 'col-1', rowId: 'row-1', value: 'test' }),
+                        createCell({ column_id: 'col-1', row_id: 'row-1', value: 'test' }),
                     ],
                 }),
             ];
@@ -596,13 +596,13 @@ describe('Dataset', () => {
                     {
                         id: 'col-1',
                         name: 'test_column',
-                        dataType: DataTypeChoices.TEXT,
+                        data_type: DataTypeChoices.TEXT,
                         source: SourceChoices.OTHERS,
                         metadata: {},
-                        isFrozen: false,
-                        isVisible: true,
-                        evalTags: [],
-                        orderIndex: 0,
+                        is_frozen: false,
+                        is_visible: true,
+                        eval_tags: [],
+                        order_index: 0,
                     },
                 ],
                 rows: [],
