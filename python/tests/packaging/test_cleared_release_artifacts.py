@@ -265,8 +265,8 @@ class WorkflowTests(unittest.TestCase):
             "schema_version": 1,
             "releases": {
                 "python-v0.8.0": {
-                    "futureagi-0.8.0-py3-none-any.whl": "3278af3145d7d40cedd826a7aa7d6ddda20b8d1f5cac4a1fb81700cf050b6e30",
-                    "futureagi-0.8.0.tar.gz": "a1209e122e83c6e66993bd0a6175d18337002dd39216fb70a45fbd12d3de2d8f",
+                    "futureagi-0.8.0-py3-none-any.whl": "d9a765e895f90b6b20fadf72bfda9a19da163fd2f1551214cd85dfc9b215538e",
+                    "futureagi-0.8.0.tar.gz": "fa8aeee0c0b798f16a8d25ab6adf25443f6c04f7a26b9398ba3388cfd0ae7d94",
                 },
                 "typescript-v0.3.0": {
                     "future-agi-sdk-0.3.0.tgz": "3f17452cd578c1f978013bec2dded0fc89cdf00e9de4fd25e92682e8f4649fc5",
