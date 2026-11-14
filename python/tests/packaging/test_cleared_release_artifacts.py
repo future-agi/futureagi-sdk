@@ -170,8 +170,10 @@ class CheckerTests(unittest.TestCase):
                 digest = files.pop("futureagi-0.8.0.tar.gz")
                 files[name] = digest
                 self.write_manifest()
-                self.assert_rejected(self.run_checker())
-                files["futureagi-0.8.0.tar.gz"] = files.pop(name)
+                try:
+                    self.assert_rejected(self.run_checker())
+                finally:
+                    files["futureagi-0.8.0.tar.gz"] = files.pop(name)
 
     def test_artifact_symlink_is_rejected_even_with_matching_bytes(self):
         self.populate()
