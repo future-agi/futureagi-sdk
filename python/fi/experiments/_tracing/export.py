@@ -6,9 +6,10 @@ key names a credential (``_redact.is_credential_key``: ``authorization``, ``api_
 ``x-api-key``, ``secret``, ``password``, ``cookie``, ``bearer``, ``private_key``, ``credential``,
 or a name ending in the word ``token`` such as ``access_token`` / ``x-auth-token``) are replaced
 whole. Token counts (``*_tokens``, ``token_count``, ``max_tokens``) are not credentials and stay.
-The exporter sends to ``{base_url}/tracer/v1/traces`` with the run's own keys, never the
-environment's, plus the run client's extra headers (``FI_EXTRA_HEADERS``; ``fi._extra_headers``),
-and the provider is never installed globally.
+The exporter sends to the full ``FI_COLLECTOR_ENDPOINT`` URL, or to ``{base_url}/tracer/v1/traces``
+when that setting is absent or empty, with the run's own keys, never ambient OTEL credentials or
+destinations. The run client's extra headers (``FI_EXTRA_HEADERS``; ``fi._extra_headers``) remain
+bound to the client's origin and base path, and the provider is never installed globally.
 
 Where the spans are stored: in the **Observe** project named by ``project``
 (default ``"<dataset> · experiments"``). The trace collector (fi-collector) creates every project as
@@ -21,7 +22,11 @@ baggage, copied onto child spans), and every uploaded item carries its ``trace_i
 
 from __future__ import annotations
 
+from ipaddress import ip_address
+import os
+import re
 from typing import Any, Callable, Mapping, Sequence
+from urllib.parse import unquote, urlsplit
 
 from opentelemetry.sdk.trace import Event, ReadableSpan
 from opentelemetry.sdk.trace.export import SpanExporter, SpanExportResult
@@ -87,8 +92,51 @@ class ScrubbingExporter(SpanExporter):
         return bool(flush(timeout_millis)) if callable(flush) else True
 
 
+def _validate_collector_endpoint(endpoint: str) -> str:
+    """Validate without normalizing the transport URL or disclosing any of its value."""
+    from fi.experiments.errors import ExperimentError
+
+    try:
+        # urlsplit silently strips some whitespace/controls: refuse them before parsing.
+        if (any(c.isspace() or ord(c) < 32 or 127 <= ord(c) < 160 for c in endpoint)
+                or any(c in endpoint for c in "?#\\")
+                or re.search(r"%(?![0-9a-fA-F]{2})", endpoint)
+                or any(ord(c) < 32 or 127 <= ord(c) < 160 or c == "\\" for c in unquote(endpoint))):
+            raise ValueError
+        parts = urlsplit(endpoint)
+        host, port = parts.hostname or "", parts.port
+        if (parts.scheme not in ("http", "https") or not host
+                or parts.username is not None or parts.password is not None
+                or "%" in parts.netloc
+                or not re.fullmatch(r"(?:\[[^\]]+\]|[^:\[\]]+)(?::[0-9]+)?", parts.netloc)
+                or port is not None and not 1 <= port <= 65535):
+            raise ValueError
+        try:
+            address = ip_address(host)
+        except ValueError:
+            ascii_host = host.encode("idna").decode("ascii").removesuffix(".")
+            if (parts.netloc.startswith("[") or len(ascii_host) > 253
+                    or re.fullmatch(r"[0-9.]+", ascii_host)
+                    or not all(re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?", label)
+                               for label in ascii_host.split("."))):
+                raise ValueError
+            loopback = host.lower() == "localhost"
+        else:
+            loopback = address.is_loopback
+        if parts.scheme == "http" and not loopback:
+            raise ValueError
+    except (ValueError, UnicodeError):
+        raise ExperimentError(
+            "FI_COLLECTOR_ENDPOINT must be a full HTTPS trace URL (HTTP is allowed only for loopback). "
+            "Use a valid host and port, with no userinfo, query, fragment, whitespace or control characters."
+        ) from None
+    return endpoint
+
+
 def collector_endpoint(base_url: str) -> str:
-    return base_url.rstrip("/") + "/tracer/v1/traces"
+    """Resolve only the FI setting, never ambient OTEL endpoints; empty keeps the hosted route."""
+    endpoint = os.environ.get("FI_COLLECTOR_ENDPOINT") or base_url.rstrip("/") + "/tracer/v1/traces"
+    return _validate_collector_endpoint(endpoint)
 
 
 def run_resource(project: str, run_name: str, run_id: str) -> Any:
@@ -113,20 +161,25 @@ def run_resource(project: str, run_name: str, run_id: str) -> Any:
 
 def exporter_factory(*, base_url: str, api_key: str, secret_key: str, project: str, run_name: str, run_id: str,
                      redactor: Redactor, inner: Any = None,
-                     extra_headers: Mapping[str, str] | None = None, outcome: Any = None) -> Callable[[], Any]:
+                     extra_headers: Mapping[str, str] | None = None, outcome: Any = None,
+                     _endpoint: str | None = None) -> Callable[[], Any]:
     """A factory for the run's delegate provider: a plain OpenTelemetry provider with one batch
     processor over the scrubbing exporter. traceAI's ``register()`` is not used: it installs SIGINT
     and SIGTERM handlers that call ``sys.exit(0)`` (the run's Ctrl-C contract is exit 4 after the
     journal flush), and its provider drops every processor on the next ``add_span_processor``.
 
     ``extra_headers`` (the run client's ``FI_EXTRA_HEADERS`` / ``extra_headers=``, read when the run
-    starts) go on every export to the collector, beside the run's keys; they never become a span
-    attribute. ``outcome`` records terminal batch failures for the engine to report after shutdown;
-    a successful queue flush alone does not mean the collector accepted any spans."""
+    starts and scoped to the destination by UploadSession) go beside the run's keys; they never
+    become a span attribute. ``_endpoint`` is UploadSession's snapshot, shared with its header
+    selection and status. Resolve it here only for callers without that snapshot, never in ``make``.
+    ``outcome`` records terminal batch failures for the engine to report after shutdown; a successful
+    queue flush alone does not mean the collector accepted any spans."""
     from fi.experiments._tracing.export_status import ExportSession, ExportStatus
 
+    endpoint = collector_endpoint(base_url) if _endpoint is None else _validate_collector_endpoint(_endpoint)
+    headers = {**(extra_headers or {}), "X-Api-Key": api_key, "X-Secret-Key": secret_key}
     if outcome is None:
-        outcome = ExportStatus(run_id, collector_endpoint(base_url), redactor)
+        outcome = ExportStatus(run_id, endpoint, redactor)
 
     def make() -> Any:
         from opentelemetry.sdk.trace import TracerProvider
@@ -136,8 +189,7 @@ def exporter_factory(*, base_url: str, api_key: str, secret_key: str, project: s
         if exporter is None:
             from fi_instrumentation.otel import HTTPSpanExporter
 
-            headers = {**(extra_headers or {}), "X-Api-Key": api_key, "X-Secret-Key": secret_key}
-            exporter = HTTPSpanExporter(endpoint=collector_endpoint(base_url), headers=headers,
+            exporter = HTTPSpanExporter(endpoint=endpoint, headers=headers,
                                         session=ExportSession(outcome))
         provider = TracerProvider(resource=run_resource(project, run_name, run_id))
         provider.add_span_processor(BatchSpanProcessor(ScrubbingExporter(exporter, redactor, outcome)))

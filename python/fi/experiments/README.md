@@ -148,3 +148,39 @@ being set. This is being fixed; do not rely on an unconditional deadline or late
 
 A task timeout does not stop that task's external work or undo its side effects. Ctrl-C also requests
 cancellation; the cost cap only stops new trials and does not cancel one in flight.
+
+## 8. Trace collection on self-hosted installations
+
+For `futureagi` experiments, the platform API and HTTP trace collector can use different ports:
+
+```sh
+export FI_BASE_URL=http://localhost:8000
+export FI_COLLECTOR_ENDPOINT=http://localhost:4318/v1/traces
+```
+
+`FI_BASE_URL` still selects the API for datasets, runs and results. `FI_COLLECTOR_ENDPOINT` is the
+**full HTTP trace URL**, including the collector's path. A nonempty value takes precedence over the
+API-derived trace route; no path is appended to it. `futureagi` reads this setting and passes it as
+`HTTPSpanExporter(endpoint=...)` to traceAI's HTTP exporter. This does not imply that Python traceAI
+itself reads `FI_COLLECTOR_ENDPOINT`.
+
+Hosted installations need no new setting. When `FI_COLLECTOR_ENDPOINT` is unset or empty, experiments
+keep using the API base URL (without trailing slashes) plus `/tracer/v1/traces`. Ambient
+`OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` and OTEL exporter header settings
+do not select this run's destination or credentials. The effective endpoint and export headers are
+snapshotted when the run's exporter factory is created; later environment changes do not retarget it.
+
+Use HTTPS, except for HTTP loopback destinations (`localhost`, `127.0.0.0/8` or `::1`). URLs with
+userinfo, query strings (including noncredential queries), fragments, malformed hosts or ports, or
+control characters are refused. An invalid nonempty setting fails rather than falling back; the
+error names `FI_COLLECTOR_ENDPOINT` without displaying its value. Trace export diagnostics show only
+the collector's origin (scheme, host and port), not its path.
+
+The run's own `X-Api-Key` and `X-Secret-Key` authenticate either the legacy destination or the explicit
+collector, including a collector on a different port. Choose that destination deliberately.
+`FI_EXTRA_HEADERS` and client `extra_headers=` remain bound to the client's API origin and base path;
+they are not forwarded to a different collector origin. Trace exports do not follow redirects.
+
+Trace delivery failures still raise `TraceExportError` (CLI exit 3) after tracing shutdown and flush.
+Run items may already be stored even if trace export fails. Check `FI_COLLECTOR_ENDPOINT`, the
+collector route and connectivity. Spans are not journaled, so resume does not re-export lost spans.
