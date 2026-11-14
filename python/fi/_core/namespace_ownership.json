@@ -6,7 +6,7 @@
   "distributions": {
     "futureagi": {
       "minimum_version": [0, 7, 0],
-      "paths": ["fi/"],
+      "paths": ["fi/", "_futureagi_namespace_guard.py", "futureagi_namespace_guard.pth"],
       "excludes": ["fi/alk/"]
     },
     "agent-learning-kit": {
