@@ -253,7 +253,9 @@ SPECIAL: Dict[str, Tuple[Dict[str, Any], Dict[Tuple[str, str], Any]]] = {
 INTENDED_DIFFERENCES: Dict[str, str] = {
     "error_server_rejects_keys": (
         "requests: ai-evaluation re-sent a request that got an HTTP error status (3 attempts, 1 s "
-        "apart); this package sends it once, because only transport failures are retried"
+        "apart); this package sends it once, because only transport failures are retried. reason: "
+        "the server's sentence and the status, then the hint about the keys, instead of one fixed "
+        "sentence about the keys"
     ),
     "error_missing_keys": (
         "message: the missing-keys error names `futureagi-py login` as a third way to supply keys"

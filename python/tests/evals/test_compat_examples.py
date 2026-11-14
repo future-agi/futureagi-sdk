@@ -37,15 +37,30 @@ def test_example_matches_ai_evaluation_1_1_0(name: str, monkeypatch: pytest.Monk
     assert {k: v for k, v in got.items() if k != "requests"} == {k: v for k, v in want.items() if k != "requests"}
 
 
+def _without_reasons(result: dict) -> dict:
+    return dict(result, eval_results=[dict(r, reason=None) for r in result["eval_results"]])
+
+
 def test_an_http_error_status_is_sent_once_not_three_times(monkeypatch: pytest.MonkeyPatch) -> None:
     """ai-evaluation re-sent a request whose response was an HTTP error (its retry loop also caught
     the error the response handler raised): three POSTs a second apart. Here only transport
-    failures are retried, so the request goes once; the result is the same."""
+    failures are retried, so the request goes once; the result is the same apart from its reason."""
     name = "error_server_rejects_keys"
     got, want = _run(name, monkeypatch), golden()["examples"][name]
     assert len(want["requests"]) == 3 and all(r == want["requests"][0] for r in want["requests"])
     assert got["requests"] == want["requests"][:1]
-    assert got["result"] == want["result"]
+    assert _without_reasons(got["result"]) == _without_reasons(want["result"])
+
+
+def test_a_403_reason_leads_with_the_server_sentence_then_the_key_hint(monkeypatch: pytest.MonkeyPatch) -> None:
+    """ai-evaluation answered every 403 with one fixed sentence about the keys, whatever the server
+    said. Here the reason is the server's sentence and the status, then the same hint about the keys."""
+    name = "error_server_rejects_keys"
+    got, want = _run(name, monkeypatch), golden()["examples"][name]
+    assert [r["reason"] for r in want["result"]["eval_results"]] == [
+        "Invalid FI Client Authentication, please check your API key and secret key."]
+    assert [r["reason"] for r in got["result"]["eval_results"]] == [
+        "Authentication credentials were not provided. (HTTP 403) Check your API key and secret key."]
 
 
 def test_missing_keys_raise_the_same_error_class(monkeypatch: pytest.MonkeyPatch) -> None:
