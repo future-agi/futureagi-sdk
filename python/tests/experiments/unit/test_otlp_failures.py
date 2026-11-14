@@ -96,10 +96,11 @@ def test_uploaded_run_cannot_succeed_after_otlp_failure(status, caplog):
     exc = error.value
     assert type(exc).__name__ == "TraceExportError"
     assert exc.get_error_code() == "TRACE_EXPORT_FAILED" and exc.exit_code == 3
-    assert exc.endpoint == base + PATH
+    assert exc.endpoint == base
     assert exc.status_code == (None if status == "refused" else status)
     assert ("connection" if status == "refused" else f"HTTP {status}") in str(exc)
-    assert exc.to_json()["endpoint"] == base + PATH
+    assert exc.to_json()["endpoint"] == base
+    assert PATH not in str(exc) + json.dumps(exc.to_json())
     assert exc.to_json()["status_code"] == exc.status_code
     # A trace-export failure is not a failed task or an item-ingest failure.
     [stored] = server.runs.values()
@@ -108,7 +109,8 @@ def test_uploaded_run_cannot_succeed_after_otlp_failure(status, caplog):
     assert exc.run_id in server.runs
     export_warnings = [w for w in caught if type(w.message).__name__ == "TraceExportWarning"]
     assert len(export_warnings) == 1, "exactly one warning per run, even with progress=False"
-    assert base + PATH in str(export_warnings[0].message)
+    assert base in str(export_warnings[0].message)
+    assert PATH not in str(export_warnings[0].message)
     assert ("connection" if status == "refused" else f"HTTP {status}") in str(export_warnings[0].message)
     assert SECRET not in str(exc) + str(export_warnings[0].message) + caplog.text
     if status != "refused":

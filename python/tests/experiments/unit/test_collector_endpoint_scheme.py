@@ -37,6 +37,8 @@ _SCOPE_CASES = [
     ("http://COLLECTOR.Example.:8000", "http://collector.example:4318/v1/traces", True, "base-case-trailing-dot"),
     ("http://collector.example:8000", "http://COLLECTOR.example.:4318/v1/traces", True, "endpoint-case-trailing-dot"),
     ("http://bücher.example:8000", "http://xn--bcher-kva.example:4318/v1/traces", True, "idna-equal"),
+    ("http://fass.example:8000", "http://faß.example:4318/v1/traces", False, "idna-sharp-s-is-not-ss"),
+    ("http://xn--fa-hia.example:8000", "http://faß.example:4318/v1/traces", True, "idna-sharp-s-punycode"),
     ("http://[2001:db8::5]:8000", "http://[2001:0db8:0:0:0:0:0:5]:4318/v1/traces", True, "ipv6-equal"),
     ("https://api.example", "http://localhost:4318/v1/traces", True, "loopback-with-https-base"),
     ("https://api.example", "http://LOCALHOST.:4318/v1/traces", True, "loopback-case-trailing-dot"),

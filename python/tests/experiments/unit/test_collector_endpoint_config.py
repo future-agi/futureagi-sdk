@@ -27,8 +27,7 @@ def isolated_endpoint_environment(monkeypatch):
         monkeypatch.delenv(name, raising=False)
 
 
-@pytest.fixture
-def provider_capture(monkeypatch):
+def _install_provider_capture(monkeypatch):
     """Exercise the delayed factory without starting a batch worker or global provider."""
     import opentelemetry.sdk.trace
     import opentelemetry.sdk.trace.export
@@ -43,6 +42,11 @@ def provider_capture(monkeypatch):
     monkeypatch.setattr(opentelemetry.sdk.trace, "TracerProvider", Provider)
     monkeypatch.setattr(opentelemetry.sdk.trace.export, "BatchSpanProcessor",
                         lambda exporter: SimpleNamespace(exporter=exporter))
+
+
+@pytest.fixture
+def provider_capture(monkeypatch):
+    _install_provider_capture(monkeypatch)
 
 
 @pytest.fixture
@@ -133,12 +137,16 @@ def test_ambient_otel_destinations_and_headers_are_not_selected(monkeypatch, exp
     assert exporter_calls[0]["headers"] == {"X-Api-Key": "test-run-api", "X-Secret-Key": "test-run-secret"}
 
 
-def test_real_http_exporter_ignores_ambient_otel_headers(monkeypatch, provider_capture):
+def test_real_http_exporter_ignores_ambient_otel_headers(monkeypatch):
     """Use traceAI's real constructor and OTLP serializer, with an in-memory HTTP adapter."""
     monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://foreign.example.test/base")
     monkeypatch.setenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "https://foreign.example.test/traces")
     monkeypatch.setenv("OTEL_EXPORTER_OTLP_HEADERS", "Authorization=test-foreign-header,X-Ambient=test-ambient")
     monkeypatch.setenv("OTEL_EXPORTER_OTLP_TRACES_HEADERS", "X-Ambient-Traces=test-ambient-traces")
+    # Load real exporter classes before replacing the SDK processor used by our factory.
+    import fi_instrumentation.otel  # noqa: F401
+
+    _install_provider_capture(monkeypatch)
     sent = []
 
     def send(adapter, request, **kwargs):
@@ -284,7 +292,9 @@ def test_secure_or_loopback_destinations_are_valid(monkeypatch, endpoint):
     "nul", "encoded-control", "bad-escape", "backslash", "host-space", "empty-host-label", "blank",
 ])
 def test_invalid_explicit_destination_fails_without_echo(monkeypatch, endpoint, capsys, caplog):
-    monkeypatch.setenv("FI_COLLECTOR_ENDPOINT", endpoint)
+    # The OS cannot store NUL in an environment variable; exercise parser input directly.
+    monkeypatch.setattr(tracing_export, "os",
+                        SimpleNamespace(environ={"FI_COLLECTOR_ENDPOINT": endpoint}), raising=False)
     with pytest.raises(ExperimentError, match="FI_COLLECTOR_ENDPOINT") as caught:
         _factory()
     assert caught.value.exit_code == 3
