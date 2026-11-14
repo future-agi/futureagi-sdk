@@ -5,6 +5,8 @@ from concurrent.futures import Future
 
 import pytest
 import requests
+from requests_futures.sessions import FuturesSession
+
 from fi.prompt import Prompt
 from fi.prompt.cache import PromptCache
 from fi.prompt.client import PromptResponseHandler
@@ -14,7 +16,6 @@ from fi.utils.errors import (
     TemplateAlreadyExists,
     TemplateNotFound,
 )
-from requests_futures.sessions import FuturesSession
 
 BAD_REQUEST_MESSAGE = "Bad request – please verify request body."
 
