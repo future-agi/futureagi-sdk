@@ -300,8 +300,9 @@ def test_invalid_explicit_destination_fails_without_echo(monkeypatch, endpoint, 
 
 def test_invalid_legacy_destination_is_rejected_without_echo():
     with pytest.raises(ExperimentError, match="FI_COLLECTOR_ENDPOINT") as caught:
-        _factory("http://remote.example.test")
+        _factory("http://test-user:test-sensitive-value@remote.example.test")
     assert "remote.example.test" not in str(caught.value)
+    assert "test-sensitive-value" not in str(caught.value)
 
 
 def test_status_warning_and_json_disclose_only_origin():
