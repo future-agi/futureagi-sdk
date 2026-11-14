@@ -83,10 +83,12 @@ jobs:
         run: |
           python -m pip install --quiet python/dist/*.whl
           python -c "import fi, fi.platform, fi.gateway; print('futureagi', fi.__version__)"
+      - name: Verify independently cleared artifacts and require an unpublished version
+        run: python .github/scripts/verify_cleared_artifacts.py --tag "$TAG" --directory python/dist --require-unpublished
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: python/dist
-          skip-existing: true
+          skip-existing: false
 
       - name: Install the published package from PyPI and run the quickstart
         # What a user gets, not what we built: a fresh venv, no local files,
@@ -144,6 +146,9 @@ jobs:
         with:
           node-version: "24"
           registry-url: https://registry.npmjs.org
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Use npm with trusted publishing support
         run: npm install --global npm@11.6.2
       - name: Install and build
@@ -152,18 +157,26 @@ jobs:
           pnpm run build
           version=$(node -p "require('./package.json').version")
           [ "typescript-v$version" = "$TAG" ] || { echo "::error::package.json is $version, tag is $TAG"; exit 1; }
-      - name: Publish through the npm trusted publisher
+      - name: Stage the canonical package into a fresh temporary directory
+        id: package
         run: |
-          name=$(node -p "require('./package.json').name")
-          version=$(node -p "require('./package.json').version")
-          if npm view "$name@$version" version >/dev/null 2>&1; then
-            echo "$name@$version is already on npm"
-            exit 0
-          fi
+          candidate=$(mktemp -d "$RUNNER_TEMP/npm-cleared.XXXXXX")
+          node gateway-client/scripts/stage-package.cjs "$candidate/staged"
+          mkdir "$candidate/dist"
+          mv "$candidate"/staged/*.tgz "$candidate/dist/"
+          echo "directory=$candidate/dist" >> "$GITHUB_OUTPUT"
+      - name: Verify independently cleared artifacts and require an unpublished version
+        env:
+          DIST_DIR: ${{ steps.package.outputs.directory }}
+        run: python "$GITHUB_WORKSPACE/.github/scripts/verify_cleared_artifacts.py" --tag "$TAG" --directory "$DIST_DIR" --require-unpublished
+      - name: Publish through the npm trusted publisher
+        env:
+          DIST_DIR: ${{ steps.package.outputs.directory }}
+        run: |
           # Do not use a placeholder/persistent token: npm exchanges the Actions
           # identity for short-lived publish credentials scoped to this workflow.
           unset NODE_AUTH_TOKEN NPM_TOKEN
-          npm publish --access public --provenance --ignore-scripts
+          npm publish "$DIST_DIR/future-agi-sdk-${TAG#typescript-v}.tgz" --access public --provenance --ignore-scripts
 
       - name: Install the published package from npm and run the quickstart
         # A fresh project, the exact version from the registry, both module
