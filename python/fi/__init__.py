@@ -6,7 +6,7 @@ _check_alk_overlap()
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
-__version__ = "0.7.0"  # x-release-please-version
+__version__ = "0.8.0"  # x-release-please-version
 
 # Keep the release-please literal above; installed metadata (or the source
 # declaration) remains authoritative for the public version and its legacy alias.

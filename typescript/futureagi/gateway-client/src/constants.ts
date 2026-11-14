@@ -6,7 +6,7 @@
  * It is declared `string` so constants.d.ts carries no version and stays the same
  * file from one release to the next (scripts/build.cjs refuses the literal form).
  */
-export const VERSION: string = "0.2.0"; // x-release-please-version
+export const VERSION: string = "0.3.0"; // x-release-please-version
 
 // Defaults
 export const DEFAULT_TIMEOUT = 600_000; // 600s in ms

@@ -1,6 +1,6 @@
 {
   "name": "@future-agi/sdk",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "We help GenAI teams maintain high-accuracy for their Models in production.",
   "license": "Apache-2.0",
   "type": "module",
