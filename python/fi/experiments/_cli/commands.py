@@ -46,6 +46,10 @@ MORE: list[tuple[str, list[tuple[tuple[str, ...], dict]]]] = [
         (("--metadata",), dict(dest="metadata", action="append", metavar="k=v", help="run metadata (repeatable)")),
         (("--experiment",), dict(dest="experiment", metavar="ID",
                                  help="attach the stored run to this experiment (an id)")),
+        (("--run",), dict(dest="attach", metavar="RUN",
+                          help="add results to this run, created elsewhere (for example in the app): only its "
+                               "planned trials with no result yet run, on its own dataset version, scored by its own "
+                               "evaluators (no --dataset needed); continue it with --resume RUN")),
         (("--project",), dict(dest="project", help='tracing project (default "<dataset> · experiments")')),
     ]),
     ("Limits", [
@@ -200,13 +204,14 @@ def _flush_task_threads(code: int) -> None:
 
 def resume_line(argv: Sequence[str], run_id: str, label: Optional[str] = None) -> str:
     """The exact command that resumes ``run_id``: this invocation's argv (secrets redacted), without
-    any earlier ``--resume``; when a run file declared several runs, ``--filter LABEL`` replaces
-    the given filters so exactly the interrupted run is selected."""
+    any earlier ``--resume`` or ``--run`` (a run started with ``--run`` is continued with ``--resume``
+    alone); when a run file declared several runs, ``--filter LABEL`` replaces the given filters so
+    exactly the interrupted run is selected."""
     import shlex
 
     from fi.experiments._redact import Redactor
 
-    kept = drop_flags(argv, ("--resume", "--filter") if label else ("--resume",))
+    kept = drop_flags(argv, ("--resume", "--run", "--filter") if label else ("--resume", "--run"))
     if label:
         kept += ["--filter", label]
     return shlex.join(["futureagi-py", *Redactor().value(kept), "--resume", run_id])
