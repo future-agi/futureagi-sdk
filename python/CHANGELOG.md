@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [0.8.0] - pending release
 
 ### Fixed: configuring evaluations without OpenTelemetry
 - `Evaluator.evaluate(..., platform=..., custom_eval_name=...)` reads the current span with

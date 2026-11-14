@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [0.3.0] - pending release
 
 ### Fixed: released root error identities
 - Root `RateLimitError` / `ServerError` retain the released dataset constructor identities,
