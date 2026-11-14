@@ -164,7 +164,8 @@ class UploadSession:
         self.export_status = ExportStatus(run_id, endpoint, redactor)
         return exporter_factory(base_url=self.base_url, api_key=creds.api_key, secret_key=creds.secret_key,
                                 project=project, run_name=run_name, run_id=run_id, redactor=redactor,
-                                extra_headers=self.extra_headers(endpoint), outcome=self.export_status)
+                                extra_headers=self.extra_headers(endpoint), outcome=self.export_status,
+                                _endpoint=endpoint)
 
     def warn_export_failure(self) -> None:
         if self.export_status is not None:

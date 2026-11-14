@@ -12,6 +12,7 @@ This module imports nothing from ``fi.utils`` or ``fi.api``.
 from __future__ import annotations
 
 from typing import Any, Iterable, Optional, Sequence
+from urllib.parse import urlsplit
 
 from fi._credentials import CredentialsMissingError
 from fi.errors import AuthError, FutureAGIError, TransportError, describe_transport_error, transport_failure_kind
@@ -44,18 +45,36 @@ class TraceExportWarning(UserWarning):
     """Collector delivery was not confirmed for some spans from an uploaded run."""
 
 
+def _trace_endpoint_origin(endpoint: str) -> str:
+    """Diagnostics retain only scheme, host and port, including for direct error construction."""
+    try:
+        parts = urlsplit(endpoint)
+        host, port = parts.hostname, parts.port
+        if (parts.scheme not in ("http", "https") or not host
+                or any(c.isspace() or ord(c) < 32 or 127 <= ord(c) < 160 for c in host)):
+            return "<collector>"
+        authority = f"[{host}]" if ":" in host else host
+        if port is not None:
+            authority += f":{port}"
+        return f"{parts.scheme}://{authority}"
+    except ValueError:
+        return "<collector>"
+
+
 class TraceExportError(ExperimentError):
     """The SDK's OTLP exporter failed; run items may already be stored (CLI exit 3)."""
 
     code = "TRACE_EXPORT_FAILED"
 
     def __init__(self, run_id: str, endpoint: str, status_code: Optional[int], reason: str) -> None:
+        endpoint = _trace_endpoint_origin(endpoint)
         self.run_id, self.endpoint, self.status_code = run_id, endpoint, status_code
         self.reason = reason
         detail = f"HTTP {status_code}" if status_code is not None else reason
         super().__init__(
             f"Run {run_id}: trace export to {endpoint} failed ({detail}); some spans were not confirmed as uploaded. "
-            "Run items may already be stored. Check the collector route and connectivity. "
+            "Run items may already be stored. Check FI_COLLECTOR_ENDPOINT (the full trace URL), "
+            "the collector route and connectivity. "
             "For future runs without tracing, set trace=False (CLI --no-trace). "
             "Spans are not journaled: resume does not re-export lost spans."
         )

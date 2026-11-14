@@ -29,7 +29,8 @@ def test_warning_policy_preserves_typed_export_error(warning_filter, caplog):
         with pytest.raises(TraceExportError) as error:
             run_on(base, ContractServer())
     assert sent and error.value.status_code == 404
-    assert error.value.endpoint == base + PATH
+    assert error.value.endpoint == base
+    assert PATH not in str(error.value) + json.dumps(error.value.to_json())
     assert SECRET not in str(error.value) + caplog.text
     if warning_filter == "default":
         assert len([w for w in caught if isinstance(w.message, TraceExportWarning)]) == 1
@@ -75,7 +76,8 @@ def test_warning_policy_preserves_cli_json(tmp_path, monkeypatch, warning_filter
         code, out, err = cli("run", str(source), "--json", "--no-env-file")
     payload = json.loads(out)
     assert code == 3 and payload["error"]["code"] == "TRACE_EXPORT_FAILED"
-    assert base + PATH in payload["error"]["message"]
+    assert base in payload["error"]["message"]
+    assert PATH not in payload["error"]["message"]
     assert "HTTP 404" in payload["error"]["message"]
     assert "runs" not in payload and SECRET not in out + err
     assert sent

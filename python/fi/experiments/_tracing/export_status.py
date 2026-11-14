@@ -9,20 +9,17 @@ from __future__ import annotations
 
 from http import HTTPStatus
 from typing import Any, Optional
-from urllib.parse import urlsplit, urlunsplit
 import warnings
 
 import requests
 
-from fi.experiments.errors import TraceExportError, TraceExportWarning
+from fi.experiments.errors import TraceExportError, TraceExportWarning, _trace_endpoint_origin
 
 
 class ExportStatus:
     def __init__(self, run_id: str, endpoint: str, redactor: Any) -> None:
-        parts = urlsplit(endpoint)
-        # Diagnostic URLs never contain userinfo, query parameters or fragments.
-        self.endpoint = redactor.text(urlunsplit((parts.scheme, parts.netloc.rsplit("@", 1)[-1],
-                                                 parts.path, "", "")))
+        # Keep the full transport URL out of status, warning and JSON diagnostics.
+        self.endpoint = redactor.text(_trace_endpoint_origin(endpoint))
         self.run_id = run_id
         self.error: Optional[TraceExportError] = None
         self.status_code: Optional[int] = None

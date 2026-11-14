@@ -93,7 +93,8 @@ def test_exporter_exception_is_typed_without_leaking_exception_text(caplog):
 def test_diagnostic_endpoint_omits_url_credentials_query_and_fragment():
     state = ExportStatus("r", "https://user:password@host.test/tracer/v1/traces?token=hidden#secret", Redactor([]))
     state.failed()
-    assert state.error.endpoint == "https://host.test/tracer/v1/traces"
+    assert state.error.endpoint == "https://host.test"
+    assert PATH not in str(state.error) + json.dumps(state.error.to_json())
     assert all(s not in json.dumps(state.error.to_json()) for s in ("password", "hidden", "secret"))
 
 
@@ -138,6 +139,7 @@ def test_cli_json_is_setup_error_not_success_after_collector_404(tmp_path, monke
             code, out, err = cli("run", str(source), "--json", "--no-env-file")
     payload = json.loads(out)
     assert code == 3 and payload["error"]["code"] == "TRACE_EXPORT_FAILED"
-    assert base + PATH in payload["error"]["message"]
+    assert base in payload["error"]["message"]
+    assert PATH not in payload["error"]["message"]
     assert "runs" not in payload and SECRET not in out + err
     assert sent
