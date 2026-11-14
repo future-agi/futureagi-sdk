@@ -28,6 +28,8 @@ import re
 from typing import Any, Callable, Mapping, Sequence
 from urllib.parse import unquote, urlsplit
 
+import idna
+
 from opentelemetry.sdk.trace import Event, ReadableSpan
 from opentelemetry.sdk.trace.export import SpanExporter, SpanExportResult
 
@@ -97,7 +99,7 @@ def _normalized_host(host: str) -> Any:
     try:
         return ip_address(host)
     except ValueError:
-        return host.encode("idna").decode("ascii").lower().removesuffix(".")
+        return idna.encode(host, uts46=True).decode("ascii").lower().removesuffix(".")
 
 
 def _validate_collector_endpoint(endpoint: str, *, base_url: str, legacy: bool = False) -> str:
@@ -122,7 +124,7 @@ def _validate_collector_endpoint(endpoint: str, *, base_url: str, legacy: bool =
         try:
             address = ip_address(host)
         except ValueError:
-            ascii_host = host.encode("idna").decode("ascii").removesuffix(".")
+            ascii_host = idna.encode(host, uts46=True).decode("ascii").removesuffix(".")
             if (parts.netloc.startswith("[") or len(ascii_host) > 253
                     or re.fullmatch(r"[0-9.]+", ascii_host)
                     or not all(re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?", label)
