@@ -10,12 +10,13 @@ from pathlib import PurePosixPath
 import re
 
 
-# Only these twelve generated management members may carry "gateway" in their
-# name outside the data-plane tree. In particular, dist/{esm,esnext,src}/gateway
-# is not where the data plane lives.
+# Only these exact generated and platform-resource management members may carry
+# "gateway" in their name outside the data-plane tree. In particular,
+# dist/{esm,esnext,src}/gateway is not where the data plane lives.
 MANAGEMENT_MEMBERS = frozenset(
-    f"package/dist/{fmt}/generated/fa-management/gateway{extension}"
+    f"package/dist/{fmt}/{module}{extension}"
     for fmt in ("esm", "esnext", "src")
+    for module in ("generated/fa-management/gateway", "platform/resources/gateway")
     for extension in (".js", ".js.map", ".d.ts", ".d.ts.map")
 )
 DATA_PLANE_PREFIX = "package/dist/gateway/"
