@@ -36,6 +36,7 @@ BATCH_MAX_ITEMS = 100
 BATCH_MAX_BYTES = 2 * 1024 * 1024 - 4096  # the server's 2 MiB body limit, minus the envelope
 FLUSH_EVERY_S = 2.0
 FIELD_MAX_BYTES = 262_144  # output / error / token_usage, each
+ITEM_MAX_BYTES = 1_048_576
 PREFIX_BYTES = 200_000
 BACKOFF_S = (1.0, 2.0, 4.0, 8.0, 16.0, 30.0)
 GIVE_UP_S = 300.0
@@ -63,20 +64,38 @@ def _canonical(value: Any) -> bytes:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode("utf-8")
 
 
+def _server_size(value: Any) -> int:
+    """The server measures canonical JSON with the default ASCII escaping."""
+    return len(json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8"))
+
+
 def bounded(value: Any) -> Any:
-    """``value`` itself, or (over 256 KiB as canonical JSON) a marker with its sha256, size and a
-    UTF-8-safe prefix. The full value stays in the journal."""
+    """``value`` itself, or (over 256 KiB as server JSON) a marker with its sha256, size and a
+    UTF-8-safe prefix. The digest and byte count still describe the full journaled UTF-8 value."""
     if value is None:
         return None
-    data = _canonical(value)
-    if len(data) <= FIELD_MAX_BYTES:
+    if _server_size(value) <= FIELD_MAX_BYTES:
         return value
-    return {
+    data = _canonical(value)
+    marker: dict[str, Any] = {
         "fi_truncated": True,
         "sha256": hashlib.sha256(data).hexdigest(),
         "bytes": len(data),
         "prefix": data[:PREFIX_BYTES].decode("utf-8", errors="ignore"),
     }
+    if _server_size(marker) <= FIELD_MAX_BYTES:
+        return marker  # preserve every previously accepted marker exactly
+    prefix = marker["prefix"]
+    low, high = 0, len(prefix)
+    while low < high:
+        mid = (low + high + 1) // 2
+        marker["prefix"] = prefix[:mid]
+        if _server_size(marker) <= FIELD_MAX_BYTES:
+            low = mid
+        else:
+            high = mid - 1
+    marker["prefix"] = prefix[:low]
+    return marker
 
 
 def score_ref(score: Mapping[str, Any], metric_id: str, evaluator_version_id: str) -> dict[str, Any]:
@@ -228,6 +247,7 @@ class Uploader:
         self.stats = UploadStats()
         self.fatal: Optional[BaseException] = None
         self._queue: list[tuple[str, dict, int]] = []
+        self._unqueued = 0  # journaled items held back by a fatal error
         self._first_at: Optional[float] = None
         self._wake: Optional[asyncio.Event] = None
         self._closing = False
@@ -239,9 +259,23 @@ class Uploader:
 
     def submit(self, receipt: str, item_bytes: bytes) -> None:
         if self.fatal is not None:
+            self._unqueued += 1
             return
         payload = project_item(item_bytes, receipt, self.bindings)
-        self._queue.append((receipt, payload, len(_canonical(payload))))
+        size = _server_size(payload)
+        if size > ITEM_MAX_BYTES:
+            self.fatal = UploadRefusedError(
+                f"A result item exceeds the {ITEM_MAX_BYTES}-byte limit; the full result remains in the journal."
+            )
+            self.stats.error = str(self.fatal)
+            self._unqueued += 1
+            # Resume submits before the engine's cleanup scope. Record the fatal rather
+            # than raising here; drain only the valid items already queued, then stop.
+            self._closing = True
+            if self._wake is not None:
+                self._wake.set()
+            return
+        self._queue.append((receipt, payload, size))
         if self._first_at is None:
             self._first_at = self.clock()
         if self._wake is not None and len(self._queue) >= BATCH_ITEMS:
@@ -249,13 +283,14 @@ class Uploader:
 
     def _take(self) -> list[tuple[str, dict, int]]:
         batch: list[tuple[str, dict, int]] = []
-        size = 0
+        size = _server_size({"items": []})
         while self._queue and len(batch) < BATCH_MAX_ITEMS:
             entry = self._queue[0]
-            if batch and size + entry[2] > BATCH_MAX_BYTES:
+            added = entry[2] + (1 if batch else 0)  # comma between items
+            if batch and size + added > BATCH_MAX_BYTES:
                 break
             batch.append(self._queue.pop(0))
-            size += entry[2]
+            size += added
         self._first_at = self.clock() if self._queue else None
         return batch
 
@@ -274,8 +309,9 @@ class Uploader:
                 try:
                     await self._send(batch)
                 except BaseException as exc:
-                    self.fatal = exc
-                    self.stats.error = str(exc)
+                    if self.fatal is None:
+                        self.fatal = exc
+                        self.stats.error = str(exc)
                     self._queue[:0] = batch
                     return
                 continue
@@ -350,7 +386,7 @@ class Uploader:
             self._wake.set()
         if self._task is not None:
             await self._task
-        self.stats.pending = len(self._queue)
+        self.stats.pending = len(self._queue) + self._unqueued
         if self.fatal is not None:
             raise self.fatal
         return self.stats
