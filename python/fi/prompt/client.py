@@ -136,7 +136,7 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
                 error_code = None
 
             if error_code == "TEMPLATE_ALREADY_EXIST":
-                raise TemplateAlreadyExists(detail.get("name", "<unknown>") if isinstance(detail, dict) else "<unknown>")
+                raise TemplateAlreadyExists(detail.get("name", "<unknown>"))
 
             # Handle specific "No version found for label" error from get-by-name
             if isinstance(detail, dict) and "result" in detail and "No version found for label" in detail["result"]:
