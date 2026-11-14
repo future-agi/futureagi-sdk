@@ -9,6 +9,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path, PurePosixPath
+import re
 import sys
 import subprocess
 import tarfile
@@ -28,6 +29,29 @@ GATEWAY_TYPES = {
 # experimental, so its range stays narrow.
 REACT_PEER = {"react": ">=17.0.0 <20"}
 AI_SDK_PEER = {"ai": ">=7.0.156 <7.1.0"}
+NAMESPACE_GUARD_FILES = {"_futureagi_namespace_guard.py", "futureagi_namespace_guard.pth"}
+
+
+def release_versions(repo):
+    """Use the pinned release manifest, never versions supplied by an archive."""
+    manifest = json.loads((repo / ".release-please-manifest.json").read_text())
+    python_version, npm_version = manifest["python"], manifest["typescript/futureagi"]
+    assert all(isinstance(version, str) and version for version in (python_version, npm_version)), "Invalid release versions"
+    # The source uses a single-line quoted Poetry version. Scope the match to
+    # that table, without requiring a TOML dependency on Python 3.10.
+    pyproject = (repo / "python/pyproject.toml").read_text()
+    poetry = re.search(
+        r"(?ms)^[ \t]*\[tool\.poetry\][ \t]*(?:#[^\n]*)?\r?\n(.*?)(?=^[ \t]*\[|\Z)",
+        pyproject,
+    )
+    versions = re.findall(
+        r'''(?m)^[ \t]*version[ \t]*=[ \t]*(['"])([^'"\r\n]+)\1[ \t]*(?:#[^\r\n]*)?\r?$''',
+        poetry.group(1) if poetry else "",
+    )
+    assert len(versions) == 1 and versions[0][1] == python_version, "Python source version disagrees with release manifest"
+    package = json.loads((repo / "typescript/futureagi/package.json").read_text())
+    assert package["version"] == npm_version, "npm source version disagrees with release manifest"
+    return python_version, npm_version
 
 
 def digest(path):
@@ -64,10 +88,15 @@ def is_deferred_evals(dist_path):
 
 def main(repo, wheel, sdist, tarball, output):
     repo, wheel, sdist, tarball, output = map(Path, (repo, wheel, sdist, tarball, output))
+    python_version, npm_version = release_versions(repo)
+    dist_info = f"futureagi-{python_version}.dist-info/"
+    sdist_prefix = f"futureagi-{python_version}/"
     with zipfile.ZipFile(wheel) as archive:
         safe_names(archive.namelist())
         whl = {name: archive.read(name) for name in archive.namelist() if not name.endswith("/")}
     source = read_tar(sdist)
+    for path in source:
+        assert path.startswith(sdist_prefix), f"sdist root disagrees with release manifest: {path}"
     npm = read_tar(tarball)
     spec = importlib.util.spec_from_file_location("check_ownership", Path(__file__).with_name("check_ownership.py"))
     ownership_gate = importlib.util.module_from_spec(spec)
@@ -89,7 +118,10 @@ def main(repo, wheel, sdist, tarball, output):
     assert "fi/py.typed" in whl
     metadata_path, = [p for p in whl if p.endswith(".dist-info/METADATA")]
     metadata = email.message_from_bytes(whl[metadata_path])
-    assert metadata["Name"] == "futureagi" and metadata["Version"] == "0.7.0"
+    assert metadata["Name"] == "futureagi" and metadata["Version"] == python_version, "wheel metadata disagrees with release manifest"
+    assert metadata_path == dist_info + "METADATA", "wheel dist-info directory disagrees with release manifest"
+    sdist_metadata = email.message_from_bytes(source[sdist_prefix + "PKG-INFO"])
+    assert sdist_metadata["Name"] == "futureagi" and sdist_metadata["Version"] == python_version, "sdist metadata disagrees with release manifest"
     assert metadata["Requires-Python"] == ">=3.10"
     assert any(d.startswith("anyio ") or d.startswith("anyio(") or d.startswith("anyio (") for d in metadata.get_all("Requires-Dist", []))
     assert not any("ai-evaluation" in d for d in metadata.get_all("Requires-Dist", []))
@@ -98,23 +130,26 @@ def main(repo, wheel, sdist, tarball, output):
     assert any(p.endswith("/fi/gateway/__init__.py") for p in source), "Missing gateway client in the sdist"
     assert not any("/fi/integrations/otel/" in "/" + p for p in whl)
     assert not any("/fi/integrations/otel/" in p for p in source)
+    for guard in NAMESPACE_GUARD_FILES:
+        assert guard in whl, f"wheel namespace guard missing: {guard}"
+        assert sdist_prefix + guard in source, f"sdist namespace guard missing: {guard}"
     for path in whl:
-        assert path.startswith(("fi/", "futureagi-0.7.0.dist-info/")), path
+        assert path in NAMESPACE_GUARD_FILES or path.startswith(("fi/", dist_info)), path
     for path in source:
-        relative = path.split("/", 1)[1]
+        relative = path.removeprefix(sdist_prefix)
         # Runtime modules only: no test suites or vendored test fixtures (python/tests/gateway/_vendor).
-        assert relative.startswith("fi/") or relative in {
+        assert relative.startswith("fi/") or relative in NAMESPACE_GUARD_FILES or relative in {
             "pyproject.toml", "README.md", "CHANGELOG.md", "LICENSE", "NOTICE", "PKG-INFO"
         }, path
 
     pkg = json.loads(npm["package/package.json"])
-    assert pkg["name"] == "@future-agi/sdk" and pkg["version"] == "0.2.0"
+    assert pkg["name"] == "@future-agi/sdk" and pkg["version"] == npm_version, "npm metadata disagrees with release manifest"
     features = json.loads((repo / "openapi/connectors/features.json").read_text())
     connector_namespaces = {"mcp_core": "connectors", "data_integrations": "integrations", "credential_reads": "credentials"}
     assert all(type(features[feature]) is bool for feature in connector_namespaces)
     assert "typesVersions" in pkg and isinstance(pkg["typesVersions"], dict) and pkg["typesVersions"], "typesVersions must be present and nonempty"
     assert all(isinstance(mapping, dict) and mapping for mapping in pkg["typesVersions"].values()), "typesVersions mappings must be nonempty"
-    expected_exports = {".", "./webhooks", *GATEWAY_SUBPATHS}
+    expected_exports = {".", "./platform", "./platform/models", "./webhooks", *GATEWAY_SUBPATHS}
     expected_exports.update("./" + namespace for feature, namespace in connector_namespaces.items() if features[feature])
     for feature, namespace in connector_namespaces.items():
         if not features[feature]:
@@ -155,7 +190,7 @@ def main(repo, wheel, sdist, tarball, output):
     peers = {**REACT_PEER, **(AI_SDK_PEER if "./sandbox/ai-sdk" in expected_exports else {})}
     assert pkg.get("peerDependencies") == peers, "React and, with ./sandbox/ai-sdk, the AI SDK are the only peers"
     assert pkg.get("peerDependenciesMeta") == {name: {"optional": True} for name in peers}, "Every peer stays optional"
-    assert not pkg.get("scripts")
+    assert not pkg.get("scripts"), "npm scripts must not ship"
     dist = repo / "typescript" / "futureagi" / "dist"
     expected_dist = set()
     for dirname in ("esm", "src", "esnext", "gateway"):
