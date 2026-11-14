@@ -123,6 +123,40 @@ def test_data_plane_symbols_stay_out_of_the_core_tree(fmt, extension, symbol):
         CHECK(whl, source, npm)
 
 
+@pytest.mark.parametrize("fmt", ["esm", "esnext", "src"])
+@pytest.mark.parametrize("extension", [".js", ".js.map", ".d.ts", ".d.ts.map"])
+def test_platform_management_gateway_members_are_allowed(fmt, extension):
+    whl, source, npm = artifacts()
+    npm[f"package/dist/{fmt}/platform/resources/gateway{extension}"] = b""
+    CHECK(whl, source, npm)
+
+
+@pytest.mark.parametrize("fmt", ["esm", "esnext", "src"])
+@pytest.mark.parametrize("suffix", [
+    "gateway-extra.js",
+    "gateway/index.js",
+    "nested/gateway.js",
+    "gateway.js.bak",
+    "gateway.mjs",
+    "gateway.cjs",
+])
+def test_platform_management_gateway_lookalikes_are_rejected(fmt, suffix):
+    whl, source, npm = artifacts()
+    npm[f"package/dist/{fmt}/platform/resources/{suffix}"] = b""
+    with pytest.raises(AssertionError, match="Gateway module outside the data plane"):
+        CHECK(whl, source, npm)
+
+
+@pytest.mark.parametrize("fmt", ["esm", "esnext", "src"])
+@pytest.mark.parametrize("extension", [".js", ".d.ts"])
+@pytest.mark.parametrize("symbol", ["AgentCC", "AsyncAgentCC"])
+def test_platform_management_gateway_cannot_export_data_plane_symbols(fmt, extension, symbol):
+    whl, source, npm = artifacts()
+    npm[f"package/dist/{fmt}/platform/resources/gateway{extension}"] = f"export class {symbol} {{}}".encode()
+    with pytest.raises(AssertionError, match="Gateway symbol outside the data plane"):
+        CHECK(whl, source, npm)
+
+
 def test_all_twelve_management_members_remain_allowed():
     whl, source, npm = artifacts()
     for fmt in ("esm", "esnext", "src"):
