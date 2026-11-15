@@ -27,10 +27,16 @@ def posts(server, suffix):
     return [body for method, path, body in server.requests if method == "POST" and path.endswith(suffix)]
 
 
+def one_post(server, suffix):
+    found = posts(server, suffix)
+    assert len(found) == 1, f"expected exactly one POST ending in {suffix}"
+    return found[0]
+
+
 def test_upload_adds_columns_before_rows():
     server = ContractServer()
     upload(server)
-    [columns] = posts(server, "/add_columns/")
+    columns = one_post(server, "/add_columns/")
     types = {c["name"]: c["data_type"] for c in columns["new_columns_data"]}
     assert types == {"id": "text", "question": "text", "count": "integer", "ratio": "float",
                      "enabled": "boolean", "context": "json", "choices": "array", "expected": "json",
@@ -45,7 +51,7 @@ def test_upload_adds_columns_before_rows():
 def test_upload_writes_table_rows_with_client_ids():
     server = ContractServer()
     upload(server)
-    [body] = posts(server, "/add_rows/")
+    body = one_post(server, "/add_rows/")
     assert len(body["rows"]) == len(ROWS)
     ids = [r["id"] for r in body["rows"]]
     assert len(set(ids)) == len(ROWS)
@@ -59,8 +65,9 @@ def test_upload_writes_table_rows_with_client_ids():
 def test_version_items_point_to_uploaded_rows():
     server = ContractServer()
     result = upload(server)
-    [rows] = posts(server, "/add_rows/")
-    [version] = posts(server, "/versions/")
+    rows = one_post(server, "/add_rows/")
+    version = one_post(server, "/versions/")
+    assert len(version["items"]) == len(ROWS)
     assert "parent_version_id" not in version
     for row, item, original in zip(rows["rows"], version["items"], ROWS):
         assert item["legacy_row_id"] == row["id"]
@@ -105,6 +112,19 @@ def test_unchanged_upload_and_local_resume_add_no_native_writes():
     assert len(posts(server, "/add_rows/")) == 1
 
 
+def test_name_based_read_preserves_metadata_and_local_reuse():
+    server = ContractServer()
+    client = client_for(server)
+    spec = experiments.dataset(ROWS, name="native-cases")
+    first = pin_dataset(client, spec)
+    by_name = pin_dataset(client, "native-cases")
+    assert by_name.version_id == first.version_id
+    assert [r.metadata for r in by_name.rows] == [r.metadata for r in first.rows]
+    again = pin_dataset(client, spec)
+    assert again.version_id == first.version_id
+    assert len(posts(server, "/versions/")) == 1
+
+
 def test_existing_version_only_dataset_is_not_materialized():
     server = ContractServer()
     did = server.add_dataset("legacy-cases")
@@ -120,10 +140,10 @@ def test_inferred_columns_preserve_nulls_and_promote_numbers():
     server = ContractServer()
     upload(server, [{"question": "a", "number": 1, "empty": None},
                     {"question": "b", "number": 1.5, "empty": None}])
-    [body] = posts(server, "/add_columns/")
+    body = one_post(server, "/add_columns/")
     assert {c["name"]: c["data_type"] for c in body["new_columns_data"]} == {
         "question": "text", "number": "float", "empty": "text"}
-    [body] = posts(server, "/add_rows/")
+    body = one_post(server, "/add_rows/")
     assert all(next(c for c in r["cells"] if c["column_name"] == "empty")["value"] is None for r in body["rows"])
 
 
@@ -138,5 +158,5 @@ def test_explicit_input_does_not_upload_unselected_columns():
     server = ContractServer()
     upload(server, [{"question": "a", "not_selected": "private-local-only", "answer": "ok"}],
            input="question", expected="answer")
-    [body] = posts(server, "/add_rows/")
+    body = one_post(server, "/add_rows/")
     assert {c["column_name"]: c["value"] for c in body["rows"][0]["cells"]} == {"question": "a", "answer": "ok"}
