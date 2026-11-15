@@ -185,6 +185,30 @@ class ContractServer:
                 return err(400, DATASET_EXIST_IN_ORG)
             did = self.add_dataset(body["new_dataset_name"])
             return ok({"message": "created", "dataset_id": did, "dataset_name": body["new_dataset_name"]})
+        m = re.fullmatch(r"/model-hub/develops/([^/]+)/add_columns/", path)
+        if m and method == "POST":
+            d = self.datasets[m.group(1)]
+            columns = body["new_columns_data"]
+            names = [c["name"] for c in columns]
+            if len(set(names)) != len(names) or set(names) & {c["name"] for c in d["columns"]}:
+                return err(400, "Duplicate column name")
+            d["columns"].extend({"id": str(uuid.uuid4()), "origin_type": "OTHERS", **c} for c in columns)
+            return ok("success")
+        m = re.fullmatch(r"/model-hub/develops/([^/]+)/add_rows/", path)
+        if m and method == "POST":
+            d = self.datasets[m.group(1)]
+            columns = {c["name"]: c["id"] for c in d["columns"]}
+            ids = {r["row_id"] for r in d["rows"]}
+            staged = []
+            for row in body["rows"]:
+                rid = str(uuid.UUID(row["id"]))
+                if rid in ids or any(c["column_name"] not in columns for c in row["cells"]):
+                    return err(400, "Invalid row")
+                ids.add(rid)
+                staged.append({"row_id": rid, **{columns[c["column_name"]]: {"cell_value": c["value"]}
+                                                    for c in row["cells"]}})
+            d["rows"].extend(staged)
+            return ok("success")
         m = re.fullmatch(r"/model-hub/develops/([^/]+)/get-dataset-table/", path)
         if m:
             d = self.datasets[m.group(1)]
@@ -276,6 +300,9 @@ class ContractServer:
             return ok({"dataset_id": did, "versions": vs[off:off + lim], "limit": lim, "offset": off,
                        "has_more": off + lim < len(vs)})
         check_body("DatasetVersionCreate", body)
+        live_rows = {r["row_id"] for r in d["rows"]}
+        if any(it.get("legacy_row_id") and it["legacy_row_id"] not in live_rows for it in body["items"]):
+            return err(400, "Legacy row does not belong to this dataset")
         parent = next((v for v in d["versions"] if v["id"] == body.get("parent_version_id")), None)
         inherit = {i["external_id"]: i["example_id"] for i in (parent or {}).get("items", []) if i.get("external_id")}
         inherit_legacy = {i["legacy_row"]: i["example_id"] for i in (parent or {}).get("items", []) if i.get("legacy_row")}
