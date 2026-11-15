@@ -215,7 +215,13 @@ def _current_from_table(client: Any, dataset_id: str, name: str, spec: DatasetSp
                                               spec.exclude_expected))
     rows: list[Row] = []
     for number, (row_id, rec) in enumerate(records, 1):
-        meta = {c.removeprefix("metadata."): rec.get(c) for c in roles.metadata if c in rec}
+        meta: dict[str, Any] = {}
+        for col in roles.metadata:
+            if col in rec:
+                if col == "metadata" and isinstance(rec[col], Mapping):
+                    meta.update(rec[col])
+                else:
+                    meta[col.removeprefix("metadata.")] = rec[col]
         meta.update({c: rec.get(c) for c in roles.reserved if c in rec})
         rows.append(Row(id=row_id, number=number, data=rec, inputs={c: rec.get(c) for c in roles.input},
                         expected=rec.get(roles.expected) if roles.expected else None, metadata=meta))
