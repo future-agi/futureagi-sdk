@@ -52,8 +52,7 @@ class FirstVersionFails(ContractServer):
 
 
 def test_S1_the_retry_after_a_failed_first_version_is_refused_for_what_was_seen_and_stored_with_the_opt_in():
-    """The dataset run 1 made is empty and has no version. Without a conditional create on the server
-    the same call again is refused before any write, saying what it saw; add_version=True stores the rows."""
+    """Native rows survive a failed version POST; a retry must not append or silently claim ownership."""
     server = FirstVersionFails()
     ds = experiments.dataset(ROWS, name="support-cases")
     with pytest.raises(Exception) as first:
@@ -65,8 +64,8 @@ def test_S1_the_retry_after_a_failed_first_version_is_refused_for_what_was_seen_
     with pytest.raises(DatasetNotOwnedError) as again:
         _run(server, ds)  # the same call again, no opt-in
     message = str(again.value)
-    assert "'support-cases' already exists on the server and is empty and has no version yet" in message
-    assert "An earlier run that stopped before storing its rows" in message and "Nothing was stored" in message
+    assert "'support-cases' already exists on the server and has table rows" in message
+    assert len(made["rows"]) == len(ROWS) and "nothing was changed" in message
     assert "add_version=True" in message and "--add-version" in message
     assert "was not created by fi.experiments" not in message
     assert server.count("POST", VERSION_POSTS) == posts and made["versions"] == []
@@ -81,7 +80,7 @@ def test_S1_an_sdk_dataset_with_rows_added_in_the_app_is_refused_for_what_was_se
     with pytest.raises(DatasetNotOwnedError) as info:
         _run(server, experiments.dataset([dict(ROWS[0], expected="delivered"), ROWS[1]], name="support-cases"))
     message = str(info.value)
-    assert "has table rows, which fi.experiments never writes" in message
+    assert "has table rows; local uploads do not synchronize an existing table" in message
     assert "was not created by fi.experiments" not in message
 
 

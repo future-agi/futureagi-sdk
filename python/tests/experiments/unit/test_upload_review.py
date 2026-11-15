@@ -190,7 +190,7 @@ def test_resume_pins_the_journaled_version_even_after_a_newer_one(monkeypatch):
     run_id = _stall(monkeypatch, server)
     edited = [dict(r) for r in ROWS]
     edited[1]["expected"] = "found"
-    _run(server, dataset=edited)  # someone snapshots a newer version of the same dataset
+    _run(server, dataset=experiments.dataset(edited, name="support-rows", add_version=True))
     posts = _version_posts(server)
     done = _run(server, resume=run_id)
     assert _version_posts(server) == posts  # the resume created nothing

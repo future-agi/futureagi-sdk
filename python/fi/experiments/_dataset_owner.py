@@ -145,7 +145,7 @@ def not_made_by_sdk(client: Any, dataset_id: str) -> Optional[str]:
     seen: the SDK cannot know who made a dataset, only what is in it."""
     res = _result(client.datasets.get_table(dataset_id, page_size=1, current_page_index=0)) or {}
     if (res.get("table") if isinstance(res, Mapping) else None):
-        return "has table rows, which fi.experiments never writes (rows added in the app or by another tool)"
+        return "has table rows; local uploads do not synchronize an existing table"
     versions = list_versions(client, dataset_id)
     if not versions:
         return EMPTY_NO_VERSION

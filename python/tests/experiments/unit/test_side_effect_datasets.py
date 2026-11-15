@@ -71,10 +71,11 @@ def test_named_inline_rows_land_in_that_dataset_and_no_hash_name_is_made():
     server = ContractServer()
     first = _run(server, experiments.dataset(ROWS, name="support-cases"))
     edited = [dict(ROWS[0], expected="delivered"), ROWS[1]]
-    second = _run(server, experiments.dataset(edited, name="support-cases"))
+    with pytest.raises(DatasetNotOwnedError, match="has table rows"):
+        _run(server, experiments.dataset(edited, name="support-cases"))
     [ds] = server.datasets.values()
-    assert ds["name"] == "support-cases" and len(ds["versions"]) == 2  # an edit is a new version, not a new dataset
-    assert first.dataset_id == second.dataset_id
+    assert ds["name"] == "support-cases" and len(ds["versions"]) == 1
+    assert len(ds["rows"]) == len(ROWS) and first.dataset_id == ds["id"]
     assert not any(d["name"].startswith("rows ") for d in server.datasets.values())
 
 
@@ -154,9 +155,10 @@ def test_another_name_keeps_the_rows_apart(tmp_path):
     assert server.datasets[ui]["versions"] == []
 
 
-def test_a_dataset_the_sdk_made_gets_new_versions_without_opt_in(tmp_path):
+def test_a_version_only_dataset_the_sdk_made_gets_new_versions_without_opt_in(tmp_path):
     server = ContractServer()
-    first = _run(server, _named(tmp_path))
+    server.add_dataset("support")
+    first = _run(server, _named(tmp_path, add_version=True))
     edited = [dict(ROWS[0], expected="delivered"), ROWS[1]]
     second = _run(server, _named(tmp_path, rows=edited))  # a later run, a fresh process: found by name
     assert second.dataset_id == first.dataset_id
