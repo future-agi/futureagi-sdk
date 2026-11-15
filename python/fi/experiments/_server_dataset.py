@@ -202,8 +202,7 @@ def _current_from_local(client: Any, source: Any) -> _Current:
 
 
 def _current_from_table(client: Any, dataset_id: str, name: str, spec: DatasetSpec) -> Optional[_Current]:
-    """The table's rows; None when the table is empty (a dataset the SDK made keeps its rows as
-    versions only: version create writes no table rows)."""
+    """The table's rows; None for an empty table, including older version-only SDK datasets."""
     records = table_records(client, dataset_id)
     if not records:
         return None
@@ -270,6 +269,12 @@ def pin_dataset(client: Any, source: Any, *, version: Any = None) -> ServerDatas
         "metadata": {ROLES_KEY: _roles_meta(cur.roles)},
         "description": "snapshot by fi.experiments",
     }
+    if cur.local and cur.created and latest is None:
+        from fi.experiments._native_rows import materialize_rows
+
+        native_ids = materialize_rows(client, cur.dataset_id, cur.rows, cur.roles)
+        for item, native_id in zip(body["items"], native_ids):
+            item["legacy_row_id"] = native_id
     if latest is not None:
         body["parent_version_id"] = str(latest["id"])
     from fi.generated.openapi_client.models.dataset_version_create import DatasetVersionCreate

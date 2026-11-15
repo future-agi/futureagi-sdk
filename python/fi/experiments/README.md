@@ -11,6 +11,25 @@ code disagree.
 harmless config. If a value you need is hidden, rename the param (for example `max_tokens`, not `tokens`), or
 pass it another way. A resume refuses `[redacted]` as a value: give the real value again.
 
+## First uploads and the dataset table
+
+The first local upload under a new dataset name writes typed table columns and rows before its
+immutable dataset version. The version preserves the original input, expected, metadata and external
+IDs, and links each item to its native row. A refused row upload stops before version or run creation;
+it never falls back to a version-only upload. These requests are not one transaction: if the version
+request fails after rows were accepted, the table rows remain. No automatic retry or deletion occurs.
+
+Only columns selected as input, expected, metadata, reserved controls or IDs are uploaded. Structured
+expected values remain in one column. Nulls are allowed; integers and floats share a float column,
+but other incompatible types in one column are refused rather than silently coerced.
+
+Existing datasets are not backfilled or synchronized. Unchanged same-name uploads and local resumes
+reuse their pinned version without adding table rows. Datasets uploaded by earlier SDK versions remain
+version-only: upload under a **new dataset name** to create native rows. Changed local uploads against
+an existing table still require `add_version=True`; that option adds a version only, not table updates.
+Ordinary experiments use the native table, not those later version-only edits. To make changed local
+rows available to an ordinary experiment, upload them under another new name.
+
 ## 1. Config keys that are credentials (params, metadata, argv, eval config)
 
 A key's value is hidden when the key names a credential. Keys are split into words (snake_case, kebab-case,
