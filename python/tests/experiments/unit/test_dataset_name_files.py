@@ -141,10 +141,11 @@ def test_the_retry_after_an_interrupted_first_run_is_refused_then_the_opt_in_sto
     with pytest.raises(Exception):
         _run(server, ds)  # run 1: the dataset is made, its first version never lands
     [made] = server.datasets.values()
-    assert made["name"] == "support-cases" and made["versions"] == [] and made["rows"] == []
+    assert made["name"] == "support-cases" and made["versions"] == [] and len(made["rows"]) == len(ROWS)
+    native_ids = [row["row_id"] for row in made["rows"]]
     with pytest.raises(DatasetNotOwnedError) as refused:
         _run(server, ds)  # the same call again: refused before any write (no conditional create on the server)
-    assert "is empty and has no version yet" in str(refused.value)
+    assert "has table rows; local uploads do not synchronize an existing table" in str(refused.value)
     assert 'name=\'support-cases\', add_version=True' in str(refused.value) and made["versions"] == []
     capsys.readouterr()
     opted = experiments.dataset(ROWS, name="support-cases", add_version=True)
@@ -152,6 +153,8 @@ def test_the_retry_after_an_interrupted_first_run_is_refused_then_the_opt_in_sto
     assert result.status == "completed" and result.dataset_id == made["id"] and len(made["versions"]) == 1
     printed = capsys.readouterr()
     text = printed.out + printed.err
-    assert "wrote the first version of the existing empty dataset 'support-cases' (2 rows)" in text
+    assert "snapshotted version" in text and "(2 rows)" in text
+    assert "existing empty dataset" not in text
+    assert [row["row_id"] for row in made["rows"]] == native_ids
     again = _run(server, ds)  # a third run, no opt-in: that version is the SDK's own, the rows are it, nothing new
     assert again.dataset_version_id == result.dataset_version_id and len(made["versions"]) == 1

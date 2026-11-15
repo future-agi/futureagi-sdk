@@ -67,7 +67,7 @@ def test_unchanged_rows_reuse_the_version_and_a_changed_row_snapshots_with_its_p
     rows = [dict(r, id=f"T{i}") for i, r in enumerate(ROWS)]
     a = _run(server, dataset=rows, dataset_name="support-ids")
     rows[1]["expected"] = "found"
-    b = _run(server, dataset=rows, dataset_name="support-ids")
+    b = _run(server, dataset=experiments.dataset(rows, name="support-ids", add_version=True))
     versions = [d for d in server.datasets.values() if len(d["versions"]) == 2][0]["versions"]
     assert versions[1]["parent_version"] == versions[0]["id"] == a.dataset_version_id
     assert b.dataset_version_id == versions[1]["id"]
