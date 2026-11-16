@@ -424,7 +424,9 @@ def _load_one(spec: dict, entry: dict, seen_mcp: set[str]) -> Op:
         raise CatalogError(f"{op_id}: path placeholders {placeholders} != path params {path_params}")
 
     # What the caller gets back: unwrap the {status, result} envelope, then the page items.
-    ok = contract_op["responses"].get("200") or contract_op["responses"].get("201") or {}
+    # 202 Accepted is a success too (an async receipt: a run, a job, a queued grading).
+    responses = contract_op["responses"]
+    ok = responses.get("200") or responses.get("201") or responses.get("202") or {}
     returns = ok.get("schema")
     resolved = resolve(spec, returns) or {}
     unwrap = None

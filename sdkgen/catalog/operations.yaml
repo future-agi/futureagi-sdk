@@ -749,6 +749,9 @@ operations:
   description: Create an agent or prompt simulation scenario of kind dataset, script or graph. Generation is asynchronous and may incur usage
     charges; poll get_scenario until ready before running tests. Requires the applicable plan entitlement.
   operation: {method: POST, path: /simulate/scenarios/create/}
+  contract_fix:
+    untyped: true
+    note: 'the contract''s 202 ScenarioCreateResponse is now readable by the generator, but this method shipped in 0.7.0 returning the raw dict; typing it would break callers that index it, so it waits for a release that may break'
   surfaces:
     sdk: {}
     mcp: {name: create_scenario, group: simulation, access: write, open_world: true}
@@ -1682,6 +1685,21 @@ operations:
 - id: simulation.personas.update
   description: Update a workspace persona; name is required on every update, other fields left out are kept, and so is simulation_type; system personas return 403.
   operation: {method: PUT, path: '/simulate/api/personas/{id}/'}
+  contract_fix:
+    body_fields:
+      gender: string[]
+      age_group: string[]
+      occupation: string[]
+      location: string[]
+      personality: string[]
+      communication_style: string[]
+      languages: string[]
+      accent: string[]
+      conversation_speed: string[]
+      finished_speaking_sensitivity: string[]
+      interrupt_sensitivity: string[]
+      keywords: string[]
+    note: 'PersonaViewSet.update declares no request_body, so drf-yasg documents the model JSONFields as objects; the backend stores lists (models/persona.py, default=list), as personas.create types them'
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.personas.duplicate

@@ -312,11 +312,11 @@ client.simulation.environments.run(
     extra_query: dict[str, Any] | None = None,
     extra_body: dict[str, Any] | None = None,
     options: RequestOptions | None = None,
-) -> Any
+) -> models.HarnessRunCreateResponse
 ```
 
 ```typescript TypeScript
-client.simulation.environments.run(id: string, params: SimulationEnvironmentsRunParams, options?: RequestOptions): Promise<unknown>
+client.simulation.environments.run(id: string, params: SimulationEnvironmentsRunParams, options?: RequestOptions): Promise<models.HarnessRunCreateResponse>
 
 export interface SimulationEnvironmentsRunParams {
   scenario_ids: Array<string>;
@@ -342,7 +342,7 @@ export interface SimulationEnvironmentsRunParams {
 
 #### Returns
 
-The decoded response. The contract does not describe its shape, so it is untyped.
+[`HarnessRunCreateResponse`](/docs/sdk/reference/simulation-models#harnessruncreateresponse).
 
 ### simulation.environments.run_plan
 
@@ -944,11 +944,11 @@ client.simulation.environments.runs.add_evaluation(
     extra_query: dict[str, Any] | None = None,
     extra_body: dict[str, Any] | None = None,
     options: RequestOptions | None = None,
-) -> Any
+) -> models.HarnessEnvironmentRunEvaluationQueued
 ```
 
 ```typescript TypeScript
-client.simulation.environments.runs.addEvaluation(id: string, executionId: string, params: SimulationEnvironmentsRunsAddEvaluationParams, options?: RequestOptions): Promise<unknown>
+client.simulation.environments.runs.addEvaluation(id: string, executionId: string, params: SimulationEnvironmentsRunsAddEvaluationParams, options?: RequestOptions): Promise<models.HarnessEnvironmentRunEvaluationQueued>
 
 export interface SimulationEnvironmentsRunsAddEvaluationParams {
   name: string;
@@ -969,7 +969,7 @@ export interface SimulationEnvironmentsRunsAddEvaluationParams {
 
 #### Returns
 
-The decoded response. The contract does not describe its shape, so it is untyped.
+[`HarnessEnvironmentRunEvaluationQueued`](/docs/sdk/reference/simulation-models#harnessenvironmentrunevaluationqueued).
 
 ### simulation.environments.runs.regrade
 
@@ -1005,11 +1005,11 @@ client.simulation.environments.runs.regrade(
     extra_query: dict[str, Any] | None = None,
     extra_body: dict[str, Any] | None = None,
     options: RequestOptions | None = None,
-) -> Any
+) -> models.HarnessEnvironmentRunEvaluationsQueued
 ```
 
 ```typescript TypeScript
-client.simulation.environments.runs.regrade(id: string, executionId: string, params: SimulationEnvironmentsRunsRegradeParams, options?: RequestOptions): Promise<unknown>
+client.simulation.environments.runs.regrade(id: string, executionId: string, params: SimulationEnvironmentsRunsRegradeParams, options?: RequestOptions): Promise<models.HarnessEnvironmentRunEvaluationsQueued>
 
 export interface SimulationEnvironmentsRunsRegradeParams {
   eval_config_ids: Array<string>;
@@ -1032,7 +1032,7 @@ export interface SimulationEnvironmentsRunsRegradeParams {
 
 #### Returns
 
-The decoded response. The contract does not describe its shape, so it is untyped.
+[`HarnessEnvironmentRunEvaluationsQueued`](/docs/sdk/reference/simulation-models#harnessenvironmentrunevaluationsqueued).
 
 ## client.simulation.environments.versions
 
@@ -1068,11 +1068,11 @@ client.simulation.environments.versions.create_agent(
     extra_query: dict[str, Any] | None = None,
     extra_body: dict[str, Any] | None = None,
     options: RequestOptions | None = None,
-) -> Any
+) -> models.HarnessAgentCredentialsResponse
 ```
 
 ```typescript TypeScript
-client.simulation.environments.versions.createAgent(id: string, params: SimulationEnvironmentsVersionsCreateAgentParams = {}, options?: RequestOptions): Promise<unknown>
+client.simulation.environments.versions.createAgent(id: string, params: SimulationEnvironmentsVersionsCreateAgentParams = {}, options?: RequestOptions): Promise<models.HarnessAgentCredentialsResponse>
 
 export interface SimulationEnvironmentsVersionsCreateAgentParams {
   archive_artifact_id?: string | null;
@@ -1094,7 +1094,7 @@ export interface SimulationEnvironmentsVersionsCreateAgentParams {
 
 #### Returns
 
-The decoded response. The contract does not describe its shape, so it is untyped.
+[`HarnessAgentCredentialsResponse`](/docs/sdk/reference/simulation-models#harnessagentcredentialsresponse).
 
 ### simulation.environments.versions.diff
 
@@ -1232,11 +1232,11 @@ client.simulation.environments.versions.retry_agent(
     extra_query: dict[str, Any] | None = None,
     extra_body: dict[str, Any] | None = None,
     options: RequestOptions | None = None,
-) -> Any
+) -> models.HarnessVersions
 ```
 
 ```typescript TypeScript
-client.simulation.environments.versions.retryAgent(id: string, versionId: string, options?: RequestOptions): Promise<unknown>
+client.simulation.environments.versions.retryAgent(id: string, versionId: string, options?: RequestOptions): Promise<models.HarnessVersions>
 ```
 
 </Expandable>
@@ -1252,7 +1252,7 @@ client.simulation.environments.versions.retryAgent(id: string, versionId: string
 
 #### Returns
 
-The decoded response. The contract does not describe its shape, so it is untyped.
+[`HarnessVersions`](/docs/sdk/reference/simulation-models#harnessversions).
 
 ### simulation.environments.versions.set_default
 
@@ -1759,11 +1759,11 @@ client.simulation.executions.insights.start(
     extra_query: dict[str, Any] | None = None,
     extra_body: dict[str, Any] | None = None,
     options: RequestOptions | None = None,
-) -> Any
+) -> models.TestExecutionDebugAnalysisResponse
 ```
 
 ```typescript TypeScript
-client.simulation.executions.insights.start(testExecutionId: string, options?: RequestOptions): Promise<unknown>
+client.simulation.executions.insights.start(testExecutionId: string, options?: RequestOptions): Promise<models.TestExecutionDebugAnalysisResponse>
 ```
 
 </Expandable>
@@ -1776,7 +1776,7 @@ client.simulation.executions.insights.start(testExecutionId: string, options?: R
 
 #### Returns
 
-The decoded response. The contract does not describe its shape, so it is untyped.
+[`TestExecutionDebugAnalysisResponse`](/docs/sdk/reference/simulation-models#testexecutiondebuganalysisresponse).
 
 ## client.simulation.jobs
 
@@ -2211,11 +2211,11 @@ client.simulation.jobs.send_message(
     extra_query: dict[str, Any] | None = None,
     extra_body: dict[str, Any] | None = None,
     options: RequestOptions | None = None,
-) -> Any
+) -> models.HarnessConversationRead
 ```
 
 ```typescript TypeScript
-client.simulation.jobs.sendMessage(id: string, params: SimulationJobsSendMessageParams, options?: RequestOptions): Promise<unknown>
+client.simulation.jobs.sendMessage(id: string, params: SimulationJobsSendMessageParams, options?: RequestOptions): Promise<models.HarnessConversationRead>
 
 export interface SimulationJobsSendMessageParams {
   content: string;
@@ -2241,7 +2241,7 @@ export interface SimulationJobsSendMessageParams {
 
 #### Returns
 
-The decoded response. The contract does not describe its shape, so it is untyped.
+[`HarnessConversationRead`](/docs/sdk/reference/simulation-models#harnessconversationread).
 
 ### simulation.jobs.set_secret_values
 
@@ -2275,11 +2275,11 @@ client.simulation.jobs.set_secret_values(
     extra_query: dict[str, Any] | None = None,
     extra_body: dict[str, Any] | None = None,
     options: RequestOptions | None = None,
-) -> Any
+) -> models.HarnessAgentCredentialsResponse
 ```
 
 ```typescript TypeScript
-client.simulation.jobs.setSecretValues(params: SimulationJobsSetSecretValuesParams, options?: RequestOptions): Promise<unknown>
+client.simulation.jobs.setSecretValues(params: SimulationJobsSetSecretValuesParams, options?: RequestOptions): Promise<models.HarnessAgentCredentialsResponse>
 
 export interface SimulationJobsSetSecretValuesParams {
   environment_values: Record<string, unknown>;
@@ -2298,7 +2298,7 @@ export interface SimulationJobsSetSecretValuesParams {
 
 #### Returns
 
-The decoded response. The contract does not describe its shape, so it is untyped.
+[`HarnessAgentCredentialsResponse`](/docs/sdk/reference/simulation-models#harnessagentcredentialsresponse).
 
 ### simulation.jobs.upload_secret_file
 
@@ -2868,20 +2868,20 @@ client.simulation.personas.update(
     *,
     name: str,
     description: str | None | NotGiven = NOT_GIVEN,
-    gender: dict[str, Any] | None | NotGiven = NOT_GIVEN,
-    age_group: dict[str, Any] | None | NotGiven = NOT_GIVEN,
-    occupation: dict[str, Any] | None | NotGiven = NOT_GIVEN,
-    location: dict[str, Any] | None | NotGiven = NOT_GIVEN,
-    personality: dict[str, Any] | None | NotGiven = NOT_GIVEN,
-    communication_style: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    gender: list[str] | None | NotGiven = NOT_GIVEN,
+    age_group: list[str] | None | NotGiven = NOT_GIVEN,
+    occupation: list[str] | None | NotGiven = NOT_GIVEN,
+    location: list[str] | None | NotGiven = NOT_GIVEN,
+    personality: list[str] | None | NotGiven = NOT_GIVEN,
+    communication_style: list[str] | None | NotGiven = NOT_GIVEN,
     multilingual: bool | None | NotGiven = NOT_GIVEN,
-    languages: dict[str, Any] | None | NotGiven = NOT_GIVEN,
-    accent: dict[str, Any] | None | NotGiven = NOT_GIVEN,
-    conversation_speed: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    languages: list[str] | None | NotGiven = NOT_GIVEN,
+    accent: list[str] | None | NotGiven = NOT_GIVEN,
+    conversation_speed: list[str] | None | NotGiven = NOT_GIVEN,
     background_sound: bool | None | NotGiven = NOT_GIVEN,
-    finished_speaking_sensitivity: dict[str, Any] | None | NotGiven = NOT_GIVEN,
-    interrupt_sensitivity: dict[str, Any] | None | NotGiven = NOT_GIVEN,
-    keywords: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    finished_speaking_sensitivity: list[str] | None | NotGiven = NOT_GIVEN,
+    interrupt_sensitivity: list[str] | None | NotGiven = NOT_GIVEN,
+    keywords: list[str] | None | NotGiven = NOT_GIVEN,
     metadata: dict[str, Any] | None | NotGiven = NOT_GIVEN,
     additional_instruction: str | None | NotGiven = NOT_GIVEN,
     profession: list[str] | None | NotGiven = NOT_GIVEN,
@@ -2906,20 +2906,20 @@ client.simulation.personas.update(id: string, params: SimulationPersonasUpdatePa
 export interface SimulationPersonasUpdateParams {
   name: string;
   description?: string | null;
-  gender?: Record<string, unknown> | null;
-  age_group?: Record<string, unknown> | null;
-  occupation?: Record<string, unknown> | null;
-  location?: Record<string, unknown> | null;
-  personality?: Record<string, unknown> | null;
-  communication_style?: Record<string, unknown> | null;
+  gender?: Array<string> | null;
+  age_group?: Array<string> | null;
+  occupation?: Array<string> | null;
+  location?: Array<string> | null;
+  personality?: Array<string> | null;
+  communication_style?: Array<string> | null;
   multilingual?: boolean | null;
-  languages?: Record<string, unknown> | null;
-  accent?: Record<string, unknown> | null;
-  conversation_speed?: Record<string, unknown> | null;
+  languages?: Array<string> | null;
+  accent?: Array<string> | null;
+  conversation_speed?: Array<string> | null;
   background_sound?: boolean | null;
-  finished_speaking_sensitivity?: Record<string, unknown> | null;
-  interrupt_sensitivity?: Record<string, unknown> | null;
-  keywords?: Record<string, unknown> | null;
+  finished_speaking_sensitivity?: Array<string> | null;
+  interrupt_sensitivity?: Array<string> | null;
+  keywords?: Array<string> | null;
   metadata?: Record<string, unknown> | null;
   additional_instruction?: string | null;
   profession?: Array<string> | null;
@@ -2944,20 +2944,20 @@ export interface SimulationPersonasUpdateParams {
 </ParamField>
 <ParamField body="name" type="string" required />
 <ParamField body="description" type="string" optional />
-<ParamField body="gender" type="object" optional />
-<ParamField body="age_group" type="object" optional />
-<ParamField body="occupation" type="object" optional />
-<ParamField body="location" type="object" optional />
-<ParamField body="personality" type="object" optional />
-<ParamField body="communication_style" type="object" optional />
+<ParamField body="gender" type="string[]" optional />
+<ParamField body="age_group" type="string[]" optional />
+<ParamField body="occupation" type="string[]" optional />
+<ParamField body="location" type="string[]" optional />
+<ParamField body="personality" type="string[]" optional />
+<ParamField body="communication_style" type="string[]" optional />
 <ParamField body="multilingual" type="boolean" optional />
-<ParamField body="languages" type="object" optional />
-<ParamField body="accent" type="object" optional />
-<ParamField body="conversation_speed" type="object" optional />
+<ParamField body="languages" type="string[]" optional />
+<ParamField body="accent" type="string[]" optional />
+<ParamField body="conversation_speed" type="string[]" optional />
 <ParamField body="background_sound" type="boolean" optional />
-<ParamField body="finished_speaking_sensitivity" type="object" optional />
-<ParamField body="interrupt_sensitivity" type="object" optional />
-<ParamField body="keywords" type="object" optional />
+<ParamField body="finished_speaking_sensitivity" type="string[]" optional />
+<ParamField body="interrupt_sensitivity" type="string[]" optional />
+<ParamField body="keywords" type="string[]" optional />
 <ParamField body="metadata" type="object" optional />
 <ParamField body="additional_instruction" type="string" optional />
 <ParamField body="profession" type="string[]" optional />

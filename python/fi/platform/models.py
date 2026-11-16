@@ -2,8 +2,9 @@
 """Response models.
 
 Every field is typed optional, so a response that leaves one out or adds one never breaks a
-call by default. The fields the contract marks required (and not nullable) are listed in each
-model's `__required__`; `Client(strict_responses=True)` rejects a response that misses one.
+call by default. The fields the contract marks required (and not nullable, and not a nested
+object, which the contract cannot mark nullable) are listed in each model's `__required__`;
+`Client(strict_responses=True)` rejects a response that misses one.
 """
 
 from __future__ import annotations
@@ -522,7 +523,7 @@ class DashboardQueryMetricResult(_Model):
 
 
 class DashboardQueryResult(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['granularity', 'metrics', 'time_range'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['granularity', 'metrics'])
     metrics: Optional[List[Optional[DashboardQueryMetricResult]]] = Field(default=None)
     time_range: Optional[DashboardQueryTimeRangeResult] = Field(default=None)
     granularity: Optional[str] = Field(default=None)  # one of: minute, hour, day, week, month
@@ -796,7 +797,7 @@ class DebugAnalysisEvidence(_Model):
 
 
 class DebugAnalysisFinding(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['cluster', 'evidence', 'id', 'statement'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['evidence', 'id', 'statement'])
     id: Optional[str] = Field(default=None)
     kind: Optional[str] = Field(default=None)
     statement: Optional[str] = Field(default=None)
@@ -822,7 +823,7 @@ class DebugAnalysisGoal(_Model):
 
 
 class DebugAnalysisReport(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['coverage', 'execution_status', 'grouping_status', 'id', 'outcome', 'recorded_at'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['execution_status', 'grouping_status', 'id', 'outcome', 'recorded_at'])
     id: Optional[str] = Field(default=None)
     execution_status: Optional[str] = Field(default=None)
     outcome: Optional[str] = Field(default=None)
@@ -1098,7 +1099,6 @@ class FailedRerunItem(_Model):
 
 
 class FeedDetailCore(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['representative_trace', 'row', 'success_trace'])
     row: Optional[FeedListRow] = Field(default=None)
     description: Optional[str] = Field(default=None)
     success_trace: Optional[TracePreview] = Field(default=None)
@@ -1115,7 +1115,7 @@ class FeedListResponse(_Model):
 
 
 class FeedListRow(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['assignees', 'cluster_id', 'error', 'modality', 'occurrences', 'sessions', 'severity', 'source', 'status', 'trace_count', 'trends', 'users_affected'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['assignees', 'cluster_id', 'modality', 'occurrences', 'sessions', 'severity', 'source', 'status', 'trace_count', 'trends', 'users_affected'])
     severity_assessment_status: Optional[str] = Field(default=None)
     severity_source: Optional[str] = Field(default=None)
     severity_reason: Optional[str] = Field(default=None)
@@ -1161,7 +1161,7 @@ class GatewayConfigProvider(_Model):
 
 
 class GatewayConfigResult(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['gateway', 'providers'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['providers'])
     id: Optional[str] = Field(default=None)
     organization: Optional[str] = Field(default=None)
     version: Optional[int] = Field(default=None)
@@ -1204,8 +1204,63 @@ class GatewaySummaryResult(_Model):
     model_count: Optional[int] = Field(default=None)
 
 
+class HarnessAgentCredentialsResponse(_Model):
+    agent_version: Optional[HarnessVersion] = Field(default=None)
+
+
+class HarnessConversationEventRead(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['emitted_at', 'event_id', 'kind', 'payload', 'sequence', 'stage'])
+    event_id: Optional[str] = Field(default=None)
+    sequence: Optional[int] = Field(default=None)
+    kind: Optional[str] = Field(default=None)
+    message_id: Optional[str] = Field(default=None)
+    stage: Optional[str] = Field(default=None)
+    invocation_id: Optional[str] = Field(default=None)
+    function_call_id: Optional[str] = Field(default=None)
+    payload: Optional[Any] = Field(default=None)
+    emitted_at: Optional[str] = Field(default=None)
+
+
+class HarnessConversationMessage(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['content', 'created_at', 'kind', 'message_id', 'payload', 'role', 'sequence', 'stage', 'state'])
+    message_id: Optional[str] = Field(default=None)
+    sequence: Optional[int] = Field(default=None)
+    role: Optional[str] = Field(default=None)  # one of: user, assistant, system
+    kind: Optional[str] = Field(default=None)  # one of: message, question, confirmation, status
+    state: Optional[str] = Field(default=None)  # one of: queued, delivered, streaming, completed, failed
+    stage: Optional[str] = Field(default=None)
+    content: Optional[str] = Field(default=None)
+    payload: Optional[Any] = Field(default=None)
+    invocation_id: Optional[str] = Field(default=None)
+    function_call_id: Optional[str] = Field(default=None)
+    reply_to: Optional[str] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+
+
+class HarnessConversationRead(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['conversation_id', 'event_watermark', 'events', 'job_id', 'messages', 'stage', 'state'])
+    conversation_id: Optional[str] = Field(default=None)
+    job_id: Optional[str] = Field(default=None)
+    state: Optional[str] = Field(default=None)
+    stage: Optional[str] = Field(default=None)
+    active_invocation_id: Optional[str] = Field(default=None)
+    blocking_input: Optional[Any] = Field(default=None)
+    messages: Optional[List[Optional[HarnessConversationMessage]]] = Field(default=None)
+    events: Optional[List[Optional[HarnessConversationEventRead]]] = Field(default=None)
+    event_watermark: Optional[int] = Field(default=None)
+    runtime: Optional[HarnessConversationRuntime] = Field(default=None)
+
+
+class HarnessConversationRuntime(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['available', 'degraded', 'state'])
+    state: Optional[str] = Field(default=None)
+    warm_until: Optional[str] = Field(default=None)
+    degraded: Optional[bool] = Field(default=None)
+    available: Optional[bool] = Field(default=None)
+
+
 class HarnessDraftItem(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['changes', 'created_at', 'created_by', 'id', 'is_default', 'last_edited_by', 'revision', 'stale', 'status', 'summary', 'updated_at'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['changes', 'created_at', 'id', 'is_default', 'revision', 'stale', 'status', 'summary', 'updated_at'])
     id: Optional[str] = Field(default=None)
     label: Optional[str] = Field(default=None)
     status: Optional[str] = Field(default=None)  # one of: draft, active, discarded
@@ -1240,20 +1295,20 @@ class HarnessDraftItem(_Model):
 
 
 class HarnessDraftSaveResponse(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['saved', 'versions'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['saved'])
     saved: Optional[Any] = Field(default=None)
     versions: Optional[HarnessVersions] = Field(default=None)
 
 
 class HarnessDrafts(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['environment', 'set_aside', 'suite'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['set_aside'])
     environment: Optional[HarnessDraftItem] = Field(default=None)
     suite: Optional[HarnessDraftItem] = Field(default=None)
     set_aside: Optional[List[Optional[HarnessDraftItem]]] = Field(default=None)
 
 
 class HarnessEnvironment(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent_type', 'created_at', 'id', 'last_run', 'name', 'runs_count', 'scenario_count', 'source_kind', 'stage', 'status'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent_type', 'created_at', 'id', 'name', 'runs_count', 'scenario_count', 'source_kind', 'stage', 'status'])
     id: Optional[str] = Field(default=None)
     name: Optional[str] = Field(default=None)
     description: Optional[str] = Field(default=None)
@@ -1312,7 +1367,7 @@ class HarnessEnvironmentCatalogueSubGoal(_Model):
 
 
 class HarnessEnvironmentContract(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['amendments', 'end_conditions', 'provenance', 'sub_goals'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['amendments', 'sub_goals'])
     agent: Optional[str] = Field(default=None)
     one_liner: Optional[str] = Field(default=None)
     modality: Optional[str] = Field(default=None)
@@ -1342,7 +1397,7 @@ class HarnessEnvironmentCredentialFile(_Model):
 
 
 class HarnessEnvironmentDetail(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['contract', 'evaluations', 'id', 'overview', 'scenarios', 'settings', 'world'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'scenarios'])
     id: Optional[str] = Field(default=None)
     overview: Optional[HarnessEnvironmentOverview] = Field(default=None)
     contract: Optional[HarnessEnvironmentContract] = Field(default=None)
@@ -1388,7 +1443,7 @@ class HarnessEnvironmentOfferedEval(_Model):
 
 
 class HarnessEnvironmentOverview(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent', 'agent_type', 'created_at', 'evaluations_count', 'id', 'name', 'run', 'runs_count', 'scenario_count', 'source_kind', 'stage', 'status'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent_type', 'created_at', 'evaluations_count', 'id', 'name', 'runs_count', 'scenario_count', 'source_kind', 'stage', 'status'])
     id: Optional[str] = Field(default=None)
     name: Optional[str] = Field(default=None)
     description: Optional[str] = Field(default=None)
@@ -1436,6 +1491,20 @@ class HarnessEnvironmentResult(_Model):
     coverage: Optional[Any] = Field(default=None)
 
 
+class HarnessEnvironmentRunEvaluationQueued(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['completed_calls', 'queued', 'skipped_existing', 'skipped_in_flight', 'skipped_pending'])
+    queued: Optional[int] = Field(default=None)
+    skipped_existing: Optional[int] = Field(default=None)
+    skipped_in_flight: Optional[int] = Field(default=None)
+    skipped_pending: Optional[int] = Field(default=None)
+    completed_calls: Optional[int] = Field(default=None)
+
+
+class HarnessEnvironmentRunEvaluationsQueued(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['call_execution_count'])
+    call_execution_count: Optional[int] = Field(default=None)
+
+
 class HarnessEnvironmentRunLink(_Model):
     run_test_id: Optional[str] = Field(default=None)
     test_execution_id: Optional[str] = Field(default=None)
@@ -1479,7 +1548,7 @@ class HarnessEnvironmentSelectedEval(_Model):
 
 
 class HarnessEnvironmentSettings(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent', 'enable_tool_evaluation', 'source'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['enable_tool_evaluation', 'source'])
     schema_version: Optional[str] = Field(default=None)
     source: Optional[Any] = Field(default=None)
     agent: Optional[HarnessEnvironmentAgentSettings] = Field(default=None)
@@ -1522,7 +1591,7 @@ class HarnessEnvironmentWorld(_Model):
 
 
 class HarnessNudge(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['answered_by', 'base_agent_version', 'base_environment_version', 'base_suite_version', 'can_stop', 'created_at', 'error', 'facts', 'id', 'queued_behind_input', 'replaced_by', 'result_environment_version', 'result_suite_version', 'state', 'target', 'trigger_agent_version'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['can_stop', 'created_at', 'id', 'queued_behind_input', 'state', 'target'])
     id: Optional[str] = Field(default=None)
     target: Optional[str] = Field(default=None)  # one of: environment, suite
     state: Optional[str] = Field(default=None)  # one of: pending, answered_no, queued, running, applied, no_change, replaced, failed
@@ -1621,7 +1690,7 @@ class HarnessPreflightCredentials(_Model):
 
 
 class HarnessPreflightResponse(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['checks', 'credentials', 'effective_parallelism', 'parallelism_enabled', 'ready_to_submit', 'snapshot', 'state'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['checks', 'effective_parallelism', 'parallelism_enabled', 'ready_to_submit', 'snapshot', 'state'])
     ready_to_submit: Optional[bool] = Field(default=None)
     state: Optional[str] = Field(default=None)  # one of: connected, failed
     checks: Optional[List[Optional[HarnessPreflightCheck]]] = Field(default=None)
@@ -1632,22 +1701,37 @@ class HarnessPreflightResponse(_Model):
     snapshot: Optional[Any] = Field(default=None)
 
 
+class HarnessRunCreateResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['environment_id', 'job_id', 'run_id', 'run_test_id', 'scenario_count', 'stage', 'state', 'test_execution_id', 'total_calls', 'trials', 'warnings'])
+    environment_id: Optional[str] = Field(default=None)
+    job_id: Optional[str] = Field(default=None)
+    run_id: Optional[str] = Field(default=None)
+    run_test_id: Optional[str] = Field(default=None)
+    test_execution_id: Optional[str] = Field(default=None)
+    scenario_count: Optional[int] = Field(default=None)
+    trials: Optional[int] = Field(default=None)
+    total_calls: Optional[int] = Field(default=None)
+    state: Optional[str] = Field(default=None)
+    stage: Optional[str] = Field(default=None)
+    versions: Optional[HarnessRunPinnedVersions] = Field(default=None)
+    warnings: Optional[List[Optional[HarnessRunWarning]]] = Field(default=None)
+
+
 class HarnessRunPinnedVersions(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent', 'environment', 'suite'])
     agent: Optional[RunVersionLabel] = Field(default=None)
     environment: Optional[RunVersionLabel] = Field(default=None)
     suite: Optional[RunVersionLabel] = Field(default=None)
 
 
 class HarnessRunPlan(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['versions', 'warnings'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['warnings'])
     versions: Optional[HarnessRunPinnedVersions] = Field(default=None)
     warnings: Optional[List[Optional[HarnessRunWarning]]] = Field(default=None)
     bundle_cached: Optional[bool] = Field(default=None)
 
 
 class HarnessRunSummary(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent_version', 'environment', 'kind', 'run_test_id', 'run_test_name', 'status', 'test_execution_id'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['kind', 'run_test_id', 'run_test_name', 'status', 'test_execution_id'])
     kind: Optional[str] = Field(default=None)  # one of: environment, simulate
     test_execution_id: Optional[str] = Field(default=None)
     run_test_id: Optional[str] = Field(default=None)
@@ -1671,7 +1755,7 @@ class HarnessRunWarning(_Model):
 
 
 class HarnessSecretFileUploadResponse(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['environment_name', 'secret_ref', 'size'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['environment_name', 'size'])
     environment_name: Optional[str] = Field(default=None)
     secret_ref: Optional[SecretReference] = Field(default=None)
     size: Optional[int] = Field(default=None)
@@ -1694,7 +1778,7 @@ class HarnessSuiteMember(_Model):
 
 
 class HarnessVersion(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'created_by', 'id', 'is_default', 'status', 'summary'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'id', 'is_default', 'status', 'summary'])
     id: Optional[str] = Field(default=None)
     label: Optional[str] = Field(default=None)
     status: Optional[str] = Field(default=None)  # one of: draft, active, discarded
@@ -1887,7 +1971,7 @@ class Organization(_Model):
 
 
 class OverviewResponse(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['events_over_time', 'pattern_summary', 'representative_traces'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['events_over_time', 'representative_traces'])
     events_over_time: Optional[List[Optional[EventsOverTimePoint]]] = Field(default=None)
     pattern_summary: Optional[PatternSummary] = Field(default=None)
     representative_traces: Optional[List[Optional[RepresentativeTrace]]] = Field(default=None)
@@ -2016,7 +2100,6 @@ class PromptLabel(_Model):
 
 
 class PromptRunStatusResult(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['executions_result'])
     status: Optional[str] = Field(default=None)
     error_message: Optional[str] = Field(default=None)
     executions_result: Optional[PromptHistoryExecution] = Field(default=None)
@@ -2067,7 +2150,7 @@ class QueueAddItemsResult(_Model):
 
 
 class QueueAddLabelResult(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['created', 'label', 'queue_status', 'reopened_items'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created', 'queue_status', 'reopened_items'])
     label: Optional[QueueLabelResult] = Field(default=None)
     created: Optional[bool] = Field(default=None)
     reopened_items: Optional[int] = Field(default=None)
@@ -2108,7 +2191,7 @@ class QueueAnalyticsAnnotatorPerformance(_Model):
 
 
 class QueueAnalyticsResult(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['annotator_performance', 'label_distribution', 'status_breakdown', 'throughput', 'total'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['annotator_performance', 'label_distribution', 'status_breakdown', 'total'])
     throughput: Optional[QueueAnalyticsThroughput] = Field(default=None)
     annotator_performance: Optional[List[Optional[QueueAnalyticsAnnotatorPerformance]]] = Field(default=None)
     label_distribution: Optional[Any] = Field(default=None)
@@ -2254,7 +2337,7 @@ class QueueProgressAnnotatorStat(_Model):
 
 
 class QueueProgressResult(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['annotator_stats', 'completed', 'in_progress', 'in_review', 'pending', 'progress_pct', 'skipped', 'total', 'user_progress'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['annotator_stats', 'completed', 'in_progress', 'in_review', 'pending', 'progress_pct', 'skipped', 'total'])
     total: Optional[int] = Field(default=None)
     pending: Optional[int] = Field(default=None)
     in_progress: Optional[int] = Field(default=None)
@@ -2311,7 +2394,7 @@ class RcaTrailStep(_Model):
 
 
 class RepresentativeTrace(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent_flow', 'evidence', 'id', 'recommendations', 'root_causes', 'status', 'summary'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'recommendations', 'root_causes', 'status'])
     id: Optional[str] = Field(default=None)
     status: Optional[str] = Field(default=None)
     timestamp: Optional[str] = Field(default=None)
@@ -2538,14 +2621,14 @@ class SpanListMetadata(_Model):
 
 
 class SpanObserveListResult(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['config', 'metadata', 'table'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['config', 'table'])
     metadata: Optional[SpanListMetadata] = Field(default=None)
     table: Optional[List[Optional[Any]]] = Field(default=None)
     config: Optional[List[Optional[SpanListColumnConfig]]] = Field(default=None)
 
 
 class StoredAgent(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['behaviour', 'gaps', 'instrumentation', 'kind', 'model', 'name', 'provider_ref', 'schema_version', 'setup_hash', 'supports', 'telephony', 'tools', 'type', 'voice'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['behaviour', 'gaps', 'instrumentation', 'kind', 'name', 'schema_version', 'setup_hash', 'supports', 'telephony', 'tools', 'type'])
     schema_version: Optional[str] = Field(default=None)
     type: Optional[str] = Field(default=None)
     kind: Optional[str] = Field(default=None)
@@ -2564,7 +2647,7 @@ class StoredAgent(_Model):
 
 
 class StoredAgentResponse(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent', 'sdk_version', 'setup_stale', 'stored_at'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['sdk_version', 'setup_stale', 'stored_at'])
     agent: Optional[StoredAgent] = Field(default=None)
     sdk_version: Optional[str] = Field(default=None)
     stored_at: Optional[str] = Field(default=None)
@@ -2603,7 +2686,7 @@ class StoredTelephony(_Model):
 
 
 class StoredTool(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['endpoint', 'kind', 'name'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['kind', 'name'])
     name: Optional[str] = Field(default=None)
     description: Optional[str] = Field(default=None)
     kind: Optional[str] = Field(default=None)
@@ -2660,7 +2743,7 @@ class TestExecutionAnalytics(_Model):
 
 
 class TestExecutionDebugAnalysisResponse(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['findings', 'goals', 'one_offs', 'report', 'status', 'summary', 'test_execution_id'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['findings', 'goals', 'one_offs', 'status', 'test_execution_id'])
     test_execution_id: Optional[str] = Field(default=None)
     status: Optional[str] = Field(default=None)  # one of: not_requested, pending, running, completed, failed
     generation: Optional[int] = Field(default=None)
@@ -2797,7 +2880,7 @@ class TraceObserveListMetadata(_Model):
 
 
 class TraceObserveListResult(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['config', 'metadata', 'table'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['config', 'table'])
     metadata: Optional[TraceObserveListMetadata] = Field(default=None)
     table: Optional[List[Optional[Any]]] = Field(default=None)
     config: Optional[List[Optional[TraceObserveColumnConfig]]] = Field(default=None)
@@ -2841,7 +2924,7 @@ class TraceSessionListMetadata(_Model):
 
 
 class TraceSessionListResult(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['config', 'metadata', 'table'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['config', 'table'])
     metadata: Optional[TraceSessionListMetadata] = Field(default=None)
     table: Optional[List[Optional[TraceSessionTableRow]]] = Field(default=None)
     config: Optional[List[Optional[TraceObserveColumnConfig]]] = Field(default=None)
@@ -2898,7 +2981,7 @@ class TracesListRow(_Model):
 
 
 class TracesTabResponse(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['aggregates', 'total', 'traces'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['total', 'traces'])
     aggregates: Optional[TracesAggregates] = Field(default=None)
     traces: Optional[List[Optional[TracesListRow]]] = Field(default=None)
     total: Optional[int] = Field(default=None)
@@ -2990,7 +3073,7 @@ class UserAlertMonitorListMetadata(_Model):
 
 
 class UserAlertMonitorListResult(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['column_config', 'metadata', 'table'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['column_config', 'table'])
     column_config: Optional[List[Optional[UserAlertMonitorListColumn]]] = Field(default=None)
     table: Optional[List[Optional[UserAlertMonitorListItem]]] = Field(default=None)
     metadata: Optional[UserAlertMonitorListMetadata] = Field(default=None)
@@ -3025,7 +3108,7 @@ class UserInfoOrganization(_Model):
 
 
 class UserInfoResponse(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'email', 'get_started_completed', 'id', 'onboarding_completed', 'organization', 'remember_me', 'restrict_simulate_to_environments', 'status', 'ws_enabled'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'email', 'get_started_completed', 'id', 'onboarding_completed', 'remember_me', 'restrict_simulate_to_environments', 'status', 'ws_enabled'])
     id: Optional[str] = Field(default=None)
     email: Optional[str] = Field(default=None)
     name: Optional[str] = Field(default=None)
@@ -3192,6 +3275,11 @@ GatewayConfigProvider.model_rebuild()
 GatewayConfigResult.model_rebuild()
 GatewayStatus.model_rebuild()
 GatewaySummaryResult.model_rebuild()
+HarnessAgentCredentialsResponse.model_rebuild()
+HarnessConversationEventRead.model_rebuild()
+HarnessConversationMessage.model_rebuild()
+HarnessConversationRead.model_rebuild()
+HarnessConversationRuntime.model_rebuild()
 HarnessDraftItem.model_rebuild()
 HarnessDraftSaveResponse.model_rebuild()
 HarnessDrafts.model_rebuild()
@@ -3212,6 +3300,8 @@ HarnessEnvironmentOverview.model_rebuild()
 HarnessEnvironmentPersona.model_rebuild()
 HarnessEnvironmentProvenance.model_rebuild()
 HarnessEnvironmentResult.model_rebuild()
+HarnessEnvironmentRunEvaluationQueued.model_rebuild()
+HarnessEnvironmentRunEvaluationsQueued.model_rebuild()
 HarnessEnvironmentRunLink.model_rebuild()
 HarnessEnvironmentScenario.model_rebuild()
 HarnessEnvironmentSelectedEval.model_rebuild()
@@ -3230,6 +3320,7 @@ HarnessNudgeVariables.model_rebuild()
 HarnessPreflightCheck.model_rebuild()
 HarnessPreflightCredentials.model_rebuild()
 HarnessPreflightResponse.model_rebuild()
+HarnessRunCreateResponse.model_rebuild()
 HarnessRunPinnedVersions.model_rebuild()
 HarnessRunPlan.model_rebuild()
 HarnessRunSummary.model_rebuild()
@@ -3454,6 +3545,11 @@ __all__ = [
     'GatewayConfigResult',
     'GatewayStatus',
     'GatewaySummaryResult',
+    'HarnessAgentCredentialsResponse',
+    'HarnessConversationEventRead',
+    'HarnessConversationMessage',
+    'HarnessConversationRead',
+    'HarnessConversationRuntime',
     'HarnessDraftItem',
     'HarnessDraftSaveResponse',
     'HarnessDrafts',
@@ -3474,6 +3570,8 @@ __all__ = [
     'HarnessEnvironmentPersona',
     'HarnessEnvironmentProvenance',
     'HarnessEnvironmentResult',
+    'HarnessEnvironmentRunEvaluationQueued',
+    'HarnessEnvironmentRunEvaluationsQueued',
     'HarnessEnvironmentRunLink',
     'HarnessEnvironmentScenario',
     'HarnessEnvironmentSelectedEval',
@@ -3492,6 +3590,7 @@ __all__ = [
     'HarnessPreflightCheck',
     'HarnessPreflightCredentials',
     'HarnessPreflightResponse',
+    'HarnessRunCreateResponse',
     'HarnessRunPinnedVersions',
     'HarnessRunPlan',
     'HarnessRunSummary',

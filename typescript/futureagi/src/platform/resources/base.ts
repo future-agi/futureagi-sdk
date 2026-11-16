@@ -1670,33 +1670,33 @@ export interface SimulationPersonasUpdateParams {
   /** Description */
   description?: string | null;
   /** Gender */
-  gender?: Record<string, unknown> | null;
+  gender?: Array<string> | null;
   /** Age group */
-  age_group?: Record<string, unknown> | null;
+  age_group?: Array<string> | null;
   /** Occupation */
-  occupation?: Record<string, unknown> | null;
+  occupation?: Array<string> | null;
   /** Location */
-  location?: Record<string, unknown> | null;
+  location?: Array<string> | null;
   /** Personality */
-  personality?: Record<string, unknown> | null;
+  personality?: Array<string> | null;
   /** Communication style */
-  communication_style?: Record<string, unknown> | null;
+  communication_style?: Array<string> | null;
   /** Multilingual */
   multilingual?: boolean | null;
   /** Languages */
-  languages?: Record<string, unknown> | null;
+  languages?: Array<string> | null;
   /** Accent */
-  accent?: Record<string, unknown> | null;
+  accent?: Array<string> | null;
   /** Conversation speed */
-  conversation_speed?: Record<string, unknown> | null;
+  conversation_speed?: Array<string> | null;
   /** Background sound */
   background_sound?: boolean | null;
   /** Finished speaking sensitivity */
-  finished_speaking_sensitivity?: Record<string, unknown> | null;
+  finished_speaking_sensitivity?: Array<string> | null;
   /** Interrupt sensitivity */
-  interrupt_sensitivity?: Record<string, unknown> | null;
+  interrupt_sensitivity?: Array<string> | null;
   /** Keywords */
-  keywords?: Record<string, unknown> | null;
+  keywords?: Array<string> | null;
   /** Metadata */
   metadata?: Record<string, unknown> | null;
   /** Additional instruction */
@@ -2031,8 +2031,8 @@ export class SimulationEnvironmentsRunsResource extends Resource {
    *
    * POST /simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/
    */
-  addEvaluation(id: string, executionId: string, params: SimulationEnvironmentsRunsAddEvaluationParams, options?: RequestOptions): Promise<unknown> {
-    return this._t.call<unknown>(ops.OP_SIMULATION_ENVIRONMENTS_RUNS_ADD_EVALUATION, { path: { id: id, execution_id: executionId }, query: {}, body: { name: params.name } }, options);
+  addEvaluation(id: string, executionId: string, params: SimulationEnvironmentsRunsAddEvaluationParams, options?: RequestOptions): Promise<models.HarnessEnvironmentRunEvaluationQueued> {
+    return this._t.call<models.HarnessEnvironmentRunEvaluationQueued>(ops.OP_SIMULATION_ENVIRONMENTS_RUNS_ADD_EVALUATION, { path: { id: id, execution_id: executionId }, query: {}, body: { name: params.name } }, options);
   }
 
   /**
@@ -2040,8 +2040,8 @@ export class SimulationEnvironmentsRunsResource extends Resource {
    *
    * POST /simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/run/
    */
-  regrade(id: string, executionId: string, params: SimulationEnvironmentsRunsRegradeParams, options?: RequestOptions): Promise<unknown> {
-    return this._t.call<unknown>(ops.OP_SIMULATION_ENVIRONMENTS_RUNS_REGRADE, { path: { id: id, execution_id: executionId }, query: {}, body: { eval_config_ids: params.eval_config_ids, enable_tool_evaluation: params.enable_tool_evaluation } }, options);
+  regrade(id: string, executionId: string, params: SimulationEnvironmentsRunsRegradeParams, options?: RequestOptions): Promise<models.HarnessEnvironmentRunEvaluationsQueued> {
+    return this._t.call<models.HarnessEnvironmentRunEvaluationsQueued>(ops.OP_SIMULATION_ENVIRONMENTS_RUNS_REGRADE, { path: { id: id, execution_id: executionId }, query: {}, body: { eval_config_ids: params.eval_config_ids, enable_tool_evaluation: params.enable_tool_evaluation } }, options);
   }
 }
 
@@ -2055,8 +2055,8 @@ export class SimulationEnvironmentsVersionsResource extends Resource {
    *
    * POST /simulate/api/harness-environments/{id}/versions/agent/
    */
-  createAgent(id: string, params: SimulationEnvironmentsVersionsCreateAgentParams = {}, options?: RequestOptions): Promise<unknown> {
-    return this._t.call<unknown>(ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_CREATE_AGENT, { path: { id: id }, query: {}, body: { archive_artifact_id: params.archive_artifact_id, prompt: params.prompt, agent_payload: params.agent_payload } }, options);
+  createAgent(id: string, params: SimulationEnvironmentsVersionsCreateAgentParams = {}, options?: RequestOptions): Promise<models.HarnessAgentCredentialsResponse> {
+    return this._t.call<models.HarnessAgentCredentialsResponse>(ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_CREATE_AGENT, { path: { id: id }, query: {}, body: { archive_artifact_id: params.archive_artifact_id, prompt: params.prompt, agent_payload: params.agent_payload } }, options);
   }
 
   /**
@@ -2082,8 +2082,8 @@ export class SimulationEnvironmentsVersionsResource extends Resource {
    *
    * POST /simulate/api/harness-environments/{id}/versions/agent/{version_id}/retry/
    */
-  retryAgent(id: string, versionId: string, options?: RequestOptions): Promise<unknown> {
-    return this._t.call<unknown>(ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_RETRY_AGENT, { path: { id: id, version_id: versionId }, query: {}, body: {} }, options);
+  retryAgent(id: string, versionId: string, options?: RequestOptions): Promise<models.HarnessVersions> {
+    return this._t.call<models.HarnessVersions>(ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_RETRY_AGENT, { path: { id: id, version_id: versionId }, query: {}, body: {} }, options);
   }
 
   /**
@@ -2124,8 +2124,8 @@ export class SimulationExecutionsInsightsResource extends Resource {
    *
    * POST /simulate/test-executions/{test_execution_id}/debug-analysis/
    */
-  start(testExecutionId: string, options?: RequestOptions): Promise<unknown> {
-    return this._t.call<unknown>(ops.OP_SIMULATION_EXECUTIONS_INSIGHTS_START, { path: { test_execution_id: testExecutionId }, query: {}, body: {} }, options);
+  start(testExecutionId: string, options?: RequestOptions): Promise<models.TestExecutionDebugAnalysisResponse> {
+    return this._t.call<models.TestExecutionDebugAnalysisResponse>(ops.OP_SIMULATION_EXECUTIONS_INSIGHTS_START, { path: { test_execution_id: testExecutionId }, query: {}, body: {} }, options);
   }
 }
 
@@ -2971,8 +2971,8 @@ export class SimulationEnvironmentsResource extends Resource {
    *
    * POST /simulate/api/harness-environments/{id}/run/
    */
-  run(id: string, params: SimulationEnvironmentsRunParams, options?: RequestOptions): Promise<unknown> {
-    return this._t.call<unknown>(ops.OP_SIMULATION_ENVIRONMENTS_RUN, { path: { id: id }, query: {}, body: { scenario_ids: params.scenario_ids, trials: params.trials, agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id } }, options);
+  run(id: string, params: SimulationEnvironmentsRunParams, options?: RequestOptions): Promise<models.HarnessRunCreateResponse> {
+    return this._t.call<models.HarnessRunCreateResponse>(ops.OP_SIMULATION_ENVIRONMENTS_RUN, { path: { id: id }, query: {}, body: { scenario_ids: params.scenario_ids, trials: params.trials, agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id } }, options);
   }
 
   /**
@@ -3112,8 +3112,8 @@ export class SimulationJobsResource extends Resource {
    *
    * POST /simulate/api/harness-jobs/{id}/conversation/messages/
    */
-  sendMessage(id: string, params: SimulationJobsSendMessageParams, options?: RequestOptions): Promise<unknown> {
-    return this._t.call<unknown>(ops.OP_SIMULATION_JOBS_SEND_MESSAGE, { path: { id: id }, query: {}, body: { content: params.content, client_request_id: params.client_request_id, kind: params.kind, reply_to: params.reply_to, payload: params.payload } }, options);
+  sendMessage(id: string, params: SimulationJobsSendMessageParams, options?: RequestOptions): Promise<models.HarnessConversationRead> {
+    return this._t.call<models.HarnessConversationRead>(ops.OP_SIMULATION_JOBS_SEND_MESSAGE, { path: { id: id }, query: {}, body: { content: params.content, client_request_id: params.client_request_id, kind: params.kind, reply_to: params.reply_to, payload: params.payload } }, options);
   }
 
   /**
@@ -3121,8 +3121,8 @@ export class SimulationJobsResource extends Resource {
    *
    * POST /simulate/api/harness-jobs/secret-values/
    */
-  setSecretValues(params: SimulationJobsSetSecretValuesParams, options?: RequestOptions): Promise<unknown> {
-    return this._t.call<unknown>(ops.OP_SIMULATION_JOBS_SET_SECRET_VALUES, { path: {}, query: {}, body: { environment_values: params.environment_values, environment_id: params.environment_id, files: params.files } }, options);
+  setSecretValues(params: SimulationJobsSetSecretValuesParams, options?: RequestOptions): Promise<models.HarnessAgentCredentialsResponse> {
+    return this._t.call<models.HarnessAgentCredentialsResponse>(ops.OP_SIMULATION_JOBS_SET_SECRET_VALUES, { path: {}, query: {}, body: { environment_values: params.environment_values, environment_id: params.environment_id, files: params.files } }, options);
   }
 
   /**

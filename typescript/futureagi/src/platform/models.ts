@@ -1101,6 +1101,57 @@ export interface GatewaySummaryResult {
   model_count?: number | null;
 }
 
+export interface HarnessAgentCredentialsResponse {
+  agent_version?: HarnessVersion | null;
+}
+
+export interface HarnessConversationEventRead {
+  event_id?: string | null;
+  sequence?: number | null;
+  kind?: string | null;
+  message_id?: string | null;
+  stage?: string | null;
+  invocation_id?: string | null;
+  function_call_id?: string | null;
+  payload?: unknown | null;
+  emitted_at?: string | null;
+}
+
+export interface HarnessConversationMessage {
+  message_id?: string | null;
+  sequence?: number | null;
+  role?: string | null; // one of: user, assistant, system
+  kind?: string | null; // one of: message, question, confirmation, status
+  state?: string | null; // one of: queued, delivered, streaming, completed, failed
+  stage?: string | null;
+  content?: string | null;
+  payload?: unknown | null;
+  invocation_id?: string | null;
+  function_call_id?: string | null;
+  reply_to?: string | null;
+  created_at?: string | null;
+}
+
+export interface HarnessConversationRead {
+  conversation_id?: string | null;
+  job_id?: string | null;
+  state?: string | null;
+  stage?: string | null;
+  active_invocation_id?: string | null;
+  blocking_input?: unknown | null;
+  messages?: Array<HarnessConversationMessage | null> | null;
+  events?: Array<HarnessConversationEventRead | null> | null;
+  event_watermark?: number | null;
+  runtime?: HarnessConversationRuntime | null;
+}
+
+export interface HarnessConversationRuntime {
+  state?: string | null;
+  warm_until?: string | null;
+  degraded?: boolean | null;
+  available?: boolean | null;
+}
+
 export interface HarnessDraftItem {
   id?: string | null;
   label?: string | null;
@@ -1313,6 +1364,18 @@ export interface HarnessEnvironmentResult {
   coverage?: unknown | null;
 }
 
+export interface HarnessEnvironmentRunEvaluationQueued {
+  queued?: number | null;
+  skipped_existing?: number | null;
+  skipped_in_flight?: number | null;
+  skipped_pending?: number | null;
+  completed_calls?: number | null;
+}
+
+export interface HarnessEnvironmentRunEvaluationsQueued {
+  call_execution_count?: number | null;
+}
+
 export interface HarnessEnvironmentRunLink {
   run_test_id?: string | null;
   test_execution_id?: string | null;
@@ -1491,6 +1554,21 @@ export interface HarnessPreflightResponse {
   effective_parallelism?: number | null;
   resource_profile?: unknown | null;
   snapshot?: unknown | null;
+}
+
+export interface HarnessRunCreateResponse {
+  environment_id?: string | null;
+  job_id?: string | null;
+  run_id?: string | null;
+  run_test_id?: string | null;
+  test_execution_id?: string | null;
+  scenario_count?: number | null;
+  trials?: number | null;
+  total_calls?: number | null;
+  state?: string | null;
+  stage?: string | null;
+  versions?: HarnessRunPinnedVersions | null;
+  warnings?: Array<HarnessRunWarning | null> | null;
 }
 
 export interface HarnessRunPinnedVersions {

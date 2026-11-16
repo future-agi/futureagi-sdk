@@ -503,6 +503,32 @@ def test_a_required_nullable_input_must_be_passed_and_may_be_null():
     assert "  expected_default_id: string | null;\n" in iface
 
 
+def test_a_202_response_is_typed_and_released_untyped_methods_stay_untyped():
+    """202 Accepted carries a schema like 200/201 (Jaya, #104); scenarios.create shipped in 0.7.0
+    as a dict, so it stays untyped until a release may break."""
+    ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
+    assert pygen._return_annotation(ops["simulation.environments.run"], is_async=False)[0] == "models.HarnessRunCreateResponse"
+    assert pygen._return_annotation(ops["simulation.executions.insights.start"], is_async=False)[0] == "models.TestExecutionDebugAnalysisResponse"
+    assert ops["simulation.scenarios.create"].returns is None
+
+
+def test_persona_update_takes_lists_like_persona_create():
+    ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
+    update = {p.name: p.schema for p in ops["simulation.personas.update"].params if p.location == "body"}
+    create = {p.name: p.schema for p in ops["simulation.personas.create"].params if p.location == "body"}
+    for name in ("gender", "age_group", "location", "personality", "accent", "keywords"):
+        assert update[name] == {"type": "array", "items": {"type": "string"}}, name
+        assert create[name]["type"] == "array", name
+
+
+def test_strict_mode_does_not_require_nested_objects():
+    from fi.platform import models
+
+    required = models.TestExecutionDebugAnalysisResponse.__required__
+    assert "status" in required and not {"report", "summary"} & required
+    assert "created_by" not in models.HarnessVersion.__required__
+
+
 def test_docs_reference_covers_every_sdk_operation_once():
     """The docs site's SDK reference (docs/sdk-reference) is generated from the same catalog."""
     from sdkgen.generator import docs as docsgen

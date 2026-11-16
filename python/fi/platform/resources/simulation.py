@@ -7,8 +7,8 @@ The wait helpers poll the generated read methods the way the futureagi CLI's `--
 does (`fi sim run`, `fi sim env status`, `fi agents push`, `fi sim runs insights`), so a
 script gets the same notion of "finished":
 
-    job = client.simulation.environments.run(env_id, scenario_ids=["1", "2"])
-    run = client.simulation.wait_for_run(job.job_id, test_execution_id=job.test_execution_id)
+    started = client.simulation.environments.run(env_id, scenario_ids=["1", "2"])
+    run = client.simulation.wait_for_run(started.job_id, test_execution_id=started.test_execution_id)
 
 Each returns the last thing it read; none of them treats a failed outcome as an error (read
 `status.state` or the returned status). A wait that runs out of time raises `TimeoutError`.
@@ -26,6 +26,8 @@ from .base import AsyncSimulationResource, SimulationResource
 JOB_TERMINAL = frozenset({"completed", "failed", "canceled"})
 EXECUTION_TERMINAL = frozenset({"completed", "failed", "cancelled"})
 INSIGHTS_TERMINAL = frozenset({"completed", "failed", "not_requested"})
+# A builder chat turn still running (internal/cli/sim_env_jobs.go simConvBusy).
+CONVERSATION_BUSY = frozenset({"starting", "hydrating", "responding"})
 
 
 def _get(obj: Any, dotted: str) -> Any:
@@ -51,8 +53,31 @@ def open_question(job: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     return question
 
 
+def conversation_busy(job: Dict[str, Any]) -> bool:
+    """Whether the builder is still working on a chat turn: a running invocation, a busy
+    conversation state, or a user message still queued. A message sent to a finished build
+    (`jobs.send_message`) changes the conversation, not `status.state`, so a finished job can
+    still be busy. A chat the server cannot run (`runtime.available` false) never is."""
+    conversation = _get(job, "conversation")
+    if not isinstance(conversation, dict) or _get(conversation, "runtime.available") is False:
+        return False
+    if conversation.get("active_invocation_id") is not None or conversation.get("state") in CONVERSATION_BUSY:
+        return True
+    return any(isinstance(m, dict) and m.get("role") == "user" and m.get("state") == "queued" for m in conversation.get("messages") or [])
+
+
 def _job_settled(job: Dict[str, Any]) -> bool:
-    return _get(job, "status.state") in JOB_TERMINAL or open_question(job) is not None
+    # The CLI's builderDone: an open question, or a terminal job whose chat is idle.
+    return open_question(job) is not None or (_get(job, "status.state") in JOB_TERMINAL and not conversation_busy(job))
+
+
+def _execution_settled(status: Any) -> bool:
+    # An execution without a status cannot be waited on (the CLI's pollRun returns then too).
+    return not status or status in EXECUTION_TERMINAL
+
+
+def _execution_id(job: Dict[str, Any], given: Optional[str]) -> Optional[str]:
+    return given or _get(job, "job.test_execution_id")
 
 
 def _agent_version(versions: Any, version_id: str) -> Any:
@@ -96,26 +121,29 @@ class Simulation(SimulationResource):
 
     def wait_for_job(self, job_id: str, *, timeout: float = 3600, poll_interval: float = 5) -> Dict[str, Any]:
         """Poll a harness job (an environment build, or a run's job) until it is completed, failed
-        or canceled, or until the builder asks a question (see `open_question`). Returns the job."""
+        or canceled and its builder chat is idle (see `conversation_busy`), or until the builder
+        asks a question (see `open_question`). Returns the job."""
         return _poll(lambda: self.jobs.get(job_id), _job_settled, f"job {job_id}", timeout, poll_interval)
 
     def wait_for_run(self, job_id: str, *, test_execution_id: Optional[str] = None, timeout: float = 3600, poll_interval: float = 5) -> Dict[str, Any]:
-        """Wait for a run started with `environments.run`: its job settles, then (when
-        `test_execution_id` is given, as `environments.run` returns it) its test execution, whose
-        grading can outlast the job. Returns `{"job": ..., "execution_status": ...}`."""
+        """Wait for a run started with `environments.run`: its job settles, then its test execution,
+        whose grading can outlast the job whatever the job's end state (a failed or canceled re-run
+        can still be grading the calls that finished). The execution is `test_execution_id`, or the
+        job's own `job.test_execution_id`. Returns `{"job": ..., "execution_status": ...}`;
+        `execution_status` is None when the run has no execution to read."""
         deadline = time.monotonic() + timeout
         job = self.wait_for_job(job_id, timeout=timeout, poll_interval=poll_interval)
+        execution_id = _execution_id(job, test_execution_id)
         status = None
-        if test_execution_id and _get(job, "status.state") == "completed":
-            left = max(deadline - time.monotonic(), poll_interval)
+        if execution_id:
             status = _poll(
-                lambda: _get(self._t.raw("GET", f"/simulate/test-executions/{test_execution_id}/", query={"limit": 1}), "status"),
-                lambda s: s in EXECUTION_TERMINAL,
-                f"test execution {test_execution_id}",
-                left,
+                lambda: _get(self._t.raw("GET", f"/simulate/test-executions/{execution_id}/", query={"limit": 1}), "status"),
+                _execution_settled,
+                f"test execution {execution_id}",
+                max(deadline - time.monotonic(), poll_interval),
                 poll_interval,
             )
-        return {"job": job, "execution_status": status}
+        return {"job": job, "execution_status": status or None}
 
     def wait_for_agent_version(self, environment_id: str, version_id: str, *, timeout: float = 3600, poll_interval: float = 5) -> Any:
         """Poll an environment's agent version until its connection check leaves `pending`
@@ -151,14 +179,15 @@ class AsyncSimulation(AsyncSimulationResource):
         """See `Simulation.wait_for_run`."""
         deadline = time.monotonic() + timeout
         job = await self.wait_for_job(job_id, timeout=timeout, poll_interval=poll_interval)
+        execution_id = _execution_id(job, test_execution_id)
         status = None
-        if test_execution_id and _get(job, "status.state") == "completed":
+        if execution_id:
 
             async def read() -> Any:
-                return _get(await self._t.raw("GET", f"/simulate/test-executions/{test_execution_id}/", query={"limit": 1}), "status")
+                return _get(await self._t.raw("GET", f"/simulate/test-executions/{execution_id}/", query={"limit": 1}), "status")
 
-            status = await _apoll(read, lambda s: s in EXECUTION_TERMINAL, f"test execution {test_execution_id}", max(deadline - time.monotonic(), poll_interval), poll_interval)
-        return {"job": job, "execution_status": status}
+            status = await _apoll(read, _execution_settled, f"test execution {execution_id}", max(deadline - time.monotonic(), poll_interval), poll_interval)
+        return {"job": job, "execution_status": status or None}
 
     async def wait_for_agent_version(self, environment_id: str, version_id: str, *, timeout: float = 3600, poll_interval: float = 5) -> Any:
         """See `Simulation.wait_for_agent_version`."""

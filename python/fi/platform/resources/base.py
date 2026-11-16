@@ -139,7 +139,7 @@ class SimulationEnvironmentsRunsResource(Resource):
 
     _t: SyncTransport
 
-    def add_evaluation(self, id: str, execution_id: str, *, name: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def add_evaluation(self, id: str, execution_id: str, *, name: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessEnvironmentRunEvaluationQueued:
         """Add an eval by name from inside a finished run and grade that run's finished calls that have no verdict for it; returns the queued and skipped counts. Spends judge credits.
 
         POST /simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/
@@ -147,9 +147,9 @@ class SimulationEnvironmentsRunsResource(Resource):
         path = {'id': id, 'execution_id': execution_id}
         query = {**(extra_query or {})}
         body = {'name': name, **(extra_body or {})}
-        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_RUNS_ADD_EVALUATION, path=path, query=query, body=body, model=None, options=options)
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_RUNS_ADD_EVALUATION, path=path, query=query, body=body, model=models.HarnessEnvironmentRunEvaluationQueued, options=options)
 
-    def regrade(self, id: str, execution_id: str, *, eval_config_ids: List[str], enable_tool_evaluation: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def regrade(self, id: str, execution_id: str, *, eval_config_ids: List[str], enable_tool_evaluation: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessEnvironmentRunEvaluationsQueued:
         """Grade a completed run's calls again with the environment's evals (eval_config_ids), replacing their previous scores; the calls are not rerun. Spends judge credits.
 
         POST /simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/run/
@@ -157,7 +157,7 @@ class SimulationEnvironmentsRunsResource(Resource):
         path = {'id': id, 'execution_id': execution_id}
         query = {**(extra_query or {})}
         body = {'eval_config_ids': eval_config_ids, 'enable_tool_evaluation': enable_tool_evaluation, **(extra_body or {})}
-        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_RUNS_REGRADE, path=path, query=query, body=body, model=None, options=options)
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_RUNS_REGRADE, path=path, query=query, body=body, model=models.HarnessEnvironmentRunEvaluationsQueued, options=options)
 
 
 class SimulationEnvironmentsVersionsResource(Resource):
@@ -165,7 +165,7 @@ class SimulationEnvironmentsVersionsResource(Resource):
 
     _t: SyncTransport
 
-    def create_agent(self, id: str, *, archive_artifact_id: str | None | NotGiven = NOT_GIVEN, prompt: str | None | NotGiven = NOT_GIVEN, agent_payload: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def create_agent(self, id: str, *, archive_artifact_id: str | None | NotGiven = NOT_GIVEN, prompt: str | None | NotGiven = NOT_GIVEN, agent_payload: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessAgentCredentialsResponse:
         """Make an environment's next agent version from an uploaded folder (archive_artifact_id from simulation.jobs.upload_sources, alone), a prompt or agent_payload settings; it is checked next, then made the default. The server refuses an empty body.
 
         POST /simulate/api/harness-environments/{id}/versions/agent/
@@ -173,7 +173,7 @@ class SimulationEnvironmentsVersionsResource(Resource):
         path = {'id': id}
         query = {**(extra_query or {})}
         body = {'archive_artifact_id': archive_artifact_id, 'prompt': prompt, 'agent_payload': agent_payload, **(extra_body or {})}
-        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_CREATE_AGENT, path=path, query=query, body=body, model=None, options=options)
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_CREATE_AGENT, path=path, query=query, body=body, model=models.HarnessAgentCredentialsResponse, options=options)
 
     def diff(self, id: str, piece: str, version_id: str, *, against: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessVersionDiff:
         """Show what one agent, environment or suite version (piece), or an open draft, changed against its parent, or against the version named by `against`.
@@ -195,7 +195,7 @@ class SimulationEnvironmentsVersionsResource(Resource):
         body = None
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_LIST, path=path, query=query, body=body, model=models.HarnessVersions, options=options)
 
-    def retry_agent(self, id: str, version_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def retry_agent(self, id: str, version_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessVersions:
         """Check again an environment's agent version whose check failed or is stuck pending (422 otherwise); returns every version.
 
         POST /simulate/api/harness-environments/{id}/versions/agent/{version_id}/retry/
@@ -203,7 +203,7 @@ class SimulationEnvironmentsVersionsResource(Resource):
         path = {'id': id, 'version_id': version_id}
         query = {**(extra_query or {})}
         body = {**(extra_body or {})}
-        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_RETRY_AGENT, path=path, query=query, body=body, model=None, options=options)
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_RETRY_AGENT, path=path, query=query, body=body, model=models.HarnessVersions, options=options)
 
     def set_default(self, id: str, piece: str, version_id: str, *, expected_default_id: str | None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessVersions:
         """Make an agent, environment or suite version (piece) the environment's default; expected_default_id is the default you saw (null for none), and a newer one returns 409. Returns every version.
@@ -241,7 +241,7 @@ class SimulationExecutionsInsightsResource(Resource):
         body = None
         return self._t.call(_ops.OP_SIMULATION_EXECUTIONS_INSIGHTS_GET, path=path, query=query, body=body, model=models.TestExecutionDebugAnalysisResponse, options=options)
 
-    def start(self, test_execution_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def start(self, test_execution_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TestExecutionDebugAnalysisResponse:
         """Request Insights (debug analysis) of a completed run; a repeat re-arms only failed calls.
 
         POST /simulate/test-executions/{test_execution_id}/debug-analysis/
@@ -249,7 +249,7 @@ class SimulationExecutionsInsightsResource(Resource):
         path = {'test_execution_id': test_execution_id}
         query = {**(extra_query or {})}
         body = {**(extra_body or {})}
-        return self._t.call(_ops.OP_SIMULATION_EXECUTIONS_INSIGHTS_START, path=path, query=query, body=body, model=None, options=options)
+        return self._t.call(_ops.OP_SIMULATION_EXECUTIONS_INSIGHTS_START, path=path, query=query, body=body, model=models.TestExecutionDebugAnalysisResponse, options=options)
 
 
 class SimulationJobsScenariosResource(Resource):
@@ -1145,7 +1145,7 @@ class SimulationEnvironmentsResource(Resource):
         body = {'name': name, **(extra_body or {})}
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_RENAME, path=path, query=query, body=body, model=models.HarnessEnvironmentDetail, options=options)
 
-    def run(self, id: str, *, scenario_ids: List[str], trials: int | None | NotGiven = NOT_GIVEN, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def run(self, id: str, *, scenario_ids: List[str], trials: int | None | NotGiven = NOT_GIVEN, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessRunCreateResponse:
         """Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults). Send the same Idempotency-Key header (options headers) to get the same run back on a retry.
 
         POST /simulate/api/harness-environments/{id}/run/
@@ -1153,7 +1153,7 @@ class SimulationEnvironmentsResource(Resource):
         path = {'id': id}
         query = {**(extra_query or {})}
         body = {'scenario_ids': scenario_ids, 'trials': trials, 'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, **(extra_body or {})}
-        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_RUN, path=path, query=query, body=body, model=None, options=options)
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_RUN, path=path, query=query, body=body, model=models.HarnessRunCreateResponse, options=options)
 
     def run_plan(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessRunPlan:
         """Resolve the agent, environment and suite versions a run would pin, with warnings. Starts nothing.
@@ -1288,7 +1288,7 @@ class SimulationJobsResource(Resource):
         body = {'agent': agent, 'artifacts': artifacts, 'schema_version': schema_version, 'run_id': run_id, 'source': source, 'scenario_count': scenario_count, 'seed': seed, 'runtime': runtime, 'security': security, 'retry': retry, 'platform_run_id': platform_run_id, 'metadata': metadata, 'credential_values': credential_values, **(extra_body or {})}
         return self._t.call(_ops.OP_SIMULATION_JOBS_PREFLIGHT, path=path, query=query, body=body, model=models.HarnessPreflightResponse, options=options)
 
-    def send_message(self, id: str, *, content: str, client_request_id: str, kind: Literal['user_message', 'user_response', 'approval', 'interrupt', 'cancel_operation'] | None | NotGiven = NOT_GIVEN, reply_to: str | None | NotGiven = NOT_GIVEN, payload: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def send_message(self, id: str, *, content: str, client_request_id: str, kind: Literal['user_message', 'user_response', 'approval', 'interrupt', 'cancel_operation'] | None | NotGiven = NOT_GIVEN, reply_to: str | None | NotGiven = NOT_GIVEN, payload: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessConversationRead:
         """Send a message to a builder job's chat (a question's answer needs kind user_response or approval, and reply_to); client_request_id deduplicates a resend.
 
         POST /simulate/api/harness-jobs/{id}/conversation/messages/
@@ -1296,9 +1296,9 @@ class SimulationJobsResource(Resource):
         path = {'id': id}
         query = {**(extra_query or {})}
         body = {'content': content, 'client_request_id': client_request_id, 'kind': kind, 'reply_to': reply_to, 'payload': payload, **(extra_body or {})}
-        return self._t.call(_ops.OP_SIMULATION_JOBS_SEND_MESSAGE, path=path, query=query, body=body, model=None, options=options)
+        return self._t.call(_ops.OP_SIMULATION_JOBS_SEND_MESSAGE, path=path, query=query, body=body, model=models.HarnessConversationRead, options=options)
 
-    def set_secret_values(self, *, environment_values: Dict[str, Any], environment_id: str, files: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    def set_secret_values(self, *, environment_values: Dict[str, Any], environment_id: str, files: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessAgentCredentialsResponse:
         """Make an environment's next agent version from credential values (environment_values) and files staged with simulation.jobs.upload_secret_file; it is checked next, then made the default.
 
         POST /simulate/api/harness-jobs/secret-values/
@@ -1306,7 +1306,7 @@ class SimulationJobsResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'environment_values': environment_values, 'environment_id': environment_id, 'files': files, **(extra_body or {})}
-        return self._t.call(_ops.OP_SIMULATION_JOBS_SET_SECRET_VALUES, path=path, query=query, body=body, model=None, options=options)
+        return self._t.call(_ops.OP_SIMULATION_JOBS_SET_SECRET_VALUES, path=path, query=query, body=body, model=models.HarnessAgentCredentialsResponse, options=options)
 
     def upload_secret_file(self, *, file: FileInput, environment_name: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessSecretFileUploadResponse:
         """Stage a credential file for an environment (today only a GOOGLE_APPLICATION_CREDENTIALS service-account JSON, as environment_name GOOGLE_APPLICATION_CREDENTIALS; anything else returns 422); pass the returned secret_ref in simulation.jobs.set_secret_values files.
@@ -1375,7 +1375,7 @@ class SimulationPersonasResource(Resource):
         query = {'limit': limit, 'type': type, 'search': search, 'simulation_type': simulation_type, **(extra_query or {})}
         return self._t.paginate(_ops.OP_SIMULATION_PERSONAS_LIST, path=path, query=query, model=None, options=options)
 
-    def update(self, id: str, *, name: str, description: str | None | NotGiven = NOT_GIVEN, gender: Dict[str, Any] | None | NotGiven = NOT_GIVEN, age_group: Dict[str, Any] | None | NotGiven = NOT_GIVEN, occupation: Dict[str, Any] | None | NotGiven = NOT_GIVEN, location: Dict[str, Any] | None | NotGiven = NOT_GIVEN, personality: Dict[str, Any] | None | NotGiven = NOT_GIVEN, communication_style: Dict[str, Any] | None | NotGiven = NOT_GIVEN, multilingual: bool | None | NotGiven = NOT_GIVEN, languages: Dict[str, Any] | None | NotGiven = NOT_GIVEN, accent: Dict[str, Any] | None | NotGiven = NOT_GIVEN, conversation_speed: Dict[str, Any] | None | NotGiven = NOT_GIVEN, background_sound: bool | None | NotGiven = NOT_GIVEN, finished_speaking_sensitivity: Dict[str, Any] | None | NotGiven = NOT_GIVEN, interrupt_sensitivity: Dict[str, Any] | None | NotGiven = NOT_GIVEN, keywords: Dict[str, Any] | None | NotGiven = NOT_GIVEN, metadata: Dict[str, Any] | None | NotGiven = NOT_GIVEN, additional_instruction: str | None | NotGiven = NOT_GIVEN, profession: List[str] | None | NotGiven = NOT_GIVEN, language: List[str] | None | NotGiven = NOT_GIVEN, custom_properties: Dict[str, Any] | None | NotGiven = NOT_GIVEN, punctuation: Literal['clean', 'minimal', 'expressive', 'erratic'] | None | NotGiven = NOT_GIVEN, slang_usage: Literal['none', 'moderate', 'heavy', 'light'] | None | NotGiven = NOT_GIVEN, typos_frequency: Literal['none', 'rare', 'occasional', 'frequent'] | None | NotGiven = NOT_GIVEN, regional_mix: Literal['none', 'moderate', 'heavy', 'light'] | None | NotGiven = NOT_GIVEN, emoji_usage: Literal['never', 'light', 'regular', 'heavy'] | None | NotGiven = NOT_GIVEN, tone: Literal['formal', 'casual', 'neutral'] | None | NotGiven = NOT_GIVEN, verbosity: Literal['brief', 'balanced', 'detailed'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.Persona:
+    def update(self, id: str, *, name: str, description: str | None | NotGiven = NOT_GIVEN, gender: List[str] | None | NotGiven = NOT_GIVEN, age_group: List[str] | None | NotGiven = NOT_GIVEN, occupation: List[str] | None | NotGiven = NOT_GIVEN, location: List[str] | None | NotGiven = NOT_GIVEN, personality: List[str] | None | NotGiven = NOT_GIVEN, communication_style: List[str] | None | NotGiven = NOT_GIVEN, multilingual: bool | None | NotGiven = NOT_GIVEN, languages: List[str] | None | NotGiven = NOT_GIVEN, accent: List[str] | None | NotGiven = NOT_GIVEN, conversation_speed: List[str] | None | NotGiven = NOT_GIVEN, background_sound: bool | None | NotGiven = NOT_GIVEN, finished_speaking_sensitivity: List[str] | None | NotGiven = NOT_GIVEN, interrupt_sensitivity: List[str] | None | NotGiven = NOT_GIVEN, keywords: List[str] | None | NotGiven = NOT_GIVEN, metadata: Dict[str, Any] | None | NotGiven = NOT_GIVEN, additional_instruction: str | None | NotGiven = NOT_GIVEN, profession: List[str] | None | NotGiven = NOT_GIVEN, language: List[str] | None | NotGiven = NOT_GIVEN, custom_properties: Dict[str, Any] | None | NotGiven = NOT_GIVEN, punctuation: Literal['clean', 'minimal', 'expressive', 'erratic'] | None | NotGiven = NOT_GIVEN, slang_usage: Literal['none', 'moderate', 'heavy', 'light'] | None | NotGiven = NOT_GIVEN, typos_frequency: Literal['none', 'rare', 'occasional', 'frequent'] | None | NotGiven = NOT_GIVEN, regional_mix: Literal['none', 'moderate', 'heavy', 'light'] | None | NotGiven = NOT_GIVEN, emoji_usage: Literal['never', 'light', 'regular', 'heavy'] | None | NotGiven = NOT_GIVEN, tone: Literal['formal', 'casual', 'neutral'] | None | NotGiven = NOT_GIVEN, verbosity: Literal['brief', 'balanced', 'detailed'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.Persona:
         """Update a workspace persona; name is required on every update, other fields left out are kept, and so is simulation_type; system personas return 403.
 
         PUT /simulate/api/personas/{id}/
@@ -2691,7 +2691,7 @@ class AsyncSimulationEnvironmentsRunsResource(Resource):
 
     _t: AsyncTransport
 
-    async def add_evaluation(self, id: str, execution_id: str, *, name: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def add_evaluation(self, id: str, execution_id: str, *, name: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessEnvironmentRunEvaluationQueued:
         """Add an eval by name from inside a finished run and grade that run's finished calls that have no verdict for it; returns the queued and skipped counts. Spends judge credits.
 
         POST /simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/
@@ -2699,9 +2699,9 @@ class AsyncSimulationEnvironmentsRunsResource(Resource):
         path = {'id': id, 'execution_id': execution_id}
         query = {**(extra_query or {})}
         body = {'name': name, **(extra_body or {})}
-        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_RUNS_ADD_EVALUATION, path=path, query=query, body=body, model=None, options=options)
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_RUNS_ADD_EVALUATION, path=path, query=query, body=body, model=models.HarnessEnvironmentRunEvaluationQueued, options=options)
 
-    async def regrade(self, id: str, execution_id: str, *, eval_config_ids: List[str], enable_tool_evaluation: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def regrade(self, id: str, execution_id: str, *, eval_config_ids: List[str], enable_tool_evaluation: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessEnvironmentRunEvaluationsQueued:
         """Grade a completed run's calls again with the environment's evals (eval_config_ids), replacing their previous scores; the calls are not rerun. Spends judge credits.
 
         POST /simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/run/
@@ -2709,7 +2709,7 @@ class AsyncSimulationEnvironmentsRunsResource(Resource):
         path = {'id': id, 'execution_id': execution_id}
         query = {**(extra_query or {})}
         body = {'eval_config_ids': eval_config_ids, 'enable_tool_evaluation': enable_tool_evaluation, **(extra_body or {})}
-        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_RUNS_REGRADE, path=path, query=query, body=body, model=None, options=options)
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_RUNS_REGRADE, path=path, query=query, body=body, model=models.HarnessEnvironmentRunEvaluationsQueued, options=options)
 
 
 class AsyncSimulationEnvironmentsVersionsResource(Resource):
@@ -2717,7 +2717,7 @@ class AsyncSimulationEnvironmentsVersionsResource(Resource):
 
     _t: AsyncTransport
 
-    async def create_agent(self, id: str, *, archive_artifact_id: str | None | NotGiven = NOT_GIVEN, prompt: str | None | NotGiven = NOT_GIVEN, agent_payload: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def create_agent(self, id: str, *, archive_artifact_id: str | None | NotGiven = NOT_GIVEN, prompt: str | None | NotGiven = NOT_GIVEN, agent_payload: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessAgentCredentialsResponse:
         """Make an environment's next agent version from an uploaded folder (archive_artifact_id from simulation.jobs.upload_sources, alone), a prompt or agent_payload settings; it is checked next, then made the default. The server refuses an empty body.
 
         POST /simulate/api/harness-environments/{id}/versions/agent/
@@ -2725,7 +2725,7 @@ class AsyncSimulationEnvironmentsVersionsResource(Resource):
         path = {'id': id}
         query = {**(extra_query or {})}
         body = {'archive_artifact_id': archive_artifact_id, 'prompt': prompt, 'agent_payload': agent_payload, **(extra_body or {})}
-        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_CREATE_AGENT, path=path, query=query, body=body, model=None, options=options)
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_CREATE_AGENT, path=path, query=query, body=body, model=models.HarnessAgentCredentialsResponse, options=options)
 
     async def diff(self, id: str, piece: str, version_id: str, *, against: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessVersionDiff:
         """Show what one agent, environment or suite version (piece), or an open draft, changed against its parent, or against the version named by `against`.
@@ -2747,7 +2747,7 @@ class AsyncSimulationEnvironmentsVersionsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_LIST, path=path, query=query, body=body, model=models.HarnessVersions, options=options)
 
-    async def retry_agent(self, id: str, version_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def retry_agent(self, id: str, version_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessVersions:
         """Check again an environment's agent version whose check failed or is stuck pending (422 otherwise); returns every version.
 
         POST /simulate/api/harness-environments/{id}/versions/agent/{version_id}/retry/
@@ -2755,7 +2755,7 @@ class AsyncSimulationEnvironmentsVersionsResource(Resource):
         path = {'id': id, 'version_id': version_id}
         query = {**(extra_query or {})}
         body = {**(extra_body or {})}
-        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_RETRY_AGENT, path=path, query=query, body=body, model=None, options=options)
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_RETRY_AGENT, path=path, query=query, body=body, model=models.HarnessVersions, options=options)
 
     async def set_default(self, id: str, piece: str, version_id: str, *, expected_default_id: str | None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessVersions:
         """Make an agent, environment or suite version (piece) the environment's default; expected_default_id is the default you saw (null for none), and a newer one returns 409. Returns every version.
@@ -2793,7 +2793,7 @@ class AsyncSimulationExecutionsInsightsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_SIMULATION_EXECUTIONS_INSIGHTS_GET, path=path, query=query, body=body, model=models.TestExecutionDebugAnalysisResponse, options=options)
 
-    async def start(self, test_execution_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def start(self, test_execution_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TestExecutionDebugAnalysisResponse:
         """Request Insights (debug analysis) of a completed run; a repeat re-arms only failed calls.
 
         POST /simulate/test-executions/{test_execution_id}/debug-analysis/
@@ -2801,7 +2801,7 @@ class AsyncSimulationExecutionsInsightsResource(Resource):
         path = {'test_execution_id': test_execution_id}
         query = {**(extra_query or {})}
         body = {**(extra_body or {})}
-        return await self._t.acall(_ops.OP_SIMULATION_EXECUTIONS_INSIGHTS_START, path=path, query=query, body=body, model=None, options=options)
+        return await self._t.acall(_ops.OP_SIMULATION_EXECUTIONS_INSIGHTS_START, path=path, query=query, body=body, model=models.TestExecutionDebugAnalysisResponse, options=options)
 
 
 class AsyncSimulationJobsScenariosResource(Resource):
@@ -3697,7 +3697,7 @@ class AsyncSimulationEnvironmentsResource(Resource):
         body = {'name': name, **(extra_body or {})}
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_RENAME, path=path, query=query, body=body, model=models.HarnessEnvironmentDetail, options=options)
 
-    async def run(self, id: str, *, scenario_ids: List[str], trials: int | None | NotGiven = NOT_GIVEN, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def run(self, id: str, *, scenario_ids: List[str], trials: int | None | NotGiven = NOT_GIVEN, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessRunCreateResponse:
         """Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults). Send the same Idempotency-Key header (options headers) to get the same run back on a retry.
 
         POST /simulate/api/harness-environments/{id}/run/
@@ -3705,7 +3705,7 @@ class AsyncSimulationEnvironmentsResource(Resource):
         path = {'id': id}
         query = {**(extra_query or {})}
         body = {'scenario_ids': scenario_ids, 'trials': trials, 'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, **(extra_body or {})}
-        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_RUN, path=path, query=query, body=body, model=None, options=options)
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_RUN, path=path, query=query, body=body, model=models.HarnessRunCreateResponse, options=options)
 
     async def run_plan(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessRunPlan:
         """Resolve the agent, environment and suite versions a run would pin, with warnings. Starts nothing.
@@ -3840,7 +3840,7 @@ class AsyncSimulationJobsResource(Resource):
         body = {'agent': agent, 'artifacts': artifacts, 'schema_version': schema_version, 'run_id': run_id, 'source': source, 'scenario_count': scenario_count, 'seed': seed, 'runtime': runtime, 'security': security, 'retry': retry, 'platform_run_id': platform_run_id, 'metadata': metadata, 'credential_values': credential_values, **(extra_body or {})}
         return await self._t.acall(_ops.OP_SIMULATION_JOBS_PREFLIGHT, path=path, query=query, body=body, model=models.HarnessPreflightResponse, options=options)
 
-    async def send_message(self, id: str, *, content: str, client_request_id: str, kind: Literal['user_message', 'user_response', 'approval', 'interrupt', 'cancel_operation'] | None | NotGiven = NOT_GIVEN, reply_to: str | None | NotGiven = NOT_GIVEN, payload: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def send_message(self, id: str, *, content: str, client_request_id: str, kind: Literal['user_message', 'user_response', 'approval', 'interrupt', 'cancel_operation'] | None | NotGiven = NOT_GIVEN, reply_to: str | None | NotGiven = NOT_GIVEN, payload: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessConversationRead:
         """Send a message to a builder job's chat (a question's answer needs kind user_response or approval, and reply_to); client_request_id deduplicates a resend.
 
         POST /simulate/api/harness-jobs/{id}/conversation/messages/
@@ -3848,9 +3848,9 @@ class AsyncSimulationJobsResource(Resource):
         path = {'id': id}
         query = {**(extra_query or {})}
         body = {'content': content, 'client_request_id': client_request_id, 'kind': kind, 'reply_to': reply_to, 'payload': payload, **(extra_body or {})}
-        return await self._t.acall(_ops.OP_SIMULATION_JOBS_SEND_MESSAGE, path=path, query=query, body=body, model=None, options=options)
+        return await self._t.acall(_ops.OP_SIMULATION_JOBS_SEND_MESSAGE, path=path, query=query, body=body, model=models.HarnessConversationRead, options=options)
 
-    async def set_secret_values(self, *, environment_values: Dict[str, Any], environment_id: str, files: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+    async def set_secret_values(self, *, environment_values: Dict[str, Any], environment_id: str, files: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessAgentCredentialsResponse:
         """Make an environment's next agent version from credential values (environment_values) and files staged with simulation.jobs.upload_secret_file; it is checked next, then made the default.
 
         POST /simulate/api/harness-jobs/secret-values/
@@ -3858,7 +3858,7 @@ class AsyncSimulationJobsResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'environment_values': environment_values, 'environment_id': environment_id, 'files': files, **(extra_body or {})}
-        return await self._t.acall(_ops.OP_SIMULATION_JOBS_SET_SECRET_VALUES, path=path, query=query, body=body, model=None, options=options)
+        return await self._t.acall(_ops.OP_SIMULATION_JOBS_SET_SECRET_VALUES, path=path, query=query, body=body, model=models.HarnessAgentCredentialsResponse, options=options)
 
     async def upload_secret_file(self, *, file: FileInput, environment_name: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessSecretFileUploadResponse:
         """Stage a credential file for an environment (today only a GOOGLE_APPLICATION_CREDENTIALS service-account JSON, as environment_name GOOGLE_APPLICATION_CREDENTIALS; anything else returns 422); pass the returned secret_ref in simulation.jobs.set_secret_values files.
@@ -3927,7 +3927,7 @@ class AsyncSimulationPersonasResource(Resource):
         query = {'limit': limit, 'type': type, 'search': search, 'simulation_type': simulation_type, **(extra_query or {})}
         return self._t.apaginate(_ops.OP_SIMULATION_PERSONAS_LIST, path=path, query=query, model=None, options=options)
 
-    async def update(self, id: str, *, name: str, description: str | None | NotGiven = NOT_GIVEN, gender: Dict[str, Any] | None | NotGiven = NOT_GIVEN, age_group: Dict[str, Any] | None | NotGiven = NOT_GIVEN, occupation: Dict[str, Any] | None | NotGiven = NOT_GIVEN, location: Dict[str, Any] | None | NotGiven = NOT_GIVEN, personality: Dict[str, Any] | None | NotGiven = NOT_GIVEN, communication_style: Dict[str, Any] | None | NotGiven = NOT_GIVEN, multilingual: bool | None | NotGiven = NOT_GIVEN, languages: Dict[str, Any] | None | NotGiven = NOT_GIVEN, accent: Dict[str, Any] | None | NotGiven = NOT_GIVEN, conversation_speed: Dict[str, Any] | None | NotGiven = NOT_GIVEN, background_sound: bool | None | NotGiven = NOT_GIVEN, finished_speaking_sensitivity: Dict[str, Any] | None | NotGiven = NOT_GIVEN, interrupt_sensitivity: Dict[str, Any] | None | NotGiven = NOT_GIVEN, keywords: Dict[str, Any] | None | NotGiven = NOT_GIVEN, metadata: Dict[str, Any] | None | NotGiven = NOT_GIVEN, additional_instruction: str | None | NotGiven = NOT_GIVEN, profession: List[str] | None | NotGiven = NOT_GIVEN, language: List[str] | None | NotGiven = NOT_GIVEN, custom_properties: Dict[str, Any] | None | NotGiven = NOT_GIVEN, punctuation: Literal['clean', 'minimal', 'expressive', 'erratic'] | None | NotGiven = NOT_GIVEN, slang_usage: Literal['none', 'moderate', 'heavy', 'light'] | None | NotGiven = NOT_GIVEN, typos_frequency: Literal['none', 'rare', 'occasional', 'frequent'] | None | NotGiven = NOT_GIVEN, regional_mix: Literal['none', 'moderate', 'heavy', 'light'] | None | NotGiven = NOT_GIVEN, emoji_usage: Literal['never', 'light', 'regular', 'heavy'] | None | NotGiven = NOT_GIVEN, tone: Literal['formal', 'casual', 'neutral'] | None | NotGiven = NOT_GIVEN, verbosity: Literal['brief', 'balanced', 'detailed'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.Persona:
+    async def update(self, id: str, *, name: str, description: str | None | NotGiven = NOT_GIVEN, gender: List[str] | None | NotGiven = NOT_GIVEN, age_group: List[str] | None | NotGiven = NOT_GIVEN, occupation: List[str] | None | NotGiven = NOT_GIVEN, location: List[str] | None | NotGiven = NOT_GIVEN, personality: List[str] | None | NotGiven = NOT_GIVEN, communication_style: List[str] | None | NotGiven = NOT_GIVEN, multilingual: bool | None | NotGiven = NOT_GIVEN, languages: List[str] | None | NotGiven = NOT_GIVEN, accent: List[str] | None | NotGiven = NOT_GIVEN, conversation_speed: List[str] | None | NotGiven = NOT_GIVEN, background_sound: bool | None | NotGiven = NOT_GIVEN, finished_speaking_sensitivity: List[str] | None | NotGiven = NOT_GIVEN, interrupt_sensitivity: List[str] | None | NotGiven = NOT_GIVEN, keywords: List[str] | None | NotGiven = NOT_GIVEN, metadata: Dict[str, Any] | None | NotGiven = NOT_GIVEN, additional_instruction: str | None | NotGiven = NOT_GIVEN, profession: List[str] | None | NotGiven = NOT_GIVEN, language: List[str] | None | NotGiven = NOT_GIVEN, custom_properties: Dict[str, Any] | None | NotGiven = NOT_GIVEN, punctuation: Literal['clean', 'minimal', 'expressive', 'erratic'] | None | NotGiven = NOT_GIVEN, slang_usage: Literal['none', 'moderate', 'heavy', 'light'] | None | NotGiven = NOT_GIVEN, typos_frequency: Literal['none', 'rare', 'occasional', 'frequent'] | None | NotGiven = NOT_GIVEN, regional_mix: Literal['none', 'moderate', 'heavy', 'light'] | None | NotGiven = NOT_GIVEN, emoji_usage: Literal['never', 'light', 'regular', 'heavy'] | None | NotGiven = NOT_GIVEN, tone: Literal['formal', 'casual', 'neutral'] | None | NotGiven = NOT_GIVEN, verbosity: Literal['brief', 'balanced', 'detailed'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.Persona:
         """Update a workspace persona; name is required on every update, other fields left out are kept, and so is simulation_type; system personas return 403.
 
         PUT /simulate/api/personas/{id}/
