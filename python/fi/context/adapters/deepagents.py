@@ -9,7 +9,10 @@ wired by that application's qualified adapter; backend fetches prove none of the
 
 from __future__ import annotations
 
+from contextlib import nullcontext
 from importlib.metadata import version
+
+from fi.context.client import _read_boundary
 from typing import Callable
 
 from deepagents.backends import BackendProtocol, CompositeBackend, StateBackend
@@ -89,16 +92,23 @@ class ReadOnlyContextBackend(BackendProtocol):
         return self._reader.ls_info(self._path(path, directory=True))
 
     def read(self, file_path: str, offset: int = 0, limit: int = 2000) -> str:
-        self._check()
-        if (
-            type(offset) is not int
-            or type(limit) is not int
-            or offset < 0
-            or not 1 <= limit <= 2000
-        ):
-            raise ValueError("Invalid line range")
-        # This is the host's line-numbered/truncated view, not a full-file receipt.
-        return self._reader.read(self._path(file_path), offset, limit)
+        relative = self._path(file_path)[1:]
+        boundary = _read_boundary(self._snapshot, relative, via="deepagents.read",
+                                  evidence="agent_read", cached=True)
+        with boundary or nullcontext():
+            self._check()
+            if (
+                type(offset) is not int
+                or type(limit) is not int
+                or offset < 0
+                or not 1 <= limit <= 2000
+            ):
+                raise ValueError("Invalid line range")
+            # This is the host's line-numbered/truncated view, not a full-file receipt.
+            result = self._reader.read(file_path, offset, limit)
+            if boundary and relative in self._snapshot.files:
+                boundary.success(result)
+            return result
 
     def grep_raw(
         self, pattern: str, path: str | None = None, glob: str | None = None
@@ -113,18 +123,29 @@ class ReadOnlyContextBackend(BackendProtocol):
         return self._reader.glob_info(pattern, self._path(path, directory=True))
 
     def download_files(self, paths: list[str]) -> list[FileDownloadResponse]:
-        self._check()
+        if not paths:
+            self._check()
+            return []
         results = []
+        checked = False
         for path in paths:
             relative = self._path(path)[1:]
-            text = self._snapshot.files.get(relative)
-            results.append(
-                FileDownloadResponse(
-                    path=path,
-                    content=None if text is None else text.encode("utf-8"),
-                    error="file_not_found" if text is None else None,
+            boundary = _read_boundary(self._snapshot, relative, via="deepagents.read",
+                                      evidence="agent_read", cached=True)
+            with boundary or nullcontext():
+                if not checked:
+                    self._check()
+                    checked = True
+                text = self._snapshot.files.get(relative)
+                results.append(
+                    FileDownloadResponse(
+                        path=path,
+                        content=None if text is None else text.encode("utf-8"),
+                        error="file_not_found" if text is None else None,
+                    )
                 )
-            )
+                if boundary and text is not None:
+                    boundary.success(text)
         return results
 
     def write(self, file_path: str, content: str) -> WriteResult:

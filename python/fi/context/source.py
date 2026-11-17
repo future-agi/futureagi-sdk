@@ -53,14 +53,17 @@ def validate_access(result: object, identity: SnapshotIdentity) -> None:
 
 
 class ConsumptionSource:
-    def __init__(self, client: Client, *, kind: str) -> None:
+    def __init__(self, client: Client, *, kind: str, tracing: bool = True) -> None:
         self.client = client
         self.kind = kind
+        self.tracing = tracing
         self.operations = _operations(kind)
 
     def resolve(self, *, name: str, selector: dict[str, object]) -> object:
+        from fi.telemetry._otel import wire_mode
         return self.client._transport.call(
-            self.operations[0], query={"name": name, **selector}
+            self.operations[0], query={"name": name, **selector},
+            options=RequestOptions(headers={"X-FI-Skills-Tracing": wire_mode(self.tracing)})
         )
 
     def manifest(
@@ -101,14 +104,17 @@ class ConsumptionSource:
 
 
 class AsyncConsumptionSource:
-    def __init__(self, client: AsyncClient, *, kind: str) -> None:
+    def __init__(self, client: AsyncClient, *, kind: str, tracing: bool = True) -> None:
         self.client = client
         self.kind = kind
+        self.tracing = tracing
         self.operations = _operations(kind)
 
     async def resolve(self, *, name: str, selector: dict[str, object]) -> object:
+        from fi.telemetry._otel import wire_mode
         return await self.client._transport.acall(
-            self.operations[0], query={"name": name, **selector}
+            self.operations[0], query={"name": name, **selector},
+            options=RequestOptions(headers={"X-FI-Skills-Tracing": wire_mode(self.tracing)})
         )
 
     async def manifest(

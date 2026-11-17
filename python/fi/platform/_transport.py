@@ -270,7 +270,8 @@ class Config:
     def headers(self, options: RequestOptions | None = None) -> dict[str, str]:
         self.validate_headers(self.default_headers)
         self.validate_headers(options.headers if options else None)
-        headers = {"User-Agent": "futureagi-python"}
+        from fi import __version__
+        headers = {"User-Agent": f"futureagi-python/{__version__}"}
         if isinstance(self.auth, ContextAuth):
             headers["Authorization"] = f"Context {self.auth.credential}"
         else:

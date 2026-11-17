@@ -65,7 +65,9 @@ class ContextSessionClient:
             collector.lease.require_live()
             collector.add(self.source.manifest(collector.identity,
                 offset=collector.next_offset, options=RequestOptions(resolution_id=resolution)))
-        snapshot = ContextSnapshot(collector.finish(), self.source)
+        snapshot = ContextSnapshot(collector.finish(), self.source,
+            _telemetry_binding_id=self.binding_id,
+            _telemetry_session_id=str(UUID(session["session_id"])))
         self.check_access(session, snapshot)
         return snapshot
 

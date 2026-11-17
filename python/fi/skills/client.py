@@ -14,13 +14,13 @@ from fi.platform import AsyncClient, Client
 
 
 class SkillsClient(SnapshotClient):
-    def __init__(self, source: Client | SnapshotSource) -> None:
+    def __init__(self, source: Client | SnapshotSource, *, tracing: bool = True) -> None:
         self._consumption = (
-            ConsumptionSource(source, kind="skill")
+            ConsumptionSource(source, kind="skill", tracing=tracing)
             if isinstance(source, Client)
             else None
         )
-        super().__init__(self._consumption or source, kind="skill")
+        super().__init__(self._consumption or source, kind="skill", tracing=tracing)
 
     def check_access(self, identity: SnapshotIdentity, lease: ResolutionLease) -> None:
         if self._consumption is None:
@@ -31,13 +31,13 @@ class SkillsClient(SnapshotClient):
 
 
 class AsyncSkillsClient(AsyncSnapshotClient):
-    def __init__(self, source: AsyncClient | AsyncSnapshotSource) -> None:
+    def __init__(self, source: AsyncClient | AsyncSnapshotSource, *, tracing: bool = True) -> None:
         self._consumption = (
-            AsyncConsumptionSource(source, kind="skill")
+            AsyncConsumptionSource(source, kind="skill", tracing=tracing)
             if isinstance(source, AsyncClient)
             else None
         )
-        super().__init__(self._consumption or source, kind="skill")
+        super().__init__(self._consumption or source, kind="skill", tracing=tracing)
 
     async def check_access(
         self, identity: SnapshotIdentity, lease: ResolutionLease

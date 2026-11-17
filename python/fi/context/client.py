@@ -7,6 +7,10 @@ implementation. Neither source nor snapshot retries a failed resolution.
 
 from __future__ import annotations
 
+import functools
+import inspect
+import logging
+import sys
 from dataclasses import dataclass, field
 from typing import Protocol
 
@@ -91,17 +95,75 @@ def _options(manifest: SnapshotManifest) -> RequestOptions:
     return RequestOptions(resolution_id=manifest.lease.resolution_id)
 
 
+_no_otel_logged = False
+
+
+def _read_boundary(snapshot, path=None, *, trace=True, **kwargs):
+    """Only public read boundaries call this; resolve/paging stay untraced."""
+    global _no_otel_logged
+    if not trace or not getattr(snapshot, "_tracing", True):
+        return None
+    if sys.modules.get("opentelemetry.trace") is None:
+        from fi.telemetry._otel import mode
+        if mode() != "off" and not _no_otel_logged:
+            _no_otel_logged = True
+            try:
+                logging.getLogger("futureagi.telemetry").info(
+                    "futureagi: no OpenTelemetry in this process"
+                )
+            except Exception:
+                pass
+        return None
+    try:
+        from fi.telemetry._hooks import Read
+        return Read(snapshot, path, **kwargs)
+    except Exception:
+        return None
+
+
+def _traced_read(function):
+    """Capture completion only after checksum, lease and full-closure checks."""
+    if inspect.iscoroutinefunction(function):
+        @functools.wraps(function)
+        async def async_read(self, *args, trace=True, **kwargs):
+            path = args[0] if args else kwargs.get("path")
+            boundary = _read_boundary(self, path, trace=trace)
+            if boundary is None:
+                return await function(self, *args, **kwargs)
+            with boundary:
+                result = await function(self, *args, **kwargs)
+                boundary.success(result)
+                return result
+        return async_read
+    @functools.wraps(function)
+    def read(self, *args, trace=True, **kwargs):
+        path = args[0] if args else kwargs.get("path")
+        boundary = _read_boundary(self, path, trace=trace)
+        if boundary is None:
+            return function(self, *args, **kwargs)
+        with boundary:
+            result = function(self, *args, **kwargs)
+            boundary.success(result)
+            return result
+    return read
+
+
 @dataclass(frozen=True)
 class ContextSnapshot:
     """Verified full inventory with lazy, authenticated, checksum-checked reads."""
 
     manifest: SnapshotManifest
     _source: SnapshotSource = field(repr=False)
+    _tracing: bool = field(default=True, repr=False)
+    _telemetry_binding_id: str | None = field(default=None, repr=False)
+    _telemetry_session_id: str | None = field(default=None, repr=False)
+    _telemetry_links: tuple | None = field(default=None, repr=False, compare=False)
 
     @property
     def identity(self) -> SnapshotIdentity:
         return self.manifest.identity
 
+    @_traced_read
     def read_file(self, path: str) -> str:
         chunks = ChunkCollector(self.manifest, path)
         while not chunks.eof:
@@ -115,8 +177,9 @@ class ContextSnapshot:
             )
         return chunks.finish()
 
+    @_traced_read
     def read_all(self) -> VerifiedSnapshot:
-        files = {item.path: self.read_file(item.path) for item in self.manifest.files}
+        files = {item.path: self.read_file(item.path, trace=False) for item in self.manifest.files}
         self.manifest.lease.require_live()
         return VerifiedSnapshot(self.manifest, files)
 
@@ -125,11 +188,16 @@ class ContextSnapshot:
 class AsyncContextSnapshot:
     manifest: SnapshotManifest
     _source: AsyncSnapshotSource = field(repr=False)
+    _tracing: bool = field(default=True, repr=False)
+    _telemetry_binding_id: str | None = field(default=None, repr=False)
+    _telemetry_session_id: str | None = field(default=None, repr=False)
+    _telemetry_links: tuple | None = field(default=None, repr=False, compare=False)
 
     @property
     def identity(self) -> SnapshotIdentity:
         return self.manifest.identity
 
+    @_traced_read
     async def read_file(self, path: str) -> str:
         chunks = ChunkCollector(self.manifest, path)
         while not chunks.eof:
@@ -143,9 +211,10 @@ class AsyncContextSnapshot:
             )
         return chunks.finish()
 
+    @_traced_read
     async def read_all(self) -> VerifiedSnapshot:
         files = {
-            item.path: await self.read_file(item.path) for item in self.manifest.files
+            item.path: await self.read_file(item.path, trace=False) for item in self.manifest.files
         }
         self.manifest.lease.require_live()
         return VerifiedSnapshot(self.manifest, files)
@@ -154,9 +223,10 @@ class AsyncContextSnapshot:
 class SnapshotClient:
     """Shared engine for context and typed leaf-consumption sources."""
 
-    def __init__(self, source: SnapshotSource, *, kind: str) -> None:
+    def __init__(self, source: SnapshotSource, *, kind: str, tracing: bool = True) -> None:
         self._source = source
         self._kind = kind
+        self._tracing = tracing
 
     def resolve(
         self, name: str, *, label: str | None = None, version: int | None = None
@@ -175,13 +245,14 @@ class SnapshotClient:
                     options=RequestOptions(resolution_id=collector.lease.resolution_id),
                 )
             )
-        return ContextSnapshot(collector.finish(), self._source)
+        return ContextSnapshot(collector.finish(), self._source, _tracing=self._tracing)
 
 
 class AsyncSnapshotClient:
-    def __init__(self, source: AsyncSnapshotSource, *, kind: str) -> None:
+    def __init__(self, source: AsyncSnapshotSource, *, kind: str, tracing: bool = True) -> None:
         self._source = source
         self._kind = kind
+        self._tracing = tracing
 
     async def resolve(
         self, name: str, *, label: str | None = None, version: int | None = None
@@ -200,15 +271,15 @@ class AsyncSnapshotClient:
                     options=RequestOptions(resolution_id=collector.lease.resolution_id),
                 )
             )
-        return AsyncContextSnapshot(collector.finish(), self._source)
+        return AsyncContextSnapshot(collector.finish(), self._source, _tracing=self._tracing)
 
 
 class ContextClient(SnapshotClient):
     """Verified reads and live access checks using the caller-owned platform client."""
 
-    def __init__(self, client: PlatformClient) -> None:
-        self._consumption = ConsumptionSource(client, kind="agent_context")
-        super().__init__(self._consumption, kind="agent_context")
+    def __init__(self, client: PlatformClient, *, tracing: bool = True) -> None:
+        self._consumption = ConsumptionSource(client, kind="agent_context", tracing=tracing)
+        super().__init__(self._consumption, kind="agent_context", tracing=tracing)
 
     def check_access(self, identity: SnapshotIdentity, lease: ResolutionLease) -> None:
         """Reauthorize exact bytes; does not renew a lease or report delivery."""
@@ -216,9 +287,9 @@ class ContextClient(SnapshotClient):
 
 
 class AsyncContextClient(AsyncSnapshotClient):
-    def __init__(self, client: PlatformAsyncClient) -> None:
-        self._consumption = AsyncConsumptionSource(client, kind="agent_context")
-        super().__init__(self._consumption, kind="agent_context")
+    def __init__(self, client: PlatformAsyncClient, *, tracing: bool = True) -> None:
+        self._consumption = AsyncConsumptionSource(client, kind="agent_context", tracing=tracing)
+        super().__init__(self._consumption, kind="agent_context", tracing=tracing)
 
     async def check_access(
         self, identity: SnapshotIdentity, lease: ResolutionLease
