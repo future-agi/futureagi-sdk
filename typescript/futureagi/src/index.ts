@@ -11,3 +11,5 @@ export * as platform from './platform';
 // Snapshot clients reuse platform auth; leaf consumption requires a bound source adapter.
 export { ContextClient } from './context';
 export { SkillsClient } from './skills';
+export * as telemetry from './telemetry';
+export { withAgentScope, declareSkill, FutureAGISkillsSpanProcessor } from './telemetry';

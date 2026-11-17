@@ -10,12 +10,12 @@ import type {
 /** Isolated leaf consumption. A custom source retains responsibility for authorization. */
 export class SkillsClient extends SnapshotClient {
   private readonly consumption?: ConsumptionSource;
-  constructor(source: Client | SnapshotSource) {
+  constructor(source: Client | SnapshotSource, options: { tracing?: boolean } = {}) {
     const consumption =
       source instanceof Client
-        ? new ConsumptionSource(source, "skill")
+        ? new ConsumptionSource(source, "skill", options)
         : undefined;
-    super(consumption ?? (source as SnapshotSource), "skill");
+    super(consumption ?? (source as SnapshotSource), "skill", options);
     this.consumption = consumption;
   }
   checkAccess(

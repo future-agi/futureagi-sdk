@@ -3,6 +3,7 @@
 
 import { APIConnectionError, APIError, errorFromResponse, isRecord } from "./errors";
 import { getPath, Pager, Pagination } from "./pagination";
+import { SDK_VERSION } from "../telemetry/version";
 
 /** What generated code passes in for each call (emitted from the catalog). */
 export interface Operation {
@@ -323,7 +324,7 @@ export class Transport {
   headers(options?: RequestOptions): Record<string, string> {
     this.validateHeaders(this.config.defaultHeaders);
     this.validateHeaders(options?.headers);
-    const headers: Record<string, string> = { "User-Agent": "futureagi-typescript" };
+    const headers: Record<string, string> = { "User-Agent": `futureagi-typescript/${SDK_VERSION}` };
     if (this.config.auth?.type === "context") {
       headers.Authorization = `Context ${this.config.auth.credential}`;
     } else {
