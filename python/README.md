@@ -41,6 +41,83 @@ Future AGI empowers GenAI teams to build near-perfect AI applications through co
 pip install futureagi
 ```
 
+### Skill and agent-context tracing (Python)
+
+Optional dependencies: `pip install 'futureagi[otel]'`. The application owns its
+OpenTelemetry provider, exporter, sampling, and service resource. The SDK never
+creates or registers a provider, installs a propagator, or exports spans itself.
+It does not import OpenTelemetry when it is absent; setup later in the process is
+picked up by the next read. The SDK selects a configured provider first, then the
+latest traceAI provider (requires the provider-registry release), then the OTel
+global provider. Pass a non-global vanilla provider explicitly.
+
+```python
+from fi.telemetry import agent_scope, configure, declare_skill, status
+
+configure(tracer_provider=provider)  # your existing application-owned provider
+with agent_scope(agent="refund-agent"):
+    with provider.get_tracer("application").start_as_current_span("request"):
+        snapshot = skills.resolve("refund-policy", label="production")
+        instructions = snapshot.read_file("SKILL.md")
+        # Later spans in this scope carry the loaded skill-version lists.
+```
+
+A load is recorded on the first read of **any** file of a skill version inside a
+recording trace. A supporting-file first read has `fi.skill.load.root_file=false`.
+The SDK emits one `skill.load` per version and evidence level per scope. This means
+**Loaded**, not that a model followed the instructions. `delivered` means **Given
+to the app**, `agent_read` means **Read by the agent**, and `declared` means
+**Reported by the app**. `declare_skill(snapshot_or_lock_entry)` records the last
+kind explicitly; it never proves a file read. Fetches and connected-app delivery
+receipts are different evidence. No loads recorded does not mean unused.
+
+The two primary controls are `FI_SKILLS_TRACING=off` and
+`configure(skills_tracing="off")`; programmatic configuration wins. `on` is the
+default. `load_only` records load spans without current-span enrichment, a trace
+registry, or processor stamping. `configure()` restores environment and provider
+discovery. Reference-only switches: `SkillsClient(client, tracing=False)`,
+`ContextClient(client, tracing=False)`, `snapshot.read_file(path, trace=False)` and
+`snapshot.read_all(trace=False)` (also on the async equivalents). Resolve sends
+`X-FI-Skills-Tracing`; all requests use the versioned Python user agent.
+
+`agent_scope(agent=..., context=...)` is a sync/async context manager and a
+function, coroutine, or async-generator decorator. A nested context replaces
+context identity and starts a fresh skills list. A nested plain scope inherits
+its parent's lists without modifying the parent. Wrap a synchronous generator's
+body explicitly rather than decorating it. Thread pools need
+`contextvars.copy_context().run`; processes need their own explicitly restored
+trace/context. Do not reuse one context-manager instance concurrently.
+
+Automatic mode enriches the current span and stamps **later** spans in the trace.
+Already-started ancestors cannot be changed, head-sampled-out spans are not
+stamped, and providers without the processor do not stamp later spans. Multiple
+agents interleaved in one automatic trace share lists: use explicit scopes to
+separate them. Lists cap at 32 versions with a truncation flag; automatic state
+is bounded to 4,096 traces with a one-hour TTL. Without `agent=`, a framework
+agent name or context name is used when available. The SDK never sets the
+service resource or substitutes the project name for an agent name.
+
+`status()` returns provider/mode/processor facts, agent-name source and the most
+recent load. `python -m fi.telemetry doctor` prints safe diagnostics and setup
+fixes without printing credentials, arbitrary identity values, or file contents.
+The first read logs an informational diagnosis; `off` silences it.
+
+Context `read_all` emits only `context.load`, **not** skill loads for its closure.
+A subsequent linked-file read emits the child identity from that verified
+closure. The Deep Agents backend emits `agent_read` for read/download only;
+listing, search and mounting emit no loads. Session snapshots carry binding and
+session IDs, distinct from Observe's `session.id`. Verification/authorization
+errors are never swallowed: failed-load spans contain the name, selector and
+scope, never a skill ID, version ID or digest.
+
+**Integration limits pending the next lane pass:** the current lazy manifest has
+no linked-skill identities. Direct linked-file reads before a verified
+`read_all`, and the linked list on a root-only `AGENTS.md` read, need a verified
+closure supplied by the consumption contract; the bridge deliberately does not
+fetch extra files or invent IDs. CLI registry consumers must opt out at their call sites before this
+change ships; those files are owned outside this lane. Generated low-level
+platform calls remain untraced. Do not treat this draft as cloud-qualified.
+
 ### TypeScript/JavaScript
 ```bash
 npm install @futureagi/sdk
