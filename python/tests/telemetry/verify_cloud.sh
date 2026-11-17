@@ -29,7 +29,7 @@ run() {
 }
 traceai_python() {
   local v="$1" env="$ENVS/traceai-$1"
-  uv venv --python "$v" "$env" &&
+  uv venv --clear --python "$v" "$env" &&
     uv pip install --python "$env/bin/python" -e "$TRACEAI_ROOT/python[grpc]" \
       pytest pytest-asyncio pytest-mock responses respx pyyaml &&
     (cd "$TRACEAI_ROOT/python" && "$env/bin/python" -m pytest tests -q --ignore-glob='tests/test_framework_*')
@@ -41,7 +41,7 @@ run traceai-wheel uv build --wheel --out-dir "$ARTIFACTS" "$TRACEAI_ROOT/python"
 sdk_python() {
   local v="$1" env="$ENVS/sdk-$1"
   local args=()
-  uv venv --python "$v" "$env" &&
+  uv venv --clear --python "$v" "$env" &&
     uv pip install --python "$env/bin/python" -e "$SDK_ROOT/python[otel]" \
       pytest pytest-asyncio pytest-mock responses respx pyyaml ruff || return
   if [[ "$v" = 3.11 ]]; then
@@ -71,6 +71,16 @@ sdk_lint() {
     python/fi/gateway/callbacks/opentelemetry.py
 }
 run sdk-ruff-changed sdk_lint
+traceai_lint() {
+  cd "$TRACEAI_ROOT"
+  "$ENVS/sdk-3.11/bin/ruff" check --isolated --target-version py310 \
+    --select E,F,W,I --ignore E501 python/fi_instrumentation/fi_types.py \
+    python/fi_instrumentation/otel.py python/fi_instrumentation/instrumentation/runtime_attributes.py \
+    python/fi_instrumentation/instrumentation/_image_cap.py \
+    python/tests/test_provider_registry.py python/tests/test_runtime_attributes.py \
+    python/tests/test_image_run_endpoints.py
+}
+run traceai-ruff-changed traceai_lint
 run sdk-wheel uv build --wheel --out-dir "$ARTIFACTS" "$SDK_ROOT/python"
 no_otel() {
   local env
@@ -100,6 +110,20 @@ traceai_typescript() {
     (cd packages/fi-core && pnpm pack --pack-destination "$ARTIFACTS")
 }
 run traceai-typescript traceai_typescript
+packed_typescript() {
+  local fixture
+  fixture="$(mktemp -d "$ENVS/packed-typescript-XXXXXX")"
+  cp "$SDK_ROOT/python/tests/telemetry/packed_traceai.mjs" "$fixture/probe.mjs"
+  cd "$fixture"
+  printf '{"name":"local-package-qualification","private":true}\n' > package.json
+  npm install --ignore-scripts --no-audit --no-fund \
+    "$ARTIFACTS"/future-agi-sdk-*.tgz "$ARTIFACTS"/traceai-fi-core-*.tgz \
+    "$ARTIFACTS"/traceai-fi-semantic-conventions-*.tgz || return
+  for mode in on load_only off; do
+    node probe.mjs "$mode" || return
+  done
+}
+run packed-typescript-interop packed_typescript
 run sdk-vector-parity cmp "$SDK_ROOT/python/tests/telemetry/vectors/processor_v1.json" \
   "$SDK_ROOT/typescript/futureagi/src/__tests__/telemetry/vectors/processor_v1.json"
 run traceai-vector-parity cmp "$SDK_ROOT/python/tests/telemetry/vectors/processor_v1.json" \
