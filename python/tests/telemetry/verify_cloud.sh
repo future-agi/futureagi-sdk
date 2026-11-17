@@ -15,6 +15,7 @@ ARTIFACTS="${SKT_ARTIFACTS:-$HOME/skt-artifacts}"
 ENVS="${SKT_ENVS:-$HOME/skt-verification-envs}"
 LOGS="$ARTIFACTS/verification"
 mkdir -p "$ARTIFACTS" "$ENVS" "$LOGS"
+rm -f "$ARTIFACTS/SHA256SUMS"
 failures=0
 run() {
   local name="$1"; shift
@@ -100,4 +101,7 @@ run sdk-vector-parity cmp "$SDK_ROOT/python/tests/telemetry/vectors/processor_v1
 run traceai-vector-parity cmp "$SDK_ROOT/python/tests/telemetry/vectors/processor_v1.json" \
   "$TRACEAI_ROOT/typescript/packages/fi-core/src/__tests__/vectors/processor_v1.json"
 printf 'Verification failures: %s; logs and packages: %s\n' "$failures" "$ARTIFACTS"
+if [[ "$failures" = 0 ]]; then
+  (cd "$ARTIFACTS" && sha256sum ./*.whl ./*.tgz > SHA256SUMS)
+fi
 [[ "$failures" = 0 ]]
