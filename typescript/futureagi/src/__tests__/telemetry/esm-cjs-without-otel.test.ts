@@ -1,7 +1,7 @@
 /** Cloud-only qualification. Build the package before this suite. It installs
  * the packed output into an isolated fixture without development/optional peers. */
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
@@ -9,9 +9,13 @@ it("imports the packed root and telemetry subpath from ESM and CJS without OTel"
   const directory = mkdtempSync(join(tmpdir(), "sdk-no-otel-"));
   const packageRoot = resolve(__dirname, "../../..");
   try {
-    const packed = JSON.parse(execFileSync("npm", ["pack", "--ignore-scripts", "--json", "--pack-destination", directory], { cwd: packageRoot, encoding: "utf8" })) as Array<{ filename: string }>;
+    execFileSync("npm", ["pack", "--ignore-scripts", "--pack-destination", directory], { cwd: packageRoot, stdio: "pipe" });
+    // Some npm versions print prepare-script output even in JSON mode. Inspect
+    // the isolated output directory rather than parsing lifecycle stdout.
+    const packed = readdirSync(directory).filter(file => file.endsWith(".tgz"));
+    expect(packed).toHaveLength(1);
     writeFileSync(join(directory, "package.json"), JSON.stringify({ private: true, name: "sdk-optional-peer-fixture" }));
-    execFileSync("npm", ["install", "--ignore-scripts", "--omit=dev", "--omit=optional", "--omit=peer", "--no-audit", "--no-fund", join(directory, packed[0].filename)], { cwd: directory, stdio: "pipe" });
+    execFileSync("npm", ["install", "--ignore-scripts", "--omit=dev", "--omit=optional", "--omit=peer", "--no-audit", "--no-fund", join(directory, packed[0])], { cwd: directory, stdio: "pipe" });
     const body = `
       const assert = require('node:assert/strict');
       const { createHash } = require('node:crypto');

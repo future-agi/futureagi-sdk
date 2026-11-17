@@ -4,7 +4,9 @@ from __future__ import annotations
 import logging
 import os
 import sys
+from collections.abc import Mapping
 from contextvars import ContextVar
+from dataclasses import dataclass
 from types import MappingProxyType
 
 CARRIER_KEY = "futureagi.runtime.span_attributes.v1"
@@ -82,11 +84,19 @@ def allowlisted(attrs):
         if not isinstance(key, str) or not key.startswith(("fi.skills.", "fi.context.", "gen_ai.agent.")):
             continue
         if isinstance(value, str):
-            value = value.encode("utf-8")[:256].decode("utf-8", errors="ignore")
+            # Every Unicode code point occupies at most four UTF-8 bytes. Most
+            # identifiers fit without encoding, slicing, and decoding again.
+            if len(value) > 64:
+                value = value.encode("utf-8")[:256].decode("utf-8", errors="ignore")
         elif isinstance(value, (tuple, list)):
-            if not all(isinstance(item, str) for item in value):
-                continue
-            value = tuple(item.encode("utf-8")[:256].decode("utf-8", errors="ignore") for item in value[:32])
+            if isinstance(value, tuple) and len(value) <= 32 and all(
+                isinstance(item, str) and len(item) <= 64 for item in value
+            ):
+                pass  # Already immutable and bounded; no attribute copy needed.
+            else:
+                if not all(isinstance(item, str) for item in value):
+                    continue
+                value = tuple(item if len(item) <= 64 else item.encode("utf-8")[:256].decode("utf-8", errors="ignore") for item in value[:32])
         elif type(value) not in (bool, int, float):
             continue
         result[key] = value
@@ -95,8 +105,35 @@ def allowlisted(attrs):
     return result
 
 
+@dataclass(frozen=True, init=False)
+class _Carrier(Mapping):
+    """Validated once at publication, immutable for the entire scope lifetime."""
+
+    attrs: Mapping
+    reset_skills: bool
+
+    def __init__(self, attrs, reset=False):
+        object.__setattr__(self, "attrs", MappingProxyType(allowlisted(attrs)))
+        object.__setattr__(self, "reset_skills", reset)
+
+    def __getitem__(self, key):
+        if key == "v":
+            return 1
+        if key == "attrs":
+            return self.attrs
+        if key == "reset_skills":
+            return self.reset_skills
+        raise KeyError(key)
+
+    def __iter__(self):
+        return iter(("v", "attrs", "reset_skills"))
+
+    def __len__(self):
+        return 3
+
+
 def carrier(attrs, reset=False):
-    return MappingProxyType({"v": 1, "attrs": MappingProxyType(allowlisted(attrs)), "reset_skills": reset})
+    return _Carrier(attrs, reset)
 
 
 def publish(state, reset=False):

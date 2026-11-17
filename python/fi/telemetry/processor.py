@@ -18,7 +18,11 @@ class FutureAGISkillsSpanProcessor:
         try:
             context = sys.modules.get("opentelemetry.context")
             value = context.get_value(_otel.CARRIER_KEY, parent_context) if context else None
-            if value is not None:
+            if type(value) is _otel._Carrier:
+                # SDK-authored carriers were sanitized and frozen at publication.
+                # Foreign/shared-contract mappings still need validation below.
+                attrs = value.attrs
+            elif value is not None:
                 if not isinstance(value, Mapping) or value.get("v") != 1 or not isinstance(value.get("attrs"), Mapping):
                     return
                 attrs = _otel.allowlisted(value["attrs"])
@@ -33,6 +37,11 @@ class FutureAGISkillsSpanProcessor:
             # Processor failures must not break application span creation.
             # No logging/I/O in this hot path.
             return
+
+    def _on_ending(self, span):
+        # OTel SDK 1.39+ invokes this hook before creating the ReadableSpan.
+        # Keep the processor duck-typed so importing it never requires OTel.
+        pass
 
     def on_end(self, span):
         pass

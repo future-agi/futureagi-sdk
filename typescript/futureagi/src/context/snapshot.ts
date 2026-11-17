@@ -505,19 +505,21 @@ export class VerifiedSnapshot {
 
 export class ContextSnapshot {
   readonly #source: SnapshotSource;
+  readonly #tracing: boolean;
   constructor(
     readonly manifest: SnapshotManifest,
     source: SnapshotSource,
-    private readonly options: { tracing?: boolean } = {},
+    options: { tracing?: boolean } = {},
   ) {
     this.#source = source;
+    this.#tracing = options.tracing !== false;
     Object.freeze(this);
   }
   get identity(): SnapshotIdentity {
     return this.manifest.identity;
   }
   async readFile(path: string, options: { trace?: boolean } = {}): Promise<string> {
-    const ticket = beginRead(this.options.tracing !== false && options.trace !== false);
+    const ticket = beginRead(this.#tracing && options.trace !== false);
     try {
       const text = await this.readFileBytes(path);
       finishRead(ticket, this, path);
@@ -540,7 +542,7 @@ export class ContextSnapshot {
     return chunks.finish();
   }
   async readAll(options: { trace?: boolean } = {}): Promise<VerifiedSnapshot> {
-    const ticket = beginRead(this.options.tracing !== false && options.trace !== false);
+    const ticket = beginRead(this.#tracing && options.trace !== false);
     try {
       const files: Record<string, string> = Object.create(null) as Record<string, string>;
       // Suppression belongs to this call, not a mutable snapshot-wide flag: a
