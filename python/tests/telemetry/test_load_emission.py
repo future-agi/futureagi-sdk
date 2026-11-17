@@ -30,11 +30,25 @@ def test_first_file_and_dedup(tracing, make_snapshot, path, root):
     assert "Refund instructions" not in str(span.attributes)
 
 
-def test_read_all_is_one_boundary(tracing, make_snapshot):
+def test_read_all_is_one_boundary(tracing, make_snapshot, monkeypatch):
+    import socket
+
     tracer, exporter, _ = tracing
     snapshot, source = make_snapshot()
+    network_calls = []
+
+    def unexpected_network(*args, **kwargs):
+        network_calls.append(True)
+        raise AssertionError("The telemetry bridge must not perform network I/O")
+
+    # The synthetic source returns verified bytes in-process. This isolates
+    # bridge overhead from the application's normal consumption transport.
+    monkeypatch.setattr(socket, "create_connection", unexpected_network)
+    monkeypatch.setattr(socket.socket, "connect", unexpected_network)
     with tracer.start_as_current_span("request"):
         snapshot.read_all()
+    assert network_calls == []
+    assert len(exporter.get_finished_spans()) == 2  # Request plus one load.
     assert len(loads(exporter)) == 1
     assert loads(exporter)[0].attributes["fi.skill.load.via"] == "sdk.read_all"
     assert source.calls == ["resolve"] + [item.path for item in snapshot.manifest.files]
