@@ -61,11 +61,14 @@ for v in 3.9 3.11 3.13; do
   run "processor-budget-$v" "$ENVS/sdk-$v/bin/python" "$SDK_ROOT/python/tests/telemetry/bench_processor.py"
 done
 sdk_lint() {
-  cd "$SDK_ROOT/python"
-  "$ENVS/sdk-3.11/bin/ruff" check fi/telemetry tests/telemetry \
-    fi/context/client.py fi/context/source.py fi/context/sessions.py \
-    fi/context/adapters/deepagents.py fi/skills/client.py \
-    fi/platform/_transport.py fi/gateway/callbacks/opentelemetry.py
+  cd "$SDK_ROOT"
+  # Match the repository CI rule set and working directory; use Python 3.9 syntax.
+  "$ENVS/sdk-3.11/bin/ruff" check --isolated --target-version py39 \
+    --select E,F,W,I --ignore E501 python/fi/telemetry python/tests/telemetry \
+    python/fi/__init__.py python/fi/context/client.py python/fi/context/source.py \
+    python/fi/context/sessions.py python/fi/context/adapters/deepagents.py \
+    python/fi/skills/client.py python/fi/platform/_transport.py \
+    python/fi/gateway/callbacks/opentelemetry.py
 }
 run sdk-ruff-changed sdk_lint
 run sdk-wheel uv build --wheel --out-dir "$ARTIFACTS" "$SDK_ROOT/python"
@@ -92,6 +95,7 @@ traceai_typescript() {
     pnpm --filter @traceai/fi-core run build &&
     pnpm --filter @traceai/fi-semantic-conventions run test --runInBand &&
     pnpm --filter @traceai/fi-core run test --runInBand &&
+    pnpm --filter @traceai/fi-core run test:provider &&
     (cd packages/fi-semantic-conventions && pnpm pack --pack-destination "$ARTIFACTS") &&
     (cd packages/fi-core && pnpm pack --pack-destination "$ARTIFACTS")
 }

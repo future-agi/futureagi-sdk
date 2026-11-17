@@ -68,7 +68,7 @@ def select_provider():
 def install(provider):
     if provider is None or mode() != "on":
         return
-    from .processor import FutureAGISkillsSpanProcessor, INSTALL_LOCK
+    from .processor import INSTALL_LOCK, FutureAGISkillsSpanProcessor
     with INSTALL_LOCK:
         if getattr(provider, "_futureagi_skills_processor", False):
             return

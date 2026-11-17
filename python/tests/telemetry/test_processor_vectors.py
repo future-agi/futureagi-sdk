@@ -3,7 +3,6 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-
 from fi.telemetry._otel import CARRIER_KEY, allowlisted
 from fi.telemetry._registry import registry
 from fi.telemetry.processor import FutureAGISkillsSpanProcessor
@@ -39,6 +38,7 @@ def test_attribute_limits():
 
 def test_sdk_carrier_is_a_detached_immutable_contract_mapping():
     from dataclasses import FrozenInstanceError
+
     from fi.telemetry._otel import carrier
 
     original = {"fi.skills.refs": ["refund@v1"], "private": "drop"}
@@ -56,8 +56,8 @@ def test_sdk_carrier_is_a_detached_immutable_contract_mapping():
 
 
 def test_sdk_carrier_fast_path_preserves_explicit_values(tracing):
-    from opentelemetry.context import Context, set_value
     from fi.telemetry._otel import carrier
+    from opentelemetry.context import Context, set_value
 
     tracer, exporter, _ = tracing
     parent = set_value(CARRIER_KEY, carrier({

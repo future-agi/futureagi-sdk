@@ -1,6 +1,5 @@
 import httpx
 import pytest
-
 from conftest import Source
 from fi import __version__
 from fi.platform import Client, ContextAuth
@@ -40,8 +39,9 @@ def test_resolve_header_only_and_versioned_user_agent(tracing, monkeypatch, mode
 
 
 def test_client_optout_header(tracing):
-    from fi.context.source import ConsumptionSource
     from types import SimpleNamespace
+
+    from fi.context.source import ConsumptionSource
     seen = []
     def call(*args, **kwargs):
         seen.append(kwargs)

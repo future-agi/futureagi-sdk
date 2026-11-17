@@ -74,12 +74,13 @@ def make_snapshot():
 @pytest.fixture
 def tracing(monkeypatch):
     pytest.importorskip("opentelemetry.sdk.trace")
+    from fi.telemetry import _otel, _status, configure
+    from fi.telemetry._registry import registry
     from opentelemetry.sdk.trace import TracerProvider
     from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
-    from fi.telemetry import configure
-    from fi.telemetry import _otel, _status
-    from fi.telemetry._registry import registry
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
+        InMemorySpanExporter,
+    )
     monkeypatch.delenv("FI_SKILLS_TRACING", raising=False)
     registry._entries.clear()
     _status._logged.clear()

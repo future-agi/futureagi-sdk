@@ -3,7 +3,6 @@ from concurrent.futures import ThreadPoolExecutor
 from contextvars import copy_context
 
 import pytest
-
 from fi.telemetry import agent_scope
 
 

@@ -1,5 +1,4 @@
 import pytest
-
 from fi.telemetry import agent_scope, configure
 from fi.telemetry._registry import registry
 

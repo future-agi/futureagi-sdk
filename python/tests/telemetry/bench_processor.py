@@ -3,10 +3,9 @@ from statistics import median
 from time import perf_counter_ns
 from types import SimpleNamespace
 
-from opentelemetry.context import Context, set_value
-
 from fi.telemetry._otel import CARRIER_KEY, carrier
 from fi.telemetry.processor import FutureAGISkillsSpanProcessor
+from opentelemetry.context import Context, set_value
 
 
 class Span:

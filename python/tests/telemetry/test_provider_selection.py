@@ -2,7 +2,6 @@ import sys
 from types import SimpleNamespace
 
 import pytest
-
 from fi.telemetry import configure
 from fi.telemetry._otel import install, select_provider
 
@@ -44,8 +43,10 @@ def test_undiscoverable_provider_enriches_only(tracing, monkeypatch, make_snapsh
 def test_real_traceai_registry_preserves_existing_exporter(make_snapshot):
     # Integration gate V1: install ST1's wheel in the cloud before this test.
     pytest.importorskip("fi_instrumentation.otel")
-    from fi_instrumentation.otel import register, get_registered_tracer_providers
-    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+    from fi_instrumentation.otel import get_registered_tracer_providers, register
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
+        InMemorySpanExporter,
+    )
     exporter = InMemorySpanExporter()
     provider = register(project_name="synthetic-runtime-test", set_global_tracer_provider=False,
                         span_exporter=exporter, batch=False, verbose=False)

@@ -2,14 +2,20 @@
 from __future__ import annotations
 
 import sys
-from time import time_ns
 from contextlib import nullcontext
 from contextvars import ContextVar
+from time import time_ns
 
 from . import _otel, _status
-from ._identity import context_attrs, error_type, identity_attrs, linked_attrs, selector_attrs, verified_links
+from ._identity import (
+    context_attrs,
+    error_type,
+    identity_attrs,
+    linked_attrs,
+    selector_attrs,
+    verified_links,
+)
 from ._registry import State, registry
-
 
 _load_only = ContextVar("futureagi.skills.load_only", default=None)
 
@@ -221,9 +227,10 @@ def declare_skill(snapshot_or_lock_entry):
     if _otel.mode() == "off":
         return
     try:
+        from types import SimpleNamespace
+
         from fi.context.materialize import LockedLink
         from fi.context.snapshot import SnapshotIdentity
-        from types import SimpleNamespace
         snapshot = snapshot_or_lock_entry
         via = "explicit"
         if isinstance(snapshot, LockedLink):

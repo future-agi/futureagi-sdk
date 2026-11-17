@@ -1,6 +1,5 @@
 import httpx
 import pytest
-
 from fi.context.snapshot import ResolutionExpiredError
 from fi.platform._errors import PermissionDeniedError
 

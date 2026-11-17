@@ -11,8 +11,6 @@ from __future__ import annotations
 
 from contextlib import nullcontext
 from importlib.metadata import version
-
-from fi.context.client import _read_boundary
 from typing import Callable
 
 from deepagents.backends import BackendProtocol, CompositeBackend, StateBackend
@@ -25,6 +23,7 @@ from deepagents.backends.protocol import (
 from deepagents.backends.utils import create_file_data
 from langchain.tools import ToolRuntime
 
+from fi.context.client import _read_boundary
 from fi.context.snapshot import (
     ResolutionLease,
     SnapshotIdentity,
