@@ -210,6 +210,132 @@ Common subclasses include:
 * `DatasetNotFoundError` – dataset name not found.  
 * `RateLimitError` – API quota exceeded.
 
+## Skill and agent-context traces
+
+A load is recorded on the first read of any file of a skill version inside a
+recording trace. **Loaded** means verified bytes were given to the app, not that
+a model followed them. Fetches, linked skills, delivery and loads are different
+facts. A cached snapshot is not evidence of a new load until application code
+reads or explicitly reports it during a traced request.
+
+The SDK does not install OpenTelemetry, a provider, an exporter, a context
+manager or a propagator. It probes the already-registered OTel API global on
+each read, so registering OTel after importing the SDK works. The API peer is
+optional and imports work without it. With a global provider, reads record
+loads without application changes. To name an agent, wrap its request:
+
+```ts
+import { withAgentScope, declareSkill } from '@future-agi/sdk/telemetry';
+
+await withAgentScope({ agent: 'refund-agent' }, async () => {
+  // Start the request's root span inside this callback.
+  const skill = await skills.resolve('refund', { label: 'production' });
+  const policy = await skill.readFile('SKILL.md');
+  // Give policy to application code here.
+});
+```
+
+For **vanilla OTel JS**, also list `new FutureAGISkillsSpanProcessor()` from
+`@future-agi/sdk/telemetry` in the provider constructor's `spanProcessors`
+list, alongside the application's exporter processor. Do not replace that
+exporter. OTel JS 2.x cannot add processors after construction. The corresponding
+traceAI integration supplies its own conforming processor; do not install both.
+No code to record the load. One scope line names the agent; the provider must
+also have the processor to stamp later spans. This is not a claim that every
+already-started span can be changed.
+
+### Controls and diagnostics
+
+```ts
+import { configure, status } from '@future-agi/sdk/telemetry';
+configure({ skillsTracing: 'load_only', tracerProvider: applicationProvider });
+// Modes: 'on' (default), 'load_only' (load spans only), 'off'.
+console.log(status());
+```
+
+`FI_SKILLS_TRACING=off` disables tracing and its info logs;
+`FI_SKILLS_TRACING=load_only` emits only loads, without current-span enrichment,
+shared attribution registry or stamping. Programmatic configuration wins over
+the environment; `configure()` clears programmatic overrides. First reads log
+one informational diagnostic per setup, never credentials, contents or paths.
+
+Run `npx --package=@future-agi/sdk futureagi-telemetry doctor`, or the installed
+`futureagi-telemetry doctor` binary. A new CLI process cannot inspect the provider
+in another running process: call `status()` inside the app to diagnose it.
+Doctor redacts app-supplied identity values. `processor_installed` is conservative:
+it confirms a processor just observed the current trace, not installation on
+all providers. The present implementation cannot distinguish traceAI's global
+provider from vanilla OTel; that truth-table diagnostic still requires integration.
+
+### Reference and evidence
+
+- `new SkillsClient(clientOrSource, { tracing: false })` and
+  `new ContextClient(client, { tracing: false })` opt out per client.
+- `snapshot.readFile(path, { trace: false })` and
+  `snapshot.readAll({ trace: false })` opt out per call.
+- `declareSkill(snapshot)` or `declareSkill(lock)` records **Reported by the app**
+  evidence. `LockedSkill` is an explicit, typed declaration with kind, name,
+  resourceId, versionId, version, digest and requested selector. It does not
+  verify external files. Ordinary SDK reads record **Given to the app** evidence.
+- A first supporting-file read records a load with `root_file: false`. A later
+  root read of the same version/evidence in the same scope does not add a load.
+- `readAll()` suppresses its inner file reads per call, including concurrent
+  reads. A skill `readAll()` records one load; a context `readAll()` records only
+  `context.load`, with linked versions available but not loaded.
+- Integrity, authorization, lease and not-found failures remain consumption
+  errors. Failed `skill.load` spans have error category, reported name and
+  selector, never an unverified skill id, version id or digest. They are not loads.
+- Resolves, manifest pages, authorization checks, authoring, and generated
+  low-level `client.skills` / `client.skillConsumption` operations are untraced.
+  Use high-level clients for runtime attribution.
+- The user agent includes the SDK version. Only consumption resolve adds
+  `X-FI-Skills-Tracing: on | load_only | off | no_otel`.
+
+| Capability | TypeScript | Python |
+| --- | --- | --- |
+| High-level skill/context reads | Available | Available |
+| Scope helper / explicit declaration | `withAgentScope` / `declareSkill` | `agent_scope` / `declare_skill` |
+| Vanilla OTel later-span stamping | Constructor processor required | Additive processor installation |
+| Installer, context sessions, Deep Agents adapter | Not present in this package | Python integrations |
+
+### Propagation limits and integration gaps
+
+Automatic mode shares a bounded 4,096-trace, one-hour registry. Several agents
+interleaved in one trace share its list: use explicit scopes to separate them.
+Lists cap at 32 versions and set `fi.skills.truncated` after that. Evidence
+is deduplicated per version and evidence level; failed reads per reported name,
+selector and error category. `load_only` keeps private, bounded-lifetime evidence
+state for deduplication but never publishes it to the propagation registry.
+
+A nested context replaces context identity and resets skill lists; a plain nested
+scope inherits and appends to its own list. Scope exit restores its parent on
+success, exception or async rejection. The OTel context manager must already be
+installed and support async propagation. Thread/worker or process handoff needs
+explicit context capture/binding. Head-sampled-out spans do not record loads.
+Already-started ancestor spans cannot be retroactively stamped. Explicit scopes
+never mutate a shared outer span; automatic mode enriches only the current span.
+
+**Lazy linked reads remain incomplete.** Today's `SnapshotManifest` has no
+verified `LockedLink` identities. A context `readAll()` verifies the descriptor
+and all child digests and remembers that closure without additional I/O. Later
+direct child reads then record the child's verified identity. A direct child read
+before that verification records no load, and a root-only `AGENTS.md` read cannot
+supply `linked_skill_version_ids`. An empty list is not fabricated. Consumption
+must provide verified closure metadata before this is complete; failed child
+reads before closure verification cannot be reliably attributed to a child.
+Telemetry must not fetch extra files to hide this gap.
+
+The SDK/traceAI TypeScript registry ABI used here is
+`globalThis[Symbol.for('futureagi.runtime.skills.v1')]` with `v: 1` and
+`get(traceId)` returning allowlisted attributes or `undefined`. Carriers use
+`Symbol.for('futureagi.runtime.span_attributes.v1')`; each read of a scope's
+context yields an immutable `{ v: 1, attrs, reset_skills }` value. The fi-core
+processor must pass the copied Python conformance vectors and read this same
+registry ABI before the integration is qualified.
+
+All runtime, packaging and provider tests for this change require cloud
+qualification. No local execution is a substitute for that gate.
+
 ## Contributing
 
 1. Fork the repo and create your branch from `main`.  

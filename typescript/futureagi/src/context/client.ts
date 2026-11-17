@@ -20,6 +20,7 @@ export class SnapshotClient {
   constructor(
     private readonly source: SnapshotSource,
     private readonly kind: SnapshotKind,
+    private readonly options: { tracing?: boolean } = {},
   ) {}
   async resolve(
     name: string,
@@ -46,16 +47,16 @@ export class SnapshotClient {
         }),
       );
     }
-    return new ContextSnapshot(pages.finish(), this.source);
+    return new ContextSnapshot(pages.finish(), this.source, this.options);
   }
 }
 
 /** Wrap the shared authenticated platform Client; no HTTP implementation or cache. */
 export class ContextClient extends SnapshotClient {
   private readonly consumption: ConsumptionSource;
-  constructor(client: Client) {
-    const source = new ConsumptionSource(client, "agent_context");
-    super(source, "agent_context");
+  constructor(client: Client, options: { tracing?: boolean } = {}) {
+    const source = new ConsumptionSource(client, "agent_context", options);
+    super(source, "agent_context", options);
     this.consumption = source;
   }
   checkAccess(

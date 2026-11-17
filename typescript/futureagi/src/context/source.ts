@@ -1,4 +1,5 @@
 import type { Client } from "../platform/client";
+import { tracingHeader } from "../telemetry/status";
 import * as operations from "../platform/_operations";
 import type { RequestOptions } from "../platform/transport";
 import {
@@ -21,6 +22,7 @@ export class ConsumptionSource implements SnapshotSource {
   constructor(
     private readonly client: Client,
     private readonly kind: SnapshotKind,
+    private readonly options: { tracing?: boolean } = {},
   ) {
     this.operations =
       kind === "agent_context"
@@ -45,7 +47,7 @@ export class ConsumptionSource implements SnapshotSource {
   resolve(name: string, selector: Selector): Promise<unknown> {
     return this.client.transport.call(this.operations[0], {
       query: { name, ...selector },
-    });
+    }, { headers: { "X-FI-Skills-Tracing": tracingHeader(this.options.tracing) } });
   }
   manifest(
     identity: SnapshotIdentity,

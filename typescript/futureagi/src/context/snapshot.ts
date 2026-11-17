@@ -1,4 +1,7 @@
 import { createHash } from "node:crypto";
+import { beginRead, failRead, finishRead } from "../telemetry/hooks";
+import { copyClosure, rememberClosure } from "../telemetry/identity";
+import { api, mode, safe } from "../telemetry/otel";
 import type {
   FileMetadata,
   ResolutionLease,
@@ -489,8 +492,10 @@ export class VerifiedSnapshot {
         sha256(copied[item.path]) !== item.sha256
       )
         invalid("Verified snapshot checksum mismatch");
-    if (manifest.identity.kind === "agent_context")
+    if (manifest.identity.kind === "agent_context") {
       validateDescriptor(copied, manifest.identity);
+      if (mode() !== "off" && api()) safe(() => rememberClosure(this, copied));
+    }
     Object.freeze(this);
   }
   get identity(): SnapshotIdentity {
@@ -503,6 +508,7 @@ export class ContextSnapshot {
   constructor(
     readonly manifest: SnapshotManifest,
     source: SnapshotSource,
+    private readonly options: { tracing?: boolean } = {},
   ) {
     this.#source = source;
     Object.freeze(this);
@@ -510,7 +516,18 @@ export class ContextSnapshot {
   get identity(): SnapshotIdentity {
     return this.manifest.identity;
   }
-  async readFile(path: string): Promise<string> {
+  async readFile(path: string, options: { trace?: boolean } = {}): Promise<string> {
+    const ticket = beginRead(this.options.tracing !== false && options.trace !== false);
+    try {
+      const text = await this.readFileBytes(path);
+      finishRead(ticket, this, path);
+      return text;
+    } catch (error) {
+      failRead(ticket, this, error, path);
+      throw error;
+    }
+  }
+  private async readFileBytes(path: string): Promise<string> {
     const chunks = new ChunkCollector(this.manifest, path);
     while (!chunks.eof) {
       requireLive(this.manifest.lease);
@@ -522,14 +539,22 @@ export class ContextSnapshot {
     }
     return chunks.finish();
   }
-  async readAll(): Promise<VerifiedSnapshot> {
-    const files: Record<string, string> = Object.create(null) as Record<
-      string,
-      string
-    >;
-    for (const item of this.manifest.files)
-      files[item.path] = await this.readFile(item.path);
-    requireLive(this.manifest.lease);
-    return new VerifiedSnapshot(this.manifest, files);
+  async readAll(options: { trace?: boolean } = {}): Promise<VerifiedSnapshot> {
+    const ticket = beginRead(this.options.tracing !== false && options.trace !== false);
+    try {
+      const files: Record<string, string> = Object.create(null) as Record<string, string>;
+      // Suppression belongs to this call, not a mutable snapshot-wide flag: a
+      // concurrent direct read still records its own evidence.
+      for (const item of this.manifest.files)
+        files[item.path] = await this.readFile(item.path, { trace: false });
+      requireLive(this.manifest.lease);
+      const verified = new VerifiedSnapshot(this.manifest, files);
+      if (mode() !== "off" && api()) safe(() => copyClosure(verified, this));
+      finishRead(ticket, this);
+      return verified;
+    } catch (error) {
+      failRead(ticket, this, error);
+      throw error;
+    }
   }
 }
