@@ -27,7 +27,15 @@ class agent_scope:
                 self._token = _otel._scope.set(self.state)
                 context = sys.modules.get("opentelemetry.context")
                 if context is not None and self._resume_context is not None and _otel.mode() == "on":
-                    self._carrier_token = context.attach(self._resume_context)
+                    # Ending a span can restore the carrier from before a load.
+                    # Keep the suspended span context, but publish the latest
+                    # scope state rather than that stale immutable carrier.
+                    resumed = context.set_value(
+                        _otel.CARRIER_KEY,
+                        _otel.carrier(self.state.attrs, reset=self.context is not None),
+                        self._resume_context,
+                    )
+                    self._carrier_token = context.attach(resumed)
                 return self
             parent = _otel._scope.get()
             attrs = dict(parent.attrs) if parent else {}

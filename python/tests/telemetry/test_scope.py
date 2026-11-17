@@ -81,6 +81,42 @@ async def test_async_generator_restores_between_yields(tracing, make_snapshot):
             assert "gen_ai.agent.name" not in span.attributes
 
 
+async def test_async_generator_keeps_suspended_span_and_closes_in_scope(tracing, make_snapshot):
+    from opentelemetry import trace
+
+    tracer, _, _ = tracing
+    skill, _ = make_snapshot()
+    closed = []
+
+    @agent_scope(agent="generator")
+    async def generate():
+        with tracer.start_as_current_span("suspended") as suspended:
+            skill.read_all()
+            try:
+                yield suspended.get_span_context().span_id
+                assert trace.get_current_span() is suspended
+                with tracer.start_as_current_span("continued") as span:
+                    assert span.attributes["fi.skills.count"] == 1
+                yield suspended.get_span_context().span_id
+            finally:
+                with tracer.start_as_current_span("cleanup") as span:
+                    closed.append(span.attributes["gen_ai.agent.name"])
+                    assert span.attributes["fi.skills.count"] == 1
+
+    with agent_scope(agent="caller"), tracer.start_as_current_span("caller") as caller:
+        iterator = generate()
+        first = await iterator.__anext__()
+        assert trace.get_current_span() is caller
+        assert await iterator.__anext__() == first
+        assert trace.get_current_span() is caller
+        await iterator.aclose()
+        assert trace.get_current_span() is caller
+        with tracer.start_as_current_span("after-close") as span:
+            assert span.attributes["gen_ai.agent.name"] == "caller"
+            assert "fi.skills.count" not in span.attributes
+    assert closed == ["generator"]
+
+
 def test_sync_decorator_and_generator_guidance(tracing):
     tracer, _, _ = tracing
     @agent_scope(agent="sync-agent")
