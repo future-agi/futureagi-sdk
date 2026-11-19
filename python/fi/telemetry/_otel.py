@@ -175,6 +175,35 @@ def current():
     return trace.get_current_span() if trace is not None else None
 
 
+def retire_absent_receipt(span, existing, selected):
+    """Never pair a new context identity with the previous immutable receipt.
+
+    OTel's Span API has setters but no unset. Its Python SDK stores attributes
+    in a BoundedAttributes behind a read-only view and serializes writes with
+    the recording span lock. Use that narrow adapter only on recognized native
+    spans. On a foreign host retain the *complete* prior annotation instead;
+    the verified load event and future spans still use the new selection.
+    """
+    if "fi.context.version_id" not in selected:
+        return True
+    stale = [k for k in ("fi.context.binding_id", "fi.context.session_id") if k in existing and k not in selected]
+    if not stale:
+        return True
+    native = getattr(sys.modules.get("opentelemetry.sdk.trace"), "Span", None)
+    bounded = getattr(sys.modules.get("opentelemetry.attributes"), "BoundedAttributes", None)
+    if native is None or bounded is None or not issubclass(type(span), native):
+        return False
+    store, lock = getattr(span, "_attributes", None), getattr(span, "_lock", None)
+    if not isinstance(store, bounded) or lock is None:
+        return False
+    with lock:
+        if getattr(span, "_end_time", None) is not None:
+            return False
+        for key in stale:
+            store.pop(key, None)
+    return True
+
+
 def wire_mode(tracing=True):
     if not tracing or mode() == "off":
         return "off"

@@ -83,6 +83,8 @@ def _enrich(state, current, mode, *, reset_skills=False):
         _otel.publish(state)
         return
     existing = getattr(current, "attributes", None) or {}
+    if not _otel.retire_absent_receipt(current, existing, state.attrs):
+        return
     if reset_skills and "fi.skills.count" in existing:
         # OTel cannot delete an attribute. Clear the former context's skill
         # list on the already-enriched span, not on unrelated future children.

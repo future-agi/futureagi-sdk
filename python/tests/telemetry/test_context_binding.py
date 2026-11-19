@@ -243,3 +243,27 @@ async def test_verified_async_delivery_mode_at_completion(pair, entry, end, scop
     elif delivered:
         assert event[0][VERSION] == lazy.identity.version_id
     assert attrs(exporter, 'observer')[0].get(VERSION) == (lazy.identity.version_id if delivered and end == 'on' and not corrupt else None)
+
+
+@pytest.mark.parametrize('wrapped', [False, True], ids=['native', 'opaque-host'])
+def test_reselection_never_exports_new_identity_with_old_session(pair, wrapped):
+    from contextlib import nullcontext
+    from opentelemetry import trace
+    from wrapt import ObjectProxy
+
+    tracer, exporter = pair
+    a, expected_a, _, _ = session(source('alpha'))
+    b = ordinary(source('beta'))
+    with tracer.start_as_current_span('parent'):
+        assert a.read_file(ROOT) == 'Support agent'
+        with tracer.start_as_current_span('nested') as active:
+            # A delegate may expose only the public API; don't use private SDK
+            # storage on it or rewrite half of its existing complete identity.
+            with trace.use_span(ObjectProxy(active)) if wrapped else nullcontext():
+                assert b.read_file(ROOT) == 'Support agent'
+        tracer.start_span('following').end()
+    for data in (attrs(exporter, 'context.load')[-1], attrs(exporter, 'following')[0]):
+        assert (data[VERSION], data[NAME], receipt(data)) == (b.identity.version_id, 'beta', {})
+    nested, = attrs(exporter, 'nested')
+    assert (nested[VERSION], nested[NAME], receipt(nested)) == (
+        (a.identity.version_id, 'alpha', expected_a) if wrapped else (b.identity.version_id, 'beta', {}))
