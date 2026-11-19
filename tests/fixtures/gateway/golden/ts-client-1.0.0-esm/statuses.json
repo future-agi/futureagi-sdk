@@ -1,0 +1,8009 @@
+{
+ "area": "statuses",
+ "cases": {
+  "status.200_non_json": {
+   "raised": {
+    "__exception__": "SyntaxError",
+    "attrs": {},
+    "chain": [
+     "SyntaxError",
+     "Error"
+    ],
+    "class": "SyntaxError",
+    "message": "Unexpected token 'o', \"not json\" is not valid JSON",
+    "toString": "SyntaxError: Unexpected token 'o', \"not json\" is not valid JSON"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.200_wrong_shape": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "unexpected": true
+   }
+  },
+  "status.201_ok": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "status.246.empty": {
+   "raised": {
+    "__exception__": "SyntaxError",
+    "attrs": {},
+    "chain": [
+     "SyntaxError",
+     "Error"
+    ],
+    "class": "SyntaxError",
+    "message": "Unexpected end of JSON input",
+    "toString": "SyntaxError: Unexpected end of JSON input"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.246.error_object": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "error": {
+     "code": "parity_code",
+     "message": "the gateway said no",
+     "param": "model",
+     "type": "invalid_request_error"
+    }
+   }
+  },
+  "status.246.error_object_minimal": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "error": {
+     "message": "minimal error"
+    }
+   }
+  },
+  "status.246.headers": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": "block",
+     "guardrailConfidence": 0.97,
+     "guardrailMessage": "PII found",
+     "guardrailName": "pii",
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": {
+      "limit": 10,
+      "remaining": 0,
+      "reset": 30
+     },
+     "requestId": "req-err-1",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "error": {
+     "code": "parity_code",
+     "message": "the gateway said no",
+     "param": "model",
+     "type": "invalid_request_error"
+    }
+   }
+  },
+  "status.246.non_json": {
+   "raised": {
+    "__exception__": "SyntaxError",
+    "attrs": {},
+    "chain": [
+     "SyntaxError",
+     "Error"
+    ],
+    "class": "SyntaxError",
+    "message": "Unexpected token 'u', \"upstream e\"... is not valid JSON",
+    "toString": "SyntaxError: Unexpected token 'u', \"upstream e\"... is not valid JSON"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.246.on_guardrail_warning": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "result": {
+     "ok": {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": "block",
+       "guardrailConfidence": 0.97,
+       "guardrailMessage": "PII found",
+       "guardrailName": "pii",
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": {
+        "limit": 10,
+        "remaining": 0,
+        "reset": 30
+       },
+       "requestId": "req-err-1",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": "Hello from parity",
+         "role": "assistant"
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-parity",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion",
+      "system_fingerprint": "fp_parity",
+      "usage": {
+       "completion_tokens": 3,
+       "prompt_tokens": 5,
+       "total_tokens": 8
+      }
+     }
+    },
+    "seen": [
+     2
+    ]
+   }
+  },
+  "status.246.top_level_message": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "code": 7,
+    "message": "top-level message only"
+   }
+  },
+  "status.400.empty": {
+   "raised": {
+    "__exception__": "BadRequestError",
+    "attrs": {
+     "body": {
+      "message": ""
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "BadRequestError",
+     "requestId": null,
+     "statusCode": 400
+    },
+    "chain": [
+     "BadRequestError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "BadRequestError",
+    "message": "Request failed with status 400",
+    "toString": "BadRequestError: Request failed with status 400"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.400.error_object": {
+   "raised": {
+    "__exception__": "BadRequestError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "BadRequestError",
+     "requestId": null,
+     "statusCode": 400
+    },
+    "chain": [
+     "BadRequestError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "BadRequestError",
+    "message": "Request failed with status 400",
+    "toString": "BadRequestError: Request failed with status 400"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.400.error_object_minimal": {
+   "raised": {
+    "__exception__": "BadRequestError",
+    "attrs": {
+     "body": {
+      "error": {
+       "message": "minimal error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "BadRequestError",
+     "requestId": null,
+     "statusCode": 400
+    },
+    "chain": [
+     "BadRequestError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "BadRequestError",
+    "message": "Request failed with status 400",
+    "toString": "BadRequestError: Request failed with status 400"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.400.headers": {
+   "raised": {
+    "__exception__": "BadRequestError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "BadRequestError",
+     "requestId": "req-err-1",
+     "statusCode": 400
+    },
+    "chain": [
+     "BadRequestError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "BadRequestError",
+    "message": "Request failed with status 400",
+    "toString": "BadRequestError: Request failed with status 400"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.400.non_json": {
+   "raised": {
+    "__exception__": "BadRequestError",
+    "attrs": {
+     "body": {
+      "message": "Unknown error"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "BadRequestError",
+     "requestId": null,
+     "statusCode": 400
+    },
+    "chain": [
+     "BadRequestError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "BadRequestError",
+    "message": "Unknown error",
+    "toString": "BadRequestError: Unknown error"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.400.top_level_message": {
+   "raised": {
+    "__exception__": "BadRequestError",
+    "attrs": {
+     "body": {
+      "code": 7,
+      "message": "top-level message only"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "BadRequestError",
+     "requestId": null,
+     "statusCode": 400
+    },
+    "chain": [
+     "BadRequestError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "BadRequestError",
+    "message": "top-level message only",
+    "toString": "BadRequestError: top-level message only"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.401.empty": {
+   "raised": {
+    "__exception__": "AuthenticationError",
+    "attrs": {
+     "body": {
+      "message": ""
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "AuthenticationError",
+     "requestId": null,
+     "statusCode": 401
+    },
+    "chain": [
+     "AuthenticationError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "AuthenticationError",
+    "message": "Request failed with status 401",
+    "toString": "AuthenticationError: Request failed with status 401"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.401.error_object": {
+   "raised": {
+    "__exception__": "AuthenticationError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "AuthenticationError",
+     "requestId": null,
+     "statusCode": 401
+    },
+    "chain": [
+     "AuthenticationError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "AuthenticationError",
+    "message": "Request failed with status 401",
+    "toString": "AuthenticationError: Request failed with status 401"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.401.error_object_minimal": {
+   "raised": {
+    "__exception__": "AuthenticationError",
+    "attrs": {
+     "body": {
+      "error": {
+       "message": "minimal error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "AuthenticationError",
+     "requestId": null,
+     "statusCode": 401
+    },
+    "chain": [
+     "AuthenticationError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "AuthenticationError",
+    "message": "Request failed with status 401",
+    "toString": "AuthenticationError: Request failed with status 401"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.401.headers": {
+   "raised": {
+    "__exception__": "AuthenticationError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "AuthenticationError",
+     "requestId": "req-err-1",
+     "statusCode": 401
+    },
+    "chain": [
+     "AuthenticationError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "AuthenticationError",
+    "message": "Request failed with status 401",
+    "toString": "AuthenticationError: Request failed with status 401"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.401.non_json": {
+   "raised": {
+    "__exception__": "AuthenticationError",
+    "attrs": {
+     "body": {
+      "message": "Unknown error"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "AuthenticationError",
+     "requestId": null,
+     "statusCode": 401
+    },
+    "chain": [
+     "AuthenticationError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "AuthenticationError",
+    "message": "Unknown error",
+    "toString": "AuthenticationError: Unknown error"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.401.top_level_message": {
+   "raised": {
+    "__exception__": "AuthenticationError",
+    "attrs": {
+     "body": {
+      "code": 7,
+      "message": "top-level message only"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "AuthenticationError",
+     "requestId": null,
+     "statusCode": 401
+    },
+    "chain": [
+     "AuthenticationError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "AuthenticationError",
+    "message": "top-level message only",
+    "toString": "AuthenticationError: top-level message only"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.403.empty": {
+   "raised": {
+    "__exception__": "PermissionDeniedError",
+    "attrs": {
+     "body": {
+      "message": ""
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "PermissionDeniedError",
+     "requestId": null,
+     "statusCode": 403
+    },
+    "chain": [
+     "PermissionDeniedError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "PermissionDeniedError",
+    "message": "Request failed with status 403",
+    "toString": "PermissionDeniedError: Request failed with status 403"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.403.error_object": {
+   "raised": {
+    "__exception__": "PermissionDeniedError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "PermissionDeniedError",
+     "requestId": null,
+     "statusCode": 403
+    },
+    "chain": [
+     "PermissionDeniedError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "PermissionDeniedError",
+    "message": "Request failed with status 403",
+    "toString": "PermissionDeniedError: Request failed with status 403"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.403.error_object_minimal": {
+   "raised": {
+    "__exception__": "PermissionDeniedError",
+    "attrs": {
+     "body": {
+      "error": {
+       "message": "minimal error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "PermissionDeniedError",
+     "requestId": null,
+     "statusCode": 403
+    },
+    "chain": [
+     "PermissionDeniedError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "PermissionDeniedError",
+    "message": "Request failed with status 403",
+    "toString": "PermissionDeniedError: Request failed with status 403"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.403.headers": {
+   "raised": {
+    "__exception__": "PermissionDeniedError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "PermissionDeniedError",
+     "requestId": "req-err-1",
+     "statusCode": 403
+    },
+    "chain": [
+     "PermissionDeniedError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "PermissionDeniedError",
+    "message": "Request failed with status 403",
+    "toString": "PermissionDeniedError: Request failed with status 403"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.403.non_json": {
+   "raised": {
+    "__exception__": "PermissionDeniedError",
+    "attrs": {
+     "body": {
+      "message": "Unknown error"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "PermissionDeniedError",
+     "requestId": null,
+     "statusCode": 403
+    },
+    "chain": [
+     "PermissionDeniedError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "PermissionDeniedError",
+    "message": "Unknown error",
+    "toString": "PermissionDeniedError: Unknown error"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.403.top_level_message": {
+   "raised": {
+    "__exception__": "PermissionDeniedError",
+    "attrs": {
+     "body": {
+      "code": 7,
+      "message": "top-level message only"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "PermissionDeniedError",
+     "requestId": null,
+     "statusCode": 403
+    },
+    "chain": [
+     "PermissionDeniedError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "PermissionDeniedError",
+    "message": "top-level message only",
+    "toString": "PermissionDeniedError: top-level message only"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.404.empty": {
+   "raised": {
+    "__exception__": "NotFoundError",
+    "attrs": {
+     "body": {
+      "message": ""
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "NotFoundError",
+     "requestId": null,
+     "statusCode": 404
+    },
+    "chain": [
+     "NotFoundError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "NotFoundError",
+    "message": "Request failed with status 404",
+    "toString": "NotFoundError: Request failed with status 404"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.404.error_object": {
+   "raised": {
+    "__exception__": "NotFoundError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "NotFoundError",
+     "requestId": null,
+     "statusCode": 404
+    },
+    "chain": [
+     "NotFoundError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "NotFoundError",
+    "message": "Request failed with status 404",
+    "toString": "NotFoundError: Request failed with status 404"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.404.error_object_minimal": {
+   "raised": {
+    "__exception__": "NotFoundError",
+    "attrs": {
+     "body": {
+      "error": {
+       "message": "minimal error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "NotFoundError",
+     "requestId": null,
+     "statusCode": 404
+    },
+    "chain": [
+     "NotFoundError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "NotFoundError",
+    "message": "Request failed with status 404",
+    "toString": "NotFoundError: Request failed with status 404"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.404.headers": {
+   "raised": {
+    "__exception__": "NotFoundError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "NotFoundError",
+     "requestId": "req-err-1",
+     "statusCode": 404
+    },
+    "chain": [
+     "NotFoundError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "NotFoundError",
+    "message": "Request failed with status 404",
+    "toString": "NotFoundError: Request failed with status 404"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.404.non_json": {
+   "raised": {
+    "__exception__": "NotFoundError",
+    "attrs": {
+     "body": {
+      "message": "Unknown error"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "NotFoundError",
+     "requestId": null,
+     "statusCode": 404
+    },
+    "chain": [
+     "NotFoundError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "NotFoundError",
+    "message": "Unknown error",
+    "toString": "NotFoundError: Unknown error"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.404.top_level_message": {
+   "raised": {
+    "__exception__": "NotFoundError",
+    "attrs": {
+     "body": {
+      "code": 7,
+      "message": "top-level message only"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "NotFoundError",
+     "requestId": null,
+     "statusCode": 404
+    },
+    "chain": [
+     "NotFoundError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "NotFoundError",
+    "message": "top-level message only",
+    "toString": "NotFoundError: top-level message only"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.408.empty": {
+   "raised": {
+    "__exception__": "APIStatusError",
+    "attrs": {
+     "body": {
+      "message": ""
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "APIStatusError",
+     "requestId": null,
+     "statusCode": 408
+    },
+    "chain": [
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "APIStatusError",
+    "message": "Request failed with status 408",
+    "toString": "APIStatusError: Request failed with status 408"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.408.error_object": {
+   "raised": {
+    "__exception__": "APIStatusError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "APIStatusError",
+     "requestId": null,
+     "statusCode": 408
+    },
+    "chain": [
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "APIStatusError",
+    "message": "Request failed with status 408",
+    "toString": "APIStatusError: Request failed with status 408"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.408.error_object_minimal": {
+   "raised": {
+    "__exception__": "APIStatusError",
+    "attrs": {
+     "body": {
+      "error": {
+       "message": "minimal error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "APIStatusError",
+     "requestId": null,
+     "statusCode": 408
+    },
+    "chain": [
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "APIStatusError",
+    "message": "Request failed with status 408",
+    "toString": "APIStatusError: Request failed with status 408"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.408.headers": {
+   "raised": {
+    "__exception__": "APIStatusError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "APIStatusError",
+     "requestId": "req-err-1",
+     "statusCode": 408
+    },
+    "chain": [
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "APIStatusError",
+    "message": "Request failed with status 408",
+    "toString": "APIStatusError: Request failed with status 408"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.408.non_json": {
+   "raised": {
+    "__exception__": "APIStatusError",
+    "attrs": {
+     "body": {
+      "message": "Unknown error"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "APIStatusError",
+     "requestId": null,
+     "statusCode": 408
+    },
+    "chain": [
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "APIStatusError",
+    "message": "Unknown error",
+    "toString": "APIStatusError: Unknown error"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.408.top_level_message": {
+   "raised": {
+    "__exception__": "APIStatusError",
+    "attrs": {
+     "body": {
+      "code": 7,
+      "message": "top-level message only"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "APIStatusError",
+     "requestId": null,
+     "statusCode": 408
+    },
+    "chain": [
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "APIStatusError",
+    "message": "top-level message only",
+    "toString": "APIStatusError: top-level message only"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.413.empty": {
+   "raised": {
+    "__exception__": "APIStatusError",
+    "attrs": {
+     "body": {
+      "message": ""
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "APIStatusError",
+     "requestId": null,
+     "statusCode": 413
+    },
+    "chain": [
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "APIStatusError",
+    "message": "Request failed with status 413",
+    "toString": "APIStatusError: Request failed with status 413"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.413.error_object": {
+   "raised": {
+    "__exception__": "APIStatusError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "APIStatusError",
+     "requestId": null,
+     "statusCode": 413
+    },
+    "chain": [
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "APIStatusError",
+    "message": "Request failed with status 413",
+    "toString": "APIStatusError: Request failed with status 413"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.413.error_object_minimal": {
+   "raised": {
+    "__exception__": "APIStatusError",
+    "attrs": {
+     "body": {
+      "error": {
+       "message": "minimal error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "APIStatusError",
+     "requestId": null,
+     "statusCode": 413
+    },
+    "chain": [
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "APIStatusError",
+    "message": "Request failed with status 413",
+    "toString": "APIStatusError: Request failed with status 413"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.413.headers": {
+   "raised": {
+    "__exception__": "APIStatusError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "APIStatusError",
+     "requestId": "req-err-1",
+     "statusCode": 413
+    },
+    "chain": [
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "APIStatusError",
+    "message": "Request failed with status 413",
+    "toString": "APIStatusError: Request failed with status 413"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.413.non_json": {
+   "raised": {
+    "__exception__": "APIStatusError",
+    "attrs": {
+     "body": {
+      "message": "Unknown error"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "APIStatusError",
+     "requestId": null,
+     "statusCode": 413
+    },
+    "chain": [
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "APIStatusError",
+    "message": "Unknown error",
+    "toString": "APIStatusError: Unknown error"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.413.top_level_message": {
+   "raised": {
+    "__exception__": "APIStatusError",
+    "attrs": {
+     "body": {
+      "code": 7,
+      "message": "top-level message only"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "APIStatusError",
+     "requestId": null,
+     "statusCode": 413
+    },
+    "chain": [
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "APIStatusError",
+    "message": "top-level message only",
+    "toString": "APIStatusError: top-level message only"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.418_unmapped": {
+   "raised": {
+    "__exception__": "APIStatusError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "APIStatusError",
+     "requestId": null,
+     "statusCode": 418
+    },
+    "chain": [
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "APIStatusError",
+    "message": "Request failed with status 418",
+    "toString": "APIStatusError: Request failed with status 418"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.422.empty": {
+   "raised": {
+    "__exception__": "UnprocessableEntityError",
+    "attrs": {
+     "body": {
+      "message": ""
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "UnprocessableEntityError",
+     "requestId": null,
+     "statusCode": 422
+    },
+    "chain": [
+     "UnprocessableEntityError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "UnprocessableEntityError",
+    "message": "Request failed with status 422",
+    "toString": "UnprocessableEntityError: Request failed with status 422"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.422.error_object": {
+   "raised": {
+    "__exception__": "UnprocessableEntityError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "UnprocessableEntityError",
+     "requestId": null,
+     "statusCode": 422
+    },
+    "chain": [
+     "UnprocessableEntityError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "UnprocessableEntityError",
+    "message": "Request failed with status 422",
+    "toString": "UnprocessableEntityError: Request failed with status 422"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.422.error_object_minimal": {
+   "raised": {
+    "__exception__": "UnprocessableEntityError",
+    "attrs": {
+     "body": {
+      "error": {
+       "message": "minimal error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "UnprocessableEntityError",
+     "requestId": null,
+     "statusCode": 422
+    },
+    "chain": [
+     "UnprocessableEntityError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "UnprocessableEntityError",
+    "message": "Request failed with status 422",
+    "toString": "UnprocessableEntityError: Request failed with status 422"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.422.headers": {
+   "raised": {
+    "__exception__": "UnprocessableEntityError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "UnprocessableEntityError",
+     "requestId": "req-err-1",
+     "statusCode": 422
+    },
+    "chain": [
+     "UnprocessableEntityError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "UnprocessableEntityError",
+    "message": "Request failed with status 422",
+    "toString": "UnprocessableEntityError: Request failed with status 422"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.422.non_json": {
+   "raised": {
+    "__exception__": "UnprocessableEntityError",
+    "attrs": {
+     "body": {
+      "message": "Unknown error"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "UnprocessableEntityError",
+     "requestId": null,
+     "statusCode": 422
+    },
+    "chain": [
+     "UnprocessableEntityError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "UnprocessableEntityError",
+    "message": "Unknown error",
+    "toString": "UnprocessableEntityError: Unknown error"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.422.top_level_message": {
+   "raised": {
+    "__exception__": "UnprocessableEntityError",
+    "attrs": {
+     "body": {
+      "code": 7,
+      "message": "top-level message only"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "UnprocessableEntityError",
+     "requestId": null,
+     "statusCode": 422
+    },
+    "chain": [
+     "UnprocessableEntityError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "UnprocessableEntityError",
+    "message": "top-level message only",
+    "toString": "UnprocessableEntityError: top-level message only"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.429.empty": {
+   "raised": {
+    "__exception__": "RateLimitError",
+    "attrs": {
+     "body": {
+      "message": ""
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "RateLimitError",
+     "ratelimitLimit": null,
+     "ratelimitRemaining": null,
+     "ratelimitReset": null,
+     "requestId": null,
+     "statusCode": 429
+    },
+    "chain": [
+     "RateLimitError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "RateLimitError",
+    "message": "Request failed with status 429",
+    "toString": "RateLimitError: Request failed with status 429"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.429.error_object": {
+   "raised": {
+    "__exception__": "RateLimitError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "RateLimitError",
+     "ratelimitLimit": null,
+     "ratelimitRemaining": null,
+     "ratelimitReset": null,
+     "requestId": null,
+     "statusCode": 429
+    },
+    "chain": [
+     "RateLimitError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "RateLimitError",
+    "message": "Request failed with status 429",
+    "toString": "RateLimitError: Request failed with status 429"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.429.error_object_minimal": {
+   "raised": {
+    "__exception__": "RateLimitError",
+    "attrs": {
+     "body": {
+      "error": {
+       "message": "minimal error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "RateLimitError",
+     "ratelimitLimit": null,
+     "ratelimitRemaining": null,
+     "ratelimitReset": null,
+     "requestId": null,
+     "statusCode": 429
+    },
+    "chain": [
+     "RateLimitError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "RateLimitError",
+    "message": "Request failed with status 429",
+    "toString": "RateLimitError: Request failed with status 429"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.429.headers": {
+   "raised": {
+    "__exception__": "RateLimitError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "RateLimitError",
+     "ratelimitLimit": 10,
+     "ratelimitRemaining": 0,
+     "ratelimitReset": 30,
+     "requestId": "req-err-1",
+     "statusCode": 429
+    },
+    "chain": [
+     "RateLimitError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "RateLimitError",
+    "message": "Request failed with status 429",
+    "toString": "RateLimitError: Request failed with status 429"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.429.non_json": {
+   "raised": {
+    "__exception__": "RateLimitError",
+    "attrs": {
+     "body": {
+      "message": "Unknown error"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "RateLimitError",
+     "ratelimitLimit": null,
+     "ratelimitRemaining": null,
+     "ratelimitReset": null,
+     "requestId": null,
+     "statusCode": 429
+    },
+    "chain": [
+     "RateLimitError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "RateLimitError",
+    "message": "Unknown error",
+    "toString": "RateLimitError: Unknown error"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.429.top_level_message": {
+   "raised": {
+    "__exception__": "RateLimitError",
+    "attrs": {
+     "body": {
+      "code": 7,
+      "message": "top-level message only"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "RateLimitError",
+     "ratelimitLimit": null,
+     "ratelimitRemaining": null,
+     "ratelimitReset": null,
+     "requestId": null,
+     "statusCode": 429
+    },
+    "chain": [
+     "RateLimitError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "RateLimitError",
+    "message": "top-level message only",
+    "toString": "RateLimitError: top-level message only"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.446.empty": {
+   "raised": {
+    "__exception__": "GuardrailBlockedError",
+    "attrs": {
+     "body": {
+      "message": ""
+     },
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "GuardrailBlockedError",
+     "requestId": null,
+     "statusCode": 446
+    },
+    "chain": [
+     "GuardrailBlockedError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "GuardrailBlockedError",
+    "message": "Request blocked by guardrail",
+    "toString": "GuardrailBlockedError: Request blocked by guardrail"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.446.error_object": {
+   "raised": {
+    "__exception__": "GuardrailBlockedError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "GuardrailBlockedError",
+     "requestId": null,
+     "statusCode": 446
+    },
+    "chain": [
+     "GuardrailBlockedError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "GuardrailBlockedError",
+    "message": "Request blocked by guardrail",
+    "toString": "GuardrailBlockedError: Request blocked by guardrail"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.446.error_object_minimal": {
+   "raised": {
+    "__exception__": "GuardrailBlockedError",
+    "attrs": {
+     "body": {
+      "error": {
+       "message": "minimal error"
+      }
+     },
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "GuardrailBlockedError",
+     "requestId": null,
+     "statusCode": 446
+    },
+    "chain": [
+     "GuardrailBlockedError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "GuardrailBlockedError",
+    "message": "Request blocked by guardrail",
+    "toString": "GuardrailBlockedError: Request blocked by guardrail"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.446.headers": {
+   "raised": {
+    "__exception__": "GuardrailBlockedError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "guardrailAction": "block",
+     "guardrailConfidence": 0.97,
+     "guardrailMessage": "PII found",
+     "guardrailName": "pii",
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "GuardrailBlockedError",
+     "requestId": "req-err-1",
+     "statusCode": 446
+    },
+    "chain": [
+     "GuardrailBlockedError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "GuardrailBlockedError",
+    "message": "Request blocked by guardrail",
+    "toString": "GuardrailBlockedError: Request blocked by guardrail"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.446.non_json": {
+   "raised": {
+    "__exception__": "GuardrailBlockedError",
+    "attrs": {
+     "body": {
+      "message": "Unknown error"
+     },
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "GuardrailBlockedError",
+     "requestId": null,
+     "statusCode": 446
+    },
+    "chain": [
+     "GuardrailBlockedError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "GuardrailBlockedError",
+    "message": "Request blocked by guardrail",
+    "toString": "GuardrailBlockedError: Request blocked by guardrail"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.446.top_level_message": {
+   "raised": {
+    "__exception__": "GuardrailBlockedError",
+    "attrs": {
+     "body": {
+      "code": 7,
+      "message": "top-level message only"
+     },
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "GuardrailBlockedError",
+     "requestId": null,
+     "statusCode": 446
+    },
+    "chain": [
+     "GuardrailBlockedError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "GuardrailBlockedError",
+    "message": "Request blocked by guardrail",
+    "toString": "GuardrailBlockedError: Request blocked by guardrail"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.500.empty": {
+   "raised": {
+    "__exception__": "InternalServerError",
+    "attrs": {
+     "body": {
+      "message": ""
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "InternalServerError",
+     "requestId": null,
+     "statusCode": 500
+    },
+    "chain": [
+     "InternalServerError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "InternalServerError",
+    "message": "Request failed with status 500",
+    "toString": "InternalServerError: Request failed with status 500"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.500.error_object": {
+   "raised": {
+    "__exception__": "InternalServerError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "InternalServerError",
+     "requestId": null,
+     "statusCode": 500
+    },
+    "chain": [
+     "InternalServerError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "InternalServerError",
+    "message": "Request failed with status 500",
+    "toString": "InternalServerError: Request failed with status 500"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.500.error_object_minimal": {
+   "raised": {
+    "__exception__": "InternalServerError",
+    "attrs": {
+     "body": {
+      "error": {
+       "message": "minimal error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "InternalServerError",
+     "requestId": null,
+     "statusCode": 500
+    },
+    "chain": [
+     "InternalServerError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "InternalServerError",
+    "message": "Request failed with status 500",
+    "toString": "InternalServerError: Request failed with status 500"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.500.headers": {
+   "raised": {
+    "__exception__": "InternalServerError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "InternalServerError",
+     "requestId": "req-err-1",
+     "statusCode": 500
+    },
+    "chain": [
+     "InternalServerError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "InternalServerError",
+    "message": "Request failed with status 500",
+    "toString": "InternalServerError: Request failed with status 500"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.500.non_json": {
+   "raised": {
+    "__exception__": "InternalServerError",
+    "attrs": {
+     "body": {
+      "message": "Unknown error"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "InternalServerError",
+     "requestId": null,
+     "statusCode": 500
+    },
+    "chain": [
+     "InternalServerError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "InternalServerError",
+    "message": "Unknown error",
+    "toString": "InternalServerError: Unknown error"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.500.top_level_message": {
+   "raised": {
+    "__exception__": "InternalServerError",
+    "attrs": {
+     "body": {
+      "code": 7,
+      "message": "top-level message only"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "InternalServerError",
+     "requestId": null,
+     "statusCode": 500
+    },
+    "chain": [
+     "InternalServerError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "InternalServerError",
+    "message": "top-level message only",
+    "toString": "InternalServerError: top-level message only"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.502.empty": {
+   "raised": {
+    "__exception__": "BadGatewayError",
+    "attrs": {
+     "body": {
+      "message": ""
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "BadGatewayError",
+     "requestId": null,
+     "statusCode": 502
+    },
+    "chain": [
+     "BadGatewayError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "BadGatewayError",
+    "message": "Request failed with status 502",
+    "toString": "BadGatewayError: Request failed with status 502"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.502.error_object": {
+   "raised": {
+    "__exception__": "BadGatewayError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "BadGatewayError",
+     "requestId": null,
+     "statusCode": 502
+    },
+    "chain": [
+     "BadGatewayError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "BadGatewayError",
+    "message": "Request failed with status 502",
+    "toString": "BadGatewayError: Request failed with status 502"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.502.error_object_minimal": {
+   "raised": {
+    "__exception__": "BadGatewayError",
+    "attrs": {
+     "body": {
+      "error": {
+       "message": "minimal error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "BadGatewayError",
+     "requestId": null,
+     "statusCode": 502
+    },
+    "chain": [
+     "BadGatewayError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "BadGatewayError",
+    "message": "Request failed with status 502",
+    "toString": "BadGatewayError: Request failed with status 502"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.502.headers": {
+   "raised": {
+    "__exception__": "BadGatewayError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "BadGatewayError",
+     "requestId": "req-err-1",
+     "statusCode": 502
+    },
+    "chain": [
+     "BadGatewayError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "BadGatewayError",
+    "message": "Request failed with status 502",
+    "toString": "BadGatewayError: Request failed with status 502"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.502.non_json": {
+   "raised": {
+    "__exception__": "BadGatewayError",
+    "attrs": {
+     "body": {
+      "message": "Unknown error"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "BadGatewayError",
+     "requestId": null,
+     "statusCode": 502
+    },
+    "chain": [
+     "BadGatewayError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "BadGatewayError",
+    "message": "Unknown error",
+    "toString": "BadGatewayError: Unknown error"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.502.top_level_message": {
+   "raised": {
+    "__exception__": "BadGatewayError",
+    "attrs": {
+     "body": {
+      "code": 7,
+      "message": "top-level message only"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "BadGatewayError",
+     "requestId": null,
+     "statusCode": 502
+    },
+    "chain": [
+     "BadGatewayError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "BadGatewayError",
+    "message": "top-level message only",
+    "toString": "BadGatewayError: top-level message only"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.503.empty": {
+   "raised": {
+    "__exception__": "ServiceUnavailableError",
+    "attrs": {
+     "body": {
+      "message": ""
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "ServiceUnavailableError",
+     "requestId": null,
+     "statusCode": 503
+    },
+    "chain": [
+     "ServiceUnavailableError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "ServiceUnavailableError",
+    "message": "Request failed with status 503",
+    "toString": "ServiceUnavailableError: Request failed with status 503"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.503.error_object": {
+   "raised": {
+    "__exception__": "ServiceUnavailableError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "ServiceUnavailableError",
+     "requestId": null,
+     "statusCode": 503
+    },
+    "chain": [
+     "ServiceUnavailableError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "ServiceUnavailableError",
+    "message": "Request failed with status 503",
+    "toString": "ServiceUnavailableError: Request failed with status 503"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.503.error_object_minimal": {
+   "raised": {
+    "__exception__": "ServiceUnavailableError",
+    "attrs": {
+     "body": {
+      "error": {
+       "message": "minimal error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "ServiceUnavailableError",
+     "requestId": null,
+     "statusCode": 503
+    },
+    "chain": [
+     "ServiceUnavailableError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "ServiceUnavailableError",
+    "message": "Request failed with status 503",
+    "toString": "ServiceUnavailableError: Request failed with status 503"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.503.headers": {
+   "raised": {
+    "__exception__": "ServiceUnavailableError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "ServiceUnavailableError",
+     "requestId": "req-err-1",
+     "statusCode": 503
+    },
+    "chain": [
+     "ServiceUnavailableError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "ServiceUnavailableError",
+    "message": "Request failed with status 503",
+    "toString": "ServiceUnavailableError: Request failed with status 503"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.503.non_json": {
+   "raised": {
+    "__exception__": "ServiceUnavailableError",
+    "attrs": {
+     "body": {
+      "message": "Unknown error"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "ServiceUnavailableError",
+     "requestId": null,
+     "statusCode": 503
+    },
+    "chain": [
+     "ServiceUnavailableError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "ServiceUnavailableError",
+    "message": "Unknown error",
+    "toString": "ServiceUnavailableError: Unknown error"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.503.top_level_message": {
+   "raised": {
+    "__exception__": "ServiceUnavailableError",
+    "attrs": {
+     "body": {
+      "code": 7,
+      "message": "top-level message only"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "ServiceUnavailableError",
+     "requestId": null,
+     "statusCode": 503
+    },
+    "chain": [
+     "ServiceUnavailableError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "ServiceUnavailableError",
+    "message": "top-level message only",
+    "toString": "ServiceUnavailableError: top-level message only"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.504.empty": {
+   "raised": {
+    "__exception__": "GatewayTimeoutError",
+    "attrs": {
+     "body": {
+      "message": ""
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "GatewayTimeoutError",
+     "requestId": null,
+     "statusCode": 504
+    },
+    "chain": [
+     "GatewayTimeoutError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "GatewayTimeoutError",
+    "message": "Request failed with status 504",
+    "toString": "GatewayTimeoutError: Request failed with status 504"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.504.error_object": {
+   "raised": {
+    "__exception__": "GatewayTimeoutError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "GatewayTimeoutError",
+     "requestId": null,
+     "statusCode": 504
+    },
+    "chain": [
+     "GatewayTimeoutError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "GatewayTimeoutError",
+    "message": "Request failed with status 504",
+    "toString": "GatewayTimeoutError: Request failed with status 504"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.504.error_object_minimal": {
+   "raised": {
+    "__exception__": "GatewayTimeoutError",
+    "attrs": {
+     "body": {
+      "error": {
+       "message": "minimal error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "GatewayTimeoutError",
+     "requestId": null,
+     "statusCode": 504
+    },
+    "chain": [
+     "GatewayTimeoutError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "GatewayTimeoutError",
+    "message": "Request failed with status 504",
+    "toString": "GatewayTimeoutError: Request failed with status 504"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.504.headers": {
+   "raised": {
+    "__exception__": "GatewayTimeoutError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "GatewayTimeoutError",
+     "requestId": "req-err-1",
+     "statusCode": 504
+    },
+    "chain": [
+     "GatewayTimeoutError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "GatewayTimeoutError",
+    "message": "Request failed with status 504",
+    "toString": "GatewayTimeoutError: Request failed with status 504"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.504.non_json": {
+   "raised": {
+    "__exception__": "GatewayTimeoutError",
+    "attrs": {
+     "body": {
+      "message": "Unknown error"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "GatewayTimeoutError",
+     "requestId": null,
+     "statusCode": 504
+    },
+    "chain": [
+     "GatewayTimeoutError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "GatewayTimeoutError",
+    "message": "Unknown error",
+    "toString": "GatewayTimeoutError: Unknown error"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.504.top_level_message": {
+   "raised": {
+    "__exception__": "GatewayTimeoutError",
+    "attrs": {
+     "body": {
+      "code": 7,
+      "message": "top-level message only"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ]
+      ]
+     },
+     "name": "GatewayTimeoutError",
+     "requestId": null,
+     "statusCode": 504
+    },
+    "chain": [
+     "GatewayTimeoutError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "GatewayTimeoutError",
+    "message": "top-level message only",
+    "toString": "GatewayTimeoutError: top-level message only"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.599_unmapped": {
+   "raised": {
+    "__exception__": "APIStatusError",
+    "attrs": {
+     "body": {
+      "message": ""
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "APIStatusError",
+     "requestId": null,
+     "statusCode": 599
+    },
+    "chain": [
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "APIStatusError",
+    "message": "Request failed with status 599",
+    "toString": "APIStatusError: Request failed with status 599"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.embeddings.429": {
+   "raised": {
+    "__exception__": "RateLimitError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "RateLimitError",
+     "ratelimitLimit": 10,
+     "ratelimitRemaining": 0,
+     "ratelimitReset": 30,
+     "requestId": "req-err-1",
+     "statusCode": 429
+    },
+    "chain": [
+     "RateLimitError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "RateLimitError",
+    "message": "Request failed with status 429",
+    "toString": "RateLimitError: Request failed with status 429"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "input": "x",
+      "model": "e"
+     },
+     "method": "POST",
+     "path": "/v1/embeddings",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.speech.500": {
+   "raised": {
+    "__exception__": "InternalServerError",
+    "attrs": {
+     "body": {
+      "message": "Unknown error"
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "text/plain; charset=utf-8"
+       ]
+      ]
+     },
+     "name": "InternalServerError",
+     "requestId": null,
+     "statusCode": 500
+    },
+    "chain": [
+     "InternalServerError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "InternalServerError",
+    "message": "Unknown error",
+    "toString": "InternalServerError: Unknown error"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "input": "x",
+      "model": "tts-1",
+      "voice": "alloy"
+     },
+     "method": "POST",
+     "path": "/v1/audio/speech",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.stream.246": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "error": null,
+    "items": [
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": "block",
+       "guardrailConfidence": 0.97,
+       "guardrailMessage": "PII found",
+       "guardrailName": "pii",
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": {
+        "limit": 10,
+        "remaining": 0,
+        "reset": 30
+       },
+       "requestId": "req-err-1",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+         "content": "Hello from parity",
+         "role": "assistant"
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-parity",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion",
+      "system_fingerprint": "fp_parity",
+      "usage": {
+       "completion_tokens": 3,
+       "prompt_tokens": 5,
+       "total_tokens": 8
+      }
+     }
+    ]
+   }
+  },
+  "status.stream.400": {
+   "raised": {
+    "__exception__": "BadRequestError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "BadRequestError",
+     "requestId": "req-err-1",
+     "statusCode": 400
+    },
+    "chain": [
+     "BadRequestError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "BadRequestError",
+    "message": "Request failed with status 400",
+    "toString": "BadRequestError: Request failed with status 400"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.stream.401": {
+   "raised": {
+    "__exception__": "AuthenticationError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "AuthenticationError",
+     "requestId": "req-err-1",
+     "statusCode": 401
+    },
+    "chain": [
+     "AuthenticationError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "AuthenticationError",
+    "message": "Request failed with status 401",
+    "toString": "AuthenticationError: Request failed with status 401"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.stream.429": {
+   "raised": {
+    "__exception__": "RateLimitError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "RateLimitError",
+     "ratelimitLimit": 10,
+     "ratelimitRemaining": 0,
+     "ratelimitReset": 30,
+     "requestId": "req-err-1",
+     "statusCode": 429
+    },
+    "chain": [
+     "RateLimitError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "RateLimitError",
+    "message": "Request failed with status 429",
+    "toString": "RateLimitError: Request failed with status 429"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.stream.446": {
+   "raised": {
+    "__exception__": "GuardrailBlockedError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "guardrailAction": "block",
+     "guardrailConfidence": 0.97,
+     "guardrailMessage": "PII found",
+     "guardrailName": "pii",
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "GuardrailBlockedError",
+     "requestId": "req-err-1",
+     "statusCode": 446
+    },
+    "chain": [
+     "GuardrailBlockedError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "GuardrailBlockedError",
+    "message": "Request blocked by guardrail",
+    "toString": "GuardrailBlockedError: Request blocked by guardrail"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.stream.500": {
+   "raised": {
+    "__exception__": "InternalServerError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "InternalServerError",
+     "requestId": "req-err-1",
+     "statusCode": 500
+    },
+    "chain": [
+     "InternalServerError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "InternalServerError",
+    "message": "Request failed with status 500",
+    "toString": "InternalServerError: Request failed with status 500"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "status.stream.503": {
+   "raised": {
+    "__exception__": "ServiceUnavailableError",
+    "attrs": {
+     "body": {
+      "error": {
+       "code": "parity_code",
+       "message": "the gateway said no",
+       "param": "model",
+       "type": "invalid_request_error"
+      }
+     },
+     "headers": {
+      "__headers__": [
+       [
+        "content-type",
+        "application/json"
+       ],
+       [
+        "x-agentcc-guardrail-action",
+        "block"
+       ],
+       [
+        "x-agentcc-guardrail-confidence",
+        "0.97"
+       ],
+       [
+        "x-agentcc-guardrail-message",
+        "PII found"
+       ],
+       [
+        "x-agentcc-guardrail-name",
+        "pii"
+       ],
+       [
+        "x-agentcc-request-id",
+        "req-err-1"
+       ],
+       [
+        "x-ratelimit-limit-requests",
+        "10"
+       ],
+       [
+        "x-ratelimit-remaining-requests",
+        "0"
+       ],
+       [
+        "x-ratelimit-reset-requests",
+        "30"
+       ]
+      ]
+     },
+     "name": "ServiceUnavailableError",
+     "requestId": "req-err-1",
+     "statusCode": 503
+    },
+    "chain": [
+     "ServiceUnavailableError",
+     "APIStatusError",
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "ServiceUnavailableError",
+    "message": "Request failed with status 503",
+    "toString": "ServiceUnavailableError: Request failed with status 503"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  }
+ },
+ "format": 1
+}

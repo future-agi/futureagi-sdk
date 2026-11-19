@@ -4,9 +4,13 @@ from __future__ import annotations
 
 from typing import Any
 
+from fi.gateway._agentcc_params import (
+    build_extra_headers,
+    collect_agentcc_params,
+    merge_session_headers,
+)
 from fi.gateway._base_client import RequestOptions
 from fi.gateway._constants import NOT_GIVEN
-from fi.gateway._agentcc_params import build_extra_headers, collect_agentcc_params, merge_session_headers
 from fi.gateway.types.completion import Completion
 
 
@@ -104,27 +108,46 @@ class Completions:
         **kwargs: Any,
     ) -> Completion | Any:
         body = _build_body(
-            model=model, prompt=prompt,
-            max_tokens=max_tokens, temperature=temperature, top_p=top_p,
-            n=n, stream=stream, logprobs=logprobs, echo=echo, stop=stop,
-            presence_penalty=presence_penalty, frequency_penalty=frequency_penalty,
-            best_of=best_of, logit_bias=logit_bias, user=user, seed=seed,
-            suffix=suffix, extra_body=extra_body, **kwargs,
+            model=model,
+            prompt=prompt,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            top_p=top_p,
+            n=n,
+            stream=stream,
+            logprobs=logprobs,
+            echo=echo,
+            stop=stop,
+            presence_penalty=presence_penalty,
+            frequency_penalty=frequency_penalty,
+            best_of=best_of,
+            logit_bias=logit_bias,
+            user=user,
+            seed=seed,
+            suffix=suffix,
+            extra_body=extra_body,
+            **kwargs,
         )
 
         agentcc_params = collect_agentcc_params(
-            session_id=session_id, trace_id=trace_id,
-            request_metadata=request_metadata, request_timeout=request_timeout,
-            cache_ttl=cache_ttl, cache_namespace=cache_namespace,
-            cache_force_refresh=cache_force_refresh, cache_control=cache_control,
+            session_id=session_id,
+            trace_id=trace_id,
+            request_metadata=request_metadata,
+            request_timeout=request_timeout,
+            cache_ttl=cache_ttl,
+            cache_namespace=cache_namespace,
+            cache_force_refresh=cache_force_refresh,
+            cache_control=cache_control,
             guardrail_policy=guardrail_policy,
         )
 
         extra_hdrs = build_extra_headers(
-            extra_headers=extra_headers, properties=properties,
-            user_id=user_id, request_id=request_id,
+            extra_headers=extra_headers,
+            properties=properties,
+            user_id=user_id,
+            request_id=request_id,
         )
-        extra_hdrs = merge_session_headers(self._client, extra_hdrs)
+        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params, defer=True)
 
         from fi.gateway._utils import parse_timeout
 
@@ -137,9 +160,11 @@ class Completions:
         )
 
         if stream is True or (stream is not NOT_GIVEN and stream):
-            return self._client._get_base_client()._open_stream(opts, agentcc_params, Completion)  # text completions, not chat chunks
+            return self._client._get_base_client()._open_stream(opts, agentcc_params, Completion)
 
-        return self._client._get_base_client()._request_with_retry(opts, Completion, agentcc_params)
+        return self._client._get_base_client()._request_with_retry(
+            opts, Completion, agentcc_params
+        )
 
 
 class AsyncCompletions:
@@ -187,27 +212,46 @@ class AsyncCompletions:
         **kwargs: Any,
     ) -> Completion | Any:
         body = _build_body(
-            model=model, prompt=prompt,
-            max_tokens=max_tokens, temperature=temperature, top_p=top_p,
-            n=n, stream=stream, logprobs=logprobs, echo=echo, stop=stop,
-            presence_penalty=presence_penalty, frequency_penalty=frequency_penalty,
-            best_of=best_of, logit_bias=logit_bias, user=user, seed=seed,
-            suffix=suffix, extra_body=extra_body, **kwargs,
+            model=model,
+            prompt=prompt,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            top_p=top_p,
+            n=n,
+            stream=stream,
+            logprobs=logprobs,
+            echo=echo,
+            stop=stop,
+            presence_penalty=presence_penalty,
+            frequency_penalty=frequency_penalty,
+            best_of=best_of,
+            logit_bias=logit_bias,
+            user=user,
+            seed=seed,
+            suffix=suffix,
+            extra_body=extra_body,
+            **kwargs,
         )
 
         agentcc_params = collect_agentcc_params(
-            session_id=session_id, trace_id=trace_id,
-            request_metadata=request_metadata, request_timeout=request_timeout,
-            cache_ttl=cache_ttl, cache_namespace=cache_namespace,
-            cache_force_refresh=cache_force_refresh, cache_control=cache_control,
+            session_id=session_id,
+            trace_id=trace_id,
+            request_metadata=request_metadata,
+            request_timeout=request_timeout,
+            cache_ttl=cache_ttl,
+            cache_namespace=cache_namespace,
+            cache_force_refresh=cache_force_refresh,
+            cache_control=cache_control,
             guardrail_policy=guardrail_policy,
         )
 
         extra_hdrs = build_extra_headers(
-            extra_headers=extra_headers, properties=properties,
-            user_id=user_id, request_id=request_id,
+            extra_headers=extra_headers,
+            properties=properties,
+            user_id=user_id,
+            request_id=request_id,
         )
-        extra_hdrs = merge_session_headers(self._client, extra_hdrs)
+        extra_hdrs = merge_session_headers(self._client, extra_hdrs, agentcc_params, defer=True)
 
         from fi.gateway._utils import parse_timeout
 
@@ -220,9 +264,15 @@ class AsyncCompletions:
         )
 
         if stream is True or (stream is not NOT_GIVEN and stream):
+            base = self._client._get_base_client()
+            if base._expanded_events:
+                return await base._open_stream(opts, agentcc_params, Completion)
+            # Published async streams bypass lifecycle callbacks, including body edits.
             from fi.gateway._streaming import AsyncStream
 
-            response = await self._client._get_base_client()._stream_request(opts, agentcc_params)
+            response = await base._stream_request(opts, agentcc_params)
             return AsyncStream(response, Completion)
 
-        return await self._client._get_base_client()._request_with_retry(opts, Completion, agentcc_params)
+        return await self._client._get_base_client()._request_with_retry(
+            opts, Completion, agentcc_params
+        )

@@ -46,6 +46,7 @@ output/
 **.joblib
 
 **/__pycache__
+**/.ruff_cache/
 
 #Excel files
 *.xlsx
@@ -60,6 +61,28 @@ output/
 
 # node_modules
 node_modules/
+
+# === Python virtualenvs + caches (added by setup) ===
+.venv
+.venv/
+.venv*/
+**/.venv
+**/.venv/
+**/.venv*/
+venv
+venv/
+**/venv
+**/venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+**/.pytest_cache/
+.ruff_cache/
+**/.ruff_cache/
+.mypy_cache/
+**/.mypy_cache/
 
 # Local backend credentials written by sdkgen/local_api_key.py
 .env.local

@@ -1,0 +1,98 @@
+[
+  {
+    "id": "publish-reviewed-policy",
+    "record": "reviewed-release-and-promotion-workflows-2026-11-07",
+    "workflow": ".github/workflows/publish.yml",
+    "blob": "5768525321a738d9b1ccd4f7a7c3761bc767e834",
+    "kind": "reviewed_workflow",
+    "location": "workflow",
+    "value": {
+      "source_sha256": "5eb7e70be2370729ef557bdd2dd8be067a7e47f18941622c2bce5ab4c58b41d1",
+      "diagnostics": [
+        ".github/workflows/publish.yml:workflow.jobs.verify.steps[2].env.GH_TOKEN: credential-named value may not come from an expression",
+        ".github/workflows/publish.yml:workflow.jobs.verify.steps[2].env.GH_TOKEN: explicit token or secret access is forbidden",
+        ".github/workflows/publish.yml:workflow.jobs.python.permissions: write or dynamic permissions are forbidden",
+        ".github/workflows/publish.yml:workflow.jobs.python.steps[4].uses: W2_BLOCKER: action requires a full SHA or a release-version tag",
+        ".github/workflows/publish.yml:workflow.jobs.python.steps[4].uses: unreviewed action or remote reusable workflow: pypa/gh-action-pypi-publish@release/v1",
+        ".github/workflows/publish.yml:workflow.jobs.typescript.permissions: write or dynamic permissions are forbidden",
+        ".github/workflows/publish.yml:workflow.jobs.typescript.steps[5].run: package publication is forbidden",
+        ".github/workflows/publish.yml:workflow.jobs.docs.steps[0].uses: unreviewed action or remote reusable workflow: actions/create-github-app-token@v2",
+        ".github/workflows/publish.yml:workflow.jobs.docs.steps[0].with.app-id: explicit token or secret access is forbidden",
+        ".github/workflows/publish.yml:workflow.jobs.docs.steps[0].with.private-key: explicit token or secret access is forbidden",
+        ".github/workflows/publish.yml:workflow.jobs.docs.steps[1].env.GH_TOKEN: credential-named value may not come from an expression",
+        ".github/workflows/publish.yml:workflow.jobs.docs.steps[1].run: GitHub API mutation is forbidden"
+      ]
+    }
+  },
+  {
+    "id": "release-please-reviewed-policy",
+    "record": "reviewed-release-and-promotion-workflows-2026-11-07",
+    "workflow": ".github/workflows/release-please.yml",
+    "blob": "bd03fe5c7d6a48b91b0570acec35a327d78cb2c4",
+    "kind": "reviewed_workflow",
+    "location": "workflow",
+    "value": {
+      "source_sha256": "0628398b4d0743ff0131bffa8ecd7bf978da2b2a82c9a551c7eb39064784f6ba",
+      "diagnostics": [
+        ".github/workflows/release-please.yml:on: event 'workflow_run' is not a test-only trigger",
+        ".github/workflows/release-please.yml:workflow.jobs.release.permissions: write or dynamic permissions are forbidden",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[2].env.GH_TOKEN: credential-named value may not come from an expression",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[2].env.GH_TOKEN: explicit token or secret access is forbidden",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[3].env.APP_ID: explicit token or secret access is forbidden",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[3].env.APP_KEY: explicit token or secret access is forbidden",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[4].uses: unreviewed action or remote reusable workflow: actions/create-github-app-token@v2",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[4].with.app-id: explicit token or secret access is forbidden",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[4].with.private-key: explicit token or secret access is forbidden",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[5].uses: unreviewed action or remote reusable workflow: googleapis/release-please-action@v4",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[5].uses: release automation is forbidden",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[5].with.token: credential-named value may not come from an expression",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[5].with.config-file: release automation is forbidden",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[5].with.manifest-file: release automation is forbidden",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[6].env.GH_TOKEN: credential-named value may not come from an expression",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[7].env.GH_TOKEN: credential-named value may not come from an expression",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[7].env.GH_TOKEN: explicit token or secret access is forbidden",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[8].env.GH_TOKEN: credential-named value may not come from an expression",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[9].uses: unreviewed action or remote reusable workflow: actions/create-github-app-token@v2",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[9].with.app-id: explicit token or secret access is forbidden",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[9].with.private-key: explicit token or secret access is forbidden",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[10].env.GH_TOKEN: credential-named value may not come from an expression",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[10].run: GitHub API mutation is forbidden",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[11].env.GH_TOKEN: credential-named value may not come from an expression",
+        ".github/workflows/release-please.yml:workflow.jobs.release.steps[11].run: GitHub API mutation is forbidden"
+      ]
+    }
+  },
+  {
+    "id": "promote-reviewed-policy",
+    "record": "reviewed-release-and-promotion-workflows-2026-11-07",
+    "workflow": ".github/workflows/promote.yml",
+    "blob": "4dd63903e8404d464e3039fc9e8532dd9b4db079",
+    "kind": "reviewed_workflow",
+    "location": "workflow",
+    "value": {
+      "source_sha256": "80c28d0190d0202afaa643d965ef429a7febe48289f8e1686b768e8235116fff",
+      "diagnostics": [
+        ".github/workflows/promote.yml:workflow.jobs.promote.steps[0].uses: unreviewed action or remote reusable workflow: actions/create-github-app-token@v2",
+        ".github/workflows/promote.yml:workflow.jobs.promote.steps[0].with.app-id: explicit token or secret access is forbidden",
+        ".github/workflows/promote.yml:workflow.jobs.promote.steps[0].with.private-key: explicit token or secret access is forbidden",
+        ".github/workflows/promote.yml:workflow.jobs.promote.steps[1].env.GH_TOKEN: credential-named value may not come from an expression"
+      ]
+    }
+  },
+  {
+    "id": "pr-title-lint-reviewed-policy",
+    "record": "reviewed-release-and-promotion-workflows-2026-11-07",
+    "workflow": ".github/workflows/pr-title-lint.yml",
+    "blob": "01db2c11caeef450ea14a715c65deb881788735d",
+    "kind": "reviewed_workflow",
+    "location": "workflow",
+    "value": {
+      "source_sha256": "b39ac646de9f1ef60db4a66768d67d266263a99b5c70b7971e66f46ba03e2958",
+      "diagnostics": [
+        ".github/workflows/pr-title-lint.yml:workflow.jobs.lint.if: release automation is forbidden",
+        ".github/workflows/pr-title-lint.yml:workflow.jobs.lint.steps[0].env.GITHUB_TOKEN: credential-named value may not come from an expression",
+        ".github/workflows/pr-title-lint.yml:workflow.jobs.lint.steps[0].env.GITHUB_TOKEN: explicit token or secret access is forbidden"
+      ]
+    }
+  }
+]

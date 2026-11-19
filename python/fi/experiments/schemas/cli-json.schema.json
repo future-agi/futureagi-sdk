@@ -1,0 +1,405 @@
+{
+ "$defs": {
+  "Error": {
+   "additionalProperties": false,
+   "description": "any refusal or failure of either command under --json",
+   "properties": {
+    "error": {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "type": "string"
+      },
+      "exit_code": {
+       "type": "integer"
+      },
+      "extra": {
+       "type": "string"
+      },
+      "message": {
+       "type": "string"
+      },
+      "module": {
+       "pattern": "^[A-Za-z0-9_.]+$",
+       "type": "string"
+      },
+      "python": {
+       "pattern": "^[0-9]+\\.[0-9]+$",
+       "type": "string"
+      },
+      "reason": {
+       "enum": [
+        "python_version",
+        "missing_module"
+       ],
+       "type": "string"
+      },
+      "required_python": {
+       "pattern": "^[0-9]+\\.[0-9]+$",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message",
+      "exit_code"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "error"
+   ],
+   "type": "object"
+  },
+  "EvaluatorSummary": {
+   "additionalProperties": false,
+   "description": "``n``: the scores this evaluator returned (error scores included); ``scored``: those in its numbers. A failed\ntrial has no score of its own: under ``error_policy`` ``zero`` (the default) each of the run's ``failed_trials``\nis 0 and a fail in ``mean`` and ``pass_rate``, and under ``exclude`` it is left out. ``errors``, the evaluator's\nerror scores, are always shown and left out of ``mean`` and ``pass_rate`` under either policy (they count in\n``Summary.error_rate``).",
+   "properties": {
+    "error_policy": {
+     "default": "zero",
+     "enum": [
+      "zero",
+      "exclude"
+     ],
+     "title": "Error Policy",
+     "type": "string"
+    },
+    "errors": {
+     "title": "Errors",
+     "type": "integer"
+    },
+    "failed_trials": {
+     "default": 0,
+     "title": "Failed Trials",
+     "type": "integer"
+    },
+    "mean": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Mean"
+    },
+    "n": {
+     "title": "N",
+     "type": "integer"
+    },
+    "name": {
+     "title": "Name",
+     "type": "string"
+    },
+    "pass_rate": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Pass Rate"
+    },
+    "scored": {
+     "default": 0,
+     "title": "Scored",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "name",
+    "n",
+    "mean",
+    "pass_rate",
+    "errors"
+   ],
+   "title": "EvaluatorSummary",
+   "type": "object"
+  },
+  "GateResult": {
+   "additionalProperties": false,
+   "properties": {
+    "exit_code": {
+     "title": "Exit Code",
+     "type": "integer"
+    },
+    "passed": {
+     "title": "Passed",
+     "type": "boolean"
+    },
+    "reasons": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Reasons",
+     "type": "array"
+    }
+   },
+   "required": [
+    "passed",
+    "reasons",
+    "exit_code"
+   ],
+   "title": "GateResult",
+   "type": "object"
+  },
+  "RunEntry": {
+   "additionalProperties": false,
+   "properties": {
+    "gate": {
+     "$ref": "#/$defs/GateResult"
+    },
+    "journal_dir": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "label": {
+     "type": "string"
+    },
+    "name": {
+     "type": "string"
+    },
+    "run_id": {
+     "type": "string"
+    },
+    "status": {
+     "type": "string"
+    },
+    "summary": {
+     "$ref": "#/$defs/Summary"
+    },
+    "url": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "url_note": {
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "required": [
+    "label",
+    "run_id",
+    "name",
+    "status",
+    "url",
+    "url_note",
+    "journal_dir",
+    "summary",
+    "gate"
+   ],
+   "type": "object"
+  },
+  "RunReport": {
+   "additionalProperties": false,
+   "description": "futureagi-py run --json",
+   "properties": {
+    "exit_code": {
+     "type": "integer"
+    },
+    "runs": {
+     "items": {
+      "$ref": "#/$defs/RunEntry"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "runs",
+    "exit_code"
+   ],
+   "type": "object"
+  },
+  "Summary": {
+   "additionalProperties": false,
+   "properties": {
+    "completed": {
+     "title": "Completed",
+     "type": "integer"
+    },
+    "cost_usd": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "title": "Cost Usd"
+    },
+    "error_policy": {
+     "default": "zero",
+     "enum": [
+      "zero",
+      "exclude"
+     ],
+     "title": "Error Policy",
+     "type": "string"
+    },
+    "error_rate": {
+     "title": "Error Rate",
+     "type": "number"
+    },
+    "error_score_trials": {
+     "default": 0,
+     "title": "Error Score Trials",
+     "type": "integer"
+    },
+    "error_scores": {
+     "default": 0,
+     "title": "Error Scores",
+     "type": "integer"
+    },
+    "errors_by_type": {
+     "additionalProperties": {
+      "type": "integer"
+     },
+     "title": "Errors By Type",
+     "type": "object"
+    },
+    "evaluators": {
+     "additionalProperties": {
+      "$ref": "#/$defs/EvaluatorSummary"
+     },
+     "title": "Evaluators",
+     "type": "object"
+    },
+    "failed": {
+     "title": "Failed",
+     "type": "integer"
+    },
+    "latency_ms": {
+     "additionalProperties": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "title": "Latency Ms",
+     "type": "object"
+    },
+    "skipped": {
+     "title": "Skipped",
+     "type": "integer"
+    },
+    "timeouts": {
+     "title": "Timeouts",
+     "type": "integer"
+    },
+    "tokens": {
+     "additionalProperties": {
+      "type": "integer"
+     },
+     "title": "Tokens",
+     "type": "object"
+    },
+    "trials": {
+     "title": "Trials",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "trials",
+    "completed",
+    "failed",
+    "skipped",
+    "timeouts",
+    "error_rate",
+    "evaluators",
+    "latency_ms",
+    "cost_usd",
+    "tokens",
+    "errors_by_type"
+   ],
+   "title": "Summary",
+   "type": "object"
+  },
+  "UploadReport": {
+   "additionalProperties": false,
+   "description": "futureagi-py upload FILE --json",
+   "properties": {
+    "dataset_id": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "dataset_version_id": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "items": {
+     "minimum": 0,
+     "type": "integer"
+    },
+    "run_id": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "status": {
+     "type": "string"
+    },
+    "summary": {
+     "$ref": "#/$defs/Summary"
+    },
+    "url": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "url_note": {
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "required": [
+    "run_id",
+    "status",
+    "url",
+    "url_note",
+    "dataset_id",
+    "dataset_version_id",
+    "items",
+    "summary"
+   ],
+   "type": "object"
+  }
+ },
+ "$id": "urn:futureagi:cli-json:1",
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "description": "One JSON object on stdout per --json invocation: a run report, an upload report or an error.",
+ "oneOf": [
+  {
+   "$ref": "#/$defs/RunReport"
+  },
+  {
+   "$ref": "#/$defs/UploadReport"
+  },
+  {
+   "$ref": "#/$defs/Error"
+  }
+ ],
+ "title": "futureagi-py run / upload --json output"
+}

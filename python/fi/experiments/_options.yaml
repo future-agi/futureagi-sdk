@@ -1,0 +1,170 @@
+# Every offered this release option of fi.experiments and the futureagi-py CLI → the real e2e rows that must all
+# be GREEN before it ships.
+#
+# Row ids are stable public conformance identifiers; The conformance suite owns their definitions and the truth
+# table (e2e/truth/truth.json). scripts/experiments/release_gate.py fails when any option below has a row
+# that is not GREEN. tests/experiments/unit/test_options.py fails when the public surface and
+# this file disagree (an orphan in either direction) or an option names no row.
+#
+# Keys: "py:NAME" (fi.experiments.NAME), "py:run(PARAM)" (a run()/arun() keyword),
+# "py:evaluators.NAME", "py:log_results(PARAM)", "cli:COMMAND", "cli:COMMAND FLAG".
+#
+# holds: an option held NOT READY whatever its rows say, with why, until the hold is lifted here
+# (release_gate.py lists it as HOLD). Use it only when a row's GREEN is known not to be evidence.
+schema_version: 1
+# The judge rate gate passed at two consecutive SDK snapshots under one gate definition.
+# Every gate run passed at both snapshots. The retained acceptance record covers B1-B24.
+# The public fixture preserves the recorded verdicts and seeded-run counts; the hold stays lifted.
+holds: {}
+options:
+  # ---- Python names ------------------------------------------------------------------------
+  py:run: [experiment.case-01, experiment.case-20, experiment.case-33, experiment.case-49, adapter.case-01, adapter.case-01l]
+  py:arun: [experiment.case-33]
+  py:log_results: [result.case-02]
+  py:from_column: [result.case-03]
+  py:dataset: [experiment.case-05, experiment.case-41, dataset.case-01]  # SDK regression: name= / add_version= (the dataset contract)
+  py:template: [evaluation.case-24]
+  py:param: [experiment.case-18]
+  py:evaluator: [evaluation.case-03, evaluation.case-05]
+  py:failed: [experiment.case-25]
+  py:new_since: [experiment.case-26]
+  py:sample: [experiment.case-22]
+  py:EvalScore: [evaluation.case-03]
+  py:Limits: [experiment.case-27, experiment.case-40]
+  py:Row: [experiment.case-41]
+  py:TaskContext: [experiment.case-10, experiment.case-18]
+  py:ExperimentResult: [result.case-05]
+  py:TrialResult: [result.case-05]
+  py:errors: [errors.case-02, experiment.case-37]
+  py:adapters: [adapter.case-01, adapter.case-02, adapter.case-05, adapter.case-16a, adapter.case-16b]
+  py:evaluators: [evaluation.case-09, evaluation.case-10]
+  py:evaluators.tool_called: [evaluation.case-09, evaluation.case-20]
+  py:evaluators.tool_order: [evaluation.case-09]
+  py:evaluators.judge: [evaluation.case-10]
+  py:evaluators.evaluator: [evaluation.case-03]
+  py:evaluators.Evaluator: [evaluation.case-03]
+  py:evaluators.EvalContext: [evaluation.case-03]
+  py:evaluators.FunctionEvaluator: [evaluation.case-03]
+  # ---- run() / arun() keywords ---------------------------------------------------------------
+  py:run(dataset): [experiment.case-01, experiment.case-02, experiment.case-03, experiment.case-04, experiment.case-42, experiment.case-52]
+  py:run(task): [experiment.case-43, adapter.case-01, adapter.case-02, adapter.case-05, adapter.case-16a, adapter.case-16b]
+  py:run(evaluators): [evaluation.case-01a, evaluation.case-03, evaluation.case-25]
+  py:run(trials): [experiment.case-08]
+  py:run(concurrency): [experiment.case-09]
+  py:run(limit): [experiment.case-21]
+  py:run(timeout_s): [experiment.case-10, experiment.case-11]
+  py:run(max_cost_usd): [experiment.case-13, experiment.case-15]
+  py:run(judge_model): [evaluation.case-01a]
+  py:run(params): [experiment.case-17]
+  py:run(name): [experiment.case-28]
+  py:run(upload): [experiment.case-20, command.case-13]
+  py:run(rows): [experiment.case-22, experiment.case-23, experiment.case-25, experiment.case-26]
+  py:run(version): [experiment.case-06]
+  py:run(experiment): [experiment.case-28]
+  py:run(description): [experiment.case-28]
+  py:run(metadata): [experiment.case-28]
+  py:run(project): [experiment.case-29]
+  py:run(limits): [experiment.case-27, experiment.case-40]
+  py:run(trace): [tracing.case-01, tracing.case-04, tracing.case-05]
+  py:run(instrument): [tracing.case-06, tracing.case-13l]  # tracing regression: a broken add-on named in the list is refused (the fail-closed contract)
+  py:run(resume): [experiment.case-24, experiment.case-34]
+  py:run(client): [experiment.case-31]
+  py:run(progress): [experiment.case-32]
+  py:run(error_policy): [experiment.case-58]  # zero (default: a failed trial is 0, a fail) | exclude; error scores left out
+  py:log_results(dataset): [result.case-02]
+  py:log_results(results): [result.case-02, command.case-22]
+  py:log_results(evaluators): [result.case-02]
+  py:log_results(name): [result.case-02]
+  py:log_results(description): [result.case-02]
+  py:log_results(metadata): [result.case-02]
+  py:log_results(experiment): [result.case-02]
+  py:log_results(version): [result.case-02, experiment.case-06]
+  py:log_results(judge_model): [result.case-02, evaluation.case-01a]
+  py:log_results(params): [result.case-02]
+  py:log_results(client): [result.case-02, experiment.case-31]
+  py:log_results(progress): [result.case-02, experiment.case-32]
+  py:log_results(resume): [result.case-02, experiment.case-24]
+  # ---- CLI commands --------------------------------------------------------------------------
+  cli:run: [command.case-04, command.case-37, command.case-46, command.case-48]
+  cli:upload: [command.case-22]
+  cli:login: [command.case-01]
+  cli:logout: [command.case-02]
+  cli:doctor: [command.case-03, tracing.case-13l]  # tracing regression: a broken tracing add-on is reported BROKEN (the fail-closed contract)
+  # ---- futureagi-py run: everyday flags -------------------------------------------------------------
+  cli:run TARGET: [command.case-04, command.case-46]
+  cli:run --dataset: [command.case-05, experiment.case-01, experiment.case-04]
+  cli:run --eval: [command.case-06, evaluation.case-01a, evaluation.case-24]
+  cli:run --judge-model: [command.case-06, evaluation.case-01a]
+  cli:run --trials: [command.case-08, experiment.case-08]
+  cli:run --concurrency: [command.case-08, experiment.case-09]
+  cli:run --limit: [command.case-05, experiment.case-21]
+  cli:run --timeout-s: [command.case-08, experiment.case-10]
+  cli:run --max-cost-usd: [command.case-08, experiment.case-13]
+  cli:run --param: [command.case-42, experiment.case-17]
+  cli:run --model: [command.case-42]
+  cli:run --name: [command.case-07]
+  cli:run --no-upload: [command.case-13]
+  cli:run --fail-under: [command.case-15]
+  cli:run --help-all: [command.case-48]
+  # ---- futureagi-py run: --help-all flags ----------------------------------------------------------
+  cli:run --version: [command.case-05, experiment.case-06]
+  cli:run --input-column: [command.case-05, experiment.case-41]
+  cli:run --dataset-name: [dataset.case-01]
+  cli:run --add-version: [dataset.case-01]
+  cli:run --expected-column: [command.case-05, experiment.case-41]
+  cli:run --rows: [command.case-05, experiment.case-22, experiment.case-23, experiment.case-25, experiment.case-26]
+  cli:run --seed: [command.case-05, experiment.case-22]
+  cli:run --from-column: [command.case-05, result.case-03]
+  cli:run --eval-map: [command.case-06, evaluation.case-25]
+  cli:run --pass-label: [command.case-06]
+  cli:run --description: [command.case-07]
+  cli:run --metadata: [command.case-07]
+  cli:run --experiment: [command.case-07, experiment.case-28]
+  cli:run --project: [command.case-07, experiment.case-29]
+  cli:run --retries: [command.case-08, experiment.case-27]
+  cli:run --fail-fast: [command.case-08, experiment.case-39]
+  cli:run --price: [command.case-08, experiment.case-13]
+  cli:run --param-str: [command.case-42]
+  cli:run --no-trace: [command.case-12, tracing.case-05]
+  cli:run --instrument: [command.case-12, tracing.case-06, tracing.case-13l]
+  cli:run --json: [command.case-17]
+  cli:run --max-error-rate: [command.case-29, command.case-36]
+  cli:run --error-policy: [command.case-50]  # zero|exclude: the product's names and scope, for failed trials (results.py)
+  cli:run --resume: [command.case-14, experiment.case-24]
+  cli:run --list: [command.case-37]
+  cli:run --filter: [command.case-37]
+  cli:run --quiet: [command.case-17, experiment.case-32]
+  cli:run --verbose: [command.case-17]
+  cli:run --env-file: [command.case-21, command.case-38]
+  cli:run --no-env-file: [command.case-21]
+  # ---- futureagi-py upload ----------------------------------------------------------------------------
+  cli:upload FILE: [command.case-22]
+  cli:upload --dataset: [command.case-22]
+  cli:upload --version: [command.case-22, experiment.case-06]
+  cli:upload --dataset-name: [dataset.case-01]
+  cli:upload --add-version: [dataset.case-01]
+  cli:upload --eval: [command.case-22, evaluation.case-01a]
+  cli:upload --eval-map: [command.case-22, evaluation.case-25]
+  cli:upload --pass-label: [command.case-22]
+  cli:upload --judge-model: [command.case-22, evaluation.case-01a]
+  cli:upload --name: [command.case-22]
+  cli:upload --description: [command.case-22]
+  cli:upload --metadata: [command.case-22]
+  cli:upload --experiment: [command.case-22, experiment.case-28]
+  cli:upload --resume: [command.case-22, command.case-14]
+  cli:upload --json: [command.case-22]  # command.case-17 runs no upload (CLI regression coverage); the schema is checked in unit tests
+  cli:upload --quiet: [command.case-22]
+  cli:upload --env-file: [command.case-22, command.case-21]
+  cli:upload --no-env-file: [command.case-22, command.case-21]
+  # ---- futureagi-py login / logout / doctor (the shared core; listed here because the experiments
+  # quickstart prints them) ----------------------------------------------------------------------
+  cli:login --base-url: [command.case-01]
+  cli:login --platform-base-url: [command.case-01]
+  cli:login --workspace-id: [command.case-01]
+  cli:login --from-env: [command.case-01]
+  cli:login --no-verify: [command.case-01]
+  cli:doctor --json: [command.case-03]
+  cli:doctor --offline: [command.case-03]
+  cli:doctor --dataset: [command.case-03]
+  cli:doctor --judge-model: [command.case-03]
+  cli:doctor TARGET: [command.case-03]

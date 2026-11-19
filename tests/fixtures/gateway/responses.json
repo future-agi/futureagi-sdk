@@ -1,0 +1,97 @@
+{
+ "about": "Canned gateway answers shared by the Python and TypeScript parity recorders. OpenAI-shaped bodies as agentcc-gateway returns them on /v1/*, plus the full set of response headers an SDK may read. Values are fixed so a recording is repeatable; no value is a credential.",
+ "bodies": {
+  "chat_completion": {"id": "chatcmpl-parity", "object": "chat.completion", "created": 1761177600, "model": "gpt-4o-mini", "system_fingerprint": "fp_parity", "choices": [{"index": 0, "message": {"role": "assistant", "content": "Hello from parity"}, "finish_reason": "stop", "logprobs": null}], "usage": {"prompt_tokens": 5, "completion_tokens": 3, "total_tokens": 8}},
+  "chat_completion_tools": {"id": "chatcmpl-tools", "object": "chat.completion", "created": 1761177600, "model": "gpt-4o-mini", "choices": [{"index": 0, "message": {"role": "assistant", "content": null, "tool_calls": [{"id": "call_1", "type": "function", "function": {"name": "get_weather", "arguments": "{\"city\":\"Paris\"}"}}]}, "finish_reason": "tool_calls"}], "usage": {"prompt_tokens": 12, "completion_tokens": 7, "total_tokens": 19}},
+  "chat_completion_json": {"id": "chatcmpl-json", "object": "chat.completion", "created": 1761177600, "model": "gpt-4o-mini", "choices": [{"index": 0, "message": {"role": "assistant", "content": "{\"name\":\"Ada\",\"age\":36}"}, "finish_reason": "stop"}], "usage": {"prompt_tokens": 9, "completion_tokens": 8, "total_tokens": 17}},
+  "chat_completion_json_bad": {"id": "chatcmpl-json-bad", "object": "chat.completion", "created": 1761177600, "model": "gpt-4o-mini", "choices": [{"index": 0, "message": {"role": "assistant", "content": "{\"name\":7}"}, "finish_reason": "stop"}], "usage": {"prompt_tokens": 9, "completion_tokens": 4, "total_tokens": 13}},
+  "completion": {"id": "cmpl-parity", "object": "text_completion", "created": 1761177600, "model": "gpt-3.5-turbo-instruct", "choices": [{"index": 0, "text": " world", "finish_reason": "stop", "logprobs": null}], "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}},
+  "embedding": {"object": "list", "data": [{"object": "embedding", "index": 0, "embedding": [0.25, -0.5, 0.125]}], "model": "text-embedding-3-small", "usage": {"prompt_tokens": 2, "total_tokens": 2}},
+  "embedding_completion_tokens": {"object": "list", "data": [{"object": "embedding", "index": 0, "embedding": [0.25, -0.5, 0.125]}], "model": "text-embedding-3-small", "usage": {"prompt_tokens": 2, "completion_tokens": 0, "total_tokens": 2}},
+  "image": {"created": 1761177600, "data": [{"url": "https://images.example.test/cat.png", "revised_prompt": "a small cat"}]},
+  "transcription": {"text": "hello world"},
+  "translation": {"text": "hello"},
+  "speech_bytes": "ID3-parity-audio-bytes",
+  "models_list": {"object": "list", "data": [{"id": "gpt-4o-mini", "object": "model", "created": 1761177600, "owned_by": "openai"}, {"id": "claude-3-5-haiku", "object": "model", "created": 1761177600, "owned_by": "anthropic"}]},
+  "model": {"id": "gpt-4o-mini", "object": "model", "created": 1761177600, "owned_by": "openai"},
+  "file_object": {"id": "file-parity", "object": "file", "bytes": 12, "created_at": 1761177600, "filename": "data.jsonl", "purpose": "batch", "status": "processed"},
+  "file_list": {"object": "list", "data": [{"id": "file-parity", "object": "file", "bytes": 12, "created_at": 1761177600, "filename": "data.jsonl", "purpose": "batch", "status": "processed"}]},
+  "file_deleted": {"id": "file-parity", "object": "file", "deleted": true},
+  "file_content": "{\"custom_id\":\"1\"}\n",
+  "rerank": {"id": "rerank-parity", "model": "rerank-v1", "results": [{"index": 1, "relevance_score": 0.9, "document": {"text": "beta"}}, {"index": 0, "relevance_score": 0.1, "document": {"text": "alpha"}}], "usage": {"total_tokens": 10}},
+  "rerank_document_strings": {"id": "rerank-strings", "model": "rerank-v1", "results": [{"index": 1, "relevance_score": 0.9, "document": "beta"}, {"index": 0, "relevance_score": 0.1}], "usage": {"total_tokens": 10}},
+  "response_object": {"id": "resp_parity", "object": "response", "created_at": 1761177600, "model": "gpt-4o-mini", "status": "completed", "output": [{"type": "message", "id": "msg_parity", "role": "assistant", "status": "completed", "content": [{"type": "output_text", "text": "Hi there", "annotations": []}]}], "usage": {"input_tokens": 3, "output_tokens": 2, "total_tokens": 5}},
+  "batch": {"batch_id": "batch-parity", "status": "completed", "total": 2, "max_concurrency": 2, "created_at": "2025-10-23T00:00:00Z", "completed_at": "2025-10-23T00:00:05Z", "results": [{"index": 0, "status": "ok"}, {"index": 1, "status": "ok"}], "summary": {"succeeded": 2, "failed": 0}},
+  "batch_running": {"batch_id": "batch-parity", "status": "running", "total": 2, "max_concurrency": 2, "created_at": "2025-10-23T00:00:00Z"},
+  "moderation": {"id": "modr-parity", "model": "omni-moderation-latest", "results": [{"flagged": false, "categories": {"violence": false}, "category_scores": {"violence": 0.01}}]},
+  "health": {"status": "ok"}
+ },
+ "chunks": {
+  "content": [
+   "{\"id\":\"chatcmpl-stream\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hel\"},\"finish_reason\":null}]}",
+   "{\"id\":\"chatcmpl-stream\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"lo\"},\"finish_reason\":null}]}",
+   "{\"id\":\"chatcmpl-stream\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}",
+   "{\"id\":\"chatcmpl-stream\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[],\"usage\":{\"prompt_tokens\":4,\"completion_tokens\":2,\"total_tokens\":6}}",
+   "[DONE]"
+  ],
+  "tool_calls": [
+   "{\"id\":\"chatcmpl-tool\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"tool_calls\":[{\"index\":0,\"id\":\"call_1\",\"type\":\"function\",\"function\":{\"name\":\"get_weather\",\"arguments\":\"\"}}]},\"finish_reason\":null}]}",
+   "{\"id\":\"chatcmpl-tool\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\"{\\\"city\\\":\"}}]},\"finish_reason\":null}]}",
+   "{\"id\":\"chatcmpl-tool\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\"\\\"Paris\\\"}\"}}]},\"finish_reason\":\"tool_calls\"}]}",
+   "{\"id\":\"chatcmpl-tool\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[],\"usage\":{\"prompt_tokens\":12,\"completion_tokens\":7,\"total_tokens\":19}}",
+   "[DONE]"
+  ],
+  "completion": [
+   "{\"id\":\"cmpl-stream\",\"object\":\"text_completion\",\"created\":1761177600,\"model\":\"gpt-3.5-turbo-instruct\",\"choices\":[{\"index\":0,\"text\":\" wor\",\"finish_reason\":null}]}",
+   "{\"id\":\"cmpl-stream\",\"object\":\"text_completion\",\"created\":1761177600,\"model\":\"gpt-3.5-turbo-instruct\",\"choices\":[{\"index\":0,\"text\":\"ld\",\"finish_reason\":\"stop\"}]}",
+   "[DONE]"
+  ]
+ },
+ "response_headers": {
+  "all": {
+   "x-agentcc-request-id": "req-parity-1",
+   "x-agentcc-trace-id": "trace-parity-1",
+   "x-agentcc-provider": "openai",
+   "x-agentcc-latency-ms": "123",
+   "x-agentcc-cost": "0.00042",
+   "x-agentcc-cache": "miss",
+   "x-agentcc-model-used": "gpt-4o-mini-2024-07-18",
+   "x-agentcc-guardrail-triggered": "true",
+   "x-agentcc-guardrails-triggered": "pii,toxicity",
+   "x-agentcc-guardrail-name": "pii",
+   "x-agentcc-guardrail-action": "warn",
+   "x-agentcc-guardrail-confidence": "0.87",
+   "x-agentcc-guardrail-message": "PII detected",
+   "x-agentcc-fallback-used": "true",
+   "x-agentcc-routing-strategy": "cost-optimized",
+   "x-agentcc-timeout-ms": "30000",
+   "x-agentcc-config-ignored": "fallback,loadbalance",
+   "x-agentcc-client-request-id": "client-req-7",
+   "x-ratelimit-limit-requests": "100",
+   "x-ratelimit-remaining-requests": "99",
+   "x-ratelimit-reset-requests": "60",
+   "x-ratelimit-limit-tokens": "10000",
+   "x-ratelimit-remaining-tokens": "9990",
+   "x-ratelimit-reset-tokens": "6"
+  },
+  "malformed": {
+   "x-agentcc-latency-ms": "fast",
+   "x-agentcc-cost": "free",
+   "x-agentcc-guardrail-triggered": "TRUE",
+   "x-agentcc-fallback-used": "yes",
+   "x-agentcc-timeout-ms": "1.5",
+   "x-agentcc-guardrail-confidence": "high",
+   "x-ratelimit-limit-requests": "lots",
+   "x-ratelimit-remaining-requests": "-1",
+   "x-ratelimit-reset-requests": "1m30s"
+  }
+ },
+ "error_envelopes": {
+  "error_object": {"error": {"message": "the gateway said no", "type": "invalid_request_error", "param": "model", "code": "parity_code"}},
+  "error_object_minimal": {"error": {"message": "minimal error"}},
+  "top_level_message": {"message": "top-level message only", "code": 7},
+  "non_json": "upstream exploded <html>",
+  "empty": ""
+ },
+ "statuses": [246, 400, 401, 403, 404, 408, 413, 422, 429, 446, 500, 502, 503, 504]
+}

@@ -64,7 +64,6 @@ export FI_SECRET_KEY="your_secret"
 - **🎨 Prompt Workbench** — Version control, A/B testing, and deployment labels for prompts
 - **📚 Knowledge Base** — Document management and retrieval for RAG applications
 - **📈 Analytics** — Model performance, token costs, and behavior insights
-- **🤖 Simulate** — Test your AI system against realistic scenarios before users hit it
 - **🔍 Observability** — OpenTelemetry-native tracing across 50+ frameworks
 
 
@@ -84,7 +83,9 @@ npm install @future-agi/sdk
 pnpm add @future-agi/sdk
 ```
 
-**Requirements:** Python >= 3.10 | Node.js >= 14
+**Requirements:** Python >= 3.10 | Node.js >= 18
+
+**Gateway client:** `fi.gateway` and `@future-agi/sdk/gateway` ship in these packages as the agentcc 1.0 and `@agentcc/client` 1.0 clients ported under the same class names (with some intended behaviour changes), so use them in code that already depends on the SDK and keep the standalone `agentcc` / `@agentcc/client` packages only for helpers that were not ported, such as the budget, batch and token utilities.
 
 ---
 

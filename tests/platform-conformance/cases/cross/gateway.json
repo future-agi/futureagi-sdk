@@ -1,0 +1,203 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "cross",
+  "about": "Gateway refusals that need no SDK credential, run through the gateway with no credential.",
+  "cases": [
+    {
+      "id": "gateway.anonymous.list-sandboxes",
+      "title": "No credential: the gateway answers a typed 401",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "anonymous"
+      },
+      "modes": [
+        "none"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "expect": {
+        "status": 401,
+        "errorClass": "AuthenticationError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "gateway.anonymous.create-run",
+      "title": "No credential on a model-start route: a typed 401, nothing started",
+      "sdk": {
+        "family": "runs",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "anonymous"
+      },
+      "modes": [
+        "none"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "body": {
+          "input": "x"
+        }
+      },
+      "expect": {
+        "status": 401,
+        "errorClass": "AuthenticationError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "gateway.anonymous.capabilities",
+      "title": "No credential: capabilities are not readable either",
+      "sdk": {
+        "family": "platform",
+        "method": "capabilities.get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/capabilities"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "anonymous"
+      },
+      "modes": [
+        "none"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "expect": {
+        "status": 401,
+        "errorClass": "AuthenticationError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "gateway.anonymous.forged-tenant-headers",
+      "title": "Tenant headers without a credential choose nothing: 401",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "anonymous"
+      },
+      "modes": [
+        "none"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "headers": {
+          "x-omega-org": "org-forged",
+          "x-omega-workspace": "ws-forged",
+          "x-organization-id": "00000000-0000-0000-0000-000000000000",
+          "x-workspace-id": "00000000-0000-0000-0000-000000000000"
+        }
+      },
+      "expect": {
+        "status": 401,
+        "errorClass": "AuthenticationError"
+      }
+    },
+    {
+      "id": "gateway.credential-in-query",
+      "title": "A credential in the query string is refused with a typed 400",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "anonymous"
+      },
+      "modes": [
+        "none"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "query": {
+          "api_key": "conf-not-a-key"
+        }
+      },
+      "expect": {
+        "status": [
+          400,
+          401
+        ],
+        "codePresent": true
+      }
+    },
+    {
+      "id": "gateway.mixed-credentials",
+      "title": "A bearer token and a key pair together are refused (401 mixed_credentials)",
+      "sdk": {
+        "family": "sandboxes",
+        "method": "list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/sandboxes"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "anonymous"
+      },
+      "modes": [
+        "none"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "headers": {
+          "authorization": "Bearer conf-not-a-token",
+          "x-api-key": "conf-not-a-key",
+          "x-secret-key": "conf-not-a-secret"
+        }
+      },
+      "expect": {
+        "status": [
+          401,
+          400
+        ],
+        "codePresent": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,249 @@
+"""Asynchronous HTTP transport with retry (httpx.AsyncClient)."""
+
+from __future__ import annotations
+
+import json
+from collections.abc import Awaitable, Callable
+from typing import Any
+
+import anyio
+import httpx
+
+from fi.gateway._constants import (
+    DEFAULT_KEEPALIVE_CONNECTIONS,
+    DEFAULT_KEEPALIVE_EXPIRY,
+    DEFAULT_MAX_CONNECTIONS,
+)
+from fi.gateway._exceptions import APIConnectionError, APIStatusError
+from fi.gateway._gateway_evidence import capture_gateway_evidence
+from fi.gateway._http_security import validate_destination
+from fi.gateway._transport._response import (
+    ResponseCapture, body_decode_error, aclose_response, safe_response, protect_stream_cleanup,
+)
+from fi.gateway._transport._scrub import (
+    bind_stream_scrubber, composed_credential_values, scrub_reachable, scrub_sent_request,
+)
+from fi.gateway._transport._base import (
+    BaseClient,
+    RequestOptions,
+    T,
+    _transport_error,
+)
+
+
+class AsyncBaseClient(BaseClient):
+    """Asynchronous HTTP transport with retry."""
+
+    def _ensure_client(self) -> httpx.AsyncClient:
+        """The pool's httpx client, built on first use (shared with ``with_options()`` copies)."""
+        client: httpx.AsyncClient = self._pool.get(self._new_http_client)
+        return client
+
+    def _new_http_client(self) -> httpx.AsyncClient:
+        return httpx.AsyncClient(
+            timeout=self._timeout,
+            limits=httpx.Limits(
+                max_connections=DEFAULT_MAX_CONNECTIONS,
+                max_keepalive_connections=DEFAULT_KEEPALIVE_CONNECTIONS,
+                keepalive_expiry=DEFAULT_KEEPALIVE_EXPIRY,
+            ),
+        )
+
+    async def _send(
+        self, options: RequestOptions, agentcc_params: dict[str, Any] | None
+    ) -> httpx.Response:
+        """Send and consume one attempt, including its completion-warning body."""
+        response = await self._send_response(options, agentcc_params, streaming=False)
+        self._remember_callback_response(options, response)
+        return response
+
+    async def _send_response(
+        self, options: RequestOptions, agentcc_params: Any, *, streaming: bool,
+    ) -> httpx.Response:
+        arguments, composed_names = self._request_arguments(options, agentcc_params, stream=streaming)
+        if streaming:
+            # Late error graphs retain names only, never the client's key state.
+            options._stream_composed_names = composed_names
+        credentials = composed_credential_values(arguments["headers"], composed_names)
+        timeout = options.timeout or self._timeout
+        client = self._ensure_client()
+        capture = ResponseCapture()
+        failure = None
+        request = response = error = None
+        try:
+            with capture.client(client, asynchronous=True) as sender:
+                try:
+                    if streaming:
+                        request = sender.build_request(**arguments, timeout=timeout)
+                        validate_destination(self._base_url, str(request.url), warn_cleartext=False)
+                        response = await sender.send(request, stream=True, follow_redirects=False)
+                    else:
+                        # Preserve the caller's request() override without building
+                        # or consuming an upload twice. Capture still observes each
+                        # actual exchange before response hooks and body readers.
+                        url = httpx.URL(arguments["url"], params=client.params or None)
+                        validate_destination(self._base_url, str(url), warn_cleartext=False)
+                        response = await sender.request(**arguments, timeout=timeout, follow_redirects=False)
+                except BaseException as exc:
+                    error = exc
+                    raise
+                finally:
+                    scrub_sent_request(request, response, error, composed_names)
+                    capture.scrub(composed_names)
+            capture.capture(response)
+            if not streaming or response.status_code == 246 or response.status_code >= 400:
+                await response.aread()
+        except httpx.TransportError as exc:
+            failure = _transport_error(exc, capture.evidence, capture.status, capture.response,
+                                       credential_values=credentials)
+        except (httpx.RequestError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            if capture.response is not None and capture.status is not None and capture.status >= 400:
+                failure = APIStatusError.from_response(safe_response(capture.response))
+            else:
+                failure = body_decode_error(exc, capture.evidence)
+        finally:
+            if error is not None or failure is not None or not streaming or (capture.status is not None and (
+                capture.status == 246 or capture.status >= 400
+            )):
+                await aclose_response(capture.response)
+            scrub_reachable((response, error, failure, capture.response), composed_names)
+        if failure is not None:
+            # Transport causes retain their original, already-scrubbed requests.
+            raise failure
+        self._check_status(response)
+        if streaming:
+            bind_stream_scrubber(response, credentials, composed_names)
+        return response
+
+    async def _request(
+        self,
+        options: RequestOptions,
+        response_cls: type[T],
+        agentcc_params: dict[str, Any] | None = None,
+    ) -> T:
+        """Execute a single HTTP request and return the parsed response."""
+        response = await self._send(options, agentcc_params)
+        return self._process_response_body(response, response_cls)
+
+    async def _request_raw(
+        self,
+        options: RequestOptions,
+        agentcc_params: dict[str, Any] | None = None,
+    ) -> bytes:
+        """Execute a single HTTP request and return the raw response bytes."""
+        response = await self._send(options, agentcc_params)
+        self._record_header_cost(response)
+        return response.content
+
+    async def _retrying(
+        self, options: RequestOptions, attempt_once: Callable[[], Awaitable[T]]
+    ) -> T:
+        """Run *attempt_once* under the retry policy, firing the request callbacks."""
+        max_retries = (
+            options.max_retries
+            if options.max_retries is not None
+            else self._max_retries
+        )
+        loop_max = self._retry_loop_bound(max_retries)
+        last_exc: Exception | None = None
+        in_flight_replayed = False
+
+        self._dispatch_callback("on_request_start", options)
+
+        for attempt in range(loop_max + 1):
+            try:
+                result = await attempt_once()
+                self._dispatch_callback("on_request_end", options, result)
+                return result
+            except (APIStatusError, APIConnectionError) as exc:
+                last_exc = exc
+                if in_flight_replayed:
+                    # The one credit replay exhausts this request, even if the
+                    # next failure is a different status, connection or timeout.
+                    self._dispatch_callback("on_error", options, exc)
+                    raise
+                delay = self._retry_delay(options, exc, attempt, max_retries)
+                if delay is None:
+                    raise
+                in_flight_replayed = isinstance(exc, APIStatusError) and exc.status_code == 402
+                await anyio.sleep(delay)
+            except Exception as exc:
+                self._dispatch_callback("on_error", options, exc)
+                raise
+
+        # Unreachable while every limit is at most the loop bound; kept as a guard.
+        if last_exc is not None:
+            self._dispatch_callback("on_error", options, last_exc)
+            raise last_exc
+        raise RuntimeError("Retry loop exited unexpectedly")  # pragma: no cover
+
+    async def _request_with_retry(
+        self,
+        options: RequestOptions,
+        response_cls: type[T],
+        agentcc_params: dict[str, Any] | None = None,
+    ) -> T:
+        """Execute a request with retry logic."""
+        self._bind_request(options, agentcc_params)
+        return await self._retrying(
+            options, lambda: self._request(options, response_cls, agentcc_params)
+        )
+
+    async def _request_raw_with_retry(
+        self,
+        options: RequestOptions,
+        agentcc_params: dict[str, Any] | None = None,
+    ) -> bytes:
+        """Execute a raw-bytes request with retry logic."""
+        self._bind_request(options, agentcc_params)
+        return await self._retrying(
+            options, lambda: self._request_raw(options, agentcc_params)
+        )
+
+    async def _stream_request(
+        self,
+        options: RequestOptions,
+        agentcc_params: dict[str, Any] | None = None,
+    ) -> httpx.Response:
+        """Execute a streaming request and return the raw response."""
+        response = await self._send_response(options, agentcc_params, streaming=True)
+        self._record_header_cost(response)
+        return response
+
+    async def _open_stream(self, options: RequestOptions, agentcc_params: Any, chunk_cls: Any) -> Any:
+        from fi.gateway._streaming import AsyncStream, AsyncResponseStream
+        from fi.gateway.callbacks.base import StreamInfo
+        from fi.gateway.types.responses import ResponseStreamEvent
+
+        self._bind_request(options, agentcc_params)
+        self._dispatch_callback("on_request_start", options)
+        response = None
+        failure = None
+        try:
+            response = await self._stream_request(options, agentcc_params)
+            protect_stream_cleanup(response)
+            on_chunk, on_finish = self._stream_hooks(options, response)
+            if chunk_cls is ResponseStreamEvent:
+                stream = AsyncResponseStream(response, on_chunk=on_chunk, on_finish=on_finish)
+            else:
+                stream = AsyncStream(response, chunk_cls, on_chunk=on_chunk, on_finish=on_finish)
+            stream._composed_names = options._stream_composed_names
+        except httpx.TransportError as exc:
+            failure = _transport_error(exc, capture_gateway_evidence(response),
+                                       response.status_code if response is not None else None, response)
+        except (httpx.RequestError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            failure = (body_decode_error(exc, capture_gateway_evidence(response))
+                       if response is not None else exc)
+        except Exception as exc:
+            failure = exc
+        if failure is not None:
+            await aclose_response(response)
+            scrub_reachable((failure,), getattr(options, "_stream_composed_names", frozenset()))
+            self._dispatch_callback("on_error", options, failure)
+            raise failure
+        self._dispatch_callback("on_stream_start", options, StreamInfo(agentcc=stream.agentcc))
+        return stream
+
+    async def aclose(self) -> None:
+        """Close the pool's async HTTP client, unless it was passed as ``http_client``."""
+        await self._pool.aclose()

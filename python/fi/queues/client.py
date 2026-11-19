@@ -1,13 +1,25 @@
 import re
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Union
+from uuid import UUID
 
 from requests import Response
 
+from fi._queue_create import (
+    QUEUE_CLIENT_DEFAULT_QUEUE_CALL,
+    OMITTED_LABEL_IDS,
+    default_label_ids,
+    default_queue_body,
+    drop_ignored_on_create,
+    id_list,
+    label_id_list,
+    require_on_create,
+)
 from fi.api.auth import APIKeyAuth, ResponseHandler
 from fi.api.types import HttpMethod, RequestConfig
 from fi.annotations.types import AnnotationLabel
 from fi.queues.types import (
     AddItemsResponse,
+    DefaultQueue,
     ExportToDatasetResponse,
     ImportAnnotationsResponse,
     QueueAgreement,
@@ -57,6 +69,21 @@ class _QueueResponseHandler(ResponseHandler[Dict[str, Any], QueueDetail]):
         if isinstance(data, dict) and "result" in data:
             data = data["result"]
         return QueueDetail(**data)
+
+    @classmethod
+    def _handle_error(cls, response: Response) -> None:
+        _raise_for_status(response)
+
+
+class _DefaultQueueResponseHandler(ResponseHandler[Dict[str, Any], DefaultQueue]):
+    """Handles get-or-create-default responses."""
+
+    @classmethod
+    def _parse_success(cls, response: Response) -> DefaultQueue:
+        data = response.json()
+        if isinstance(data, dict) and "result" in data:
+            data = data["result"]
+        return DefaultQueue(**data)
 
     @classmethod
     def _handle_error(cls, response: Response) -> None:
@@ -214,8 +241,11 @@ class AnnotationQueue(APIKeyAuth):
 
         client = AnnotationQueue(fi_api_key="...", fi_secret_key="...")
 
-        # Create a queue
-        queue = client.create(name="Review Queue", instructions="Rate quality 1-5")
+        # Create a queue (it needs at least one label)
+        label = client.create_label(name="Helpful", type="thumbs_up_down")
+        queue = client.create(
+            name="Review Queue", label_ids=[label.id], instructions="Is the answer helpful?"
+        )
 
         # Add items
         client.add_items(queue.id, items=[
@@ -276,19 +306,76 @@ class AnnotationQueue(APIKeyAuth):
         self,
         name: str,
         *,
+        label_ids: Sequence[Union[str, UUID]] = OMITTED_LABEL_IDS,
         description: Optional[str] = None,
         instructions: Optional[str] = None,
         assignment_strategy: Optional[str] = None,
         annotations_required: Optional[int] = None,
         reservation_timeout_minutes: Optional[int] = None,
         requires_review: Optional[bool] = None,
+        auto_assign: Optional[bool] = None,
+        annotator_ids: Optional[Sequence[Union[str, UUID]]] = None,
+        annotator_roles: Optional[Mapping[str, Union[str, Sequence[str]]]] = None,
         project: Optional[str] = None,
         dataset: Optional[str] = None,
         agent_definition: Optional[str] = None,
         timeout: Optional[int] = None,
     ) -> QueueDetail:
-        """Create a new annotation queue."""
-        body: Dict[str, Any] = {"name": name}
+        """Create a new annotation queue. It starts as a draft; ``activate`` opens it.
+
+        Args:
+            name: Queue name.
+            label_ids: Annotation label ids, at least one (``create_label`` / ``list_labels``).
+                If omitted, emits one ``DeprecationWarning`` and reuses the labels returned
+                by ``get_or_create_default`` for the given project, dataset or agent definition.
+                This can create or restore that default queue even if the label check then
+                fails; it does not scope the new queue. No labels are invented. Pass explicit
+                ids to avoid the lookup and warning.
+            description: What the queue is for.
+            instructions: Guidelines shown to annotators.
+            assignment_strategy: ``"manual"`` (server default), ``"round_robin"`` or
+                ``"load_balanced"``.
+            annotations_required: Annotations needed per item (server default 1).
+            reservation_timeout_minutes: How long an annotator holds an item (server default 60).
+            requires_review: Completed items go to a reviewer first. The server checks
+                that your plan includes the review workflow.
+            auto_assign: Every member can annotate any item without an explicit assignment.
+            annotator_ids: User ids to add as members. You, the creator, are always added
+                as a manager, reviewer and annotator.
+            annotator_roles: Roles per user id in ``annotator_ids``: ``"annotator"``,
+                ``"reviewer"``, ``"manager"``, or a list of them (default ``"annotator"``).
+            project: Not sent (read-only on create); when labels are omitted, identifies
+                the default queue used to obtain labels. With explicit labels, warns that
+                this field cannot scope the new queue. To use the default queue itself,
+                call ``get_or_create_default(project_id=...)``.
+            dataset: Not sent on create; accepted for default-label lookup, as ``project``.
+            agent_definition: Not sent on create; accepted for default-label lookup, as ``project``.
+            timeout: Request timeout in seconds.
+
+        Raises:
+            fi.queues.DefaultQueueLabelError: labels were omitted and no single scope
+                was given, or its default queue has no usable labels (a ``ValueError`` subclass).
+            TypeError: explicit ``label_ids`` is not a list of id strings.
+            ValueError: ``name`` or ``label_ids`` is ``None`` (the server requires both;
+                ``fi._queue_create.REQUIRED_ON_CREATE``), or ``label_ids`` is empty.
+        """
+        if label_ids is OMITTED_LABEL_IDS:
+            if name is None:
+                require_on_create({"name": name, "label_ids": []}, caller="AnnotationQueue.create()")
+            label_ids = default_label_ids(
+                {"project": project, "dataset": dataset, "agent_definition": agent_definition},
+                get_default=lambda **scope: self.get_or_create_default(**scope, timeout=timeout),
+                caller="AnnotationQueue.create()",
+                stacklevel=2,
+            )
+            project = dataset = agent_definition = None
+        require_on_create(
+            {"name": name, "label_ids": label_ids}, caller="AnnotationQueue.create()"
+        )
+        body: Dict[str, Any] = {
+            "name": name,
+            "label_ids": label_id_list(label_ids, caller="AnnotationQueue.create()"),
+        }
         if description is not None:
             body["description"] = description
         if instructions is not None:
@@ -301,12 +388,23 @@ class AnnotationQueue(APIKeyAuth):
             body["reservation_timeout_minutes"] = reservation_timeout_minutes
         if requires_review is not None:
             body["requires_review"] = requires_review
-        if project is not None:
-            body["project"] = project
-        if dataset is not None:
-            body["dataset"] = dataset
-        if agent_definition is not None:
-            body["agent_definition"] = agent_definition
+        if auto_assign is not None:
+            body["auto_assign"] = auto_assign
+        if annotator_ids is not None:
+            body["annotator_ids"] = id_list(
+                annotator_ids, caller="AnnotationQueue.create()", argument="annotator_ids"
+            )
+        if annotator_roles is not None:
+            body["annotator_roles"] = {
+                str(user_id): roles if isinstance(roles, str) else list(roles)
+                for user_id, roles in annotator_roles.items()
+            }
+        drop_ignored_on_create(
+            {"project": project, "dataset": dataset, "agent_definition": agent_definition},
+            caller="AnnotationQueue.create()",
+            instead=QUEUE_CLIENT_DEFAULT_QUEUE_CALL,
+            stacklevel=2,
+        )
 
         logger.info("Creating annotation queue '%s'", name)
         config = RequestConfig(
@@ -316,6 +414,46 @@ class AnnotationQueue(APIKeyAuth):
             timeout=timeout,
         )
         return self.request(config, _QueueResponseHandler)
+
+    def get_or_create_default(
+        self,
+        *,
+        project_id: Optional[Union[str, UUID]] = None,
+        dataset_id: Optional[Union[str, UUID]] = None,
+        agent_definition_id: Optional[Union[str, UUID]] = None,
+        timeout: Optional[int] = None,
+    ) -> DefaultQueue:
+        """Get the default queue of a project, dataset or agent definition.
+
+        Give exactly one of the three ids. The server returns the active default queue,
+        restores an archived one, or creates it (``action`` is ``"fetched"``, ``"restored"``
+        or ``"created"``), with its labels. Default queues are open to every member of the
+        organization. This is how a queue belongs to a project, dataset or agent definition:
+        ``create`` never scopes one.
+
+        Args:
+            project_id: A project id (``str`` or ``UUID``).
+            dataset_id: A dataset id.
+            agent_definition_id: An agent definition id.
+            timeout: Request timeout in seconds.
+
+        Raises:
+            ValueError: none, or more than one, of the ids was given.
+            TypeError: the id is not a non-empty string or a UUID.
+        """
+        body = default_queue_body(
+            caller="AnnotationQueue.get_or_create_default()",
+            project_id=project_id,
+            dataset_id=dataset_id,
+            agent_definition_id=agent_definition_id,
+        )
+        config = RequestConfig(
+            method=HttpMethod.POST,
+            url=f"{self._base_url}/{Routes.annotation_queue_get_or_create_default.value}",
+            json=body,
+            timeout=timeout,
+        )
+        return self.request(config, _DefaultQueueResponseHandler)
 
     def list_queues(
         self,
@@ -327,8 +465,8 @@ class AnnotationQueue(APIKeyAuth):
         page_size: int = 20,
         timeout: Optional[int] = None,
     ) -> List[QueueDetail]:
-        """List annotation queues."""
-        params: Dict[str, Any] = {"page": page, "page_size": page_size}
+        """List queues; ``page`` is 1-based and ``page_size`` is sent as ``limit``."""
+        params: Dict[str, Any] = {"page": page, "limit": page_size}
         if status:
             params["status"] = status
         if search:
@@ -631,12 +769,12 @@ class AnnotationQueue(APIKeyAuth):
         page_size: int = 50,
         timeout: Optional[int] = None,
     ) -> List[QueueItem]:
-        """List items in a queue with optional filters."""
+        """List items; ``page`` is 1-based and ``page_size`` is sent as ``limit``."""
         if not queue_id and not queue_name:
             raise ValueError("Provide either queue_id or queue_name")
         resolved_id = queue_id or self._get_queue_id_from_name(queue_name)
         _validate_id(resolved_id, "queue_id")
-        params: Dict[str, Any] = {"page": page, "page_size": page_size}
+        params: Dict[str, Any] = {"page": page, "limit": page_size}
         if status:
             params["status"] = status
         if assigned_to:

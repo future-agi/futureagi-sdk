@@ -1,0 +1,87 @@
+{
+ "about": "Every test of @agentcc/react as of agent-command-center-sdk client-patch-source (sdk/typescript/packages/agentcc-react/tests, the same sources as the published 1.0.0 build), as vitest 1.6.1 ran them in jsdom 24.1.3 with react 18.3.1: per file, in run order, the full name and the status. 17 tests, 17 passed.",
+ "source": {
+  "repo": "future-agi/agent-command-center-sdk",
+  "record": "client-patch-source",
+  "vitest_json_sha256": "d6ac0fc46684ea23a3f0de47b68870d8058654a2f5eab2c351079b58607d96f7",
+  "totals": {
+   "tests": 17,
+   "passed": 17,
+   "failed": 0
+  }
+ },
+ "files": {
+  "hooks.test.ts": [
+   {
+    "name": "useAgentCCChat logic > client.chat.completions.stream can be called",
+    "status": "passed"
+   },
+   {
+    "name": "useAgentCCChat logic > client.chat.completions.create works for completion hook",
+    "status": "passed"
+   },
+   {
+    "name": "useAgentCCChat logic > client.chat.completions.create works for object hook with json_schema",
+    "status": "passed"
+   },
+   {
+    "name": "React module exports > AgentCCProvider is a React component function",
+    "status": "passed"
+   },
+   {
+    "name": "React module exports > useAgentCCClient is a hook function",
+    "status": "passed"
+   },
+   {
+    "name": "React module exports > useAgentCCChat is a hook function",
+    "status": "passed"
+   },
+   {
+    "name": "React module exports > useAgentCCCompletion is a hook function",
+    "status": "passed"
+   },
+   {
+    "name": "React module exports > useAgentCCObject is a hook function",
+    "status": "passed"
+   }
+  ],
+  "provider.test.ts": [
+   {
+    "name": "agentcc-react exports > exports AgentCCProvider as a function",
+    "status": "passed"
+   },
+   {
+    "name": "agentcc-react exports > exports useAgentCCClient as a function",
+    "status": "passed"
+   },
+   {
+    "name": "agentcc-react exports > exports useAgentCCChat as a function",
+    "status": "passed"
+   },
+   {
+    "name": "agentcc-react exports > exports useAgentCCChatWithClient as a function",
+    "status": "passed"
+   },
+   {
+    "name": "agentcc-react exports > exports useAgentCCCompletion as a function",
+    "status": "passed"
+   },
+   {
+    "name": "agentcc-react exports > exports useAgentCCCompletionWithClient as a function",
+    "status": "passed"
+   },
+   {
+    "name": "agentcc-react exports > exports useAgentCCObject as a function",
+    "status": "passed"
+   },
+   {
+    "name": "agentcc-react exports > exports useAgentCCObjectWithClient as a function",
+    "status": "passed"
+   },
+   {
+    "name": "agentcc-react exports > exports AgentCCContext",
+    "status": "passed"
+   }
+  ]
+ }
+}

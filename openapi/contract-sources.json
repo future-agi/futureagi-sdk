@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "ee": {
+    "sha256": "8e391c6c54f6eec68270e11b753ffaa85f965e21dad0aaea04239da73557ab11"
+  },
+  "fa": {
+    "sha256": "ffe769065665b10dc7ce8301045adb8c6fe913be9fc1eb437543c92bc2bec9eb"
+  },
+  "gateway": {
+    "sha256": "b1598b7223f66073bf13be06707ee5a74648ec7b0462a2863bead2d29aa7b9ee"
+  },
+  "lifecycle": {
+    "sha256": "sha256:d3a18f82340ee8685878337cbb6ae5a9c8adb1cb1c710f3437b2c16aea19f60f",
+    "extensions": {
+      "release-gate": {
+        "pin": "openapi/sdk/release-gate-source.json",
+        "sha256": "sha256:a23da381c931e5a2bd89c76ea4600ebbc189edb1696d73fca016b3ba0914f043"
+      },
+      "trial-stability": {
+        "pin": "openapi/sdk/trial-stability-source.json",
+        "sha256": "sha256:6a0a5abd6b90688e63258c6e83e079d4c14900d937027c088430f53df7460804"
+      },
+      "metadata-slices": {
+        "pin": "openapi/sdk/metadata-slices-source.json",
+        "sha256": "sha256:8e3de58ed208f4e2208a4f792acc16ef369c003d507776d93daa3cf6c70a0ba0"
+      }
+    },
+    "projection": "sha256:a5455eb3b3702eb50824b7fb5de06fd1fe1cd0ce04c026e1f4bf4f3eed35d5f6"
+  }
+}

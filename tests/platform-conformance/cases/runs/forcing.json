@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "runs",
+  "about": "Rare run shapes: a society-mode run starts or is refused with a typed error.",
+  "cases": [
+    {
+      "id": "runs.create.society",
+      "title": "A society-mode run starts, or is refused with a typed error",
+      "sdk": {
+        "family": "runs",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/conversations"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "agent"
+      ],
+      "call": {
+        "body": {
+          "input": "Plan a three-step research task and delegate it",
+          "mode": "society",
+          "agentId": "${own.agent}"
+        }
+      },
+      "expect": {
+        "status": [
+          201,
+          400,
+          503
+        ]
+      },
+      "capture": {
+        "conv": "conversation.id"
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "availability": "source-preview-only",
+  "backendQualification": "not-evaluated",
+  "examples": [
+    {
+      "framework": "langchain",
+      "python": ["python/langchain_chat.py:ask", "python/langchain_chat.py:ask_sync"],
+      "typescript": ["typescript/langchain.ts:ask"]
+    },
+    {
+      "framework": "llamaindex-openai-like",
+      "python": ["python/llamaindex_chat.py:ask", "python/llamaindex_chat.py:ask_sync"],
+      "typescript": "NOT-OFFERED",
+      "reason": "OpenAILike is a Python LlamaIndex class; no TypeScript OpenAILike API is claimed."
+    },
+    {
+      "framework": "vercel-ai-sdk",
+      "python": "NOT-OFFERED",
+      "typescript": ["typescript/vercel.ts:ask"],
+      "reason": "The Vercel AI SDK is a JavaScript framework."
+    },
+    {
+      "framework": "express",
+      "python": "NOT-OFFERED",
+      "typescript": ["typescript/express.ts:createApp"],
+      "reason": "Express is a JavaScript framework."
+    },
+    {
+      "framework": "react-nextjs",
+      "python": "NOT-OFFERED",
+      "typescript": ["typescript/app/chat.tsx:default", "typescript/app/api/chat/route.ts:POST"],
+      "reason": "React and Next.js are JavaScript frameworks."
+    }
+  ]
+}

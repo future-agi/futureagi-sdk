@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "cross",
+  "about": "Anonymous tenant-selector refusal on an offered operation.",
+  "cases": [
+    {
+      "id": "gateway.anonymous.forged-tenant-headers.offered",
+      "title": "Tenant headers without a credential choose nothing on an offered route: 401",
+      "sdk": {"family": "platform", "method": "capabilities.get"},
+      "op": {"method": "GET", "path": "/workspace/capabilities"},
+      "tenant": {"org": "A", "role": "anonymous"},
+      "modes": ["none"],
+      "tags": ["deterministic", "failure"],
+      "call": {
+        "headers": {
+          "x-omega-org": "org-forged",
+          "x-omega-workspace": "ws-forged",
+          "x-organization-id": "00000000-0000-0000-0000-000000000000",
+          "x-workspace-id": "00000000-0000-0000-0000-000000000000"
+        }
+      },
+      "expect": {"status": 401, "errorClass": "AuthenticationError"}
+    }
+  ]
+}

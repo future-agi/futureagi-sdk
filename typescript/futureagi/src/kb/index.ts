@@ -9,6 +9,10 @@ export {
 export type {
     KnowledgeBaseConfig,
     KnowledgeBaseCreateResponse,
+    LegacyKnowledgeBaseCreateResponse,
+    LegacyKnowledgeBaseListResponse,
+    KnowledgeBaseCreateResult,
+    KnowledgeBaseListResult,
     KnowledgeBaseUpdateResponse,
     KnowledgeBaseListResponse,
     KnowledgeBaseOptions,

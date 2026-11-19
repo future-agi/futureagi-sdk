@@ -1,0 +1,22 @@
+{
+  "provenance": {
+    "kind": "Frozen source-backed response bodies, not a hosted deployment capture; no live service calls",
+    "fa_head": "840133ed34b091f954696326b7f5eea8b797d7e0",
+    "fa": "Default Django unrouted-path response: tfc/asgi.py:199-208 falls through to Django; the checked-in tfc/urls.py:61-220 has no direct omega/api route or handler404 override; tfc/settings/settings.py:348-381 installs middleware; agentcc/mcp_features.py:138-164 passes non-agentcc paths through; tfc/middleware/workspace_context.py:129-131 returns the response unchanged. Django 5.1.15 is pinned at pyproject.toml:10: django/conf/urls/__init__.py:8 selects page_not_found; django/views/defaults.py:16-26,65-79 supplies this fallback HTML body when 404.html is absent.",
+    "fa_scope": "This establishes the default unrouted response only, not the exact hosted deployment response. tfc/urls.py:169-180 conditionally mounts ee.cloud.control_plane.urls at the site root; that module is absent from the inspected FA checkout, so its routing, templates, and EE middleware cannot be verified here. Classification uses the actual failing response, never a host-name or deployment assumption.",
+    "ee": "openapi/platform/generated/futureagi-platform.openapi.json components.schemas.OmegaEeError, OmegaNestedError, OmegaGatewayError; legacy shapes also parsed by fi._core.errors.read_error_shape and _core/error-map.ts readErrorShape."
+  },
+  "fa_unrouted": {
+    "content_type": "text/html; charset=utf-8",
+    "body": "\n<!doctype html>\n<html lang=\"en\">\n<head>\n  <title>Not Found</title>\n</head>\n<body>\n  <h1>Not Found</h1><p>The requested resource was not found on this server.</p>\n</body>\n</html>\n"
+  },
+  "ee": [
+    {"id": "resource", "body": {"code": "not_found", "message": "Agent not found", "request_id": "ee-request", "error": {"code": "not_found", "message": "Agent not found"}}, "class": "NotFoundError", "code": "not_found"},
+    {"id": "legacy-nested", "body": {"error": {"code": "not_found", "message": "Run not found"}}, "class": "NotFoundError", "code": "not_found"},
+    {"id": "legacy-string", "body": {"error": "not_found"}, "class": "NotFoundError", "code": "not_found"},
+    {"id": "future-code", "body": {"code": "future_resource_missing", "message": "Resource not found"}, "class": "NotFoundError", "code": "future_resource_missing"},
+    {"id": "schema-code-not-parser-code", "body": {"code": "Future resource missing", "message": "Resource not found"}, "class": "NotFoundError", "code": "http_404"},
+    {"id": "product-ee", "body": {"code": "product_not_admitted", "message": "Product is not admitted", "request_id": "ee-request", "error": {"code": "product_not_admitted", "message": "Product is not admitted"}}, "class": "ProductNotAvailableError", "code": "product_not_admitted"},
+    {"id": "product-gateway", "body": {"error": "product_not_admitted", "reason": "workspace_not_admitted", "requestId": "gateway-request"}, "class": "ProductNotAvailableError", "code": "product_not_admitted"}
+  ]
+}

@@ -10,6 +10,10 @@ from __future__ import annotations
 from typing import Any
 
 
+from fi.gateway._deprecation import deprecated
+
+
+@deprecated
 def patch_openai(
     client: Any = None,
     *,

@@ -1,0 +1,2308 @@
+{
+ "case_ids": [
+  "resource.chat.create",
+  "resource.chat.create.gateway_params",
+  "resource.chat.create.tools",
+  "resource.chat.create.stream",
+  "resource.chat.create.stream_tools",
+  "resource.chat.stream",
+  "resource.chat.stream.tools",
+  "resource.chat.dryRun",
+  "resource.chat.runTools",
+  "resource.chat.createParsed",
+  "resource.completions.create",
+  "resource.completions.create.gateway_params",
+  "resource.embeddings.create",
+  "resource.embeddings.create.list",
+  "resource.images.generate",
+  "resource.audio.transcriptions.file",
+  "resource.audio.translations.file",
+  "resource.audio.speech",
+  "resource.audio.speech.options",
+  "resource.models.list",
+  "resource.models.retrieve",
+  "resource.models.retrieve.slash",
+  "resource.files.create",
+  "resource.files.list",
+  "resource.files.retrieve",
+  "resource.files.content",
+  "resource.files.delete",
+  "resource.rerank.rank",
+  "resource.batches.create",
+  "resource.batches.list",
+  "resource.batches.retrieve",
+  "resource.batches.cancel",
+  "resource.moderations.create",
+  "resource.healthCheck.method",
+  "resource.healthCheck.method.error",
+  "resource.healthCheck.function",
+  "resource.healthCheck.function.error",
+  "resource.checkValidKey",
+  "resource.checkValidKey.401",
+  "resource.withResponse",
+  "resource.injected_fetch",
+  "param.chat.temperature",
+  "param.chat.top_p",
+  "param.chat.n",
+  "param.chat.stop",
+  "param.chat.max_tokens",
+  "param.chat.max_completion_tokens",
+  "param.chat.presence_penalty",
+  "param.chat.frequency_penalty",
+  "param.chat.logit_bias",
+  "param.chat.logprobs",
+  "param.chat.top_logprobs",
+  "param.chat.user",
+  "param.chat.seed",
+  "param.chat.tools",
+  "param.chat.tool_choice",
+  "param.chat.response_format",
+  "param.chat.stream_options",
+  "param.chat.extra_body",
+  "param.chat.unknown_kwarg",
+  "param.chat.session_id",
+  "param.chat.trace_id",
+  "param.chat.request_metadata",
+  "param.chat.request_timeout",
+  "param.chat.cache_ttl",
+  "param.chat.cache_namespace",
+  "param.chat.cache_force_refresh",
+  "param.chat.cache_control",
+  "param.chat.guardrail_policy",
+  "param.chat.extra_headers",
+  "param.chat.properties",
+  "param.chat.user_id",
+  "param.chat.request_id",
+  "param.chat.temperature.null",
+  "param.chat.session_id.null",
+  "param.chat.cache_ttl.null",
+  "param.chat.cache_force_refresh.null",
+  "param.chat.extra_headers.null",
+  "param.chat.combined",
+  "client_option.defaultQuery",
+  "client_option.defaultHeaders",
+  "client_option.sessionId",
+  "client_option.metadata",
+  "client_option.dropParams",
+  "client_option.dropParams.unknown_model",
+  "client_option.modifyParams",
+  "client_option.redactMessages",
+  "client_option.traceContext",
+  "client_option.traceparent",
+  "client_option.timeout",
+  "client_option.preCallRules.allow",
+  "client_option.preCallRules.block",
+  "client_option.jsonSchemaValidation.bad",
+  "client_option.jsonSchemaValidation.ok",
+  "with_options.timeout",
+  "with_options.maxRetries",
+  "with_options.defaultHeaders",
+  "with_options.defaultQuery",
+  "with_options.sessionId",
+  "with_options.metadata",
+  "header_merge.l3_over_l1",
+  "header_merge.l3_over_l2",
+  "header_merge.l3_case_variant_l2",
+  "header_merge.l4_over_l3",
+  "header_merge.l5_over_l4",
+  "header_merge.l6_over_l5",
+  "header_merge.l6_over_l4",
+  "header_merge.l7_over_l6",
+  "header_merge.l7_over_l2",
+  "header_merge.l7_over_l1",
+  "header_merge.l7_case_variant_l3",
+  "header_merge.trace_over_default",
+  "header_merge.session",
+  "config.section.fallback",
+  "config.wire.fallback",
+  "config.section.loadBalance",
+  "config.wire.loadBalance",
+  "config.section.cache",
+  "config.wire.cache",
+  "config.section.guardrails",
+  "config.wire.guardrails",
+  "config.section.routing",
+  "config.wire.routing",
+  "config.section.mirror",
+  "config.wire.mirror",
+  "config.section.retry",
+  "config.wire.retry",
+  "config.section.timeout",
+  "config.wire.timeout",
+  "create_headers.apiKey",
+  "create_headers.traceId",
+  "create_headers.sessionId",
+  "create_headers.sessionName",
+  "create_headers.sessionPath",
+  "create_headers.metadata",
+  "create_headers.userId",
+  "create_headers.requestId",
+  "create_headers.cacheTtl",
+  "create_headers.cacheNamespace",
+  "create_headers.cacheForceRefresh",
+  "create_headers.guardrailPolicy",
+  "create_headers.properties",
+  "create_headers.combined",
+  "create_headers.none",
+  "session.pure",
+  "response_header.none",
+  "response_header.all",
+  "response_header.malformed",
+  "response_header.stream_all",
+  "response_header.current_cost",
+  "response_header.alone.x-agentcc-request-id",
+  "response_header.alone.x-agentcc-trace-id",
+  "response_header.alone.x-agentcc-provider",
+  "response_header.alone.x-agentcc-latency-ms",
+  "response_header.alone.x-agentcc-cost",
+  "response_header.alone.x-agentcc-cache",
+  "response_header.alone.x-agentcc-model-used",
+  "response_header.alone.x-agentcc-guardrail-triggered",
+  "response_header.alone.x-agentcc-guardrails-triggered",
+  "response_header.alone.x-agentcc-guardrail-name",
+  "response_header.alone.x-agentcc-guardrail-action",
+  "response_header.alone.x-agentcc-guardrail-confidence",
+  "response_header.alone.x-agentcc-guardrail-message",
+  "response_header.alone.x-agentcc-fallback-used",
+  "response_header.alone.x-agentcc-routing-strategy",
+  "response_header.alone.x-agentcc-timeout-ms",
+  "response_header.alone.x-agentcc-config-ignored",
+  "response_header.alone.x-agentcc-client-request-id",
+  "response_header.alone.x-ratelimit-limit-requests",
+  "response_header.alone.x-ratelimit-remaining-requests",
+  "response_header.alone.x-ratelimit-reset-requests",
+  "response_header.alone.x-ratelimit-limit-tokens",
+  "response_header.alone.x-ratelimit-remaining-tokens",
+  "response_header.alone.x-ratelimit-reset-tokens",
+  "status.246.error_object",
+  "status.246.error_object_minimal",
+  "status.246.top_level_message",
+  "status.246.non_json",
+  "status.246.empty",
+  "status.246.headers",
+  "status.400.error_object",
+  "status.400.error_object_minimal",
+  "status.400.top_level_message",
+  "status.400.non_json",
+  "status.400.empty",
+  "status.400.headers",
+  "status.401.error_object",
+  "status.401.error_object_minimal",
+  "status.401.top_level_message",
+  "status.401.non_json",
+  "status.401.empty",
+  "status.401.headers",
+  "status.403.error_object",
+  "status.403.error_object_minimal",
+  "status.403.top_level_message",
+  "status.403.non_json",
+  "status.403.empty",
+  "status.403.headers",
+  "status.404.error_object",
+  "status.404.error_object_minimal",
+  "status.404.top_level_message",
+  "status.404.non_json",
+  "status.404.empty",
+  "status.404.headers",
+  "status.408.error_object",
+  "status.408.error_object_minimal",
+  "status.408.top_level_message",
+  "status.408.non_json",
+  "status.408.empty",
+  "status.408.headers",
+  "status.413.error_object",
+  "status.413.error_object_minimal",
+  "status.413.top_level_message",
+  "status.413.non_json",
+  "status.413.empty",
+  "status.413.headers",
+  "status.422.error_object",
+  "status.422.error_object_minimal",
+  "status.422.top_level_message",
+  "status.422.non_json",
+  "status.422.empty",
+  "status.422.headers",
+  "status.429.error_object",
+  "status.429.error_object_minimal",
+  "status.429.top_level_message",
+  "status.429.non_json",
+  "status.429.empty",
+  "status.429.headers",
+  "status.446.error_object",
+  "status.446.error_object_minimal",
+  "status.446.top_level_message",
+  "status.446.non_json",
+  "status.446.empty",
+  "status.446.headers",
+  "status.500.error_object",
+  "status.500.error_object_minimal",
+  "status.500.top_level_message",
+  "status.500.non_json",
+  "status.500.empty",
+  "status.500.headers",
+  "status.502.error_object",
+  "status.502.error_object_minimal",
+  "status.502.top_level_message",
+  "status.502.non_json",
+  "status.502.empty",
+  "status.502.headers",
+  "status.503.error_object",
+  "status.503.error_object_minimal",
+  "status.503.top_level_message",
+  "status.503.non_json",
+  "status.503.empty",
+  "status.503.headers",
+  "status.504.error_object",
+  "status.504.error_object_minimal",
+  "status.504.top_level_message",
+  "status.504.non_json",
+  "status.504.empty",
+  "status.504.headers",
+  "status.stream.400",
+  "status.stream.401",
+  "status.stream.429",
+  "status.stream.446",
+  "status.stream.500",
+  "status.stream.503",
+  "status.stream.246",
+  "status.246.on_guardrail_warning",
+  "status.embeddings.429",
+  "status.speech.500",
+  "status.418_unmapped",
+  "status.599_unmapped",
+  "status.200_non_json",
+  "status.200_wrong_shape",
+  "status.201_ok",
+  "retry.408.exhausted",
+  "retry.408.then_ok",
+  "retry.429.exhausted",
+  "retry.429.then_ok",
+  "retry.500.exhausted",
+  "retry.500.then_ok",
+  "retry.502.exhausted",
+  "retry.502.then_ok",
+  "retry.503.exhausted",
+  "retry.503.then_ok",
+  "retry.504.exhausted",
+  "retry.504.then_ok",
+  "retry.400.not_retried",
+  "retry.401.not_retried",
+  "retry.403.not_retried",
+  "retry.404.not_retried",
+  "retry.413.not_retried",
+  "retry.422.not_retried",
+  "retry.446.not_retried",
+  "retry.retry_after.zero",
+  "retry.retry_after.one",
+  "retry.retry_after.fraction",
+  "retry.retry_after.above_cap",
+  "retry.retry_after.negative",
+  "retry.retry_after.text",
+  "retry.retry_after.http_date",
+  "retry.retry_after_ms",
+  "retry.max_retries.0",
+  "retry.max_retries.1",
+  "retry.max_retries.3",
+  "retry.max_retries.5",
+  "retry.transport.connect",
+  "retry.transport.connect.exhausted",
+  "retry.transport.read_timeout",
+  "retry.transport.read_timeout.exhausted",
+  "retry.transport.remote_protocol",
+  "retry.transport.remote_protocol.exhausted",
+  "retry.stream.500",
+  "retry.stream.connect",
+  "retry.policy.ratelimit",
+  "retry.policy.no_5xx",
+  "retry.policy.408",
+  "retry.policy.timeout",
+  "retry.policy.defaults",
+  "retry.callbacks",
+  "timeout.client.default",
+  "timeout.client.ms",
+  "timeout.with_options",
+  "timeout.request_timeout_header",
+  "timeout.read_raises",
+  "timeout.stream_read_raises",
+  "timeout.stream_drop_mid_body",
+  "stream.fixture.guardrail_block_after_content_then_done.iter",
+  "stream.fixture.guardrail_block_after_content_then_done.events",
+  "stream.fixture.guardrail_block_after_content_then_done.text",
+  "stream.fixture.guardrail_block_after_content_then_done.final",
+  "stream.fixture.guardrail_block_after_content_then_done.break_on_done",
+  "stream.fixture.guardrail_block_at_finish_then_metadata_then_done.iter",
+  "stream.fixture.guardrail_block_at_finish_then_metadata_then_done.events",
+  "stream.fixture.guardrail_block_at_finish_then_metadata_then_done.text",
+  "stream.fixture.guardrail_block_at_finish_then_metadata_then_done.final",
+  "stream.fixture.guardrail_block_at_finish_then_metadata_then_done.break_on_done",
+  "stream.fixture.guardrail_block_first_frame.iter",
+  "stream.fixture.guardrail_block_first_frame.events",
+  "stream.fixture.guardrail_block_first_frame.text",
+  "stream.fixture.guardrail_block_first_frame.final",
+  "stream.fixture.guardrail_block_first_frame.break_on_done",
+  "stream.fixture.upstream_timeout_cut_after_content.iter",
+  "stream.fixture.upstream_timeout_cut_after_content.events",
+  "stream.fixture.upstream_timeout_cut_after_content.text",
+  "stream.fixture.upstream_timeout_cut_after_content.final",
+  "stream.fixture.upstream_timeout_cut_after_content.break_on_done",
+  "stream.fixture.normal_stream.iter",
+  "stream.fixture.normal_stream.events",
+  "stream.fixture.normal_stream.text",
+  "stream.fixture.normal_stream.final",
+  "stream.fixture.normal_stream.break_on_done",
+  "stream.fixture.usage_chunk_with_empty_choices.iter",
+  "stream.fixture.usage_chunk_with_empty_choices.events",
+  "stream.fixture.usage_chunk_with_empty_choices.text",
+  "stream.fixture.usage_chunk_with_empty_choices.final",
+  "stream.fixture.usage_chunk_with_empty_choices.break_on_done",
+  "stream.extra.cache_hit_json_to_stream.iter",
+  "stream.extra.cache_hit_json_to_stream.events",
+  "stream.extra.cache_hit_json_to_stream.text",
+  "stream.extra.cache_hit_json_to_stream.final",
+  "stream.extra.cache_hit_json_to_stream.break_on_done",
+  "stream.extra.late_error_after_finish_reason.iter",
+  "stream.extra.late_error_after_finish_reason.events",
+  "stream.extra.late_error_after_finish_reason.text",
+  "stream.extra.late_error_after_finish_reason.final",
+  "stream.extra.late_error_after_finish_reason.break_on_done",
+  "stream.extra.guardrail_header_open.iter",
+  "stream.extra.guardrail_header_open.events",
+  "stream.extra.guardrail_header_open.text",
+  "stream.extra.guardrail_header_open.final",
+  "stream.extra.guardrail_header_open.break_on_done",
+  "stream.malformed.invalid_json_frame.iter",
+  "stream.malformed.invalid_json_frame.final",
+  "stream.malformed.split_across_chunks.iter",
+  "stream.malformed.split_across_chunks.final",
+  "stream.malformed.crlf_line_endings.iter",
+  "stream.malformed.crlf_line_endings.final",
+  "stream.malformed.comment_and_fields.iter",
+  "stream.malformed.comment_and_fields.final",
+  "stream.malformed.multiline_data.iter",
+  "stream.malformed.multiline_data.final",
+  "stream.malformed.no_trailing_newline.iter",
+  "stream.malformed.no_trailing_newline.final",
+  "stream.malformed.no_done_end_of_body.iter",
+  "stream.malformed.no_done_end_of_body.final",
+  "stream.malformed.empty_body.iter",
+  "stream.malformed.empty_body.final",
+  "stream.malformed.data_without_space.iter",
+  "stream.malformed.data_without_space.final",
+  "stream.malformed.done_then_more.iter",
+  "stream.malformed.done_then_more.final",
+  "stream.malformed.frame_is_list.iter",
+  "stream.malformed.frame_is_list.final",
+  "stream.malformed.frame_is_string.iter",
+  "stream.malformed.frame_is_string.final",
+  "stream.malformed.error_is_string.iter",
+  "stream.malformed.error_is_string.final",
+  "stream.malformed.error_without_message.iter",
+  "stream.malformed.error_without_message.final",
+  "stream.malformed.choices_null.iter",
+  "stream.malformed.choices_null.final",
+  "stream.malformed.unknown_fields.iter",
+  "stream.malformed.unknown_fields.final",
+  "stream.malformed.usage_twice.iter",
+  "stream.malformed.usage_twice.final",
+  "stream.malformed.usage_on_finish_chunk.iter",
+  "stream.malformed.usage_on_finish_chunk.final",
+  "stream.malformed.two_choices.iter",
+  "stream.malformed.two_choices.final",
+  "stream.text_plain_200",
+  "stream.abort",
+  "utility.all",
+  "utility.budget_manager",
+  "utility.batch_completion",
+  "utility.batch_completion_models",
+  "utility.patch_openai",
+  "utility.middleware_use",
+  "utility.builtin_callbacks",
+  "mock.testing",
+  "integration.express",
+  "integration.nextjs.stream",
+  "integration.nextjs.stream_error",
+  "surface.runtime",
+  "env.key_none.url_none",
+  "env.key_none.url_arg",
+  "env.key_none.url_agentcc_env",
+  "env.key_none.url_fi_gateway_env",
+  "env.key_none.url_both_env_differ",
+  "env.key_none.url_arg_over_env",
+  "env.key_none.url_gateway_url_env",
+  "env.key_none.url_empty_arg_env",
+  "env.key_arg.url_none",
+  "env.key_arg.url_arg",
+  "env.key_arg.url_agentcc_env",
+  "env.key_arg.url_fi_gateway_env",
+  "env.key_arg.url_both_env_differ",
+  "env.key_arg.url_arg_over_env",
+  "env.key_arg.url_gateway_url_env",
+  "env.key_arg.url_empty_arg_env",
+  "env.key_agentcc_env.url_none",
+  "env.key_agentcc_env.url_arg",
+  "env.key_agentcc_env.url_agentcc_env",
+  "env.key_agentcc_env.url_fi_gateway_env",
+  "env.key_agentcc_env.url_both_env_differ",
+  "env.key_agentcc_env.url_arg_over_env",
+  "env.key_agentcc_env.url_gateway_url_env",
+  "env.key_agentcc_env.url_empty_arg_env",
+  "env.key_fi_gateway_env.url_none",
+  "env.key_fi_gateway_env.url_arg",
+  "env.key_fi_gateway_env.url_agentcc_env",
+  "env.key_fi_gateway_env.url_fi_gateway_env",
+  "env.key_fi_gateway_env.url_both_env_differ",
+  "env.key_fi_gateway_env.url_arg_over_env",
+  "env.key_fi_gateway_env.url_gateway_url_env",
+  "env.key_fi_gateway_env.url_empty_arg_env",
+  "env.key_both_env_differ.url_none",
+  "env.key_both_env_differ.url_arg",
+  "env.key_both_env_differ.url_agentcc_env",
+  "env.key_both_env_differ.url_fi_gateway_env",
+  "env.key_both_env_differ.url_both_env_differ",
+  "env.key_both_env_differ.url_arg_over_env",
+  "env.key_both_env_differ.url_gateway_url_env",
+  "env.key_both_env_differ.url_empty_arg_env",
+  "env.key_arg_over_env.url_none",
+  "env.key_arg_over_env.url_arg",
+  "env.key_arg_over_env.url_agentcc_env",
+  "env.key_arg_over_env.url_fi_gateway_env",
+  "env.key_arg_over_env.url_both_env_differ",
+  "env.key_arg_over_env.url_arg_over_env",
+  "env.key_arg_over_env.url_gateway_url_env",
+  "env.key_arg_over_env.url_empty_arg_env",
+  "env.key_empty_arg_env.url_none",
+  "env.key_empty_arg_env.url_arg",
+  "env.key_empty_arg_env.url_agentcc_env",
+  "env.key_empty_arg_env.url_fi_gateway_env",
+  "env.key_empty_arg_env.url_both_env_differ",
+  "env.key_empty_arg_env.url_arg_over_env",
+  "env.key_empty_arg_env.url_gateway_url_env",
+  "env.key_empty_arg_env.url_empty_arg_env",
+  "env.base_url.trailing_slash",
+  "env.base_url.v1",
+  "env.base_url.v1_slash",
+  "env.base_url.v1_twice",
+  "env.base_url.prefix",
+  "env.base_url.prefix_v1",
+  "env.base_url.port",
+  "env.base_url.localhost",
+  "env.base_url.uppercase_v1",
+  "env.isolation.all_fi_openai_set",
+  "env.isolation.chat",
+  "env.fi_api_key_reused_as_gateway_key",
+  "env.fi_secret_key_reused_as_gateway_key",
+  "env.gateway_url_constant.unset",
+  "env.gateway_url_constant.agentcc_base_url",
+  "env.gateway_url_constant.agentcc_gateway_url",
+  "env.gateway_url_constant.both"
+ ],
+ "dts": {
+  "@agentcc/client": {
+   "dist/cjs/agentcc-params.d.ts": {
+    "exports": [
+     "function extractAgentCCParams"
+    ],
+    "sha256": "2b0a64f4b75f37f50b1b0a967fdd80585078b39ed31b3644af50ce4180055007"
+   },
+   "dist/cjs/base-client.d.ts": {
+    "exports": [
+     "class BaseClient",
+     "interface ClientOptions",
+     "interface RequestOptions",
+     "interface WithResponseResult"
+    ],
+    "sha256": "75ec82f6996c4499c2e0364f414f9a26368aa340bafd204206cd25a102a3753e"
+   },
+   "dist/cjs/batch.d.ts": {
+    "exports": [
+     "function batchCompletion",
+     "function batchCompletionModels",
+     "interface BatchCompletionModelsParams",
+     "interface BatchCompletionParams",
+     "interface ModelCompletionResult"
+    ],
+    "sha256": "b9cde57badf12440d7bff30395a4466d9b301c9f7fbad1b5552201991876d815"
+   },
+   "dist/cjs/budget.d.ts": {
+    "exports": [
+     "class BudgetManager",
+     "interface BudgetManagerOptions"
+    ],
+    "sha256": "239c4134a51e505c7cd6b2cfce7c8f0edd84794ce3390d6336539cf6d8791338"
+   },
+   "dist/cjs/callbacks-builtin.d.ts": {
+    "exports": [
+     "class JSONLoggingCallback",
+     "class LoggingCallback",
+     "class MetricsCallback"
+    ],
+    "sha256": "04a50bb213e32254b60c13d949bee51935cc2136198e22d508eee397bd894196"
+   },
+   "dist/cjs/callbacks.d.ts": {
+    "exports": [
+     "class CallbackHandler",
+     "function invokeCallbacks",
+     "interface CallbackRequest",
+     "interface CallbackResponse",
+     "interface SessionSummary",
+     "interface StreamInfo"
+    ],
+    "sha256": "ba88a3484c7fbb8854e3ffc25c9ab6fa60fe608046295d9d13de8f63fb3c6eba"
+   },
+   "dist/cjs/client.d.ts": {
+    "exports": [
+     "class AgentCC"
+    ],
+    "sha256": "ee86825e0c0b7e3c645f904c524ec2472af32acd1e4046038649c858b17cd451"
+   },
+   "dist/cjs/constants.d.ts": {
+    "exports": [
+     "const AGENTCC_GATEWAY_URL",
+     "const DEFAULT_BASE_URL",
+     "const DEFAULT_MAX_RETRIES",
+     "const DEFAULT_TIMEOUT",
+     "const HEADER_API_KEY",
+     "const HEADER_CACHE_CONTROL",
+     "const HEADER_CACHE_FORCE_REFRESH",
+     "const HEADER_CACHE_NAMESPACE",
+     "const HEADER_CACHE_TTL",
+     "const HEADER_CONFIG",
+     "const HEADER_CONTENT_TYPE",
+     "const HEADER_GUARDRAIL_POLICY",
+     "const HEADER_METADATA",
+     "const HEADER_RATELIMIT_LIMIT",
+     "const HEADER_RATELIMIT_REMAINING",
+     "const HEADER_RATELIMIT_RESET",
+     "const HEADER_REQUEST_TIMEOUT",
+     "const HEADER_RESPONSE_CACHE",
+     "const HEADER_RESPONSE_COST",
+     "const HEADER_RESPONSE_FALLBACK_USED",
+     "const HEADER_RESPONSE_GUARDRAIL_ACTION",
+     "const HEADER_RESPONSE_GUARDRAIL_CONFIDENCE",
+     "const HEADER_RESPONSE_GUARDRAIL_MESSAGE",
+     "const HEADER_RESPONSE_GUARDRAIL_NAME",
+     "const HEADER_RESPONSE_GUARDRAIL_TRIGGERED",
+     "const HEADER_RESPONSE_LATENCY",
+     "const HEADER_RESPONSE_MODEL_USED",
+     "const HEADER_RESPONSE_PROVIDER",
+     "const HEADER_RESPONSE_REQUEST_ID",
+     "const HEADER_RESPONSE_ROUTING_STRATEGY",
+     "const HEADER_RESPONSE_TIMEOUT",
+     "const HEADER_RESPONSE_TRACE_ID",
+     "const HEADER_SDK_VERSION",
+     "const HEADER_SESSION_ID",
+     "const HEADER_SESSION_NAME",
+     "const HEADER_SESSION_PATH",
+     "const HEADER_TRACE_ID",
+     "const HEADER_USER_AGENT",
+     "const NOT_GIVEN",
+     "const RETRYABLE_STATUS_CODES",
+     "const VERSION",
+     "function isNotGiven",
+     "type NotGiven"
+    ],
+    "sha256": "4286c2a274e4b5796b7fd7d8205b9d1f94867523903f612c18c8ead90a7839e9"
+   },
+   "dist/cjs/dry-run.d.ts": {
+    "exports": [
+     "interface DryRunResult"
+    ],
+    "sha256": "04fd4b0690442c8ea1b3cb124ec3bb627db12010b94ad81bef77afed4aeffb13"
+   },
+   "dist/cjs/errors.d.ts": {
+    "exports": [
+     "class APIConnectionError",
+     "class APIStatusError",
+     "class APITimeoutError",
+     "class AgentCCError",
+     "class AuthenticationError",
+     "class BadGatewayError",
+     "class BadRequestError",
+     "class GatewayTimeoutError",
+     "class GuardrailBlockedError",
+     "class GuardrailWarning",
+     "class InternalServerError",
+     "class NotFoundError",
+     "class PermissionDeniedError",
+     "class RateLimitError",
+     "class ServiceUnavailableError",
+     "class StreamError",
+     "class UnprocessableEntityError",
+     "interface ErrorBody",
+     "interface StreamErrorOptions"
+    ],
+    "sha256": "3610cd7f47c2b52f31471a7f97e01c2e4c1ff42ef37514d5a61d98350fc2c1b5"
+   },
+   "dist/cjs/express.d.ts": {
+    "exports": [
+     "function agentccMiddleware",
+     "interface AgentCCMiddlewareOptions"
+    ],
+    "sha256": "a1d86bbd74ce7450824d3724e42045111399e97d571ee38b6273c4107f086380"
+   },
+   "dist/cjs/function-to-tool.d.ts": {
+    "exports": [
+     "function functionToTool",
+     "interface FunctionToToolOptions"
+    ],
+    "sha256": "6b11baa9909e59db227635fc7110d5b2815775cbb8303ebebc727ae29c817e89"
+   },
+   "dist/cjs/gateway-config.d.ts": {
+    "exports": [
+     "function createHeaders",
+     "function gatewayConfigToDict",
+     "function gatewayConfigToHeaders",
+     "interface CacheConfig",
+     "interface ConditionalRoutingConfig",
+     "interface CreateHeadersOptions",
+     "interface FallbackConfig",
+     "interface FallbackTarget",
+     "interface GatewayConfig",
+     "interface GuardrailCheck",
+     "interface GuardrailConfig",
+     "interface LoadBalanceConfig",
+     "interface LoadBalanceTarget",
+     "interface RetryConfig",
+     "interface RoutingCondition",
+     "interface TimeoutConfig",
+     "interface TrafficMirrorConfig"
+    ],
+    "sha256": "219ba8acc90938021264f7f6e1b6a475eed33aea1a66c520d4758f6e251216ef"
+   },
+   "dist/cjs/health-check.d.ts": {
+    "exports": [
+     "function checkValidKey",
+     "function healthCheck",
+     "interface CheckValidKeyOptions",
+     "interface CheckValidKeyResult",
+     "interface HealthCheckOptions",
+     "interface HealthCheckResult"
+    ],
+    "sha256": "12a32ee05b7604df83e66ce48d8397e2f92d869a735ecd0e3b898883c2f4624a"
+   },
+   "dist/cjs/index.d.ts": {
+    "exports": [
+     "re AGENTCC_GATEWAY_URL <- ./constants.js",
+     "re APIConnectionError <- ./errors.js",
+     "re APIStatusError <- ./errors.js",
+     "re APITimeoutError <- ./errors.js",
+     "re AgentCC <- ./client.js",
+     "re AgentCCError <- ./errors.js",
+     "re AuthenticationError <- ./errors.js",
+     "re BadGatewayError <- ./errors.js",
+     "re BadRequestError <- ./errors.js",
+     "re BudgetManager <- ./budget.js",
+     "re CallbackHandler <- ./callbacks.js",
+     "re ChunkAccumulator <- ./streaming.js",
+     "re GatewayTimeoutError <- ./errors.js",
+     "re GuardrailBlockedError <- ./errors.js",
+     "re GuardrailWarning <- ./errors.js",
+     "re InternalServerError <- ./errors.js",
+     "re JSONLoggingCallback <- ./callbacks-builtin.js",
+     "re LoggingCallback <- ./callbacks-builtin.js",
+     "re MetricsCallback <- ./callbacks-builtin.js",
+     "re NOT_GIVEN <- ./constants.js",
+     "re NotFoundError <- ./errors.js",
+     "re OTelCallback <- ./otel-callback.js",
+     "re PaginatedList <- ./pagination.js",
+     "re PermissionDeniedError <- ./errors.js",
+     "re RateLimitError <- ./errors.js",
+     "re RetryPolicy <- ./retry-policy.js",
+     "re RunToolsRunner <- ./run-tools.js",
+     "re ServiceUnavailableError <- ./errors.js",
+     "re Session <- ./session.js",
+     "re Stream <- ./streaming.js",
+     "re StreamError <- ./errors.js",
+     "re StreamManager <- ./streaming.js",
+     "re TraceContextManager <- ./trace-context.js",
+     "re UnprocessableEntityError <- ./errors.js",
+     "re VERSION <- ./constants.js",
+     "re allowModels <- ./pre-call-rules.js",
+     "re batchCompletion <- ./batch.js",
+     "re batchCompletionModels <- ./batch.js",
+     "re blockModels <- ./pre-call-rules.js",
+     "re checkValidKey <- ./health-check.js",
+     "re completionCost <- ./tokens.js",
+     "re completionCostFromResponse <- ./tokens.js",
+     "re composeMiddlewares <- ./middleware.js",
+     "re createHeaders <- ./gateway-config.js",
+     "re createMiddleware <- ./middleware.js",
+     "re decode <- ./token-encoding.js",
+     "re encode <- ./token-encoding.js",
+     "re evaluatePreCallRules <- ./pre-call-rules.js",
+     "re formatTraceparent <- ./trace-context.js",
+     "re functionToTool <- ./function-to-tool.js",
+     "re generateSpanId <- ./trace-context.js",
+     "re generateTraceId <- ./trace-context.js",
+     "re getContentPolicyFallback <- ./tokens.js",
+     "re getContextWindowFallback <- ./tokens.js",
+     "re getEncodingForModel <- ./token-encoding.js",
+     "re getMaxOutputTokens <- ./tokens.js",
+     "re getMaxTokens <- ./tokens.js",
+     "re getModelInfo <- ./models-info.js",
+     "re getValidModels <- ./models-info.js",
+     "re healthCheck <- ./health-check.js",
+     "re invokeCallbacks <- ./callbacks.js",
+     "re isPromptCachingValid <- ./tokens.js",
+     "re isZodSchema <- ./structured-output.js",
+     "re modelAliasMap <- ./models-info.js",
+     "re parseTraceparent <- ./trace-context.js",
+     "re patchOpenAI <- ./patch-openai.js",
+     "re redactCallbackRequest <- ./redact.js",
+     "re registerModel <- ./models-info.js",
+     "re requireSessionId <- ./pre-call-rules.js",
+     "re supportsFunctionCalling <- ./models-info.js",
+     "re supportsJsonMode <- ./models-info.js",
+     "re supportsResponseSchema <- ./models-info.js",
+     "re supportsVision <- ./models-info.js",
+     "re toResponseFormat <- ./validate-response.js",
+     "re tokenCounter <- ./tokens.js",
+     "re trimMessages <- ./tokens.js",
+     "re validateEnvironment <- ./models-info.js",
+     "re validateJsonResponse <- ./validate-response.js",
+     "re zodToJsonSchema <- ./structured-output.js",
+     "type re AgentCCMetadata <- ./types/index.js",
+     "type re Batch <- ./types/index.js",
+     "type re BatchCompletionModelsParams <- ./batch.js",
+     "type re BatchCompletionParams <- ./batch.js",
+     "type re BatchCreateParams <- ./types/index.js",
+     "type re BatchList <- ./types/index.js",
+     "type re BudgetManagerOptions <- ./budget.js",
+     "type re CacheConfig <- ./gateway-config.js",
+     "type re CallbackRequest <- ./callbacks.js",
+     "type re CallbackResponse <- ./callbacks.js",
+     "type re ChatCompletion <- ./types/index.js",
+     "type re ChatCompletionChunk <- ./types/index.js",
+     "type re ChatCompletionCreateParams <- ./types/index.js",
+     "type re ChatCompletionMessage <- ./types/index.js",
+     "type re ChatCompletionMessageParam <- ./types/index.js",
+     "type re ChatMessage <- ./tokens.js",
+     "type re CheckValidKeyOptions <- ./health-check.js",
+     "type re CheckValidKeyResult <- ./health-check.js",
+     "type re Choice <- ./types/index.js",
+     "type re ClientOptions <- ./base-client.js",
+     "type re Completion <- ./types/index.js",
+     "type re CompletionChoice <- ./types/index.js",
+     "type re CompletionCreateParams <- ./types/index.js",
+     "type re ConditionalRoutingConfig <- ./gateway-config.js",
+     "type re ContentPart <- ./types/index.js",
+     "type re CreateHeadersOptions <- ./gateway-config.js",
+     "type re Delta <- ./types/index.js",
+     "type re DryRunResult <- ./dry-run.js",
+     "type re Embedding <- ./types/index.js",
+     "type re EmbeddingCreateParams <- ./types/index.js",
+     "type re EmbeddingResponse <- ./types/index.js",
+     "type re ErrorBody <- ./errors.js",
+     "type re FallbackConfig <- ./gateway-config.js",
+     "type re FallbackTarget <- ./gateway-config.js",
+     "type re FileList <- ./types/index.js",
+     "type re FileObject <- ./types/index.js",
+     "type re FileUploadParams <- ./types/index.js",
+     "type re FunctionCall <- ./types/index.js",
+     "type re FunctionCallDelta <- ./types/index.js",
+     "type re FunctionDefinition <- ./types/index.js",
+     "type re FunctionToToolOptions <- ./function-to-tool.js",
+     "type re GatewayConfig <- ./gateway-config.js",
+     "type re GuardrailCheck <- ./gateway-config.js",
+     "type re GuardrailConfig <- ./gateway-config.js",
+     "type re HealthCheckOptions <- ./health-check.js",
+     "type re HealthCheckResult as HealthCheckResponse <- ./health-check.js",
+     "type re ImageData <- ./types/index.js",
+     "type re ImageGenerateParams <- ./types/index.js",
+     "type re ImageResponse <- ./types/index.js",
+     "type re LoadBalanceConfig <- ./gateway-config.js",
+     "type re LoadBalanceTarget <- ./gateway-config.js",
+     "type re Middleware <- ./middleware.js",
+     "type re MiddlewareContext <- ./middleware.js",
+     "type re MiddlewareResult <- ./middleware.js",
+     "type re Model <- ./types/index.js",
+     "type re ModelCompletionResult <- ./batch.js",
+     "type re ModelInfo <- ./models-info.js",
+     "type re ModelList <- ./types/index.js",
+     "type re ModerationCreateParams <- ./types/index.js",
+     "type re ModerationResponse <- ./types/index.js",
+     "type re ModerationResult <- ./types/index.js",
+     "type re NextFn <- ./middleware.js",
+     "type re NotGiven <- ./constants.js",
+     "type re OTelCallbackOptions <- ./otel-callback.js",
+     "type re OTelCounter <- ./otel-callback.js",
+     "type re OTelHistogram <- ./otel-callback.js",
+     "type re OTelMeter <- ./otel-callback.js",
+     "type re OTelSpan <- ./otel-callback.js",
+     "type re OTelTracer <- ./otel-callback.js",
+     "type re PreCallRule <- ./pre-call-rules.js",
+     "type re PreCallRuleInput <- ./pre-call-rules.js",
+     "type re PreCallRuleResult <- ./pre-call-rules.js",
+     "type re RateLimitInfo <- ./types/index.js",
+     "type re RerankParams <- ./types/index.js",
+     "type re RerankResponse <- ./types/index.js",
+     "type re RerankResult <- ./types/index.js",
+     "type re ResponseFormat <- ./types/index.js",
+     "type re RetryConfig <- ./gateway-config.js",
+     "type re RetryPolicyOptions <- ./retry-policy.js",
+     "type re RoutingCondition <- ./gateway-config.js",
+     "type re RunToolsParams <- ./run-tools.js",
+     "type re RunToolsResult <- ./run-tools.js",
+     "type re SessionOptions <- ./session.js",
+     "type re SessionSummary <- ./callbacks.js",
+     "type re SpeechCreateParams <- ./types/index.js",
+     "type re StreamChoice <- ./types/index.js",
+     "type re StreamErrorOptions <- ./errors.js",
+     "type re StreamEvent <- ./stream-events.js",
+     "type re StreamInfo <- ./callbacks.js",
+     "type re TimeoutConfig <- ./gateway-config.js",
+     "type re ToolCall <- ./types/index.js",
+     "type re ToolCallDelta <- ./types/index.js",
+     "type re ToolDefinition <- ./types/index.js",
+     "type re ToolStep <- ./run-tools.js",
+     "type re ToolWithExecute <- ./run-tools.js",
+     "type re TraceContext <- ./trace-context.js",
+     "type re TraceContextManagerOptions <- ./trace-context.js",
+     "type re TrafficMirrorConfig <- ./gateway-config.js",
+     "type re Transcription <- ./types/index.js",
+     "type re TranscriptionCreateParams <- ./types/index.js",
+     "type re Translation <- ./types/index.js",
+     "type re TranslationCreateParams <- ./types/index.js",
+     "type re Usage <- ./types/index.js",
+     "type re ValidationResult <- ./validate-response.js",
+     "type re WithResponseResult <- ./base-client.js"
+    ],
+    "sha256": "d064ebd60e9a746efbbd87e824ef5445541e6f58e72d96fddbe32a446bb8b474"
+   },
+   "dist/cjs/middleware.d.ts": {
+    "exports": [
+     "function composeMiddlewares",
+     "function createMiddleware",
+     "interface MiddlewareContext",
+     "interface MiddlewareResult",
+     "type Middleware",
+     "type NextFn"
+    ],
+    "sha256": "dbade5f0e8d44af5ff14c1b25eb440c289d381dd3e17b6c563c9d7fa21195ff1"
+   },
+   "dist/cjs/models-info.d.ts": {
+    "exports": [
+     "const modelAliasMap",
+     "function getModelInfo",
+     "function getValidModels",
+     "function registerModel",
+     "function supportsFunctionCalling",
+     "function supportsJsonMode",
+     "function supportsResponseSchema",
+     "function supportsVision",
+     "function validateEnvironment",
+     "interface ModelInfo"
+    ],
+    "sha256": "76cde1c8dfebd7152b0d0be1325297e6ad73c638fd94c827784fc5ec906a0d51"
+   },
+   "dist/cjs/nextjs.d.ts": {
+    "exports": [
+     "function createAgentCCClient",
+     "function resetAgentCCClient",
+     "function streamResponse"
+    ],
+    "sha256": "9715934e95ce62a852e1683be3ff4f097288d6b03739e15eb2e574d2cb50e9f6"
+   },
+   "dist/cjs/otel-callback.d.ts": {
+    "exports": [
+     "class OTelCallback",
+     "interface OTelCallbackOptions",
+     "interface OTelCounter",
+     "interface OTelHistogram",
+     "interface OTelMeter",
+     "interface OTelSpan",
+     "interface OTelTracer"
+    ],
+    "sha256": "0a0f3b272729ad05ee8e6e460cd4866a77c92a3bea57e67f4e29b6a239af5d77"
+   },
+   "dist/cjs/pagination.d.ts": {
+    "exports": [
+     "class PaginatedList"
+    ],
+    "sha256": "70adea6c8aafd7d70b27eff137730e3914919125e17ec659e226c2b0516a78f2"
+   },
+   "dist/cjs/patch-openai.d.ts": {
+    "exports": [
+     "function patchOpenAI"
+    ],
+    "sha256": "3b6f0fbb758ac4a2b9389c82d5c5aa6aa17603fd7b0e5cec8fc7fc8ea9d22097"
+   },
+   "dist/cjs/pre-call-rules.d.ts": {
+    "exports": [
+     "function allowModels",
+     "function blockModels",
+     "function evaluatePreCallRules",
+     "function requireSessionId",
+     "interface PreCallRuleInput",
+     "interface PreCallRuleResult",
+     "type PreCallRule"
+    ],
+    "sha256": "e7172f375c675e1a549bba1eda0f877a3ecbf23e243577d5767b5fe6d4df1c08"
+   },
+   "dist/cjs/redact.d.ts": {
+    "exports": [
+     "function redactCallbackRequest"
+    ],
+    "sha256": "08fddbd1b4e669d6e3e53f520ce98f1764f30d1b2683c845e36551fef54ff13a"
+   },
+   "dist/cjs/resources/audio.d.ts": {
+    "exports": [
+     "class Audio"
+    ],
+    "sha256": "05e76cec72b29400f2556b71aad6105d41669f1c56bee27acb68e4d4ae1bbd14"
+   },
+   "dist/cjs/resources/batches.d.ts": {
+    "exports": [
+     "class Batches"
+    ],
+    "sha256": "65b8d3231ac41a45d48b16c27cb31aef001311e3a8f66ab87c79a8026fab8aaf"
+   },
+   "dist/cjs/resources/chat/completions.d.ts": {
+    "exports": [
+     "class ChatCompletions"
+    ],
+    "sha256": "26db1b5cb6f837f5c3d72a637799aef431653887e4bee0e1ffd253ca78836008"
+   },
+   "dist/cjs/resources/chat/index.d.ts": {
+    "exports": [
+     "class Chat",
+     "re ChatCompletions"
+    ],
+    "sha256": "189b90ddbd5789d289b95e0f1bf0d02f8be49028569ebbce93c4492aab2f5c03"
+   },
+   "dist/cjs/resources/completions.d.ts": {
+    "exports": [
+     "class Completions"
+    ],
+    "sha256": "03f8cc210b2781db731a4eed43ca29c7ff88b98ff3dfa12c25cf25c5f42df2c6"
+   },
+   "dist/cjs/resources/embeddings.d.ts": {
+    "exports": [
+     "class Embeddings"
+    ],
+    "sha256": "876bd15c7eeb4996f5d3667d332a878cfa9579bf14bce70c08ceaae1a9d4cf14"
+   },
+   "dist/cjs/resources/files.d.ts": {
+    "exports": [
+     "class Files"
+    ],
+    "sha256": "7a86b945a939d488df8da9f4f949862a4fecbb7252b8257c0aa0c1cb563a549e"
+   },
+   "dist/cjs/resources/images.d.ts": {
+    "exports": [
+     "class Images"
+    ],
+    "sha256": "97f7f15c126084f43bed262467dea83e577d9b4afa5537df15be56948c336bf2"
+   },
+   "dist/cjs/resources/index.d.ts": {
+    "exports": [
+     "re Audio <- ./audio.js",
+     "re Batches <- ./batches.js",
+     "re Chat <- ./chat/index.js",
+     "re ChatCompletions <- ./chat/index.js",
+     "re Completions <- ./completions.js",
+     "re Embeddings <- ./embeddings.js",
+     "re Files <- ./files.js",
+     "re Images <- ./images.js",
+     "re Models <- ./models.js",
+     "re Moderations <- ./moderations.js",
+     "re Rerank <- ./rerank.js"
+    ],
+    "sha256": "04959d29cc3987b21b20613873ee3c26c89362d4dc394f4c2352f0b39ddeed1e"
+   },
+   "dist/cjs/resources/models.d.ts": {
+    "exports": [
+     "class Models"
+    ],
+    "sha256": "f3e74bfe539231c081e00d8546fcd085821a40407af6e0be2b8af676d9c53870"
+   },
+   "dist/cjs/resources/moderations.d.ts": {
+    "exports": [
+     "class Moderations"
+    ],
+    "sha256": "76c3b3fc49ea9f5cf492443961a292aef12da88df9e8c731c4e49a071a3dc6b9"
+   },
+   "dist/cjs/resources/rerank.d.ts": {
+    "exports": [
+     "class Rerank"
+    ],
+    "sha256": "ecb916dd63fc7e73cb9945ffd5a2636d7f44c3f32a4e31da111b46aa09ec4a42"
+   },
+   "dist/cjs/retry-policy.d.ts": {
+    "exports": [
+     "class RetryPolicy",
+     "interface RetryPolicyOptions"
+    ],
+    "sha256": "bad5b82b46f4b3a36725145296d28c8bd03b5cbd68e831ef544fbb2744c9bf5d"
+   },
+   "dist/cjs/run-tools.d.ts": {
+    "exports": [
+     "class RunToolsRunner",
+     "interface RunToolsParams",
+     "interface RunToolsResult",
+     "interface ToolStep",
+     "interface ToolWithExecute"
+    ],
+    "sha256": "8f1411381461f3a40238bc37fd4f78e51673b42891e6d30eff29793749e9eadf"
+   },
+   "dist/cjs/session.d.ts": {
+    "exports": [
+     "class Session",
+     "interface SessionOptions"
+    ],
+    "sha256": "aa42d3a1f5648699ef7a62a650fe92c2ade2e6cbb9c7c1a3efc1b26dcb38e871"
+   },
+   "dist/cjs/stream-events.d.ts": {
+    "exports": [
+     "type StreamEvent"
+    ],
+    "sha256": "d38db5a225fa23dacc30e3273246dfb865cf0fef081d87a8f1162b9740eb2cf8"
+   },
+   "dist/cjs/streaming.d.ts": {
+    "exports": [
+     "class ChunkAccumulator",
+     "class Stream",
+     "class StreamManager",
+     "function parseSSE"
+    ],
+    "sha256": "8c2a7c85f276ce0c80e84341c9666bfb38e869bfb1f292501b645cf30092f0b1"
+   },
+   "dist/cjs/structured-output.d.ts": {
+    "exports": [
+     "function isZodSchema",
+     "function zodToJsonSchema"
+    ],
+    "sha256": "b6c64be1bac502a316f29287388b61860a3a1660df1b08c681f1ced9cea41765"
+   },
+   "dist/cjs/testing.d.ts": {
+    "exports": [
+     "class MockAgentCC",
+     "class MockChat",
+     "class MockChatCompletions",
+     "class MockEmbeddings",
+     "function assertAgentCCMetadata",
+     "function assertCompletionHasContent",
+     "function assertCompletionValid",
+     "function assertCostTracked",
+     "function assertUsageValid",
+     "function mockAgentCCMetadata",
+     "function mockCompletion",
+     "function mockUsage"
+    ],
+    "sha256": "b500340efe72a0b1f2469580c70402c8718058cb92ae7727cb2563d7a455c5f3"
+   },
+   "dist/cjs/token-encoding.d.ts": {
+    "exports": [
+     "function _resetTokenizerCache",
+     "function decode",
+     "function encode",
+     "function getEncodingForModel"
+    ],
+    "sha256": "63d854cbb432e2dfc50bc0e76bd60d846ac5c7e4ab7a33319e531c3a0a1ba116"
+   },
+   "dist/cjs/tokens.d.ts": {
+    "exports": [
+     "function completionCost",
+     "function completionCostFromResponse",
+     "function getContentPolicyFallback",
+     "function getContextWindowFallback",
+     "function getMaxOutputTokens",
+     "function getMaxTokens",
+     "function isPromptCachingValid",
+     "function tokenCounter",
+     "function trimMessages",
+     "interface ChatMessage"
+    ],
+    "sha256": "a648da0b7ee48c541fd1b9176f74dbad8d45967d24207d6cd9d742ae35a1c576"
+   },
+   "dist/cjs/trace-context.d.ts": {
+    "exports": [
+     "class TraceContextManager",
+     "function formatTraceparent",
+     "function generateSpanId",
+     "function generateTraceId",
+     "function parseTraceparent",
+     "interface TraceContext",
+     "interface TraceContextManagerOptions"
+    ],
+    "sha256": "b4e0b6f6d0fe61baae50c92ce7a02f162172f831b35f1d6e8a69cf08ac21c54c"
+   },
+   "dist/cjs/types/audio.d.ts": {
+    "exports": [
+     "interface SpeechCreateParams",
+     "interface Transcription",
+     "interface TranscriptionCreateParams",
+     "interface Translation",
+     "interface TranslationCreateParams"
+    ],
+    "sha256": "8a028181354c0853a979bef0b5afe36d19a9708aedb0eccb530542e11795309f"
+   },
+   "dist/cjs/types/batch.d.ts": {
+    "exports": [
+     "interface Batch",
+     "interface BatchCreateParams",
+     "interface BatchList"
+    ],
+    "sha256": "007afaeef07ebdc1de1295de8f3fa440e805e23b3ad67d30de7fab36b74589f9"
+   },
+   "dist/cjs/types/chat/chat-completion-chunk.d.ts": {
+    "exports": [
+     "interface ChatCompletionChunk",
+     "interface Delta",
+     "interface FunctionCallDelta",
+     "interface StreamChoice",
+     "interface ToolCallDelta"
+    ],
+    "sha256": "b299b8d45ee64e113f5444af386d53508c3860c83674cf792952386876eb6af9"
+   },
+   "dist/cjs/types/chat/chat-completion.d.ts": {
+    "exports": [
+     "interface ChatCompletion",
+     "interface ChatCompletionMessage",
+     "interface Choice",
+     "interface FunctionCall",
+     "interface ToolCall"
+    ],
+    "sha256": "6618aaad84697373d79e5bf2c990bc6c8b58f838523f839bf0e9d27492d52b56"
+   },
+   "dist/cjs/types/chat/completion-create-params.d.ts": {
+    "exports": [
+     "interface ChatCompletionCreateParams",
+     "interface ChatCompletionMessageParam",
+     "interface ContentPart",
+     "interface FunctionDefinition",
+     "interface ResponseFormat",
+     "interface ToolDefinition"
+    ],
+    "sha256": "690e98461ab4ce7395ba137fa966fd1036b55f03c013c3644137802b8845212b"
+   },
+   "dist/cjs/types/chat/index.d.ts": {
+    "exports": [
+     "type re ChatCompletion <- ./chat-completion.js",
+     "type re ChatCompletionChunk <- ./chat-completion-chunk.js",
+     "type re ChatCompletionCreateParams <- ./completion-create-params.js",
+     "type re ChatCompletionMessage <- ./chat-completion.js",
+     "type re ChatCompletionMessageParam <- ./completion-create-params.js",
+     "type re Choice <- ./chat-completion.js",
+     "type re ContentPart <- ./completion-create-params.js",
+     "type re Delta <- ./chat-completion-chunk.js",
+     "type re FunctionCall <- ./chat-completion.js",
+     "type re FunctionCallDelta <- ./chat-completion-chunk.js",
+     "type re FunctionDefinition <- ./completion-create-params.js",
+     "type re ResponseFormat <- ./completion-create-params.js",
+     "type re StreamChoice <- ./chat-completion-chunk.js",
+     "type re ToolCall <- ./chat-completion.js",
+     "type re ToolCallDelta <- ./chat-completion-chunk.js",
+     "type re ToolDefinition <- ./completion-create-params.js"
+    ],
+    "sha256": "93a155cde163851f5237eb854b69cdbbb1283b7d24f400b36e570eef3feb7582"
+   },
+   "dist/cjs/types/completion.d.ts": {
+    "exports": [
+     "interface Completion",
+     "interface CompletionChoice",
+     "interface CompletionCreateParams"
+    ],
+    "sha256": "a731cb6466855c32b58b080b32f734c39ce52751b964caf53c1a4ce7974cd76f"
+   },
+   "dist/cjs/types/embedding.d.ts": {
+    "exports": [
+     "interface Embedding",
+     "interface EmbeddingCreateParams",
+     "interface EmbeddingResponse"
+    ],
+    "sha256": "44ca2dcb8cbfa8ded276b5b49cbf413bcee6eefd670e64936e4ba8e951400cb5"
+   },
+   "dist/cjs/types/files.d.ts": {
+    "exports": [
+     "interface FileList",
+     "interface FileObject",
+     "interface FileUploadParams"
+    ],
+    "sha256": "bd147b441f3d0ab901cf31bf7ad97195aa010f5c2ef0370b2ed3857e3c0b721b"
+   },
+   "dist/cjs/types/image.d.ts": {
+    "exports": [
+     "interface ImageData",
+     "interface ImageGenerateParams",
+     "interface ImageResponse"
+    ],
+    "sha256": "ab297dcc7c38caa936279d0c1c373ac0ffc3c0b571bd1f64f1175b2b2f90b74d"
+   },
+   "dist/cjs/types/index.d.ts": {
+    "exports": [
+     "re parseAgentCCMetadata <- ./shared.js",
+     "type re AgentCCMetadata <- ./shared.js",
+     "type re Batch <- ./batch.js",
+     "type re BatchCreateParams <- ./batch.js",
+     "type re BatchList <- ./batch.js",
+     "type re ChatCompletion <- ./chat/index.js",
+     "type re ChatCompletionChunk <- ./chat/index.js",
+     "type re ChatCompletionCreateParams <- ./chat/index.js",
+     "type re ChatCompletionMessage <- ./chat/index.js",
+     "type re ChatCompletionMessageParam <- ./chat/index.js",
+     "type re Choice <- ./chat/index.js",
+     "type re Completion <- ./completion.js",
+     "type re CompletionChoice <- ./completion.js",
+     "type re CompletionCreateParams <- ./completion.js",
+     "type re ContentPart <- ./chat/index.js",
+     "type re Delta <- ./chat/index.js",
+     "type re Embedding <- ./embedding.js",
+     "type re EmbeddingCreateParams <- ./embedding.js",
+     "type re EmbeddingResponse <- ./embedding.js",
+     "type re FileList <- ./files.js",
+     "type re FileObject <- ./files.js",
+     "type re FileUploadParams <- ./files.js",
+     "type re FunctionCall <- ./chat/index.js",
+     "type re FunctionCallDelta <- ./chat/index.js",
+     "type re FunctionDefinition <- ./chat/index.js",
+     "type re ImageData <- ./image.js",
+     "type re ImageGenerateParams <- ./image.js",
+     "type re ImageResponse <- ./image.js",
+     "type re Model <- ./model.js",
+     "type re ModelList <- ./model.js",
+     "type re ModerationCreateParams <- ./moderation.js",
+     "type re ModerationResponse <- ./moderation.js",
+     "type re ModerationResult <- ./moderation.js",
+     "type re RateLimitInfo <- ./shared.js",
+     "type re RerankParams <- ./rerank.js",
+     "type re RerankResponse <- ./rerank.js",
+     "type re RerankResult <- ./rerank.js",
+     "type re ResponseFormat <- ./chat/index.js",
+     "type re SpeechCreateParams <- ./audio.js",
+     "type re StreamChoice <- ./chat/index.js",
+     "type re ToolCall <- ./chat/index.js",
+     "type re ToolCallDelta <- ./chat/index.js",
+     "type re ToolDefinition <- ./chat/index.js",
+     "type re Transcription <- ./audio.js",
+     "type re TranscriptionCreateParams <- ./audio.js",
+     "type re Translation <- ./audio.js",
+     "type re TranslationCreateParams <- ./audio.js",
+     "type re Usage <- ./shared.js"
+    ],
+    "sha256": "7e8ae70335d88e3a7c0ee830aba2af03e4ef218d7d3a8d6994f5688c1cda737d"
+   },
+   "dist/cjs/types/model.d.ts": {
+    "exports": [
+     "interface Model",
+     "interface ModelList"
+    ],
+    "sha256": "3ed2e6c98c5f3cb6b5803563c890a520d5904d13bfd26e025035555106742805"
+   },
+   "dist/cjs/types/moderation.d.ts": {
+    "exports": [
+     "interface ModerationCategories",
+     "interface ModerationCategoryScores",
+     "interface ModerationCreateParams",
+     "interface ModerationResponse",
+     "interface ModerationResult"
+    ],
+    "sha256": "7f1fdf033c704e11195d9ad88b7e653f66e02f8b4db807b6939d98c459f4ea3d"
+   },
+   "dist/cjs/types/rerank.d.ts": {
+    "exports": [
+     "interface RerankParams",
+     "interface RerankResponse",
+     "interface RerankResult"
+    ],
+    "sha256": "77aa60527b4d3dc11fd4664eaa1eb432ac41d286343e572de22736823d632d62"
+   },
+   "dist/cjs/types/shared.d.ts": {
+    "exports": [
+     "function parseAgentCCMetadata",
+     "interface AgentCCMetadata",
+     "interface RateLimitInfo",
+     "interface Usage"
+    ],
+    "sha256": "a1f1026e998138a2343f9ff0a1c73e25a17eb8b79b329ccf4b6d1d47402a548d"
+   },
+   "dist/cjs/validate-response.d.ts": {
+    "exports": [
+     "function toResponseFormat",
+     "function validateJsonResponse",
+     "interface ValidationResult"
+    ],
+    "sha256": "47ca961190571e87db6a9544ade3caa9b4ccc64286f1974981d35a33e56152f0"
+   },
+   "dist/esm/agentcc-params.d.ts": {
+    "exports": [
+     "function extractAgentCCParams"
+    ],
+    "sha256": "2b0a64f4b75f37f50b1b0a967fdd80585078b39ed31b3644af50ce4180055007"
+   },
+   "dist/esm/base-client.d.ts": {
+    "exports": [
+     "class BaseClient",
+     "interface ClientOptions",
+     "interface RequestOptions",
+     "interface WithResponseResult"
+    ],
+    "sha256": "75ec82f6996c4499c2e0364f414f9a26368aa340bafd204206cd25a102a3753e"
+   },
+   "dist/esm/batch.d.ts": {
+    "exports": [
+     "function batchCompletion",
+     "function batchCompletionModels",
+     "interface BatchCompletionModelsParams",
+     "interface BatchCompletionParams",
+     "interface ModelCompletionResult"
+    ],
+    "sha256": "b9cde57badf12440d7bff30395a4466d9b301c9f7fbad1b5552201991876d815"
+   },
+   "dist/esm/budget.d.ts": {
+    "exports": [
+     "class BudgetManager",
+     "interface BudgetManagerOptions"
+    ],
+    "sha256": "239c4134a51e505c7cd6b2cfce7c8f0edd84794ce3390d6336539cf6d8791338"
+   },
+   "dist/esm/callbacks-builtin.d.ts": {
+    "exports": [
+     "class JSONLoggingCallback",
+     "class LoggingCallback",
+     "class MetricsCallback"
+    ],
+    "sha256": "04a50bb213e32254b60c13d949bee51935cc2136198e22d508eee397bd894196"
+   },
+   "dist/esm/callbacks.d.ts": {
+    "exports": [
+     "class CallbackHandler",
+     "function invokeCallbacks",
+     "interface CallbackRequest",
+     "interface CallbackResponse",
+     "interface SessionSummary",
+     "interface StreamInfo"
+    ],
+    "sha256": "ba88a3484c7fbb8854e3ffc25c9ab6fa60fe608046295d9d13de8f63fb3c6eba"
+   },
+   "dist/esm/client.d.ts": {
+    "exports": [
+     "class AgentCC"
+    ],
+    "sha256": "ee86825e0c0b7e3c645f904c524ec2472af32acd1e4046038649c858b17cd451"
+   },
+   "dist/esm/constants.d.ts": {
+    "exports": [
+     "const AGENTCC_GATEWAY_URL",
+     "const DEFAULT_BASE_URL",
+     "const DEFAULT_MAX_RETRIES",
+     "const DEFAULT_TIMEOUT",
+     "const HEADER_API_KEY",
+     "const HEADER_CACHE_CONTROL",
+     "const HEADER_CACHE_FORCE_REFRESH",
+     "const HEADER_CACHE_NAMESPACE",
+     "const HEADER_CACHE_TTL",
+     "const HEADER_CONFIG",
+     "const HEADER_CONTENT_TYPE",
+     "const HEADER_GUARDRAIL_POLICY",
+     "const HEADER_METADATA",
+     "const HEADER_RATELIMIT_LIMIT",
+     "const HEADER_RATELIMIT_REMAINING",
+     "const HEADER_RATELIMIT_RESET",
+     "const HEADER_REQUEST_TIMEOUT",
+     "const HEADER_RESPONSE_CACHE",
+     "const HEADER_RESPONSE_COST",
+     "const HEADER_RESPONSE_FALLBACK_USED",
+     "const HEADER_RESPONSE_GUARDRAIL_ACTION",
+     "const HEADER_RESPONSE_GUARDRAIL_CONFIDENCE",
+     "const HEADER_RESPONSE_GUARDRAIL_MESSAGE",
+     "const HEADER_RESPONSE_GUARDRAIL_NAME",
+     "const HEADER_RESPONSE_GUARDRAIL_TRIGGERED",
+     "const HEADER_RESPONSE_LATENCY",
+     "const HEADER_RESPONSE_MODEL_USED",
+     "const HEADER_RESPONSE_PROVIDER",
+     "const HEADER_RESPONSE_REQUEST_ID",
+     "const HEADER_RESPONSE_ROUTING_STRATEGY",
+     "const HEADER_RESPONSE_TIMEOUT",
+     "const HEADER_RESPONSE_TRACE_ID",
+     "const HEADER_SDK_VERSION",
+     "const HEADER_SESSION_ID",
+     "const HEADER_SESSION_NAME",
+     "const HEADER_SESSION_PATH",
+     "const HEADER_TRACE_ID",
+     "const HEADER_USER_AGENT",
+     "const NOT_GIVEN",
+     "const RETRYABLE_STATUS_CODES",
+     "const VERSION",
+     "function isNotGiven",
+     "type NotGiven"
+    ],
+    "sha256": "4286c2a274e4b5796b7fd7d8205b9d1f94867523903f612c18c8ead90a7839e9"
+   },
+   "dist/esm/dry-run.d.ts": {
+    "exports": [
+     "interface DryRunResult"
+    ],
+    "sha256": "04fd4b0690442c8ea1b3cb124ec3bb627db12010b94ad81bef77afed4aeffb13"
+   },
+   "dist/esm/errors.d.ts": {
+    "exports": [
+     "class APIConnectionError",
+     "class APIStatusError",
+     "class APITimeoutError",
+     "class AgentCCError",
+     "class AuthenticationError",
+     "class BadGatewayError",
+     "class BadRequestError",
+     "class GatewayTimeoutError",
+     "class GuardrailBlockedError",
+     "class GuardrailWarning",
+     "class InternalServerError",
+     "class NotFoundError",
+     "class PermissionDeniedError",
+     "class RateLimitError",
+     "class ServiceUnavailableError",
+     "class StreamError",
+     "class UnprocessableEntityError",
+     "interface ErrorBody",
+     "interface StreamErrorOptions"
+    ],
+    "sha256": "3610cd7f47c2b52f31471a7f97e01c2e4c1ff42ef37514d5a61d98350fc2c1b5"
+   },
+   "dist/esm/express.d.ts": {
+    "exports": [
+     "function agentccMiddleware",
+     "interface AgentCCMiddlewareOptions"
+    ],
+    "sha256": "a1d86bbd74ce7450824d3724e42045111399e97d571ee38b6273c4107f086380"
+   },
+   "dist/esm/function-to-tool.d.ts": {
+    "exports": [
+     "function functionToTool",
+     "interface FunctionToToolOptions"
+    ],
+    "sha256": "6b11baa9909e59db227635fc7110d5b2815775cbb8303ebebc727ae29c817e89"
+   },
+   "dist/esm/gateway-config.d.ts": {
+    "exports": [
+     "function createHeaders",
+     "function gatewayConfigToDict",
+     "function gatewayConfigToHeaders",
+     "interface CacheConfig",
+     "interface ConditionalRoutingConfig",
+     "interface CreateHeadersOptions",
+     "interface FallbackConfig",
+     "interface FallbackTarget",
+     "interface GatewayConfig",
+     "interface GuardrailCheck",
+     "interface GuardrailConfig",
+     "interface LoadBalanceConfig",
+     "interface LoadBalanceTarget",
+     "interface RetryConfig",
+     "interface RoutingCondition",
+     "interface TimeoutConfig",
+     "interface TrafficMirrorConfig"
+    ],
+    "sha256": "219ba8acc90938021264f7f6e1b6a475eed33aea1a66c520d4758f6e251216ef"
+   },
+   "dist/esm/health-check.d.ts": {
+    "exports": [
+     "function checkValidKey",
+     "function healthCheck",
+     "interface CheckValidKeyOptions",
+     "interface CheckValidKeyResult",
+     "interface HealthCheckOptions",
+     "interface HealthCheckResult"
+    ],
+    "sha256": "12a32ee05b7604df83e66ce48d8397e2f92d869a735ecd0e3b898883c2f4624a"
+   },
+   "dist/esm/index.d.ts": {
+    "exports": [
+     "re AGENTCC_GATEWAY_URL <- ./constants.js",
+     "re APIConnectionError <- ./errors.js",
+     "re APIStatusError <- ./errors.js",
+     "re APITimeoutError <- ./errors.js",
+     "re AgentCC <- ./client.js",
+     "re AgentCCError <- ./errors.js",
+     "re AuthenticationError <- ./errors.js",
+     "re BadGatewayError <- ./errors.js",
+     "re BadRequestError <- ./errors.js",
+     "re BudgetManager <- ./budget.js",
+     "re CallbackHandler <- ./callbacks.js",
+     "re ChunkAccumulator <- ./streaming.js",
+     "re GatewayTimeoutError <- ./errors.js",
+     "re GuardrailBlockedError <- ./errors.js",
+     "re GuardrailWarning <- ./errors.js",
+     "re InternalServerError <- ./errors.js",
+     "re JSONLoggingCallback <- ./callbacks-builtin.js",
+     "re LoggingCallback <- ./callbacks-builtin.js",
+     "re MetricsCallback <- ./callbacks-builtin.js",
+     "re NOT_GIVEN <- ./constants.js",
+     "re NotFoundError <- ./errors.js",
+     "re OTelCallback <- ./otel-callback.js",
+     "re PaginatedList <- ./pagination.js",
+     "re PermissionDeniedError <- ./errors.js",
+     "re RateLimitError <- ./errors.js",
+     "re RetryPolicy <- ./retry-policy.js",
+     "re RunToolsRunner <- ./run-tools.js",
+     "re ServiceUnavailableError <- ./errors.js",
+     "re Session <- ./session.js",
+     "re Stream <- ./streaming.js",
+     "re StreamError <- ./errors.js",
+     "re StreamManager <- ./streaming.js",
+     "re TraceContextManager <- ./trace-context.js",
+     "re UnprocessableEntityError <- ./errors.js",
+     "re VERSION <- ./constants.js",
+     "re allowModels <- ./pre-call-rules.js",
+     "re batchCompletion <- ./batch.js",
+     "re batchCompletionModels <- ./batch.js",
+     "re blockModels <- ./pre-call-rules.js",
+     "re checkValidKey <- ./health-check.js",
+     "re completionCost <- ./tokens.js",
+     "re completionCostFromResponse <- ./tokens.js",
+     "re composeMiddlewares <- ./middleware.js",
+     "re createHeaders <- ./gateway-config.js",
+     "re createMiddleware <- ./middleware.js",
+     "re decode <- ./token-encoding.js",
+     "re encode <- ./token-encoding.js",
+     "re evaluatePreCallRules <- ./pre-call-rules.js",
+     "re formatTraceparent <- ./trace-context.js",
+     "re functionToTool <- ./function-to-tool.js",
+     "re generateSpanId <- ./trace-context.js",
+     "re generateTraceId <- ./trace-context.js",
+     "re getContentPolicyFallback <- ./tokens.js",
+     "re getContextWindowFallback <- ./tokens.js",
+     "re getEncodingForModel <- ./token-encoding.js",
+     "re getMaxOutputTokens <- ./tokens.js",
+     "re getMaxTokens <- ./tokens.js",
+     "re getModelInfo <- ./models-info.js",
+     "re getValidModels <- ./models-info.js",
+     "re healthCheck <- ./health-check.js",
+     "re invokeCallbacks <- ./callbacks.js",
+     "re isPromptCachingValid <- ./tokens.js",
+     "re isZodSchema <- ./structured-output.js",
+     "re modelAliasMap <- ./models-info.js",
+     "re parseTraceparent <- ./trace-context.js",
+     "re patchOpenAI <- ./patch-openai.js",
+     "re redactCallbackRequest <- ./redact.js",
+     "re registerModel <- ./models-info.js",
+     "re requireSessionId <- ./pre-call-rules.js",
+     "re supportsFunctionCalling <- ./models-info.js",
+     "re supportsJsonMode <- ./models-info.js",
+     "re supportsResponseSchema <- ./models-info.js",
+     "re supportsVision <- ./models-info.js",
+     "re toResponseFormat <- ./validate-response.js",
+     "re tokenCounter <- ./tokens.js",
+     "re trimMessages <- ./tokens.js",
+     "re validateEnvironment <- ./models-info.js",
+     "re validateJsonResponse <- ./validate-response.js",
+     "re zodToJsonSchema <- ./structured-output.js",
+     "type re AgentCCMetadata <- ./types/index.js",
+     "type re Batch <- ./types/index.js",
+     "type re BatchCompletionModelsParams <- ./batch.js",
+     "type re BatchCompletionParams <- ./batch.js",
+     "type re BatchCreateParams <- ./types/index.js",
+     "type re BatchList <- ./types/index.js",
+     "type re BudgetManagerOptions <- ./budget.js",
+     "type re CacheConfig <- ./gateway-config.js",
+     "type re CallbackRequest <- ./callbacks.js",
+     "type re CallbackResponse <- ./callbacks.js",
+     "type re ChatCompletion <- ./types/index.js",
+     "type re ChatCompletionChunk <- ./types/index.js",
+     "type re ChatCompletionCreateParams <- ./types/index.js",
+     "type re ChatCompletionMessage <- ./types/index.js",
+     "type re ChatCompletionMessageParam <- ./types/index.js",
+     "type re ChatMessage <- ./tokens.js",
+     "type re CheckValidKeyOptions <- ./health-check.js",
+     "type re CheckValidKeyResult <- ./health-check.js",
+     "type re Choice <- ./types/index.js",
+     "type re ClientOptions <- ./base-client.js",
+     "type re Completion <- ./types/index.js",
+     "type re CompletionChoice <- ./types/index.js",
+     "type re CompletionCreateParams <- ./types/index.js",
+     "type re ConditionalRoutingConfig <- ./gateway-config.js",
+     "type re ContentPart <- ./types/index.js",
+     "type re CreateHeadersOptions <- ./gateway-config.js",
+     "type re Delta <- ./types/index.js",
+     "type re DryRunResult <- ./dry-run.js",
+     "type re Embedding <- ./types/index.js",
+     "type re EmbeddingCreateParams <- ./types/index.js",
+     "type re EmbeddingResponse <- ./types/index.js",
+     "type re ErrorBody <- ./errors.js",
+     "type re FallbackConfig <- ./gateway-config.js",
+     "type re FallbackTarget <- ./gateway-config.js",
+     "type re FileList <- ./types/index.js",
+     "type re FileObject <- ./types/index.js",
+     "type re FileUploadParams <- ./types/index.js",
+     "type re FunctionCall <- ./types/index.js",
+     "type re FunctionCallDelta <- ./types/index.js",
+     "type re FunctionDefinition <- ./types/index.js",
+     "type re FunctionToToolOptions <- ./function-to-tool.js",
+     "type re GatewayConfig <- ./gateway-config.js",
+     "type re GuardrailCheck <- ./gateway-config.js",
+     "type re GuardrailConfig <- ./gateway-config.js",
+     "type re HealthCheckOptions <- ./health-check.js",
+     "type re HealthCheckResult as HealthCheckResponse <- ./health-check.js",
+     "type re ImageData <- ./types/index.js",
+     "type re ImageGenerateParams <- ./types/index.js",
+     "type re ImageResponse <- ./types/index.js",
+     "type re LoadBalanceConfig <- ./gateway-config.js",
+     "type re LoadBalanceTarget <- ./gateway-config.js",
+     "type re Middleware <- ./middleware.js",
+     "type re MiddlewareContext <- ./middleware.js",
+     "type re MiddlewareResult <- ./middleware.js",
+     "type re Model <- ./types/index.js",
+     "type re ModelCompletionResult <- ./batch.js",
+     "type re ModelInfo <- ./models-info.js",
+     "type re ModelList <- ./types/index.js",
+     "type re ModerationCreateParams <- ./types/index.js",
+     "type re ModerationResponse <- ./types/index.js",
+     "type re ModerationResult <- ./types/index.js",
+     "type re NextFn <- ./middleware.js",
+     "type re NotGiven <- ./constants.js",
+     "type re OTelCallbackOptions <- ./otel-callback.js",
+     "type re OTelCounter <- ./otel-callback.js",
+     "type re OTelHistogram <- ./otel-callback.js",
+     "type re OTelMeter <- ./otel-callback.js",
+     "type re OTelSpan <- ./otel-callback.js",
+     "type re OTelTracer <- ./otel-callback.js",
+     "type re PreCallRule <- ./pre-call-rules.js",
+     "type re PreCallRuleInput <- ./pre-call-rules.js",
+     "type re PreCallRuleResult <- ./pre-call-rules.js",
+     "type re RateLimitInfo <- ./types/index.js",
+     "type re RerankParams <- ./types/index.js",
+     "type re RerankResponse <- ./types/index.js",
+     "type re RerankResult <- ./types/index.js",
+     "type re ResponseFormat <- ./types/index.js",
+     "type re RetryConfig <- ./gateway-config.js",
+     "type re RetryPolicyOptions <- ./retry-policy.js",
+     "type re RoutingCondition <- ./gateway-config.js",
+     "type re RunToolsParams <- ./run-tools.js",
+     "type re RunToolsResult <- ./run-tools.js",
+     "type re SessionOptions <- ./session.js",
+     "type re SessionSummary <- ./callbacks.js",
+     "type re SpeechCreateParams <- ./types/index.js",
+     "type re StreamChoice <- ./types/index.js",
+     "type re StreamErrorOptions <- ./errors.js",
+     "type re StreamEvent <- ./stream-events.js",
+     "type re StreamInfo <- ./callbacks.js",
+     "type re TimeoutConfig <- ./gateway-config.js",
+     "type re ToolCall <- ./types/index.js",
+     "type re ToolCallDelta <- ./types/index.js",
+     "type re ToolDefinition <- ./types/index.js",
+     "type re ToolStep <- ./run-tools.js",
+     "type re ToolWithExecute <- ./run-tools.js",
+     "type re TraceContext <- ./trace-context.js",
+     "type re TraceContextManagerOptions <- ./trace-context.js",
+     "type re TrafficMirrorConfig <- ./gateway-config.js",
+     "type re Transcription <- ./types/index.js",
+     "type re TranscriptionCreateParams <- ./types/index.js",
+     "type re Translation <- ./types/index.js",
+     "type re TranslationCreateParams <- ./types/index.js",
+     "type re Usage <- ./types/index.js",
+     "type re ValidationResult <- ./validate-response.js",
+     "type re WithResponseResult <- ./base-client.js"
+    ],
+    "sha256": "d064ebd60e9a746efbbd87e824ef5445541e6f58e72d96fddbe32a446bb8b474"
+   },
+   "dist/esm/middleware.d.ts": {
+    "exports": [
+     "function composeMiddlewares",
+     "function createMiddleware",
+     "interface MiddlewareContext",
+     "interface MiddlewareResult",
+     "type Middleware",
+     "type NextFn"
+    ],
+    "sha256": "dbade5f0e8d44af5ff14c1b25eb440c289d381dd3e17b6c563c9d7fa21195ff1"
+   },
+   "dist/esm/models-info.d.ts": {
+    "exports": [
+     "const modelAliasMap",
+     "function getModelInfo",
+     "function getValidModels",
+     "function registerModel",
+     "function supportsFunctionCalling",
+     "function supportsJsonMode",
+     "function supportsResponseSchema",
+     "function supportsVision",
+     "function validateEnvironment",
+     "interface ModelInfo"
+    ],
+    "sha256": "76cde1c8dfebd7152b0d0be1325297e6ad73c638fd94c827784fc5ec906a0d51"
+   },
+   "dist/esm/nextjs.d.ts": {
+    "exports": [
+     "function createAgentCCClient",
+     "function resetAgentCCClient",
+     "function streamResponse"
+    ],
+    "sha256": "9715934e95ce62a852e1683be3ff4f097288d6b03739e15eb2e574d2cb50e9f6"
+   },
+   "dist/esm/otel-callback.d.ts": {
+    "exports": [
+     "class OTelCallback",
+     "interface OTelCallbackOptions",
+     "interface OTelCounter",
+     "interface OTelHistogram",
+     "interface OTelMeter",
+     "interface OTelSpan",
+     "interface OTelTracer"
+    ],
+    "sha256": "0a0f3b272729ad05ee8e6e460cd4866a77c92a3bea57e67f4e29b6a239af5d77"
+   },
+   "dist/esm/pagination.d.ts": {
+    "exports": [
+     "class PaginatedList"
+    ],
+    "sha256": "70adea6c8aafd7d70b27eff137730e3914919125e17ec659e226c2b0516a78f2"
+   },
+   "dist/esm/patch-openai.d.ts": {
+    "exports": [
+     "function patchOpenAI"
+    ],
+    "sha256": "3b6f0fbb758ac4a2b9389c82d5c5aa6aa17603fd7b0e5cec8fc7fc8ea9d22097"
+   },
+   "dist/esm/pre-call-rules.d.ts": {
+    "exports": [
+     "function allowModels",
+     "function blockModels",
+     "function evaluatePreCallRules",
+     "function requireSessionId",
+     "interface PreCallRuleInput",
+     "interface PreCallRuleResult",
+     "type PreCallRule"
+    ],
+    "sha256": "e7172f375c675e1a549bba1eda0f877a3ecbf23e243577d5767b5fe6d4df1c08"
+   },
+   "dist/esm/redact.d.ts": {
+    "exports": [
+     "function redactCallbackRequest"
+    ],
+    "sha256": "08fddbd1b4e669d6e3e53f520ce98f1764f30d1b2683c845e36551fef54ff13a"
+   },
+   "dist/esm/resources/audio.d.ts": {
+    "exports": [
+     "class Audio"
+    ],
+    "sha256": "05e76cec72b29400f2556b71aad6105d41669f1c56bee27acb68e4d4ae1bbd14"
+   },
+   "dist/esm/resources/batches.d.ts": {
+    "exports": [
+     "class Batches"
+    ],
+    "sha256": "65b8d3231ac41a45d48b16c27cb31aef001311e3a8f66ab87c79a8026fab8aaf"
+   },
+   "dist/esm/resources/chat/completions.d.ts": {
+    "exports": [
+     "class ChatCompletions"
+    ],
+    "sha256": "26db1b5cb6f837f5c3d72a637799aef431653887e4bee0e1ffd253ca78836008"
+   },
+   "dist/esm/resources/chat/index.d.ts": {
+    "exports": [
+     "class Chat",
+     "re ChatCompletions"
+    ],
+    "sha256": "189b90ddbd5789d289b95e0f1bf0d02f8be49028569ebbce93c4492aab2f5c03"
+   },
+   "dist/esm/resources/completions.d.ts": {
+    "exports": [
+     "class Completions"
+    ],
+    "sha256": "03f8cc210b2781db731a4eed43ca29c7ff88b98ff3dfa12c25cf25c5f42df2c6"
+   },
+   "dist/esm/resources/embeddings.d.ts": {
+    "exports": [
+     "class Embeddings"
+    ],
+    "sha256": "876bd15c7eeb4996f5d3667d332a878cfa9579bf14bce70c08ceaae1a9d4cf14"
+   },
+   "dist/esm/resources/files.d.ts": {
+    "exports": [
+     "class Files"
+    ],
+    "sha256": "7a86b945a939d488df8da9f4f949862a4fecbb7252b8257c0aa0c1cb563a549e"
+   },
+   "dist/esm/resources/images.d.ts": {
+    "exports": [
+     "class Images"
+    ],
+    "sha256": "97f7f15c126084f43bed262467dea83e577d9b4afa5537df15be56948c336bf2"
+   },
+   "dist/esm/resources/index.d.ts": {
+    "exports": [
+     "re Audio <- ./audio.js",
+     "re Batches <- ./batches.js",
+     "re Chat <- ./chat/index.js",
+     "re ChatCompletions <- ./chat/index.js",
+     "re Completions <- ./completions.js",
+     "re Embeddings <- ./embeddings.js",
+     "re Files <- ./files.js",
+     "re Images <- ./images.js",
+     "re Models <- ./models.js",
+     "re Moderations <- ./moderations.js",
+     "re Rerank <- ./rerank.js"
+    ],
+    "sha256": "04959d29cc3987b21b20613873ee3c26c89362d4dc394f4c2352f0b39ddeed1e"
+   },
+   "dist/esm/resources/models.d.ts": {
+    "exports": [
+     "class Models"
+    ],
+    "sha256": "f3e74bfe539231c081e00d8546fcd085821a40407af6e0be2b8af676d9c53870"
+   },
+   "dist/esm/resources/moderations.d.ts": {
+    "exports": [
+     "class Moderations"
+    ],
+    "sha256": "76c3b3fc49ea9f5cf492443961a292aef12da88df9e8c731c4e49a071a3dc6b9"
+   },
+   "dist/esm/resources/rerank.d.ts": {
+    "exports": [
+     "class Rerank"
+    ],
+    "sha256": "ecb916dd63fc7e73cb9945ffd5a2636d7f44c3f32a4e31da111b46aa09ec4a42"
+   },
+   "dist/esm/retry-policy.d.ts": {
+    "exports": [
+     "class RetryPolicy",
+     "interface RetryPolicyOptions"
+    ],
+    "sha256": "bad5b82b46f4b3a36725145296d28c8bd03b5cbd68e831ef544fbb2744c9bf5d"
+   },
+   "dist/esm/run-tools.d.ts": {
+    "exports": [
+     "class RunToolsRunner",
+     "interface RunToolsParams",
+     "interface RunToolsResult",
+     "interface ToolStep",
+     "interface ToolWithExecute"
+    ],
+    "sha256": "8f1411381461f3a40238bc37fd4f78e51673b42891e6d30eff29793749e9eadf"
+   },
+   "dist/esm/session.d.ts": {
+    "exports": [
+     "class Session",
+     "interface SessionOptions"
+    ],
+    "sha256": "aa42d3a1f5648699ef7a62a650fe92c2ade2e6cbb9c7c1a3efc1b26dcb38e871"
+   },
+   "dist/esm/stream-events.d.ts": {
+    "exports": [
+     "type StreamEvent"
+    ],
+    "sha256": "d38db5a225fa23dacc30e3273246dfb865cf0fef081d87a8f1162b9740eb2cf8"
+   },
+   "dist/esm/streaming.d.ts": {
+    "exports": [
+     "class ChunkAccumulator",
+     "class Stream",
+     "class StreamManager",
+     "function parseSSE"
+    ],
+    "sha256": "8c2a7c85f276ce0c80e84341c9666bfb38e869bfb1f292501b645cf30092f0b1"
+   },
+   "dist/esm/structured-output.d.ts": {
+    "exports": [
+     "function isZodSchema",
+     "function zodToJsonSchema"
+    ],
+    "sha256": "b6c64be1bac502a316f29287388b61860a3a1660df1b08c681f1ced9cea41765"
+   },
+   "dist/esm/testing.d.ts": {
+    "exports": [
+     "class MockAgentCC",
+     "class MockChat",
+     "class MockChatCompletions",
+     "class MockEmbeddings",
+     "function assertAgentCCMetadata",
+     "function assertCompletionHasContent",
+     "function assertCompletionValid",
+     "function assertCostTracked",
+     "function assertUsageValid",
+     "function mockAgentCCMetadata",
+     "function mockCompletion",
+     "function mockUsage"
+    ],
+    "sha256": "b500340efe72a0b1f2469580c70402c8718058cb92ae7727cb2563d7a455c5f3"
+   },
+   "dist/esm/token-encoding.d.ts": {
+    "exports": [
+     "function _resetTokenizerCache",
+     "function decode",
+     "function encode",
+     "function getEncodingForModel"
+    ],
+    "sha256": "63d854cbb432e2dfc50bc0e76bd60d846ac5c7e4ab7a33319e531c3a0a1ba116"
+   },
+   "dist/esm/tokens.d.ts": {
+    "exports": [
+     "function completionCost",
+     "function completionCostFromResponse",
+     "function getContentPolicyFallback",
+     "function getContextWindowFallback",
+     "function getMaxOutputTokens",
+     "function getMaxTokens",
+     "function isPromptCachingValid",
+     "function tokenCounter",
+     "function trimMessages",
+     "interface ChatMessage"
+    ],
+    "sha256": "a648da0b7ee48c541fd1b9176f74dbad8d45967d24207d6cd9d742ae35a1c576"
+   },
+   "dist/esm/trace-context.d.ts": {
+    "exports": [
+     "class TraceContextManager",
+     "function formatTraceparent",
+     "function generateSpanId",
+     "function generateTraceId",
+     "function parseTraceparent",
+     "interface TraceContext",
+     "interface TraceContextManagerOptions"
+    ],
+    "sha256": "b4e0b6f6d0fe61baae50c92ce7a02f162172f831b35f1d6e8a69cf08ac21c54c"
+   },
+   "dist/esm/types/audio.d.ts": {
+    "exports": [
+     "interface SpeechCreateParams",
+     "interface Transcription",
+     "interface TranscriptionCreateParams",
+     "interface Translation",
+     "interface TranslationCreateParams"
+    ],
+    "sha256": "8a028181354c0853a979bef0b5afe36d19a9708aedb0eccb530542e11795309f"
+   },
+   "dist/esm/types/batch.d.ts": {
+    "exports": [
+     "interface Batch",
+     "interface BatchCreateParams",
+     "interface BatchList"
+    ],
+    "sha256": "007afaeef07ebdc1de1295de8f3fa440e805e23b3ad67d30de7fab36b74589f9"
+   },
+   "dist/esm/types/chat/chat-completion-chunk.d.ts": {
+    "exports": [
+     "interface ChatCompletionChunk",
+     "interface Delta",
+     "interface FunctionCallDelta",
+     "interface StreamChoice",
+     "interface ToolCallDelta"
+    ],
+    "sha256": "b299b8d45ee64e113f5444af386d53508c3860c83674cf792952386876eb6af9"
+   },
+   "dist/esm/types/chat/chat-completion.d.ts": {
+    "exports": [
+     "interface ChatCompletion",
+     "interface ChatCompletionMessage",
+     "interface Choice",
+     "interface FunctionCall",
+     "interface ToolCall"
+    ],
+    "sha256": "6618aaad84697373d79e5bf2c990bc6c8b58f838523f839bf0e9d27492d52b56"
+   },
+   "dist/esm/types/chat/completion-create-params.d.ts": {
+    "exports": [
+     "interface ChatCompletionCreateParams",
+     "interface ChatCompletionMessageParam",
+     "interface ContentPart",
+     "interface FunctionDefinition",
+     "interface ResponseFormat",
+     "interface ToolDefinition"
+    ],
+    "sha256": "690e98461ab4ce7395ba137fa966fd1036b55f03c013c3644137802b8845212b"
+   },
+   "dist/esm/types/chat/index.d.ts": {
+    "exports": [
+     "type re ChatCompletion <- ./chat-completion.js",
+     "type re ChatCompletionChunk <- ./chat-completion-chunk.js",
+     "type re ChatCompletionCreateParams <- ./completion-create-params.js",
+     "type re ChatCompletionMessage <- ./chat-completion.js",
+     "type re ChatCompletionMessageParam <- ./completion-create-params.js",
+     "type re Choice <- ./chat-completion.js",
+     "type re ContentPart <- ./completion-create-params.js",
+     "type re Delta <- ./chat-completion-chunk.js",
+     "type re FunctionCall <- ./chat-completion.js",
+     "type re FunctionCallDelta <- ./chat-completion-chunk.js",
+     "type re FunctionDefinition <- ./completion-create-params.js",
+     "type re ResponseFormat <- ./completion-create-params.js",
+     "type re StreamChoice <- ./chat-completion-chunk.js",
+     "type re ToolCall <- ./chat-completion.js",
+     "type re ToolCallDelta <- ./chat-completion-chunk.js",
+     "type re ToolDefinition <- ./completion-create-params.js"
+    ],
+    "sha256": "93a155cde163851f5237eb854b69cdbbb1283b7d24f400b36e570eef3feb7582"
+   },
+   "dist/esm/types/completion.d.ts": {
+    "exports": [
+     "interface Completion",
+     "interface CompletionChoice",
+     "interface CompletionCreateParams"
+    ],
+    "sha256": "a731cb6466855c32b58b080b32f734c39ce52751b964caf53c1a4ce7974cd76f"
+   },
+   "dist/esm/types/embedding.d.ts": {
+    "exports": [
+     "interface Embedding",
+     "interface EmbeddingCreateParams",
+     "interface EmbeddingResponse"
+    ],
+    "sha256": "44ca2dcb8cbfa8ded276b5b49cbf413bcee6eefd670e64936e4ba8e951400cb5"
+   },
+   "dist/esm/types/files.d.ts": {
+    "exports": [
+     "interface FileList",
+     "interface FileObject",
+     "interface FileUploadParams"
+    ],
+    "sha256": "bd147b441f3d0ab901cf31bf7ad97195aa010f5c2ef0370b2ed3857e3c0b721b"
+   },
+   "dist/esm/types/image.d.ts": {
+    "exports": [
+     "interface ImageData",
+     "interface ImageGenerateParams",
+     "interface ImageResponse"
+    ],
+    "sha256": "ab297dcc7c38caa936279d0c1c373ac0ffc3c0b571bd1f64f1175b2b2f90b74d"
+   },
+   "dist/esm/types/index.d.ts": {
+    "exports": [
+     "re parseAgentCCMetadata <- ./shared.js",
+     "type re AgentCCMetadata <- ./shared.js",
+     "type re Batch <- ./batch.js",
+     "type re BatchCreateParams <- ./batch.js",
+     "type re BatchList <- ./batch.js",
+     "type re ChatCompletion <- ./chat/index.js",
+     "type re ChatCompletionChunk <- ./chat/index.js",
+     "type re ChatCompletionCreateParams <- ./chat/index.js",
+     "type re ChatCompletionMessage <- ./chat/index.js",
+     "type re ChatCompletionMessageParam <- ./chat/index.js",
+     "type re Choice <- ./chat/index.js",
+     "type re Completion <- ./completion.js",
+     "type re CompletionChoice <- ./completion.js",
+     "type re CompletionCreateParams <- ./completion.js",
+     "type re ContentPart <- ./chat/index.js",
+     "type re Delta <- ./chat/index.js",
+     "type re Embedding <- ./embedding.js",
+     "type re EmbeddingCreateParams <- ./embedding.js",
+     "type re EmbeddingResponse <- ./embedding.js",
+     "type re FileList <- ./files.js",
+     "type re FileObject <- ./files.js",
+     "type re FileUploadParams <- ./files.js",
+     "type re FunctionCall <- ./chat/index.js",
+     "type re FunctionCallDelta <- ./chat/index.js",
+     "type re FunctionDefinition <- ./chat/index.js",
+     "type re ImageData <- ./image.js",
+     "type re ImageGenerateParams <- ./image.js",
+     "type re ImageResponse <- ./image.js",
+     "type re Model <- ./model.js",
+     "type re ModelList <- ./model.js",
+     "type re ModerationCreateParams <- ./moderation.js",
+     "type re ModerationResponse <- ./moderation.js",
+     "type re ModerationResult <- ./moderation.js",
+     "type re RateLimitInfo <- ./shared.js",
+     "type re RerankParams <- ./rerank.js",
+     "type re RerankResponse <- ./rerank.js",
+     "type re RerankResult <- ./rerank.js",
+     "type re ResponseFormat <- ./chat/index.js",
+     "type re SpeechCreateParams <- ./audio.js",
+     "type re StreamChoice <- ./chat/index.js",
+     "type re ToolCall <- ./chat/index.js",
+     "type re ToolCallDelta <- ./chat/index.js",
+     "type re ToolDefinition <- ./chat/index.js",
+     "type re Transcription <- ./audio.js",
+     "type re TranscriptionCreateParams <- ./audio.js",
+     "type re Translation <- ./audio.js",
+     "type re TranslationCreateParams <- ./audio.js",
+     "type re Usage <- ./shared.js"
+    ],
+    "sha256": "7e8ae70335d88e3a7c0ee830aba2af03e4ef218d7d3a8d6994f5688c1cda737d"
+   },
+   "dist/esm/types/model.d.ts": {
+    "exports": [
+     "interface Model",
+     "interface ModelList"
+    ],
+    "sha256": "3ed2e6c98c5f3cb6b5803563c890a520d5904d13bfd26e025035555106742805"
+   },
+   "dist/esm/types/moderation.d.ts": {
+    "exports": [
+     "interface ModerationCategories",
+     "interface ModerationCategoryScores",
+     "interface ModerationCreateParams",
+     "interface ModerationResponse",
+     "interface ModerationResult"
+    ],
+    "sha256": "7f1fdf033c704e11195d9ad88b7e653f66e02f8b4db807b6939d98c459f4ea3d"
+   },
+   "dist/esm/types/rerank.d.ts": {
+    "exports": [
+     "interface RerankParams",
+     "interface RerankResponse",
+     "interface RerankResult"
+    ],
+    "sha256": "77aa60527b4d3dc11fd4664eaa1eb432ac41d286343e572de22736823d632d62"
+   },
+   "dist/esm/types/shared.d.ts": {
+    "exports": [
+     "function parseAgentCCMetadata",
+     "interface AgentCCMetadata",
+     "interface RateLimitInfo",
+     "interface Usage"
+    ],
+    "sha256": "a1f1026e998138a2343f9ff0a1c73e25a17eb8b79b329ccf4b6d1d47402a548d"
+   },
+   "dist/esm/validate-response.d.ts": {
+    "exports": [
+     "function toResponseFormat",
+     "function validateJsonResponse",
+     "interface ValidationResult"
+    ],
+    "sha256": "47ca961190571e87db6a9544ade3caa9b4ccc64286f1974981d35a33e56152f0"
+   }
+  }
+ },
+ "environment": {
+  "format": "esm",
+  "node": "v22.23.3",
+  "target": "client",
+  "versions": {
+   "@agentcc/client": "1.0.1",
+   "@agentcc/langchain": null,
+   "@agentcc/llamaindex": null,
+   "@agentcc/react": null,
+   "@agentcc/vercel": null,
+   "@ai-sdk/openai": null,
+   "react": null,
+   "react-test-renderer": null,
+   "zod": null
+  }
+ },
+ "files": {
+  "config.json": "5235aa4362cced1863e858bb507208e5a864e3d13f5370cb6385249f51253e56",
+  "env_matrix.json": "85e2decaa499cbbb3f65daec759542e1d09b6fe78c33d786ac4f19d7f394f250",
+  "express_nextjs.json": "9fcfe4a67ea3035358f6b82e6a3053dfe56ec639b88b36152bae7ef9206c00b0",
+  "header_merge.json": "71f4a118dfe9632ce64f4741e0074106e09005d150eaaf30efeccc74c9c3db23",
+  "mocks.json": "4403032c53bfcfabb3c982280f9c8f94eebc11793b41b4d9614b770596597d5b",
+  "params.json": "5e7e7a0a907f6eb9a3689ea6e915741d1d281e994a4e1f632d6b30c7231ee23a",
+  "resources.json": "0a909a628438f026332166b8c31e4026cec7d0d22a0a79ac05cc52d374fe00d8",
+  "response_headers.json": "4a7e8f2ab1380afa7a6507df235db77511c37c23750727c57e819c348b54dd71",
+  "retry.json": "41f70daa419adba643da1c9ecfcc910e07360cb2f4bcdaa59a5459ba00bf63f5",
+  "sse.json": "27d9c20c3df782e7d346057835332488f9b0b8307117280f1039f6414128ed50",
+  "statuses.json": "0b92c22349bab16cc9843013eaff7b25d9b6362cc6ce47964155ec743a129062",
+  "stream_extra.json": "d6dddf33fa802438ca038dd01d8f9b204aa590872366bc371f13c998d00ce0da",
+  "stream_fixture.json": "9921241513316fc85ddaa0cd1c77ab49fd86862fa502ff37241e323a4d8ef5b6",
+  "surface.json": "7775b49b93100a2c41c611706accb3141674b6c4678739e1d503fa357f8d41a7",
+  "timeouts.json": "5d4c2d10e7a2eebccbad21b1d67eabd0d0abbd4cb0c66dc3dfe594dd48ddfad7",
+  "utilities.json": "8397bdbd9806374ab7c353b745eab7bb563a38724d6d4761100dde8fe8fcb4c7"
+ },
+ "format": 1,
+ "loads": {
+  "@agentcc/client": {
+   "exports": [
+    "AGENTCC_GATEWAY_URL",
+    "APIConnectionError",
+    "APIStatusError",
+    "APITimeoutError",
+    "AgentCC",
+    "AgentCCError",
+    "AuthenticationError",
+    "BadGatewayError",
+    "BadRequestError",
+    "BudgetManager",
+    "CallbackHandler",
+    "ChunkAccumulator",
+    "GatewayTimeoutError",
+    "GuardrailBlockedError",
+    "GuardrailWarning",
+    "InternalServerError",
+    "JSONLoggingCallback",
+    "LoggingCallback",
+    "MetricsCallback",
+    "NOT_GIVEN",
+    "NotFoundError",
+    "OTelCallback",
+    "PaginatedList",
+    "PermissionDeniedError",
+    "RateLimitError",
+    "RetryPolicy",
+    "RunToolsRunner",
+    "ServiceUnavailableError",
+    "Session",
+    "Stream",
+    "StreamError",
+    "StreamManager",
+    "TraceContextManager",
+    "UnprocessableEntityError",
+    "VERSION",
+    "allowModels",
+    "batchCompletion",
+    "batchCompletionModels",
+    "blockModels",
+    "checkValidKey",
+    "completionCost",
+    "completionCostFromResponse",
+    "composeMiddlewares",
+    "createHeaders",
+    "createMiddleware",
+    "decode",
+    "encode",
+    "evaluatePreCallRules",
+    "formatTraceparent",
+    "functionToTool",
+    "generateSpanId",
+    "generateTraceId",
+    "getContentPolicyFallback",
+    "getContextWindowFallback",
+    "getEncodingForModel",
+    "getMaxOutputTokens",
+    "getMaxTokens",
+    "getModelInfo",
+    "getValidModels",
+    "healthCheck",
+    "invokeCallbacks",
+    "isPromptCachingValid",
+    "isZodSchema",
+    "modelAliasMap",
+    "parseTraceparent",
+    "patchOpenAI",
+    "redactCallbackRequest",
+    "registerModel",
+    "requireSessionId",
+    "supportsFunctionCalling",
+    "supportsJsonMode",
+    "supportsResponseSchema",
+    "supportsVision",
+    "toResponseFormat",
+    "tokenCounter",
+    "trimMessages",
+    "validateEnvironment",
+    "validateJsonResponse",
+    "zodToJsonSchema"
+   ],
+   "ok": true
+  },
+  "@agentcc/client/express": {
+   "exports": [
+    "agentccMiddleware"
+   ],
+   "ok": true
+  },
+  "@agentcc/client/nextjs": {
+   "exports": [
+    "createAgentCCClient",
+    "resetAgentCCClient",
+    "streamResponse"
+   ],
+   "ok": true
+  },
+  "@agentcc/client/testing": {
+   "exports": [
+    "MockAgentCC",
+    "MockChat",
+    "MockChatCompletions",
+    "MockEmbeddings",
+    "assertAgentCCMetadata",
+    "assertCompletionHasContent",
+    "assertCompletionValid",
+    "assertCostTracked",
+    "assertUsageValid",
+    "mockAgentCCMetadata",
+    "mockCompletion",
+    "mockUsage"
+   ],
+   "ok": true
+  }
+ },
+ "skipped_load_failed": 0
+}

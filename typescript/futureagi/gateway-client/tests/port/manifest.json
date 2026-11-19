@@ -1,0 +1,201 @@
+{
+ "about": "Where each @agentcc/client 1.0.1 test file (tests/port/vitest-legacy-client.json) and each @agentcc/react test file at client-patch-source (tests/port/react-vitest-legacy.json, named react/<file>) went. to: port = tests/<same file> in this suite, same test names (scripts/check-test-names.cjs proves it on every run); shim = code the gateway never applied, which stays with its tests in the @agentcc/client 2.0 compatibility package; live = gateway-client/tests/live/, which needs a running gateway. shim_tests sends single tests of a ported file to the shim; added lists tests the port wrote into a ported file; changed records each kept test whose body a numbered intended difference (tests/fixtures/gateway/intended-differences.json) changed.",
+ "files": {
+  "agentcc-params.test.ts": {
+   "to": "port"
+  },
+  "batch.test.ts": {
+   "to": "shim",
+   "delta": "D-21",
+   "why": "batchCompletion / batchCompletionModels: client-side fan-out over the public API; it stays in the 2.0 compatibility package."
+  },
+  "benchmark-deep.test.ts": {
+   "to": "live",
+   "why": "Needs a gateway on localhost:8090; it runs from gateway-client/tests/live/, gated by FI_GATEWAY_LIVE_BASE_URL."
+  },
+  "benchmark-latency.test.ts": {
+   "to": "live",
+   "why": "Needs a gateway on localhost:8090; it runs from gateway-client/tests/live/, gated by FI_GATEWAY_LIVE_BASE_URL."
+  },
+  "benchmark-v3.test.ts": {
+   "to": "live",
+   "why": "Needs a gateway on localhost:8090; it runs from gateway-client/tests/live/, gated by FI_GATEWAY_LIVE_BASE_URL."
+  },
+  "budget.test.ts": {
+   "to": "shim",
+   "delta": "D-21",
+   "why": "BudgetManager: never wired into requests; budgets are enforced by the gateway; it stays in the 2.0 compatibility package."
+  },
+  "callbacks-builtin.test.ts": {
+   "to": "port"
+  },
+  "callbacks.test.ts": {
+   "to": "port"
+  },
+  "client.test.ts": {
+   "to": "port",
+   "changed": {
+    "AgentCC client > constructs with defaults": "D-21: client.moderations and client.batches are gone (no gateway route); the test asserts they are undefined instead of defined.",
+    "AgentCC client > exports version": "D-03: VERSION is the @future-agi/sdk version, so the test compares it with typescript/futureagi/package.json (1.0.1 compared it with @agentcc/client 1.0.1)."
+   }
+  },
+  "dry-run.test.ts": {
+   "to": "port",
+   "shim_tests": {
+    "dryRun > applies modifyParams": "D-21: modifyParams is an option of the 2.0 compatibility package only; new AgentCC({ modifyParams }) raises TypeError here (tests/gateway/shim-only.test.ts)."
+   },
+   "changed": {
+    "dryRun > includes gateway config headers": "D-21: 1.0.1 passed config { cacheConfig: { enabled, ttlSeconds } } (no section of GatewayConfig) and asserted only that headers exist; GatewayConfig now takes cache.{ttl,namespace,force_refresh} only and raises for anything else, so the test sends cache.ttl 300 and asserts x-agentcc-cache-ttl and x-agentcc-config."
+   }
+  },
+  "e2e-real.test.ts": {
+   "to": "live",
+   "why": "Needs a gateway on localhost:8090; it runs from gateway-client/tests/live/, gated by FI_GATEWAY_LIVE_BASE_URL."
+  },
+  "errors.test.ts": {
+   "to": "port"
+  },
+  "express-middleware.test.ts": {
+   "to": "port"
+  },
+  "function-to-tool.test.ts": {
+   "to": "port"
+  },
+  "gateway-config.test.ts": {
+   "to": "port",
+   "changed": {
+    "GatewayConfig > gatewayConfigToDict strips undefined values": "D-21: 1.0.1 built the config from cache.enabled and a fallback section, which now raise TypeError; the undefined value is now a cache field (namespace)."
+   }
+  },
+  "health-check.test.ts": {
+   "to": "port"
+  },
+  "json-schema-validation.test.ts": {
+   "to": "port",
+   "shim_tests": {
+    "preCallRules integration > blocks request when pre-call rule fails": "D-21: preCallRules is an option of the 2.0 compatibility package only; new AgentCC({ preCallRules }) raises TypeError here (tests/gateway/shim-only.test.ts).",
+    "preCallRules integration > allows request when all rules pass": "D-21: as above."
+   }
+  },
+  "middleware.test.ts": {
+   "to": "shim",
+   "delta": "D-21",
+   "why": "createMiddleware / composeMiddlewares and use(): use() pushes middleware that no request ever runs (1.0.1 base-client.ts:25,109,162); the 2.0 compatibility package keeps use() inert and warns once."
+  },
+  "models-info.test.ts": {
+   "to": "shim",
+   "delta": "D-21",
+   "why": "getModelInfo and the model table: a local copy of about 23 models; frozen as pure functions in the 2.0 compatibility package."
+  },
+  "nextjs-helpers.test.ts": {
+   "to": "port"
+  },
+  "otel-callback.test.ts": {
+   "to": "port"
+  },
+  "pagination.test.ts": {
+   "to": "port"
+  },
+  "patch-openai.test.ts": {
+   "to": "shim",
+   "delta": "D-21",
+   "why": "patchOpenAI; it stays in the 2.0 compatibility package."
+  },
+  "pre-call-rules.test.ts": {
+   "to": "shim",
+   "delta": "D-21",
+   "why": "evaluatePreCallRules / allowModels / blockModels / requireSessionId; preCallRules is an option of the 2.0 compatibility package only."
+  },
+  "redact.test.ts": {
+   "to": "port"
+  },
+  "resources-audio.test.ts": {
+   "to": "port"
+  },
+  "resources-batches.test.ts": {
+   "to": "shim",
+   "delta": "D-21",
+   "why": "client.batches: the gateway at live-gateway-source serves no /v1/batches route, only the admin /-/batches (server.go:416-433, :558-560); it stays in the 2.0 compatibility package."
+  },
+  "resources-chat-completions.test.ts": {
+   "to": "port"
+  },
+  "resources-completions.test.ts": {
+   "to": "port"
+  },
+  "resources-embeddings.test.ts": {
+   "to": "port"
+  },
+  "resources-files.test.ts": {
+   "to": "port"
+  },
+  "resources-images.test.ts": {
+   "to": "port"
+  },
+  "resources-models.test.ts": {
+   "to": "port"
+  },
+  "resources-moderations.test.ts": {
+   "to": "shim",
+   "delta": "D-21",
+   "why": "client.moderations: the gateway at live-gateway-source serves no /v1/moderations route; it stays in the 2.0 compatibility package."
+  },
+  "resources-rerank.test.ts": {
+   "to": "port"
+  },
+  "retry-policy.test.ts": {
+   "to": "port"
+  },
+  "run-tools.test.ts": {
+   "to": "port"
+  },
+  "session.test.ts": {
+   "to": "port"
+  },
+  "shared-types.test.ts": {
+   "to": "port"
+  },
+  "stream-error.test.ts": {
+   "to": "port"
+  },
+  "stream-events.test.ts": {
+   "to": "port"
+  },
+  "streaming.test.ts": {
+   "to": "port"
+  },
+  "structured-output.test.ts": {
+   "to": "port"
+  },
+  "testing-utils.test.ts": {
+   "to": "port"
+  },
+  "token-encoding.test.ts": {
+   "to": "shim",
+   "delta": "D-21",
+   "why": "encode / decode / getEncodingForModel: local tokenizer tables; it stays in the 2.0 compatibility package."
+  },
+  "tokens.test.ts": {
+   "to": "shim",
+   "delta": "D-21",
+   "why": "tokenCounter / completionCost / trimMessages and the fallback tables: local price and context tables; cost comes from .agentcc.cost; it stays in the 2.0 compatibility package."
+  },
+  "trace-context.test.ts": {
+   "to": "port"
+  },
+  "validate-response.test.ts": {
+   "to": "port"
+  },
+  "react/hooks.test.ts": {
+   "to": "port",
+   "changed": {
+    "useAgentCCChat logic > client.chat.completions.stream can be called": "D-18: the test runs in jsdom, a browser page, so its client passes dangerouslyAllowBrowser: true",
+    "useAgentCCChat logic > client.chat.completions.create works for completion hook": "D-18: the test runs in jsdom, a browser page, so its client passes dangerouslyAllowBrowser: true",
+    "useAgentCCChat logic > client.chat.completions.create works for object hook with json_schema": "D-18: the test runs in jsdom, a browser page, so its client passes dangerouslyAllowBrowser: true"
+   }
+  },
+  "react/provider.test.ts": {
+   "to": "port"
+  }
+ }
+}

@@ -1,431 +1,251 @@
-"""fi.gateway: OpenAI-compatible client for the Future AGI gateway (Agent Command Center).
+"""Lazy gateway clients and utilities.
 
-    from fi.gateway import Gateway
-    gw = Gateway()   # FI_GATEWAY_API_KEY / FI_GATEWAY_URL (AGENTCC_* also work)
-
-This is the AgentCC SDK (formerly the separate ``agentcc`` package), vendored
-into ``futureagi``. ``AgentCC`` / ``AsyncAgentCC`` keep their original behaviour.
-Gateway management (keys, providers, logs) is a platform API: ``fi.Client().gateway``
-(the generated platform client, PR #35).
+``AgentCC`` requires an explicit gateway origin (argument or environment).
+``Gateway`` retains the released fixed HTTPS hosted default. Neither client
+uses the platform FI key pair as a gateway virtual key.
 """
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any
+
 from fi.gateway._constants import NOT_GIVEN as NOT_GIVEN
 from fi.gateway._constants import __version__ as __version__
 from fi.gateway._exceptions import (
-    APIConnectionError as APIConnectionError,
-)
-from fi.gateway._exceptions import (
-    APIStatusError as APIStatusError,
-)
-from fi.gateway._exceptions import (
-    APITimeoutError as APITimeoutError,
-)
-from fi.gateway._exceptions import (
-    AuthenticationError as AuthenticationError,
-)
-from fi.gateway._exceptions import (
-    BadGatewayError as BadGatewayError,
-)
-from fi.gateway._exceptions import (
-    BadRequestError as BadRequestError,
-)
-from fi.gateway._exceptions import (
-    GatewayTimeoutError as GatewayTimeoutError,
-)
-from fi.gateway._exceptions import (
-    GuardrailBlockedError as GuardrailBlockedError,
-)
-from fi.gateway._exceptions import (
-    GuardrailWarning as GuardrailWarning,
-)
-from fi.gateway._exceptions import (
-    InternalServerError as InternalServerError,
-)
-from fi.gateway._exceptions import (
-    NotFoundError as NotFoundError,
-)
-from fi.gateway._exceptions import (
-    PermissionDeniedError as PermissionDeniedError,
-)
-from fi.gateway._exceptions import (
+    AgentBudgetExhaustedError as AgentBudgetExhaustedError,
     AgentCCError as AgentCCError,
-)
-from fi.gateway._exceptions import (
+    APIConnectionError as APIConnectionError,
+    APIStatusError as APIStatusError,
+    APITimeoutError as APITimeoutError,
+    AuthenticationError as AuthenticationError,
+    BadGatewayError as BadGatewayError,
+    BadRequestError as BadRequestError,
+    BudgetExceededError as BudgetExceededError,
+    FutureAGICreditsOffError as FutureAGICreditsOffError,
+    GatewayTimeoutError as GatewayTimeoutError,
+    GuardrailBlockedError as GuardrailBlockedError,
+    GuardrailWarning as GuardrailWarning,
+    InsufficientCreditsError as InsufficientCreditsError,
+    InternalServerError as InternalServerError,
+    NotFoundError as NotFoundError,
+    PermissionDeniedError as PermissionDeniedError,
     RateLimitError as RateLimitError,
-)
-from fi.gateway._exceptions import (
     ServiceUnavailableError as ServiceUnavailableError,
-)
-from fi.gateway._exceptions import (
     StreamError as StreamError,
-)
-from fi.gateway._exceptions import (
     UnprocessableEntityError as UnprocessableEntityError,
 )
 
-# Lazy imports — these are defined but only loaded when accessed.
-# This keeps `import agentcc` fast (<50ms) by deferring httpx/pydantic imports.
+if TYPE_CHECKING:
+    from fi.gateway._gateway_evidence import DispatchState as DispatchState, GatewayEvidence as GatewayEvidence
+    from fi.gateway._base_client import Timeout as Timeout
+    from fi.gateway._batch import (
+        abatch_completion as abatch_completion,
+        abatch_completion_models as abatch_completion_models,
+        abatch_completion_models_all as abatch_completion_models_all,
+        batch_completion as batch_completion,
+        batch_completion_models as batch_completion_models,
+        batch_completion_models_all as batch_completion_models_all,
+    )
+    from fi.gateway._budget import BudgetManager as BudgetManager
+    from fi.gateway._client import AgentCC as AgentCC, AsyncAgentCC as AsyncAgentCC
+    from fi.gateway._compat import patch_openai as patch_openai
+    from fi.gateway._compat_openai import openai_kwargs as openai_kwargs
+    from fi.gateway._constants import AGENTCC_GATEWAY_URL as AGENTCC_GATEWAY_URL
+    from fi.gateway._deprecation import AgentCCDeprecationWarning as AgentCCDeprecationWarning
+    from fi.gateway._fi import Gateway as Gateway, AsyncGateway as AsyncGateway
+    from fi.gateway._function_utils import function_to_dict as function_to_dict
+    from fi.gateway._gateway_config import (
+        CacheConfig as CacheConfig,
+        ConditionalRoutingConfig as ConditionalRoutingConfig,
+        FallbackConfig as FallbackConfig,
+        FallbackTarget as FallbackTarget,
+        GatewayConfig as GatewayConfig,
+        GuardrailCheck as GuardrailCheck,
+        GuardrailConfig as GuardrailConfig,
+        LoadBalanceConfig as LoadBalanceConfig,
+        LoadBalanceTarget as LoadBalanceTarget,
+        RetryConfig as RetryConfig,
+        RoutingCondition as RoutingCondition,
+        TimeoutConfig as TimeoutConfig,
+        TrafficMirrorConfig as TrafficMirrorConfig,
+        create_headers as create_headers,
+    )
+    from fi.gateway._models_info import (
+        MODEL_INFO as MODEL_INFO,
+        ModelInfo as ModelInfo,
+        get_model_info as get_model_info,
+        get_valid_models as get_valid_models,
+        model_alias_map as model_alias_map,
+        register_model as register_model,
+        supports_function_calling as supports_function_calling,
+        supports_json_mode as supports_json_mode,
+        supports_response_schema as supports_response_schema,
+        supports_vision as supports_vision,
+        validate_environment as validate_environment,
+    )
+    from fi.gateway._retry_policy import RetryPolicy as RetryPolicy
+    from fi.gateway._session import Session as Session, SessionContext as SessionContext
+    from fi.gateway._streaming import (
+        AsyncStream as AsyncStream,
+        ChunkAccumulator as ChunkAccumulator,
+        Stream as Stream,
+        stream_chunk_builder as stream_chunk_builder,
+    )
+    from fi.gateway._structured import (
+        to_response_format as to_response_format,
+        validate_json_response as validate_json_response,
+    )
+    from fi.gateway._tokens import (
+        CONTENT_POLICY_FALLBACKS as CONTENT_POLICY_FALLBACKS,
+        CONTEXT_WINDOW_FALLBACKS as CONTEXT_WINDOW_FALLBACKS,
+        completion_cost as completion_cost,
+        completion_cost_from_response as completion_cost_from_response,
+        decode as decode,
+        encode as encode,
+        get_content_policy_fallback as get_content_policy_fallback,
+        get_context_window_fallback as get_context_window_fallback,
+        get_max_output_tokens as get_max_output_tokens,
+        get_max_tokens as get_max_tokens,
+        is_prompt_caching_valid as is_prompt_caching_valid,
+        token_counter as token_counter,
+        trim_messages as trim_messages,
+    )
+    from fi.gateway._utils import (
+        check_valid_key as check_valid_key,
+        health_check as health_check,
+        return_raw_request as return_raw_request,
+    )
+    from fi.gateway.callbacks.custom_logger import AgentCCLogger as AgentCCLogger
+    from fi.gateway.callbacks.json_logger import JSONLoggingCallbackHandler as JSONLoggingCallbackHandler
+    from fi.gateway.testing.mock import create_mock_client as create_mock_client
+    from fi.gateway.types.agentcc_metadata import (
+        AgentCCMetadata as AgentCCMetadata,
+        RateLimitInfo as RateLimitInfo,
+    )
 
-
-def __getattr__(name: str) -> object:
-    if name in ("Gateway", "AsyncGateway"):
-        from fi.gateway._fi import AsyncGateway, Gateway
-
-        globals()["Gateway"] = Gateway
-        globals()["AsyncGateway"] = AsyncGateway
-        return globals()[name]
-
-    if name in ("AgentCC", "AsyncAgentCC"):
-        from fi.gateway._client import AsyncAgentCC, AgentCC
-
-        globals()["AgentCC"] = AgentCC
-        globals()["AsyncAgentCC"] = AsyncAgentCC
-        return globals()[name]
-
-    if name in ("Session", "SessionContext"):
-        from fi.gateway._session import Session, SessionContext
-
-        globals()["Session"] = Session
-        globals()["SessionContext"] = SessionContext
-        return globals()[name]
-
-    if name == "Timeout":
-        from fi.gateway._base_client import Timeout
-
-        globals()["Timeout"] = Timeout
-        return Timeout
-
-    if name in ("Stream", "AsyncStream", "ChunkAccumulator"):
-        from fi.gateway._streaming import AsyncStream, ChunkAccumulator, Stream
-
-        globals()["Stream"] = Stream
-        globals()["AsyncStream"] = AsyncStream
-        globals()["ChunkAccumulator"] = ChunkAccumulator
-        return globals()[name]
-
-    if name == "patch_openai":
-        from fi.gateway._compat import patch_openai
-
-        globals()["patch_openai"] = patch_openai
-        return patch_openai
-
-    if name in (
-        "token_counter",
-        "get_max_tokens",
-        "get_max_output_tokens",
-        "completion_cost",
-        "completion_cost_from_response",
-        "encode",
-        "decode",
-        "trim_messages",
-        "is_prompt_caching_valid",
-    ):
-        from fi.gateway._tokens import (
-            completion_cost,
-            completion_cost_from_response,
-            decode,
-            encode,
-            get_max_output_tokens,
-            get_max_tokens,
-            is_prompt_caching_valid,
-            token_counter,
-            trim_messages,
-        )
-
-        globals()["token_counter"] = token_counter
-        globals()["get_max_tokens"] = get_max_tokens
-        globals()["get_max_output_tokens"] = get_max_output_tokens
-        globals()["completion_cost"] = completion_cost
-        globals()["completion_cost_from_response"] = completion_cost_from_response
-        globals()["encode"] = encode
-        globals()["decode"] = decode
-        globals()["trim_messages"] = trim_messages
-        globals()["is_prompt_caching_valid"] = is_prompt_caching_valid
-        return globals()[name]
-
-    if name == "stream_chunk_builder":
-        from fi.gateway._streaming import stream_chunk_builder
-
-        globals()["stream_chunk_builder"] = stream_chunk_builder
-        return stream_chunk_builder
-
-    if name in (
-        "ModelInfo",
-        "get_model_info",
-        "MODEL_INFO",
-        "validate_environment",
-        "get_valid_models",
-        "register_model",
-        "model_alias_map",
-        "supports_vision",
-        "supports_function_calling",
-        "supports_json_mode",
-        "supports_response_schema",
-    ):
-        from fi.gateway._models_info import (
-            MODEL_INFO,
-            ModelInfo,
-            get_model_info,
-            get_valid_models,
-            model_alias_map,
-            register_model,
-            supports_function_calling,
-            supports_json_mode,
-            supports_response_schema,
-            supports_vision,
-            validate_environment,
-        )
-
-        globals()["ModelInfo"] = ModelInfo
-        globals()["get_model_info"] = get_model_info
-        globals()["MODEL_INFO"] = MODEL_INFO
-        globals()["validate_environment"] = validate_environment
-        globals()["get_valid_models"] = get_valid_models
-        globals()["register_model"] = register_model
-        globals()["model_alias_map"] = model_alias_map
-        globals()["supports_vision"] = supports_vision
-        globals()["supports_function_calling"] = supports_function_calling
-        globals()["supports_json_mode"] = supports_json_mode
-        globals()["supports_response_schema"] = supports_response_schema
-        return globals()[name]
-
-    if name == "function_to_dict":
-        from fi.gateway._function_utils import function_to_dict
-
-        globals()["function_to_dict"] = function_to_dict
-        return function_to_dict
-
-    if name == "RetryPolicy":
-        from fi.gateway._retry_policy import RetryPolicy
-
-        globals()["RetryPolicy"] = RetryPolicy
-        return RetryPolicy
-
-    if name == "BudgetManager":
-        from fi.gateway._budget import BudgetManager
-
-        globals()["BudgetManager"] = BudgetManager
-        return BudgetManager
-
-    if name in (
-        "get_context_window_fallback",
-        "get_content_policy_fallback",
-        "CONTEXT_WINDOW_FALLBACKS",
-        "CONTENT_POLICY_FALLBACKS",
-    ):
-        from fi.gateway._tokens import (
-            CONTENT_POLICY_FALLBACKS,
-            CONTEXT_WINDOW_FALLBACKS,
-            get_content_policy_fallback,
-            get_context_window_fallback,
-        )
-
-        globals()["get_context_window_fallback"] = get_context_window_fallback
-        globals()["get_content_policy_fallback"] = get_content_policy_fallback
-        globals()["CONTEXT_WINDOW_FALLBACKS"] = CONTEXT_WINDOW_FALLBACKS
-        globals()["CONTENT_POLICY_FALLBACKS"] = CONTENT_POLICY_FALLBACKS
-        return globals()[name]
-
-    if name in ("to_response_format", "validate_json_response"):
-        from fi.gateway._structured import to_response_format, validate_json_response
-
-        globals()["to_response_format"] = to_response_format
-        globals()["validate_json_response"] = validate_json_response
-        return globals()[name]
-
-    if name in ("return_raw_request", "check_valid_key", "health_check"):
-        from fi.gateway._utils import check_valid_key, health_check, return_raw_request
-
-        globals()["return_raw_request"] = return_raw_request
-        globals()["check_valid_key"] = check_valid_key
-        globals()["health_check"] = health_check
-        return globals()[name]
-
-    if name in (
-        "GatewayConfig",
-        "FallbackConfig",
-        "FallbackTarget",
-        "LoadBalanceConfig",
-        "LoadBalanceTarget",
-        "CacheConfig",
-        "GuardrailConfig",
-        "GuardrailCheck",
-        "ConditionalRoutingConfig",
-        "RoutingCondition",
-        "TrafficMirrorConfig",
-        "RetryConfig",
-        "TimeoutConfig",
-        "create_headers",
-    ):
-        from fi.gateway._gateway_config import (
-            CacheConfig,
-            ConditionalRoutingConfig,
-            FallbackConfig,
-            FallbackTarget,
-            GatewayConfig,
-            GuardrailCheck,
-            GuardrailConfig,
-            LoadBalanceConfig,
-            LoadBalanceTarget,
-            RetryConfig,
-            RoutingCondition,
-            TimeoutConfig,
-            TrafficMirrorConfig,
-            create_headers,
-        )
-
-        globals()["GatewayConfig"] = GatewayConfig
-        globals()["FallbackConfig"] = FallbackConfig
-        globals()["FallbackTarget"] = FallbackTarget
-        globals()["LoadBalanceConfig"] = LoadBalanceConfig
-        globals()["LoadBalanceTarget"] = LoadBalanceTarget
-        globals()["CacheConfig"] = CacheConfig
-        globals()["GuardrailConfig"] = GuardrailConfig
-        globals()["GuardrailCheck"] = GuardrailCheck
-        globals()["ConditionalRoutingConfig"] = ConditionalRoutingConfig
-        globals()["RoutingCondition"] = RoutingCondition
-        globals()["TrafficMirrorConfig"] = TrafficMirrorConfig
-        globals()["RetryConfig"] = RetryConfig
-        globals()["TimeoutConfig"] = TimeoutConfig
-        globals()["create_headers"] = create_headers
-        return globals()[name]
-
-    if name == "create_mock_client":
-        from fi.gateway.testing.mock import create_mock_client
-
-        globals()["create_mock_client"] = create_mock_client
-        return create_mock_client
-
-    if name in ("JSONLoggingCallbackHandler", "AgentCCLogger"):
-        from fi.gateway.callbacks.custom_logger import AgentCCLogger
-        from fi.gateway.callbacks.json_logger import JSONLoggingCallbackHandler
-
-        globals()["JSONLoggingCallbackHandler"] = JSONLoggingCallbackHandler
-        globals()["AgentCCLogger"] = AgentCCLogger
-        return globals()[name]
-
-    if name == "AGENTCC_GATEWAY_URL":
-        from fi.gateway._constants import AGENTCC_GATEWAY_URL
-
-        globals()["AGENTCC_GATEWAY_URL"] = AGENTCC_GATEWAY_URL
-        return AGENTCC_GATEWAY_URL
-
-    if name in (
-        "batch_completion",
-        "abatch_completion",
-        "batch_completion_models",
-        "abatch_completion_models",
-        "batch_completion_models_all",
-        "abatch_completion_models_all",
-    ):
-        from fi.gateway._batch import (
-            abatch_completion,
-            abatch_completion_models,
-            abatch_completion_models_all,
-            batch_completion,
-            batch_completion_models,
-            batch_completion_models_all,
-        )
-
-        globals()["batch_completion"] = batch_completion
-        globals()["abatch_completion"] = abatch_completion
-        globals()["batch_completion_models"] = batch_completion_models
-        globals()["abatch_completion_models"] = abatch_completion_models
-        globals()["batch_completion_models_all"] = batch_completion_models_all
-        globals()["abatch_completion_models_all"] = abatch_completion_models_all
-        return globals()[name]
-
-    raise AttributeError(f"module 'agentcc' has no attribute {name!r}")
-
+_LAZY: dict[str, str] = {
+    "GatewayEvidence": "fi.gateway._gateway_evidence",
+    "DispatchState": "fi.gateway._gateway_evidence",
+    "AgentCC": "fi.gateway._client",
+    "AsyncAgentCC": "fi.gateway._client",
+    "Gateway": "fi.gateway._fi",
+    "AsyncGateway": "fi.gateway._fi",
+    "Session": "fi.gateway._session",
+    "SessionContext": "fi.gateway._session",
+    "Timeout": "fi.gateway._base_client",
+    "RetryPolicy": "fi.gateway._retry_policy",
+    "BudgetManager": "fi.gateway._budget",
+    "Stream": "fi.gateway._streaming",
+    "AsyncStream": "fi.gateway._streaming",
+    "ChunkAccumulator": "fi.gateway._streaming",
+    "stream_chunk_builder": "fi.gateway._streaming",
+    "create_headers": "fi.gateway._gateway_config",
+    "GatewayConfig": "fi.gateway._gateway_config",
+    "CacheConfig": "fi.gateway._gateway_config",
+    "TimeoutConfig": "fi.gateway._gateway_config",
+    "ConditionalRoutingConfig": "fi.gateway._gateway_config",
+    "FallbackConfig": "fi.gateway._gateway_config",
+    "FallbackTarget": "fi.gateway._gateway_config",
+    "GuardrailCheck": "fi.gateway._gateway_config",
+    "GuardrailConfig": "fi.gateway._gateway_config",
+    "LoadBalanceConfig": "fi.gateway._gateway_config",
+    "LoadBalanceTarget": "fi.gateway._gateway_config",
+    "RetryConfig": "fi.gateway._gateway_config",
+    "RoutingCondition": "fi.gateway._gateway_config",
+    "TrafficMirrorConfig": "fi.gateway._gateway_config",
+    "create_mock_client": "fi.gateway.testing.mock",
+    "health_check": "fi.gateway._utils",
+    "check_valid_key": "fi.gateway._utils",
+    "return_raw_request": "fi.gateway._utils",
+    "to_response_format": "fi.gateway._structured",
+    "validate_json_response": "fi.gateway._structured",
+    "function_to_dict": "fi.gateway._function_utils",
+    "openai_kwargs": "fi.gateway._compat_openai",
+    "patch_openai": "fi.gateway._compat",
+    "AgentCCDeprecationWarning": "fi.gateway._deprecation",
+    "AgentCCMetadata": "fi.gateway.types.agentcc_metadata",
+    "RateLimitInfo": "fi.gateway.types.agentcc_metadata",
+    "AgentCCLogger": "fi.gateway.callbacks.custom_logger",
+    "JSONLoggingCallbackHandler": "fi.gateway.callbacks.json_logger",
+    "AGENTCC_GATEWAY_URL": "fi.gateway._constants",
+    "batch_completion": "fi.gateway._batch",
+    "abatch_completion": "fi.gateway._batch",
+    "batch_completion_models": "fi.gateway._batch",
+    "abatch_completion_models": "fi.gateway._batch",
+    "batch_completion_models_all": "fi.gateway._batch",
+    "abatch_completion_models_all": "fi.gateway._batch",
+    "MODEL_INFO": "fi.gateway._models_info",
+    "ModelInfo": "fi.gateway._models_info",
+    "get_model_info": "fi.gateway._models_info",
+    "get_valid_models": "fi.gateway._models_info",
+    "model_alias_map": "fi.gateway._models_info",
+    "register_model": "fi.gateway._models_info",
+    "supports_function_calling": "fi.gateway._models_info",
+    "supports_json_mode": "fi.gateway._models_info",
+    "supports_response_schema": "fi.gateway._models_info",
+    "supports_vision": "fi.gateway._models_info",
+    "validate_environment": "fi.gateway._models_info",
+    "CONTENT_POLICY_FALLBACKS": "fi.gateway._tokens",
+    "CONTEXT_WINDOW_FALLBACKS": "fi.gateway._tokens",
+    "completion_cost": "fi.gateway._tokens",
+    "completion_cost_from_response": "fi.gateway._tokens",
+    "decode": "fi.gateway._tokens",
+    "encode": "fi.gateway._tokens",
+    "get_content_policy_fallback": "fi.gateway._tokens",
+    "get_context_window_fallback": "fi.gateway._tokens",
+    "get_max_output_tokens": "fi.gateway._tokens",
+    "get_max_tokens": "fi.gateway._tokens",
+    "is_prompt_caching_valid": "fi.gateway._tokens",
+    "token_counter": "fi.gateway._tokens",
+    "trim_messages": "fi.gateway._tokens",
+}
 
 __all__ = [
-    "Gateway",
-    "AsyncGateway",
-    "CONTENT_POLICY_FALLBACKS",
-    "CONTEXT_WINDOW_FALLBACKS",
-    "MODEL_INFO",
-    "NOT_GIVEN",
-    "AGENTCC_GATEWAY_URL",
-    "APIConnectionError",
-    "APIStatusError",
-    "APITimeoutError",
-    "AsyncAgentCC",
-    "AsyncStream",
-    "AuthenticationError",
-    "BadGatewayError",
-    "BadRequestError",
-    "BudgetManager",
-    "CacheConfig",
-    "ChunkAccumulator",
-    "ConditionalRoutingConfig",
-    "FallbackConfig",
-    "FallbackTarget",
-    "GatewayConfig",
-    "GatewayTimeoutError",
-    "GuardrailBlockedError",
-    "GuardrailCheck",
-    "GuardrailConfig",
-    "GuardrailWarning",
-    "InternalServerError",
-    "JSONLoggingCallbackHandler",
-    "LoadBalanceConfig",
-    "LoadBalanceTarget",
-    "ModelInfo",
-    "NotFoundError",
-    "PermissionDeniedError",
-    "AgentCC",
-    "AgentCCError",
-    "AgentCCLogger",
-    "RateLimitError",
-    "RetryConfig",
-    "RetryPolicy",
-    "RoutingCondition",
-    "ServiceUnavailableError",
-    "Session",
-    "SessionContext",
-    "Stream",
-    "StreamError",
-    "Timeout",
-    "TimeoutConfig",
-    "TrafficMirrorConfig",
-    "UnprocessableEntityError",
-    "__version__",
-    "abatch_completion",
-    "abatch_completion_models",
-    "abatch_completion_models_all",
-    "batch_completion",
-    "batch_completion_models",
-    "batch_completion_models_all",
-    "check_valid_key",
-    "completion_cost",
-    "completion_cost_from_response",
-    "create_headers",
-    "create_mock_client",
-    "decode",
-    "encode",
-    "function_to_dict",
-    "get_content_policy_fallback",
-    "get_context_window_fallback",
-    "get_max_output_tokens",
-    "get_max_tokens",
-    "get_model_info",
-    "get_valid_models",
-    "health_check",
-    "is_prompt_caching_valid",
-    "model_alias_map",
-    "patch_openai",
-    "register_model",
-    "return_raw_request",
-    "stream_chunk_builder",
-    "supports_function_calling",
-    "supports_json_mode",
-    "supports_response_schema",
-    "supports_vision",
-    "to_response_format",
-    "token_counter",
-    "trim_messages",
-    "validate_environment",
-    "validate_json_response",
+    "NOT_GIVEN", "__version__", "AgentCCError", "APIConnectionError",
+    "APIStatusError", "APITimeoutError", "AuthenticationError", "BadGatewayError",
+    "BadRequestError", "GatewayTimeoutError", "GuardrailBlockedError",
+    "GuardrailWarning", "InternalServerError", "NotFoundError",
+    "PermissionDeniedError", "RateLimitError", "ServiceUnavailableError",
+    "StreamError", "UnprocessableEntityError", "InsufficientCreditsError",
+    "AgentBudgetExhaustedError", "BudgetExceededError", "FutureAGICreditsOffError", *_LAZY,
 ]
+
+
+_DEPRECATED_RELEASE_NAMES = {
+    "AGENTCC_GATEWAY_URL", "AgentCCLogger", "AsyncGateway", "BudgetManager",
+    "CONTENT_POLICY_FALLBACKS", "CONTEXT_WINDOW_FALLBACKS", "ConditionalRoutingConfig",
+    "FallbackConfig", "FallbackTarget", "Gateway", "GuardrailCheck", "GuardrailConfig",
+    "JSONLoggingCallbackHandler", "LoadBalanceConfig", "LoadBalanceTarget", "MODEL_INFO",
+    "ModelInfo", "RetryConfig", "RoutingCondition", "TrafficMirrorConfig",
+    "abatch_completion", "abatch_completion_models", "abatch_completion_models_all",
+    "batch_completion", "batch_completion_models", "batch_completion_models_all",
+    "completion_cost", "completion_cost_from_response", "decode", "encode",
+    "get_content_policy_fallback", "get_context_window_fallback", "get_max_output_tokens",
+    "get_max_tokens", "get_model_info", "get_valid_models", "is_prompt_caching_valid",
+    "model_alias_map", "patch_openai", "register_model", "return_raw_request",
+    "supports_function_calling", "supports_json_mode", "supports_response_schema",
+    "supports_vision", "token_counter", "trim_messages", "validate_environment",
+}
+
+
+def __getattr__(name: str) -> Any:
+    module_name = _LAZY.get(name)
+    if module_name is None:
+        raise AttributeError(f"module 'fi.gateway' has no attribute {name!r}")
+    import importlib
+
+    value = getattr(importlib.import_module(module_name), name)
+    if name in _DEPRECATED_RELEASE_NAMES:
+        import warnings
+
+        warnings.warn(
+            f"fi.gateway.{name} is a deprecated released compatibility API.",
+            DeprecationWarning, stacklevel=2,
+        )
+    else:
+        globals()[name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    return sorted(set(__all__) | {n for n in globals() if n.startswith("__")})

@@ -1,0 +1,2219 @@
+{
+  "schema": "fi-sdk/alk-compat-errors/v2",
+  "ownership_note": "RL2241: alk_owned_modules is inventory only, not SDK stubs. Its error_target records a public ALK destination (null for private entries); the SDK ships none of these modules and must not import them.",
+  "join_sha256": "28bdda9c84a5313ec677f45883a40aa47f852b728b1b054f6e873bfa6e8af971",
+  "alk_owned_modules": [
+    {
+      "error_target": "fi.alk",
+      "module": "fi.alk",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk._facade",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk._module_alias",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk._paths",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk._schema",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.actions",
+      "module": "fi.alk.actions",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.bench",
+      "module": "fi.alk.bench",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.bench._codeexec",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.bench._coding",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.bench._docker",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.bench._grader",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.bench._pull",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.bench._voice",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.capabilities",
+      "module": "fi.alk.capabilities",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.cli",
+      "module": "fi.alk.cli",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.config",
+      "module": "fi.alk.config",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.cua_loop",
+      "module": "fi.alk.cua_loop",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.episode",
+      "module": "fi.alk.episode",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.episode.conformance",
+      "module": "fi.alk.episode.conformance",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.episode.convert",
+      "module": "fi.alk.episode.convert",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.episode.converters",
+      "module": "fi.alk.episode.converters",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.episode.coverage",
+      "module": "fi.alk.episode.coverage",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.episode.events",
+      "module": "fi.alk.episode.events",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.episode.ids",
+      "module": "fi.alk.episode.ids",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.episode.models",
+      "module": "fi.alk.episode.models",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.episode.schema",
+      "module": "fi.alk.episode.schema",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.evals",
+      "module": "fi.alk.evals",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.extensions",
+      "module": "fi.alk.extensions",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness",
+      "module": "fi.alk.harness",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.harness.__main__",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.action_certification",
+      "module": "fi.alk.harness.action_certification",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.amend",
+      "module": "fi.alk.harness.amend",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.artifacts",
+      "module": "fi.alk.harness.artifacts",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.authoring_entrypoint",
+      "module": "fi.alk.harness.authoring_entrypoint",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.authoring_runtime_validation",
+      "module": "fi.alk.harness.authoring_runtime_validation",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.backends",
+      "module": "fi.alk.harness.backends",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.backends.base",
+      "module": "fi.alk.harness.backends.base",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.backends.claude",
+      "module": "fi.alk.harness.backends.claude",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.backends.files",
+      "module": "fi.alk.harness.backends.files",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.backends.vertex_gemini",
+      "module": "fi.alk.harness.backends.vertex_gemini",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.background_noise",
+      "module": "fi.alk.harness.background_noise",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.build",
+      "module": "fi.alk.harness.build",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.builder",
+      "module": "fi.alk.harness.builder",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.bundle",
+      "module": "fi.alk.harness.bundle",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.bundle_author_v2",
+      "module": "fi.alk.harness.bundle_author_v2",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.bundle_v2",
+      "module": "fi.alk.harness.bundle_v2",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.call_runner",
+      "module": "fi.alk.harness.call_runner",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.call_worker",
+      "module": "fi.alk.harness.call_worker",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.callback_http_adapter",
+      "module": "fi.alk.harness.callback_http_adapter",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.catalogue",
+      "module": "fi.alk.harness.catalogue",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.certification",
+      "module": "fi.alk.harness.certification",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.chat",
+      "module": "fi.alk.harness.chat",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.chat_call_runner",
+      "module": "fi.alk.harness.chat_call_runner",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.chat_policy",
+      "module": "fi.alk.harness.chat_policy",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.chat_worker",
+      "module": "fi.alk.harness.chat_worker",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.checks",
+      "module": "fi.alk.harness.checks",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.cli",
+      "module": "fi.alk.harness.cli",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.compile",
+      "module": "fi.alk.harness.compile",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.compile.base",
+      "module": "fi.alk.harness.compile.base",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.compile.no_state",
+      "module": "fi.alk.harness.compile.no_state",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.compile.postgres",
+      "module": "fi.alk.harness.compile.postgres",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.compile.sqlite",
+      "module": "fi.alk.harness.compile.sqlite",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.config",
+      "module": "fi.alk.harness.config",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.contract",
+      "module": "fi.alk.harness.contract",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.credentials",
+      "module": "fi.alk.harness.credentials",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.diagnostic_adapters",
+      "module": "fi.alk.harness.diagnostic_adapters",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.diagnostic_adapters.postgres",
+      "module": "fi.alk.harness.diagnostic_adapters.postgres",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.diagnostic_adapters.world_ir",
+      "module": "fi.alk.harness.diagnostic_adapters.world_ir",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.diagnostics",
+      "module": "fi.alk.harness.diagnostics",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.environment",
+      "module": "fi.alk.harness.environment",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.environment_plan",
+      "module": "fi.alk.harness.environment_plan",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.events",
+      "module": "fi.alk.harness.events",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.executor",
+      "module": "fi.alk.harness.executor",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.folder",
+      "module": "fi.alk.harness.folder",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.generated_runtime",
+      "module": "fi.alk.harness.generated_runtime",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.generic_pipeline",
+      "module": "fi.alk.harness.generic_pipeline",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.github",
+      "module": "fi.alk.harness.github",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.hosted_authoring_entrypoint",
+      "module": "fi.alk.harness.hosted_authoring_entrypoint",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.hosted_chat_entrypoint",
+      "module": "fi.alk.harness.hosted_chat_entrypoint",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.hosted_conversation",
+      "module": "fi.alk.harness.hosted_conversation",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.hosted_entrypoint",
+      "module": "fi.alk.harness.hosted_entrypoint",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.hosted_scheduler",
+      "module": "fi.alk.harness.hosted_scheduler",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.instrumentation_evidence",
+      "module": "fi.alk.harness.instrumentation_evidence",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.isolated_process",
+      "module": "fi.alk.harness.isolated_process",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.job",
+      "module": "fi.alk.harness.job",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.joint_judge",
+      "module": "fi.alk.harness.joint_judge",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.judge",
+      "module": "fi.alk.harness.judge",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.langgraph_http_adapter",
+      "module": "fi.alk.harness.langgraph_http_adapter",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.live",
+      "module": "fi.alk.harness.live",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.livekit_source",
+      "module": "fi.alk.harness.livekit_source",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.livekit_tool_trace_bootstrap",
+      "module": "fi.alk.harness.livekit_tool_trace_bootstrap",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.local_certified_runtime",
+      "module": "fi.alk.harness.local_certified_runtime",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.observability",
+      "module": "fi.alk.harness.observability",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.outbound",
+      "module": "fi.alk.harness.outbound",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.packaging",
+      "module": "fi.alk.harness.packaging",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.persona_guides",
+      "module": "fi.alk.harness.persona_guides",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.phase_worker",
+      "module": "fi.alk.harness.phase_worker",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.platform",
+      "module": "fi.alk.harness.platform",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.poc_guest_booking",
+      "module": "fi.alk.harness.poc_guest_booking",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.process_preflight",
+      "module": "fi.alk.harness.process_preflight",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.process_runtime",
+      "module": "fi.alk.harness.process_runtime",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.prove",
+      "module": "fi.alk.harness.prove",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.provider_import",
+      "module": "fi.alk.harness.provider_import",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.provider_lifecycle",
+      "module": "fi.alk.harness.provider_lifecycle",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.provision",
+      "module": "fi.alk.harness.provision",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.reception",
+      "module": "fi.alk.harness.reception",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.repair_authoring",
+      "module": "fi.alk.harness.repair_authoring",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.repair_controller",
+      "module": "fi.alk.harness.repair_controller",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.repair_patch",
+      "module": "fi.alk.harness.repair_patch",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.retell_chat_call_runner",
+      "module": "fi.alk.harness.retell_chat_call_runner",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.run",
+      "module": "fi.alk.harness.run",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.run.alk",
+      "module": "fi.alk.harness.run.alk",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.run.call",
+      "module": "fi.alk.harness.run.call",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.run.conversation",
+      "module": "fi.alk.harness.run.conversation",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.run.evidence",
+      "module": "fi.alk.harness.run.evidence",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.run.grade",
+      "module": "fi.alk.harness.run.grade",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.run.live",
+      "module": "fi.alk.harness.run.live",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.run.models",
+      "module": "fi.alk.harness.run.models",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.run.platform_evals",
+      "module": "fi.alk.harness.run.platform_evals",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.run.sdk_voice",
+      "module": "fi.alk.harness.run.sdk_voice",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.run.simulation",
+      "module": "fi.alk.harness.run.simulation",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.run.stage",
+      "module": "fi.alk.harness.run.stage",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.run.targets",
+      "module": "fi.alk.harness.run.targets",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.run.tools",
+      "module": "fi.alk.harness.run.tools",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.run.voice",
+      "module": "fi.alk.harness.run.voice",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.runtime",
+      "module": "fi.alk.harness.runtime",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.runtime_files",
+      "module": "fi.alk.harness.runtime_files",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.runtime_repair",
+      "module": "fi.alk.harness.runtime_repair",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.sandbox_server",
+      "module": "fi.alk.harness.sandbox_server",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.sandbox_worker",
+      "module": "fi.alk.harness.sandbox_worker",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.scenario",
+      "module": "fi.alk.harness.scenario",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.scenario_repair",
+      "module": "fi.alk.harness.scenario_repair",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.scenario_source",
+      "module": "fi.alk.harness.scenario_source",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.scenario_tools",
+      "module": "fi.alk.harness.scenario_tools",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.scenarios",
+      "module": "fi.alk.harness.scenarios",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.secrets",
+      "module": "fi.alk.harness.secrets",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.service_catalog",
+      "module": "fi.alk.harness.service_catalog",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.session",
+      "module": "fi.alk.harness.session",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.sessions",
+      "module": "fi.alk.harness.sessions",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.simulation_mark_bootstrap",
+      "module": "fi.alk.harness.simulation_mark_bootstrap",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.simulator",
+      "module": "fi.alk.harness.simulator",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.simulator_voice",
+      "module": "fi.alk.harness.simulator_voice",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.source_data_invariants",
+      "module": "fi.alk.harness.source_data_invariants",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.source_discovery",
+      "module": "fi.alk.harness.source_discovery",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.source_model",
+      "module": "fi.alk.harness.source_model",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.source_schema",
+      "module": "fi.alk.harness.source_schema",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.source_schema.postgres",
+      "module": "fi.alk.harness.source_schema.postgres",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.source_schema.sqlite",
+      "module": "fi.alk.harness.source_schema.sqlite",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.source_tool_evidence",
+      "module": "fi.alk.harness.source_tool_evidence",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.sources",
+      "module": "fi.alk.harness.sources",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.spend",
+      "module": "fi.alk.harness.spend",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.subprocess_http_adapter",
+      "module": "fi.alk.harness.subprocess_http_adapter",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.tool_certification",
+      "module": "fi.alk.harness.tool_certification",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.tool_trace_proxy",
+      "module": "fi.alk.harness.tool_trace_proxy",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.tools",
+      "module": "fi.alk.harness.tools",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.understand",
+      "module": "fi.alk.harness.understand",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.usage",
+      "module": "fi.alk.harness.usage",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.voicemail_audio",
+      "module": "fi.alk.harness.voicemail_audio",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world",
+      "module": "fi.alk.harness.world",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.errors",
+      "module": "fi.alk.harness.world.errors",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.expectations",
+      "module": "fi.alk.harness.world.expectations",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.handle",
+      "module": "fi.alk.harness.world.handle",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.kinds",
+      "module": "fi.alk.harness.world.kinds",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.mutate",
+      "module": "fi.alk.harness.world.mutate",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.probe",
+      "module": "fi.alk.harness.world.probe",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.provision",
+      "module": "fi.alk.harness.world.provision",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.provisioned",
+      "module": "fi.alk.harness.world.provisioned",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.runtime",
+      "module": "fi.alk.harness.world.runtime",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.snapshot",
+      "module": "fi.alk.harness.world.snapshot",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.stores",
+      "module": "fi.alk.harness.world.stores",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.stores.container",
+      "module": "fi.alk.harness.world.stores.container",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.stores.inprocess",
+      "module": "fi.alk.harness.world.stores.inprocess",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.stores.postgres",
+      "module": "fi.alk.harness.world.stores.postgres",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.stores.prove",
+      "module": "fi.alk.harness.world.stores.prove",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.stores.sqlite",
+      "module": "fi.alk.harness.world.stores.sqlite",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.stores.written",
+      "module": "fi.alk.harness.world.stores.written",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.tools",
+      "module": "fi.alk.harness.world.tools",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world.workspace",
+      "module": "fi.alk.harness.world.workspace",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world_import",
+      "module": "fi.alk.harness.world_import",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world_import.sqlite",
+      "module": "fi.alk.harness.world_import.sqlite",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.harness.world_ir",
+      "module": "fi.alk.harness.world_ir",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.image_loop",
+      "module": "fi.alk.image_loop",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.image_perturb",
+      "module": "fi.alk.image_perturb",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.improve",
+      "module": "fi.alk.improve",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.live",
+      "module": "fi.alk.live",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._attribution",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._capture",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._codec",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._contract",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._loopback",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._perturb",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._runner",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._stats",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._transcript",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._workers",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._workers.a2a_worker",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._workers.langgraph_worker",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._workers.livekit_worker",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._workers.mcp_loopback_server",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._workers.mcp_worker",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.live._workers.pipecat_worker",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.live.a2a_lane",
+      "module": "fi.alk.live.a2a_lane",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.live.langgraph_lane",
+      "module": "fi.alk.live.langgraph_lane",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.live.livekit_lane",
+      "module": "fi.alk.live.livekit_lane",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.live.mcp_lane",
+      "module": "fi.alk.live.mcp_lane",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.live.pipecat_lane",
+      "module": "fi.alk.live.pipecat_lane",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.live.voice_redteam",
+      "module": "fi.alk.live.voice_redteam",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.loss",
+      "module": "fi.alk.loss",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.optimize",
+      "module": "fi.alk.optimize",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.practice",
+      "module": "fi.alk.practice",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.practice._assess",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.practice._budget",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.practice._calibrate",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.practice._capstone",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.practice._contract",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.practice._diagnose",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.practice._drill",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.practice._experiment",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.practice._schedule",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.practice._store",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.practice._trainer",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.practice._update",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.providers",
+      "module": "fi.alk.providers",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.providers.agent",
+      "module": "fi.alk.providers.agent",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.providers.setup_hash",
+      "module": "fi.alk.providers.setup_hash",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.redteam",
+      "module": "fi.alk.redteam",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.rewardhack",
+      "module": "fi.alk.rewardhack",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.simulate",
+      "module": "fi.alk.simulate",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.studio",
+      "module": "fi.alk.studio",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.studio._bias",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.studio._calibration",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.studio._coverage",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.studio._download",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.studio._fidelity_attack",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.studio._generate",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.studio._library",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.studio._scan",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.studio._upgrade",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.studio._vendor",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.suite",
+      "module": "fi.alk.suite",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.tasks",
+      "module": "fi.alk.tasks",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.telemetry",
+      "module": "fi.alk.telemetry",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.telemetry._contract",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.telemetry._emit",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.telemetry._ledger",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.telemetry._queue",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.telemetry._row",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.telemetry._run",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.telemetry._sync",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": null,
+      "module": "fi.alk.telemetry._url",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.trinity",
+      "module": "fi.alk.trinity",
+      "namespace": "fi.alk"
+    },
+    {
+      "error_target": "fi.alk.voice_loop",
+      "module": "fi.alk.voice_loop",
+      "namespace": "fi.alk"
+    }
+  ],
+  "stub_modules": [
+    {
+      "error_target": "fi.alk.opt",
+      "module": "fi.opt",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt._objective_scoring",
+      "module": "fi.opt._objective_scoring",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.base",
+      "module": "fi.opt.base",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.base.base_generator",
+      "module": "fi.opt.base.base_generator",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.base.base_mapper",
+      "module": "fi.opt.base.base_mapper",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.base.base_optimizer",
+      "module": "fi.opt.base.base_optimizer",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.base.evaluator",
+      "module": "fi.opt.base.evaluator",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.components",
+      "module": "fi.opt.components",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.datamappers",
+      "module": "fi.opt.datamappers",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.datamappers.basic_mapper",
+      "module": "fi.opt.datamappers.basic_mapper",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.deployment",
+      "module": "fi.opt.deployment",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.evidence",
+      "module": "fi.opt.evidence",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.generators",
+      "module": "fi.opt.generators",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.generators.litellm",
+      "module": "fi.opt.generators.litellm",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.integrations",
+      "module": "fi.opt.integrations",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.integrations.generative_suite",
+      "module": "fi.opt.integrations.generative_suite",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.integrations.simulate",
+      "module": "fi.opt.integrations.simulate",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.mutations",
+      "module": "fi.opt.mutations",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.observability",
+      "module": "fi.opt.observability",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizer_trace",
+      "module": "fi.opt.optimizer_trace",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers",
+      "module": "fi.opt.optimizers",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.agent",
+      "module": "fi.opt.optimizers.agent",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.agent_bandit",
+      "module": "fi.opt.optimizers.agent_bandit",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.agent_curriculum",
+      "module": "fi.opt.optimizers.agent_curriculum",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.agent_evolution",
+      "module": "fi.opt.optimizers.agent_evolution",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.agent_feedback",
+      "module": "fi.opt.optimizers.agent_feedback",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.agent_pareto",
+      "module": "fi.opt.optimizers.agent_pareto",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.agent_social_memory",
+      "module": "fi.opt.optimizers.agent_social_memory",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.agent_tpe",
+      "module": "fi.opt.optimizers.agent_tpe",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.bayesian_search",
+      "module": "fi.opt.optimizers.bayesian_search",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.council",
+      "module": "fi.opt.optimizers.council",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.futureagi_replay",
+      "module": "fi.opt.optimizers.futureagi_replay",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.gepa",
+      "module": "fi.opt.optimizers.gepa",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.metaprompt",
+      "module": "fi.opt.optimizers.metaprompt",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.promptwizard",
+      "module": "fi.opt.optimizers.promptwizard",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.protegi",
+      "module": "fi.opt.optimizers.protegi",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.optimizers.random_search",
+      "module": "fi.opt.optimizers.random_search",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.research",
+      "module": "fi.opt.research",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.simulation",
+      "module": "fi.opt.simulation",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.targets",
+      "module": "fi.opt.targets",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.types",
+      "module": "fi.opt.types",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.utils",
+      "module": "fi.opt.utils",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.utils.early_stopping",
+      "module": "fi.opt.utils.early_stopping",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.opt.utils.setup_logging",
+      "module": "fi.opt.utils.setup_logging",
+      "namespace": "fi.opt"
+    },
+    {
+      "error_target": "fi.alk.simulate",
+      "module": "fi.simulate",
+      "namespace": "fi.simulate"
+    },
+    {
+      "module": "fi.simulate._hashing",
+      "namespace": "fi.simulate",
+      "error_target": null
+    },
+    {
+      "module": "fi.simulate._logging",
+      "namespace": "fi.simulate",
+      "error_target": null
+    },
+    {
+      "module": "fi.simulate.adapters",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.adapters"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent",
+      "module": "fi.simulate.agent",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.browser",
+      "module": "fi.simulate.agent.browser",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.definition",
+      "module": "fi.simulate.agent.definition",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.frameworks",
+      "module": "fi.simulate.agent.frameworks",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.generic",
+      "module": "fi.simulate.agent.generic",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.import_probe",
+      "module": "fi.simulate.agent.import_probe",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.memory",
+      "module": "fi.simulate.agent.memory",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.mocks",
+      "module": "fi.simulate.agent.mocks",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.multi_agent",
+      "module": "fi.simulate.agent.multi_agent",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.orchestration",
+      "module": "fi.simulate.agent.orchestration",
+      "namespace": "fi.simulate"
+    },
+    {
+      "module": "fi.simulate.agent.realtime",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.agent.realtime"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.wrapper",
+      "module": "fi.simulate.agent.wrapper",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.wrappers",
+      "module": "fi.simulate.agent.wrappers",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.wrappers.anthropic",
+      "module": "fi.simulate.agent.wrappers.anthropic",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.wrappers.gemini",
+      "module": "fi.simulate.agent.wrappers.gemini",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.wrappers.http",
+      "module": "fi.simulate.agent.wrappers.http",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.wrappers.langchain",
+      "module": "fi.simulate.agent.wrappers.langchain",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.wrappers.openai",
+      "module": "fi.simulate.agent.wrappers.openai",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.agent.wrappers.websocket",
+      "module": "fi.simulate.agent.wrappers.websocket",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.artifacts",
+      "module": "fi.simulate.artifacts",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.artifacts.manifest",
+      "module": "fi.simulate.artifacts.manifest",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.cli",
+      "module": "fi.simulate.cli",
+      "namespace": "fi.simulate"
+    },
+    {
+      "module": "fi.simulate.endpoints",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.endpoints"
+    },
+    {
+      "module": "fi.simulate.endpoints._http_actor",
+      "namespace": "fi.simulate",
+      "error_target": null
+    },
+    {
+      "module": "fi.simulate.endpoints.actor_sources",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.endpoints.actor_sources"
+    },
+    {
+      "module": "fi.simulate.endpoints.base",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.endpoints.base"
+    },
+    {
+      "module": "fi.simulate.endpoints.builtins",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.endpoints.builtins"
+    },
+    {
+      "module": "fi.simulate.endpoints.callable",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.endpoints.callable"
+    },
+    {
+      "module": "fi.simulate.endpoints.http",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.endpoints.http"
+    },
+    {
+      "module": "fi.simulate.endpoints.livekit",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.endpoints.livekit"
+    },
+    {
+      "module": "fi.simulate.endpoints.originators",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.endpoints.originators"
+    },
+    {
+      "module": "fi.simulate.endpoints.profiles",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.endpoints.profiles"
+    },
+    {
+      "module": "fi.simulate.endpoints.retell",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.endpoints.retell"
+    },
+    {
+      "module": "fi.simulate.endpoints.vapi",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.endpoints.vapi"
+    },
+    {
+      "module": "fi.simulate.endpoints.websocket",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.endpoints.websocket"
+    },
+    {
+      "error_target": "fi.alk.simulate.environment",
+      "module": "fi.simulate.environment",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.environments",
+      "module": "fi.simulate.environments",
+      "namespace": "fi.simulate"
+    },
+    {
+      "module": "fi.simulate.environments.base",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.environments.base"
+    },
+    {
+      "error_target": "fi.alk.simulate.environments.chat",
+      "module": "fi.simulate.environments.chat",
+      "namespace": "fi.simulate"
+    },
+    {
+      "module": "fi.simulate.environments.voice",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.environments.voice"
+    },
+    {
+      "error_target": "fi.alk.simulate.evaluation",
+      "module": "fi.simulate.evaluation",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.evaluation.ai_eval",
+      "module": "fi.simulate.evaluation.ai_eval",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.evidence",
+      "module": "fi.simulate.evidence",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.evidence.base",
+      "module": "fi.simulate.evidence.base",
+      "namespace": "fi.simulate"
+    },
+    {
+      "module": "fi.simulate.evidence.caller_observed",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.evidence.caller_observed"
+    },
+    {
+      "module": "fi.simulate.evidence.livekit_instrumentation",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.evidence.livekit_instrumentation"
+    },
+    {
+      "module": "fi.simulate.evidence.livekit_room",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.evidence.livekit_room"
+    },
+    {
+      "module": "fi.simulate.evidence.otel",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.evidence.otel"
+    },
+    {
+      "module": "fi.simulate.evidence.providers",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.evidence.providers"
+    },
+    {
+      "module": "fi.simulate.evidence.providers.base",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.evidence.providers.base"
+    },
+    {
+      "module": "fi.simulate.evidence.providers.retell",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.evidence.providers.retell"
+    },
+    {
+      "module": "fi.simulate.evidence.providers.vapi",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.evidence.providers.vapi"
+    },
+    {
+      "module": "fi.simulate.hosted",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.hosted"
+    },
+    {
+      "module": "fi.simulate.hosted.child_entrypoint",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.hosted.child_entrypoint"
+    },
+    {
+      "module": "fi.simulate.hosted.job",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.hosted.job"
+    },
+    {
+      "module": "fi.simulate.hosted.targets",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.hosted.targets"
+    },
+    {
+      "module": "fi.simulate.instrumentation",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.instrumentation"
+    },
+    {
+      "module": "fi.simulate.instrumentation.livekit",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.instrumentation.livekit"
+    },
+    {
+      "error_target": "fi.alk.simulate.manifest",
+      "module": "fi.simulate.manifest",
+      "namespace": "fi.simulate"
+    },
+    {
+      "module": "fi.simulate.matrix_cli",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.matrix_cli"
+    },
+    {
+      "module": "fi.simulate.realtime",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.realtime"
+    },
+    {
+      "module": "fi.simulate.realtime.events",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.realtime.events"
+    },
+    {
+      "module": "fi.simulate.realtime.media",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.realtime.media"
+    },
+    {
+      "module": "fi.simulate.realtime.session",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.realtime.session"
+    },
+    {
+      "error_target": "fi.alk.simulate.recording",
+      "module": "fi.simulate.recording",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.recording.room_recorder",
+      "module": "fi.simulate.recording.room_recorder",
+      "namespace": "fi.simulate"
+    },
+    {
+      "module": "fi.simulate.registry",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.registry"
+    },
+    {
+      "error_target": "fi.alk.simulate.results",
+      "module": "fi.simulate.results",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.results.base",
+      "module": "fi.simulate.results.base",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.results.filesystem",
+      "module": "fi.simulate.results.filesystem",
+      "namespace": "fi.simulate"
+    },
+    {
+      "module": "fi.simulate.results.futureagi",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.results.futureagi"
+    },
+    {
+      "error_target": "fi.alk.simulate.runtime",
+      "module": "fi.simulate.runtime",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.runtime.capabilities",
+      "module": "fi.simulate.runtime.capabilities",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.runtime.events",
+      "module": "fi.simulate.runtime.events",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.runtime.failures",
+      "module": "fi.simulate.runtime.failures",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.runtime.ids",
+      "module": "fi.simulate.runtime.ids",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.runtime.plan",
+      "module": "fi.simulate.runtime.plan",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.runtime.planner",
+      "module": "fi.simulate.runtime.planner",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.runtime.report",
+      "module": "fi.simulate.runtime.report",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.runtime.run",
+      "module": "fi.simulate.runtime.run",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.runtime.runner",
+      "module": "fi.simulate.runtime.runner",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.runtime.spec",
+      "module": "fi.simulate.runtime.spec",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.simulation",
+      "module": "fi.simulate.simulation",
+      "namespace": "fi.simulate"
+    },
+    {
+      "module": "fi.simulate.simulation.behavior_policy",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.behavior_policy"
+    },
+    {
+      "module": "fi.simulate.simulation.bridge",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.bridge"
+    },
+    {
+      "module": "fi.simulate.simulation.bridge.audio",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.bridge.audio"
+    },
+    {
+      "module": "fi.simulate.simulation.bridge.connector",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.bridge.connector"
+    },
+    {
+      "module": "fi.simulate.simulation.bridge.livekit",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.bridge.livekit"
+    },
+    {
+      "module": "fi.simulate.simulation.bridge.retell",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.bridge.retell"
+    },
+    {
+      "module": "fi.simulate.simulation.bridge.vapi",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.bridge.vapi"
+    },
+    {
+      "module": "fi.simulate.simulation.contract",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.contract"
+    },
+    {
+      "error_target": "fi.alk.simulate.simulation.engines",
+      "module": "fi.simulate.simulation.engines",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.simulation.engines.base",
+      "module": "fi.simulate.simulation.engines.base",
+      "namespace": "fi.simulate"
+    },
+    {
+      "module": "fi.simulate.simulation.engines.caller_barge_in",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.engines.caller_barge_in"
+    },
+    {
+      "error_target": "fi.alk.simulate.simulation.engines.cloud",
+      "module": "fi.simulate.simulation.engines.cloud",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.simulation.engines.livekit",
+      "module": "fi.simulate.simulation.engines.livekit",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.simulation.engines.local_text",
+      "module": "fi.simulate.simulation.engines.local_text",
+      "namespace": "fi.simulate"
+    },
+    {
+      "module": "fi.simulate.simulation.engines.opening",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.engines.opening"
+    },
+    {
+      "module": "fi.simulate.simulation.fidelity",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.fidelity"
+    },
+    {
+      "module": "fi.simulate.simulation.gemini_tts_stream",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.gemini_tts_stream"
+    },
+    {
+      "error_target": "fi.alk.simulate.simulation.generator",
+      "module": "fi.simulate.simulation.generator",
+      "namespace": "fi.simulate"
+    },
+    {
+      "module": "fi.simulate.simulation.goal_machine",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.goal_machine"
+    },
+    {
+      "module": "fi.simulate.simulation.livekit_models",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.livekit_models"
+    },
+    {
+      "module": "fi.simulate.simulation.matrix",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.matrix"
+    },
+    {
+      "error_target": "fi.alk.simulate.simulation.models",
+      "module": "fi.simulate.simulation.models",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.simulation.runner",
+      "module": "fi.simulate.simulation.runner",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.simulation.synthetic",
+      "module": "fi.simulate.simulation.synthetic",
+      "namespace": "fi.simulate"
+    },
+    {
+      "module": "fi.simulate.simulation.voice_prompt",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulation.voice_prompt"
+    },
+    {
+      "module": "fi.simulate.simulator",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulator"
+    },
+    {
+      "module": "fi.simulate.simulator.builtins",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.simulator.builtins"
+    },
+    {
+      "error_target": "fi.alk.simulate.suite",
+      "module": "fi.simulate.suite",
+      "namespace": "fi.simulate"
+    },
+    {
+      "error_target": "fi.alk.simulate.utils.routes",
+      "module": "fi.simulate.utils.routes",
+      "namespace": "fi.simulate"
+    },
+    {
+      "module": "fi.simulate.voice",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.voice"
+    },
+    {
+      "module": "fi.simulate.voice_cli",
+      "namespace": "fi.simulate",
+      "error_target": "fi.alk.simulate.voice_cli"
+    }
+  ],
+  "fi_evals_modules": [
+    {
+      "alk_target": "fi.alk.evals.metrics.agents.report",
+      "module": "fi.evals.metrics.agents.report"
+    }
+  ],
+  "fi_evals_names": [
+    {
+      "alk_target": "fi.alk.evals.AgentReportCaseResult",
+      "module": "fi.evals.metrics",
+      "name": "AgentReportCaseResult",
+      "replacement_import": "from fi.alk.evals import AgentReportCaseResult"
+    },
+    {
+      "alk_target": "fi.alk.evals.AgentReportEvalConfig",
+      "module": "fi.evals.metrics",
+      "name": "AgentReportEvalConfig",
+      "replacement_import": "from fi.alk.evals import AgentReportEvalConfig"
+    },
+    {
+      "alk_target": "fi.alk.evals.AgentReportEvaluation",
+      "module": "fi.evals.metrics",
+      "name": "AgentReportEvaluation",
+      "replacement_import": "from fi.alk.evals import AgentReportEvaluation"
+    },
+    {
+      "alk_target": "fi.alk.evals.AgentReportEvaluator",
+      "module": "fi.evals.metrics",
+      "name": "AgentReportEvaluator",
+      "replacement_import": "from fi.alk.evals import AgentReportEvaluator"
+    },
+    {
+      "alk_target": "fi.alk.evals.AgentReportMetricResult",
+      "module": "fi.evals.metrics",
+      "name": "AgentReportMetricResult",
+      "replacement_import": "from fi.alk.evals import AgentReportMetricResult"
+    },
+    {
+      "alk_target": "fi.alk.evals.metrics",
+      "module": "fi.evals.metrics",
+      "name": "evaluate_agent_report",
+      "replacement_import": "from fi.alk.evals.metrics import evaluate_agent_report"
+    },
+    {
+      "alk_target": "fi.alk.evals.normalize_agent_report",
+      "module": "fi.evals.metrics",
+      "name": "normalize_agent_report",
+      "replacement_import": "from fi.alk.evals import normalize_agent_report"
+    },
+    {
+      "alk_target": "fi.alk.evals.AgentReportCaseResult",
+      "module": "fi.evals.metrics.agents",
+      "name": "AgentReportCaseResult",
+      "replacement_import": "from fi.alk.evals import AgentReportCaseResult"
+    },
+    {
+      "alk_target": "fi.alk.evals.AgentReportEvalConfig",
+      "module": "fi.evals.metrics.agents",
+      "name": "AgentReportEvalConfig",
+      "replacement_import": "from fi.alk.evals import AgentReportEvalConfig"
+    },
+    {
+      "alk_target": "fi.alk.evals.AgentReportEvaluation",
+      "module": "fi.evals.metrics.agents",
+      "name": "AgentReportEvaluation",
+      "replacement_import": "from fi.alk.evals import AgentReportEvaluation"
+    },
+    {
+      "alk_target": "fi.alk.evals.AgentReportEvaluator",
+      "module": "fi.evals.metrics.agents",
+      "name": "AgentReportEvaluator",
+      "replacement_import": "from fi.alk.evals import AgentReportEvaluator"
+    },
+    {
+      "alk_target": "fi.alk.evals.AgentReportMetricResult",
+      "module": "fi.evals.metrics.agents",
+      "name": "AgentReportMetricResult",
+      "replacement_import": "from fi.alk.evals import AgentReportMetricResult"
+    },
+    {
+      "alk_target": "fi.alk.evals.analyze_domain_package_registry_coverage",
+      "module": "fi.evals.metrics.agents",
+      "name": "analyze_domain_package_registry_coverage",
+      "replacement_import": "from fi.alk.evals import analyze_domain_package_registry_coverage"
+    },
+    {
+      "alk_target": "fi.alk.evals.diff_domain_package_registries",
+      "module": "fi.evals.metrics.agents",
+      "name": "diff_domain_package_registries",
+      "replacement_import": "from fi.alk.evals import diff_domain_package_registries"
+    },
+    {
+      "alk_target": "fi.alk.evals.metrics.agents",
+      "module": "fi.evals.metrics.agents",
+      "name": "evaluate_agent_report",
+      "replacement_import": "from fi.alk.evals.metrics.agents import evaluate_agent_report"
+    },
+    {
+      "alk_target": "fi.alk.evals.generate_domain_package_registry_fixtures",
+      "module": "fi.evals.metrics.agents",
+      "name": "generate_domain_package_registry_fixtures",
+      "replacement_import": "from fi.alk.evals import generate_domain_package_registry_fixtures"
+    },
+    {
+      "alk_target": "fi.alk.evals.generate_domain_package_registry_mutation_pack",
+      "module": "fi.evals.metrics.agents",
+      "name": "generate_domain_package_registry_mutation_pack",
+      "replacement_import": "from fi.alk.evals import generate_domain_package_registry_mutation_pack"
+    },
+    {
+      "alk_target": "fi.alk.evals.normalize_agent_report",
+      "module": "fi.evals.metrics.agents",
+      "name": "normalize_agent_report",
+      "replacement_import": "from fi.alk.evals import normalize_agent_report"
+    },
+    {
+      "alk_target": "fi.alk.evals.replay_domain_package_registry",
+      "module": "fi.evals.metrics.agents",
+      "name": "replay_domain_package_registry",
+      "replacement_import": "from fi.alk.evals import replay_domain_package_registry"
+    },
+    {
+      "alk_target": "fi.alk.evals.select_domain_package_registry_replay_pack",
+      "module": "fi.evals.metrics.agents",
+      "name": "select_domain_package_registry_replay_pack",
+      "replacement_import": "from fi.alk.evals import select_domain_package_registry_replay_pack"
+    },
+    {
+      "alk_target": "fi.alk.evals.validate_domain_package_registry",
+      "module": "fi.evals.metrics.agents",
+      "name": "validate_domain_package_registry",
+      "replacement_import": "from fi.alk.evals import validate_domain_package_registry"
+    }
+  ],
+  "pending_reconcile": [],
+  "simulate_reconciliation": {
+    "sha256": "aacbb1511c62996b6c458f5792feabf3f42f15f795ae18b2dd13092545a2e46b",
+    "alias_added": 57,
+    "intentionally_private": 3
+  }
+}

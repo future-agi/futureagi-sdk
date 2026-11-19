@@ -1,0 +1,4849 @@
+{
+ "area": "env_matrix",
+ "cases": {
+  "env.base_url.localhost": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.base_url.port": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "127.0.0.1",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.base_url.prefix": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/gw/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.base_url.prefix_v1": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/gw/v1/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.base_url.trailing_slash": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.base_url.uppercase_v1": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/V1/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.base_url.v1": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.base_url.v1_slash": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.base_url.v1_twice": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/v1/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.fi_api_key_reused_as_gateway_key": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "env.fi_secret_key_reused_as_gateway_key": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "env.gateway_url_constant.agentcc_base_url": {
+   "requests": [],
+   "result": {
+    "exit": 0,
+    "stderr_tail": [],
+    "stdout": "https://from-env.example.test"
+   }
+  },
+  "env.gateway_url_constant.agentcc_gateway_url": {
+   "requests": [],
+   "result": {
+    "exit": 0,
+    "stderr_tail": [],
+    "stdout": "https://gateway-url-env.example.test"
+   }
+  },
+  "env.gateway_url_constant.both": {
+   "requests": [],
+   "result": {
+    "exit": 0,
+    "stderr_tail": [],
+    "stdout": "https://gateway-url-env.example.test"
+   }
+  },
+  "env.gateway_url_constant.unset": {
+   "requests": [],
+   "result": {
+    "exit": 0,
+    "stderr_tail": [],
+    "stdout": "https://gateway.futureagi.com/v1"
+   }
+  },
+  "env.isolation.all_fi_openai_set": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.isolation.chat": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "env.key_agentcc_env.url_agentcc_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_agentcc_env.url_arg": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_agentcc_env.url_arg_over_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_agentcc_env.url_both_env_differ": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_agentcc_env.url_empty_arg_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_agentcc_env.url_fi_gateway_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_agentcc_env.url_gateway_url_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_agentcc_env.url_none": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg.url_agentcc_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg.url_arg": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg.url_arg_over_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg.url_both_env_differ": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg.url_empty_arg_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg.url_fi_gateway_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg.url_gateway_url_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg.url_none": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg_over_env.url_agentcc_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg_over_env.url_arg": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg_over_env.url_arg_over_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg_over_env.url_both_env_differ": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg_over_env.url_empty_arg_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg_over_env.url_fi_gateway_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg_over_env.url_gateway_url_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_arg_over_env.url_none": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-arg"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_both_env_differ.url_agentcc_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-agentcc"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_both_env_differ.url_arg": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-agentcc"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_both_env_differ.url_arg_over_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-agentcc"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_both_env_differ.url_both_env_differ": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-agentcc"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_both_env_differ.url_empty_arg_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-agentcc"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_both_env_differ.url_fi_gateway_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-agentcc"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_both_env_differ.url_gateway_url_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-agentcc"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_both_env_differ.url_none": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-agentcc"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_empty_arg_env.url_agentcc_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_empty_arg_env.url_arg": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_empty_arg_env.url_arg_over_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_empty_arg_env.url_both_env_differ": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_empty_arg_env.url_empty_arg_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_empty_arg_env.url_fi_gateway_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_empty_arg_env.url_gateway_url_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_empty_arg_env.url_none": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer key-from-agentcc-env"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_fi_gateway_env.url_agentcc_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_fi_gateway_env.url_arg": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_fi_gateway_env.url_arg_over_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_fi_gateway_env.url_both_env_differ": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_fi_gateway_env.url_empty_arg_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_fi_gateway_env.url_fi_gateway_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_fi_gateway_env.url_gateway_url_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_fi_gateway_env.url_none": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_none.url_agentcc_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_none.url_arg": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_none.url_arg_over_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_none.url_both_env_differ": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_none.url_empty_arg_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "agentcc-env.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_none.url_fi_gateway_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_none.url_gateway_url_env": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "env.key_none.url_none": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "localhost",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": 8090,
+     "query": [],
+     "scheme": "http",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  }
+ },
+ "format": 1
+}

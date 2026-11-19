@@ -1,0 +1,25 @@
+{
+  "name": "@future-agi/sdk-gateway-client-toolchain",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The pinned build and test toolchain of typescript/futureagi/gateway-client (the @future-agi/sdk/gateway* subpaths). Never published: the code ships inside @future-agi/sdk (registration-fragment.json). jest, ts-jest, typescript and @types/node are the versions typescript/pnpm-lock.yaml pins for the root package.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "test": "jest -c jest.config.cjs --runInBand",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.typecheck.json"
+  },
+  "devDependencies": {
+    "@jest/globals": "29.7.0",
+    "@testing-library/react": "14.3.1",
+    "@types/node": "20.19.2",
+    "@types/react": "18.3.12",
+    "esbuild": "0.25.5",
+    "jest": "29.7.0",
+    "jest-environment-jsdom": "29.7.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "ts-jest": "29.4.0",
+    "typescript": "5.8.3"
+  }
+}

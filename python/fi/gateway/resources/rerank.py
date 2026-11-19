@@ -88,4 +88,6 @@ class AsyncRerank:
             headers=extra_headers or {},
             timeout=parse_timeout(timeout) if timeout is not NOT_GIVEN else None,
         )
-        return await self._client._get_base_client()._request_with_retry(opts, RerankResponse)
+        return await self._client._get_base_client()._request_with_retry(
+            opts, RerankResponse
+        )

@@ -1,0 +1,8 @@
+# Test/example dependencies only; the SDK is loaded from this checkout in CI.
+langchain-openai==0.3.33
+llama-index-llms-openai-like==0.4.0
+openai==1.109.1
+httpx==0.28.1
+pytest==8.3.5
+pytest-socket==0.7.0
+PyYAML==6.0.2

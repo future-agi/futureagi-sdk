@@ -22,7 +22,7 @@ class RequestConfig(BaseModel):
     files: Optional[Dict[str, Any]] = {}
     data: Optional[Dict[str, Any]] = {}
     json: Optional[Dict[str, Any]] = {}
-    timeout: Optional[int] = None
+    timeout: Optional[float] = None
     retry_attempts: int = 3
     retry_delay: float = 1.0
 

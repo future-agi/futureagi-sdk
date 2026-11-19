@@ -1,0 +1,1 @@
+{ "compilerOptions": { "module": "commonjs", "moduleResolution": "node10", "target": "ES2022", "lib": ["ES2022", "DOM"], "types": ["node"], "strict": true, "noEmit": true, "skipLibCheck": true, "esModuleInterop": true }, "files": ["root-node10.ts"] }

@@ -1,0 +1,9 @@
+{
+  "//": "The live wire suite: tsconfig.test.json without its tests/live exclusion. Also typechecked with tsc -p tests/live/tsconfig.live.json --noEmit (run-wire-suite.sh step ts).",
+  "extends": "../../tsconfig.test.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["../../src/**/*.ts", "./**/*.ts"],
+  "exclude": ["../../node_modules", "./stock", "./browser"]
+}

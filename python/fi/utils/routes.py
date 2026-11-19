@@ -4,9 +4,6 @@ from enum import Enum
 class Routes(str, Enum):
     healthcheck = "healthcheck"
 
-    # logging
-    log_model = "sdk/api/v1/log/model/"
-
     # evaluation
     evaluate = "sdk/api/v1/eval/"
     evaluatev2 = "sdk/api/v1/new-eval/"
@@ -37,6 +34,32 @@ class Routes(str, Enum):
     composite_eval_execute = (
         "model-hub/eval-templates/{template_id}/composite/execute/"
     )
+    composite_eval_execute_adhoc = "model-hub/eval-templates/composite/execute-adhoc/"
+    eval_template_list_charts = "model-hub/eval-templates/list-charts/"
+    eval_template_duplicate = "model-hub/duplicate-eval-template/"
+    eval_template_usage = "model-hub/eval-templates/{template_id}/usage/"
+    eval_template_feedback_list = "model-hub/eval-templates/{template_id}/feedback-list/"
+
+    # eval ground truth (data and config), used by fi.evals.EvalTemplateManager
+    ground_truth_list = "model-hub/eval-templates/{template_id}/ground-truth/"
+    ground_truth_upload = "model-hub/eval-templates/{template_id}/ground-truth/upload/"
+    ground_truth_setup = "model-hub/ground-truth/{ground_truth_id}/setup/"
+    ground_truth_data = "model-hub/ground-truth/{ground_truth_id}/data/"
+    ground_truth_status = "model-hub/ground-truth/{ground_truth_id}/status/"
+    ground_truth_embed = "model-hub/ground-truth/{ground_truth_id}/embed/"
+    ground_truth_delete = "model-hub/ground-truth/{ground_truth_id}/"
+
+    # removed from the current platform; kept for source compatibility with ai-evaluation 1.1.0; never called
+    log_model = "sdk/api/v1/log/model/"
+    ground_truth_config = "model-hub/eval-templates/{template_id}/ground-truth-config/"
+    ground_truth_mapping = "model-hub/ground-truth/{ground_truth_id}/mapping/"
+    ground_truth_role_mapping = "model-hub/ground-truth/{ground_truth_id}/role-mapping/"
+    ground_truth_search = "model-hub/ground-truth/{ground_truth_id}/search/"
+
+    # eval playground
+    eval_playground = "model-hub/eval-playground/"
+    eval_playground_feedback = "model-hub/eval-playground/feedback/"
+    eval_sdk_code = "model-hub/eval-sdk-code/"
 
     # dataset
     dataset = "model-hub/develops"
@@ -101,6 +124,7 @@ class Routes(str, Enum):
 
     # annotation queues
     annotation_queues = "model-hub/annotation-queues/"
+    annotation_queue_get_or_create_default = "model-hub/annotation-queues/get-or-create-default/"
     annotation_queue_detail = "model-hub/annotation-queues/{queue_id}/"
     annotation_queue_status = "model-hub/annotation-queues/{queue_id}/update-status/"
     annotation_queue_progress = "model-hub/annotation-queues/{queue_id}/progress/"

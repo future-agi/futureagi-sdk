@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "label": "historical",
+  "docs_complete": false,
+  "python_entries": [
+    "fi:FutureAGIClient", "fi:AsyncFutureAGIClient", "fi.errors:SDKException",
+    "fi.datasets:Dataset", "fi.prompt:Prompt", "fi.kb:KnowledgeBase",
+    "fi.evals:Evaluator", "fi.experiments:run", "fi.experiments:arun", "fi.webhooks"
+  ],
+  "node_entries": [".", "./webhooks"],
+  "states": {
+    "datasets": {"py": "ON", "ts": "ON"},
+    "experiments": {"py": "ON", "ts": "ON"},
+    "evals": {"py": "ON", "ts": "ON"},
+    "tracing": {"py": "ON", "ts": "ON"},
+    "prompts": {"py": "ON", "ts": "ON"},
+    "knowledge_bases": {"py": "ON", "ts": "ON"},
+    "annotations": {"py": "ON", "ts": "ON"},
+    "simulations": {"py": "ON", "ts": "ON"},
+    "gateway": {"py": "OFF", "ts": "OFF"},
+    "gateway_management": {"py": "OFF", "ts": "OFF"},
+    "billing": {"py": "OFF", "ts": "OFF"},
+    "agents": {"py": "OFF", "ts": "OFF"},
+    "runs": {"py": "OFF", "ts": "OFF"},
+    "agent_code": {"py": "OFF", "ts": "OFF"},
+    "sandboxes": {"py": "OFF", "ts": "OFF"},
+    "deployments": {"py": "OFF", "ts": "OFF"},
+    "connectors": {"py": "OFF", "ts": "OFF"},
+    "webhooks": {"py": "ON", "ts": "ON"}
+  }
+}

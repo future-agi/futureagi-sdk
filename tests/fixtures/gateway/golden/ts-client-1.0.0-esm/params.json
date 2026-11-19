@@ -1,0 +1,5175 @@
+{
+ "area": "params",
+ "cases": {
+  "client_option.defaultHeaders": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-default",
+       "d"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "client_option.defaultQuery": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [
+      [
+       "tenant",
+       "t1"
+      ]
+     ],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "client_option.dropParams": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "client_option.dropParams.unknown_model": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "unknown-model"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "client_option.jsonSchemaValidation.bad": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "attrs": {
+     "name": "AgentCCError"
+    },
+    "chain": [
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "AgentCCError",
+    "message": "Structured output validation failed: /name: expected type \"string\", got number",
+    "toString": "AgentCCError: Structured output validation failed: /name: expected type \"string\", got number"
+   },
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "response_format": {
+       "json_schema": {
+        "name": "p",
+        "schema": {
+         "properties": {
+          "age": {
+           "type": "integer"
+          },
+          "name": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "name"
+         ],
+         "type": "object"
+        }
+       },
+       "type": "json_schema"
+      }
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ]
+  },
+  "client_option.jsonSchemaValidation.ok": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "response_format": {
+       "json_schema": {
+        "name": "p",
+        "schema": {
+         "properties": {
+          "age": {
+           "type": "integer"
+          },
+          "name": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "name"
+         ],
+         "type": "object"
+        }
+       },
+       "type": "json_schema"
+      }
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+       "content": "{\"name\":\"Ada\",\"age\":36}",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-json",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "usage": {
+     "completion_tokens": 8,
+     "prompt_tokens": 9,
+     "total_tokens": 17
+    }
+   }
+  },
+  "client_option.metadata": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-metadata",
+       "{\"team\":\"a\",\"n\":2}"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "client_option.modifyParams": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "injected": true,
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "client_option.preCallRules.allow": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "attrs": {
+     "name": "AgentCCError"
+    },
+    "chain": [
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "AgentCCError",
+    "message": "Pre-call rule blocked request: no reason given",
+    "toString": "AgentCCError: Pre-call rule blocked request: no reason given"
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "client_option.preCallRules.block": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "attrs": {
+     "name": "AgentCCError"
+    },
+    "chain": [
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "AgentCCError",
+    "message": "Pre-call rule blocked request: no",
+    "toString": "AgentCCError: Pre-call rule blocked request: no"
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "client_option.redactMessages": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "client_option.sessionId": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-session-id",
+       "client-sess"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "client_option.timeout": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 9000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "client_option.traceContext": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "traceparent",
+       "00-00000000000040008000000000000001-0000000000004000-01"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-trace-id",
+       "00000000000040008000000000000001"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "client_option.traceparent": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "traceparent",
+       "00-0af7651916cd43dd8448eb211c80319c-0000000000004000-01"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-trace-id",
+       "0af7651916cd43dd8448eb211c80319c"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.cache_control": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "cache-control",
+       "no-cache"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.cache_force_refresh": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-cache-force-refresh",
+       "true"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.cache_force_refresh.null": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.cache_namespace": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-cache-namespace",
+       "ns-1"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.cache_ttl": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-cache-ttl",
+       "300"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.cache_ttl.null": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.combined": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "cache-control",
+       "no-cache"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-cache-force-refresh",
+       "true"
+      ],
+      [
+       "x-agentcc-cache-namespace",
+       "ns-1"
+      ],
+      [
+       "x-agentcc-cache-ttl",
+       "300"
+      ],
+      [
+       "x-agentcc-metadata",
+       "{\"k\":\"v\",\"n\":1}"
+      ],
+      [
+       "x-agentcc-request-timeout",
+       "30"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-session-id",
+       "sess-1"
+      ],
+      [
+       "x-agentcc-trace-id",
+       "trace-1"
+      ],
+      [
+       "x-custom",
+       "1"
+      ],
+      [
+       "x-guardrail-policy",
+       "strict"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "custom_field": 1,
+      "frequency_penalty": 0.2,
+      "logit_bias": {
+       "50256": -100
+      },
+      "logprobs": true,
+      "max_completion_tokens": 12,
+      "max_tokens": 10,
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "n": 2,
+      "presence_penalty": 0.1,
+      "properties": {
+       "team": "a"
+      },
+      "request_id": "r-1",
+      "response_format": {
+       "type": "json_object"
+      },
+      "seed": 42,
+      "stop": [
+       "\n"
+      ],
+      "stream_options": {
+       "include_usage": true
+      },
+      "temperature": 0.5,
+      "tool_choice": "none",
+      "tools": [
+       {
+        "function": {
+         "name": "f",
+         "parameters": {
+          "type": "object"
+         }
+        },
+        "type": "function"
+       }
+      ],
+      "top_logprobs": 2,
+      "top_p": 0.9,
+      "unknown_kwarg": "passes through",
+      "user": "user-1",
+      "user_id": "u-1"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.extra_body": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "custom_field": 1,
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.extra_headers": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-custom",
+       "1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.extra_headers.null": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.frequency_penalty": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "frequency_penalty": 0.2,
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.guardrail_policy": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-guardrail-policy",
+       "strict"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.logit_bias": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "logit_bias": {
+       "50256": -100
+      },
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.logprobs": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "logprobs": true,
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.max_completion_tokens": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "max_completion_tokens": 12,
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.max_tokens": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "max_tokens": 10,
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.n": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "n": 2
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.presence_penalty": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "presence_penalty": 0.1
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.properties": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "properties": {
+       "team": "a"
+      }
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.request_id": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "request_id": "r-1"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.request_metadata": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-metadata",
+       "{\"k\":\"v\",\"n\":1}"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.request_timeout": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-request-timeout",
+       "30"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.response_format": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "response_format": {
+       "type": "json_object"
+      }
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.seed": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "seed": 42
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.session_id": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-session-id",
+       "sess-1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.session_id.null": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.stop": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stop": [
+       "\n"
+      ]
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.stream_options": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream_options": {
+       "include_usage": true
+      }
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.temperature": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "temperature": 0.5
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.temperature.null": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "temperature": null
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.tool_choice": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "tool_choice": "none"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.tools": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "tools": [
+       {
+        "function": {
+         "name": "f",
+         "parameters": {
+          "type": "object"
+         }
+        },
+        "type": "function"
+       }
+      ]
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.top_logprobs": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "top_logprobs": 2
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.top_p": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "top_p": 0.9
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.trace_id": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-trace-id",
+       "trace-1"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.unknown_kwarg": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "unknown_kwarg": "passes through"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.user": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "user": "user-1"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "param.chat.user_id": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "user_id": "u-1"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "with_options.defaultHeaders": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-session-id",
+       "base-sess"
+      ],
+      [
+       "x-derived",
+       "d"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "base": 0,
+    "derived": 0,
+    "result": {
+     "agentcc": {
+      "cacheStatus": null,
+      "cost": null,
+      "fallbackUsed": false,
+      "guardrailAction": null,
+      "guardrailConfidence": null,
+      "guardrailMessage": null,
+      "guardrailName": null,
+      "guardrailTriggered": false,
+      "latencyMs": 0,
+      "modelUsed": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "requestId": "unknown",
+      "routingStrategy": null,
+      "timeoutMs": null,
+      "traceId": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "role": "assistant"
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "prompt_tokens": 5,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "with_options.defaultQuery": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-session-id",
+       "base-sess"
+      ],
+      [
+       "x-base",
+       "b"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [
+      [
+       "q",
+       "1"
+      ]
+     ],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "base": 0,
+    "derived": 0,
+    "result": {
+     "agentcc": {
+      "cacheStatus": null,
+      "cost": null,
+      "fallbackUsed": false,
+      "guardrailAction": null,
+      "guardrailConfidence": null,
+      "guardrailMessage": null,
+      "guardrailName": null,
+      "guardrailTriggered": false,
+      "latencyMs": 0,
+      "modelUsed": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "requestId": "unknown",
+      "routingStrategy": null,
+      "timeoutMs": null,
+      "traceId": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "role": "assistant"
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "prompt_tokens": 5,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "with_options.maxRetries": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-session-id",
+       "base-sess"
+      ],
+      [
+       "x-base",
+       "b"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "base": 0,
+    "derived": 0,
+    "result": {
+     "agentcc": {
+      "cacheStatus": null,
+      "cost": null,
+      "fallbackUsed": false,
+      "guardrailAction": null,
+      "guardrailConfidence": null,
+      "guardrailMessage": null,
+      "guardrailName": null,
+      "guardrailTriggered": false,
+      "latencyMs": 0,
+      "modelUsed": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "requestId": "unknown",
+      "routingStrategy": null,
+      "timeoutMs": null,
+      "traceId": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "role": "assistant"
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "prompt_tokens": 5,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "with_options.metadata": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-metadata",
+       "{\"m\":\"1\"}"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-session-id",
+       "base-sess"
+      ],
+      [
+       "x-base",
+       "b"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "base": 0,
+    "derived": 0,
+    "result": {
+     "agentcc": {
+      "cacheStatus": null,
+      "cost": null,
+      "fallbackUsed": false,
+      "guardrailAction": null,
+      "guardrailConfidence": null,
+      "guardrailMessage": null,
+      "guardrailName": null,
+      "guardrailTriggered": false,
+      "latencyMs": 0,
+      "modelUsed": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "requestId": "unknown",
+      "routingStrategy": null,
+      "timeoutMs": null,
+      "traceId": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "role": "assistant"
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "prompt_tokens": 5,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "with_options.sessionId": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-session-id",
+       "derived-sess"
+      ],
+      [
+       "x-base",
+       "b"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "base": 0,
+    "derived": 0,
+    "result": {
+     "agentcc": {
+      "cacheStatus": null,
+      "cost": null,
+      "fallbackUsed": false,
+      "guardrailAction": null,
+      "guardrailConfidence": null,
+      "guardrailMessage": null,
+      "guardrailName": null,
+      "guardrailTriggered": false,
+      "latencyMs": 0,
+      "modelUsed": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "requestId": "unknown",
+      "routingStrategy": null,
+      "timeoutMs": null,
+      "traceId": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "role": "assistant"
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "prompt_tokens": 5,
+      "total_tokens": 8
+     }
+    }
+   }
+  },
+  "with_options.timeout": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-session-id",
+       "base-sess"
+      ],
+      [
+       "x-base",
+       "b"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 7500
+    }
+   ],
+   "result": {
+    "base": 0,
+    "derived": 0,
+    "result": {
+     "agentcc": {
+      "cacheStatus": null,
+      "cost": null,
+      "fallbackUsed": false,
+      "guardrailAction": null,
+      "guardrailConfidence": null,
+      "guardrailMessage": null,
+      "guardrailName": null,
+      "guardrailTriggered": false,
+      "latencyMs": 0,
+      "modelUsed": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "requestId": "unknown",
+      "routingStrategy": null,
+      "timeoutMs": null,
+      "traceId": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "role": "assistant"
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "prompt_tokens": 5,
+      "total_tokens": 8
+     }
+    }
+   }
+  }
+ },
+ "format": 1
+}

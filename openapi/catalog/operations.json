@@ -1,0 +1,304 @@
+{
+  "source": "https://github.com/future-agi/futureagi-sdk/pull/35",
+  "source_record": "public-catalog-operation-inventory",
+  "operations": [
+    {
+      "id": "workspaces.list",
+      "method": "GET",
+      "path": "/accounts/workspaces/",
+      "unwrap": "result",
+      "pagination": null,
+      "query": [],
+      "path_params": [],
+      "operation_id": "accounts_workspaces_list",
+      "public": "workspaces.list"
+    },
+    {
+      "id": "workspaces.get",
+      "method": "GET",
+      "path": "/accounts/workspaces/{workspace_id}/",
+      "unwrap": "result",
+      "pagination": null,
+      "query": [],
+      "path_params": [
+        "workspace_id"
+      ],
+      "operation_id": "accounts_workspaces_read",
+      "public": "workspaces.get"
+    },
+    {
+      "id": "optimizations.list",
+      "method": "GET",
+      "path": "/model-hub/dataset-optimization/",
+      "unwrap": "result",
+      "pagination": {
+        "page_param": "page",
+        "size_param": "limit",
+        "first_page": 1,
+        "items": "table",
+        "total_items": "metadata.total_rows"
+      },
+      "query": [
+        "column_id",
+        "dataset_id",
+        "develop_id",
+        "limit",
+        "page"
+      ],
+      "path_params": [],
+      "operation_id": "model-hub_dataset-optimization_list",
+      "public": "optimizations.list"
+    },
+    {
+      "id": "optimizations.get",
+      "method": "GET",
+      "path": "/model-hub/dataset-optimization/{id}/",
+      "unwrap": "result",
+      "pagination": null,
+      "query": [],
+      "path_params": [
+        "id"
+      ],
+      "operation_id": "model-hub_dataset-optimization_read",
+      "public": "optimizations.get"
+    },
+    {
+      "id": "optimizations.create",
+      "method": "POST",
+      "path": "/model-hub/dataset-optimization/",
+      "unwrap": null,
+      "pagination": null,
+      "query": [],
+      "path_params": [],
+      "operation_id": "model-hub_dataset-optimization_create",
+      "public": "optimizations.create"
+    },
+    {
+      "id": "dashboards.list",
+      "method": "GET",
+      "path": "/tracer/dashboard/",
+      "unwrap": null,
+      "pagination": null,
+      "query": [],
+      "path_params": [],
+      "operation_id": "tracer_dashboard_list",
+      "public": "tracing.dashboards.list"
+    },
+    {
+      "id": "dashboards.get",
+      "method": "GET",
+      "path": "/tracer/dashboard/{id}/",
+      "unwrap": null,
+      "pagination": null,
+      "query": [],
+      "path_params": [
+        "id"
+      ],
+      "operation_id": "tracer_dashboard_read",
+      "public": "tracing.dashboards.get"
+    },
+    {
+      "id": "dashboards.create",
+      "method": "POST",
+      "path": "/tracer/dashboard/",
+      "unwrap": null,
+      "pagination": null,
+      "query": [],
+      "path_params": [],
+      "operation_id": "tracer_dashboard_create",
+      "public": "tracing.dashboards.create"
+    },
+    {
+      "id": "dashboards.update",
+      "method": "PATCH",
+      "path": "/tracer/dashboard/{id}/",
+      "unwrap": null,
+      "pagination": null,
+      "query": [],
+      "path_params": [
+        "id"
+      ],
+      "operation_id": "tracer_dashboard_partial_update",
+      "public": "tracing.dashboards.update"
+    },
+    {
+      "id": "dashboards.widgets.list",
+      "method": "GET",
+      "path": "/tracer/dashboard/{dashboard_pk}/widgets/",
+      "unwrap": null,
+      "pagination": {
+        "page_param": "page",
+        "size_param": "limit",
+        "first_page": 1,
+        "items": "results",
+        "next": "next"
+      },
+      "query": [
+        "limit",
+        "page"
+      ],
+      "path_params": [
+        "dashboard_pk"
+      ],
+      "operation_id": "tracer_dashboard_widgets_list",
+      "public": "tracing.dashboards.widgets.list"
+    },
+    {
+      "id": "dashboards.widgets.get",
+      "method": "GET",
+      "path": "/tracer/dashboard/{dashboard_pk}/widgets/{id}/",
+      "unwrap": null,
+      "pagination": null,
+      "query": [],
+      "path_params": [
+        "dashboard_pk",
+        "id"
+      ],
+      "operation_id": "tracer_dashboard_widgets_read",
+      "public": "tracing.dashboards.widgets.get"
+    },
+    {
+      "id": "dashboards.widgets.create",
+      "method": "POST",
+      "path": "/tracer/dashboard/{dashboard_pk}/widgets/",
+      "unwrap": null,
+      "pagination": null,
+      "query": [],
+      "path_params": [
+        "dashboard_pk"
+      ],
+      "operation_id": "tracer_dashboard_widgets_create",
+      "public": "tracing.dashboards.widgets.create"
+    },
+    {
+      "id": "dashboards.widgets.update",
+      "method": "PATCH",
+      "path": "/tracer/dashboard/{dashboard_pk}/widgets/{id}/",
+      "unwrap": null,
+      "pagination": null,
+      "query": [],
+      "path_params": [
+        "dashboard_pk",
+        "id"
+      ],
+      "operation_id": "tracer_dashboard_widgets_partial_update",
+      "public": "tracing.dashboards.widgets.update"
+    },
+    {
+      "id": "dashboards.widgets.query",
+      "method": "POST",
+      "path": "/tracer/dashboard/{dashboard_pk}/widgets/{id}/query/",
+      "unwrap": "result",
+      "pagination": null,
+      "query": [
+        "refresh"
+      ],
+      "path_params": [
+        "dashboard_pk",
+        "id"
+      ],
+      "operation_id": "tracer_dashboard_widgets_execute_query",
+      "public": "tracing.dashboards.widgets.query"
+    },
+    {
+      "id": "dashboards.delete",
+      "method": "DELETE",
+      "path": "/tracer/dashboard/{id}/",
+      "unwrap": null,
+      "pagination": null,
+      "query": [],
+      "path_params": [
+        "id"
+      ],
+      "operation_id": "tracer_dashboard_delete",
+      "public": "tracing.dashboards.delete"
+    },
+    {
+      "id": "dashboards.query",
+      "method": "POST",
+      "path": "/tracer/dashboard/query/",
+      "unwrap": "result",
+      "pagination": null,
+      "query": [
+        "refresh"
+      ],
+      "path_params": [],
+      "operation_id": "tracer_dashboard_query",
+      "public": "tracing.dashboards.query"
+    },
+    {
+      "id": "dashboards.metrics.list",
+      "method": "GET",
+      "path": "/tracer/dashboard/metrics/",
+      "unwrap": "result",
+      "pagination": null,
+      "query": [
+        "agent_definition_id",
+        "category",
+        "cursor",
+        "cursor_mode",
+        "exclude_custom_attributes",
+        "page",
+        "page_size",
+        "per_eval_config",
+        "project_ids",
+        "role",
+        "search",
+        "source",
+        "workflow"
+      ],
+      "path_params": [],
+      "operation_id": "tracer_dashboard_metrics",
+      "public": "tracing.dashboards.metrics.list"
+    },
+    {
+      "id": "dashboards.filter_values",
+      "method": "GET",
+      "path": "/tracer/dashboard/filter_values/",
+      "unwrap": "result",
+      "pagination": null,
+      "query": [
+        "attribute_type",
+        "cursor",
+        "dataset_id",
+        "metric_name",
+        "metric_type",
+        "page_size",
+        "project_ids",
+        "property_id",
+        "search",
+        "source"
+      ],
+      "path_params": [],
+      "operation_id": "tracer_dashboard_filter_values",
+      "public": "tracing.dashboards.filter_values"
+    },
+    {
+      "id": "models.list",
+      "method": "GET",
+      "path": "/model-hub/api/models_list/",
+      "unwrap": null,
+      "pagination": {
+        "page_param": "page",
+        "size_param": "limit",
+        "first_page": 1,
+        "items": "results",
+        "next": "next",
+        "total_items": "count",
+        "current_page": "current_page"
+      },
+      "query": [
+        "exclude_providers",
+        "limit",
+        "model_type",
+        "name",
+        "page",
+        "search"
+      ],
+      "path_params": [],
+      "operation_id": "model-hub_api_models_list_list",
+      "public": "models.list",
+      "description": "List the platform model catalog, not the gateway data-plane catalog. Returns a page that walks subsequent pages on the same authenticated origin. Availability describes configured providers; this call does not invoke a model."
+    }
+  ]
+}

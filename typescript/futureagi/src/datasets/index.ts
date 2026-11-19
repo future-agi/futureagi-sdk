@@ -5,12 +5,20 @@ export { Dataset, DatasetResponseHandler } from './dataset';
 export {
     DataTypeChoices,
     SourceChoices,
+    ModelTypes,
     DataTypeUtils,
     createColumn,
     createRow,
     createCell,
     DatasetTableUtils,
     type Column,
+    type ColumnInput,
+    type ColumnResult,
+    type CanonicalColumn,
+    type LegacyColumn,
+    type LegacyDatasetTable,
+    type DatasetTableInput,
+    type DatasetTableResult,
     type Cell,
     type Row,
     type DatasetConfig,
@@ -26,3 +34,5 @@ export {
 
 // Default export
 export { Dataset as default } from './dataset';
+export { decodeVersionJsonl, encodeVersionJsonl } from './version-jsonl';
+export type { LegacyRowsPolicy } from './version-jsonl';

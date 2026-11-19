@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "sdk-conformance-compare/v1",
+  "about": "What 'the fake matches the live service' means. Every top-level field of a parity record must be listed in exact or shapeOnly; a field listed in neither fails the comparison, so a new field can never be ignored silently. resultFieldClasses decides which response leaves are compared by shape (present, same JSON type) instead of by value; every other leaf is compared by name and type through resultFields.",
+  "exact": {
+    "status": "the HTTP status, or null for a client-side refusal",
+    "errorClass": "the SDK error class (lib/errors.mjs errorClassFor), or null on success",
+    "code": "the typed error code, or null on success",
+    "resultFields": "every response leaf's dotted path and JSON type (values are not compared here)",
+    "exitCode": "a command's exit code",
+    "fileContent": "file contents written and read back",
+    "stateSequence": "the lifecycle states a resource passed through, in order",
+    "eventTypes": "the sequence of stream event types, consecutive duplicates collapsed",
+    "deltaText": "the concatenated message_delta text of a run"
+  },
+  "shapeOnly": {
+    "requestId": "the gateway request id",
+    "upstreamRequestId": "EE's request id",
+    "receiptId": "an audit receipt id",
+    "idempotencyKey": "the key a call was sent with",
+    "ids": "resource ids found in the response (resultFieldClasses.ids)",
+    "timestamps": "date-time values (resultFieldClasses.timestamps)",
+    "durations": "durations in ms or s (resultFieldClasses.durations)",
+    "cursors": "opaque paging cursors (resultFieldClasses.cursors)",
+    "sizes": "byte counts and sizes that depend on timing or encoding (resultFieldClasses.sizes)",
+    "hashes": "content addresses, digests and audit hashes (resultFieldClasses.hashes)"
+  },
+  "resultFieldClasses": {
+    "ids": "(^|\\.)(id|[a-z][A-Za-z0-9]*Id|request_id)$",
+    "timestamps": "(^|\\.)(at|[a-z][A-Za-z0-9]*At|generatedAt|checkedAt|since)$",
+    "durations": "(^|\\.)([a-z][A-Za-z0-9]*(Ms|Seconds)|duration[A-Za-z]*)$",
+    "cursors": "(^|\\.)(cursor|nextCursor|after)$",
+    "sizes": "(^|\\.)(bytes|size|[a-z][A-Za-z0-9]*Bytes|length|count|eventCount|tokens|costUsd)$",
+    "hashes": "(^|\\.)(hash|previousHash|headHash|digest|sha256|contentSha256|contentAddress)$"
+  }
+}

@@ -1,0 +1,614 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "deployments",
+  "about": "Deployments: list, get, health, logs, token rotation, rollback and refusals.",
+  "cases": [
+    {
+      "id": "deployments.list.ok",
+      "title": "List deployments",
+      "sdk": {
+        "family": "deployments",
+        "method": "list"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/deployments"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "deployments": "array"
+        }
+      }
+    },
+    {
+      "id": "deployments.get.ok",
+      "title": "Get one deployment",
+      "sdk": {
+        "family": "deployments",
+        "method": "get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/deployments/{deployment}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "deployment"
+      ],
+      "call": {
+        "params": {
+          "deployment": "${res.deployment}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": {
+          "id": {
+            "equals": "${res.deployment}"
+          }
+        }
+      }
+    },
+    {
+      "id": "deployments.get.cross-tenant",
+      "title": "Org B's credential on org A's deployment answers 404, every time",
+      "sdk": {
+        "family": "deployments",
+        "method": "get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/deployments/{deployment}"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "deployment"
+      ],
+      "call": {
+        "params": {
+          "deployment": "${res.deployment}"
+        }
+      },
+      "repeat": 20,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "deployments.get.unknown-id",
+      "title": "A deployment id that does not exist answers 404",
+      "sdk": {
+        "family": "deployments",
+        "method": "get"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/deployments/{deployment}"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "params": {
+          "deployment": "dep-0000000000000000"
+        }
+      },
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "deployments.health.ok",
+      "title": "Read a deployment's health",
+      "sdk": {
+        "family": "deployments",
+        "method": "health"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/deployments/{deployment}/health"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "deployment"
+      ],
+      "call": {
+        "params": {
+          "deployment": "${res.deployment}"
+        }
+      },
+      "expect": {
+        "status": 200,
+        "contract": true
+      }
+    },
+    {
+      "id": "deployments.health.cross-tenant",
+      "title": "Org B cannot read org A's deployment health",
+      "sdk": {
+        "family": "deployments",
+        "method": "health"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/deployments/{deployment}/health"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "deployment"
+      ],
+      "call": {
+        "params": {
+          "deployment": "${res.deployment}"
+        }
+      },
+      "repeat": 5,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "deployments.logs.build",
+      "title": "Read a deployment's build log to its end",
+      "sdk": {
+        "family": "deployments",
+        "method": "logs"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/deployments/{deployment}/logs"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic"
+      ],
+      "needs": [
+        "deployment"
+      ],
+      "call": {
+        "params": {
+          "deployment": "${res.deployment}"
+        },
+        "query": {
+          "source": "build"
+        },
+        "stream": {
+          "kind": "sse-get",
+          "maxMs": 15000,
+          "until": [
+            "end"
+          ]
+        }
+      },
+      "expect": {
+        "status": 200,
+        "events": {
+          "minCount": 1
+        }
+      }
+    },
+    {
+      "id": "deployments.logs.cross-tenant",
+      "title": "Org B cannot read org A's deployment logs",
+      "sdk": {
+        "family": "deployments",
+        "method": "logs"
+      },
+      "op": {
+        "method": "GET",
+        "path": "/workspace/deployments/{deployment}/logs"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "deployment"
+      ],
+      "call": {
+        "params": {
+          "deployment": "${res.deployment}"
+        },
+        "query": {
+          "source": "build"
+        },
+        "stream": {
+          "kind": "sse-get",
+          "maxMs": 5000
+        }
+      },
+      "repeat": 5,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "deployments.create.bad-protocol",
+      "title": "A deploy with an unknown protocol is a typed 400",
+      "sdk": {
+        "family": "deployments",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/deployments"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "body": {
+          "protocol": "omega-deploy/0",
+          "kind": "project",
+          "name": "conf-bad"
+        },
+        "bodyInvalidOnPurpose": true
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "deployments.create.missing-key",
+      "title": "A deploy without an Idempotency-Key is a typed 400",
+      "sdk": {
+        "family": "deployments",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/deployments"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "body": {
+          "protocol": "omega-deploy/1",
+          "kind": "project",
+          "name": "conf-nokey"
+        },
+        "noIdempotencyKey": true,
+        "bodyInvalidOnPurpose": true
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "deployments.create.malformed-json",
+      "title": "A deploy body that is not JSON is a typed 400",
+      "sdk": {
+        "family": "deployments",
+        "method": "create"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/deployments"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "call": {
+        "rawBody": "{\"protocol\": "
+      },
+      "expect": {
+        "status": 400,
+        "errorClass": "BadRequestError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "deployments.rollback.bad-revision",
+      "title": "Rolling back to a revision that does not exist is refused with a typed error",
+      "sdk": {
+        "family": "deployments",
+        "method": "rollback"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/deployments/{deployment}/revisions/{revision}/rollback"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "deployment"
+      ],
+      "call": {
+        "params": {
+          "deployment": "${res.deployment}",
+          "revision": "999"
+        },
+        "body": {
+          "expectedRevision": 999
+        }
+      },
+      "expect": {
+        "status": [
+          400,
+          404,
+          409
+        ],
+        "codePresent": true
+      }
+    },
+    {
+      "id": "deployments.access-token.rotate",
+      "title": "Rotate a deployment's access token (shown once)",
+      "sdk": {
+        "family": "deployments",
+        "method": "rotateAccessToken"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/deployments/{deployment}/access-token"
+      },
+      "tenant": {
+        "org": "A",
+        "role": "owner"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "mutating"
+      ],
+      "needs": [
+        "deployment"
+      ],
+      "call": {
+        "params": {
+          "deployment": "${res.deployment}"
+        },
+        "body": {}
+      },
+      "expect": {
+        "status": [
+          200,
+          202
+        ],
+        "contract": true
+      }
+    },
+    {
+      "id": "deployments.access-token.cross-tenant",
+      "title": "Org B cannot rotate org A's deployment token",
+      "sdk": {
+        "family": "deployments",
+        "method": "rotateAccessToken"
+      },
+      "op": {
+        "method": "POST",
+        "path": "/workspace/deployments/{deployment}/access-token"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "deployment"
+      ],
+      "call": {
+        "params": {
+          "deployment": "${res.deployment}"
+        },
+        "body": {}
+      },
+      "repeat": 5,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      }
+    },
+    {
+      "id": "deployments.delete.cross-tenant",
+      "title": "Org B cannot delete org A's deployment, and it is still there afterwards",
+      "sdk": {
+        "family": "deployments",
+        "method": "delete"
+      },
+      "op": {
+        "method": "DELETE",
+        "path": "/workspace/deployments/{deployment}"
+      },
+      "tenant": {
+        "org": "B",
+        "role": "owner",
+        "resourceOrg": "A"
+      },
+      "modes": [
+        "ee-key",
+        "fa-session",
+        "fi-keypair"
+      ],
+      "tags": [
+        "deterministic",
+        "failure"
+      ],
+      "needs": [
+        "deployment"
+      ],
+      "call": {
+        "params": {
+          "deployment": "${res.deployment}"
+        }
+      },
+      "repeat": 3,
+      "expect": {
+        "status": 404,
+        "errorClass": "NotFoundError",
+        "codePresent": true
+      },
+      "verify": [
+        {
+          "op": {
+            "method": "GET",
+            "path": "/workspace/deployments/{deployment}"
+          },
+          "params": {
+            "deployment": "${res.deployment}"
+          },
+          "expectStatus": 200
+        }
+      ]
+    }
+  ]
+}

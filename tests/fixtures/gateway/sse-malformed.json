@@ -1,0 +1,82 @@
+{
+ "description": "Malformed and edge-case SSE bodies for /v1/chat/completions stream:true, sent verbatim as body chunks. Shared by the Python and TypeScript parity recorders (catalog bullet: malformed SSE, events(), final usage).",
+ "cases": {
+  "invalid_json_frame": [
+   "data: {not json}\n\n",
+   "data: [DONE]\n\n"
+  ],
+  "split_across_chunks": [
+   "data: {\"id\":\"c\",\"object\":\"chat.compl",
+   "etion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"Hel\"},\"finish_reason\":null}]}\n\n",
+   "data: [DONE]\n\n"
+  ],
+  "crlf_line_endings": [
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"crlf\"},\"finish_reason\":null}]}\r\n\r\n",
+   "data: [DONE]\r\n\r\n"
+  ],
+  "comment_and_fields": [
+   ": ping\n\n",
+   "event: message\nid: 7\nretry: 100\ndata: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"x\"},\"finish_reason\":null}]}\n\n",
+   "data: [DONE]\n\n"
+  ],
+  "multiline_data": [
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\ndata: \"created\":1,\"model\":\"m\",\"choices\":[]}\n\n",
+   "data: [DONE]\n\n"
+  ],
+  "no_trailing_newline": [
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"a\"},\"finish_reason\":null}]}\n\n",
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"b\"},\"finish_reason\":null}]}"
+  ],
+  "no_done_end_of_body": [
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"a\"},\"finish_reason\":null}]}\n\n",
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\n"
+  ],
+  "empty_body": [],
+  "data_without_space": [
+   "data:{\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"tight\"},\"finish_reason\":null}]}\n\n",
+   "data:[DONE]\n\n"
+  ],
+  "done_then_more": [
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"a\"},\"finish_reason\":null}]}\n\n",
+   "data: [DONE]\n\n",
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"after\"},\"finish_reason\":null}]}\n\n"
+  ],
+  "frame_is_list": [
+   "data: [1,2]\n\n",
+   "data: [DONE]\n\n"
+  ],
+  "frame_is_string": [
+   "data: \"just text\"\n\n",
+   "data: [DONE]\n\n"
+  ],
+  "error_is_string": [
+   "data: {\"error\":\"plain string error\"}\n\n"
+  ],
+  "error_without_message": [
+   "data: {\"error\":{\"type\":\"x\",\"code\":\"y\"}}\n\n"
+  ],
+  "choices_null": [
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":null}\n\n",
+   "data: [DONE]\n\n"
+  ],
+  "unknown_fields": [
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"extra\":{\"a\":1},\"choices\":[{\"index\":0,\"delta\":{\"content\":\"u\",\"x\":1},\"finish_reason\":null,\"y\":2}]}\n\n",
+   "data: [DONE]\n\n"
+  ],
+  "usage_twice": [
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"a\"},\"finish_reason\":null}]}\n\n",
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[],\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":1,\"total_tokens\":2}}\n\n",
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[],\"usage\":{\"prompt_tokens\":5,\"completion_tokens\":1,\"total_tokens\":6}}\n\n",
+   "data: [DONE]\n\n"
+  ],
+  "usage_on_finish_chunk": [
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"a\"},\"finish_reason\":null}]}\n\n",
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":2,\"completion_tokens\":1,\"total_tokens\":3}}\n\n",
+   "data: [DONE]\n\n"
+  ],
+  "two_choices": [
+   "data: {\"id\":\"c\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"m\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"zero\"},\"finish_reason\":null},{\"index\":1,\"delta\":{\"content\":\"one\"},\"finish_reason\":null}]}\n\n",
+   "data: [DONE]\n\n"
+  ]
+ }
+}

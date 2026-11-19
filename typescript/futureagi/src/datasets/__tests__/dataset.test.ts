@@ -1,5 +1,5 @@
 import { Dataset, DatasetResponseHandler } from '../dataset';
-import { DatasetConfig, DatasetTable, HuggingfaceDatasetConfig, createColumn, createCell, createRow, DataTypeChoices, SourceChoices } from '../types';
+import { DatasetConfig, DatasetTable, DatasetTableInput, HuggingfaceDatasetConfig, createColumn, createCell, createRow, DataTypeChoices, SourceChoices } from '../types';
 import { DatasetError, DatasetNotFoundError, DatasetValidationError } from '../../utils/errors';
 import { AxiosResponse } from 'axios';
 import * as fs from 'fs';
@@ -387,7 +387,7 @@ describe('Dataset', () => {
                 name: 'test-dataset',
             };
 
-            const mockTable: DatasetTable = {
+            const mockTable: DatasetTableInput = {
                 id: 'dataset-123',
                 columns: [],
                 rows: [],
@@ -564,7 +564,8 @@ describe('Dataset', () => {
                         name: 'my_prompt',
                         config: expect.objectContaining({
                             model: 'gpt-3.5-turbo',
-                            messages: options.messages,
+                            // Existing serializer converts text to canonical content blocks.
+                            messages: [{ role: 'user', content: [{ type: 'text', text: 'Hello' }] }],
                         }),
                     }),
                 }),
@@ -590,7 +591,7 @@ describe('Dataset', () => {
                 name: 'test-dataset',
             };
 
-            const mockTable: DatasetTable = {
+            const mockTable: DatasetTableInput = {
                 id: 'dataset-123',
                 columns: [
                     {
@@ -622,7 +623,7 @@ describe('Dataset', () => {
                 name: 'test-dataset',
             };
 
-            const mockTable: DatasetTable = {
+            const mockTable: DatasetTableInput = {
                 id: 'dataset-123',
                 columns: [],
                 rows: [],

@@ -87,7 +87,9 @@ describe("resources", () => {
     const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
     try {
       expect(OP_DATASETS_ROWS_ADD.id).toBe("datasets.rows.add");
-      const c = client();
+      // HTTPS origin: this test counts only the beta-stability warning; keep the separate
+      // one-time plain-HTTP credentials notice (http-security) out of the console.warn count.
+      const c = new Client({ apiKey: "k", secretKey: "s", baseUrl: "https://unused", fetch: ok });
       await c.datasets.rows.add("d1", { rows: [] });
       await c.datasets.rows.add("d1", { rows: [] });
       expect(warn).toHaveBeenCalledTimes(1);

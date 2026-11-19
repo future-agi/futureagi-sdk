@@ -1,0 +1,1905 @@
+{
+  "basePath": "/",
+  "definitions": {
+    "APIKeyBulkItem": {
+      "properties": {
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires at",
+          "type": "string",
+          "x-nullable": true
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "key_hash": {
+          "minLength": 1,
+          "title": "Key hash",
+          "type": "string"
+        },
+        "key_prefix": {
+          "title": "Key prefix",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": {
+            "type": "string",
+            "x-nullable": true
+          },
+          "title": "Metadata",
+          "type": "object"
+        },
+        "models": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "owner": {
+          "title": "Owner",
+          "type": "string"
+        },
+        "providers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "owner",
+        "key_hash",
+        "key_prefix",
+        "models",
+        "providers",
+        "metadata",
+        "expires_at"
+      ],
+      "type": "object"
+    },
+    "APIKeyBulkResponse": {
+      "properties": {
+        "result": {
+          "items": {
+            "$ref": "#/definitions/APIKeyBulkItem"
+          },
+          "type": "array"
+        },
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object"
+    },
+    "AgentccAPIKey": {
+      "properties": {
+        "allowed_models": {
+          "title": "Allowed models",
+          "type": "object"
+        },
+        "allowed_providers": {
+          "title": "Allowed providers",
+          "type": "object"
+        },
+        "created_at": {
+          "format": "date-time",
+          "readOnly": true,
+          "title": "Created at",
+          "type": "string"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires at",
+          "type": "string",
+          "x-nullable": true
+        },
+        "gateway_key_id": {
+          "minLength": 1,
+          "readOnly": true,
+          "title": "Gateway key id",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "readOnly": true,
+          "title": "Id",
+          "type": "string"
+        },
+        "key_prefix": {
+          "minLength": 1,
+          "readOnly": true,
+          "title": "Key prefix",
+          "type": "string"
+        },
+        "last_used_at": {
+          "format": "date-time",
+          "title": "Last used at",
+          "type": "string",
+          "x-nullable": true
+        },
+        "metadata": {
+          "title": "Metadata",
+          "type": "object"
+        },
+        "name": {
+          "maxLength": 255,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "organization": {
+          "format": "uuid",
+          "readOnly": true,
+          "title": "Organization",
+          "type": "string"
+        },
+        "owner": {
+          "maxLength": 255,
+          "title": "Owner",
+          "type": "string"
+        },
+        "project": {
+          "format": "uuid",
+          "title": "Project",
+          "type": "string",
+          "x-nullable": true
+        },
+        "status": {
+          "enum": [
+            "active",
+            "revoked",
+            "expired"
+          ],
+          "readOnly": true,
+          "title": "Status",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "readOnly": true,
+          "title": "Updated at",
+          "type": "string"
+        },
+        "user": {
+          "format": "uuid",
+          "title": "User",
+          "type": "string",
+          "x-nullable": true
+        },
+        "workspace": {
+          "format": "uuid",
+          "readOnly": true,
+          "title": "Workspace",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "AgentccErrorResponse": {
+      "properties": {
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "x-nullable": true
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "additionalProperties": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Details",
+          "type": "object"
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "x-nullable": true
+        },
+        "status": {
+          "default": false,
+          "title": "Status",
+          "type": "boolean"
+        },
+        "type": {
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "title": "Type",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "type": "object"
+    },
+    "AgentccOrgConfig": {
+      "properties": {
+        "a2a": {
+          "title": "A2a",
+          "type": "object"
+        },
+        "alerting": {
+          "title": "Alerting",
+          "type": "object"
+        },
+        "audit": {
+          "title": "Audit",
+          "type": "object"
+        },
+        "budgets": {
+          "title": "Budgets",
+          "type": "object"
+        },
+        "cache": {
+          "title": "Cache",
+          "type": "object"
+        },
+        "change_description": {
+          "title": "Change description",
+          "type": "string"
+        },
+        "cost_tracking": {
+          "title": "Cost tracking",
+          "type": "object"
+        },
+        "created_at": {
+          "format": "date-time",
+          "readOnly": true,
+          "title": "Created at",
+          "type": "string"
+        },
+        "created_by": {
+          "format": "uuid",
+          "readOnly": true,
+          "title": "Created by",
+          "type": "string",
+          "x-nullable": true
+        },
+        "guardrails": {
+          "title": "Guardrails",
+          "type": "object"
+        },
+        "id": {
+          "format": "uuid",
+          "readOnly": true,
+          "title": "Id",
+          "type": "string"
+        },
+        "ip_acl": {
+          "title": "Ip acl",
+          "type": "object"
+        },
+        "is_active": {
+          "readOnly": true,
+          "title": "Is active",
+          "type": "boolean"
+        },
+        "mcp": {
+          "title": "Mcp",
+          "type": "object"
+        },
+        "model_database": {
+          "title": "Model database",
+          "type": "object"
+        },
+        "model_map": {
+          "title": "Model map",
+          "type": "object"
+        },
+        "organization": {
+          "format": "uuid",
+          "readOnly": true,
+          "title": "Organization",
+          "type": "string"
+        },
+        "privacy": {
+          "title": "Privacy",
+          "type": "object"
+        },
+        "rate_limiting": {
+          "title": "Rate limiting",
+          "type": "object"
+        },
+        "routing": {
+          "title": "Routing",
+          "type": "object"
+        },
+        "tool_policy": {
+          "title": "Tool policy",
+          "type": "object"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "readOnly": true,
+          "title": "Updated at",
+          "type": "string"
+        },
+        "version": {
+          "readOnly": true,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "AgentccProviderCredential": {
+      "properties": {
+        "api_format": {
+          "maxLength": 50,
+          "minLength": 1,
+          "title": "Api format",
+          "type": "string"
+        },
+        "base_url": {
+          "format": "uri",
+          "maxLength": 500,
+          "title": "Base url",
+          "type": "string"
+        },
+        "conn_pool_size": {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "title": "Conn pool size",
+          "type": "integer"
+        },
+        "created_at": {
+          "format": "date-time",
+          "readOnly": true,
+          "title": "Created at",
+          "type": "string"
+        },
+        "credentials": {
+          "readOnly": true,
+          "title": "Credentials",
+          "type": "string"
+        },
+        "default_timeout_seconds": {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "title": "Default timeout seconds",
+          "type": "integer"
+        },
+        "display_name": {
+          "maxLength": 255,
+          "title": "Display name",
+          "type": "string"
+        },
+        "extra_config": {
+          "title": "Extra config",
+          "type": "object"
+        },
+        "id": {
+          "format": "uuid",
+          "readOnly": true,
+          "title": "Id",
+          "type": "string"
+        },
+        "is_active": {
+          "title": "Is active",
+          "type": "boolean"
+        },
+        "last_rotated_at": {
+          "format": "date-time",
+          "title": "Last rotated at",
+          "type": "string",
+          "x-nullable": true
+        },
+        "max_concurrent": {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "title": "Max concurrent",
+          "type": "integer"
+        },
+        "models_list": {
+          "title": "Models list",
+          "type": "object"
+        },
+        "organization": {
+          "format": "uuid",
+          "readOnly": true,
+          "title": "Organization",
+          "type": "string"
+        },
+        "provider_name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Provider name",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "readOnly": true,
+          "title": "Updated at",
+          "type": "string"
+        },
+        "workspace": {
+          "format": "uuid",
+          "readOnly": true,
+          "title": "Workspace",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "required": [
+        "provider_name"
+      ],
+      "type": "object"
+    },
+    "GatewayConfigPatchRequest": {
+      "properties": {
+        "a2a": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "A2a",
+          "type": "object"
+        },
+        "alerting": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "Alerting",
+          "type": "object"
+        },
+        "audit": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "Audit",
+          "type": "object"
+        },
+        "budgets": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "Budgets",
+          "type": "object"
+        },
+        "cache": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "Cache",
+          "type": "object"
+        },
+        "cost_tracking": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "Cost tracking",
+          "type": "object"
+        },
+        "guardrails": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "Guardrails",
+          "type": "object"
+        },
+        "ip_acl": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "Ip acl",
+          "type": "object"
+        },
+        "mcp": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "Mcp",
+          "type": "object"
+        },
+        "model_database": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "Model database",
+          "type": "object"
+        },
+        "model_map": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "Model map",
+          "type": "object"
+        },
+        "privacy": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "Privacy",
+          "type": "object"
+        },
+        "rate_limiting": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "Rate limiting",
+          "type": "object"
+        },
+        "routing": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "Routing",
+          "type": "object"
+        },
+        "tool_policy": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "Tool policy",
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "GatewayMutationResponse": {
+      "properties": {
+        "result": {
+          "$ref": "#/definitions/GatewayMutationResult"
+        },
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status",
+        "result"
+      ],
+      "type": "object"
+    },
+    "GatewayMutationResult": {
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "budget": {
+          "title": "Budget",
+          "type": "string"
+        },
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "gateway_synced": {
+          "title": "Gateway synced",
+          "type": "boolean"
+        },
+        "gateway_warning": {
+          "title": "Gateway warning",
+          "type": "string"
+        },
+        "guardrail": {
+          "title": "Guardrail",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "server": {
+          "title": "Server",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "ManagementAPIErrorResponse": {
+      "properties": {
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "x-nullable": true
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "additionalProperties": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Details",
+          "type": "object"
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "x-nullable": true
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "x-nullable": true
+        },
+        "status": {
+          "default": false,
+          "title": "Status",
+          "type": "boolean"
+        },
+        "type": {
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "title": "Type",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "type": "object"
+    },
+    "OrgConfigBulkItem": {
+      "properties": {
+        "a2a": {
+          "title": "A2a",
+          "type": "object"
+        },
+        "alerting": {
+          "title": "Alerting",
+          "type": "object"
+        },
+        "audit": {
+          "title": "Audit",
+          "type": "object"
+        },
+        "budgets": {
+          "title": "Budgets",
+          "type": "object"
+        },
+        "cache": {
+          "title": "Cache",
+          "type": "object"
+        },
+        "cost_tracking": {
+          "title": "Cost tracking",
+          "type": "object"
+        },
+        "guardrails": {
+          "title": "Guardrails",
+          "type": "object"
+        },
+        "ip_acl": {
+          "title": "Ip acl",
+          "type": "object"
+        },
+        "mcp": {
+          "title": "Mcp",
+          "type": "object"
+        },
+        "model_database": {
+          "title": "Model database",
+          "type": "object"
+        },
+        "model_map": {
+          "title": "Model map",
+          "type": "object"
+        },
+        "privacy": {
+          "title": "Privacy",
+          "type": "object"
+        },
+        "providers": {
+          "additionalProperties": {
+            "type": "object"
+          },
+          "title": "Providers",
+          "type": "object"
+        },
+        "rate_limiting": {
+          "title": "Rate limiting",
+          "type": "object"
+        },
+        "routing": {
+          "title": "Routing",
+          "type": "object"
+        },
+        "tool_policy": {
+          "title": "Tool policy",
+          "type": "object"
+        }
+      },
+      "required": [
+        "providers",
+        "guardrails",
+        "routing",
+        "cache",
+        "rate_limiting",
+        "budgets",
+        "cost_tracking",
+        "ip_acl",
+        "alerting",
+        "privacy",
+        "tool_policy",
+        "mcp",
+        "a2a",
+        "audit",
+        "model_database",
+        "model_map"
+      ],
+      "type": "object"
+    },
+    "OrgConfigBulkResponse": {
+      "properties": {
+        "result": {
+          "additionalProperties": {
+            "$ref": "#/definitions/OrgConfigBulkItem"
+          },
+          "title": "Result",
+          "type": "object"
+        },
+        "status": {
+          "title": "Status",
+          "type": "boolean"
+        },
+        "unbuilt_org_ids": {
+          "description": "Orgs with an active config that could not be built. The gateway keeps their last good config instead of dropping them.",
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "result",
+        "unbuilt_org_ids"
+      ],
+      "type": "object"
+    }
+  },
+  "info": {
+    "title": "Gateway Management",
+    "version": "1"
+  },
+  "paths": {
+    "/agentcc/api-keys/": {
+      "get": {
+        "description": "\n\nPagination: none. limit and page are accepted but ignored; the server does not paginate this response.",
+        "operationId": "agentcc_api-keys_list",
+        "parameters": [
+          {
+            "description": "A page number within the paginated result set.",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "description": "Number of results to return per page.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-nullable": true
+                },
+                "results": {
+                  "items": {
+                    "$ref": "#/definitions/AgentccAPIKey"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "idempotent": false,
+          "method": "GET",
+          "name": "gateway.keys.list",
+          "operation_id": "agentcc_api-keys_list",
+          "page": true,
+          "path": "/agentcc/api-keys/",
+          "path_params": [],
+          "query": [
+            "limit",
+            "page"
+          ],
+          "retry_class": "http-idempotent",
+          "summary": "List personal gateway key metadata. This requires the person-owned key backend. Pagination: none. limit and page are accepted but ignored; the server does not paginate this response."
+        }
+      },
+      "parameters": []
+    },
+    "/agentcc/api-keys/{id}/": {
+      "delete": {
+        "description": "",
+        "operationId": "agentcc_api-keys_delete",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "idempotent": false,
+          "method": "DELETE",
+          "name": "gateway.keys.delete",
+          "operation_id": "agentcc_api-keys_delete",
+          "path": "/agentcc/api-keys/{id}/",
+          "path_params": [
+            "id"
+          ],
+          "query": [],
+          "retry_class": "http-idempotent",
+          "summary": "Delete a personal gateway key."
+        }
+      },
+      "get": {
+        "description": "",
+        "operationId": "agentcc_api-keys_read",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AgentccAPIKey"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "idempotent": false,
+          "method": "GET",
+          "name": "gateway.keys.get",
+          "operation_id": "agentcc_api-keys_read",
+          "path": "/agentcc/api-keys/{id}/",
+          "path_params": [
+            "id"
+          ],
+          "query": [],
+          "retry_class": "http-idempotent",
+          "summary": "Read personal gateway key metadata, never its secret."
+        }
+      },
+      "parameters": [
+        {
+          "description": "A UUID string identifying this agentcc api key.",
+          "format": "uuid",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "patch": {
+        "description": "",
+        "operationId": "agentcc_api-keys_partial_update",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AgentccAPIKey"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AgentccAPIKey"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "body_arg": "patch",
+          "idempotent": false,
+          "method": "PATCH",
+          "name": "gateway.keys.update",
+          "operation_id": "agentcc_api-keys_partial_update",
+          "path": "/agentcc/api-keys/{id}/",
+          "path_params": [
+            "id"
+          ],
+          "query": [],
+          "retry_class": "unsafe",
+          "summary": "Update a personal gateway key. Ownership and unsupported limits cannot be changed."
+        }
+      }
+    },
+    "/agentcc/api-keys/{id}/revoke/": {
+      "parameters": [
+        {
+          "description": "A UUID string identifying this agentcc api key.",
+          "format": "uuid",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "description": "",
+        "operationId": "agentcc_api-keys_revoke",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AgentccAPIKey"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AgentccAPIKey"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "idempotent": false,
+          "method": "POST",
+          "name": "gateway.keys.revoke",
+          "operation_id": "agentcc_api-keys_revoke",
+          "path": "/agentcc/api-keys/{id}/revoke/",
+          "path_params": [
+            "id"
+          ],
+          "query": [],
+          "retry_class": "unsafe",
+          "summary": "Revoke a personal gateway key."
+        }
+      }
+    },
+    "/agentcc/gateways/{id}/update-config/": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "description": "Patch one or more JSON fields on the org's active config and push.",
+        "operationId": "agentcc_gateways_update_config",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GatewayConfigPatchRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/GatewayMutationResponse"
+            }
+          },
+          "400": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AgentccErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true,
+        "x-sdk-management": {
+          "body_arg": "patch",
+          "fixed_path": {
+            "id": "default"
+          },
+          "idempotent": false,
+          "method": "POST",
+          "name": "gateway.config.update",
+          "operation_id": "agentcc_gateways_update_config",
+          "path": "/agentcc/gateways/{id}/update-config/",
+          "path_params": [
+            "id"
+          ],
+          "query": [],
+          "retry_class": "unsafe",
+          "summary": "Apply an RFC 7386 merge patch per section; null deletes a key. Server warnings are surfaced."
+        }
+      }
+    },
+    "/agentcc/org-configs/": {
+      "get": {
+        "description": "Per-org gateway configuration management. Configs are versioned and immutable.\n\nPagination: none. limit and page are accepted but ignored; the server does not paginate this response.",
+        "operationId": "agentcc_org-configs_list",
+        "parameters": [
+          {
+            "description": "A page number within the paginated result set.",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "description": "Number of results to return per page.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-nullable": true
+                },
+                "results": {
+                  "items": {
+                    "$ref": "#/definitions/AgentccOrgConfig"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "idempotent": false,
+          "method": "GET",
+          "name": "gateway.config.versions.list",
+          "operation_id": "agentcc_org-configs_list",
+          "page": true,
+          "path": "/agentcc/org-configs/",
+          "path_params": [],
+          "query": [
+            "limit",
+            "page"
+          ],
+          "retry_class": "http-idempotent",
+          "summary": "Iterate configuration versions using DRF pagination. Pagination: none. limit and page are accepted but ignored; the server does not paginate this response."
+        }
+      },
+      "parameters": [],
+      "post": {
+        "description": "Create a new config version. Auto-increments version and activates it.",
+        "operationId": "agentcc_org-configs_create",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AgentccOrgConfig"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AgentccOrgConfig"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "body_arg": "sections",
+          "idempotent": false,
+          "method": "POST",
+          "name": "gateway.config.create_version",
+          "operation_id": "agentcc_org-configs_create",
+          "path": "/agentcc/org-configs/",
+          "path_params": [],
+          "query": [],
+          "retry_class": "unsafe",
+          "summary": "Create and activate a replacement configuration; omitted sections reset to server defaults and are not copied from the active version. Use config.update for a merge patch."
+        }
+      }
+    },
+    "/agentcc/org-configs/active/": {
+      "get": {
+        "description": "Get the currently active config for the requesting user's org.\n\nPagination: none. limit and page are accepted but ignored; the server does not paginate this response.",
+        "operationId": "agentcc_org-configs_active",
+        "parameters": [
+          {
+            "description": "A page number within the paginated result set.",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "description": "Number of results to return per page.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-nullable": true
+                },
+                "results": {
+                  "items": {
+                    "$ref": "#/definitions/AgentccOrgConfig"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "idempotent": false,
+          "method": "GET",
+          "name": "gateway.config.get_active",
+          "operation_id": "agentcc_org-configs_active",
+          "path": "/agentcc/org-configs/active/",
+          "path_params": [],
+          "query": [
+            "limit",
+            "page"
+          ],
+          "retry_class": "http-idempotent",
+          "summary": "Read the active configuration, or null if none exists. Pagination: none. limit and page are accepted but ignored; the server does not paginate this response."
+        }
+      },
+      "parameters": []
+    },
+    "/agentcc/org-configs/{id}/": {
+      "get": {
+        "description": "Per-org gateway configuration management. Configs are versioned and immutable.",
+        "operationId": "agentcc_org-configs_read",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AgentccOrgConfig"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "idempotent": false,
+          "method": "GET",
+          "name": "gateway.config.versions.get",
+          "operation_id": "agentcc_org-configs_read",
+          "path": "/agentcc/org-configs/{id}/",
+          "path_params": [
+            "id"
+          ],
+          "query": [],
+          "retry_class": "http-idempotent",
+          "summary": "Read a configuration version."
+        }
+      },
+      "parameters": [
+        {
+          "description": "A UUID string identifying this agentcc org config.",
+          "format": "uuid",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/agentcc/org-configs/{id}/activate/": {
+      "parameters": [
+        {
+          "description": "A UUID string identifying this agentcc org config.",
+          "format": "uuid",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "description": "Roll back to a specific config version by activating it.",
+        "operationId": "agentcc_org-configs_activate",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AgentccOrgConfig"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AgentccOrgConfig"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "idempotent": false,
+          "method": "POST",
+          "name": "gateway.config.versions.activate",
+          "operation_id": "agentcc_org-configs_activate",
+          "path": "/agentcc/org-configs/{id}/activate/",
+          "path_params": [
+            "id"
+          ],
+          "query": [],
+          "retry_class": "unsafe",
+          "summary": "Roll back by activating a configuration version; server warnings are surfaced."
+        }
+      }
+    },
+    "/agentcc/org-configs/{id}/diff/": {
+      "get": {
+        "description": "Compare this config version with another. Pass ?compare_to=<uuid>.",
+        "operationId": "agentcc_org-configs_diff",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AgentccOrgConfig"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "extra_query": [
+            "compare_to"
+          ],
+          "idempotent": false,
+          "method": "GET",
+          "name": "gateway.config.versions.diff",
+          "operation_id": "agentcc_org-configs_diff",
+          "path": "/agentcc/org-configs/{id}/diff/",
+          "path_params": [
+            "id"
+          ],
+          "query": [
+            "compare_to"
+          ],
+          "retry_class": "http-idempotent",
+          "summary": "Compare this version with compare_to; secret sections remain masked."
+        }
+      },
+      "parameters": [
+        {
+          "description": "A UUID string identifying this agentcc org config.",
+          "format": "uuid",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/agentcc/provider-credentials/": {
+      "get": {
+        "description": "\n\nPagination: none. limit and page are accepted but ignored; the server does not paginate this response.",
+        "operationId": "agentcc_provider-credentials_list",
+        "parameters": [
+          {
+            "description": "A page number within the paginated result set.",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "description": "Number of results to return per page.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "format": "uri",
+                  "type": "string",
+                  "x-nullable": true
+                },
+                "results": {
+                  "items": {
+                    "$ref": "#/definitions/AgentccProviderCredential"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "idempotent": false,
+          "method": "GET",
+          "name": "gateway.provider_credentials.list",
+          "operation_id": "agentcc_provider-credentials_list",
+          "page": true,
+          "path": "/agentcc/provider-credentials/",
+          "path_params": [],
+          "query": [
+            "limit",
+            "page"
+          ],
+          "retry_class": "http-idempotent",
+          "summary": "List provider credentials with values masked. Pagination: none. limit and page are accepted but ignored; the server does not paginate this response."
+        }
+      },
+      "parameters": [],
+      "post": {
+        "description": "",
+        "operationId": "agentcc_provider-credentials_create",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AgentccProviderCredential"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AgentccProviderCredential"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "body_arg": "body",
+          "idempotent": false,
+          "method": "POST",
+          "name": "gateway.provider_credentials.create",
+          "operation_id": "agentcc_provider-credentials_create",
+          "path": "/agentcc/provider-credentials/",
+          "path_params": [],
+          "query": [],
+          "retry_class": "unsafe",
+          "summary": "Store a provider credential explicitly; the response is masked. Write typing awaits a recorded contract override."
+        }
+      }
+    },
+    "/agentcc/provider-credentials/fetch_models/": {
+      "parameters": [],
+      "post": {
+        "description": "Two modes:\n- provider_name: look up stored credential by provider name for this org.\n- api_key + base_url + api_format: use raw values (for create-mode).",
+        "operationId": "agentcc_provider-credentials_fetch_models",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AgentccProviderCredential"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AgentccProviderCredential"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "summary": "Fetch available models from a provider's API.",
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "body_arg": "body",
+          "idempotent": false,
+          "method": "POST",
+          "name": "gateway.provider_credentials.fetch_models",
+          "operation_id": "agentcc_provider-credentials_fetch_models",
+          "path": "/agentcc/provider-credentials/fetch_models/",
+          "path_params": [],
+          "query": [],
+          "retry_class": "unsafe",
+          "summary": "Fetch provider models through the control plane; this may contact the configured provider."
+        }
+      }
+    },
+    "/agentcc/provider-credentials/{id}/": {
+      "delete": {
+        "description": "",
+        "operationId": "agentcc_provider-credentials_delete",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "idempotent": false,
+          "method": "DELETE",
+          "name": "gateway.provider_credentials.delete",
+          "operation_id": "agentcc_provider-credentials_delete",
+          "path": "/agentcc/provider-credentials/{id}/",
+          "path_params": [
+            "id"
+          ],
+          "query": [],
+          "retry_class": "http-idempotent",
+          "summary": "Delete a provider credential."
+        }
+      },
+      "get": {
+        "description": "",
+        "operationId": "agentcc_provider-credentials_read",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AgentccProviderCredential"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "idempotent": false,
+          "method": "GET",
+          "name": "gateway.provider_credentials.get",
+          "operation_id": "agentcc_provider-credentials_read",
+          "path": "/agentcc/provider-credentials/{id}/",
+          "path_params": [
+            "id"
+          ],
+          "query": [],
+          "retry_class": "http-idempotent",
+          "summary": "Read provider credential metadata with values masked."
+        }
+      },
+      "parameters": [
+        {
+          "description": "A UUID string identifying this agentcc provider credential.",
+          "format": "uuid",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "patch": {
+        "description": "",
+        "operationId": "agentcc_provider-credentials_partial_update",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AgentccProviderCredential"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AgentccProviderCredential"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "body_arg": "patch",
+          "idempotent": false,
+          "method": "PATCH",
+          "name": "gateway.provider_credentials.update",
+          "operation_id": "agentcc_provider-credentials_partial_update",
+          "path": "/agentcc/provider-credentials/{id}/",
+          "path_params": [
+            "id"
+          ],
+          "query": [],
+          "retry_class": "unsafe",
+          "summary": "Update provider credential metadata; use rotate to replace the credential."
+        }
+      }
+    },
+    "/agentcc/provider-credentials/{id}/rotate/": {
+      "parameters": [
+        {
+          "description": "A UUID string identifying this agentcc provider credential.",
+          "format": "uuid",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "description": "Rotate credentials \u2014 accepts new credentials, encrypts, and updates.",
+        "operationId": "agentcc_provider-credentials_rotate",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AgentccProviderCredential"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AgentccProviderCredential"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "agentcc"
+        ],
+        "x-sdk-management": {
+          "body_arg": "body",
+          "idempotent": false,
+          "method": "POST",
+          "name": "gateway.provider_credentials.rotate",
+          "operation_id": "agentcc_provider-credentials_rotate",
+          "path": "/agentcc/provider-credentials/{id}/rotate/",
+          "path_params": [
+            "id"
+          ],
+          "query": [],
+          "retry_class": "unsafe",
+          "summary": "Replace stored provider credentials; the response is masked."
+        }
+      }
+    }
+  },
+  "swagger": "2.0",
+  "x-sdk-admin-schema": "../admin.schema.json",
+  "x-sdk-envelope": {
+    "result": "payload",
+    "status": "boolean"
+  },
+  "x-sdk-pending-recordings": [
+    {
+      "operation_id": "agentcc_provider-credentials_create",
+      "reason": "Swagger declares the read serializer for the write body. A real control-plane capture is required before a typed write override is accepted."
+    },
+    {
+      "operation_id": "agentcc_org-configs_active",
+      "reason": "Swagger describes a page; the backend action returns one active version or null. Capture required for response model certification."
+    },
+    {
+      "operation_id": "agentcc_org-configs_diff",
+      "reason": "The backend accepts compare_to, which Swagger omits. Capture required for contract certification."
+    }
+  ],
+  "x-sdk-qualification": "PROVISIONAL"
+}

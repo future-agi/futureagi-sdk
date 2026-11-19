@@ -1,0 +1,379 @@
+{
+ "about": "Where each of the 52 live-bucket tests of @agentcc/client 1.0.1 (tests/port/manifest.json 'to: live'; names from tests/port/vitest-legacy-client.json) went. to = tests/live/<file> (same test name, run against agentcc-gateway live-gateway-source over the mock upstream) or shim (code that stays only in the @agentcc/client 2.0 shim). New live tests (wire.test.ts, stock/stock-openai.test.ts) are listed under added.",
+ "total": 52,
+ "ported": 45,
+ "to_shim": 7,
+ "files": {
+  "e2e-real.test.ts": [
+   {
+    "name": "E2E: Chat Completions > creates a basic chat completion",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Chat Completions > returns usage info",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Chat Completions > passes temperature and max_tokens",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Chat Completions > handles system message",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Chat Completions > handles multi-turn conversation",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Streaming > streams chat completion chunks",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Streaming > StreamManager collects full text",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: AgentCC Metadata > auto-attaches agentcc metadata to response",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Session Management > creates a session-scoped client",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Session Management > tracks cost across session requests",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Callbacks > LoggingCallback fires on request",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Callbacks > MetricsCallback tracks request count",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Trace Context > sends traceparent header with request",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Middleware > middleware can observe requests",
+    "status_1_0_1": "failed",
+    "to": "shim",
+    "why": "D-21: createMiddleware / use() are shim-only (inert in 1.0.1: base-client.ts never ran middleware); the 2.0 shim keeps use() inert and warns once."
+   },
+   {
+    "name": "E2E: Models > lists available models",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Cost Tracking > tracks cumulative cost on client",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Dry Run > inspects request without sending",
+    "status_1_0_1": "passed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Pre-call Rules > blocks disallowed model before sending",
+    "status_1_0_1": "failed",
+    "to": "shim",
+    "why": "D-21: preCallRules / allowModels are shim-only; the 2.0 shim wraps create() with the pure pre-check."
+   },
+   {
+    "name": "E2E: Token Utilities > counts tokens for a message",
+    "status_1_0_1": "passed",
+    "to": "shim",
+    "why": "D-21: tokenCounter is shim-only, a frozen pure table; no gateway involved."
+   },
+   {
+    "name": "E2E: Token Utilities > estimates completion cost",
+    "status_1_0_1": "passed",
+    "to": "shim",
+    "why": "D-21: completionCost is shim-only, a frozen pure table; cost comes from .agentcc.cost (x-agentcc-cost), proven here by 'E2E: Cost Tracking'."
+   },
+   {
+    "name": "E2E: Token Utilities > returns model info",
+    "status_1_0_1": "passed",
+    "to": "shim",
+    "why": "D-21: getModelInfo is shim-only, a frozen pure table."
+   },
+   {
+    "name": "E2E: Token Utilities > lists valid models",
+    "status_1_0_1": "passed",
+    "to": "shim",
+    "why": "D-21: getValidModels is shim-only, a frozen pure table; the live model list is client.models.list(), proven by 'E2E: Models'."
+   },
+   {
+    "name": "E2E: Validate Response > validates real structured output against schema",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Validate Response > toResponseFormat creates correct format",
+    "status_1_0_1": "passed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Auto JSON Schema Validation > validates response automatically when flag is enabled",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Health Check Utilities > checkValidKey returns valid for a good key",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Health Check Utilities > healthCheck returns healthy",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap).",
+    "changed": "latencyMs > 0 became >= 0: healthCheck times with Date.now() (millisecond steps) and a loopback answer can take under 1 ms, so 0 is a correct reading (seen in one of three runs)."
+   },
+   {
+    "name": "E2E: Budget Manager > tracks budget across requests",
+    "status_1_0_1": "failed",
+    "to": "shim",
+    "why": "D-21: BudgetManager is shim-only, never wired into requests; budgets are the gateway's."
+   },
+   {
+    "name": "E2E: withOptions > creates a derived client with different config",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Client healthCheck > client.healthCheck() returns true for running gateway",
+    "status_1_0_1": "failed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   },
+   {
+    "name": "E2E: Error Handling > throws on invalid model",
+    "status_1_0_1": "passed",
+    "to": "tests/live/e2e-real.test.ts",
+    "same_name": true,
+    "note": "Same name; the mock upstream's [[mock:...]] scenario stands in for a real model's answer, and the test also checks what the gateway forwarded or what the client sent (wire tap)."
+   }
+  ],
+  "benchmark-deep.test.ts": [
+   {
+    "name": "Deep Benchmark: /healthz overhead > 100 sequential /healthz calls",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-deep.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   },
+   {
+    "name": "Deep Benchmark: /healthz overhead > 200 concurrent /healthz calls (50 parallel)",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-deep.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   },
+   {
+    "name": "Deep Benchmark: /v1/models overhead > 100 sequential /v1/models calls",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-deep.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   },
+   {
+    "name": "Deep Benchmark: Cache hit overhead (full pipeline) > 200 cached chat completions (sequential)",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-deep.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   },
+   {
+    "name": "Deep Benchmark: Cache hit overhead (full pipeline) > 500 cached chat completions (50 parallel)",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-deep.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   },
+   {
+    "name": "Deep Benchmark: Fresh requests (provider round-trip) > 20 sequential fresh completions",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-deep.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   },
+   {
+    "name": "Deep Benchmark: Fresh requests (provider round-trip) > 50 concurrent fresh completions (10 parallel)",
+    "status_1_0_1": "passed",
+    "to": "tests/live/benchmark-deep.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   },
+   {
+    "name": "Deep Benchmark: Auth overhead isolation > compares /healthz (no auth) vs /v1/models (auth required)",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-deep.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   },
+   {
+    "name": "Deep Benchmark: Plugin pipeline overhead > compares /v1/models vs cache hit (shows plugin pipeline cost)",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-deep.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   },
+   {
+    "name": "Deep Benchmark: Full summary table > prints a comparison summary",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-deep.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   }
+  ],
+  "benchmark-latency.test.ts": [
+   {
+    "name": "Benchmark: Sequential Latency > sends 20 sequential chat completions",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-latency.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   },
+   {
+    "name": "Benchmark: Concurrent Latency > sends 30 concurrent chat completions (batches of 10)",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-latency.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   },
+   {
+    "name": "Benchmark: Streaming Latency > measures time-to-first-token and total streaming time (10 requests)",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-latency.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   },
+   {
+    "name": "Benchmark: Gateway Overhead (cached responses) > measures overhead on cache hits (50 identical requests)",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-latency.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   },
+   {
+    "name": "Benchmark: Models List Latency > measures /v1/models latency (20 requests)",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-latency.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   },
+   {
+    "name": "Benchmark: Burst Test > fires 50 requests at once",
+    "status_1_0_1": "passed",
+    "to": "tests/live/benchmark-latency.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   }
+  ],
+  "benchmark-v3.test.ts": [
+   {
+    "name": "Gateway v3 Benchmark > healthz endpoint",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-v3.test.ts",
+    "same_name": true,
+    "note": "1.0.1 compared two hand-started gateways (Docker :8090, v3 :8092) and asserted v3.mean < 2 x docker.mean. One build exists here (the pin): it measures that build alone, asserts every answer is 200 and records latencies as evidence; the cross-build ratio is not reproducible."
+   },
+   {
+    "name": "Gateway v3 Benchmark > GET /v1/models (static route)",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-v3.test.ts",
+    "same_name": true,
+    "note": "as 'healthz endpoint': single build, success asserted, ratio dropped."
+   },
+   {
+    "name": "Gateway v3 Benchmark > cache hit latency (POST /v1/chat/completions)",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-v3.test.ts",
+    "same_name": true,
+    "note": "as 'healthz endpoint'; also asserts every answer is a cache hit (x-agentcc-cache: hit_exact)."
+   },
+   {
+    "name": "Gateway v3 Benchmark > burst throughput (50 concurrent cache hits)",
+    "status_1_0_1": "failed",
+    "to": "tests/live/benchmark-v3.test.ts",
+    "same_name": true,
+    "note": "as 'healthz endpoint'; 5 rounds of 50 concurrent hits, each round all 200 and all hits."
+   },
+   {
+    "name": "Gateway v3 Benchmark > summary table",
+    "status_1_0_1": "passed",
+    "to": "tests/live/benchmark-v3.test.ts",
+    "same_name": true,
+    "note": "Same name and request count; asserts the count, that every answer is 200 and, for cache cases, that the cache answered; latencies are written to evidence only (a shared build machine gives no latency claim)."
+   }
+  ]
+ },
+ "added": [
+  "tests/live/wire.test.ts",
+  "tests/live/stock/stock-openai.test.ts",
+  "tests/live/browser/cors-entry.ts + cors-browser.cjs (the browser CORS case, run by run-wire-suite.sh, not jest)"
+ ]
+}

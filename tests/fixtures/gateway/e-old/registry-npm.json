@@ -1,0 +1,273 @@
+{
+ "packages": {
+  "@agentcc/client": {
+   "deprecated": null,
+   "dist_tags": {
+    "latest": "1.0.0"
+   },
+   "homepage": "https://github.com/future-agi/agent-command-center#readme",
+   "latest_dist": {
+    "fileCount": 491,
+    "integrity": "sha512-dg0ngvbG/At2gtiPr3KhE1Cngx8TKXhvL3IabbODJ9DqebawTbh7WB+ytAHhJ6qBVJwqCAvRPM5hwdlQjONusg==",
+    "shasum": "81b5315b2c79c14d9dd6c1e49a82997c5944745e",
+    "tarball": "https://registry.npmjs.org/@agentcc/client/-/client-1.0.0.tgz",
+    "unpackedSize": 962464
+   },
+   "license": "Apache-2.0",
+   "name": "@agentcc/client",
+   "npm_view_exit": 0,
+   "peerDependencies": null,
+   "published": true,
+   "repository": {
+    "type": "git",
+    "url": "git+https://github.com/future-agi/agent-command-center.git"
+   },
+   "time": {
+    "0.1.0": "2026-04-09T12:10:52.462Z",
+    "1.0.0": "2026-04-22T11:28:53.316Z",
+    "created": "2026-04-09T12:10:52.079Z",
+    "modified": "2026-04-22T11:28:53.498Z"
+   },
+   "version_dist": {
+    "1.0.0": {
+     "fileCount": 491,
+     "integrity": "sha512-dg0ngvbG/At2gtiPr3KhE1Cngx8TKXhvL3IabbODJ9DqebawTbh7WB+ytAHhJ6qBVJwqCAvRPM5hwdlQjONusg==",
+     "npm_view_exit": 0,
+     "shasum": "81b5315b2c79c14d9dd6c1e49a82997c5944745e",
+     "tarball": "https://registry.npmjs.org/@agentcc/client/-/client-1.0.0.tgz",
+     "unpackedSize": 962464
+    }
+   },
+   "versions": [
+    "0.1.0",
+    "1.0.0"
+   ]
+  },
+  "@agentcc/langchain": {
+   "deprecated": null,
+   "dist_tags": {
+    "latest": "1.0.0"
+   },
+   "homepage": null,
+   "latest_dist": {
+    "fileCount": 19,
+    "integrity": "sha512-qmxItCb6UAHZbrb4LUehBMz3d0v0+Lcs5tW1o0Huy5a2OfrK+tPtd26FtL6LBqlZcRjmUBfDZEKx+XvwBMpTNQ==",
+    "shasum": "d2d976adda5b3899c4f715d19ae89443ef25d04a",
+    "tarball": "https://registry.npmjs.org/@agentcc/langchain/-/langchain-1.0.0.tgz",
+    "unpackedSize": 47118
+   },
+   "license": "Apache-2.0",
+   "name": "@agentcc/langchain",
+   "npm_view_exit": 0,
+   "peerDependencies": {
+    "@agentcc/client": ">=0.1.0",
+    "@langchain/core": ">=0.2.0"
+   },
+   "published": true,
+   "repository": null,
+   "time": {
+    "0.1.0": "2026-04-09T12:10:56.234Z",
+    "1.0.0": "2026-04-22T11:29:24.961Z",
+    "created": "2026-04-09T12:10:55.982Z",
+    "modified": "2026-04-22T11:29:25.087Z"
+   },
+   "version_dist": {
+    "1.0.0": {
+     "fileCount": 19,
+     "integrity": "sha512-qmxItCb6UAHZbrb4LUehBMz3d0v0+Lcs5tW1o0Huy5a2OfrK+tPtd26FtL6LBqlZcRjmUBfDZEKx+XvwBMpTNQ==",
+     "npm_view_exit": 0,
+     "shasum": "d2d976adda5b3899c4f715d19ae89443ef25d04a",
+     "tarball": "https://registry.npmjs.org/@agentcc/langchain/-/langchain-1.0.0.tgz",
+     "unpackedSize": 47118
+    }
+   },
+   "versions": [
+    "0.1.0",
+    "1.0.0"
+   ]
+  },
+  "@agentcc/llamaindex": {
+   "deprecated": null,
+   "dist_tags": {
+    "latest": "1.0.0"
+   },
+   "homepage": null,
+   "latest_dist": {
+    "fileCount": 15,
+    "integrity": "sha512-zB/W4PC0bBTCjDYXJATaRVRkL+9yZ3SSPVYRfCMbKdp4V6LYBgJSDqbiC034Mvkh5MgQQJkFs4uQ9i0EkoCtbA==",
+    "shasum": "8da01388ef09d99eacc3541539f0606d499353ff",
+    "tarball": "https://registry.npmjs.org/@agentcc/llamaindex/-/llamaindex-1.0.0.tgz",
+    "unpackedSize": 32766
+   },
+   "license": "Apache-2.0",
+   "name": "@agentcc/llamaindex",
+   "npm_view_exit": 0,
+   "peerDependencies": {
+    "@agentcc/client": ">=0.1.0",
+    "llamaindex": ">=0.3.0"
+   },
+   "published": true,
+   "repository": null,
+   "time": {
+    "0.1.0": "2026-04-09T12:11:00.006Z",
+    "1.0.0": "2026-04-22T11:29:42.166Z",
+    "created": "2026-04-09T12:10:59.731Z",
+    "modified": "2026-04-22T11:29:42.293Z"
+   },
+   "version_dist": {
+    "1.0.0": {
+     "fileCount": 15,
+     "integrity": "sha512-zB/W4PC0bBTCjDYXJATaRVRkL+9yZ3SSPVYRfCMbKdp4V6LYBgJSDqbiC034Mvkh5MgQQJkFs4uQ9i0EkoCtbA==",
+     "npm_view_exit": 0,
+     "shasum": "8da01388ef09d99eacc3541539f0606d499353ff",
+     "tarball": "https://registry.npmjs.org/@agentcc/llamaindex/-/llamaindex-1.0.0.tgz",
+     "unpackedSize": 32766
+    }
+   },
+   "versions": [
+    "0.1.0",
+    "1.0.0"
+   ]
+  },
+  "@agentcc/react": {
+   "deprecated": null,
+   "dist_tags": {
+    "latest": "1.0.0"
+   },
+   "homepage": null,
+   "latest_dist": {
+    "fileCount": 27,
+    "integrity": "sha512-kLov0gqmUi3TziE3PGXpsU4rB+GynKEF+XTwuQ5jCjQIsSdpOYqSiFkualm7NJFIPN8wzHiaIUphNmCV4sOZoA==",
+    "shasum": "74c11ab87519a77f1d1b78796a8cb36fd804c104",
+    "tarball": "https://registry.npmjs.org/@agentcc/react/-/react-1.0.0.tgz",
+    "unpackedSize": 47916
+   },
+   "license": "Apache-2.0",
+   "name": "@agentcc/react",
+   "npm_view_exit": 0,
+   "peerDependencies": {
+    "@agentcc/client": ">=0.1.0",
+    "react": ">=18.0.0"
+   },
+   "published": true,
+   "repository": null,
+   "time": {
+    "0.1.0": "2026-04-09T12:11:05.012Z",
+    "1.0.0": "2026-04-22T11:29:51.150Z",
+    "created": "2026-04-09T12:11:04.692Z",
+    "modified": "2026-04-22T11:29:51.285Z"
+   },
+   "version_dist": {
+    "1.0.0": {
+     "fileCount": 27,
+     "integrity": "sha512-kLov0gqmUi3TziE3PGXpsU4rB+GynKEF+XTwuQ5jCjQIsSdpOYqSiFkualm7NJFIPN8wzHiaIUphNmCV4sOZoA==",
+     "npm_view_exit": 0,
+     "shasum": "74c11ab87519a77f1d1b78796a8cb36fd804c104",
+     "tarball": "https://registry.npmjs.org/@agentcc/react/-/react-1.0.0.tgz",
+     "unpackedSize": 47916
+    }
+   },
+   "versions": [
+    "0.1.0",
+    "1.0.0"
+   ]
+  },
+  "@agentcc/vercel": {
+   "deprecated": null,
+   "dist_tags": {
+    "latest": "1.0.0"
+   },
+   "homepage": null,
+   "latest_dist": {
+    "fileCount": 11,
+    "integrity": "sha512-EVAKWZpMHoGaeyU0RTPJ/nD7AIJgm75kRggp2SAYoXhHMtgJUgmXnAWdv65FOFh5i0jrTzeFbOqAW+ZTg/tZDA==",
+    "shasum": "df0e9f8ad2626ba56679d5f5bd79b14dc9da9b93",
+    "tarball": "https://registry.npmjs.org/@agentcc/vercel/-/vercel-1.0.0.tgz",
+    "unpackedSize": 26248
+   },
+   "license": "Apache-2.0",
+   "name": "@agentcc/vercel",
+   "npm_view_exit": 0,
+   "peerDependencies": {
+    "@ai-sdk/openai": ">=0.0.40",
+    "ai": ">=3.0.0"
+   },
+   "published": true,
+   "repository": null,
+   "time": {
+    "0.1.0": "2026-04-09T12:11:10.493Z",
+    "1.0.0": "2026-04-22T11:29:58.770Z",
+    "created": "2026-04-09T12:11:10.242Z",
+    "modified": "2026-04-22T11:29:58.894Z"
+   },
+   "version_dist": {
+    "1.0.0": {
+     "fileCount": 11,
+     "integrity": "sha512-EVAKWZpMHoGaeyU0RTPJ/nD7AIJgm75kRggp2SAYoXhHMtgJUgmXnAWdv65FOFh5i0jrTzeFbOqAW+ZTg/tZDA==",
+     "npm_view_exit": 0,
+     "shasum": "df0e9f8ad2626ba56679d5f5bd79b14dc9da9b93",
+     "tarball": "https://registry.npmjs.org/@agentcc/vercel/-/vercel-1.0.0.tgz",
+     "unpackedSize": 26248
+    }
+   },
+   "versions": [
+    "0.1.0",
+    "1.0.0"
+   ]
+  },
+  "@futureagi/agentcc": {
+   "error_code": "E404",
+   "error_summary": "Not Found - GET https://registry.npmjs.org/@futureagi%2fagentcc - Not found",
+   "npm_view_exit": 1,
+   "published": false
+  },
+  "agentcc": {
+   "deprecated": null,
+   "dist_tags": {
+    "latest": "0.1.81"
+   },
+   "homepage": null,
+   "latest_dist": {
+    "fileCount": 33,
+    "integrity": "sha512-9QFqLvTPU8uTiQsRJ0YTf97Mb6jiy7G31YdVF3ciqGSj9st6lwSfN9mKh9U8Rljy48p4aMPXZDbqRjBUA8depA==",
+    "shasum": "65fef5e0ebadd75d0bc5a29aa51798661a13efc6",
+    "tarball": "https://registry.npmjs.org/agentcc/-/agentcc-0.1.81.tgz",
+    "unpackedSize": 603746
+   },
+   "license": "MIT",
+   "name": "agentcc",
+   "npm_view_exit": 0,
+   "peerDependencies": {
+    "@langchain/core": ">=0.3",
+    "@openai/agents": ">=0.1",
+    "ai": ">=5",
+    "openai": ">=4"
+   },
+   "published": true,
+   "repository": null,
+   "time": {
+    "0.1.7": "2026-07-08T22:57:09.208Z",
+    "0.1.8": "2026-07-08T23:30:09.371Z",
+    "0.1.81": "2026-07-08T23:34:57.340Z",
+    "created": "2026-07-08T22:57:08.913Z",
+    "modified": "2026-07-08T23:34:57.458Z"
+   },
+   "versions": [
+    "0.1.7",
+    "0.1.8",
+    "0.1.81"
+   ]
+  }
+ },
+ "search": {
+  "scope-agentcc": [],
+  "text-agentcc": [
+   "@agentcc/client",
+   "@agentcc/langchain",
+   "@agentcc/llamaindex",
+   "@agentcc/react",
+   "@agentcc/vercel",
+   "agentcc"
+  ]
+ }
+}

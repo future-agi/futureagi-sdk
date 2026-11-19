@@ -204,6 +204,11 @@ MODEL_INFO: dict[str, ModelInfo] = {
     ),
 }
 
+from fi.gateway._deprecation import deprecated
+
+# Keep registry construction silent; warn only on callers' new model records.
+ModelInfo = deprecated(ModelInfo)
+
 model_alias_map: dict[str, str] = {}
 """Map short names to full model names. E.g. ``{"gpt4": "gpt-4o"}``"""
 
@@ -212,6 +217,7 @@ model_alias_map: dict[str, str] = {}
 _REQUIRED_ENV_VARS: list[str] = ["AGENTCC_API_KEY", "AGENTCC_BASE_URL"]
 
 
+@deprecated
 def get_model_info(model: str) -> ModelInfo | None:
     """Look up model info by name.
 
@@ -237,11 +243,13 @@ def get_model_info(model: str) -> ModelInfo | None:
     return None
 
 
+@deprecated
 def get_valid_models() -> list[str]:
     """Return all known model names from the model info database."""
     return list(MODEL_INFO.keys())
 
 
+@deprecated
 def register_model(model_name: str, model_info: ModelInfo) -> None:
     """Register or update a model in the info database.
 
@@ -252,29 +260,34 @@ def register_model(model_name: str, model_info: ModelInfo) -> None:
     MODEL_INFO[model_name] = model_info
 
 
+@deprecated
 def supports_vision(model: str) -> bool:
     """Check if *model* supports vision/image inputs."""
     info = get_model_info(model)
     return info.supports_vision if info else False
 
 
+@deprecated
 def supports_function_calling(model: str) -> bool:
     """Check if *model* supports function/tool calling."""
     info = get_model_info(model)
     return info.supports_function_calling if info else False
 
 
+@deprecated
 def supports_json_mode(model: str) -> bool:
     """Check if *model* supports JSON mode / structured output."""
     info = get_model_info(model)
     return info.supports_json_mode if info else False
 
 
+@deprecated
 def supports_response_schema(model: str) -> bool:
     """Alias for :func:`supports_json_mode`."""
     return supports_json_mode(model)
 
 
+@deprecated
 def validate_environment() -> dict[str, Any]:
     """Check if required environment variables are set.
 

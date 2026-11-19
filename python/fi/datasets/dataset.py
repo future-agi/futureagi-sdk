@@ -12,6 +12,24 @@ from tqdm import tqdm
 
 from fi.api.auth import APIKeyAuth, ResponseHandler
 from fi.api.types import HttpMethod, RequestConfig
+# Published 0.6.13 eval helpers remain importable, without eagerly importing the
+# eval stack for callers that only use datasets. Each resolves to the canonical
+# supported implementation, retaining its public members.
+def __getattr__(name):
+    if name == "EvalInfoResponseHandler":
+        from fi.evals.evaluator import EvalInfoResponseHandler
+        globals()[name] = EvalInfoResponseHandler
+        return EvalInfoResponseHandler
+    if name == "EvalTemplate":
+        from fi.evals.templates import EvalTemplate
+        globals()[name] = EvalTemplate
+        return EvalTemplate
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__():
+    return sorted(set(globals()) | {"EvalInfoResponseHandler", "EvalTemplate"})
+
 from fi.datasets.types import (
     Cell,
     Column,
@@ -20,12 +38,6 @@ from fi.datasets.types import (
     HuggingfaceDatasetConfig,
     Row,
 )
-try :
-    from fi.evals.evaluator import EvalInfoResponseHandler
-    from fi.evals.templates import EvalTemplate
-except ImportError:
-    logging.warning(f"ai-evaluation is not installed. Please install it to add evaluations to your dataset.")
-
 from fi.utils.constants import (
     DATASET_TEMP_FILE_PREFIX,
     DATASET_TEMP_FILE_SUFFIX,
@@ -434,7 +446,13 @@ class Dataset(APIKeyAuth):
         tool_choice: Optional[Any] = None,
         response_format: Optional[Dict] = None,
     ) -> "Dataset":
+        """Add a prompt column and return this dataset.
 
+        Numeric generation options are sent in ``config.run_prompt_config``;
+        model, messages, output format, concurrency, tools, tool choice and
+        response format remain directly under ``config``. Explicit empty tools
+        and response formats are retained; ``None`` omits those optional fields.
+        """
         if not self.dataset_config or not self.dataset_config.id:
             raise DatasetError("Dataset must be configured with an ID to add a run prompt column.")
         if not name:
@@ -513,19 +531,21 @@ class Dataset(APIKeyAuth):
                 "output_format": output_format,
                 "concurrency": concurrency,
                 "messages": processed_messages,
-                "max_tokens": max_tokens,
-                "temperature": temperature,
-                "presence_penalty": presence_penalty,
-                "frequency_penalty": frequency_penalty,
-                "top_p": top_p,
+                "run_prompt_config": {
+                    "max_tokens": max_tokens,
+                    "temperature": temperature,
+                    "presence_penalty": presence_penalty,
+                    "frequency_penalty": frequency_penalty,
+                    "top_p": top_p,
+                },
             },
         }
 
-        if tools:
+        if tools is not None:
             config["config"]["tools"] = tools
         if tool_choice is not None:
             config["config"]["tool_choice"] = tool_choice
-        if response_format:
+        if response_format is not None:
             config["config"]["response_format"] = response_format
 
         url = f"{self._base_url}/{Routes.dataset_add_run_prompt_column.value}"
@@ -550,11 +570,18 @@ class Dataset(APIKeyAuth):
         error_localizer: bool = False,
         kb_id: Optional[str] = None
         ) -> "Dataset":
-        try :
-            from fi.evals.evaluator import EvalInfoResponseHandler
-            from fi.evals.templates import EvalTemplate
-        except ImportError:
-            raise DatasetError("ai-evaluation is not installed. Please install it to add evaluations to your dataset.")
+        """Add a dataset evaluation using the legacy dataset client.
+
+        Selecting Turing/Protect models requires an Enterprise licence including
+        those models on self-hosted servers; cloud plan checks are separate.
+        A model-gate denial returns HTTP 402 ENTITLEMENT_DENIED. This legacy
+        method retains DatasetError; FutureAGIClient.evals.add_dataset_user_eval
+        instead raises PaymentRequiredError, not LicenseRequiredError.
+        Select another model or ask the server administrator to enable the
+        licensed models. Code evaluations are exempt from this model gate.
+        """
+        # imported here so `import fi.datasets` does not load the evals package
+        from fi.evals.evaluator import EvalInfoResponseHandler
 
         if not self.dataset_config or not self.dataset_config.id:
             raise DatasetError("Dataset must be configured with an ID to add an evaluation.")
@@ -1121,3 +1148,10 @@ class Dataset(APIKeyAuth):
 
         instance = cls.get_dataset_config(dataset_name, **kwargs)
         return instance.add_rows(rows=rows)
+
+
+# Preserve star-import visibility as well as direct imports and dir() for the
+# lazily resolved published helpers. Ordinary dataset imports stay lightweight.
+__all__ = [name for name in globals() if not name.startswith("_")] + [
+    "EvalInfoResponseHandler", "EvalTemplate",
+]

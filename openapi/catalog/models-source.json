@@ -1,0 +1,56 @@
+{
+  "operation_id": "model-hub_api_models_list_list",
+  "method": "GET",
+  "path": "/model-hub/api/models_list/",
+  "response_schema": {
+    "required": [
+      "count",
+      "results"
+    ],
+    "type": "object",
+    "properties": {
+      "count": {
+        "title": "Count",
+        "type": "integer"
+      },
+      "next": {
+        "title": "Next",
+        "type": "string",
+        "x-nullable": true
+      },
+      "previous": {
+        "title": "Previous",
+        "type": "string",
+        "x-nullable": true
+      },
+      "results": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "declared_parameters": [],
+  "overrides": {
+    "query": [
+      "page",
+      "limit",
+      "name",
+      "search",
+      "model_type",
+      "exclude_providers"
+    ],
+    "pagination": {
+      "current_page": "current_page",
+      "last_page_selector": "last"
+    },
+    "source": [
+      "futureagi/model_hub/views/run_prompt.py:LiteLLMModelListView",
+      "futureagi/tfc/utils/pagination.py:ExtendedPageNumberPagination"
+    ],
+    "reason": "Swagger omits the view filters, inherited paginator parameters, and resolved current_page metadata"
+  },
+  "swagger_sha256": "sha256:ffe769065665b10dc7ce8301045adb8c6fe913be9fc1eb437543c92bc2bec9eb",
+  "x-sdk-pagination-dialects": "openapi/sdk/pagination-dialects.json"
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "namespace": "fi",
+  "forbidden_paths": ["fi/cli/", "fi/agentcc.py"],
+  "forbidden_console_scripts": ["fi"],
+  "distributions": {
+    "futureagi": {
+      "minimum_version": [0, 7, 0],
+      "paths": ["fi/"],
+      "excludes": ["fi/alk/"]
+    },
+    "agent-learning-kit": {
+      "minimum_version": [0, 3, 4],
+      "paths": ["fi/alk/"]
+    },
+    "agentcc": {
+      "minimum_version": [2, 0, 0],
+      "paths": ["agentcc/"]
+    },
+    "fi-instrumentation-otel": {
+      "paths": ["fi_instrumentation/"]
+    }
+  },
+  "distribution_families": {
+    "traceai-": {"paths": ["fi_instrumentation/", "traceai_*"]}
+  },
+  "unsupported_distributions": ["ai-evaluation"],
+  "repair_commands": [
+    "pip install --upgrade --force-reinstall --no-deps futureagi",
+    "futureagi-py doctor --offline"
+  ]
+}

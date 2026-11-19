@@ -1,0 +1,64 @@
+{
+ "description": "The four stream cases the parity catalog adds to stream-error-frames.json. Each case is one HTTP answer: status, headers and body chunks sent verbatim (\"raw\") or as data frames (\"sse\"). Shared by the Python and TypeScript parity recorders.",
+ "source": {
+  "plan": "the parity case list (stream cases) and deltas D-12, D-16, D-17",
+  "gateway_pin": "agentcc-gateway live-gateway-source",
+  "inferred": "cache_hit_json_to_stream follows chat_stream.go:211-214 (a short-circuit answers stream:true with JSON). responses_event_error uses the OpenAI Responses error event shape; the gateway's own frame is re-recorded by the live wire suite at the pin."
+ },
+ "cases": [
+  {
+   "name": "cache_hit_json_to_stream",
+   "about": "A cache hit (or any short-circuit) answers a stream:true chat request with one JSON body instead of SSE.",
+   "path": "/v1/chat/completions",
+   "reply": {
+    "status": 200,
+    "headers": {"content-type": "application/json", "x-agentcc-cache": "hit", "x-agentcc-request-id": "req-cache-1"},
+    "json": {"id": "chatcmpl-cache", "object": "chat.completion", "created": 1761177600, "model": "gpt-4o-mini", "choices": [{"index": 0, "message": {"role": "assistant", "content": "Cached hello"}, "finish_reason": "stop"}], "usage": {"prompt_tokens": 4, "completion_tokens": 2, "total_tokens": 6}}
+   }
+  },
+  {
+   "name": "responses_event_error",
+   "about": "A /v1/responses stream that sends typed events, then an `event: error` frame.",
+   "path": "/v1/responses",
+   "reply": {
+    "status": 200,
+    "headers": {"content-type": "text/event-stream", "x-agentcc-request-id": "req-resp-1"},
+    "raw": [
+     "event: response.created\ndata: {\"type\":\"response.created\",\"sequence_number\":0,\"response\":{\"id\":\"resp_stream\",\"object\":\"response\",\"created_at\":1761177600,\"model\":\"gpt-4o-mini\",\"status\":\"in_progress\",\"output\":[]}}\n\n",
+     "event: response.output_text.delta\ndata: {\"type\":\"response.output_text.delta\",\"sequence_number\":1,\"item_id\":\"msg_1\",\"output_index\":0,\"content_index\":0,\"delta\":\"Hi\"}\n\n",
+     "event: error\ndata: {\"type\":\"error\",\"sequence_number\":2,\"code\":\"stream_blocked\",\"message\":\"Content blocked by streaming guardrail\",\"param\":null}\n\n"
+    ]
+   }
+  },
+  {
+   "name": "late_error_after_finish_reason",
+   "about": "Content, a finish_reason chunk and the gateway's usage chunk, then an error frame and [DONE]: the error comes after everything a consumer might treat as the end (D-16).",
+   "path": "/v1/chat/completions",
+   "reply": {
+    "status": 200,
+    "headers": {"content-type": "text/event-stream"},
+    "sse": [
+     "{\"id\":\"chatcmpl-late\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hello\"},\"finish_reason\":null}]}",
+     "{\"id\":\"chatcmpl-late\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}",
+     "{\"id\":\"chatcmpl-late\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[],\"usage\":{\"prompt_tokens\":3,\"completion_tokens\":1,\"total_tokens\":4}}",
+     "{\"error\":{\"message\":\"Content blocked by streaming guardrail\",\"type\":\"guardrail_error\",\"param\":null,\"code\":\"stream_blocked\"}}",
+     "[DONE]"
+    ]
+   }
+  },
+  {
+   "name": "guardrail_header_open",
+   "about": "A stream that opens with guardrail warning headers on the 200 answer, then streams normally.",
+   "path": "/v1/chat/completions",
+   "reply": {
+    "status": 200,
+    "headers": {"content-type": "text/event-stream", "x-agentcc-guardrail-triggered": "true", "x-agentcc-guardrails-triggered": "pii", "x-agentcc-guardrail-name": "pii", "x-agentcc-guardrail-action": "warn", "x-agentcc-guardrail-confidence": "0.91", "x-agentcc-guardrail-message": "PII detected", "x-agentcc-request-id": "req-guard-1"},
+    "sse": [
+     "{\"id\":\"chatcmpl-guard\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Safe text\"},\"finish_reason\":null}]}",
+     "{\"id\":\"chatcmpl-guard\",\"object\":\"chat.completion.chunk\",\"created\":1761177600,\"model\":\"gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}",
+     "[DONE]"
+    ]
+   }
+  }
+ ]
+}

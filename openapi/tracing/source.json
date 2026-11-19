@@ -1,0 +1,949 @@
+{
+  "source": "https://github.com/future-agi/future-agi",
+  "revision": "b544357d02",
+  "paths": {
+    "/tracer/project/list_projects/": {
+      "get": {
+        "operationId": "tracer_project_list_projects",
+        "summary": "List projects filtered by organization ID.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "project_type",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "[]"
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "created_at"
+          },
+          {
+            "name": "sort_direction",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "desc"
+          },
+          {
+            "name": "page_number",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1
+          }
+        ],
+        "description": "\n\nPagination: page_number (0-based); page_size (page size)."
+      }
+    },
+    "/tracer/trace/list_traces/": {
+      "get": {
+        "operationId": "tracer_trace_list_traces",
+        "summary": "Traces",
+        "parameters": [
+          {
+            "name": "project_version_id",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "trace_ids",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": []
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "[]",
+            "minLength": 1
+          },
+          {
+            "name": "sort_params",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "[]",
+            "minLength": 1
+          },
+          {
+            "name": "page_number",
+            "in": "query",
+            "description": "Zero-based numbered page. Pages whose required ordered work exceeds the finite read contract return HTTP 422 with code page_depth_exceeded; request an earlier page or narrow the time range.",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 30,
+            "maximum": 500,
+            "minimum": 1
+          },
+          {
+            "name": "allow_sampled",
+            "in": "query",
+            "description": "Omit for backward-compatible complete bounded pages, which may label total_rows as a lower bound. Send false to require an exact total, or true to opt in explicitly to lower-bound totals.",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "description": "\n\nPagination: page_number (0-based); page_size (page size)."
+      }
+    },
+    "/tracer/trace/{id}/": {
+      "get": {
+        "operationId": "tracer_trace_read",
+        "summary": "Retrieve a trace by its ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "test_execution_id",
+            "in": "query",
+            "description": "A run the caller can read; opens the hidden simulation project of that run's agent.",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "call_execution_id",
+            "in": "query",
+            "description": "A run the caller can read; opens the hidden simulation project of that run's agent.",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "description": "Project the detail was opened from. The same id can exist in several projects; when supplied, only that project's copy is read.",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          }
+        ]
+      }
+    },
+    "/tracer/trace/list_voice_calls/": {
+      "get": {
+        "operationId": "tracer_trace_list_voice_calls",
+        "summary": "Voice calls",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "[]",
+            "minLength": 1
+          },
+          {
+            "name": "attribute_keys",
+            "in": "query",
+            "description": "JSON-encoded list of custom attribute keys to include as CSV columns. Comma-separated simple keys remain supported.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "One-based numbered page. Pages whose required ordered work exceeds the finite read contract return HTTP 422 with code page_depth_exceeded; request an earlier page, use the additive continuation cursor, or narrow the time range.",
+            "required": false,
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 30,
+            "maximum": 500,
+            "minimum": 1
+          },
+          {
+            "name": "remove_simulation_calls",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Opaque continuation token returned by the previous page. When supplied, do not also send the numbered-page parameter.",
+            "required": false,
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1
+          },
+          {
+            "name": "cursor_mode",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "allow_sampled",
+            "in": "query",
+            "description": "Omit for backward-compatible complete bounded pages, which may label count as a lower bound. Send false to require an exact total. Send true to opt in explicitly to lower-bound totals and, on the first page, a clearly labelled bounded partial result when the full ordered prefix cannot be proven inside the read budget.",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "description": "\n\nPagination: page (1-based); page_size (page size); cursor (opaque continuation token); cursor_mode (enable cursor pagination)."
+      }
+    },
+    "/tracer/trace/voice_call_detail/": {
+      "get": {
+        "operationId": "tracer_trace_voice_call_detail",
+        "summary": "Return the heavy / detail-only fields for a single voice call.",
+        "parameters": [
+          {
+            "name": "test_execution_id",
+            "in": "query",
+            "description": "A run the caller can read; opens the hidden simulation project of that run's agent.",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "call_execution_id",
+            "in": "query",
+            "description": "A run the caller can read; opens the hidden simulation project of that run's agent.",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "trace_id",
+            "in": "query",
+            "description": "Voice-call trace UUID. Supply this or the legacy traceId alias.",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "traceId",
+            "in": "query",
+            "description": "Legacy alias for trace_id; when both are supplied they must match.",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "description": "Project the detail was opened from. The same id can exist in several projects; when supplied, only that project's copy is read.",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "description": "\n\nPagination: no supported paging parameters."
+      }
+    },
+    "/tracer/trace/get_properties/": {
+      "get": {
+        "operationId": "tracer_trace_get_properties",
+        "summary": "Properties",
+        "parameters": [],
+        "description": "\n\nPagination: no supported paging parameters."
+      }
+    },
+    "/tracer/trace/{id}/tags/": {
+      "patch": {
+        "operationId": "tracer_trace_update_tags",
+        "summary": "Update tags",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "/tracer/trace/get_graph_methods/": {
+      "post": {
+        "operationId": "tracer_trace_get_graph_methods",
+        "summary": "Graph methods",
+        "parameters": [
+          {
+            "name": "allow_sampled",
+            "in": "query",
+            "description": "Deprecated compatibility parameter. Observe graphs always return complete exact data or a retryable error.",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "refresh",
+            "in": "query",
+            "description": "Recompute and atomically replace the last complete exact result.",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ]
+      }
+    },
+    "/tracer/trace-session/list_sessions/": {
+      "get": {
+        "operationId": "tracer_trace-session_list_sessions",
+        "summary": "Sessions",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "bookmarked",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "x-nullable": true
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "[]",
+            "minLength": 1
+          },
+          {
+            "name": "sort_params",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "[]",
+            "minLength": 1
+          },
+          {
+            "name": "page_number",
+            "in": "query",
+            "description": "Zero-based numbered page. Pages whose required ordered work exceeds the finite read contract return HTTP 422 with code page_depth_exceeded; request an earlier page or narrow the time range.",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 30,
+            "maximum": 500,
+            "minimum": 1
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Opaque continuation token returned by the previous page. When supplied, do not also send the numbered-page parameter.",
+            "required": false,
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1
+          },
+          {
+            "name": "cursor_mode",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "allow_sampled",
+            "in": "query",
+            "description": "Omit for backward-compatible complete bounded pages, which may label total_rows as a lower bound. Send false to require an exact total, or true to opt in explicitly to lower-bound totals.",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "description": "\n\nPagination: page_number (0-based); page_size (page size); cursor (opaque continuation token); cursor_mode (enable cursor pagination)."
+      }
+    },
+    "/tracer/trace-session/{id}/": {
+      "get": {
+        "operationId": "tracer_trace-session_read",
+        "summary": "Get session",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "page_number",
+            "in": "query",
+            "required": false,
+            "description": "Pagination: page_number (0-based); page_size (page size).",
+            "type": "integer",
+            "minimum": 0
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "description": "Pagination: page_number (0-based); page_size (page size).",
+            "type": "integer"
+          }
+        ],
+        "description": "\n\nPagination: page_number (0-based); page_size (page size)."
+      }
+    },
+    "/tracer/trace-session/get_session_graph_data/": {
+      "post": {
+        "operationId": "tracer_trace-session_get_session_graph_data",
+        "summary": "Fetch time-series session metrics for the observe graph.",
+        "parameters": [
+          {
+            "name": "allow_sampled",
+            "in": "query",
+            "description": "Deprecated compatibility parameter. Observe graphs always return complete exact data or a retryable error.",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "refresh",
+            "in": "query",
+            "description": "Recompute and atomically replace the last complete exact result.",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ]
+      }
+    },
+    "/tracer/users/": {
+      "get": {
+        "operationId": "tracer_users_list",
+        "summary": "Users",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "maximum": 500,
+            "minimum": 1
+          },
+          {
+            "name": "current_page_index",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 0
+          },
+          {
+            "name": "sort_params",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "[]",
+            "minLength": 1
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "[]",
+            "minLength": 1
+          },
+          {
+            "name": "export",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Opaque continuation token returned by the previous page. When supplied, do not also send the numbered-page parameter.",
+            "required": false,
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1
+          },
+          {
+            "name": "cursor_mode",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "requested_columns",
+            "in": "query",
+            "description": "JSON-encoded list of visible Users-table fields. Raw-derived metrics are hydrated only when explicitly requested.",
+            "required": false,
+            "type": "string",
+            "default": []
+          },
+          {
+            "name": "attribute_keys",
+            "in": "query",
+            "description": "JSON-encoded list of visible custom user attribute keys. Only these keys (plus keys required by filters) are hydrated.",
+            "required": false,
+            "type": "string",
+            "default": []
+          }
+        ],
+        "description": "\n\nPagination: page_size (page size); current_page_index (0-based); cursor (opaque continuation token); cursor_mode (enable cursor pagination)."
+      }
+    },
+    "/tracer/get-annotation-labels/": {
+      "get": {
+        "operationId": "tracer_get-annotation-labels_list",
+        "summary": "Annotation labels",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          }
+        ]
+      }
+    },
+    "/tracer/bulk-annotation/": {
+      "post": {
+        "operationId": "tracer_bulk-annotation_create",
+        "summary": "Bulk annotation",
+        "parameters": []
+      }
+    },
+    "/tracer/feed/issues/": {
+      "get": {
+        "operationId": "tracer_feed_issues_list",
+        "summary": "Issues",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "escalating",
+              "for_review",
+              "acknowledged",
+              "resolved"
+            ]
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          {
+            "name": "fix_layer",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "scanner",
+              "eval"
+            ]
+          },
+          {
+            "name": "issue_group",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "time_range_days",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "last_seen",
+              "first_seen",
+              "error_count",
+              "unique_traces",
+              "severity"
+            ],
+            "default": "last_seen"
+          },
+          {
+            "name": "sort_dir",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "desc"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 25,
+            "maximum": 200,
+            "minimum": 1
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          }
+        ],
+        "description": "\n\nPagination: limit (page size); offset (0-based)."
+      }
+    },
+    "/tracer/feed/issues/{cluster_id}/": {
+      "get": {
+        "operationId": "tracer_feed_issues_read",
+        "summary": "Issue",
+        "parameters": [
+          {
+            "name": "cluster_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          }
+        ]
+      }
+    },
+    "/tracer/feed/issues/stats/": {
+      "get": {
+        "operationId": "tracer_feed_issues_stats_list",
+        "summary": "Issue stats",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "time_range_days",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1
+          }
+        ]
+      }
+    },
+    "/tracer/project/{id}/": {
+      "get": {
+        "operationId": "tracer_project_read",
+        "summary": "Get project",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "/tracer/observation-span/list_spans_observe/": {
+      "get": {
+        "operationId": "tracer_observation-span_list_spans_observe",
+        "summary": "Spans",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid",
+            "x-nullable": true
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "[]",
+            "minLength": 1
+          },
+          {
+            "name": "page_number",
+            "in": "query",
+            "description": "Zero-based numbered page. Pages whose required ordered work exceeds the finite read contract return HTTP 422 with code page_depth_exceeded; request an earlier page or narrow the time range.",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 30,
+            "maximum": 500,
+            "minimum": 1
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Opaque continuation token returned by the previous page. When supplied, do not also send the numbered-page parameter.",
+            "required": false,
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1
+          },
+          {
+            "name": "cursor_mode",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "allow_sampled",
+            "in": "query",
+            "description": "Omit for backward-compatible complete bounded pages, which may label total_rows as a lower bound. Send false to require an exact total, or true to opt in explicitly to lower-bound totals.",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "description": "\n\nPagination: page_number (0-based); page_size (page size); cursor (opaque continuation token); cursor_mode (enable cursor pagination)."
+      }
+    },
+    "/tracer/observation-span/{id}/": {
+      "get": {
+        "operationId": "tracer_observation-span_read",
+        "summary": "Get span",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "test_execution_id",
+            "in": "query",
+            "description": "A run the caller can read; opens the hidden simulation project of that run's agent.",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "call_execution_id",
+            "in": "query",
+            "description": "A run the caller can read; opens the hidden simulation project of that run's agent.",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "trace_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "name": "start_hour",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "observation_type",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "service_name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "expected_start_time",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "expected_version",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "minLength": 1
+          }
+        ]
+      }
+    },
+    "/tracer/trace-error-analysis/{trace_id}/": {
+      "get": {
+        "operationId": "tracer_trace-error-analysis_read",
+        "summary": "Error analysis",
+        "parameters": [
+          {
+            "name": "trace_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "x-sdk-pagination-dialects": "openapi/sdk/pagination-dialects.json"
+}

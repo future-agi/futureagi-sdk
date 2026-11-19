@@ -13,7 +13,9 @@ import {
     DEFAULT_SETTINGS, 
     get_base_url 
 } from '../utils/constants';
-import { RequestConfig, HttpMethod, ModelProvider } from './types';
+import { HttpMethod } from './types';
+import { ExtraHeaders, ExtraHeadersError, isPlatformUrl, type ExtraHeadersInput } from '../extra-headers';
+import type { RequestConfig } from './types';
 
 /**
  * Generic response handler for parsing and validating HTTP responses
@@ -89,6 +91,12 @@ export abstract class ResponseHandler<T = any, U = any> {
 export interface HttpClientConfig {
     baseUrl?: string;
     defaultHeaders?: Record<string, string>;
+    /**
+     * Headers for every request under `baseUrl`, added to `FI_EXTRA_HEADERS` and winning over it for
+     * the same name. Never `X-Api-Key`, `X-Secret-Key` or `Authorization`, never another host or a
+     * redirect to one (extra-headers.ts).
+     */
+    extraHeaders?: ExtraHeadersInput;
     timeout?: number;
     maxQueue?: number;
     maxWorkers?: number;
@@ -106,9 +114,11 @@ export class HttpClient {
     protected readonly _defaultTimeout: number;
     protected readonly _defaultRetryAttempts: number;
     protected readonly _defaultRetryDelay: number;
+    protected readonly _extraHeaders: ExtraHeaders;
 
     constructor(config: HttpClientConfig = {}) {
         this._baseUrl = (config.baseUrl || get_base_url()).replace(/\/$/, '');
+        this._extraHeaders = new ExtraHeaders(this._baseUrl, config.extraHeaders);
         this._defaultTimeout = config.timeout || DEFAULT_SETTINGS.TIMEOUT;
         this._defaultRetryAttempts = config.retryAttempts || 3;
         this._defaultRetryDelay = config.retryDelay || 1000;
@@ -124,6 +134,8 @@ export class HttpClient {
             },
             // Enable connection pooling
             maxRedirects: 5,
+            // FI_EXTRA_HEADERS: a redirect off the base URL loses them, one under it keeps them
+            beforeRedirect: (options: Record<string, any>) => this._guardRedirect(options),
             validateStatus: () => true, // Handle all status codes manually
         });
 
@@ -145,6 +157,11 @@ export class HttpClient {
             (config) => {
                 // Add request timestamp for performance monitoring
                 (config as any).startTime = Date.now();
+                // FI_EXTRA_HEADERS / extraHeaders, read now, on URLs under the base URL only
+                const extra = this._extraHeaders.forUrl(this._axiosInstance.getUri(config));
+                for (const [name, value] of Object.entries(extra)) {
+                    if (!config.headers.has(name)) config.headers.set(name, value);
+                }
                 return config;
             },
             (error) => Promise.reject(error)
@@ -159,6 +176,25 @@ export class HttpClient {
             },
             (error) => Promise.reject(error)
         );
+    }
+
+    /** follow-redirects' options for the next hop: the extra headers stay under the base URL and are
+     * stripped anywhere else (follow-redirects keeps custom headers on every host). */
+    private _guardRedirect(options: Record<string, any>): void {
+        const port = options.port ? `:${options.port}` : '';
+        const href = options.href || `${options.protocol}//${options.hostname}${port}${options.path || '/'}`;
+        const headers: Record<string, unknown> = options.headers || (options.headers = {});
+        const present = new Set(Object.keys(headers).map((k) => k.toLowerCase()));
+        if (isPlatformUrl(href, this._baseUrl)) {
+            for (const [name, value] of Object.entries(this._extraHeaders.forUrl(href))) {
+                if (!present.has(name.toLowerCase())) headers[name] = value;
+            }
+            return;
+        }
+        const names = new Set(this._extraHeaders.names().map((n) => n.toLowerCase()));
+        for (const key of Object.keys(headers)) {
+            if (names.has(key.toLowerCase())) delete headers[key];
+        }
     }
 
     /**
@@ -216,9 +252,11 @@ export class HttpClient {
 
                     return response;
                 } catch (error) {
-                    // Don't retry certain errors
-                    if (error instanceof DatasetNotFoundError || 
+                    // Don't retry certain errors (a malformed FI_EXTRA_HEADERS / extraHeaders sent
+                    // nothing and fails the same way every time: at once, as in Python)
+                    if (error instanceof DatasetNotFoundError ||
                         error instanceof InvalidAuthError ||
+                        error instanceof ExtraHeadersError ||
                         (error instanceof AxiosError && error.response?.status === 401)) {
                         throw error;
                     }

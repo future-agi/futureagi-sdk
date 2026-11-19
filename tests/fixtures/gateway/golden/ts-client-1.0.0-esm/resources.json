@@ -1,0 +1,3404 @@
+{
+ "area": "resources",
+ "cases": {
+  "resource.audio.speech": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "input": "hello",
+      "model": "tts-1",
+      "voice": "alloy"
+     },
+     "method": "POST",
+     "path": "/v1/audio/speech",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "status": 200,
+    "text": "ID3-parity-audio-bytes"
+   }
+  },
+  "resource.audio.speech.options": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "input": "hello",
+      "model": "tts-1",
+      "response_format": "wav",
+      "session_id": "s",
+      "speed": 1.25,
+      "voice": "alloy"
+     },
+     "method": "POST",
+     "path": "/v1/audio/speech",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "status": 200,
+    "text": "ID3-parity-audio-bytes"
+   }
+  },
+  "resource.audio.transcriptions.file": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "POST",
+     "multipart": [
+      {
+       "filename": "a.wav",
+       "name": "file",
+       "text": "RIFF-parity",
+       "type": "audio/wav"
+      },
+      {
+       "name": "model",
+       "text": "whisper-1"
+      },
+      {
+       "name": "language",
+       "text": "en"
+      }
+     ],
+     "path": "/v1/audio/transcriptions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "text": "hello world"
+   }
+  },
+  "resource.audio.translations.file": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "POST",
+     "multipart": [
+      {
+       "filename": "a.wav",
+       "name": "file",
+       "text": "RIFF-parity",
+       "type": "audio/wav"
+      },
+      {
+       "name": "model",
+       "text": "whisper-1"
+      }
+     ],
+     "path": "/v1/audio/translations",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "text": "hello"
+   }
+  },
+  "resource.batches.cancel": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "POST",
+     "path": "/v1/batches/batch-parity/cancel",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "batch_id": "batch-parity",
+    "completed_at": "2025-10-23T00:00:05Z",
+    "created_at": "2025-10-23T00:00:00Z",
+    "max_concurrency": 2,
+    "results": [
+     {
+      "index": 0,
+      "status": "ok"
+     },
+     {
+      "index": 1,
+      "status": "ok"
+     }
+    ],
+    "status": "completed",
+    "summary": {
+     "failed": 0,
+     "succeeded": 2
+    },
+    "total": 2
+   }
+  },
+  "resource.batches.create": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "max_concurrency": 2,
+      "requests": [
+       {
+        "messages": [
+         {
+          "content": "Say hello",
+          "role": "user"
+         }
+        ],
+        "model": "gpt-4o-mini"
+       }
+      ]
+     },
+     "method": "POST",
+     "path": "/v1/batches",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "batch_id": "batch-parity",
+    "completed_at": "2025-10-23T00:00:05Z",
+    "created_at": "2025-10-23T00:00:00Z",
+    "max_concurrency": 2,
+    "results": [
+     {
+      "index": 0,
+      "status": "ok"
+     },
+     {
+      "index": 1,
+      "status": "ok"
+     }
+    ],
+    "status": "completed",
+    "summary": {
+     "failed": 0,
+     "succeeded": 2
+    },
+    "total": 2
+   }
+  },
+  "resource.batches.list": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/batches",
+     "port": null,
+     "query": [
+      [
+       "after",
+       "b0"
+      ],
+      [
+       "limit",
+       "5"
+      ]
+     ],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [],
+    "object": "list"
+   }
+  },
+  "resource.batches.retrieve": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/batches/batch-parity",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "batch_id": "batch-parity",
+    "completed_at": "2025-10-23T00:00:05Z",
+    "created_at": "2025-10-23T00:00:00Z",
+    "max_concurrency": 2,
+    "results": [
+     {
+      "index": 0,
+      "status": "ok"
+     },
+     {
+      "index": 1,
+      "status": "ok"
+     }
+    ],
+    "status": "completed",
+    "summary": {
+     "failed": 0,
+     "succeeded": 2
+    },
+    "total": 2
+   }
+  },
+  "resource.chat.create": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "resource.chat.create.gateway_params": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-cache-ttl",
+       "60"
+      ],
+      [
+       "x-agentcc-metadata",
+       "{\"team\":\"a\"}"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-session-id",
+       "sess-r"
+      ],
+      [
+       "x-agentcc-trace-id",
+       "trace-r"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+       "content": "Hello from parity",
+       "role": "assistant"
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-parity",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_parity",
+    "usage": {
+     "completion_tokens": 3,
+     "prompt_tokens": 5,
+     "total_tokens": 8
+    }
+   }
+  },
+  "resource.chat.create.stream": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "error": null,
+    "items": [
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {
+         "content": "Hel",
+         "role": "assistant"
+        },
+        "finish_reason": null,
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-stream",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     },
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {
+         "content": "lo"
+        },
+        "finish_reason": null,
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-stream",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     },
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {},
+        "finish_reason": "stop",
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-stream",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     },
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [],
+      "created": 1761177600,
+      "id": "chatcmpl-stream",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk",
+      "usage": {
+       "completion_tokens": 2,
+       "prompt_tokens": 4,
+       "total_tokens": 6
+      }
+     }
+    ]
+   }
+  },
+  "resource.chat.create.stream_tools": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "error": null,
+    "items": [
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {
+         "role": "assistant",
+         "tool_calls": [
+          {
+           "function": {
+            "arguments": {
+             "__truncated__": "String"
+            },
+            "name": {
+             "__truncated__": "String"
+            }
+           },
+           "id": "call_1",
+           "index": 0,
+           "type": "function"
+          }
+         ]
+        },
+        "finish_reason": null,
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-tool",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     },
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {
+         "tool_calls": [
+          {
+           "function": {
+            "arguments": {
+             "__truncated__": "String"
+            }
+           },
+           "index": 0
+          }
+         ]
+        },
+        "finish_reason": null,
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-tool",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     },
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "delta": {
+         "tool_calls": [
+          {
+           "function": {
+            "arguments": {
+             "__truncated__": "String"
+            }
+           },
+           "index": 0
+          }
+         ]
+        },
+        "finish_reason": "tool_calls",
+        "index": 0
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-tool",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk"
+     },
+     {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [],
+      "created": 1761177600,
+      "id": "chatcmpl-tool",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion.chunk",
+      "usage": {
+       "completion_tokens": 7,
+       "prompt_tokens": 12,
+       "total_tokens": 19
+      }
+     }
+    ]
+   }
+  },
+  "resource.chat.create.tools": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "tool_choice": "auto",
+      "tools": [
+       {
+        "function": {
+         "name": "get_weather",
+         "parameters": {
+          "type": "object"
+         }
+        },
+        "type": "function"
+       }
+      ]
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "tool_calls",
+      "index": 0,
+      "message": {
+       "content": null,
+       "role": "assistant",
+       "tool_calls": [
+        {
+         "function": {
+          "arguments": "{\"city\":\"Paris\"}",
+          "name": "get_weather"
+         },
+         "id": "call_1",
+         "type": "function"
+        }
+       ]
+      }
+     }
+    ],
+    "created": 1761177600,
+    "id": "chatcmpl-tools",
+    "model": "gpt-4o-mini",
+    "object": "chat.completion",
+    "usage": {
+     "completion_tokens": 7,
+     "prompt_tokens": 12,
+     "total_tokens": 19
+    }
+   }
+  },
+  "resource.chat.createParsed": {
+   "raised": {
+    "__exception__": "AgentCCError",
+    "attrs": {
+     "name": "AgentCCError"
+    },
+    "chain": [
+     "AgentCCError",
+     "Error"
+    ],
+    "class": "AgentCCError",
+    "message": "createParsed: responseSchema must be a Zod schema. Install zod and pass a z.object({...}) schema.",
+    "toString": "AgentCCError: createParsed: responseSchema must be a Zod schema. Install zod and pass a z.object({...}) schema."
+   },
+   "requests": [],
+   "unused_replies": 1
+  },
+  "resource.chat.dryRun": {
+   "requests": [],
+   "result": {
+    "body": {
+     "messages": [
+      {
+       "content": "Say hello",
+       "role": "user"
+      }
+     ],
+     "model": "gpt-4o-mini"
+    },
+    "headers": {
+     "Accept": "application/json",
+     "Authorization": "Bearer parity-gateway-key",
+     "Content-Type": "application/json",
+     "User-Agent": "agentcc-typescript/0.1.0",
+     "X-D": "1",
+     "x-agentcc-cache-ttl": "60",
+     "x-agentcc-metadata": "{\"team\":\"a\"}",
+     "x-agentcc-sdk-version": "0.1.0",
+     "x-agentcc-session-id": "sess-r",
+     "x-agentcc-trace-id": "trace-r"
+    },
+    "method": "POST",
+    "url": "https://gateway.example.test/v1/chat/completions"
+   }
+  },
+  "resource.chat.runTools": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": false,
+      "tools": [
+       {
+        "function": {
+         "name": "get_weather",
+         "parameters": {
+          "properties": {
+           "city": {
+            "type": "string"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "type": "function"
+       }
+      ]
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    },
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       },
+       {
+        "content": null,
+        "role": "assistant",
+        "tool_calls": [
+         {
+          "function": {
+           "arguments": "{\"city\":\"Paris\"}",
+           "name": "get_weather"
+          },
+          "id": "call_1",
+          "type": "function"
+         }
+        ]
+       },
+       {
+        "content": "{\"temp\":21,\"args\":{\"city\":\"Paris\"}}",
+        "role": "tool",
+        "tool_call_id": "call_1"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": false,
+      "tools": [
+       {
+        "function": {
+         "name": "get_weather",
+         "parameters": {
+          "properties": {
+           "city": {
+            "type": "string"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "type": "function"
+       }
+      ]
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "completion": {
+     "agentcc": {
+      "cacheStatus": null,
+      "cost": null,
+      "fallbackUsed": false,
+      "guardrailAction": null,
+      "guardrailConfidence": null,
+      "guardrailMessage": null,
+      "guardrailName": null,
+      "guardrailTriggered": false,
+      "latencyMs": 0,
+      "modelUsed": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "requestId": "unknown",
+      "routingStrategy": null,
+      "timeoutMs": null,
+      "traceId": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "role": "assistant"
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "prompt_tokens": 5,
+      "total_tokens": 8
+     }
+    },
+    "steps": [
+     {
+      "completion": {
+       "agentcc": {
+        "cacheStatus": null,
+        "cost": null,
+        "fallbackUsed": false,
+        "guardrailAction": null,
+        "guardrailConfidence": null,
+        "guardrailMessage": null,
+        "guardrailName": null,
+        "guardrailTriggered": false,
+        "latencyMs": 0,
+        "modelUsed": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "requestId": "unknown",
+        "routingStrategy": null,
+        "timeoutMs": null,
+        "traceId": "unknown"
+       },
+       "choices": [
+        {
+         "finish_reason": "tool_calls",
+         "index": 0,
+         "message": {
+          "content": null,
+          "role": "assistant",
+          "tool_calls": [
+           {
+            "function": {
+             "__truncated__": "Object"
+            },
+            "id": {
+             "__truncated__": "String"
+            },
+            "type": {
+             "__truncated__": "String"
+            }
+           }
+          ]
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-tools",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "usage": {
+        "completion_tokens": 7,
+        "prompt_tokens": 12,
+        "total_tokens": 19
+       }
+      },
+      "toolCalls": [
+       {
+        "function": {
+         "arguments": "{\"city\":\"Paris\"}",
+         "name": "get_weather"
+        },
+        "id": "call_1",
+        "type": "function"
+       }
+      ],
+      "toolResults": [
+       {
+        "result": {
+         "args": {
+          "city": "Paris"
+         },
+         "temp": 21
+        },
+        "toolCallId": "call_1"
+       }
+      ]
+     },
+     {
+      "completion": {
+       "agentcc": {
+        "cacheStatus": null,
+        "cost": null,
+        "fallbackUsed": false,
+        "guardrailAction": null,
+        "guardrailConfidence": null,
+        "guardrailMessage": null,
+        "guardrailName": null,
+        "guardrailTriggered": false,
+        "latencyMs": 0,
+        "modelUsed": null,
+        "provider": "unknown",
+        "ratelimit": null,
+        "requestId": "unknown",
+        "routingStrategy": null,
+        "timeoutMs": null,
+        "traceId": "unknown"
+       },
+       "choices": [
+        {
+         "finish_reason": "stop",
+         "index": 0,
+         "logprobs": null,
+         "message": {
+          "content": "Hello from parity",
+          "role": "assistant"
+         }
+        }
+       ],
+       "created": 1761177600,
+       "id": "chatcmpl-parity",
+       "model": "gpt-4o-mini",
+       "object": "chat.completion",
+       "system_fingerprint": "fp_parity",
+       "usage": {
+        "completion_tokens": 3,
+        "prompt_tokens": 5,
+        "total_tokens": 8
+       }
+      },
+      "toolCalls": [],
+      "toolResults": []
+     }
+    ],
+    "totalSteps": 2
+   }
+  },
+  "resource.chat.stream": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "events": {
+     "error": null,
+     "items": [
+      {
+       "text": "Hel",
+       "type": "content"
+      },
+      {
+       "text": "lo",
+       "type": "content"
+      },
+      {
+       "completion": {
+        "agentcc": {
+         "cacheStatus": null,
+         "cost": null,
+         "fallbackUsed": false,
+         "guardrailAction": null,
+         "guardrailConfidence": null,
+         "guardrailMessage": null,
+         "guardrailName": null,
+         "guardrailTriggered": false,
+         "latencyMs": 0,
+         "modelUsed": null,
+         "provider": "unknown",
+         "ratelimit": null,
+         "requestId": "unknown",
+         "routingStrategy": null,
+         "timeoutMs": null,
+         "traceId": "unknown"
+        },
+        "choices": [
+         {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+           "content": "Hello",
+           "role": "assistant"
+          }
+         }
+        ],
+        "created": 1761177600,
+        "id": "chatcmpl-stream",
+        "model": "gpt-4o-mini",
+        "object": "chat.completion",
+        "usage": "<undefined>"
+       },
+       "type": "done"
+      },
+      {
+       "type": "usage",
+       "usage": {
+        "completion_tokens": 2,
+        "prompt_tokens": 4,
+        "total_tokens": 6
+       }
+      }
+     ]
+    },
+    "final": {
+     "ok": {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+         "content": "Hello",
+         "role": "assistant"
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-stream",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion",
+      "usage": {
+       "completion_tokens": 2,
+       "prompt_tokens": 4,
+       "total_tokens": 6
+      }
+     }
+    },
+    "text": {
+     "ok": "Hello"
+    }
+   }
+  },
+  "resource.chat.stream.tools": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini",
+      "stream": true
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "events": {
+     "error": null,
+     "items": [
+      {
+       "arguments": "",
+       "id": "call_1",
+       "index": 0,
+       "name": "get_weather",
+       "type": "tool_call"
+      },
+      {
+       "arguments": "{\"city\":",
+       "id": "<undefined>",
+       "index": 0,
+       "name": "<undefined>",
+       "type": "tool_call"
+      },
+      {
+       "arguments": "\"Paris\"}",
+       "id": "<undefined>",
+       "index": 0,
+       "name": "<undefined>",
+       "type": "tool_call"
+      },
+      {
+       "completion": {
+        "agentcc": {
+         "cacheStatus": null,
+         "cost": null,
+         "fallbackUsed": false,
+         "guardrailAction": null,
+         "guardrailConfidence": null,
+         "guardrailMessage": null,
+         "guardrailName": null,
+         "guardrailTriggered": false,
+         "latencyMs": 0,
+         "modelUsed": null,
+         "provider": "unknown",
+         "ratelimit": null,
+         "requestId": "unknown",
+         "routingStrategy": null,
+         "timeoutMs": null,
+         "traceId": "unknown"
+        },
+        "choices": [
+         {
+          "finish_reason": "tool_calls",
+          "index": 0,
+          "message": {
+           "content": null,
+           "role": "assistant",
+           "tool_calls": [
+            {
+             "__truncated__": "Object"
+            }
+           ]
+          }
+         }
+        ],
+        "created": 1761177600,
+        "id": "chatcmpl-tool",
+        "model": "gpt-4o-mini",
+        "object": "chat.completion",
+        "usage": "<undefined>"
+       },
+       "type": "done"
+      },
+      {
+       "type": "usage",
+       "usage": {
+        "completion_tokens": 7,
+        "prompt_tokens": 12,
+        "total_tokens": 19
+       }
+      }
+     ]
+    },
+    "final": {
+     "ok": {
+      "agentcc": {
+       "cacheStatus": null,
+       "cost": null,
+       "fallbackUsed": false,
+       "guardrailAction": null,
+       "guardrailConfidence": null,
+       "guardrailMessage": null,
+       "guardrailName": null,
+       "guardrailTriggered": false,
+       "latencyMs": 0,
+       "modelUsed": null,
+       "provider": "unknown",
+       "ratelimit": null,
+       "requestId": "unknown",
+       "routingStrategy": null,
+       "timeoutMs": null,
+       "traceId": "unknown"
+      },
+      "choices": [
+       {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+         "content": null,
+         "role": "assistant",
+         "tool_calls": [
+          {
+           "function": {
+            "arguments": {
+             "__truncated__": "String"
+            },
+            "name": {
+             "__truncated__": "String"
+            }
+           },
+           "id": "call_1",
+           "type": "function"
+          }
+         ]
+        }
+       }
+      ],
+      "created": 1761177600,
+      "id": "chatcmpl-tool",
+      "model": "gpt-4o-mini",
+      "object": "chat.completion",
+      "usage": {
+       "completion_tokens": 7,
+       "prompt_tokens": 12,
+       "total_tokens": 19
+      }
+     }
+    },
+    "text": {
+     "ok": ""
+    }
+   }
+  },
+  "resource.checkValidKey": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 10000
+    }
+   ],
+   "result": {
+    "valid": true
+   }
+  },
+  "resource.checkValidKey.401": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 10000
+    }
+   ],
+   "result": {
+    "error": "Invalid or unauthorized API key",
+    "valid": false
+   }
+  },
+  "resource.completions.create": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "max_tokens": 5,
+      "model": "gpt-3.5-turbo-instruct",
+      "prompt": "Hello"
+     },
+     "method": "POST",
+     "path": "/v1/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "text": " world"
+     }
+    ],
+    "created": 1761177600,
+    "id": "cmpl-parity",
+    "model": "gpt-3.5-turbo-instruct",
+    "object": "text_completion",
+    "usage": {
+     "completion_tokens": 1,
+     "prompt_tokens": 1,
+     "total_tokens": 2
+    }
+   }
+  },
+  "resource.completions.create.gateway_params": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-cache-ttl",
+       "60"
+      ],
+      [
+       "x-agentcc-metadata",
+       "{\"team\":\"a\"}"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ],
+      [
+       "x-agentcc-session-id",
+       "sess-r"
+      ],
+      [
+       "x-agentcc-trace-id",
+       "trace-r"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "model": "gpt-3.5-turbo-instruct",
+      "prompt": [
+       "a",
+       "b"
+      ]
+     },
+     "method": "POST",
+     "path": "/v1/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "text": " world"
+     }
+    ],
+    "created": 1761177600,
+    "id": "cmpl-parity",
+    "model": "gpt-3.5-turbo-instruct",
+    "object": "text_completion",
+    "usage": {
+     "completion_tokens": 1,
+     "prompt_tokens": 1,
+     "total_tokens": 2
+    }
+   }
+  },
+  "resource.embeddings.create": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "dimensions": 3,
+      "encoding_format": "float",
+      "input": "hi",
+      "model": "text-embedding-3-small"
+     },
+     "method": "POST",
+     "path": "/v1/embeddings",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "embedding": [
+       0.25,
+       -0.5,
+       0.125
+      ],
+      "index": 0,
+      "object": "embedding"
+     }
+    ],
+    "model": "text-embedding-3-small",
+    "object": "list",
+    "usage": {
+     "prompt_tokens": 2,
+     "total_tokens": 2
+    }
+   }
+  },
+  "resource.embeddings.create.list": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "input": [
+       "a",
+       "b"
+      ],
+      "model": "text-embedding-3-small"
+     },
+     "method": "POST",
+     "path": "/v1/embeddings",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "embedding": [
+       0.25,
+       -0.5,
+       0.125
+      ],
+      "index": 0,
+      "object": "embedding"
+     }
+    ],
+    "model": "text-embedding-3-small",
+    "object": "list",
+    "usage": {
+     "prompt_tokens": 2,
+     "total_tokens": 2
+    }
+   }
+  },
+  "resource.files.content": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/files/file-parity/content",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "status": 200,
+    "text": "{\"custom_id\":\"1\"}\n"
+   }
+  },
+  "resource.files.create": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "POST",
+     "multipart": [
+      {
+       "filename": "data.jsonl",
+       "name": "file",
+       "text": "{\"a\":1}\n",
+       "type": "application/jsonl"
+      },
+      {
+       "name": "purpose",
+       "text": "batch"
+      }
+     ],
+     "path": "/v1/files",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "bytes": 12,
+    "created_at": 1761177600,
+    "filename": "data.jsonl",
+    "id": "file-parity",
+    "object": "file",
+    "purpose": "batch",
+    "status": "processed"
+   }
+  },
+  "resource.files.delete": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "DELETE",
+     "path": "/v1/files/file-parity",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "deleted": true,
+    "id": "file-parity",
+    "object": "file"
+   }
+  },
+  "resource.files.list": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/files",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "bytes": 12,
+      "created_at": 1761177600,
+      "filename": "data.jsonl",
+      "id": "file-parity",
+      "object": "file",
+      "purpose": "batch",
+      "status": "processed"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "resource.files.retrieve": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/files/file-parity",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "bytes": 12,
+    "created_at": 1761177600,
+    "filename": "data.jsonl",
+    "id": "file-parity",
+    "object": "file",
+    "purpose": "batch",
+    "status": "processed"
+   }
+  },
+  "resource.healthCheck.function": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "max_tokens": 1,
+      "messages": [
+       {
+        "content": "ping",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 30000
+    }
+   ],
+   "result": {
+    "healthy": true,
+    "latencyMs": 0,
+    "model": "gpt-4o-mini",
+    "provider": "openai"
+   }
+  },
+  "resource.healthCheck.function.error": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "max_tokens": 1,
+      "messages": [
+       {
+        "content": "ping",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 30000
+    }
+   ],
+   "result": {
+    "error": "Request failed with status 401",
+    "healthy": false,
+    "latencyMs": 0
+   }
+  },
+  "resource.healthCheck.method": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/healthz",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": true
+  },
+  "resource.healthCheck.method.error": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/healthz",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": false
+  },
+  "resource.images.generate": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "model": "dall-e-3",
+      "n": 1,
+      "prompt": "a cat",
+      "size": "1024x1024"
+     },
+     "method": "POST",
+     "path": "/v1/images/generations",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "created": 1761177600,
+    "data": [
+     {
+      "revised_prompt": "a small cat",
+      "url": "https://images.example.test/cat.png"
+     }
+    ]
+   }
+  },
+  "resource.injected_fetch": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "messages": [
+       {
+        "content": "Say hello",
+        "role": "user"
+       }
+      ],
+      "model": "gpt-4o-mini"
+     },
+     "method": "POST",
+     "path": "/v1/chat/completions",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "result": {
+     "agentcc": {
+      "cacheStatus": null,
+      "cost": null,
+      "fallbackUsed": false,
+      "guardrailAction": null,
+      "guardrailConfidence": null,
+      "guardrailMessage": null,
+      "guardrailName": null,
+      "guardrailTriggered": false,
+      "latencyMs": 0,
+      "modelUsed": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "requestId": "unknown",
+      "routingStrategy": null,
+      "timeoutMs": null,
+      "traceId": "unknown"
+     },
+     "choices": [
+      {
+       "finish_reason": "stop",
+       "index": 0,
+       "logprobs": null,
+       "message": {
+        "content": "Hello from parity",
+        "role": "assistant"
+       }
+      }
+     ],
+     "created": 1761177600,
+     "id": "chatcmpl-parity",
+     "model": "gpt-4o-mini",
+     "object": "chat.completion",
+     "system_fingerprint": "fp_parity",
+     "usage": {
+      "completion_tokens": 3,
+      "prompt_tokens": 5,
+      "total_tokens": 8
+     }
+    },
+    "seen": [
+     "https://gateway.example.test/v1/chat/completions"
+    ]
+   }
+  },
+  "resource.models.list": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": [
+     {
+      "created": 1761177600,
+      "id": "gpt-4o-mini",
+      "object": "model",
+      "owned_by": "openai"
+     },
+     {
+      "created": 1761177600,
+      "id": "claude-3-5-haiku",
+      "object": "model",
+      "owned_by": "anthropic"
+     }
+    ],
+    "object": "list"
+   }
+  },
+  "resource.models.retrieve": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models/gpt-4o-mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "created": 1761177600,
+    "id": "gpt-4o-mini",
+    "object": "model",
+    "owned_by": "openai"
+   }
+  },
+  "resource.models.retrieve.slash": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models/openai%2Fgpt-4o%20mini",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "created": 1761177600,
+    "id": "gpt-4o-mini",
+    "object": "model",
+    "owned_by": "openai"
+   }
+  },
+  "resource.moderations.create": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "input": "hello",
+      "model": "omni-moderation-latest"
+     },
+     "method": "POST",
+     "path": "/v1/moderations",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "id": "modr-parity",
+    "model": "omni-moderation-latest",
+    "results": [
+     {
+      "categories": {
+       "violence": false
+      },
+      "category_scores": {
+       "violence": 0.01
+      },
+      "flagged": false
+     }
+    ]
+   }
+  },
+  "resource.rerank.rank": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "json": {
+      "documents": [
+       "alpha",
+       "beta"
+      ],
+      "model": "rerank-v1",
+      "query": "q",
+      "return_documents": true,
+      "top_n": 2
+     },
+     "method": "POST",
+     "path": "/v1/rerank",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "unknown",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "id": "rerank-parity",
+    "model": "rerank-v1",
+    "results": [
+     {
+      "document": {
+       "text": "beta"
+      },
+      "index": 1,
+      "relevance_score": 0.9
+     },
+     {
+      "document": {
+       "text": "alpha"
+      },
+      "index": 0,
+      "relevance_score": 0.1
+     }
+    ],
+    "usage": {
+     "total_tokens": 10
+    }
+   }
+  },
+  "resource.withResponse": {
+   "requests": [
+    {
+     "headers": [
+      [
+       "accept",
+       "application/json"
+      ],
+      [
+       "authorization",
+       "Bearer parity-gateway-key"
+      ],
+      [
+       "content-type",
+       "application/json"
+      ],
+      [
+       "user-agent",
+       "agentcc-typescript/0.1.0"
+      ],
+      [
+       "x-agentcc-sdk-version",
+       "0.1.0"
+      ]
+     ],
+     "host": "gateway.example.test",
+     "method": "GET",
+     "path": "/v1/models",
+     "port": null,
+     "query": [],
+     "scheme": "https",
+     "timeout_ms": 600000
+    }
+   ],
+   "result": {
+    "agentcc": {
+     "cacheStatus": null,
+     "cost": null,
+     "fallbackUsed": false,
+     "guardrailAction": null,
+     "guardrailConfidence": null,
+     "guardrailMessage": null,
+     "guardrailName": null,
+     "guardrailTriggered": false,
+     "latencyMs": 0,
+     "modelUsed": null,
+     "provider": "unknown",
+     "ratelimit": null,
+     "requestId": "r1",
+     "routingStrategy": null,
+     "timeoutMs": null,
+     "traceId": "unknown"
+    },
+    "data": {
+     "agentcc": {
+      "cacheStatus": null,
+      "cost": null,
+      "fallbackUsed": false,
+      "guardrailAction": null,
+      "guardrailConfidence": null,
+      "guardrailMessage": null,
+      "guardrailName": null,
+      "guardrailTriggered": false,
+      "latencyMs": 0,
+      "modelUsed": null,
+      "provider": "unknown",
+      "ratelimit": null,
+      "requestId": "r1",
+      "routingStrategy": null,
+      "timeoutMs": null,
+      "traceId": "unknown"
+     },
+     "data": [
+      {
+       "created": 1761177600,
+       "id": "gpt-4o-mini",
+       "object": "model",
+       "owned_by": "openai"
+      },
+      {
+       "created": 1761177600,
+       "id": "claude-3-5-haiku",
+       "object": "model",
+       "owned_by": "anthropic"
+      }
+     ],
+     "object": "list"
+    },
+    "response": {
+     "__response__": 200,
+     "type": "application/json"
+    }
+   }
+  }
+ },
+ "format": 1
+}

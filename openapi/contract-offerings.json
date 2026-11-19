@@ -1,0 +1,22 @@
+{
+  "modules": {},
+  "core": {
+    "py_async": {
+      "annotationQueues": {"status": "NOT-OFFERED", "owner": "core-namespaces", "reason": "Legacy core namespace has no async facade"},
+      "annotationQueueItems": {"status": "NOT-OFFERED", "owner": "core-namespaces", "reason": "Legacy core namespace has no async facade"},
+      "annotationQueueDiscussion": {"status": "NOT-OFFERED", "owner": "core-namespaces", "reason": "Legacy core namespace has no async facade"},
+      "annotationQueueReview": {"status": "NOT-OFFERED", "owner": "core-namespaces", "reason": "Legacy core namespace has no async facade"},
+      "datasets": {"status": "NOT-OFFERED", "owner": "core-namespaces", "reason": "Legacy core namespace has no async facade"},
+      "evals": {"status": "NOT-OFFERED", "owner": "evals-python", "reason": "Legacy core namespace has no async facade"},
+      "experiments": {"status": "NOT-OFFERED", "owner": "core-namespaces", "reason": "Legacy core namespace has no async facade"},
+      "simulations": {"status": "NOT-OFFERED", "owner": "core-namespaces", "reason": "Legacy core namespace has no async facade"},
+      "simulationAgentDefinitions": {"status": "NOT-OFFERED", "owner": "core-namespaces", "reason": "Legacy core namespace has no async facade"},
+      "simulationRunTests": {"status": "NOT-OFFERED", "owner": "core-namespaces", "reason": "Legacy core namespace has no async facade"},
+      "simulationTestExecutions": {"status": "NOT-OFFERED", "owner": "core-namespaces", "reason": "Legacy core namespace has no async facade"},
+      "simulationPersonas": {"status": "NOT-OFFERED", "owner": "core-namespaces", "reason": "Legacy core namespace has no async facade"},
+      "simulationScenarios": {"status": "NOT-OFFERED", "owner": "core-namespaces", "reason": "Legacy core namespace has no async facade"},
+      "users": {"status": "NOT-OFFERED", "owner": "core-namespaces", "reason": "Legacy core namespace has no async facade"},
+      "alerts": {"status": "NOT-OFFERED", "owner": "core-namespaces", "reason": "Legacy core namespace has no async facade"}
+    }
+  }
+}

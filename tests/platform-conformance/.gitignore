@@ -1,0 +1,2 @@
+# The repository ignores lib/ (build output); this kit keeps its library here.
+!lib/

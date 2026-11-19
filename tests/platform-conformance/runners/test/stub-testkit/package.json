@@ -1,0 +1,8 @@
+{
+  "name": "@platform-conformance/stub-testkit",
+  "version": "0.0.0-stub",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./conformance/binding.mjs" },
+  "description": "A stub test kit used only by the fake runner shell's own tests: no network at all."
+}

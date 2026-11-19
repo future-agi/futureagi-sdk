@@ -1,0 +1,8 @@
+{
+  "overrides": [],
+  "pending_recordings": [
+    {"operation_id":"agentcc_provider-credentials_create","reason":"Swagger declares the read serializer for the write body. A real control-plane capture is required before a typed write override is accepted."},
+    {"operation_id":"agentcc_org-configs_active","reason":"Swagger describes a page; the backend action returns one active version or null. Capture required for response model certification."},
+    {"operation_id":"agentcc_org-configs_diff","reason":"The backend accepts compare_to, which Swagger omits. Capture required for contract certification."}
+  ]
+}

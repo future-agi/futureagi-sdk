@@ -30,12 +30,24 @@ class _MockResponse(BaseModel):
 
 
 def _make_sync_client(**kwargs: Any) -> SyncBaseClient:
-    defaults: dict[str, Any] = {"api_key": "sk-test-key-12345"}
+    # Construct through the public client with an explicitly chosen destination.
+    # The private transport no longer chooses a hosted origin on the caller's behalf.
+    from fi.gateway import AgentCC
+
+    retry_config = kwargs.pop("retry_config", None)
+    defaults: dict[str, Any] = {
+        "api_key": "sk-test-key-12345", "base_url": "https://gateway.test",
+    }
     defaults.update(kwargs)
-    return SyncBaseClient(**defaults)
-
-
-# --- Header building tests ---
+    if "callbacks" in defaults:
+        with pytest.warns(DeprecationWarning, match="Deprecated gateway compatibility options: callbacks"):
+            public = AgentCC(**defaults)
+    else:
+        public = AgentCC(**defaults)
+    client = public._get_base_client()
+    if retry_config is not None:
+        client._retry_config = retry_config
+    return client
 
 
 class TestBuildHeaders:
@@ -101,9 +113,6 @@ class TestBuildHeaders:
         assert parsed == {"user": "global"}
 
 
-# --- URL building tests ---
-
-
 class TestBuildUrl:
     def test_basic_join(self) -> None:
         client = _make_sync_client(base_url="https://gateway.example.com")
@@ -118,8 +127,12 @@ class TestBuildUrl:
         assert client._build_url("v1/chat/completions") == "https://gateway.example.com/v1/chat/completions"
 
     def test_absolute_url_returned_as_is(self) -> None:
-        client = _make_sync_client()
+        from fi.gateway import AgentCCError
+
+        client = _make_sync_client(base_url="https://other.com")
         assert client._build_url("https://other.com/api") == "https://other.com/api"
+        with pytest.raises(AgentCCError, match="explicitly configured origin"):
+            client._build_url("https://unconfigured.test/api")
 
 
 # --- Retry logic tests ---
@@ -194,7 +207,7 @@ class TestProcessResponse:
             200,
             json={"id": "abc", "content": "hello"},
             headers={
-                "x-agentcc-request-id": "req-1",
+                "x-agentcc-request-id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
                 "x-agentcc-trace-id": "trace-1",
                 "x-agentcc-provider": "openai",
                 "x-agentcc-latency-ms": "50",
@@ -206,7 +219,7 @@ class TestProcessResponse:
         assert result.id == "abc"
         assert result.content == "hello"
         assert hasattr(result, "agentcc")
-        assert result.agentcc.request_id == "req-1"  # type: ignore[attr-defined]
+        assert result.agentcc.request_id == "01ARZ3NDEKTSV4RRFFQ69G5FAV"  # type: ignore[attr-defined]
         assert result.agentcc.provider == "openai"  # type: ignore[attr-defined]
 
     @respx.mock
@@ -253,7 +266,7 @@ class TestRetryIntegration:
         route.side_effect = [
             httpx.Response(429, json={"error": {"message": "Rate limited"}}),
             httpx.Response(200, json={"id": "abc", "content": "hello"}, headers={
-                "x-agentcc-request-id": "req-1",
+                "x-agentcc-request-id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
                 "x-agentcc-trace-id": "trace-1",
                 "x-agentcc-provider": "openai",
                 "x-agentcc-latency-ms": "50",
@@ -296,9 +309,6 @@ class TestRetryIntegration:
         assert route.call_count == 1
 
 
-# --- Callback tests ---
-
-
 class TestCallbackDispatch:
     def test_callbacks_called_in_order(self) -> None:
         order: list[str] = []
@@ -312,7 +322,7 @@ class TestCallbackDispatch:
                 order.append("cb2")
 
         client = _make_sync_client(callbacks=[CB1(), CB2()])
-        client._dispatch_callback("on_request_start", "test")
+        client._dispatch_callback("on_request_start", RequestOptions(method="GET", url="/v1/models"))
         assert order == ["cb1", "cb2"]
 
     def test_callback_exception_does_not_propagate(self) -> None:
@@ -327,7 +337,7 @@ class TestCallbackDispatch:
         good = GoodCallback()
         client = _make_sync_client(callbacks=[BadCallback(), good])
         # Should not raise
-        client._dispatch_callback("on_request_start", "test")
+        client._dispatch_callback("on_request_start", RequestOptions(method="GET", url="/v1/models"))
         assert good.called is True
 
     def test_missing_callback_method_ignored(self) -> None:
@@ -336,7 +346,7 @@ class TestCallbackDispatch:
 
         client = _make_sync_client(callbacks=[PartialCallback()])
         # Should not raise
-        client._dispatch_callback("on_request_start", "test")
+        client._dispatch_callback("on_request_start", RequestOptions(method="GET", url="/v1/models"))
 
 
 # --- Timeout dataclass tests ---

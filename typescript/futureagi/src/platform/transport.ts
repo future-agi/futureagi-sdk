@@ -1,6 +1,7 @@
 // The one HTTP layer every resource uses: auth, retries, envelope unwrap, errors.
 // Mirrors the Python `fi/platform/_transport.py`; the same catalog drives both.
 
+import { checkHttpSecurity } from "../_core/http-security";
 import { APIConnectionError, APIError, errorFromResponse, isRecord } from "./errors";
 import { getPath, Pager, Pagination } from "./pagination";
 
@@ -91,7 +92,7 @@ const originOf = (url: string) => new URL(url).origin.toLowerCase();
 function followRedirect(baseUrl: string, from: string, status: number, location: string, method: string): { url: string; method: string } {
   const target = new URL(location, from).toString();
   if (originOf(target) !== originOf(baseUrl)) {
-    throw new APIConnectionError(`${status} redirect to ${target} was not followed: it leaves ${baseUrl} and the API keys would go with it`);
+    throw new APIConnectionError("Redirect was not followed: it leaves the configured origin and would expose credentials");
   }
   const asGet = status === 303 || ((status === 301 || status === 302) && method === "POST"); // the way browsers re-issue these
   return { url: target, method: asGet ? "GET" : method };
@@ -267,6 +268,9 @@ export class Transport {
     let attempt = 0;
     let redirects = 0;
     for (;;) {
+      // Released clients use keys; share the lane's policy and warning budget,
+      // including every destination reached by a same-origin redirect.
+      checkHttpSecurity(new URL(url), "keys");
       // Rebuilt per attempt (a FormData stream is single-use); a request re-issued as a GET after a redirect has no body.
       const { body, headers } = method === op.method ? await buildBody(op, args, options) : { body: undefined, headers: {} };
       let response: Response;

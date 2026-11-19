@@ -53,3 +53,12 @@ pytest tests/
 Follow the existing module conventions for datasets, prompt workbench, knowledge base, and guardrails. Keep the public API surface small and consistent with existing patterns.
 
 Questions about feature fit, API boundaries, or design — open a Discussion or ping `@future-agi/sdk-maintainers` on Discord before writing the code.
+
+## Development installs with Poetry
+
+`python/poetry.lock` is generated with Poetry 2.5.1. Use Poetry 2.5.1 or newer for
+`poetry install` and `poetry check --lock`: older Poetry versions compute a different
+lock content-hash, treat the lock as out of date and try to re-resolve it, which can
+take a very long time. CI, packaging and releases do not use the lock: they install with
+`pip install -e "./python[...]"` and build with `python -m build`. Poetry installs the
+development tools tox and pre-commit only on Python 3.11 and newer.

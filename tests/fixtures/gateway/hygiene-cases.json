@@ -1,0 +1,121 @@
+{
+ "about": "Conformance cases for the local-path guard: python/tests/gateway/parity/_hygiene.py leaks() and gateway-client/tests/parity/harness/hygiene.mjs leaks() must both return 'expect' for 'text' and 'roots'. So that no local path is written into the repository, each {name} expands at test time: {file} to 'file:' + '//', any other {Name} to '/' + Name.",
+ "cases": [
+  {
+   "expect": [
+    "{file}",
+    "{Volumes}/"
+   ],
+   "name": "a stack frame as React printed it before normalisation",
+   "text": "at Bare ({file}{Volumes}/example/checkout/cases/integrations.mjs:84:71)"
+  },
+  {
+   "expect": [],
+   "name": "the same frame after normalisation",
+   "text": "at Bare (<frame>)"
+  },
+  {
+   "expect": [],
+   "name": "text after a <path> placeholder is relative",
+   "text": "<path>{tmp}/agentcc/_client.py and <path>/node_modules/pkg{home}/x.js"
+  },
+  {
+   "expect": [],
+   "name": "a URL path is not a local path",
+   "text": "https://gateway.example.test{tmp}/v1{home}/x and http://host:8080{root}/y"
+  },
+  {
+   "expect": [
+    "{tmp}/"
+   ],
+   "name": "a path after a newline",
+   "text": "line one\n{tmp}/x.log"
+  },
+  {
+   "expect": [
+    "{home}/"
+   ],
+   "name": "a quoted CI checkout",
+   "text": "'{home}/runner/work/repo'"
+  },
+  {
+   "expect": [
+    "{Users}/"
+   ],
+   "name": "a macOS home",
+   "text": "{Users}/example/repo/x.py"
+  },
+  {
+   "expect": [
+    "{private}/"
+   ],
+   "name": "a macOS temp directory",
+   "text": "cd {private}/var/folders/x"
+  },
+  {
+   "expect": [
+    "{tmp}/"
+   ],
+   "name": "a path after '='",
+   "text": "dir={tmp}/y"
+  },
+  {
+   "expect": [
+    "{home}/",
+    "{Volumes}/"
+   ],
+   "name": "two tokens in one string",
+   "text": "{home}/a and {Volumes}/b"
+  },
+  {
+   "expect": [],
+   "name": "an ISO time",
+   "text": "2025-10-23T00:00:05"
+  },
+  {
+   "expect": [],
+   "name": "an API path",
+   "text": "POST /v1/chat/completions"
+  },
+  {
+   "expect": [
+    "/srv/ci/checkout"
+   ],
+   "name": "a recorder root outside the static rule",
+   "roots": [
+    "/srv/ci/checkout"
+   ],
+   "text": "/srv/ci/checkout/python/x.py"
+  },
+  {
+   "expect": [
+    "/srv/ci/checkout"
+   ],
+   "name": "a root given with a trailing slash",
+   "roots": [
+    "/srv/ci/checkout/"
+   ],
+   "text": "at /srv/ci/checkout"
+  },
+  {
+   "expect": ["{checkout}"],
+   "name": "a one-component checkout root is checked",
+   "roots": ["{checkout}"],
+   "text": "{checkout}/x"
+  },
+  {
+   "expect": [],
+   "name": "the filesystem root is ignored",
+   "roots": ["/"],
+   "text": "POST /v1/chat/completions"
+  },
+  {
+   "expect": [],
+   "name": "a relative root is ignored",
+   "roots": [
+    "srv/ci"
+   ],
+   "text": "srv/ci/x"
+  }
+ ]
+}

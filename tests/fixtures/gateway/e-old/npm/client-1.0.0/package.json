@@ -1,0 +1,8 @@
+{
+  "name": "parity-e-old-client-1.0.0",
+  "private": true,
+  "description": "E-OLD install for the parity recorder: the published @agentcc/client 1.0.0 (registry integrity pinned by package-lock.json).",
+  "dependencies": {
+    "@agentcc/client": "1.0.0"
+  }
+}

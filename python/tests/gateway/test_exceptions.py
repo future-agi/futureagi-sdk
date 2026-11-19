@@ -186,7 +186,7 @@ def test_from_response_400() -> None:
     assert exc.type == "invalid_request_error"
     assert exc.code == "invalid_param"
     assert exc.param == "model"
-    assert exc.request_id == "req-123"
+    assert exc.request_id is None  # Non-ULID wire IDs are not gateway identity.
 
 
 def test_from_response_401() -> None:
@@ -406,7 +406,7 @@ def test_from_response_246_guardrail_warning() -> None:
     assert exc.guardrail_action == "warn"
     assert exc.guardrail_confidence == 0.72
     assert exc.guardrail_message == "Potentially sensitive"
-    assert exc.request_id == "req-456"
+    assert exc.request_id is None  # Non-ULID wire IDs are not gateway identity.
 
 
 def test_guardrail_warning_has_completion() -> None:

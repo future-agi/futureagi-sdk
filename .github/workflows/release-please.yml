@@ -65,18 +65,25 @@ jobs:
           target-branch: main
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+      - name: Reconcile the outstanding version PR, including unchanged retries
+        if: steps.gate.outputs.ready == 'true'
+        id: candidate
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BOT: ${{ steps.app-token.outputs.app-slug }}[bot]
+        # release-please emits no prs_created output for an unchanged PR. A
+        # previous failed approval must not leave that PR permanently stranded.
+        run: python .github/scripts/release_guard.py reconcile --bot "$BOT"
       - name: Validate and approve only generated version changes
-        if: steps.release.outputs.prs_created == 'true'
+        if: steps.candidate.outputs.number != ''
         id: approval
         env:
           GH_TOKEN: ${{ github.token }}
-          PRS: ${{ steps.release.outputs.prs }}
+          NUMBER: ${{ steps.candidate.outputs.number }}
           BOT: ${{ steps.app-token.outputs.app-slug }}[bot]
         run: |
-          # separate-pull-requests=false: a single manifest release PR only.
-          number=$(jq -er 'if length == 1 then .[0].number else error("expected one release PR") end' <<< "$PRS")
-          python .github/scripts/release_guard.py approve --number "$number" --bot "$BOT"
-          echo "number=$number" >> "$GITHUB_OUTPUT"
+          python .github/scripts/release_guard.py approve --number "$NUMBER" --bot "$BOT"
+          echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
       - name: Queue the validated release PR behind required checks
         if: steps.approval.outputs.head != ''
         env:

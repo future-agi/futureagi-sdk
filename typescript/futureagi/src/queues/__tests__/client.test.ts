@@ -4,6 +4,18 @@ import { SDKException } from '../../utils/errors';
 // Mock the auth module so APIKeyAuth constructor doesn't actually validate
 jest.mock('../../api/auth');
 
+// A label as the get-or-create-default view returns it (the generated QueueLabelResult's fields).
+const DEFAULT_LABEL = {
+    id: 'lbl-1',
+    name: 'Helpful',
+    type: 'thumbs_up_down',
+    settings: {},
+    description: '',
+    allow_notes: false,
+    required: false,
+    order: 0,
+};
+
 describe('AnnotationQueue', () => {
     let client: AnnotationQueue;
     let mockRequest: jest.Mock;
@@ -33,10 +45,14 @@ describe('AnnotationQueue', () => {
 
             const result = await client.create({
                 name: 'Test Queue',
+                labelIds: ['lbl-1', 'lbl-2'],
                 description: 'A test queue',
                 instructions: 'Rate quality',
                 assignmentStrategy: 'round_robin',
                 annotationsRequired: 2,
+                autoAssign: true,
+                annotatorIds: ['u1'],
+                annotatorRoles: { u1: ['reviewer', 'annotator'] },
             });
 
             expect(result).toEqual(queue);
@@ -46,24 +62,182 @@ describe('AnnotationQueue', () => {
             expect(config.method).toBe('POST');
             expect(config.url).toContain('annotation-queues/');
             expect(config.json.name).toBe('Test Queue');
+            expect(config.json.label_ids).toEqual(['lbl-1', 'lbl-2']);
             expect(config.json.description).toBe('A test queue');
             expect(config.json.assignment_strategy).toBe('round_robin');
             expect(config.json.annotations_required).toBe(2);
+            expect(config.json.auto_assign).toBe(true);
+            expect(config.json.annotator_ids).toEqual(['u1']);
+            expect(config.json.annotator_roles).toEqual({ u1: ['reviewer', 'annotator'] });
         });
 
         it('should create a queue with minimal config', async () => {
             mockRequest.mockResolvedValueOnce({ id: 'q2', name: 'Min' });
 
-            await client.create({ name: 'Min' });
+            await client.create({ name: 'Min', labelIds: ['lbl-1'] });
 
             const config = mockRequest.mock.calls[0][0];
-            expect(config.json).toEqual({ name: 'Min' });
+            expect(config.json).toEqual({ name: 'Min', label_ids: ['lbl-1'] });
         });
 
         it('should throw on invalid assignmentStrategy', async () => {
             await expect(
-                client.create({ name: 'Bad', assignmentStrategy: 'invalid' as any }),
+                client.create({
+                    name: 'Bad',
+                    labelIds: ['lbl-1'],
+                    assignmentStrategy: 'invalid' as any,
+                }),
             ).rejects.toThrow('Invalid assignmentStrategy');
+        });
+
+        it('should refuse a queue without labels before any request', async () => {
+            await expect(
+                client.create({ name: 'No labels' } as any),
+            ).rejects.toThrow('needs labelIds or exactly one');
+            await expect(
+                client.create({ name: 'No labels', labelIds: [] }),
+            ).rejects.toThrow('labelIds needs at least one annotation label id');
+            await expect(
+                client.create({ name: 'Bad labels', labelIds: 'lbl-1' as any }),
+            ).rejects.toThrow(SDKException);
+            expect(mockRequest).not.toHaveBeenCalled();
+        });
+
+        it('should accept project/dataset/agentDefinition, not send them, and warn once', async () => {
+            const emitWarning = jest.spyOn(process, 'emitWarning').mockImplementation(() => {});
+            try {
+                mockRequest.mockResolvedValue({ id: 'q3', name: 'Scoped' });
+
+                await client.create({
+                    name: 'Scoped',
+                    labelIds: ['lbl-1'],
+                    project: 'p1',
+                    dataset: 'd1',
+                    agentDefinition: 'a1',
+                });
+                await client.create({ name: 'Scoped again', labelIds: ['lbl-1'], dataset: 'd1' });
+
+                expect(mockRequest.mock.calls[0][0].json).toEqual({
+                    name: 'Scoped',
+                    label_ids: ['lbl-1'],
+                });
+                expect(mockRequest.mock.calls[1][0].json).toEqual({
+                    name: 'Scoped again',
+                    label_ids: ['lbl-1'],
+                });
+                expect(emitWarning).toHaveBeenCalledTimes(1);
+                const [message, options] = emitWarning.mock.calls[0] as unknown as [string, any];
+                expect(message).toContain('AnnotationQueue.create()');
+                expect(message).toContain('ignored by the server');
+                expect(message).toContain('remain accepted for compatibility');
+                // The hint is a call on this client, not a raw endpoint.
+                expect(message).toContain('AnnotationQueue.getOrCreateDefault({ projectId })');
+                expect(message).not.toContain('/model-hub/');
+                expect(options).toMatchObject({ type: 'DeprecationWarning' });
+            } finally {
+                emitWarning.mockRestore();
+            }
+        });
+    });
+
+    describe('create refuses scope ids', () => {
+        it.each([
+            ['projectId', 'projectId'],
+            ['datasetId', 'datasetId'],
+            ['agentDefinitionId', 'agentDefinitionId'],
+            ['project_id', 'projectId'],
+            ['dataset_id', 'datasetId'],
+            ['agent_definition_id', 'agentDefinitionId'],
+        ])('refuses %s, naming getOrCreateDefault({ %s })', async (key, callKey) => {
+            const config = { name: 'Q', labelIds: ['lbl-1'], [key]: 'x1' };
+            await expect(client.create(config as any)).rejects.toThrow(
+                `AnnotationQueue.create(): ${key} cannot be set on a new queue`,
+            );
+            await expect(client.create(config as any)).rejects.toThrow(
+                `call AnnotationQueue.getOrCreateDefault({ ${callKey}: "x1" })`,
+            );
+            expect(mockRequest).not.toHaveBeenCalled();
+        });
+
+        it('refuses several, and allows undefined ones', async () => {
+            await expect(
+                client.create({
+                    name: 'Q',
+                    labelIds: ['lbl-1'],
+                    datasetId: 'd1',
+                    agentDefinitionId: 'a1',
+                } as any),
+            ).rejects.toThrow('datasetId and agentDefinitionId cannot be set');
+            expect(mockRequest).not.toHaveBeenCalled();
+            mockRequest.mockResolvedValueOnce({ id: 'q1', name: 'Q' });
+            await client.create({ name: 'Q', labelIds: ['lbl-1'], projectId: undefined } as any);
+            expect(mockRequest.mock.calls[0][0].json).toEqual({ name: 'Q', label_ids: ['lbl-1'] });
+        });
+    });
+
+    describe('getOrCreateDefault', () => {
+        it.each([
+            [{ projectId: 'p1' }, { project_id: 'p1' }],
+            [{ datasetId: 'd1' }, { dataset_id: 'd1' }],
+            [{ agentDefinitionId: 'a1' }, { agent_definition_id: 'a1' }],
+        ])('sends %j as %j', async (scope, wire) => {
+            const result = {
+                queue: { id: 'q9', name: 'Default - P', is_default: true },
+                labels: [DEFAULT_LABEL],
+                created: false,
+                action: 'fetched',
+            };
+            mockRequest.mockResolvedValueOnce(result);
+
+            await expect(client.getOrCreateDefault(scope as any)).resolves.toEqual(result);
+
+            const config = mockRequest.mock.calls[0][0];
+            expect(config.method).toBe('POST');
+            expect(config.url).toBe(
+                'http://localhost:8000/model-hub/annotation-queues/get-or-create-default/',
+            );
+            expect(config.json).toEqual(wire);
+        });
+
+        it('needs exactly one non-empty id, before any request', async () => {
+            await expect(client.getOrCreateDefault({} as any)).rejects.toThrow(
+                'give exactly one of projectId, datasetId, agentDefinitionId (got none)',
+            );
+            await expect(
+                client.getOrCreateDefault({ projectId: 'p1', datasetId: 'd1' } as any),
+            ).rejects.toThrow('(got projectId, datasetId)');
+            await expect(client.getOrCreateDefault({ projectId: '' })).rejects.toThrow(
+                'projectId must be a non-empty id string',
+            );
+            await expect(
+                client.getOrCreateDefault({ project_id: 'p1' } as any),
+            ).rejects.toThrow(SDKException);
+            expect(mockRequest).not.toHaveBeenCalled();
+        });
+
+        it('parses the server envelope with the handler it passes to request()', async () => {
+            mockRequest.mockResolvedValueOnce({});
+            await client.getOrCreateDefault({ projectId: 'p1' });
+            const handler = mockRequest.mock.calls[0][1];
+            const result = {
+                queue: {
+                    id: 'q6',
+                    name: 'Default - Orders',
+                    description: '',
+                    instructions: '',
+                    status: 'active',
+                    is_default: true,
+                },
+                labels: [DEFAULT_LABEL],
+                created: false,
+                action: 'restored',
+            };
+            // The view answers {status, result}; the handler returns the result.
+            expect(handler._parseSuccess({ status: 200, data: { status: true, result } })).toEqual(
+                result,
+            );
+            // A body without the envelope is returned as it is.
+            expect(handler._parseSuccess({ status: 200, data: result })).toEqual(result);
         });
     });
 
@@ -78,6 +252,8 @@ describe('AnnotationQueue', () => {
             expect(config.params.status).toBe('active');
             expect(config.params.search).toBe('test');
             expect(config.params.include_counts).toBe('true');
+            expect(config.params.page).toBe(1);
+            expect(config.params).not.toHaveProperty('page_size');
             expect(result).toHaveLength(1);
         });
     });
@@ -396,7 +572,7 @@ describe('AnnotationQueue', () => {
             expect(config.method).toBe('GET');
             expect(config.params.status).toBe('pending');
             expect(config.params.page).toBe(2);
-            expect(config.params.page_size).toBe(10);
+            expect(config.params.limit).toBe(10);
         });
     });
 

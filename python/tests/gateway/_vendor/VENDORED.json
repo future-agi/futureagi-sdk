@@ -1,0 +1,29 @@
+{
+ "about": "respx, vendored unmodified for the fi.gateway unit suite: the fixed CI line (pip install -e ./python pytest) installs no respx. Every file below is byte-identical to the respx-0.23.1 wheel; the hashes are the wheel's own RECORD entries (respx/<name>, and respx-0.23.1.dist-info/LICENSE.md for LICENSE.md). python/tests/gateway/unit/test_vendored_respx.py checks them, and FI_GATEWAY_TEST_RESPX=installed runs the suite against a pip-installed respx instead.",
+ "package": "respx",
+ "version": "0.23.1",
+ "license": "BSD-3-Clause",
+ "module_line_limit_exception": {
+  "reason": "Unmodified third-party test dependency, not first-party SDK code. Keep upstream bytes and license intact instead of rewriting the vendor to satisfy the first-party 400-line limit. test_vendored_respx.py checks every file against the wheel RECORD; test_gw_gates.py requires this exact size exception list.",
+  "files": {"models.py": 550, "patterns.py": 782, "router.py": 486}
+ },
+ "upstream": "https://github.com/lundberg/respx",
+ "wheel": "respx-0.23.1-py2.py3-none-any.whl",
+ "record_sha256": {
+  "LICENSE.md": "sha256=dBt_PxOdWMiOz0PeH_7bSRSTbpFKk6ld-jPTZztRN70",
+  "__init__.py": "sha256=keaqgn7N2RIX2CeZYxG7ddPnD9c4SYlr9fALSME_A1M",
+  "__version__.py": "sha256=EmtVqV41YmZp6Mj5pkm4iGXDMznVEE4GQEUYGGidq30",
+  "api.py": "sha256=QQiMqlFpbh49g77eaEgG2yQv2Ur6Ld4DNQOt9XxHtqA",
+  "fixtures.py": "sha256=PapY5BHbGPHpmp9pQpWWusw7AfqK63i7TyeLzAX0-Bk",
+  "handlers.py": "sha256=sNyJ63oiKy5ERdPjOAXmzagLTV9bHK9cpcZr6WwGw9g",
+  "mocks.py": "sha256=ZP3F233-X6dP45nG5T9l7kJjAuAfax34KoR6aspc6wY",
+  "models.py": "sha256=66VTLogbX1J0dKp6Y06opgdN64aETIHG9V8ArMESDEM",
+  "patterns.py": "sha256=gKycXkwS_zY-7GRP3ODu-5wWm_ZeqqGig7dB6VotOhY",
+  "plugin.py": "sha256=gMtQhT3KznX15BJsP5c4wJ1solr2ul63MqbXz-A14eI",
+  "py.typed": "sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU",
+  "router.py": "sha256=gX_VBCIBR5wWKReq2UEGafbBnY-oMV_fWw_olHtoBfA",
+  "transports.py": "sha256=beNasN1Knckfq1wViW6486PqSGhlohNscq7x0xTRaL4",
+  "types.py": "sha256=whjH8E5ZJMl7yVrK5pekL1iv6aGgdeR2qqOa3Ry6e3w",
+  "utils.py": "sha256=qoPotI00nx6aGtTYGOhgYXJWdLTENm1ZpYP-IkKPssU"
+ }
+}

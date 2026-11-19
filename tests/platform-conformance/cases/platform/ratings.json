@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "platform",
+  "about": "Caller-scoped workspace ratings: aggregate reads and revoked-credential refusals.",
+  "cases": [
+    {
+      "id": "platform.ratings.summary.ok",
+      "title": "A member reads their aggregate workspace satisfaction signal",
+      "sdk": { "family": "platform", "method": "ratings.summary" },
+      "op": { "method": "GET", "path": "/workspace/ratings/summary" },
+      "tenant": { "org": "A", "role": "member" },
+      "modes": ["ee-key", "fa-session", "fi-keypair"],
+      "tags": ["deterministic"],
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": { "up": "number", "down": "number", "total": "number" }
+      }
+    },
+    {
+      "id": "platform.ratings.trajectory.ok",
+      "title": "A member reads their workspace satisfaction time series",
+      "sdk": { "family": "platform", "method": "ratings.trajectory" },
+      "op": { "method": "GET", "path": "/workspace/ratings/trajectory" },
+      "tenant": { "org": "A", "role": "member" },
+      "modes": ["ee-key", "fa-session", "fi-keypair"],
+      "tags": ["deterministic"],
+      "expect": {
+        "status": 200,
+        "contract": true,
+        "fields": { "trajectory": "array", "regressed": "boolean" }
+      }
+    },
+    {
+      "id": "platform.ratings.summary.revoked-key",
+      "title": "A revoked personal credential cannot read ratings summary",
+      "sdk": { "family": "platform", "method": "ratings.summary" },
+      "op": { "method": "GET", "path": "/workspace/ratings/summary" },
+      "tenant": { "org": "A", "role": "revoked" },
+      "modes": ["ee-key", "fi-keypair"],
+      "tags": ["deterministic", "failure"],
+      "expect": { "status": 401, "errorClass": "AuthenticationError" }
+    },
+    {
+      "id": "platform.ratings.trajectory.revoked-key",
+      "title": "A revoked personal credential cannot read ratings trajectory",
+      "sdk": { "family": "platform", "method": "ratings.trajectory" },
+      "op": { "method": "GET", "path": "/workspace/ratings/trajectory" },
+      "tenant": { "org": "A", "role": "revoked" },
+      "modes": ["ee-key", "fi-keypair"],
+      "tags": ["deterministic", "failure"],
+      "expect": { "status": 401, "errorClass": "AuthenticationError" }
+    }
+  ]
+}

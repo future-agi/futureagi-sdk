@@ -25,6 +25,7 @@
     "typescript/futureagi": {
       "release-type": "node",
       "package-name": "@future-agi/sdk",
+      "extra-files": ["gateway-client/src/constants.ts"],
       "component": "typescript"
     }
   }

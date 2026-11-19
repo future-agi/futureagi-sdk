@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "sdk-conformance-cases/v1",
+  "family": "cross",
+  "about": "Offered-route counterparts keep client security validation active when sandboxes are absent. The original sandbox scenarios remain enabled-scope cases.",
+  "cases": [
+    {
+      "id": "must-exist.host-guard.fi-keypair.offered",
+      "title": "The FI key pair is refused on the offered capabilities route before any network call",
+      "sdk": {"family": "platform", "method": "capabilities.get"},
+      "op": {"method": "GET", "path": "/workspace/capabilities"},
+      "tenant": {"org": "A", "role": "owner"},
+      "modes": ["fi-keypair"],
+      "tags": ["must-exist", "deterministic", "failure"],
+      "runners": ["ts", "py", "fake"],
+      "client": {"platformBaseUrl": "https://foreign.invalid/omega/api", "credential": "fi-keypair"},
+      "expect": {"errorClass": "HostNotAllowedError"}
+    },
+    {
+      "id": "must-exist.host-guard.env-switches-ignored.offered",
+      "title": "Other SDKs' allow flags cannot disable the host guard on the offered capabilities route",
+      "sdk": {"family": "platform", "method": "capabilities.get"},
+      "op": {"method": "GET", "path": "/workspace/capabilities"},
+      "tenant": {"org": "A", "role": "owner"},
+      "modes": ["fi-keypair"],
+      "tags": ["must-exist", "deterministic", "failure"],
+      "runners": ["ts", "py", "fake"],
+      "client": {
+        "platformBaseUrl": "https://foreign.invalid/omega/api",
+        "credential": "fi-keypair",
+        "env": {"FUTUREAGI_OMEGA_ALLOW_CUSTOM_BASE_URL": "true", "OMEGA_ALLOW_CUSTOM_BASE_URL": "1", "FUTUREAGI_OMEGA_DANGEROUSLY_ALLOW_BROWSER": "true"}
+      },
+      "expect": {"errorClass": "HostNotAllowedError"}
+    },
+    {
+      "id": "must-exist.planted-secret.scan.offered",
+      "title": "The offered capabilities route keeps planted secrets out of logs, cassettes, spans and errors",
+      "sdk": {"family": "platform", "method": "capabilities.get"},
+      "op": {"method": "GET", "path": "/workspace/capabilities"},
+      "tenant": {"org": "A", "role": "owner"},
+      "modes": ["ee-key", "fa-session", "fi-keypair"],
+      "tags": ["must-exist", "deterministic"],
+      "runners": ["ts", "py"],
+      "client": {"plant": ["exec-env-value", "deployment-access-token", "fixed-token"], "debugLog": true, "cassette": true, "spans": true},
+      "expect": {"status": 200}
+    },
+    {
+      "id": "gateway.credential-in-query.offered",
+      "title": "A query credential is refused on the offered capabilities route",
+      "sdk": {"family": "platform", "method": "capabilities.get"},
+      "op": {"method": "GET", "path": "/workspace/capabilities"},
+      "tenant": {"org": "A", "role": "anonymous"},
+      "modes": ["none"],
+      "tags": ["deterministic", "failure"],
+      "call": {"query": {"api_key": "conf-not-a-key"}},
+      "expect": {"status": [400, 401], "codePresent": true}
+    },
+    {
+      "id": "gateway.mixed-credentials.offered",
+      "title": "Mixed bearer and key-pair credentials are refused on the offered capabilities route",
+      "sdk": {"family": "platform", "method": "capabilities.get"},
+      "op": {"method": "GET", "path": "/workspace/capabilities"},
+      "tenant": {"org": "A", "role": "anonymous"},
+      "modes": ["none"],
+      "tags": ["deterministic", "failure"],
+      "call": {"headers": {"authorization": "Bearer conf-not-a-token", "x-api-key": "conf-not-a-key", "x-secret-key": "conf-not-a-secret"}},
+      "expect": {"status": [401, 400], "codePresent": true}
+    }
+  ]
+}

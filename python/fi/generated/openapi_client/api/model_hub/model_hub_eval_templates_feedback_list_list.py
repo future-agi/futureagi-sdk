@@ -1,0 +1,246 @@
+from http import HTTPStatus
+from typing import Any
+from urllib.parse import quote
+
+import httpx
+
+from ...client import AuthenticatedClient, Client
+from ...models.eval_feedback_list_response import EvalFeedbackListResponse
+from ...models.management_api_error_response import ManagementAPIErrorResponse
+from ...models.model_hub_error_response import ModelHubErrorResponse
+from ...types import UNSET, Response, Unset
+
+
+def _get_kwargs(
+    template_id: str,
+    *,
+    page: int | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+) -> dict[str, Any]:
+
+    params: dict[str, Any] = {}
+
+    params["page"] = page
+
+    params["page_size"] = page_size
+
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
+
+    _kwargs: dict[str, Any] = {
+        "method": "get",
+        "url": "/model-hub/eval-templates/{template_id}/feedback-list/".format(
+            template_id=quote(str(template_id), safe=""),
+        ),
+        "params": params,
+    }
+
+    return _kwargs
+
+
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> EvalFeedbackListResponse | ManagementAPIErrorResponse | ModelHubErrorResponse:
+    if response.status_code == 200:
+        response_200 = EvalFeedbackListResponse.from_dict(response.json())
+
+        return response_200
+
+    if response.status_code == 400:
+        response_400 = ModelHubErrorResponse.from_dict(response.json())
+
+        return response_400
+
+    if response.status_code == 403:
+        response_403 = ModelHubErrorResponse.from_dict(response.json())
+
+        return response_403
+
+    if response.status_code == 404:
+        response_404 = ModelHubErrorResponse.from_dict(response.json())
+
+        return response_404
+
+    if response.status_code == 409:
+        response_409 = ModelHubErrorResponse.from_dict(response.json())
+
+        return response_409
+
+    if response.status_code == 500:
+        response_500 = ModelHubErrorResponse.from_dict(response.json())
+
+        return response_500
+
+    response_default = ManagementAPIErrorResponse.from_dict(response.json())
+
+    return response_default
+
+
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[
+    EvalFeedbackListResponse | ManagementAPIErrorResponse | ModelHubErrorResponse
+]:
+    return Response(
+        status_code=HTTPStatus(response.status_code),
+        content=response.content,
+        headers=response.headers,
+        parsed=_parse_response(client=client, response=response),
+    )
+
+
+def sync_detailed(
+    template_id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    page: int | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+) -> Response[
+    EvalFeedbackListResponse | ManagementAPIErrorResponse | ModelHubErrorResponse
+]:
+    """GET /model-hub/eval-templates/<id>/feedback-list/
+
+     Paginated feedback list with user info.
+    Query params: page (0-based), page_size
+
+    Pagination: page (0-based); page_size (page size).
+
+    Args:
+        template_id (str):
+        page (int | Unset):
+        page_size (int | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[EvalFeedbackListResponse | ManagementAPIErrorResponse | ModelHubErrorResponse]
+    """
+
+    kwargs = _get_kwargs(
+        template_id=template_id,
+        page=page,
+        page_size=page_size,
+    )
+
+    response = client.get_httpx_client().request(
+        **kwargs,
+    )
+
+    return _build_response(client=client, response=response)
+
+
+def sync(
+    template_id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    page: int | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+) -> (
+    EvalFeedbackListResponse | ManagementAPIErrorResponse | ModelHubErrorResponse | None
+):
+    """GET /model-hub/eval-templates/<id>/feedback-list/
+
+     Paginated feedback list with user info.
+    Query params: page (0-based), page_size
+
+    Pagination: page (0-based); page_size (page size).
+
+    Args:
+        template_id (str):
+        page (int | Unset):
+        page_size (int | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        EvalFeedbackListResponse | ManagementAPIErrorResponse | ModelHubErrorResponse
+    """
+
+    return sync_detailed(
+        template_id=template_id,
+        client=client,
+        page=page,
+        page_size=page_size,
+    ).parsed
+
+
+async def asyncio_detailed(
+    template_id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    page: int | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+) -> Response[
+    EvalFeedbackListResponse | ManagementAPIErrorResponse | ModelHubErrorResponse
+]:
+    """GET /model-hub/eval-templates/<id>/feedback-list/
+
+     Paginated feedback list with user info.
+    Query params: page (0-based), page_size
+
+    Pagination: page (0-based); page_size (page size).
+
+    Args:
+        template_id (str):
+        page (int | Unset):
+        page_size (int | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[EvalFeedbackListResponse | ManagementAPIErrorResponse | ModelHubErrorResponse]
+    """
+
+    kwargs = _get_kwargs(
+        template_id=template_id,
+        page=page,
+        page_size=page_size,
+    )
+
+    response = await client.get_async_httpx_client().request(**kwargs)
+
+    return _build_response(client=client, response=response)
+
+
+async def asyncio(
+    template_id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    page: int | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+) -> (
+    EvalFeedbackListResponse | ManagementAPIErrorResponse | ModelHubErrorResponse | None
+):
+    """GET /model-hub/eval-templates/<id>/feedback-list/
+
+     Paginated feedback list with user info.
+    Query params: page (0-based), page_size
+
+    Pagination: page (0-based); page_size (page size).
+
+    Args:
+        template_id (str):
+        page (int | Unset):
+        page_size (int | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        EvalFeedbackListResponse | ManagementAPIErrorResponse | ModelHubErrorResponse
+    """
+
+    return (
+        await asyncio_detailed(
+            template_id=template_id,
+            client=client,
+            page=page,
+            page_size=page_size,
+        )
+    ).parsed

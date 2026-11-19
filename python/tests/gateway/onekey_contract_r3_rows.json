@@ -1,0 +1,222 @@
+{
+  "source_sha256": "d990a957da25bb121707408ccf0c14eeabeaa6ca2cae0320df2c78f4ad3768dd",
+  "rows": [
+    {
+      "status": 410,
+      "type": "not_found",
+      "code": "model_expired",
+      "retry": "never",
+      "remedy": "Choose an active replacement model; an expired or shut-down model is not restored by retrying.",
+      "metadata_presence": "present",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "reason"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "status": 404,
+      "type": "not_found",
+      "code": "no_provider_matches",
+      "retry": "never",
+      "remedy": "Adjust the request provider filters/order/allow_fallbacks to include an eligible endpoint; do not bypass organization policy.",
+      "metadata_presence": "present",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "reason"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "provider_preference_unavailable",
+      "retry": "never",
+      "remedy": "Remove/change the unsupported provider preference, or choose a model whose endpoint information supports it.",
+      "metadata_presence": "present",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "reason"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "model_ambiguous",
+      "retry": "never",
+      "remedy": "Send one of the complete catalog model IDs named by the refusal instead of an ambiguous bare name.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "no_auto_candidate",
+      "retry": "never",
+      "remedy": "Choose an eligible explicit model or correct the auto candidate/capability/price constraints; if there are no usable routes, enable credits or add an own-provider route through authorized controls.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "omega_default_unroutable",
+      "retry": "never",
+      "remedy": "Enable managed models through the authorized credits control or add an own provider; alternatively configure a routable default model.",
+      "metadata_presence": "present",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "remedy_hint": {
+              "type": "string"
+            },
+            "model_alias_requested": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "remedy_hint",
+            "model_alias_requested"
+          ],
+          "additionalProperties": true
+        }
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "route_hint_unsupported",
+      "retry": "never",
+      "remedy": "For model auto, use route-hint cost, balanced or quality, or omit the hint; latency ranking is unsupported.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "routing_field_not_yet_supported",
+      "retry": "never",
+      "remedy": "Remove the unimplemented field or use a routing field the gateway supports.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "invalid_provider_preference",
+      "retry": "never",
+      "remedy": "Correct or remove the field named by error.param; use a supported provider preference with its documented type and allowed values.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "invalid_routing_field",
+      "retry": "never",
+      "remedy": "Correct or remove the field named by error.param. Do not send models and fallbacks together; obey the model-list and fallback-list limits and required shapes.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "extra_body_conflict",
+      "retry": "never",
+      "remedy": "Remove the conflicting duplicate or make it agree with the top-level field. Send pre-read model, messages, streaming, user, metadata and session fields at the top level.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 400,
+      "type": "invalid_request_error",
+      "code": "invalid_extra_body",
+      "retry": "never",
+      "remedy": "Send extra_body as a non-nested JSON object whose fields have the request types the gateway expects, or remove it.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    },
+    {
+      "status": 404,
+      "type": "not_found",
+      "code": "provider_not_found",
+      "retry": "never",
+      "remedy": "Correct or remove the provider lock, or ask an authorized operator to configure the intended provider; do not bypass provider access policy.",
+      "metadata_presence": "omitted",
+      "headers": {},
+      "availability": "current on 651ab5bb",
+      "error": {
+        "metadata": null
+      }
+    }
+  ]
+}

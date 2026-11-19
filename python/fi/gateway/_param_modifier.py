@@ -68,7 +68,7 @@ def modify_params_for_provider(model: str, body: dict[str, Any]) -> dict[str, An
     as needed for the target provider, based on the model name.
 
     Args:
-        model: The model identifier (e.g. "claude-3-5-sonnet-20241022").
+        model: The model identifier (e.g. "anthropic-direct/claude-sonnet-5").
         body: The request body dict (mutated in place and returned).
 
     Returns:

@@ -1,0 +1,1791 @@
+{
+ "about": "Every test of @agentcc/client 1.0.1 (agent-command-center-sdk client-patch-source, sdk/typescript/tests) as vitest ran it: per file, in run order, the full name (describe titles and the test title joined by \" > \"; vitest JSON reports a leading empty ancestor title for the file, dropped here) and the status. 420 tests: 378 passed, 42 failed (all 42 in the four live-gateway files, which need a gateway on localhost:8090; 10 tests in those files pass without one).",
+ "source": {
+  "repo": "future-agi/agent-command-center-sdk",
+  "record": "client-patch-source",
+  "vitest_json_sha256": "6cb8f9309f3b704234cadaedfd3102d4b9d0bc4a669a0476d061ef9a85b11432",
+  "totals": {
+   "tests": 420,
+   "passed": 378,
+   "failed": 42
+  }
+ },
+ "files": {
+  "agentcc-params.test.ts": [
+   {
+    "name": "extractAgentCCParams > extracts agentcc params to headers and removes from body",
+    "status": "passed"
+   },
+   {
+    "name": "extractAgentCCParams > serializes metadata as JSON",
+    "status": "passed"
+   },
+   {
+    "name": "extractAgentCCParams > serializes booleans",
+    "status": "passed"
+   },
+   {
+    "name": "extractAgentCCParams > skips null/undefined agentcc params",
+    "status": "passed"
+   },
+   {
+    "name": "extractAgentCCParams > excludes extra_headers and extra_body from cleanBody",
+    "status": "passed"
+   }
+  ],
+  "batch.test.ts": [
+   {
+    "name": "batchCompletion > runs multiple completions and preserves order",
+    "status": "passed"
+   },
+   {
+    "name": "batchCompletion > respects maxConcurrency",
+    "status": "passed"
+   },
+   {
+    "name": "batchCompletion > returnExceptions captures errors instead of throwing",
+    "status": "passed"
+   },
+   {
+    "name": "batchCompletion > throws on first error when returnExceptions is false",
+    "status": "passed"
+   },
+   {
+    "name": "batchCompletionModels > runs same prompt across different models",
+    "status": "passed"
+   },
+   {
+    "name": "batchCompletionModels > captures per-model errors without throwing",
+    "status": "passed"
+   }
+  ],
+  "benchmark-deep.test.ts": [
+   {
+    "name": "Deep Benchmark: /healthz overhead > 100 sequential /healthz calls",
+    "status": "failed"
+   },
+   {
+    "name": "Deep Benchmark: /healthz overhead > 200 concurrent /healthz calls (50 parallel)",
+    "status": "failed"
+   },
+   {
+    "name": "Deep Benchmark: /v1/models overhead > 100 sequential /v1/models calls",
+    "status": "failed"
+   },
+   {
+    "name": "Deep Benchmark: Cache hit overhead (full pipeline) > 200 cached chat completions (sequential)",
+    "status": "failed"
+   },
+   {
+    "name": "Deep Benchmark: Cache hit overhead (full pipeline) > 500 cached chat completions (50 parallel)",
+    "status": "failed"
+   },
+   {
+    "name": "Deep Benchmark: Fresh requests (provider round-trip) > 20 sequential fresh completions",
+    "status": "failed"
+   },
+   {
+    "name": "Deep Benchmark: Fresh requests (provider round-trip) > 50 concurrent fresh completions (10 parallel)",
+    "status": "passed"
+   },
+   {
+    "name": "Deep Benchmark: Auth overhead isolation > compares /healthz (no auth) vs /v1/models (auth required)",
+    "status": "failed"
+   },
+   {
+    "name": "Deep Benchmark: Plugin pipeline overhead > compares /v1/models vs cache hit (shows plugin pipeline cost)",
+    "status": "failed"
+   },
+   {
+    "name": "Deep Benchmark: Full summary table > prints a comparison summary",
+    "status": "failed"
+   }
+  ],
+  "benchmark-latency.test.ts": [
+   {
+    "name": "Benchmark: Sequential Latency > sends 20 sequential chat completions",
+    "status": "failed"
+   },
+   {
+    "name": "Benchmark: Concurrent Latency > sends 30 concurrent chat completions (batches of 10)",
+    "status": "failed"
+   },
+   {
+    "name": "Benchmark: Streaming Latency > measures time-to-first-token and total streaming time (10 requests)",
+    "status": "failed"
+   },
+   {
+    "name": "Benchmark: Gateway Overhead (cached responses) > measures overhead on cache hits (50 identical requests)",
+    "status": "failed"
+   },
+   {
+    "name": "Benchmark: Models List Latency > measures /v1/models latency (20 requests)",
+    "status": "failed"
+   },
+   {
+    "name": "Benchmark: Burst Test > fires 50 requests at once",
+    "status": "passed"
+   }
+  ],
+  "benchmark-v3.test.ts": [
+   {
+    "name": "Gateway v3 Benchmark > healthz endpoint",
+    "status": "failed"
+   },
+   {
+    "name": "Gateway v3 Benchmark > GET /v1/models (static route)",
+    "status": "failed"
+   },
+   {
+    "name": "Gateway v3 Benchmark > cache hit latency (POST /v1/chat/completions)",
+    "status": "failed"
+   },
+   {
+    "name": "Gateway v3 Benchmark > burst throughput (50 concurrent cache hits)",
+    "status": "failed"
+   },
+   {
+    "name": "Gateway v3 Benchmark > summary table",
+    "status": "passed"
+   }
+  ],
+  "budget.test.ts": [
+   {
+    "name": "BudgetManager > tracks global spend",
+    "status": "passed"
+   },
+   {
+    "name": "BudgetManager > throws when global budget exceeded",
+    "status": "passed"
+   },
+   {
+    "name": "BudgetManager > allows within budget",
+    "status": "passed"
+   },
+   {
+    "name": "BudgetManager > tracks per-user spend",
+    "status": "passed"
+   },
+   {
+    "name": "BudgetManager > throws when user budget exceeded",
+    "status": "passed"
+   },
+   {
+    "name": "BudgetManager > reset clears global counters",
+    "status": "passed"
+   },
+   {
+    "name": "BudgetManager > reset clears per-user counter only",
+    "status": "passed"
+   },
+   {
+    "name": "BudgetManager > returns null remaining when no budget set",
+    "status": "passed"
+   },
+   {
+    "name": "BudgetManager > isValidUser checks budget",
+    "status": "passed"
+   },
+   {
+    "name": "BudgetManager > isValidUser returns false for unregistered user",
+    "status": "passed"
+   },
+   {
+    "name": "BudgetManager > projectedCost returns 0 initially",
+    "status": "passed"
+   }
+  ],
+  "callbacks-builtin.test.ts": [
+   {
+    "name": "LoggingCallback > logs request start and end",
+    "status": "passed"
+   },
+   {
+    "name": "MetricsCallback > tracks request count and cost",
+    "status": "passed"
+   },
+   {
+    "name": "MetricsCallback > tracks cache hits and guardrails",
+    "status": "passed"
+   },
+   {
+    "name": "MetricsCallback > reset clears all counters",
+    "status": "passed"
+   },
+   {
+    "name": "JSONLoggingCallback > writes structured JSON per event",
+    "status": "passed"
+   },
+   {
+    "name": "JSONLoggingCallback > logs errors",
+    "status": "passed"
+   }
+  ],
+  "callbacks.test.ts": [
+   {
+    "name": "CallbackHandler > all hooks are no-op by default",
+    "status": "passed"
+   },
+   {
+    "name": "CallbackHandler > concrete subclass receives events",
+    "status": "passed"
+   },
+   {
+    "name": "invokeCallbacks > calls method on all callbacks",
+    "status": "passed"
+   },
+   {
+    "name": "invokeCallbacks > swallows callback errors",
+    "status": "passed"
+   },
+   {
+    "name": "invokeCallbacks > handles async callbacks",
+    "status": "passed"
+   }
+  ],
+  "client.test.ts": [
+   {
+    "name": "AgentCC client > constructs with defaults",
+    "status": "passed"
+   },
+   {
+    "name": "AgentCC client > tracks cumulative cost",
+    "status": "passed"
+   },
+   {
+    "name": "AgentCC client > withOptions creates a new client",
+    "status": "passed"
+   },
+   {
+    "name": "AgentCC client > exports version",
+    "status": "passed"
+   }
+  ],
+  "dry-run.test.ts": [
+   {
+    "name": "dryRun > returns url, method, headers, and body",
+    "status": "passed"
+   },
+   {
+    "name": "dryRun > does not make a network call",
+    "status": "passed"
+   },
+   {
+    "name": "dryRun > applies modifyParams",
+    "status": "passed"
+   },
+   {
+    "name": "dryRun > extracts agentcc-specific params to headers",
+    "status": "passed"
+   },
+   {
+    "name": "dryRun > includes gateway config headers",
+    "status": "passed"
+   },
+   {
+    "name": "dryRun > includes extra_headers in output",
+    "status": "passed"
+   }
+  ],
+  "e2e-real.test.ts": [
+   {
+    "name": "E2E: Chat Completions > creates a basic chat completion",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Chat Completions > returns usage info",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Chat Completions > passes temperature and max_tokens",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Chat Completions > handles system message",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Chat Completions > handles multi-turn conversation",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Streaming > streams chat completion chunks",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Streaming > StreamManager collects full text",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: AgentCC Metadata > auto-attaches agentcc metadata to response",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Session Management > creates a session-scoped client",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Session Management > tracks cost across session requests",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Callbacks > LoggingCallback fires on request",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Callbacks > MetricsCallback tracks request count",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Trace Context > sends traceparent header with request",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Middleware > middleware can observe requests",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Models > lists available models",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Cost Tracking > tracks cumulative cost on client",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Dry Run > inspects request without sending",
+    "status": "passed"
+   },
+   {
+    "name": "E2E: Pre-call Rules > blocks disallowed model before sending",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Token Utilities > counts tokens for a message",
+    "status": "passed"
+   },
+   {
+    "name": "E2E: Token Utilities > estimates completion cost",
+    "status": "passed"
+   },
+   {
+    "name": "E2E: Token Utilities > returns model info",
+    "status": "passed"
+   },
+   {
+    "name": "E2E: Token Utilities > lists valid models",
+    "status": "passed"
+   },
+   {
+    "name": "E2E: Validate Response > validates real structured output against schema",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Validate Response > toResponseFormat creates correct format",
+    "status": "passed"
+   },
+   {
+    "name": "E2E: Auto JSON Schema Validation > validates response automatically when flag is enabled",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Health Check Utilities > checkValidKey returns valid for a good key",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Health Check Utilities > healthCheck returns healthy",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Budget Manager > tracks budget across requests",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: withOptions > creates a derived client with different config",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Client healthCheck > client.healthCheck() returns true for running gateway",
+    "status": "failed"
+   },
+   {
+    "name": "E2E: Error Handling > throws on invalid model",
+    "status": "passed"
+   }
+  ],
+  "errors.test.ts": [
+   {
+    "name": "Error hierarchy > AgentCCError is base",
+    "status": "passed"
+   },
+   {
+    "name": "Error hierarchy > APIConnectionError extends AgentCCError",
+    "status": "passed"
+   },
+   {
+    "name": "Error hierarchy > APITimeoutError extends APIConnectionError",
+    "status": "passed"
+   },
+   {
+    "name": "Error hierarchy > StreamError extends AgentCCError",
+    "status": "passed"
+   },
+   {
+    "name": "Error hierarchy > APIStatusError.from returns specific subclass",
+    "status": "passed"
+   },
+   {
+    "name": "Error hierarchy > RateLimitError parses rate-limit headers",
+    "status": "passed"
+   },
+   {
+    "name": "Error hierarchy > GuardrailBlockedError parses guardrail headers",
+    "status": "passed"
+   },
+   {
+    "name": "Error hierarchy > GuardrailWarning stores completion body",
+    "status": "passed"
+   },
+   {
+    "name": "Error hierarchy > APIStatusError parses request-id header",
+    "status": "passed"
+   }
+  ],
+  "express-middleware.test.ts": [
+   {
+    "name": "agentccMiddleware > attaches agentcc client to req",
+    "status": "passed"
+   },
+   {
+    "name": "agentccMiddleware > attaches session to req",
+    "status": "passed"
+   },
+   {
+    "name": "agentccMiddleware > uses x-request-id as session ID",
+    "status": "passed"
+   },
+   {
+    "name": "agentccMiddleware > uses custom session header",
+    "status": "passed"
+   },
+   {
+    "name": "agentccMiddleware > generates session ID when header not present",
+    "status": "passed"
+   },
+   {
+    "name": "agentccMiddleware > propagates traceparent from incoming request",
+    "status": "passed"
+   }
+  ],
+  "function-to-tool.test.ts": [
+   {
+    "name": "functionToTool > converts Zod schema to tool definition",
+    "status": "passed"
+   },
+   {
+    "name": "functionToTool > accepts plain JSON Schema",
+    "status": "passed"
+   },
+   {
+    "name": "functionToTool > adds strict flag when requested",
+    "status": "passed"
+   },
+   {
+    "name": "functionToTool > omits description when not provided",
+    "status": "passed"
+   },
+   {
+    "name": "functionToTool > throws for invalid schema",
+    "status": "passed"
+   },
+   {
+    "name": "functionToTool > throws for null schema",
+    "status": "passed"
+   }
+  ],
+  "gateway-config.test.ts": [
+   {
+    "name": "GatewayConfig > gatewayConfigToDict strips undefined values",
+    "status": "passed"
+   },
+   {
+    "name": "GatewayConfig > gatewayConfigToHeaders produces x-agentcc-config JSON",
+    "status": "passed"
+   },
+   {
+    "name": "GatewayConfig > empty config produces no headers",
+    "status": "passed"
+   },
+   {
+    "name": "createHeaders > creates auth header",
+    "status": "passed"
+   },
+   {
+    "name": "createHeaders > creates session headers",
+    "status": "passed"
+   },
+   {
+    "name": "createHeaders > creates metadata header as JSON",
+    "status": "passed"
+   },
+   {
+    "name": "createHeaders > creates cache headers",
+    "status": "passed"
+   },
+   {
+    "name": "createHeaders > creates guardrail policy header",
+    "status": "passed"
+   },
+   {
+    "name": "createHeaders > creates property headers",
+    "status": "passed"
+   },
+   {
+    "name": "createHeaders > includes config headers when config provided",
+    "status": "passed"
+   },
+   {
+    "name": "createHeaders > returns empty object when no options set",
+    "status": "passed"
+   }
+  ],
+  "health-check.test.ts": [
+   {
+    "name": "checkValidKey > returns valid when models endpoint succeeds",
+    "status": "passed"
+   },
+   {
+    "name": "checkValidKey > returns invalid on 401",
+    "status": "passed"
+   },
+   {
+    "name": "checkValidKey > returns error on network failure",
+    "status": "passed"
+   },
+   {
+    "name": "healthCheck > returns healthy on successful completion",
+    "status": "passed"
+   },
+   {
+    "name": "healthCheck > returns unhealthy on failure",
+    "status": "passed"
+   },
+   {
+    "name": "healthCheck > measures latency",
+    "status": "passed"
+   }
+  ],
+  "json-schema-validation.test.ts": [
+   {
+    "name": "enableJsonSchemaValidation > passes validation when response matches schema",
+    "status": "passed"
+   },
+   {
+    "name": "enableJsonSchemaValidation > throws when response does not match schema",
+    "status": "passed"
+   },
+   {
+    "name": "enableJsonSchemaValidation > skips validation when not using json_schema response_format",
+    "status": "passed"
+   },
+   {
+    "name": "enableJsonSchemaValidation > skips validation when flag is false",
+    "status": "passed"
+   },
+   {
+    "name": "preCallRules integration > blocks request when pre-call rule fails",
+    "status": "passed"
+   },
+   {
+    "name": "preCallRules integration > allows request when all rules pass",
+    "status": "passed"
+   }
+  ],
+  "middleware.test.ts": [
+   {
+    "name": "createMiddleware > creates a middleware with name",
+    "status": "passed"
+   },
+   {
+    "name": "composeMiddlewares > calls handler when no middlewares",
+    "status": "passed"
+   },
+   {
+    "name": "composeMiddlewares > runs middleware in correct order (first = outermost)",
+    "status": "passed"
+   },
+   {
+    "name": "composeMiddlewares > middleware can modify the context",
+    "status": "passed"
+   },
+   {
+    "name": "composeMiddlewares > middleware can modify the result",
+    "status": "passed"
+   },
+   {
+    "name": "composeMiddlewares > middleware can short-circuit (skip handler)",
+    "status": "passed"
+   },
+   {
+    "name": "composeMiddlewares > errors propagate through middleware",
+    "status": "passed"
+   },
+   {
+    "name": "composeMiddlewares > middleware that throws propagates to caller",
+    "status": "passed"
+   }
+  ],
+  "models-info.test.ts": [
+   {
+    "name": "getModelInfo > returns info for exact model names",
+    "status": "passed"
+   },
+   {
+    "name": "getModelInfo > returns null for unknown models",
+    "status": "passed"
+   },
+   {
+    "name": "getModelInfo > resolves aliases",
+    "status": "passed"
+   },
+   {
+    "name": "getModelInfo > resolves prefix matches",
+    "status": "passed"
+   },
+   {
+    "name": "getModelInfo > exact match takes precedence over prefix",
+    "status": "passed"
+   },
+   {
+    "name": "getValidModels > returns non-empty list",
+    "status": "passed"
+   },
+   {
+    "name": "getValidModels > contains known models",
+    "status": "passed"
+   },
+   {
+    "name": "getValidModels > all entries are strings",
+    "status": "passed"
+   },
+   {
+    "name": "registerModel > registers a new model",
+    "status": "passed"
+   },
+   {
+    "name": "capability checks > supportsVision for gpt-4o",
+    "status": "passed"
+   },
+   {
+    "name": "capability checks > supportsVision returns false for unknown",
+    "status": "passed"
+   },
+   {
+    "name": "capability checks > supportsFunctionCalling for claude-sonnet-4",
+    "status": "passed"
+   },
+   {
+    "name": "capability checks > supportsJsonMode for gpt-4o-mini",
+    "status": "passed"
+   },
+   {
+    "name": "capability checks > supportsResponseSchema is alias for supportsJsonMode",
+    "status": "passed"
+   },
+   {
+    "name": "capability checks > llama-3.1-8b does not support function calling",
+    "status": "passed"
+   },
+   {
+    "name": "validateEnvironment > reports missing vars",
+    "status": "passed"
+   },
+   {
+    "name": "validateEnvironment > reports set vars",
+    "status": "passed"
+   }
+  ],
+  "nextjs-helpers.test.ts": [
+   {
+    "name": "createAgentCCClient > returns a AgentCC instance",
+    "status": "passed"
+   },
+   {
+    "name": "createAgentCCClient > returns the same singleton",
+    "status": "passed"
+   },
+   {
+    "name": "createAgentCCClient > reset allows new instance",
+    "status": "passed"
+   },
+   {
+    "name": "streamResponse > returns a Response with SSE content type",
+    "status": "passed"
+   },
+   {
+    "name": "streamResponse > produces SSE-formatted body",
+    "status": "passed"
+   },
+   {
+    "name": "streamResponse > includes custom headers",
+    "status": "passed"
+   }
+  ],
+  "otel-callback.test.ts": [
+   {
+    "name": "OTelCallback > creates span on request start",
+    "status": "passed"
+   },
+   {
+    "name": "OTelCallback > sets response attributes and ends span",
+    "status": "passed"
+   },
+   {
+    "name": "OTelCallback > records error on span",
+    "status": "passed"
+   },
+   {
+    "name": "OTelCallback > records metrics",
+    "status": "passed"
+   },
+   {
+    "name": "OTelCallback > records cost metric via onCostUpdate",
+    "status": "passed"
+   },
+   {
+    "name": "OTelCallback > records error counter",
+    "status": "passed"
+   },
+   {
+    "name": "OTelCallback > works without tracer/meter (no-op)",
+    "status": "passed"
+   },
+   {
+    "name": "OTelCallback > derives span name from URL path",
+    "status": "passed"
+   },
+   {
+    "name": "OTelCallback > uses custom span prefix",
+    "status": "passed"
+   }
+  ],
+  "pagination.test.ts": [
+   {
+    "name": "PaginatedList > iterates through a single page",
+    "status": "passed"
+   },
+   {
+    "name": "PaginatedList > iterates through multiple pages",
+    "status": "passed"
+   },
+   {
+    "name": "PaginatedList > hasNextPage returns correct values",
+    "status": "passed"
+   },
+   {
+    "name": "PaginatedList > getNextPage returns the next page",
+    "status": "passed"
+   },
+   {
+    "name": "PaginatedList > getNextPage throws when no more pages",
+    "status": "passed"
+   },
+   {
+    "name": "PaginatedList > handles empty pages",
+    "status": "passed"
+   },
+   {
+    "name": "PaginatedList > fromDjango > creates paginated list from Django format",
+    "status": "passed"
+   },
+   {
+    "name": "PaginatedList > fromDjango > no next page when next is null",
+    "status": "passed"
+   },
+   {
+    "name": "PaginatedList > fromOpenAI > creates paginated list from OpenAI format",
+    "status": "passed"
+   },
+   {
+    "name": "PaginatedList > fromOpenAI > no next page when has_more is false",
+    "status": "passed"
+   }
+  ],
+  "patch-openai.test.ts": [
+   {
+    "name": "patchOpenAI > extracts apiKey from OpenAI-like client",
+    "status": "passed"
+   },
+   {
+    "name": "patchOpenAI > uses provided apiKey over extracted one",
+    "status": "passed"
+   },
+   {
+    "name": "patchOpenAI > uses provided baseUrl",
+    "status": "passed"
+   },
+   {
+    "name": "patchOpenAI > passes through client options",
+    "status": "passed"
+   },
+   {
+    "name": "patchOpenAI > works without apiKey on client object",
+    "status": "passed"
+   },
+   {
+    "name": "patchOpenAI > handles non-string apiKey gracefully",
+    "status": "passed"
+   }
+  ],
+  "pre-call-rules.test.ts": [
+   {
+    "name": "evaluatePreCallRules > passes when no rules",
+    "status": "passed"
+   },
+   {
+    "name": "evaluatePreCallRules > passes when all rules allow",
+    "status": "passed"
+   },
+   {
+    "name": "evaluatePreCallRules > throws on first blocking rule",
+    "status": "passed"
+   },
+   {
+    "name": "evaluatePreCallRules > includes default reason when none given",
+    "status": "passed"
+   },
+   {
+    "name": "evaluatePreCallRules > passes input to rule functions",
+    "status": "passed"
+   },
+   {
+    "name": "allowModels > allows listed models",
+    "status": "passed"
+   },
+   {
+    "name": "allowModels > blocks unlisted models",
+    "status": "passed"
+   },
+   {
+    "name": "allowModels > allows requests without a model",
+    "status": "passed"
+   },
+   {
+    "name": "blockModels > blocks listed models",
+    "status": "passed"
+   },
+   {
+    "name": "blockModels > allows unlisted models",
+    "status": "passed"
+   },
+   {
+    "name": "requireSessionId > blocks when no session_id",
+    "status": "passed"
+   },
+   {
+    "name": "requireSessionId > allows when session_id present",
+    "status": "passed"
+   }
+  ],
+  "redact.test.ts": [
+   {
+    "name": "redactCallbackRequest > redacts message content",
+    "status": "passed"
+   },
+   {
+    "name": "redactCallbackRequest > preserves model and non-content fields",
+    "status": "passed"
+   },
+   {
+    "name": "redactCallbackRequest > redacts legacy prompt",
+    "status": "passed"
+   },
+   {
+    "name": "redactCallbackRequest > redacts embedding input",
+    "status": "passed"
+   },
+   {
+    "name": "redactCallbackRequest > redacts array input",
+    "status": "passed"
+   },
+   {
+    "name": "redactCallbackRequest > does not mutate original request",
+    "status": "passed"
+   },
+   {
+    "name": "redactCallbackRequest > handles null body",
+    "status": "passed"
+   }
+  ],
+  "resources-audio.test.ts": [
+   {
+    "name": "audio resource > transcriptions.create() sends FormData POST to /v1/audio/transcriptions",
+    "status": "passed"
+   },
+   {
+    "name": "audio resource > translations.create() sends FormData POST to /v1/audio/translations",
+    "status": "passed"
+   },
+   {
+    "name": "audio resource > speech.create() sends POST and returns raw Response",
+    "status": "passed"
+   }
+  ],
+  "resources-batches.test.ts": [
+   {
+    "name": "batches resource > create() sends POST to /v1/batches",
+    "status": "passed"
+   },
+   {
+    "name": "batches resource > list() sends GET to /v1/batches",
+    "status": "passed"
+   },
+   {
+    "name": "batches resource > retrieve() sends GET to /v1/batches/:id",
+    "status": "passed"
+   },
+   {
+    "name": "batches resource > cancel() sends POST to /v1/batches/:id/cancel",
+    "status": "passed"
+   }
+  ],
+  "resources-chat-completions.test.ts": [
+   {
+    "name": "chat.completions resource > create() sends POST to /v1/chat/completions",
+    "status": "passed"
+   },
+   {
+    "name": "chat.completions resource > create() passes model and messages in body",
+    "status": "passed"
+   },
+   {
+    "name": "chat.completions resource > create() extracts agentcc params to headers",
+    "status": "passed"
+   },
+   {
+    "name": "chat.completions resource > create() passes extra_headers",
+    "status": "passed"
+   },
+   {
+    "name": "chat.completions resource > create() passes extra_body",
+    "status": "passed"
+   },
+   {
+    "name": "chat.completions resource > create() with stream returns a Stream",
+    "status": "passed"
+   },
+   {
+    "name": "chat.completions resource > stream() returns a StreamManager",
+    "status": "passed"
+   },
+   {
+    "name": "chat.completions resource > dryRun() returns request details without network call",
+    "status": "passed"
+   }
+  ],
+  "resources-completions.test.ts": [
+   {
+    "name": "completions resource (legacy) > create() sends POST to /v1/completions",
+    "status": "passed"
+   }
+  ],
+  "resources-embeddings.test.ts": [
+   {
+    "name": "embeddings resource > create() sends POST to /v1/embeddings",
+    "status": "passed"
+   },
+   {
+    "name": "embeddings resource > create() passes model and input in body",
+    "status": "passed"
+   }
+  ],
+  "resources-files.test.ts": [
+   {
+    "name": "files resource > create() sends POST with FormData to /v1/files",
+    "status": "passed"
+   },
+   {
+    "name": "files resource > list() sends GET to /v1/files",
+    "status": "passed"
+   },
+   {
+    "name": "files resource > retrieve() sends GET to /v1/files/:id",
+    "status": "passed"
+   },
+   {
+    "name": "files resource > content() sends GET to /v1/files/:id/content",
+    "status": "passed"
+   },
+   {
+    "name": "files resource > delete() sends DELETE to /v1/files/:id",
+    "status": "passed"
+   }
+  ],
+  "resources-images.test.ts": [
+   {
+    "name": "images resource > generate() sends POST to /v1/images/generations",
+    "status": "passed"
+   }
+  ],
+  "resources-models.test.ts": [
+   {
+    "name": "models resource > list() sends GET to /v1/models",
+    "status": "passed"
+   },
+   {
+    "name": "models resource > retrieve() sends GET to /v1/models/:id",
+    "status": "passed"
+   },
+   {
+    "name": "models resource > retrieve() encodes model ID",
+    "status": "passed"
+   }
+  ],
+  "resources-moderations.test.ts": [
+   {
+    "name": "moderations resource > create() sends POST to /v1/moderations",
+    "status": "passed"
+   }
+  ],
+  "resources-rerank.test.ts": [
+   {
+    "name": "rerank resource > rank() sends POST to /v1/rerank",
+    "status": "passed"
+   }
+  ],
+  "retry-policy.test.ts": [
+   {
+    "name": "RetryPolicy > returns defaults for each error type",
+    "status": "passed"
+   },
+   {
+    "name": "RetryPolicy > allows custom retry counts",
+    "status": "passed"
+   },
+   {
+    "name": "RetryPolicy > returns 0 for unknown status codes",
+    "status": "passed"
+   },
+   {
+    "name": "RetryPolicy > partially overrides defaults",
+    "status": "passed"
+   }
+  ],
+  "run-tools.test.ts": [
+   {
+    "name": "RunToolsRunner > completes in single step when no tool calls",
+    "status": "passed"
+   },
+   {
+    "name": "RunToolsRunner > executes tool calls and feeds results back",
+    "status": "passed"
+   },
+   {
+    "name": "RunToolsRunner > handles errors in tool execute gracefully",
+    "status": "passed"
+   },
+   {
+    "name": "RunToolsRunner > handles unknown tool name",
+    "status": "passed"
+   },
+   {
+    "name": "RunToolsRunner > respects maxSteps limit",
+    "status": "passed"
+   },
+   {
+    "name": "RunToolsRunner > calls onStep callback for each step",
+    "status": "passed"
+   },
+   {
+    "name": "RunToolsRunner > handles multiple parallel tool calls",
+    "status": "passed"
+   }
+  ],
+  "session.test.ts": [
+   {
+    "name": "Session > generates a session ID if not provided",
+    "status": "passed"
+   },
+   {
+    "name": "Session > uses provided session ID",
+    "status": "passed"
+   },
+   {
+    "name": "Session > tracks steps in path",
+    "status": "passed"
+   },
+   {
+    "name": "Session > resetPath returns to root",
+    "status": "passed"
+   },
+   {
+    "name": "Session > tracks request metrics",
+    "status": "passed"
+   },
+   {
+    "name": "Session > toHeaders includes session-id",
+    "status": "passed"
+   },
+   {
+    "name": "Session > toHeaders includes path when not root",
+    "status": "passed"
+   },
+   {
+    "name": "Session > toHeaders includes metadata as JSON",
+    "status": "passed"
+   },
+   {
+    "name": "Session > toHeaders omits empty name and metadata",
+    "status": "passed"
+   }
+  ],
+  "shared-types.test.ts": [
+   {
+    "name": "parseAgentCCMetadata > parses all gateway headers",
+    "status": "passed"
+   },
+   {
+    "name": "parseAgentCCMetadata > uses defaults for missing headers",
+    "status": "passed"
+   }
+  ],
+  "stream-error.test.ts": [
+   {
+    "name": "gateway stream error: 'guardrail_block_after_content_then_do…' > chat.completions.create({ stream: true }) iteration throws StreamError with the code and message",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_after_content_then_do…' > new Stream(response) iteration throws StreamError",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_after_content_then_do…' > StreamManager iteration throws StreamError and keeps the text before it",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_after_content_then_do…' > StreamManager.textStream() throws StreamError after the text before it",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_after_content_then_do…' > StreamManager.events() throws StreamError",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_after_content_then_do…' > nextjs streamResponse() forwards the gateway's error code and message",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_after_content_then_do…' > cancels the response body once the error frame is read",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_at_finish_then_metada…' > chat.completions.create({ stream: true }) iteration throws StreamError with the code and message",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_at_finish_then_metada…' > new Stream(response) iteration throws StreamError",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_at_finish_then_metada…' > StreamManager iteration throws StreamError and keeps the text before it",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_at_finish_then_metada…' > StreamManager.textStream() throws StreamError after the text before it",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_at_finish_then_metada…' > StreamManager.events() throws StreamError",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_at_finish_then_metada…' > nextjs streamResponse() forwards the gateway's error code and message",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_at_finish_then_metada…' > cancels the response body once the error frame is read",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_first_frame' > chat.completions.create({ stream: true }) iteration throws StreamError with the code and message",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_first_frame' > new Stream(response) iteration throws StreamError",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_first_frame' > StreamManager iteration throws StreamError and keeps the text before it",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_first_frame' > StreamManager.textStream() throws StreamError after the text before it",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_first_frame' > StreamManager.events() throws StreamError",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_first_frame' > nextjs streamResponse() forwards the gateway's error code and message",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'guardrail_block_first_frame' > cancels the response body once the error frame is read",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'upstream_timeout_cut_after_content' > chat.completions.create({ stream: true }) iteration throws StreamError with the code and message",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'upstream_timeout_cut_after_content' > new Stream(response) iteration throws StreamError",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'upstream_timeout_cut_after_content' > StreamManager iteration throws StreamError and keeps the text before it",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'upstream_timeout_cut_after_content' > StreamManager.textStream() throws StreamError after the text before it",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'upstream_timeout_cut_after_content' > StreamManager.events() throws StreamError",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'upstream_timeout_cut_after_content' > nextjs streamResponse() forwards the gateway's error code and message",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream error: 'upstream_timeout_cut_after_content' > cancels the response body once the error frame is read",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream without error: 'normal_stream' > Stream iteration yields every chunk",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream without error: 'normal_stream' > StreamManager, textStream() and events() complete",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream without error: 'normal_stream' > nextjs streamResponse() ends with [DONE] and no error frame",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream without error: 'usage_chunk_with_empty_choices' > Stream iteration yields every chunk",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream without error: 'usage_chunk_with_empty_choices' > StreamManager, textStream() and events() complete",
+    "status": "passed"
+   },
+   {
+    "name": "gateway stream without error: 'usage_chunk_with_empty_choices' > nextjs streamResponse() ends with [DONE] and no error frame",
+    "status": "passed"
+   },
+   {
+    "name": "StreamError fields > an SDK-raised StreamError has null gateway fields",
+    "status": "passed"
+   },
+   {
+    "name": "StreamError fields > takes the gateway's fields as options",
+    "status": "passed"
+   },
+   {
+    "name": "StreamError fields > an error frame whose error is a string raises StreamError with that message",
+    "status": "passed"
+   },
+   {
+    "name": "StreamError fields > an error frame whose error is 42 (neither an object nor a string) raises StreamError with a null body",
+    "status": "passed"
+   },
+   {
+    "name": "StreamError fields > an error frame whose error is true (neither an object nor a string) raises StreamError with a null body",
+    "status": "passed"
+   },
+   {
+    "name": "StreamError fields > an error frame whose error is [\"blocked\"] (neither an object nor a string) raises StreamError with a null body",
+    "status": "passed"
+   },
+   {
+    "name": "StreamError fields > a chunk with error: null is an ordinary chunk",
+    "status": "passed"
+   },
+   {
+    "name": "StreamError fields > malformed JSON still raises the parse StreamError",
+    "status": "passed"
+   }
+  ],
+  "stream-events.test.ts": [
+   {
+    "name": "StreamManager.events() > yields content events",
+    "status": "passed"
+   },
+   {
+    "name": "StreamManager.events() > yields done event with completion",
+    "status": "passed"
+   },
+   {
+    "name": "StreamManager.events() > yields tool_call events",
+    "status": "passed"
+   }
+  ],
+  "streaming.test.ts": [
+   {
+    "name": "ChunkAccumulator > accumulates text from multiple chunks",
+    "status": "passed"
+   },
+   {
+    "name": "ChunkAccumulator > produces a valid ChatCompletion",
+    "status": "passed"
+   },
+   {
+    "name": "ChunkAccumulator > accumulates tool calls across chunks",
+    "status": "passed"
+   }
+  ],
+  "structured-output.test.ts": [
+   {
+    "name": "isZodSchema > returns true for Zod-like objects",
+    "status": "passed"
+   },
+   {
+    "name": "isZodSchema > returns false for non-Zod values",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts ZodString",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts ZodString with description",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts ZodString with constraints",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts ZodNumber",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts ZodNumber with int check",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts ZodBoolean",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts ZodNull",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts ZodLiteral",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts ZodEnum",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts ZodArray",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts ZodObject",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > handles ZodOptional in object — not required",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts ZodNullable",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts ZodDefault",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts ZodUnion",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts ZodRecord",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > converts nested objects",
+    "status": "passed"
+   },
+   {
+    "name": "zodToJsonSchema > throws for non-Zod input",
+    "status": "passed"
+   }
+  ],
+  "testing-utils.test.ts": [
+   {
+    "name": "MockAgentCC > returns queued responses",
+    "status": "passed"
+   },
+   {
+    "name": "MockAgentCC > records all calls",
+    "status": "passed"
+   },
+   {
+    "name": "MockAgentCC > returns default response when no queued",
+    "status": "passed"
+   },
+   {
+    "name": "MockAgentCC > mock embeddings works",
+    "status": "passed"
+   },
+   {
+    "name": "factory functions > mockCompletion creates valid completion",
+    "status": "passed"
+   },
+   {
+    "name": "factory functions > mockAgentCCMetadata creates valid metadata",
+    "status": "passed"
+   },
+   {
+    "name": "factory functions > mockUsage creates valid usage",
+    "status": "passed"
+   },
+   {
+    "name": "assertion helpers > assertCompletionValid passes for valid completion",
+    "status": "passed"
+   },
+   {
+    "name": "assertion helpers > assertCompletionValid fails for missing id",
+    "status": "passed"
+   },
+   {
+    "name": "assertion helpers > assertCompletionHasContent checks content",
+    "status": "passed"
+   },
+   {
+    "name": "assertion helpers > assertUsageValid passes for valid usage",
+    "status": "passed"
+   },
+   {
+    "name": "assertion helpers > assertAgentCCMetadata checks provider",
+    "status": "passed"
+   },
+   {
+    "name": "assertion helpers > assertCostTracked checks cost",
+    "status": "passed"
+   }
+  ],
+  "token-encoding.test.ts": [
+   {
+    "name": "getEncodingForModel > maps gpt-4o to o200k_base",
+    "status": "passed"
+   },
+   {
+    "name": "getEncodingForModel > maps gpt-4o-mini to o200k_base",
+    "status": "passed"
+   },
+   {
+    "name": "getEncodingForModel > maps gpt-4 to cl100k_base",
+    "status": "passed"
+   },
+   {
+    "name": "getEncodingForModel > maps gpt-3.5-turbo to cl100k_base",
+    "status": "passed"
+   },
+   {
+    "name": "getEncodingForModel > maps gpt-4-turbo to cl100k_base",
+    "status": "passed"
+   },
+   {
+    "name": "getEncodingForModel > maps o1 to o200k_base",
+    "status": "passed"
+   },
+   {
+    "name": "getEncodingForModel > maps o3-mini to o200k_base",
+    "status": "passed"
+   },
+   {
+    "name": "getEncodingForModel > falls back to cl100k_base for unknown models",
+    "status": "passed"
+   },
+   {
+    "name": "getEncodingForModel > handles versioned model names via prefix matching",
+    "status": "passed"
+   },
+   {
+    "name": "getEncodingForModel > maps embedding models",
+    "status": "passed"
+   },
+   {
+    "name": "encode/decode > throws when gpt-tokenizer is not installed",
+    "status": "passed"
+   },
+   {
+    "name": "encode/decode > decode throws when gpt-tokenizer is not installed",
+    "status": "passed"
+   }
+  ],
+  "tokens.test.ts": [
+   {
+    "name": "tokenCounter > returns 0 for no input",
+    "status": "passed"
+   },
+   {
+    "name": "tokenCounter > estimates tokens for raw text",
+    "status": "passed"
+   },
+   {
+    "name": "tokenCounter > estimates tokens for messages",
+    "status": "passed"
+   },
+   {
+    "name": "tokenCounter > handles multi-part content",
+    "status": "passed"
+   },
+   {
+    "name": "tokenCounter > handles messages with tool_calls",
+    "status": "passed"
+   },
+   {
+    "name": "getMaxTokens / getMaxOutputTokens > returns context window for known models",
+    "status": "passed"
+   },
+   {
+    "name": "getMaxTokens / getMaxOutputTokens > returns null for unknown models",
+    "status": "passed"
+   },
+   {
+    "name": "getMaxTokens / getMaxOutputTokens > returns max output tokens",
+    "status": "passed"
+   },
+   {
+    "name": "completionCost > estimates cost for known model",
+    "status": "passed"
+   },
+   {
+    "name": "completionCost > returns null for unknown model",
+    "status": "passed"
+   },
+   {
+    "name": "completionCost > handles zero tokens",
+    "status": "passed"
+   },
+   {
+    "name": "completionCostFromResponse > uses gateway-reported cost if available",
+    "status": "passed"
+   },
+   {
+    "name": "completionCostFromResponse > falls back to local estimation",
+    "status": "passed"
+   },
+   {
+    "name": "completionCostFromResponse > returns null if no usage data",
+    "status": "passed"
+   },
+   {
+    "name": "trimMessages > returns all messages if they fit",
+    "status": "passed"
+   },
+   {
+    "name": "trimMessages > preserves system messages",
+    "status": "passed"
+   },
+   {
+    "name": "trimMessages > removes oldest non-system messages first",
+    "status": "passed"
+   },
+   {
+    "name": "trimMessages > throws for unknown model without maxTokens",
+    "status": "passed"
+   },
+   {
+    "name": "trimMessages > works with explicit maxTokens",
+    "status": "passed"
+   },
+   {
+    "name": "trimMessages > returns new array (no mutation)",
+    "status": "passed"
+   },
+   {
+    "name": "fallbacks > getContextWindowFallback returns larger model",
+    "status": "passed"
+   },
+   {
+    "name": "fallbacks > getContextWindowFallback returns null for unknown",
+    "status": "passed"
+   },
+   {
+    "name": "fallbacks > getContentPolicyFallback returns less restrictive model",
+    "status": "passed"
+   },
+   {
+    "name": "fallbacks > getContentPolicyFallback returns null for unknown",
+    "status": "passed"
+   },
+   {
+    "name": "isPromptCachingValid > detects Anthropic cache_control",
+    "status": "passed"
+   },
+   {
+    "name": "isPromptCachingValid > detects cache_control in content parts",
+    "status": "passed"
+   },
+   {
+    "name": "isPromptCachingValid > detects long system prompts for OpenAI models",
+    "status": "passed"
+   },
+   {
+    "name": "isPromptCachingValid > returns false when no caching indicators",
+    "status": "passed"
+   }
+  ],
+  "trace-context.test.ts": [
+   {
+    "name": "generateTraceId > returns 32 hex chars",
+    "status": "passed"
+   },
+   {
+    "name": "generateTraceId > returns unique values",
+    "status": "passed"
+   },
+   {
+    "name": "generateSpanId > returns 16 hex chars",
+    "status": "passed"
+   },
+   {
+    "name": "parseTraceparent > parses valid traceparent",
+    "status": "passed"
+   },
+   {
+    "name": "parseTraceparent > returns null for invalid format",
+    "status": "passed"
+   },
+   {
+    "name": "parseTraceparent > handles leading/trailing whitespace",
+    "status": "passed"
+   },
+   {
+    "name": "formatTraceparent > formats trace context correctly",
+    "status": "passed"
+   },
+   {
+    "name": "TraceContextManager > generates unique traceparents per call",
+    "status": "passed"
+   },
+   {
+    "name": "TraceContextManager > uses trace ID from propagated traceparent",
+    "status": "passed"
+   },
+   {
+    "name": "TraceContextManager > generates trace ID if propagated traceparent is invalid",
+    "status": "passed"
+   },
+   {
+    "name": "TraceContextManager > returns empty headers when disabled",
+    "status": "passed"
+   },
+   {
+    "name": "TraceContextManager > getHeaders returns traceparent and x-agentcc-trace-id",
+    "status": "passed"
+   },
+   {
+    "name": "TraceContextManager > enabled property reflects state",
+    "status": "passed"
+   }
+  ],
+  "validate-response.test.ts": [
+   {
+    "name": "validateJsonResponse > valid object with correct types",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > rejects invalid JSON",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > detects type mismatch",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > detects missing required property",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > validates string constraints",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > validates number constraints",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > validates integer type",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > validates enum",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > validates const",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > validates array items",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > validates array length constraints",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > validates pattern",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > validates nested objects",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > validates anyOf",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > validates null type",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > validates boolean type",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > validates additionalProperties: false",
+    "status": "passed"
+   },
+   {
+    "name": "validateJsonResponse > validates exclusiveMinimum/exclusiveMaximum",
+    "status": "passed"
+   },
+   {
+    "name": "toResponseFormat > wraps a JSON Schema object",
+    "status": "passed"
+   },
+   {
+    "name": "toResponseFormat > defaults name to 'response'",
+    "status": "passed"
+   },
+   {
+    "name": "toResponseFormat > throws for invalid input",
+    "status": "passed"
+   }
+  ]
+ }
+}

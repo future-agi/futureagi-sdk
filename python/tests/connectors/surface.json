@@ -1,0 +1,32 @@
+{
+  "mcp_core": {
+    "connectors.catalog": "connectors.catalog",
+    "connectors.addCustomMcp": "connectors.add_custom_mcp",
+    "connectors.get": "connectors.get",
+    "connectors.disconnect": "connectors.delete",
+    "connectors.refreshTools": "connectors.refresh_tools",
+    "connectors.attach": "connectors.attach",
+    "connectors.detach": "connectors.detach"
+  },
+  "oauth_connect": {"connectors.connect": "connectors.connect_app"},
+  "credential_reads": {
+    "platform.credentials.list": "credentials.list",
+    "platform.credentials.get": "credentials.get",
+    "platform.credentials.bindings": "credentials.bindings"
+  },
+  "data_integrations": {
+    "integrations_connections_list": "integrations.list",
+    "integrations_connections_create": "integrations.create",
+    "integrations_connections_read": "integrations.get",
+    "integrations_connections_partial_update": "integrations.update",
+    "integrations_connections_update": "integrations.replace",
+    "integrations_connections_delete": "integrations.delete",
+    "integrations_connections_validate_credentials": "integrations.validate",
+    "integrations_connections_pause": "integrations.pause",
+    "integrations_connections_resume": "integrations.resume",
+    "integrations_connections_sync_now": "integrations.sync_now",
+    "integrations_sync-logs_list": "integrations.sync_logs.list",
+    "integrations_sync-logs_read": "integrations.sync_logs.get"
+  },
+  "slack_channels": {"integrations_connections_slack_channels_list": "integrations.slack_channels"}
+}

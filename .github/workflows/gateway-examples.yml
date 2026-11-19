@@ -1,0 +1,51 @@
+name: Gateway framework examples
+
+on:
+  pull_request:
+    paths:
+      - "examples/gateway/**"
+      - "python/fi/gateway/**"
+      - "python/fi/_sdk_exception.py"
+      - "typescript/futureagi/gateway-client/**"
+      - "typescript/futureagi/package.json"
+      - ".github/workflows/gateway-examples.yml"
+  push:
+    branches-ignore: [main, master, "release/**", "releases/**"]
+    tags-ignore: ["**"]
+    paths:
+      - "examples/gateway/**"
+      - "python/fi/gateway/**"
+      - "typescript/futureagi/gateway-client/**"
+      - "typescript/futureagi/package.json"
+      - ".github/workflows/gateway-examples.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  examples:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.12"]
+    env:
+      PYTHON_VERSION: ${{ matrix.python }}
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependency tool
+        run: python -m pip install uv==0.8.13
+      - name: Prepare locked dependencies and gateway preview
+        run: bash examples/gateway/ci/prepare.sh
+      - name: Exercise real frameworks against MockAgentCC
+        run: bash examples/gateway/ci/test.sh

@@ -15,6 +15,9 @@ from urllib.parse import quote
 import httpx
 from pydantic import TypeAdapter, ValidationError
 
+# Share the lane's graded HTTP policy and its one-notice-per-origin budget.
+from fi._core.http_security import check_http_security
+
 from ._errors import (
     APIConnectionError,
     APIError,
@@ -155,7 +158,7 @@ def _follow_redirect(base_url: str, response: httpx.Response, method: str) -> tu
     target = str(response.request.url.join(response.headers["location"]))
     if _origin(target) != _origin(base_url):
         raise APIConnectionError(
-            f"{response.status_code} redirect to {target} was not followed: it leaves {base_url} and the API keys would go with it"
+            "Redirect was not followed: it leaves the configured origin and would expose credentials"
         )
     if response.status_code == 303 or (response.status_code in (301, 302) and method == "POST"):
         method = "GET"  # the way browsers and httpx re-issue these
@@ -312,6 +315,7 @@ class SyncTransport:
         headers, timeout, retries = self.config.headers(options), self.config.timeout_for(options), self.config.retries_for(options)
         attempt = redirects = 0
         while True:
+            check_http_security(httpx.URL(url), "keys")  # includes same-origin redirect targets
             try:
                 response = self._http.request(method, url, params=_clean(query), headers=headers, timeout=timeout, follow_redirects=False, **payload)
             except httpx.TransportError as exc:
@@ -371,6 +375,7 @@ class AsyncTransport:
         headers, timeout, retries = self.config.headers(options), self.config.timeout_for(options), self.config.retries_for(options)
         attempt = redirects = 0
         while True:
+            check_http_security(httpx.URL(url), "keys")  # includes same-origin redirect targets
             try:
                 response = await self._http.request(method, url, params=_clean(query), headers=headers, timeout=timeout, follow_redirects=False, **payload)
             except httpx.TransportError as exc:
