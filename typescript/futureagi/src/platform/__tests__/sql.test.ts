@@ -8,7 +8,7 @@ test("SQL snapshots, REST defaults, bounded pages and cancellation keep their wi
   const base = { id, ...body, created_at: body.start, expires_at: body.end, finished_at: null, error: "", expired: false, result: {} };
   const replies = [
     { ...base, state: "queued", reused: false },
-    { ...base, state: "running" },
+    { ...base, state: "waiting_for_capacity" },
     { ...base, state: "succeeded", result: { rows: [[1, false, "cell", null]], next_offset: null, has_more: false } },
     { ...base, state: "cancelled" },
     { version: 1, identity_semantics: "project", datasets: [], examples: [], max_rows: 10000, max_window_days: 31, can_save: false },
@@ -20,9 +20,9 @@ test("SQL snapshots, REST defaults, bounded pages and cancellation keep their wi
     return new Response(JSON.stringify(replies[calls.length - 1]), { status: calls.length === 1 ? 202 : 200 });
   } });
   const run: SQLExecution = await client.sql.run(body);
-  const state: "queued" | "running" | "succeeded" | "failed" | "cancelled" | null | undefined = run.state;
+  const state: string | null | undefined = run.state;
   expect(state).toBe("queued");
-  expect((await client.sql.getResult(id, { project_id })).state).toBe("running");
+  expect((await client.sql.getResult(id, { project_id })).state).toBe("waiting_for_capacity");
   const page = await client.sql.getResult(id, { project_id, limit: 1000, offset: 0 });
   expect(page.result?.rows).toEqual([[1, false, "cell", null]]);
   expect((await client.sql.cancel(id, { project_id })).state).toBe("cancelled");
@@ -56,4 +56,46 @@ test("optional SQL fields allow omission, not null", async () => {
   await expect(client.sql.run(body, { extraBody: { reuse: null } })).rejects.toThrow("reuse cannot be null");
   await expect(client.sql.getResult("id", { project_id: "project" }, { extraQuery: { limit: null } })).rejects.toThrow("limit cannot be null");
   expect(bodies).toEqual([body, { ...body, reuse: false }]);
+});
+
+
+test("SQL retries use the validated body and query overrides for the entire call", async () => {
+  const extraBody = { reuse: false as boolean | null };
+  const extraQuery = { limit: 1 as number | null, offset: 0 as number | null };
+  const sent: unknown[] = [];
+  const client = new Client({ apiKey: "example", secretKey: "example", maxRetries: 1, fetch: async (url, init) => {
+    sent.push(init.method === "POST" ? JSON.parse(String(init.body)).reuse : Object.fromEntries(new URL(url).searchParams));
+    if (sent.length % 2 === 1) {
+      if (init.method === "POST") extraBody.reuse = null;
+      else extraQuery.limit = extraQuery.offset = null;
+      return new Response(null, { status: 429, headers: { "Retry-After": "0" } });
+    }
+    return new Response("{}", { status: 200 });
+  } });
+  const project_id = "project";
+  await client.sql.run({ project_id, sql: "mock input", start: "start", end: "end" }, { extraBody });
+  await client.sql.getResult("job", { project_id }, { extraQuery });
+  const page = { project_id, limit: "1", offset: "0" };
+  expect(sent).toEqual([false, false, page, page]);
+});
+
+
+test("SQL validates the same values it sends without losing request option getters", async () => {
+  let reads = 0;
+  class RunParams {
+    project_id = "project"; sql = "mock input"; start = "start"; end = "end";
+    get reuse(): boolean { ++reads; return true; }
+  }
+  class Options {
+    #token = "scoped";
+    get extraBody() { return { reuse: false }; }
+    get headers() { return { "X-Test": this.#token }; }
+  }
+  const client = new Client({ apiKey: "example", secretKey: "example", fetch: async (_url, init) => {
+    expect(new Headers(init.headers).get("x-test")).toBe("scoped");
+    expect(JSON.parse(String(init.body)).reuse).toBe(false);
+    return new Response("{}", { status: 202 });
+  } });
+  await client.sql.run(new RunParams(), Object.freeze(new Options()));
+  expect(reads).toBe(1);
 });

@@ -55,7 +55,8 @@ def test_accepted_response_selection_is_explicit_and_fails_on_removed_status():
         load(spec, catalog)
 
 
-def test_scoped_sync_rejects_mismatched_source_bytes_and_shared_definitions(monkeypatch):
+@pytest.fixture
+def scoped_sync(monkeypatch):
     """Exercise the two-input gate without depending on Git history in a shallow CI checkout."""
     import hashlib
 
@@ -68,14 +69,26 @@ def test_scoped_sync_rejects_mismatched_source_bytes_and_shared_definitions(monk
                 "x-source-sha256": "baseline-hash"}
     source = json.dumps(spec).encode()
     manifest = {"tool_count": 4, "source_contract_sha256": hashlib.sha256(source).hexdigest(), "tools": []}
+    projections = {
+        "run_sql": ([], [], ["project_id", "sql", "start", "end", "reuse"], ["project_id", "sql", "start", "end"]),
+        "get_sql_result": (["id"], ["project_id", "offset", "limit"], [], ["id", "project_id"]),
+        "cancel_sql": (["id"], [], ["project_id"], ["id", "project_id"]),
+        "get_sql_catalog": ([], ["project_id"], [], ["project_id"]),
+    }
     for entry in sql["operations"]:
         operation = entry["operation"]
         path, method = operation["path"], operation["method"]
+        tool_name = entry["surfaces"]["mcp"]["name"]
+        path_names, query, body, required = projections[tool_name]
+        props = {k: {} for k in path_names + query + body}
+        if "limit" in props:
+            props["limit"]["maximum"] = 100
         manifest["tools"].append({
-            "name": entry["surfaces"]["mcp"]["name"], "group": "observability", "response": {"unwrap": None},
-            "request": {"method": method, "path": path}, "source": {"operationId": spec["paths"][path][method.lower()]["operationId"]},
+            "name": tool_name, "group": "observability", "response": {"unwrap": None},
+            "request": {"method": method, "path": path, "parameters": {"path": path_names, "query": query, "body": body}},
+            "source": {"operationId": spec["paths"][path][method.lower()]["operationId"]},
             "annotations": {"readOnlyHint": True, "destructiveHint": False, "openWorldHint": False, "idempotentHint": method == "GET"},
-            "inputSchema": {"properties": {"limit": {"maximum": 100}}},
+            "inputSchema": {"properties": props, "required": required},
         })
 
     def blob(_repo, _commit, path):
@@ -83,12 +96,43 @@ def test_scoped_sync_rejects_mismatched_source_bytes_and_shared_definitions(monk
                 sync.MCP: json.dumps(manifest).encode()}[path]
 
     monkeypatch.setattr(sync, "_blob", blob)
+    return lambda: sync.compose(ROOT, "0" * 40, "1" * 40), baseline, manifest
+
+
+def test_scoped_sync_rejects_mismatched_source_bytes_and_shared_definitions(scoped_sync):
+    compose, baseline, manifest = scoped_sync
     baseline["definitions"]["ManagementAPIErrorResponse"]["title"] = "conflicting baseline shape"
     with pytest.raises(ValueError, match="collides"):
-        sync.compose(ROOT, "0" * 40, "1" * 40)
+        compose()
     manifest["source_contract_sha256"] = "wrong"
     with pytest.raises(ValueError, match="hashes disagree"):
-        sync.compose(ROOT, "0" * 40, "1" * 40)
+        compose()
+
+
+@pytest.mark.parametrize("drift, message", [
+    ("move_path", "placement"), ("move_query", "placement"), ("move_body", "placement"),
+    ("missing_required", "required"), ("extra_required", "required"), ("extra_property", "properties"),
+])
+def test_scoped_sync_rejects_mcp_input_projection_drift(scoped_sync, drift, message):
+    compose, _, manifest = scoped_sync
+    tools = {tool["name"]: tool for tool in manifest["tools"]}
+    reader = tools["get_sql_result"]
+    params = reader["request"]["parameters"]
+    if drift == "move_path":
+        params["query"].append(params["path"].pop())
+    elif drift == "move_query":
+        params["body"].append(params["query"].pop())
+    elif drift == "move_body":
+        params = tools["run_sql"]["request"]["parameters"]
+        params["query"].append(params["body"].pop())
+    elif drift == "missing_required":
+        reader["inputSchema"]["required"].remove("project_id")
+    elif drift == "extra_required":
+        reader["inputSchema"]["required"].append("offset")
+    else:
+        reader["inputSchema"]["properties"]["unknown"] = {}
+    with pytest.raises(ValueError, match=message):
+        compose()
 
 
 def test_optional_input_nullability_comes_from_the_schema_only_when_opted_in():

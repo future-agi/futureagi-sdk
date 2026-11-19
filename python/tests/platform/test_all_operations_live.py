@@ -12,6 +12,7 @@ from __future__ import annotations
 import time
 import uuid
 import warnings
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import fi.platform as fi
@@ -123,6 +124,35 @@ def project(client):
 
 
 # --------------------------------------------------------------------------- #
+
+
+def test_sql_job_on_synthetic_spans(client, project):
+    """Run a bounded read on this test's own project and cancel only the job it created."""
+    project_id, spans, _ = project
+    assert client.projects.get(project_id).name == spans[0]["project_name"]
+    assert client.sql.get_catalog(project_id=project_id).max_window_days >= 1
+    # The ClickHouse list and the SQL scan must see the fixture after async ingestion.
+    assert wait_until(lambda: len(client.spans.list(project_id=project_id).table) == len(spans))
+    start = datetime.fromtimestamp(spans[0]["start_time"] / 1e9, tz=timezone.utc) - timedelta(minutes=1)
+    job = client.sql.run(project_id=project_id, sql="SELECT count() AS n FROM spans", start=start.isoformat(),
+                         end=datetime.now(timezone.utc).isoformat(), reuse=False)
+    assert job.id and job.project_id == project_id
+    try:
+        deadline = time.monotonic() + 45
+        while True:
+            page = client.sql.get_result(job.id, project_id=project_id, offset=0, limit=1)
+            assert page.id == job.id and page.project_id == project_id
+            if page.state not in {"queued", "running"}:
+                break
+            assert time.monotonic() < deadline, f"SQL job did not finish: {page.state}"
+            time.sleep(0.5)
+        assert page.state == "succeeded", page.error
+        assert page.result.rows == [[len(spans)]] and page.result.has_more is False
+    finally:
+        # Cancelling an already completed job returns its unchanged terminal snapshot.
+        final = client.sql.cancel(job.id, project_id=project_id)
+        assert final.id == job.id and final.project_id == project_id
+    assert final.state == "succeeded"
 
 
 def test_context(client):

@@ -245,3 +245,7 @@ schema has `x-nullable: true`. Omitting `run.reuse` leaves the server default
 leaves `limit` and `offset` off the query string unless supplied. Passing null
 for any of these three fields fails before a request is sent. Existing SDK
 operations keep their previous input types and wire behavior.
+
+`SQLExecution.state` reports the current server string, including future job
+states, without losing the typed snapshot. In strict Python reads, a required
+nullable response key such as `finished_at` must be present, but may be null.

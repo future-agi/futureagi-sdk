@@ -9,7 +9,7 @@ model's `__required__`; `Client(strict_responses=True)` rejects a response that 
 from __future__ import annotations
 
 # typing aliases (not `X | None`): pydantic evaluates these at runtime, and the SDK supports Python 3.9
-from typing import Any, ClassVar, Dict, FrozenSet, List, Literal, Optional
+from typing import Any, ClassVar, Dict, FrozenSet, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, model_validator
 
@@ -1715,7 +1715,7 @@ class SQLExecution(_Model):
     id: Optional[str] = Field(default=None)
     project_id: Optional[str] = Field(default=None)
     sql: Optional[str] = Field(default=None)
-    state: Optional[Literal['queued', 'running', 'succeeded', 'failed', 'cancelled']] = Field(default=None)  # one of: queued, running, succeeded, failed, cancelled
+    state: Optional[str] = Field(default=None)  # one of: queued, running, succeeded, failed, cancelled
     created_at: Optional[str] = Field(default=None)
     expires_at: Optional[str] = Field(default=None)
     finished_at: Optional[str] = Field(default=None)
@@ -1723,6 +1723,14 @@ class SQLExecution(_Model):
     error: Optional[str] = Field(default=None)
     result: Optional[SQLResult] = Field(default=None)
     expired: Optional[bool] = Field(default=None)
+
+    @model_validator(mode="after")
+    def _required_nullable_keys(self, info: ValidationInfo) -> "SQLExecution":
+        if info.context and info.context.get("strict"):
+            missing = sorted(set(['finished_at']) - self.model_fields_set)
+            if missing:
+                raise ValueError(f"missing required field(s): {', '.join(missing)}")
+        return self
 
 
 class SQLResult(_Model):

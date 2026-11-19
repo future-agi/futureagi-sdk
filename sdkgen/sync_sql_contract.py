@@ -17,6 +17,7 @@ from pathlib import Path
 
 import sync_contract
 import yaml
+from generator.catalog import Op, load
 
 TOOLS = {"run_sql", "get_sql_result", "cancel_sql", "get_sql_catalog"}
 SWAGGER = "api_contracts/openapi/swagger.json"
@@ -27,6 +28,19 @@ def _blob(repo: Path, commit: str, path: str) -> bytes:
     if not re.fullmatch(r"[a-f0-9]{40}", commit):
         raise ValueError("contract sources require full commit hashes")
     return subprocess.check_output(["git", "-C", str(repo), "show", f"{commit}:{path}"])
+
+
+def _check_mcp_parameters(op: Op, tool: dict) -> None:
+    """Compare the generated SDK inputs to the MCP wire mapping, not just its route."""
+    expected = {loc: sorted(p.name for p in op.params_in(loc)) for loc in ("path", "query", "body")}
+    actual = tool["request"]["parameters"]
+    if {loc: sorted(names) for loc, names in actual.items()} != expected:
+        raise ValueError(f"SQL MCP parameter placement mismatch: {op.id}")
+    schema = tool["inputSchema"]
+    if set(schema["properties"]) != {p.name for p in op.params}:
+        raise ValueError(f"SQL MCP input properties mismatch: {op.id}")
+    if sorted(schema.get("required", [])) != sorted(p.name for p in op.params if p.required):
+        raise ValueError(f"SQL MCP required parameters mismatch: {op.id}")
 
 
 def compose(product: Path, commit: str, baseline_sdk: str) -> dict:
@@ -68,6 +82,8 @@ def compose(product: Path, commit: str, baseline_sdk: str) -> dict:
         (sql if is_sql else existing).append(entry)
     if len(sql) != len(TOOLS) or {e["surfaces"]["mcp"]["name"] for e in sql} != TOOLS:
         raise ValueError("expected exactly four public SQL mappings")
+    for op in load(source, {"operations": sql}):
+        _check_mcp_parameters(op, tools[op.surfaces["mcp"]["name"]])
     old_paths, old_defs = sync_contract.project(old, existing)
     if old_paths != old["paths"] or old_defs != old["definitions"]:
         raise ValueError("SQL projection would alter the SDK baseline")

@@ -1568,7 +1568,7 @@ export interface SQLExecution {
   id?: string | null;
   project_id?: string | null;
   sql?: string | null;
-  state?: "queued" | "running" | "succeeded" | "failed" | "cancelled" | null; // one of: queued, running, succeeded, failed, cancelled
+  state?: "queued" | "running" | "succeeded" | "failed" | "cancelled" | (string & Record<never, never>) | null; // one of: queued, running, succeeded, failed, cancelled
   created_at?: string | null;
   expires_at?: string | null;
   finished_at?: string | null;

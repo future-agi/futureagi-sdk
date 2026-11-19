@@ -3417,13 +3417,22 @@ export class SqlResource extends Resource {
    * GET /tracer/sql-query/{id}/
    */
   async getResult(id: string, params: SqlGetResultParams, options?: RequestOptions): Promise<models.SQLExecution> {
-    if (params["offset"] === null || options?.extraQuery?.["offset"] === null) {
+    const query = { project_id: params.project_id, offset: params.offset, limit: params.limit };
+    const extraQuery = { ...options?.extraQuery };
+    if (query["offset"] === null || extraQuery["offset"] === null) {
       throw new TypeError("sql.get_result: offset cannot be null; omit it instead");
     }
-    if (params["limit"] === null || options?.extraQuery?.["limit"] === null) {
+    if (query["limit"] === null || extraQuery["limit"] === null) {
       throw new TypeError("sql.get_result: limit cannot be null; omit it instead");
     }
-    return this._t.call<models.SQLExecution>(ops.OP_SQL_GET_RESULT, { path: { id: id }, query: { project_id: params.project_id, offset: params.offset, limit: params.limit } }, options);
+    const callOptions = {
+      get headers() { return options?.headers; },
+      get timeout() { return options?.timeout; },
+      get maxRetries() { return options?.maxRetries; },
+      extraQuery,
+      get extraBody() { return options?.extraBody; },
+    } satisfies Record<keyof RequestOptions, unknown>;
+    return this._t.call<models.SQLExecution>(ops.OP_SQL_GET_RESULT, { path: { id: id }, query }, callOptions);
   }
 
   /**
@@ -3432,10 +3441,19 @@ export class SqlResource extends Resource {
    * POST /tracer/sql-query/run/
    */
   async run(params: SqlRunParams, options?: RequestOptions): Promise<models.SQLExecution> {
-    if (params["reuse"] === null || options?.extraBody?.["reuse"] === null) {
+    const body = { project_id: params.project_id, sql: params.sql, start: params.start, end: params.end, reuse: params.reuse };
+    const extraBody = { ...options?.extraBody };
+    if (body["reuse"] === null || extraBody["reuse"] === null) {
       throw new TypeError("sql.run: reuse cannot be null; omit it instead");
     }
-    return this._t.call<models.SQLExecution>(ops.OP_SQL_RUN, { path: {}, query: {}, body: { project_id: params.project_id, sql: params.sql, start: params.start, end: params.end, reuse: params.reuse } }, options);
+    const callOptions = {
+      get headers() { return options?.headers; },
+      get timeout() { return options?.timeout; },
+      get maxRetries() { return options?.maxRetries; },
+      get extraQuery() { return options?.extraQuery; },
+      extraBody,
+    } satisfies Record<keyof RequestOptions, unknown>;
+    return this._t.call<models.SQLExecution>(ops.OP_SQL_RUN, { path: {}, query: {}, body }, callOptions);
   }
 }
 

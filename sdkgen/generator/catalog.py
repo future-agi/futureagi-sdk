@@ -122,13 +122,13 @@ def is_method_field(prop: dict) -> bool:
     return plain(prop) or (prop.get("type") == "array" and plain(prop.get("items", {})))
 
 
-def declared_enum_models(ops: list[Op]) -> set[str]:
-    """Only opted-in response models use the declared wire enum rather than an open string."""
+def declared_response_models(ops: list[Op]) -> set[str]:
+    """Named responses opted into required nullable keys and open, documented string enums."""
     models = set()
     for op in sdk_ops(ops):
-        if op.surfaces["sdk"].get("declared_response_enums"):
+        if op.surfaces["sdk"].get("declared_response_fields"):
             if not op.returns or "$ref" not in op.returns:
-                raise CatalogError(f"{op.id}: declared_response_enums needs a named response")
+                raise CatalogError(f"{op.id}: declared_response_fields needs a named response")
             models.add(class_name(op.returns["$ref"]))
     return models
 

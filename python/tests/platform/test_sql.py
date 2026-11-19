@@ -5,7 +5,13 @@ import json
 
 import httpx
 import pytest
-from fi.platform import AsyncClient, Client, PermissionDeniedError, models
+from fi.platform import (
+    AsyncClient,
+    Client,
+    PermissionDeniedError,
+    ResponseValidationError,
+    models,
+)
 
 PROJECT = "00000000-0000-4000-8000-000000000001"
 JOB = "00000000-0000-4000-8000-000000000002"
@@ -96,8 +102,7 @@ def test_run_omits_reuse_and_rejects_explicit_null_before_transport():
     assert bodies == [args, {**args, "reuse": False}]
 
 
-@pytest.mark.asyncio
-async def test_async_run_distinguishes_omission_false_and_null():
+def test_async_run_distinguishes_omission_false_and_null():
     bodies = []
 
     def handle(request):
@@ -105,13 +110,40 @@ async def test_async_run_distinguishes_omission_false_and_null():
         return httpx.Response(202, json=job("queued"))
 
     args = dict(project_id=PROJECT, sql=TEXT, start=START, end=END)
-    async with httpx.AsyncClient(transport=httpx.MockTransport(handle)) as http:
-        client = AsyncClient(api_key="example", secret_key="example", http_client=http)
-        await client.sql.run(**args)
-        await client.sql.run(**args, reuse=False)
-        with pytest.raises(TypeError, match="reuse cannot be null"):
-            await client.sql.run(**args, reuse=None)
-        for field in ("offset", "limit"):
-            with pytest.raises(TypeError, match=f"{field} cannot be null"):
-                await client.sql.get_result(JOB, project_id=PROJECT, extra_query={field: None})
+
+    async def run():
+        async with httpx.AsyncClient(transport=httpx.MockTransport(handle)) as http:
+            client = AsyncClient(api_key="example", secret_key="example", http_client=http)
+            await client.sql.run(**args)
+            await client.sql.run(**args, reuse=False)
+            with pytest.raises(TypeError, match="reuse cannot be null"):
+                await client.sql.run(**args, reuse=None)
+            for field in ("offset", "limit"):
+                with pytest.raises(TypeError, match=f"{field} cannot be null"):
+                    await client.sql.get_result(JOB, project_id=PROJECT, extra_query={field: None})
+
+    asyncio.run(run())
     assert bodies == [args, {**args, "reuse": False}]
+
+
+@pytest.mark.parametrize("strict", [False, True])
+def test_future_job_state_preserves_typed_snapshot(strict):
+    reply = {**job("waiting_for_capacity"), "result": {"rows": [[1]]}}
+    with httpx.Client(transport=httpx.MockTransport(lambda _: httpx.Response(200, json=reply))) as http:
+        sql = Client(api_key="example", secret_key="example", http_client=http, strict_responses=strict).sql
+        snapshot = sql.get_result(JOB, project_id=PROJECT)
+        assert isinstance(snapshot, models.SQLExecution) and snapshot.state == "waiting_for_capacity"
+        assert snapshot.result.rows == [[1]]
+
+
+def test_strict_job_requires_finished_at_key_not_a_nonnull_timestamp():
+    reply = job("queued")
+    with httpx.Client(transport=httpx.MockTransport(lambda _: httpx.Response(200, json=reply))) as http:
+        kwargs = dict(api_key="example", secret_key="example", http_client=http)
+        strict = Client(**kwargs, strict_responses=True).sql
+        assert strict.get_result(JOB, project_id=PROJECT).finished_at is None
+        del reply["finished_at"]
+        with pytest.raises(ResponseValidationError, match="finished_at"):
+            strict.get_result(JOB, project_id=PROJECT)
+        snapshot = Client(**kwargs).sql.get_result(JOB, project_id=PROJECT)
+        assert isinstance(snapshot, models.SQLExecution) and "finished_at" not in snapshot.model_fields_set
