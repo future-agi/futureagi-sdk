@@ -9,6 +9,7 @@ exists once traces are indexed); those accept the typed error the backend sends,
 
 from __future__ import annotations
 
+import decimal
 import json
 import os
 import re
@@ -180,13 +181,20 @@ def _clean_sql_otlp_receipt(body):
     def invalid_constant(_):  # Python accepts NaN/Infinity by default; JSON.parse does not.
         raise ValueError
 
+    def unique_object(pairs):
+        obj = dict(pairs)
+        if len(obj) != len(pairs):
+            raise ValueError
+        return obj
+
     try:
         text = body.decode("utf-8")
         # String.trim() treats Unicode separators and BOM as whitespace, not arbitrary controls.
         if all(ch in "\t\n\v\f\r\ufeff" or unicodedata.category(ch).startswith("Z") for ch in text):
             return True
-        receipt = json.loads(text, parse_constant=invalid_constant)
-    except (ValueError, RecursionError):
+        receipt = json.loads(text, object_pairs_hook=unique_object, parse_int=decimal.Decimal,
+                             parse_float=decimal.Decimal, parse_constant=invalid_constant)
+    except (ValueError, RecursionError, decimal.InvalidOperation):
         return False
 
     counts = {"rejectedSpans", "rejected_spans"}
@@ -198,7 +206,7 @@ def _clean_sql_otlp_receipt(body):
             return False
         for key, value in partial.items():
             if key in counts:
-                zero = type(value) in (int, float) and value == 0
+                zero = isinstance(value, decimal.Decimal) and value.is_zero()
                 if not zero and not (isinstance(value, str) and re.fullmatch(r"0+", value)):
                     return False
             elif value != "":
@@ -232,9 +240,11 @@ def sql_project(client):
         try:
             reply = http.post(url, json=payload, headers=headers)
         except httpx.RequestError:
-            raise ValueError("SQL fixture collector request failed") from None
+            reply = None
+        if reply is None:  # Don't chain a transport exception into pytest's report.
+            pytest.fail("SQL fixture collector request failed", pytrace=False)
         if not reply.is_success:
-            raise ValueError(f"SQL fixture collector returned HTTP {reply.status_code}")
+            pytest.fail(f"SQL fixture collector returned HTTP {reply.status_code}", pytrace=False)
         if not _clean_sql_otlp_receipt(reply.content):
             pytest.fail("SQL fixture collector returned an invalid or partial OTLP receipt", pytrace=False)
 

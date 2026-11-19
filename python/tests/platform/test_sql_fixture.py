@@ -1,6 +1,9 @@
 """Exercise the SQL seed fixture without a backend, real credentials or network I/O."""
 
+import os
 import socket
+import subprocess
+import sys
 from unittest.mock import Mock
 
 import httpx
@@ -80,6 +83,8 @@ def test_sql_seed_rejects_invalid_collector_port(wire, monkeypatch, port):
 @pytest.mark.parametrize("body", [
     b"", b" \t\r\n", "\ufeff\u00a0".encode(), b"{}", b'{"partialSuccess":{}}',
     b'{"partialSuccess":{"rejectedSpans":0,"errorMessage":""},"partial_success":{"rejected_spans":"00","error_message":""}}',
+    b'{"partialSuccess":{"rejectedSpans":0e-400}}',
+    b'{"partialSuccess":{"rejectedSpans":0E+400}}',
 ])
 def test_sql_seed_accepts_clean_receipt(wire, body):
     seed, requests, _ = wire
@@ -95,10 +100,18 @@ def test_sql_seed_accepts_clean_receipt(wire, body):
     b'{"partial_success":{},"partialSuccess":{"error_message":"opaque-body"}}',
     b'{"partialSuccess":{"rejectedSpans":0,"rejected_spans":1}}',
     b'{"partial_success":{"errorMessage":"","error_message":"opaque-body"}}',
-    b'{"partialSuccess":{"rejectedSpans":NaN,"rejectedSpans":0}}', b"\x1c",
+    b'{"partialSuccess":{"rejectedSpans":NaN,"rejectedSpans":0}}',
+    b'{"partialSuccess":{"rejectedSpans":1e-400}}',
+    b'{"partialSuccess":{"rejectedSpans":1,"rejectedSpans":0}}',
+    b'{"partial_success":{"error_message":"opaque-body","error_message":""}}',
+    b'{"partialSuccess":{"rejectedSpans":1},"partialSuccess":{}}',
+    b'{"partial_success":{},"partial_success":{}}',
+    b"\x1c",
     b"opaque-body", b"\xff", b"[]", b"null", b'{"opaque-body":0}', b'{"partial_success":null}',
     b'{"partialSuccess":{"opaque-body":0}}', b'{"partial_success":{"errorMessage":null}}',
     b'{"partialSuccess":{"rejectedSpans":false}}', b'{"partialSuccess":{"rejectedSpans":"0.0"}}',
+    b'{"partialSuccess":{"rejectedSpans":1e+400}}', b'{"partialSuccess":{"rejectedSpans":1e}}',
+    b'{"partial_success":{"rejected_spans":-Infinity}}', b'{"partialSuccess":{"rejectedSpans":1e9999999999999999999999}}',
 ])
 def test_sql_seed_stops_on_unclean_receipt(wire, body):
     seed, requests, sdk = wire
@@ -111,14 +124,42 @@ def test_sql_seed_stops_on_unclean_receipt(wire, body):
 @pytest.mark.parametrize("status", [307, 429, 503])
 def test_sql_seed_does_not_redirect_or_replay(wire, status):
     seed, requests, sdk = wire
-    with pytest.raises(ValueError, match=f"^SQL fixture collector returned HTTP {status}$"):
+    with pytest.raises(pytest.fail.Exception, match=f"^SQL fixture collector returned HTTP {status}$") as failure:
         seed(b"opaque-body", status)
+    assert not failure.value.pytrace
     assert [str(request.url) for request in requests] == ["http://localhost:24318/v1/traces"]
     assert not sdk.mock_calls
 
 
 def test_sql_seed_does_not_replay_after_ambiguous_transport_error(wire):
     seed, requests, sdk = wire
-    with pytest.raises(ValueError, match="^SQL fixture collector request failed$"):
+    with pytest.raises(pytest.fail.Exception, match="^SQL fixture collector request failed$") as failure:
         seed(error=httpx.ReadError("synthetic-secret"))
+    assert not failure.value.pytrace
     assert len(requests) == 1 and not sdk.mock_calls
+
+
+def test_sql_seed_failure_output_is_sanitized(tmp_path):
+    script = tmp_path / "failure_test.py"
+    script.write_text(
+        "import httpx\n"
+        "from test_sql_fixture import wire\n\n"
+        "def test_transport(wire):\n"
+        "    wire[0](error=httpx.ReadError('opaque-transport-detail'))\n\n"
+        "def test_status(wire):\n"
+        "    wire[0](b'opaque-body', 503)\n",
+        encoding="utf-8",
+    )
+    result = subprocess.run(
+        [sys.executable, "-m", "pytest", "--showlocals", "--tb=long", "-q", str(script)],
+        cwd=tmp_path, capture_output=True, text=True, timeout=45,
+        env={**os.environ, "PYTHONPATH": os.pathsep.join(sys.path), "PYTEST_ADDOPTS": "",
+             "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1"},
+    )
+    output = (result.stdout + result.stderr).lower()
+    assert result.returncode == pytest.ExitCode.TESTS_FAILED and "2 failed" in output
+    assert "sql fixture collector request failed" in output
+    assert "sql fixture collector returned http 503" in output
+    for marker in ("synthetic-api", "synthetic-secret", "opaque-body", "opaque-header",
+                   "opaque-transport-detail", "x-api-key", "x-secret-key", "location"):
+        assert marker not in output
