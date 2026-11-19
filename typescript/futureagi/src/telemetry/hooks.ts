@@ -1,6 +1,7 @@
 import type { Context, Span, TracerProvider } from "@opentelemetry/api";
 import type { Selector, SnapshotIdentity } from "../context/types";
 import { activeContext, allowlisted, Attributes, carrierAttributes, CARRIER_KEY, mode, provider, recording, safe, SCOPE_KEY, setAttributes } from "./otel";
+import { automaticName, markContextName } from "./agent-name";
 import { closure, errorType, identityAttrs, linkedSkill, selectorAttrs, SnapshotLike, validIdentity } from "./identity";
 import { deliveryState, ScopeState } from "./registry";
 import { logFirstLoad, recordLastLoad } from "./status";
@@ -36,19 +37,17 @@ function atCompletion(ticket: ReadTicket): DeliveryTicket | undefined {
   const state = deliveryState(traceId, activeMode, explicit);
   if (!explicit && Object.keys(state.attrs).length === 0) state.attrs = carrierAttributes(parent.getValue(CARRIER_KEY));
   const framework = (current as Span & { attributes?: Attributes }).attributes?.["gen_ai.agent.name"];
-  if (!state.attrs["gen_ai.agent.name"] && typeof framework === "string") {
+  if (!state.attrs["gen_ai.agent.name"] && typeof framework === "string" && !automaticName(current)) {
     state.attrs = allowlisted({ ...state.attrs, "gen_ai.agent.name": framework });
     state.agentSource = "framework";
   }
   return { ...ticket, state, mode: activeMode };
 }
-// Only overwrite an agent name which this hook itself put on this span.
-const contextAgents = new WeakMap<Span, unknown>();
 function scopeAttrs(ticket: DeliveryTicket): Attributes {
   const attrs = Object.fromEntries(Object.entries(ticket.state.attrs).filter(([key]) => /^(fi\.context\.(id|version_id|digest|name|version|requested_label|requested_version|binding_id|session_id)|gen_ai\.agent\.(name|id))$/.test(key)));
   const explicit = (ticket.current as Span & { attributes?: Attributes }).attributes;
   for (const key of ["gen_ai.agent.name", "gen_ai.agent.id"]) {
-    if (explicit?.[key] !== undefined && !(key === "gen_ai.agent.name" && explicit[key] === contextAgents.get(ticket.current))) attrs[key] = explicit[key];
+    if (explicit?.[key] !== undefined && !(key === "gen_ai.agent.name" && automaticName(ticket.current))) attrs[key] = explicit[key];
   }
   return allowlisted(attrs);
 }
@@ -80,9 +79,9 @@ function enrich(ticket: DeliveryTicket, resetSkills = false): void {
     }
     const attrs = Object.fromEntries(Object.entries(ticket.state.attrs).filter(([key]) =>
       !key.startsWith("gen_ai.agent.") || explicit?.[key] === undefined ||
-      (key === "gen_ai.agent.name" && explicit[key] === contextAgents.get(ticket.current))));
+      (key === "gen_ai.agent.name" && automaticName(ticket.current))));
     setAttributes(ticket.current, attrs);
-    if (ticket.state.agentSource === "context" && attrs["gen_ai.agent.name"]) contextAgents.set(ticket.current, attrs["gen_ai.agent.name"]);
+    if (ticket.state.agentSource === "context" && attrs["gen_ai.agent.name"]) markContextName(ticket.current);
   }
 }
 function loadContext(ticket: DeliveryTicket, snapshot: SnapshotLike, enrichCurrent = true): void {

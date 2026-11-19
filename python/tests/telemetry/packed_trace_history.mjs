@@ -10,9 +10,11 @@ const load = (form, name) => form === 'cjs' ? require(name) : import(name);
 const [coreForm, sdkForm] = process.argv.slice(2);
 const {register} = await load(coreForm, '@traceai/fi-core');
 const {ContextSnapshot, SnapshotIntegrityError} = await load(sdkForm, '@future-agi/sdk/context');
-const {configure, withAgentScope, declareSkill} = await load(sdkForm === 'esm' ? 'cjs' : 'esm', '@future-agi/sdk/telemetry');
+const {configure, withAgentScope, declareSkill, FutureAGISkillsSpanProcessor} = await load(sdkForm === 'esm' ? 'cjs' : 'esm', '@future-agi/sdk/telemetry');
 const memory = new InMemorySpanExporter();
-const provider = register({projectName: 'history', spanProcessors: [new SimpleSpanProcessor(memory)]});
+const sdkProcessor = process.argv[4] === 'sdk-processor';
+const provider = register({projectName: 'history', runtimeAttributes: !sdkProcessor,
+  spanProcessors: [...(sdkProcessor ? [new FutureAGISkillsSpanProcessor()] : []), new SimpleSpanProcessor(memory)]});
 const tracer = trace.getTracer('history');
 const hash = v => createHash('sha256').update(v).digest('hex');
 function fixture(kind, name, tracing = true) {
@@ -96,6 +98,56 @@ for (const scoped of [false, true]) for (const env of [false, true]) {
       if (middle === 'on' && !scoped) { assert.equal(parent.attributes['fi.skills.count'], 0); assert.deepEqual(parent.attributes['fi.skills.version_ids'], []); }
       assert.deepEqual(events('context.load').map(s => s.attributes['fi.context.version_id']), [a.version,b.version]);
     }, a.snapshot);
+  });
+}
+const NAME = 'gen_ai.agent.name', VERSION = 'fi.context.version_id';
+for (const nested of [false, true]) for (const override of ['none', 'start_same', 'setter_same', 'bulk_same', 'setter_different']) {
+  test(`context name nested=${nested} origin=${override}`, async () => {
+    memory.reset(); mode(false, 'on');
+    const a = fixture('agent_context', 'alpha'), b = fixture('agent_context', 'beta');
+    const options = override === 'start_same' ? {attributes:{[NAME]:'alpha'}} : {};
+    await tracer.startActiveSpan('root', nested ? {} : options, async root => {
+      try {
+        assert.equal(await a.snapshot.readFile('AGENTS.md'), 'alpha');
+        const select = async active => {
+          if (override.startsWith('setter')) active.setAttribute(NAME, override.endsWith('different') ? 'gamma' : 'alpha');
+          if (override === 'bulk_same') active.setAttributes({[NAME]: 'alpha'});
+          assert.equal(await b.snapshot.readFile('AGENTS.md'), 'beta');
+        };
+        if (nested) await tracer.startActiveSpan('nested', options, async s => { try {await select(s);} finally {s.end();} });
+        else await select(root);
+      } finally { root.end(); }
+    });
+    const expected = override === 'none' ? 'beta' : override.endsWith('different') ? 'gamma' : 'alpha';
+    for (const span of [events('context.load').at(-1), events(nested ? 'nested' : 'root')[0]]) {
+      assert.equal(span.attributes[VERSION], b.version);
+      assert.equal(span.attributes[NAME], expected);
+    }
+  });
+}
+for (const entry of ['load_only', 'on']) for (const completion of ['load_only','on','off']) for (const env of [false,true]) {
+  test(`entry context ${entry} completion=${completion} env=${env}`, async () => {
+    memory.reset(); mode(env, entry);
+    const b = fixture('agent_context','beta'), c = fixture('agent_context','gamma');
+    await tracer.startActiveSpan('root', async root => {
+      try {
+        await withAgentScope({context: b.snapshot}, async () => {
+          mode(env, 'on'); tracer.startSpan('mode-alone').end();
+          const {entered,resume} = c.source.pause = {entered:Promise.withResolvers(), resume:Promise.withResolvers()};
+          const read = c.snapshot.readFile('AGENTS.md'); await entered.promise;
+          mode(env, completion); resume.resolve(); assert.equal(await read, 'gamma');
+          mode(env, 'on'); tracer.startSpan('after-delivery').end();
+          assert.equal(await c.snapshot.readFile('AGENTS.md'), 'gamma'); tracer.startSpan('selected').end();
+        });
+        tracer.startSpan('outside').end();
+      } finally { root.end(); }
+    });
+    const seeded = entry === 'on' ? b : undefined;
+    for (const [label, context] of [['mode-alone',seeded], ['after-delivery',completion === 'on' ? c : seeded], ['selected',c], ['outside',undefined]]) {
+      const event = events(label)[0].attributes;
+      assert.equal(event[VERSION], context?.version, label); assert.equal(event[NAME], context?.snapshot.identity.name, label);
+    }
+    assert.deepEqual(events('context.load').map(s => s.attributes[VERSION]), [b.version,c.version]);
   });
 }
 after(async () => { delete process.env.FI_SKILLS_TRACING; configure(); await provider.shutdown(); });

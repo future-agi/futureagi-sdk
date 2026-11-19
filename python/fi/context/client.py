@@ -18,6 +18,7 @@ from fi.platform import AsyncClient as PlatformAsyncClient
 from fi.platform import Client as PlatformClient
 from fi.platform import RequestOptions
 
+from ._receipt import verified_handoff
 from .snapshot import (
     ChunkCollector,
     ManifestCollector,
@@ -181,7 +182,7 @@ class ContextSnapshot:
     def read_all(self) -> VerifiedSnapshot:
         files = {item.path: self.read_file(item.path, trace=False) for item in self.manifest.files}
         self.manifest.lease.require_live()
-        return VerifiedSnapshot(self.manifest, files)
+        return verified_handoff(self, VerifiedSnapshot(self.manifest, files))
 
 
 @dataclass(frozen=True)

@@ -36,10 +36,11 @@ def context_attrs(snapshot):
     requested = snapshot.manifest.requested
     if "label" in requested:
         attrs.update(selector_attrs(requested, "fi.context"))
-    for name in ("binding_id", "session_id"):
-        value = getattr(snapshot, "_telemetry_" + name, None)
-        if value:
-            attrs["fi.context." + name] = _uuid(value)
+    from fi.context._receipt import session_receipt
+    receipt = session_receipt(snapshot)
+    if receipt is not None:
+        attrs["fi.context.binding_id"] = receipt.binding_id
+        attrs["fi.context.session_id"] = receipt.session_id
     return attrs
 
 

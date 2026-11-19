@@ -17,7 +17,7 @@ class ScopeContext implements Context {
   constructor(private readonly base: Context, private readonly state: ScopeState, private readonly reset: boolean) {}
   getValue(key: symbol): unknown {
     if (key === SCOPE_KEY) return this.state;
-    if (key === CARRIER_KEY) return Object.freeze({ v: 1, attrs: mode() === "on" ? this.state.attrs : Object.freeze({}), reset_skills: this.reset });
+    if (key === CARRIER_KEY) return Object.freeze({ v: 1, attrs: mode() === "on" ? this.state.propagationAttrs : Object.freeze({}), reset_skills: this.reset });
     return this.base.getValue(key);
   }
   setValue(key: symbol, value: unknown): Context {
@@ -31,7 +31,8 @@ class ScopeContext implements Context {
 }
 
 export function withAgentScope<T>(options: { agent?: string; context?: SnapshotLike }, callback: () => T): T {
-  if (mode() === "off") return callback();
+  const entryMode = mode();
+  if (entryMode === "off") return callback();
   const setup = safe(() => {
     const manager = api()?.context;
     const parent = activeContext();
@@ -43,11 +44,11 @@ export function withAgentScope<T>(options: { agent?: string; context?: SnapshotL
     let attrs = { ...inherited };
     if (options.context) {
       attrs = Object.fromEntries(Object.entries(attrs).filter(([key]) => !/^(fi\.context\.|fi\.skills\.|gen_ai\.agent\.)/.test(key)));
-      attrs = { ...attrs, ...identityAttrs(options.context.identity, options.context.manifest.requested), "gen_ai.agent.name": options.context.identity.name };
     }
     if (options.agent !== undefined) attrs["gen_ai.agent.name"] = options.agent;
     const state = new ScopeState(allowlisted(attrs));
-    state.agentSource = options.agent !== undefined ? "agent_scope" : options.context ? "context" : previous?.agentSource ?? "none";
+    state.agentSource = options.agent !== undefined ? "agent_scope" : options.context ? "none" : previous?.agentSource ?? "none";
+    if (options.context) state.view(entryMode).selectContext(identityAttrs(options.context.identity, options.context.manifest.requested), options.context.identity.name);
     return { manager, context: new ScopeContext(parent, state, !!options.context) };
   });
   if (!setup) return callback();

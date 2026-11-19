@@ -1,4 +1,5 @@
 import type { Context, Span } from "@opentelemetry/api";
+import { AGENT_NAME, markPublishedName } from "./agent-name";
 import { allowlisted, Attributes, carrierAttributes, CARRIER_KEY, mode, PROCESSOR_KEY, REGISTRY_KEY, safe } from "./otel";
 
 interface StartSpan extends Span { readonly attributes?: Record<string, unknown>; }
@@ -16,12 +17,14 @@ export class FutureAGISkillsSpanProcessor {
       globals[PROCESSOR_KEY] = traceId;
       const carrier = parentContext.getValue(CARRIER_KEY);
       const registry = globals[REGISTRY_KEY] as RegistryReader | undefined;
+      const registryAttrs = carrier == null && registry?.v === 1 ? registry.get(traceId) : undefined;
       const attrs = carrier !== undefined && carrier !== null
         ? carrierAttributes(carrier)
-        : allowlisted(registry?.v === 1 ? registry.get(traceId) : undefined);
+        : allowlisted(registryAttrs);
       for (const [key, value] of Object.entries(attrs)) {
         if (Object.prototype.hasOwnProperty.call(span.attributes ?? {}, key)) continue;
         span.setAttribute(key, Array.isArray(value) ? [...value] : value as string | number | boolean);
+        if (key === AGENT_NAME) markPublishedName(span, (carrier as { attrs?: unknown } | undefined)?.attrs ?? registryAttrs);
       }
     });
   }

@@ -3,9 +3,8 @@ from __future__ import annotations
 
 import sys
 from time import time_ns
-from weakref import WeakKeyDictionary
 
-from . import _otel, _status
+from . import _agent_name, _otel, _status
 from ._identity import (
     context_attrs,
     error_type,
@@ -14,18 +13,9 @@ from ._identity import (
     selector_attrs,
     verified_links,
 )
-from ._registry import registry
+from ._registry import State, registry
 
-# Distinguish our automatic context-derived name from a framework's explicit name.
-_context_agents = WeakKeyDictionary()
 _EMPTY_CARRIER = _otel.carrier({})
-
-
-def _context_agent(span):
-    try:
-        return _context_agents.get(span)
-    except TypeError:  # A custom host span need not support weak references.
-        return None
 
 
 def _scope_attrs(state, span):
@@ -42,7 +32,7 @@ def _scope_attrs(state, span):
     existing = getattr(span, "attributes", None) or {}
     if _otel._scope.get() is None:
         for key in ("gen_ai.agent.name", "gen_ai.agent.id"):
-            if key in existing and not (key == "gen_ai.agent.name" and existing[key] == _context_agent(span)):
+            if key in existing and not (key == "gen_ai.agent.name" and _agent_name.automatic(span)):
                 attrs[key] = existing[key]
     return attrs
 
@@ -96,15 +86,13 @@ def _enrich(state, current, mode, *, reset_skills=False):
             current.set_attribute("fi.skills.truncated", False)
     for key, value in state.attrs.items():
         if key.startswith("gen_ai.agent.") and key in existing and not (
-            key == "gen_ai.agent.name" and existing[key] == _context_agent(current)
+            key == "gen_ai.agent.name" and _agent_name.automatic(current)
         ):
             continue
-        current.set_attribute(key, value)
-        if key == "gen_ai.agent.name" and state.agent_source == "context":
-            try:
-                _context_agents[current] = value
-            except TypeError:
-                pass  # Without provenance, preserve the existing agent name next time.
+        if key == _agent_name.NAME and state.agent_source == "context":
+            _agent_name.write_context_name(current, value)
+        else:
+            current.set_attribute(key, value)
 
 
 def load_context(snapshot, state, current, provider, start, mode, *, enrich=True):
@@ -192,8 +180,12 @@ class Read:
                     requested, root = snapshot.manifest.requested, True
                 else:
                     skill, requested, root = linked
-                    attrs.update(context_attrs(snapshot))
-                    attrs.setdefault("gen_ai.agent.name", snapshot.identity.name)
+                    # Linked-file evidence belongs to its source, not whichever
+                    # context was last selected on this trace. Do not select it
+                    # for future spans just to describe this individual read.
+                    selected = State(attrs=dict(state.attrs), agent_source=state.agent_source)
+                    selected.select_context(context_attrs(snapshot), snapshot.identity.name)
+                    attrs = _scope_attrs(selected, self.current)
                     skill["fi.skill.via_context.version_id"] = snapshot.identity.version_id
                 via = self.via or "context.read"
             attrs.update(selector_attrs(requested))

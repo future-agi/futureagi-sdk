@@ -36,12 +36,12 @@ class agent_scope:
                 attrs.update(_otel.allowlisted(value.get("attrs", {})))
             if self.context is not None:
                 attrs = {k: v for k, v in attrs.items() if not k.startswith(("fi.context.", "fi.skills.", "gen_ai.agent."))}
-                attrs.update(context_attrs(self.context))
-                attrs["gen_ai.agent.name"] = self.context.identity.name
             if self.agent is not None:
                 attrs["gen_ai.agent.name"] = str(self.agent)
             self.state = State(attrs=_otel.allowlisted(attrs))
-            self.state.agent_source = "agent_scope" if self.agent is not None else "context" if self.context is not None else getattr(parent, "agent_source", "none")
+            self.state.agent_source = "agent_scope" if self.agent is not None else "none" if self.context is not None else getattr(parent, "agent_source", "none")
+            if self.context is not None:
+                self.state.view(_otel.mode()).select_context(context_attrs(self.context), self.context.identity.name)
             self._token = _otel._scope.set(self.state)
             self._carrier_token = _otel.bind_scope(self.state, reset=self.context is not None)
             provider, _ = _otel.select_provider()

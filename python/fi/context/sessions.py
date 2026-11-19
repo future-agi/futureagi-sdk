@@ -11,6 +11,7 @@ from uuid import UUID
 
 from fi.platform import Client, RequestOptions
 
+from ._receipt import _attach
 from .client import ContextSnapshot
 from .snapshot import PAGE_SIZE, ManifestCollector, SnapshotIntegrityError
 from .source import ConsumptionSource, validate_access
@@ -69,6 +70,7 @@ class ContextSessionClient:
             _telemetry_binding_id=self.binding_id,
             _telemetry_session_id=str(UUID(session["session_id"])))
         self.check_access(session, snapshot)
+        _attach(snapshot, self.binding_id, snapshot._telemetry_session_id)
         return snapshot
 
     def check_access(self, session: dict, snapshot: ContextSnapshot) -> None:

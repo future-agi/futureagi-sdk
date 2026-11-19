@@ -1,3 +1,4 @@
+import { contextSource } from "./agent-name";
 import { allowlisted, Attributes, REGISTRY_KEY } from "./otel";
 
 class History {
@@ -11,6 +12,7 @@ export class ScopeState {
   agentSource = "none";
   visible = false;
   constructor(attrs: Attributes = {}, readonly history = new History()) { this.attrs = allowlisted(attrs); }
+  get propagationAttrs(): Attributes { return this.agentSource === "context" ? contextSource(this.attrs) : this.attrs; }
   // Scoped load-only dedup must not mutate the carrier revived by a later on.
   private evidence?: ScopeState;
   view(mode: "on" | "load_only"): ScopeState {
@@ -70,7 +72,7 @@ export class TraceRegistry {
   }
   get(traceId: string): Attributes | undefined {
     const state = this.state(traceId);
-    return state?.visible ? state.attrs : undefined;
+    return state?.visible ? state.propagationAttrs : undefined;
   }
   get size(): number { return this.entries.size; }
 }

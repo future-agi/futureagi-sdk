@@ -5,7 +5,7 @@ import sys
 from collections.abc import Mapping
 from threading import RLock
 
-from . import _otel
+from . import _agent_name, _otel
 from ._registry import registry
 
 INSTALL_LOCK = RLock()
@@ -18,10 +18,12 @@ class FutureAGISkillsSpanProcessor:
         try:
             context = sys.modules.get("opentelemetry.context")
             value = context.get_value(_otel.CARRIER_KEY, parent_context) if context else None
+            state = None
             if type(value) is _otel._Carrier:
                 # SDK-authored carriers were sanitized and frozen at publication.
                 # Foreign/shared-contract mappings still need validation below.
                 attrs = value.attrs
+                state = value._scope_state
             elif value is not None:
                 if not isinstance(value, Mapping) or value.get("v") != 1 or not isinstance(value.get("attrs"), Mapping):
                     return
@@ -32,7 +34,10 @@ class FutureAGISkillsSpanProcessor:
             existing = getattr(span, "attributes", None) or {}
             for key, value in attrs.items():
                 if key not in existing:
-                    span.set_attribute(key, value)
+                    if key == _agent_name.NAME and state is not None and state.agent_source == "context":
+                        _agent_name.write_context_name(span, value)
+                    else:
+                        span.set_attribute(key, value)
         except Exception:
             # Processor failures must not break application span creation.
             # No logging/I/O in this hot path.
