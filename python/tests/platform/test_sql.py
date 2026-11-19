@@ -73,3 +73,45 @@ def test_async_read_omits_mcp_page_defaults_and_propagates_denial():
 def test_execution_states_and_empty_expired_snapshot(state):
     snapshot = models.SQLExecution.model_validate({**job(state), "expired": True}, context={"strict": True})
     assert snapshot.state == state and snapshot.expired and snapshot.result.rows is None
+
+
+def test_run_omits_reuse_and_rejects_explicit_null_before_transport():
+    bodies = []
+
+    def handle(request):
+        bodies.append(json.loads(request.content))
+        return httpx.Response(202, json=job("queued"))
+
+    args = dict(project_id=PROJECT, sql=TEXT, start=START, end=END)
+    with httpx.Client(transport=httpx.MockTransport(handle)) as http:
+        client = Client(api_key="example", secret_key="example", http_client=http)
+        client.sql.run(**args)
+        client.sql.run(**args, reuse=False)
+        for kwargs in ({"reuse": None}, {"extra_body": {"reuse": None}}):
+            with pytest.raises(TypeError, match="reuse cannot be null"):
+                client.sql.run(**args, **kwargs)
+        for field in ("offset", "limit"):
+            with pytest.raises(TypeError, match=f"{field} cannot be null"):
+                client.sql.get_result(JOB, project_id=PROJECT, **{field: None})
+    assert bodies == [args, {**args, "reuse": False}]
+
+
+@pytest.mark.asyncio
+async def test_async_run_distinguishes_omission_false_and_null():
+    bodies = []
+
+    def handle(request):
+        bodies.append(json.loads(request.content))
+        return httpx.Response(202, json=job("queued"))
+
+    args = dict(project_id=PROJECT, sql=TEXT, start=START, end=END)
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handle)) as http:
+        client = AsyncClient(api_key="example", secret_key="example", http_client=http)
+        await client.sql.run(**args)
+        await client.sql.run(**args, reuse=False)
+        with pytest.raises(TypeError, match="reuse cannot be null"):
+            await client.sql.run(**args, reuse=None)
+        for field in ("offset", "limit"):
+            with pytest.raises(TypeError, match=f"{field} cannot be null"):
+                await client.sql.get_result(JOB, project_id=PROJECT, extra_query={field: None})
+    assert bodies == [args, {**args, "reuse": False}]

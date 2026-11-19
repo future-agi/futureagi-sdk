@@ -1514,9 +1514,9 @@ export interface SqlGetCatalogParams {
 
 export interface SqlGetResultParams {
   project_id: string;
-  offset?: number | null;
+  offset?: number;
   /** Optional bounded result page; omitted REST requests retain the full snapshot. MCP defaults to 100. Wide rows are explicitly previewed; download for full cells. */
-  limit?: number | null;
+  limit?: number;
 }
 
 export interface SqlRunParams {
@@ -1529,7 +1529,7 @@ export interface SqlRunParams {
   /** End */
   end: string;
   /** Reuse */
-  reuse?: boolean | null;
+  reuse?: boolean;
 }
 
 export interface TracesGetParams {
@@ -3416,7 +3416,13 @@ export class SqlResource extends Resource {
    *
    * GET /tracer/sql-query/{id}/
    */
-  getResult(id: string, params: SqlGetResultParams, options?: RequestOptions): Promise<models.SQLExecution> {
+  async getResult(id: string, params: SqlGetResultParams, options?: RequestOptions): Promise<models.SQLExecution> {
+    if (params["offset"] === null || options?.extraQuery?.["offset"] === null) {
+      throw new TypeError("sql.get_result: offset cannot be null; omit it instead");
+    }
+    if (params["limit"] === null || options?.extraQuery?.["limit"] === null) {
+      throw new TypeError("sql.get_result: limit cannot be null; omit it instead");
+    }
     return this._t.call<models.SQLExecution>(ops.OP_SQL_GET_RESULT, { path: { id: id }, query: { project_id: params.project_id, offset: params.offset, limit: params.limit } }, options);
   }
 
@@ -3425,7 +3431,10 @@ export class SqlResource extends Resource {
    *
    * POST /tracer/sql-query/run/
    */
-  run(params: SqlRunParams, options?: RequestOptions): Promise<models.SQLExecution> {
+  async run(params: SqlRunParams, options?: RequestOptions): Promise<models.SQLExecution> {
+    if (params["reuse"] === null || options?.extraBody?.["reuse"] === null) {
+      throw new TypeError("sql.run: reuse cannot be null; omit it instead");
+    }
     return this._t.call<models.SQLExecution>(ops.OP_SQL_RUN, { path: {}, query: {}, body: { project_id: params.project_id, sql: params.sql, start: params.start, end: params.end, reuse: params.reuse } }, options);
   }
 }

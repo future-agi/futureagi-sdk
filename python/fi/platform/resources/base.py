@@ -1939,17 +1939,21 @@ class SqlResource(Resource):
         body = None
         return self._t.call(_ops.OP_SQL_GET_CATALOG, path=path, query=query, body=body, model=models.SQLCatalog, options=options)
 
-    def get_result(self, id: str, *, project_id: str, offset: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLExecution:
+    def get_result(self, id: str, *, project_id: str, offset: int | NotGiven = NOT_GIVEN, limit: int | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLExecution:
         """Read the caller's job in the given project. Omit limit for the full bounded REST snapshot, or pass 1–1000 and follow result.next_offset while has_more is true (offset 0–10000). MCP defaults to and caps pages at 100. Wide cells may be previewed; results expire after 24 hours.
 
         GET /tracer/sql-query/{id}/
         """
         path = {'id': id}
         query = {'project_id': project_id, 'offset': offset, 'limit': limit, **(extra_query or {})}
+        if offset is None or query['offset'] is None:
+            raise TypeError("sql.get_result: offset cannot be null; omit it instead")
+        if limit is None or query['limit'] is None:
+            raise TypeError("sql.get_result: limit cannot be null; omit it instead")
         body = None
         return self._t.call(_ops.OP_SQL_GET_RESULT, path=path, query=query, body=body, model=models.SQLExecution, options=options)
 
-    def run(self, *, project_id: str, sql: str, start: str, end: str, reuse: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLExecution:
+    def run(self, *, project_id: str, sql: str, start: str, end: str, reuse: bool | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLExecution:
         """Start or reuse a personal read-only SQL job in a project. Supply SQL and a time window of at most 31 days; reuse defaults to true. The 202 response is a job snapshot, not a page of rows. Poll sql.get_result using its id.
 
         POST /tracer/sql-query/run/
@@ -1957,6 +1961,8 @@ class SqlResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'project_id': project_id, 'sql': sql, 'start': start, 'end': end, 'reuse': reuse, **(extra_body or {})}
+        if reuse is None or body['reuse'] is None:
+            raise TypeError("sql.run: reuse cannot be null; omit it instead")
         return self._t.call(_ops.OP_SQL_RUN, path=path, query=query, body=body, model=models.SQLExecution, options=options)
 
 
@@ -3953,17 +3959,21 @@ class AsyncSqlResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_SQL_GET_CATALOG, path=path, query=query, body=body, model=models.SQLCatalog, options=options)
 
-    async def get_result(self, id: str, *, project_id: str, offset: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLExecution:
+    async def get_result(self, id: str, *, project_id: str, offset: int | NotGiven = NOT_GIVEN, limit: int | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLExecution:
         """Read the caller's job in the given project. Omit limit for the full bounded REST snapshot, or pass 1–1000 and follow result.next_offset while has_more is true (offset 0–10000). MCP defaults to and caps pages at 100. Wide cells may be previewed; results expire after 24 hours.
 
         GET /tracer/sql-query/{id}/
         """
         path = {'id': id}
         query = {'project_id': project_id, 'offset': offset, 'limit': limit, **(extra_query or {})}
+        if offset is None or query['offset'] is None:
+            raise TypeError("sql.get_result: offset cannot be null; omit it instead")
+        if limit is None or query['limit'] is None:
+            raise TypeError("sql.get_result: limit cannot be null; omit it instead")
         body = None
         return await self._t.acall(_ops.OP_SQL_GET_RESULT, path=path, query=query, body=body, model=models.SQLExecution, options=options)
 
-    async def run(self, *, project_id: str, sql: str, start: str, end: str, reuse: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLExecution:
+    async def run(self, *, project_id: str, sql: str, start: str, end: str, reuse: bool | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLExecution:
         """Start or reuse a personal read-only SQL job in a project. Supply SQL and a time window of at most 31 days; reuse defaults to true. The 202 response is a job snapshot, not a page of rows. Poll sql.get_result using its id.
 
         POST /tracer/sql-query/run/
@@ -3971,6 +3981,8 @@ class AsyncSqlResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'project_id': project_id, 'sql': sql, 'start': start, 'end': end, 'reuse': reuse, **(extra_body or {})}
+        if reuse is None or body['reuse'] is None:
+            raise TypeError("sql.run: reuse cannot be null; omit it instead")
         return await self._t.acall(_ops.OP_SQL_RUN, path=path, query=query, body=body, model=models.SQLExecution, options=options)
 
 

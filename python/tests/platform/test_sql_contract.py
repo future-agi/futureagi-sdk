@@ -89,3 +89,24 @@ def test_scoped_sync_rejects_mismatched_source_bytes_and_shared_definitions(monk
     manifest["source_contract_sha256"] = "wrong"
     with pytest.raises(ValueError, match="hashes disagree"):
         sync.compose(ROOT, "0" * 40, "1" * 40)
+
+
+def test_optional_input_nullability_comes_from_the_schema_only_when_opted_in():
+    spec, catalog = sql_contract()
+    ops = load(spec, catalog)
+    assert {(op.id, p.name) for op in ops for p in op.params if op.rejects_optional_null(p)} == {
+        ("sql.run", "reuse"), ("sql.get_result", "limit"), ("sql.get_result", "offset"),
+    }
+    run = next(e for e in catalog["operations"] if e["id"] == "sql.run")
+
+    def rejects_reuse():
+        op, = load(spec, {"operations": [run]})
+        return op.rejects_optional_null(next(p for p in op.params if p.name == "reuse"))
+
+    # A later schema may explicitly allow clearing a field without making it required.
+    prop = spec["definitions"]["SQLRun"]["properties"]["reuse"]
+    prop["x-nullable"] = True
+    assert not rejects_reuse()
+    del prop["x-nullable"]
+    del run["surfaces"]["sdk"]["declared_optional_nullability"]
+    assert not rejects_reuse()  # old, non-opted-in operations keep accepting null

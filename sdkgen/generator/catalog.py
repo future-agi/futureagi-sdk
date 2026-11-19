@@ -65,6 +65,10 @@ class Op:
     def params_in(self, location: str) -> list[Param]:
         return [p for p in self.params if p.location == location]
 
+    def rejects_optional_null(self, p: Param) -> bool:
+        """Opted-in SDK calls distinguish optional (may omit) from x-nullable (may send null)."""
+        return bool(self.surfaces.get("sdk", {}).get("declared_optional_nullability") and not p.required and not p.schema.get("x-nullable"))
+
     @property
     def file_params(self) -> list[Param]:
         return [p for p in self.params if p.location == "body" and is_file(p.schema)]

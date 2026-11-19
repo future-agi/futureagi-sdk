@@ -202,8 +202,10 @@ def _signature(op: Op) -> tuple[list[str], list[tuple[Param, str]]]:
     args.append("*")
     for p in rest:
         py = py_type(p.schema, for_input=True)
-        # Optional: NOT_GIVEN is left out of the request, an explicit None is sent as null.
-        args.append(f"{arg_name(p)}: {py}" if p.required else f"{arg_name(p)}: {py} | None | NotGiven = NOT_GIVEN")
+        if not p.required:
+            null = "" if op.rejects_optional_null(p) else " | None"
+            py = f"{py}{null} | NotGiven = NOT_GIVEN"
+        args.append(f"{arg_name(p)}: {py}")
         named.append((p, arg_name(p)))
     # Escape hatches: fields the contract does not (yet) describe, and per-call request options.
     args.append("extra_query: dict[str, Any] | None = None")
@@ -230,6 +232,10 @@ def _method(op: Op, *, is_async: bool) -> str:
         if location in ("query", "body"):
             items = f"{items}, **(extra_{location} or {{}})".lstrip(", ")
         lines.append(f"        {location} = {{{items}}}\n" if items else f"        {location} = None\n")
+        for p, arg in group:
+            if op.rejects_optional_null(p):
+                lines.append(f"        if {arg} is None or {location}[{p.name!r}] is None:\n")
+                lines.append(f'            raise TypeError("{op.id}: {p.name} cannot be null; omit it instead")\n')
     if not op.sends_body and not op.pagination:
         lines.append("        body = None\n")
     if op.multipart:  # file params travel separately from the form fields

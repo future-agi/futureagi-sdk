@@ -37,3 +37,23 @@ test("SQL snapshots, REST defaults, bounded pages and cancellation keep their wi
     ["GET", root + "catalog/", { project_id }, null],
   ]);
 });
+
+test("optional SQL fields allow omission, not null", async () => {
+  const bodies: unknown[] = [];
+  const client = new Client({ apiKey: "example", secretKey: "example", fetch: async (_url, init) => {
+    bodies.push(JSON.parse(String(init.body)));
+    return new Response("{}", { status: 202 });
+  } });
+  const body = { project_id: "project", sql: "mock input", start: "start", end: "end" };
+  await client.sql.run(body);
+  await client.sql.run({ ...body, reuse: false });
+  // @ts-expect-error Optional boolean does not accept null.
+  await expect(client.sql.run({ ...body, reuse: null })).rejects.toThrow("reuse cannot be null");
+  // @ts-expect-error Optional limit does not accept null.
+  await expect(client.sql.getResult("id", { project_id: "project", limit: null })).rejects.toThrow("limit cannot be null");
+  // @ts-expect-error Optional offset does not accept null.
+  await expect(client.sql.getResult("id", { project_id: "project", offset: null })).rejects.toThrow("offset cannot be null");
+  await expect(client.sql.run(body, { extraBody: { reuse: null } })).rejects.toThrow("reuse cannot be null");
+  await expect(client.sql.getResult("id", { project_id: "project" }, { extraQuery: { limit: null } })).rejects.toThrow("limit cannot be null");
+  expect(bodies).toEqual([body, { ...body, reuse: false }]);
+});

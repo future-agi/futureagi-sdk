@@ -237,3 +237,11 @@ python sdkgen/check_mcp_parity.py --ref "$product_commit"
 The parity command checks the **entire** MCP name list of that commit. It does
 not qualify a later product ref, the release image, or a combined Skills build.
 The normal release sync replaces this scoped slice; no release pin changes here.
+
+The four SQL calls opt in to `surfaces.sdk.declared_optional_nullability`. An
+optional request field may be omitted; it accepts null only if its Swagger
+schema has `x-nullable: true`. Omitting `run.reuse` leaves the server default
+(`true`) alone; passing `false` sends `false`. The result reader likewise
+leaves `limit` and `offset` off the query string unless supplied. Passing null
+for any of these three fields fails before a request is sent. Existing SDK
+operations keep their previous input types and wire behavior.
