@@ -9,7 +9,7 @@ model's `__required__`; `Client(strict_responses=True)` rejects a response that 
 from __future__ import annotations
 
 # typing aliases (not `X | None`): pydantic evaluates these at runtime, and the SDK supports Python 3.9
-from typing import Any, ClassVar, Dict, FrozenSet, List, Optional
+from typing import Any, ClassVar, Dict, FrozenSet, List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, model_validator
 
@@ -1675,6 +1675,71 @@ class RunTestResponse(_Model):
     deleted_at: Optional[str] = Field(default=None)
 
 
+class SQLCatalog(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['can_save', 'datasets', 'examples', 'identity_semantics', 'max_rows', 'max_window_days', 'version'])
+    identity_semantics: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+    datasets: Optional[List[Optional[SQLDataset]]] = Field(default=None)
+    examples: Optional[List[Optional[SQLExample]]] = Field(default=None)
+    max_rows: Optional[int] = Field(default=None)
+    max_window_days: Optional[int] = Field(default=None)
+    can_save: Optional[bool] = Field(default=None)
+
+
+class SQLColumn(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name', 'type'])
+    name: Optional[str] = Field(default=None)
+    type: Optional[str] = Field(default=None)
+
+
+class SQLDataset(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['available', 'columns', 'description', 'name', 'unavailable_reason'])
+    available: Optional[bool] = Field(default=None)
+    unavailable_reason: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    columns: Optional[List[Optional[SQLColumn]]] = Field(default=None)
+
+
+class SQLExample(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['datasets', 'description', 'id', 'sql', 'title'])
+    id: Optional[str] = Field(default=None)
+    title: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    sql: Optional[str] = Field(default=None)
+    datasets: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class SQLExecution(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'error', 'expired', 'expires_at', 'id', 'project_id', 'result', 'sql', 'state'])
+    id: Optional[str] = Field(default=None)
+    project_id: Optional[str] = Field(default=None)
+    sql: Optional[str] = Field(default=None)
+    state: Optional[Literal['queued', 'running', 'succeeded', 'failed', 'cancelled']] = Field(default=None)  # one of: queued, running, succeeded, failed, cancelled
+    created_at: Optional[str] = Field(default=None)
+    expires_at: Optional[str] = Field(default=None)
+    finished_at: Optional[str] = Field(default=None)
+    reused: Optional[bool] = Field(default=None)
+    error: Optional[str] = Field(default=None)
+    result: Optional[SQLResult] = Field(default=None)
+    expired: Optional[bool] = Field(default=None)
+
+
+class SQLResult(_Model):
+    columns: Optional[List[Optional[SQLColumn]]] = Field(default=None)
+    rows: Optional[List[Optional[List[Optional[Any]]]]] = Field(default=None)
+    truncated: Optional[bool] = Field(default=None)
+    row_count: Optional[int] = Field(default=None)
+    result_bytes: Optional[int] = Field(default=None)
+    elapsed_ms: Optional[int] = Field(default=None)
+    offset: Optional[int] = Field(default=None)
+    next_offset: Optional[int] = Field(default=None)
+    has_more: Optional[bool] = Field(default=None)
+    page_row_count: Optional[int] = Field(default=None)
+    previewed: Optional[bool] = Field(default=None)
+    retrieval_note: Optional[str] = Field(default=None)
+
+
 class ScenarioDetailResponse(_Model):
     id: Optional[str] = Field(default=None)
     name: Optional[str] = Field(default=None)
@@ -2388,6 +2453,12 @@ RepresentativeTrace.model_rebuild()
 RunEnvironmentRef.model_rebuild()
 RunTestExecutionResponse.model_rebuild()
 RunTestResponse.model_rebuild()
+SQLCatalog.model_rebuild()
+SQLColumn.model_rebuild()
+SQLDataset.model_rebuild()
+SQLExample.model_rebuild()
+SQLExecution.model_rebuild()
+SQLResult.model_rebuild()
 ScenarioDetailResponse.model_rebuild()
 ScenarioEditResponse.model_rebuild()
 ScenarioPromptItem.model_rebuild()
@@ -2573,6 +2644,12 @@ __all__ = [
     'RunEnvironmentRef',
     'RunTestExecutionResponse',
     'RunTestResponse',
+    'SQLCatalog',
+    'SQLColumn',
+    'SQLDataset',
+    'SQLExample',
+    'SQLExecution',
+    'SQLResult',
     'ScenarioDetailResponse',
     'ScenarioEditResponse',
     'ScenarioPromptItem',

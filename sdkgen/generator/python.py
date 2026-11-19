@@ -21,6 +21,7 @@ from .catalog import (
     Param,
     children_of,
     class_name,
+    declared_enum_models,
     is_file,
     is_json_value,
     is_method_field,
@@ -92,6 +93,7 @@ def py_type(schema: dict | None, *, for_input: bool) -> str:
 
 
 def emit_models(spec: dict, ops: list[Op]) -> str:
+    enum_models = declared_enum_models(ops)
     names = model_refs(spec, [op.returns for op in sdk_ops(ops) if op.returns])
     out = [
         HEADER,
@@ -102,7 +104,7 @@ def emit_models(spec: dict, ops: list[Op]) -> str:
         '"""\n\n',
         "from __future__ import annotations\n\n",
         "# typing aliases (not `X | None`): pydantic evaluates these at runtime, and the SDK supports Python 3.9\n",
-        "from typing import Any, ClassVar, Dict, FrozenSet, List, Optional\n\n",
+        "from typing import Any, ClassVar, Dict, FrozenSet, List," + (" Literal," if enum_models else "") + " Optional\n\n",
         "from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, model_validator\n\n\n",
         "class _Model(BaseModel):\n",
         "    model_config = ConfigDict(extra=\"allow\", populate_by_name=True, protected_namespaces=(), coerce_numbers_to_str=True)\n",
@@ -129,6 +131,8 @@ def emit_models(spec: dict, ops: list[Op]) -> str:
             out.append(f"    __required__: ClassVar[FrozenSet[str]] = frozenset({required!r})\n")
         for prop_name, prop in props.items():
             py = ("list[Any]" if prop.get("type") == "array" else "Any") if is_method_field(prop) else py_type(prop, for_input=False)
+            if name in enum_models and "enum" in prop:
+                py = py_type(prop, for_input=True)
             fname = field_name(prop_name)
             alias = f", alias={prop_name!r}" if fname != prop_name else ""
             comment = f"  # one of: {', '.join(map(str, prop['enum']))}" if "enum" in prop else ""

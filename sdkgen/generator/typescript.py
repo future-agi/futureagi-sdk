@@ -23,6 +23,7 @@ from .catalog import (
     Param,
     children_of,
     class_name,
+    declared_enum_models,
     is_file,
     is_json_value,
     is_method_field,
@@ -105,6 +106,7 @@ def _doc(lines: list[str], indent: str = "") -> str:
 
 
 def emit_models(spec: dict, ops: list[Op]) -> str:
+    enum_models = declared_enum_models(ops)
     names = model_refs(spec, [op.returns for op in sdk_ops(ops) if op.returns])
     out = [HEADER, "// Response models. Every field is optional so a missing or new field never breaks a call.\n\n"]
     for name in names:
@@ -112,6 +114,8 @@ def emit_models(spec: dict, ops: list[Op]) -> str:
         out.append(f"export interface {name} {{\n")
         for prop_name, prop in props.items():
             ts = ("unknown[]" if prop.get("type") == "array" else "unknown") if is_method_field(prop) else ts_type(prop, for_input=False).replace("models.", "")
+            if name in enum_models and "enum" in prop:
+                ts = ts_type(prop, for_input=True)
             comment = f" // one of: {', '.join(map(str, prop['enum']))}" if "enum" in prop else ""
             out.append(f"  {prop_key(prop_name)}?: {ts} | null;{comment}\n")
         out.append("}\n\n")

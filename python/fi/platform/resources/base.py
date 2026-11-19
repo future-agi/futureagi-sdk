@@ -1914,6 +1914,52 @@ class SpansResource(Resource):
         return self._t.call(_ops.OP_SPANS_LIST, path=path, query=query, body=body, model=models.SpanObserveListResult, options=options)
 
 
+class SqlResource(Resource):
+    """`client.sql`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+
+    def cancel(self, id: str, *, project_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLExecution:
+        """Request cancellation of the caller's SQL job without changing project data. Returns its job snapshot; an already finished job need not change state.
+
+        POST /tracer/sql-query/{id}/cancel/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'project_id': project_id, **(extra_body or {})}
+        return self._t.call(_ops.OP_SQL_CANCEL, path=path, query=query, body=body, model=models.SQLExecution, options=options)
+
+    def get_catalog(self, *, project_id: str, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLCatalog:
+        """Read the available scoped SQL sources, their columns, examples, and query limits for a project.
+
+        GET /tracer/sql-query/catalog/
+        """
+        path = None
+        query = {'project_id': project_id, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SQL_GET_CATALOG, path=path, query=query, body=body, model=models.SQLCatalog, options=options)
+
+    def get_result(self, id: str, *, project_id: str, offset: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLExecution:
+        """Read the caller's job in the given project. Omit limit for the full bounded REST snapshot, or pass 1–1000 and follow result.next_offset while has_more is true (offset 0–10000). MCP defaults to and caps pages at 100. Wide cells may be previewed; results expire after 24 hours.
+
+        GET /tracer/sql-query/{id}/
+        """
+        path = {'id': id}
+        query = {'project_id': project_id, 'offset': offset, 'limit': limit, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SQL_GET_RESULT, path=path, query=query, body=body, model=models.SQLExecution, options=options)
+
+    def run(self, *, project_id: str, sql: str, start: str, end: str, reuse: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLExecution:
+        """Start or reuse a personal read-only SQL job in a project. Supply SQL and a time window of at most 31 days; reuse defaults to true. The 202 response is a job snapshot, not a page of rows. Poll sql.get_result using its id.
+
+        POST /tracer/sql-query/run/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'project_id': project_id, 'sql': sql, 'start': start, 'end': end, 'reuse': reuse, **(extra_body or {})}
+        return self._t.call(_ops.OP_SQL_RUN, path=path, query=query, body=body, model=models.SQLExecution, options=options)
+
+
 class TracesResource(Resource):
     """`client.traces`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -3882,6 +3928,52 @@ class AsyncSpansResource(Resource):
         return await self._t.acall(_ops.OP_SPANS_LIST, path=path, query=query, body=body, model=models.SpanObserveListResult, options=options)
 
 
+class AsyncSqlResource(Resource):
+    """`client.sql`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+
+    async def cancel(self, id: str, *, project_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLExecution:
+        """Request cancellation of the caller's SQL job without changing project data. Returns its job snapshot; an already finished job need not change state.
+
+        POST /tracer/sql-query/{id}/cancel/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'project_id': project_id, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SQL_CANCEL, path=path, query=query, body=body, model=models.SQLExecution, options=options)
+
+    async def get_catalog(self, *, project_id: str, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLCatalog:
+        """Read the available scoped SQL sources, their columns, examples, and query limits for a project.
+
+        GET /tracer/sql-query/catalog/
+        """
+        path = None
+        query = {'project_id': project_id, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SQL_GET_CATALOG, path=path, query=query, body=body, model=models.SQLCatalog, options=options)
+
+    async def get_result(self, id: str, *, project_id: str, offset: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLExecution:
+        """Read the caller's job in the given project. Omit limit for the full bounded REST snapshot, or pass 1–1000 and follow result.next_offset while has_more is true (offset 0–10000). MCP defaults to and caps pages at 100. Wide cells may be previewed; results expire after 24 hours.
+
+        GET /tracer/sql-query/{id}/
+        """
+        path = {'id': id}
+        query = {'project_id': project_id, 'offset': offset, 'limit': limit, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SQL_GET_RESULT, path=path, query=query, body=body, model=models.SQLExecution, options=options)
+
+    async def run(self, *, project_id: str, sql: str, start: str, end: str, reuse: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SQLExecution:
+        """Start or reuse a personal read-only SQL job in a project. Supply SQL and a time window of at most 31 days; reuse defaults to true. The 202 response is a job snapshot, not a page of rows. Poll sql.get_result using its id.
+
+        POST /tracer/sql-query/run/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'project_id': project_id, 'sql': sql, 'start': start, 'end': end, 'reuse': reuse, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SQL_RUN, path=path, query=query, body=body, model=models.SQLExecution, options=options)
+
+
 class AsyncTracesResource(Resource):
     """`client.traces`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -4010,6 +4102,7 @@ __all__ = [
     'SimulationScenariosResource',
     'SimulationTestsResource',
     'SpansResource',
+    'SqlResource',
     'TracesResource',
     'TracesPropertiesResource',
     'UsageResource',
@@ -4061,6 +4154,7 @@ __all__ = [
     'AsyncSimulationScenariosResource',
     'AsyncSimulationTestsResource',
     'AsyncSpansResource',
+    'AsyncSqlResource',
     'AsyncTracesResource',
     'AsyncTracesPropertiesResource',
     'AsyncUsageResource',

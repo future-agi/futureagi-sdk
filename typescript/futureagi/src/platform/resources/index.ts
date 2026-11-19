@@ -26,6 +26,7 @@ import { Scores } from "./scores";
 import { Sessions } from "./sessions";
 import { Simulation } from "./simulation";
 import { Spans } from "./spans";
+import { Sql } from "./sql";
 import { Traces } from "./traces";
 import { Usage } from "./usage";
 import { Workspaces } from "./workspaces";
@@ -56,6 +57,7 @@ export interface Resources {
   sessions: Sessions;
   simulation: Simulation;
   spans: Spans;
+  sql: Sql;
   traces: Traces;
   usage: Usage;
   workspaces: Workspaces;
@@ -86,6 +88,7 @@ export const DEFAULT_RESOURCES: ResourceClasses = {
   sessions: Sessions,
   simulation: Simulation,
   spans: Spans,
+  sql: Sql,
   traces: Traces,
   usage: Usage,
   workspaces: Workspaces,
@@ -123,6 +126,7 @@ export {
   Sessions,
   Simulation,
   Spans,
+  Sql,
   Traces,
   Usage,
   Workspaces,

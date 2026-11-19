@@ -1,0 +1,258 @@
+---
+title: "Sql"
+description: "Reference for client.sql in the Future AGI Python and TypeScript SDKs: sql.cancel, sql.get_catalog, sql.get_result, sql.run."
+---
+
+`client.sql` on `fi.Client` (Python) and `client.sql` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Observability response models](/docs/sdk/reference/observability-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+<div class="sdk-ref-table">
+
+| Method | Description |
+|---|---|
+| [`sql.cancel`](#sqlcancel) | Request cancellation of the caller's SQL job without changing project data. |
+| [`sql.get_catalog`](#sqlget_catalog) | Read the available scoped SQL sources, their columns, examples, and query limits for a project. |
+| [`sql.get_result`](#sqlget_result) | Read the caller's job in the given project. |
+| [`sql.run`](#sqlrun) | Start or reuse a personal read-only SQL job in a project. |
+
+</div>
+
+## client.sql
+
+### sql.cancel
+
+Request cancellation of the caller's SQL job without changing project data. Returns its job snapshot; an already finished job need not change state.
+
+<ApiEndpoint method="POST" path="/tracer/sql-query/{id}/cancel/" />
+
+**MCP tool**: `cancel_sql`
+
+<CodeGroup>
+
+```python Python
+result = client.sql.cancel("your-id", project_id="your-project-id")
+```
+
+```typescript TypeScript
+const result = await client.sql.cancel("your-id", { project_id: "your-project-id" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.sql.cancel(
+    id: str,
+    *,
+    project_id: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SQLExecution
+```
+
+```typescript TypeScript
+client.sql.cancel(id: string, params: SqlCancelParams, options?: RequestOptions): Promise<models.SQLExecution>
+
+export interface SqlCancelParams {
+  project_id: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="project_id" type="string" required />
+
+#### Returns
+
+[`SQLExecution`](/docs/sdk/reference/observability-models#sqlexecution).
+
+### sql.get_catalog
+
+Read the available scoped SQL sources, their columns, examples, and query limits for a project.
+
+<ApiEndpoint method="GET" path="/tracer/sql-query/catalog/" />
+
+**MCP tool**: `get_sql_catalog`
+
+<CodeGroup>
+
+```python Python
+result = client.sql.get_catalog(project_id="your-project-id")
+```
+
+```typescript TypeScript
+const result = await client.sql.getCatalog({ project_id: "your-project-id" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.sql.get_catalog(
+    *,
+    project_id: str,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SQLCatalog
+```
+
+```typescript TypeScript
+client.sql.getCatalog(params: SqlGetCatalogParams, options?: RequestOptions): Promise<models.SQLCatalog>
+
+export interface SqlGetCatalogParams {
+  project_id: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="project_id" type="string" required />
+
+#### Returns
+
+[`SQLCatalog`](/docs/sdk/reference/observability-models#sqlcatalog).
+
+### sql.get_result
+
+Read the caller's job in the given project. Omit limit for the full bounded REST snapshot, or pass 1–1000 and follow result.next_offset while has_more is true (offset 0–10000). MCP defaults to and caps pages at 100. Wide cells may be previewed; results expire after 24 hours.
+
+<ApiEndpoint method="GET" path="/tracer/sql-query/{id}/" />
+
+**MCP tool**: `get_sql_result`
+
+<CodeGroup>
+
+```python Python
+result = client.sql.get_result("your-id", project_id="your-project-id")
+```
+
+```typescript TypeScript
+const result = await client.sql.getResult("your-id", { project_id: "your-project-id" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.sql.get_result(
+    id: str,
+    *,
+    project_id: str,
+    offset: int | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SQLExecution
+```
+
+```typescript TypeScript
+client.sql.getResult(id: string, params: SqlGetResultParams, options?: RequestOptions): Promise<models.SQLExecution>
+
+export interface SqlGetResultParams {
+  project_id: string;
+  offset?: number | null;
+  /** Optional bounded result page; omitted REST requests retain the full snapshot. MCP defaults to 100. Wide rows are explicitly previewed; download for full cells. */
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField query="project_id" type="string" required />
+<ParamField query="offset" type="integer" optional />
+<ParamField query="limit" type="integer" optional>
+  Optional bounded result page; omitted REST requests retain the full snapshot. MCP defaults to 100. Wide rows are explicitly previewed; download for full cells.
+</ParamField>
+
+#### Returns
+
+[`SQLExecution`](/docs/sdk/reference/observability-models#sqlexecution).
+
+### sql.run
+
+Start or reuse a personal read-only SQL job in a project. Supply SQL and a time window of at most 31 days; reuse defaults to true. The 202 response is a job snapshot, not a page of rows. Poll sql.get_result using its id.
+
+<ApiEndpoint method="POST" path="/tracer/sql-query/run/" />
+
+**MCP tool**: `run_sql`
+
+<CodeGroup>
+
+```python Python
+result = client.sql.run(
+    project_id="your-project-id",
+    sql="your-sql",
+    start="your-start",
+    end="your-end",
+)
+```
+
+```typescript TypeScript
+const result = await client.sql.run({
+  project_id: "your-project-id",
+  sql: "your-sql",
+  start: "your-start",
+  end: "your-end",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.sql.run(
+    *,
+    project_id: str,
+    sql: str,
+    start: str,
+    end: str,
+    reuse: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SQLExecution
+```
+
+```typescript TypeScript
+client.sql.run(params: SqlRunParams, options?: RequestOptions): Promise<models.SQLExecution>
+
+export interface SqlRunParams {
+  project_id: string;
+  sql: string;
+  start: string;
+  end: string;
+  reuse?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="project_id" type="string" required />
+<ParamField body="sql" type="string" required />
+<ParamField body="start" type="string" required />
+<ParamField body="end" type="string" required />
+<ParamField body="reuse" type="boolean" optional />
+
+#### Returns
+
+[`SQLExecution`](/docs/sdk/reference/observability-models#sqlexecution).

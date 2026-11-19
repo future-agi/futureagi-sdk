@@ -1503,6 +1503,35 @@ export interface SpansListParams {
   allow_sampled?: boolean | null;
 }
 
+export interface SqlCancelParams {
+  /** Project id */
+  project_id: string;
+}
+
+export interface SqlGetCatalogParams {
+  project_id: string;
+}
+
+export interface SqlGetResultParams {
+  project_id: string;
+  offset?: number | null;
+  /** Optional bounded result page; omitted REST requests retain the full snapshot. MCP defaults to 100. Wide rows are explicitly previewed; download for full cells. */
+  limit?: number | null;
+}
+
+export interface SqlRunParams {
+  /** Project id */
+  project_id: string;
+  /** Sql */
+  sql: string;
+  /** Start */
+  start: string;
+  /** End */
+  end: string;
+  /** Reuse */
+  reuse?: boolean | null;
+}
+
 export interface TracesGetParams {
   /** A run the caller can read; opens the hidden simulation project of that run's agent. */
   test_execution_id?: string | null;
@@ -3356,6 +3385,48 @@ export class SpansResource extends Resource {
    */
   list(params: SpansListParams = {}, options?: RequestOptions): Promise<models.SpanObserveListResult> {
     return this._t.call<models.SpanObserveListResult>(ops.OP_SPANS_LIST, { path: {}, query: { project_id: params.project_id, user_id: params.user_id, filters: params.filters, page_number: params.page_number, page_size: params.page_size, cursor: params.cursor, cursor_mode: params.cursor_mode, allow_sampled: params.allow_sampled } }, options);
+  }
+}
+
+/**
+ * `client.sql`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SqlResource extends Resource {
+
+  /**
+   * Request cancellation of the caller's SQL job without changing project data. Returns its job snapshot; an already finished job need not change state.
+   *
+   * POST /tracer/sql-query/{id}/cancel/
+   */
+  cancel(id: string, params: SqlCancelParams, options?: RequestOptions): Promise<models.SQLExecution> {
+    return this._t.call<models.SQLExecution>(ops.OP_SQL_CANCEL, { path: { id: id }, query: {}, body: { project_id: params.project_id } }, options);
+  }
+
+  /**
+   * Read the available scoped SQL sources, their columns, examples, and query limits for a project.
+   *
+   * GET /tracer/sql-query/catalog/
+   */
+  getCatalog(params: SqlGetCatalogParams, options?: RequestOptions): Promise<models.SQLCatalog> {
+    return this._t.call<models.SQLCatalog>(ops.OP_SQL_GET_CATALOG, { path: {}, query: { project_id: params.project_id } }, options);
+  }
+
+  /**
+   * Read the caller's job in the given project. Omit limit for the full bounded REST snapshot, or pass 1–1000 and follow result.next_offset while has_more is true (offset 0–10000). MCP defaults to and caps pages at 100. Wide cells may be previewed; results expire after 24 hours.
+   *
+   * GET /tracer/sql-query/{id}/
+   */
+  getResult(id: string, params: SqlGetResultParams, options?: RequestOptions): Promise<models.SQLExecution> {
+    return this._t.call<models.SQLExecution>(ops.OP_SQL_GET_RESULT, { path: { id: id }, query: { project_id: params.project_id, offset: params.offset, limit: params.limit } }, options);
+  }
+
+  /**
+   * Start or reuse a personal read-only SQL job in a project. Supply SQL and a time window of at most 31 days; reuse defaults to true. The 202 response is a job snapshot, not a page of rows. Poll sql.get_result using its id.
+   *
+   * POST /tracer/sql-query/run/
+   */
+  run(params: SqlRunParams, options?: RequestOptions): Promise<models.SQLExecution> {
+    return this._t.call<models.SQLExecution>(ops.OP_SQL_RUN, { path: {}, query: {}, body: { project_id: params.project_id, sql: params.sql, start: params.start, end: params.end, reuse: params.reuse } }, options);
   }
 }
 

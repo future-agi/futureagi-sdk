@@ -44,6 +44,7 @@ AREAS: list[tuple[str, list[str]]] = [
             "traces",
             "spans",
             "sessions",
+            "sql",
             "dashboards",
             "error_clusters",
             "alerts",
