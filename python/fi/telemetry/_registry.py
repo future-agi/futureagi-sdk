@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from collections import OrderedDict
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from threading import RLock
 from time import monotonic
@@ -20,6 +21,7 @@ class State:
     history: History = field(default_factory=History)
     agent_source: str = "none"
     visible: bool = False
+    published_attrs: Mapping = field(default_factory=dict, repr=False, compare=False)
     _evidence: State | None = field(default=None, repr=False)
     lock: RLock = field(default_factory=RLock, repr=False)
 

@@ -8,6 +8,10 @@ from collections.abc import Mapping
 from contextvars import ContextVar
 from dataclasses import dataclass
 from types import MappingProxyType
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ._registry import State
 
 CARRIER_KEY = "futureagi.runtime.span_attributes.v1"
 _scope = ContextVar("futureagi.skills.scope", default=None)
@@ -108,16 +112,31 @@ def allowlisted(attrs):
     return result
 
 
+_EMPTY_ATTRS = MappingProxyType({})
+
+
 @dataclass(frozen=True, init=False)
 class _Carrier(Mapping):
-    """Validated once at publication, immutable for the entire scope lifetime."""
+    """Read-only v1 mapping. Each attrs value is an immutable snapshot.
 
-    attrs: Mapping
+    A plain carrier stays fixed. An explicit scope's carrier follows the last
+    published on-mode snapshot even after an inner OTel span detaches.
+    """
+
+    _attrs: Mapping
+    _scope_state: State | None
     reset_skills: bool
 
-    def __init__(self, attrs, reset=False):
-        object.__setattr__(self, "attrs", MappingProxyType(allowlisted(attrs)))
+    def __init__(self, attrs, reset=False, *, scope_state=None):
+        object.__setattr__(self, "_attrs", MappingProxyType(allowlisted(attrs)))
+        object.__setattr__(self, "_scope_state", scope_state)
         object.__setattr__(self, "reset_skills", reset)
+
+    @property
+    def attrs(self):
+        if self._scope_state is None:
+            return self._attrs
+        return self._scope_state.published_attrs if mode() == "on" else _EMPTY_ATTRS
 
     def __getitem__(self, key):
         if key == "v":
@@ -139,11 +158,16 @@ def carrier(attrs, reset=False):
     return _Carrier(attrs, reset)
 
 
-def publish(state, reset=False):
+def publish(state):
+    state.published_attrs = MappingProxyType(allowlisted(state.attrs))
+
+
+def bind_scope(state, *, reset, parent=None):
     context = sys.modules.get("opentelemetry.context")
-    if context is not None and mode() == "on":
-        return context.attach(context.set_value(CARRIER_KEY, carrier(state.attrs, reset)))
-    return None
+    if context is None:
+        return None
+    publish(state)
+    return context.attach(context.set_value(CARRIER_KEY, _Carrier({}, reset, scope_state=state), parent))
 
 
 def current():

@@ -25,23 +25,14 @@ class agent_scope:
             if self._resume_state is not None:
                 self.state = self._resume_state
                 self._token = _otel._scope.set(self.state)
-                context = sys.modules.get("opentelemetry.context")
-                if context is not None and self._resume_context is not None:
-                    # Ending a span can restore the carrier from before a load.
-                    # Keep the suspended span context, but publish the latest
-                    # scope state rather than that stale immutable carrier.
-                    resumed = context.set_value(
-                        _otel.CARRIER_KEY,
-                        _otel.carrier(self.state.attrs if _otel.mode() == "on" else {}, reset=self.context is not None),
-                        self._resume_context,
-                    )
-                    self._carrier_token = context.attach(resumed)
+                self._carrier_token = _otel.bind_scope(
+                    self.state, reset=self.context is not None, parent=self._resume_context)
                 return self
             parent = _otel._scope.get()
             attrs = dict(parent.attrs) if parent else {}
             otel_context = sys.modules.get("opentelemetry.context")
             value = otel_context.get_value(_otel.CARRIER_KEY) if otel_context else None
-            if value and value.get("v") == 1:
+            if parent is None and value and value.get("v") == 1:
                 attrs.update(_otel.allowlisted(value.get("attrs", {})))
             if self.context is not None:
                 attrs = {k: v for k, v in attrs.items() if not k.startswith(("fi.context.", "fi.skills.", "gen_ai.agent."))}
@@ -52,12 +43,7 @@ class agent_scope:
             self.state = State(attrs=_otel.allowlisted(attrs))
             self.state.agent_source = "agent_scope" if self.agent is not None else "context" if self.context is not None else getattr(parent, "agent_source", "none")
             self._token = _otel._scope.set(self.state)
-            self._carrier_token = _otel.publish(self.state, reset=self.context is not None)
-            if self._carrier_token is None and otel_context is not None:
-                # Even a load-only scope needs a restoration token: a read may
-                # publish an on-mode carrier before this scope exits.
-                self._carrier_token = otel_context.attach(otel_context.set_value(
-                    _otel.CARRIER_KEY, _otel.carrier({}, reset=self.context is not None)))
+            self._carrier_token = _otel.bind_scope(self.state, reset=self.context is not None)
             provider, _ = _otel.select_provider()
             _otel.install(provider)
             current = _otel.current()

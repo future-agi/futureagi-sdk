@@ -168,7 +168,8 @@ def test_context_is_current_even_if_event_already_sent(pair, make_snapshot, monk
     assert [s.attributes["fi.context.version_id"] for s in loads] == [a.identity.version_id, b.identity.version_id]
 
 
-def test_authorized_session_snapshot_through_real_consumer_and_provider(pair):
+@pytest.mark.parametrize("scoped", [False, True])
+def test_authorized_session_snapshot_through_real_consumer_and_provider(pair, scoped):
     from fi.platform import _operations as ops
     tracer, exporter = pair
     source = Source("agent_context")
@@ -204,15 +205,31 @@ def test_authorized_session_snapshot_through_real_consumer_and_provider(pair):
     with tracer.start_as_current_span("parent"):
         opened = consumer.open({}, idempotency_key=str(uuid4()))
         snapshot = consumer.snapshot(opened)
-        assert snapshot.read_file("AGENTS.md") == source.files["AGENTS.md"]
-        with tracer.start_as_current_span("following") as child:
-            assert child.attributes["fi.context.session_id"] == receipt
+        other = Source("agent_context")
+        other.id, other.version_id, other.name = str(uuid4()), str(uuid4()), "another"
+        ordinary = SnapshotClient(other, kind="agent_context").resolve(other.name)
+        with agent_scope(context=snapshot) if scoped else nullcontext():
+            assert snapshot.read_file("AGENTS.md") == source.files["AGENTS.md"]
+            with tracer.start_as_current_span("following") as child:
+                assert child.attributes["fi.context.session_id"] == receipt
+            with tracer.start_as_current_span("select-ordinary"):
+                ordinary.read_file("AGENTS.md")
+            # Detaching the selector's span must not revive its old carrier.
+            with tracer.start_as_current_span("following-ordinary") as child:
+                assert child.attributes["fi.context.version_id"] == ordinary.identity.version_id
+                assert "fi.context.session_id" not in child.attributes
+                assert "fi.context.binding_id" not in child.attributes
+            snapshot.read_file("AGENTS.md")
+            with tracer.start_as_current_span("following-restored") as child:
+                assert child.attributes["fi.context.session_id"] == receipt
         permission["allowed"] = False
         with pytest.raises(SnapshotIntegrityError):
             consumer.snapshot(opened)
-    assert calls == ["open", "manifest", "session-access", "snapshot-access", "chunk", "manifest", "session-access"]
+    assert calls == ["open", "manifest", "session-access", "snapshot-access", "chunk", "chunk", "manifest", "session-access"]
     events = [s for s in exporter.get_finished_spans() if s.name == "context.load"]
-    assert len(events) == 1
+    assert [s.attributes["fi.context.version_id"] for s in events] == [snapshot.identity.version_id, ordinary.identity.version_id]
+    assert "fi.context.session_id" not in events[1].attributes
+    assert "fi.context.binding_id" not in events[1].attributes
     assert events[0].attributes["fi.context.binding_id"] == binding
     assert events[0].attributes["fi.context.session_id"] == receipt
     assert page["resolution_id"] not in str(events[0].attributes)

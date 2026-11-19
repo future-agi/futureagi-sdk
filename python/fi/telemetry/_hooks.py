@@ -18,6 +18,7 @@ from ._registry import registry
 
 # Distinguish our automatic context-derived name from a framework's explicit name.
 _context_agents = WeakKeyDictionary()
+_EMPTY_CARRIER = _otel.carrier({})
 
 
 def _context_agent(span):
@@ -31,10 +32,13 @@ def _scope_attrs(state, span):
     attrs = {}
     context = sys.modules.get("opentelemetry.context")
     value = context.get_value(_otel.CARRIER_KEY) if context else None
-    if value and value.get("v") == 1:
+    if _otel._scope.get() is None and value and value.get("v") == 1:
         attrs.update(_otel.allowlisted(value.get("attrs", {})))
-    if state:
-        attrs.update(_otel.allowlisted(state.attrs))
+        if "fi.context.version_id" in state.attrs:
+            # A verified context replaces its entire identity. Do not recover a
+            # prior context's optional receipt or selector from an older carrier.
+            attrs = {k: v for k, v in attrs.items() if not k.startswith(("fi.context.", "fi.skills."))}
+    attrs.update(_otel.allowlisted(state.attrs))
     existing = getattr(span, "attributes", None) or {}
     if _otel._scope.get() is None:
         for key in ("gen_ai.agent.name", "gen_ai.agent.id"):
@@ -59,7 +63,11 @@ def _emit(name, attrs, provider, start, *, failed=False):
         bounded[key] = value
         if len(bounded) == 64:
             break
-    span = tracer.start_span(name, kind=trace.SpanKind.INTERNAL, attributes=bounded, start_time=start)
+    # The complete selected view is already in bounded. Prevent an on-start
+    # processor from backfilling omitted fields from a previous context.
+    context = sys.modules["opentelemetry.context"]
+    parent = context.set_value(_otel.CARRIER_KEY, _EMPTY_CARRIER)
+    span = tracer.start_span(name, context=parent, kind=trace.SpanKind.INTERNAL, attributes=bounded, start_time=start)
     try:
         if not span.is_recording():
             return False
