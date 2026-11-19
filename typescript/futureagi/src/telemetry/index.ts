@@ -1,14 +1,17 @@
-import type { Context } from "@opentelemetry/api";
-import { activeContext, allowlisted, api, carrierAttributes, CARRIER_KEY, configure, debugFailure, mode, recording, safe, SCOPE_KEY } from "./otel";
+import type { Context } from "./bridge-types";
+import { activeContext, allowlisted, api, carrierAttributes, CARRIER_KEY, configure as configureOtel, debugFailure, mode, recording, safe, SCOPE_KEY } from "./otel";
+import type { Mode, TracerProvider } from "./bridge-types";
 import { identityAttrs, LockedSkill, SnapshotLike } from "./identity";
 import { beginRead, declareIdentity, loadContext } from "./hooks";
 import { ScopeState, sharedRegistry } from "./registry";
 
-export { configure };
+export function configure(options: { skillsTracing?: Mode; tracerProvider?: TracerProvider } = {}): void {
+  configureOtel(options as unknown as Parameters<typeof configureOtel>[0]);
+}
 export { status } from "./status";
 export { FutureAGISkillsSpanProcessor } from "./processor";
 export type { LockedSkill } from "./identity";
-export type { Mode } from "./otel";
+export type { Mode } from "./bridge-types";
 
 /** The carrier returned by getValue is an immutable value, never a mutable
  * shared attributes map. The context view publishes a fresh value after reads,

@@ -1,5 +1,5 @@
 import type { Selector, SnapshotIdentity, SnapshotManifest } from "../context/types";
-import type { Attributes } from "./otel";
+import type { Attributes } from "./bridge-types";
 
 export interface SnapshotLike { readonly identity: SnapshotIdentity; readonly manifest: SnapshotManifest; }
 export interface LockedSkill {

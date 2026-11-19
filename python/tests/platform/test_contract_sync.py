@@ -86,6 +86,48 @@ def test_duplicate_mcp_names_fail_before_contract_write(sources, monkeypatch):
     assert not output.exists()
 
 
+@pytest.mark.parametrize("value", [
+    None,
+    [],
+    {},
+    {"tools": None},
+    {"tools": [None]},
+    {"tools": [{"name": None}]},
+    {"tools": [{"name": "  "}]},
+])
+def test_explicit_invalid_mcp_is_not_omission_and_preserves_every_output(
+    sources, monkeypatch, value
+):
+    source, tools, output = sources
+    paths = [
+        output,
+        output.with_name("SOURCE.json"),
+        output.with_name("mcp-tools.json"),
+        output.with_name("BACKEND_VERSION"),
+    ]
+    for path in paths:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(f"existing:{path.name}")
+    tools.write_text(json.dumps(value))
+    before = {path: path.read_bytes() for path in paths}
+    with pytest.raises(SystemExit):
+        invoke(monkeypatch, source, "--backend-commit", "c" * 40, "--mcp-tools", str(tools))
+    assert {path: path.read_bytes() for path in paths} == before
+
+
+def test_malformed_mcp_json_preserves_existing_outputs(sources, monkeypatch):
+    source, tools, output = sources
+    paths = [output, output.with_name("SOURCE.json"), output.with_name("mcp-tools.json")]
+    for path in paths:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(f"existing:{path.name}")
+    tools.write_text("null {")
+    before = {path: path.read_bytes() for path in paths}
+    with pytest.raises(SystemExit):
+        invoke(monkeypatch, source, "--backend-commit", "d" * 40, "--mcp-tools", str(tools))
+    assert {path: path.read_bytes() for path in paths} == before
+
+
 CONTRACTS = Path(__file__).resolve().parents[3] / "sdkgen/contracts"
 CONTEXTS = "/model-hub/skills/contexts/"
 CONSUMPTION = "/model-hub/skills/consumption/"

@@ -156,7 +156,12 @@ def emit_operations(ops: list[Op]) -> str:
     return "".join(out)
 
 
+_STRICT_TYPED_RESPONSE_IDS = {"contexts.get", "skills.latest_load"}
+
+
 def _return_type(op: Op) -> str:
+    if op.id in _STRICT_TYPED_RESPONSE_IDS:
+        return "Promise<unknown>"
     returns = op.returns or {}
     if "$ref" in returns:
         item = f"models.{class_name(returns['$ref'])}"
@@ -208,6 +213,15 @@ def _method(op: Op, fields: list[Param]) -> str:
     if stability == "deprecated":
         doc.append("@deprecated")
     lines = [_doc(doc, "  ")]
+    if op.id in _STRICT_TYPED_RESPONSE_IDS:
+        returns = op.returns or {}
+        if "$ref" not in returns:
+            raise ValueError(f"{op.id}: strict typed response needs a named model")
+        typed = f"Promise<models.{class_name(returns['$ref'])}>"
+        method_args = args[:-1]
+        strict_args = [*method_args, "options: RequestOptions & { strictResponse: true }"]
+        lines.append(f"  {ts_method(op)}({', '.join(strict_args)}): {typed};\n")
+        lines.append(f"  {ts_method(op)}({', '.join(args)}): Promise<unknown>;\n")
     lines.append(f"  {ts_method(op)}({', '.join(args)}): {_return_type(op)} {{\n")
     if stability != "stable":
         lines.append(f"    warnStability({json.dumps(op.id)}, {json.dumps(stability)});\n")

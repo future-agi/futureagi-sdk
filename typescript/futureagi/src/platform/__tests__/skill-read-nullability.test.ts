@@ -18,6 +18,18 @@ test("strict mode accepts present nullable keys, not omitted or invalid values",
   await expect(client({load: null}, false).skills.latestLoad(query)).resolves.toEqual({load: null});
 });
 
+test("per-call strict reads validate without weakening client strict mode", async () => {
+  await expect(
+    client({fetch: null, load: null}, false).skills.latestLoad(query, {strictResponse: true}),
+  ).resolves.toEqual({fetch: null, load: null});
+  await expect(
+    client({load: null}, false).skills.latestLoad(query, {strictResponse: true}),
+  ).rejects.toBeInstanceOf(ResponseValidationError);
+  await expect(
+    client({load: null}).skills.latestLoad(query, {strictResponse: true}),
+  ).rejects.toBeInstanceOf(ResponseValidationError);
+});
+
 test("strict context reads reject invalid nested data, and legacy reads stay tolerant", async () => {
   await expect(client({own_draft: null, latest: null, context: [], release_state: {}}).contexts.get(query.resource_id))
     .rejects.toBeInstanceOf(ResponseValidationError);

@@ -69,6 +69,8 @@ export interface RequestOptions {
   /** Milliseconds. */
   timeout?: number;
   maxRetries?: number;
+  /** Validate a generated strict-wire response and retain its declared type. Cannot disable client strict mode. */
+  strictResponse?: true;
   /** Query fields the contract does not describe yet. */
   extraQuery?: Record<string, unknown>;
   /** Body fields the contract does not describe yet (JSON and form bodies). */
@@ -409,7 +411,7 @@ export class Transport {
         throw errorFromResponse(response.status, text, response.headers.get("x-request-id"));
       }
       const result = decode(op, response.status, response.headers, text);
-      if (this.config.strictResponses && op.wireModel) {
+      if ((this.config.strictResponses || options?.strictResponse === true) && op.wireModel) {
         const { validateResponse } = await import("./wire-validation");
         validateResponse(op.id, op.wireModel, result);
       }

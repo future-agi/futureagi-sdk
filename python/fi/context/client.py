@@ -181,7 +181,13 @@ class ContextSnapshot:
     def read_all(self) -> VerifiedSnapshot:
         files = {item.path: self.read_file(item.path, trace=False) for item in self.manifest.files}
         self.manifest.lease.require_live()
-        return VerifiedSnapshot(self.manifest, files)
+        return VerifiedSnapshot(
+            self.manifest,
+            files,
+            _tracing=self._tracing,
+            _telemetry_binding_id=self._telemetry_binding_id,
+            _telemetry_session_id=self._telemetry_session_id,
+        )
 
 
 @dataclass(frozen=True)
@@ -217,7 +223,13 @@ class AsyncContextSnapshot:
             item.path: await self.read_file(item.path, trace=False) for item in self.manifest.files
         }
         self.manifest.lease.require_live()
-        return VerifiedSnapshot(self.manifest, files)
+        return VerifiedSnapshot(
+            self.manifest,
+            files,
+            _tracing=self._tracing,
+            _telemetry_binding_id=self._telemetry_binding_id,
+            _telemetry_session_id=self._telemetry_session_id,
+        )
 
 
 class SnapshotClient:

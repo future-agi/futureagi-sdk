@@ -157,12 +157,25 @@ def main() -> None:
 
     tools_snapshot = OUT.parent / "mcp-tools.json"
     provenance = OUT.parent / "SOURCE.json"
-    # Validate all supplied inputs before updating the contract slice.
-    tools = json.loads(args.mcp_tools.read_bytes()) if args.mcp_tools else None
-    if tools is not None:
-        names = sorted(tool["name"] for tool in tools["tools"])
-        if len(set(names)) != len(names) or not all(isinstance(n, str) and n for n in names):
-            parser.error("MCP source has invalid or duplicate names")
+    # Validate every supplied MCP input before the contract writer can run. An
+    # explicit JSON null is invalid input, never equivalent to omission.
+    tools = None
+    if args.mcp_tools is not None:
+        try:
+            tools = json.loads(args.mcp_tools.read_bytes())
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            parser.error(f"cannot read MCP source: {exc}")
+        if not isinstance(tools, dict) or not isinstance(tools.get("tools"), list):
+            parser.error("MCP source must be an object containing a tools array")
+        rows = tools["tools"]
+        if any(not isinstance(tool, dict) for tool in rows):
+            parser.error("MCP source tools must be objects")
+        names = [tool.get("name") for tool in rows]
+        if not all(isinstance(name, str) and name.strip() for name in names):
+            parser.error("MCP source has invalid tool names")
+        names.sort()
+        if len(set(names)) != len(names):
+            parser.error("MCP source has duplicate tool names")
     baseline_raw = None
     baseline_hash = None
     if args.skills_baseline_sdk:

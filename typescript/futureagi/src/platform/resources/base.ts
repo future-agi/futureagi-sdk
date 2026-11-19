@@ -2856,8 +2856,10 @@ export class ContextsResource extends Resource {
    *
    * GET /model-hub/skills/contexts/{context_id}/
    */
-  get(contextId: string, options?: RequestOptions): Promise<models.SkillsContextDetail> {
-    return this._t.call<models.SkillsContextDetail>(ops.OP_CONTEXTS_GET, { path: { context_id: contextId }, query: {} }, options);
+  get(contextId: string, options: RequestOptions & { strictResponse: true }): Promise<models.SkillsContextDetail>;
+  get(contextId: string, options?: RequestOptions): Promise<unknown>;
+  get(contextId: string, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_CONTEXTS_GET, { path: { context_id: contextId }, query: {} }, options);
   }
 
   /**
@@ -3700,8 +3702,10 @@ Both resource kinds share this read and the caller's workspace scope.
    *
    * GET /model-hub/skills/loads/
    */
-  latestLoad(params: SkillsLatestLoadParams, options?: RequestOptions): Promise<models.LatestLoadResult> {
-    return this._t.call<models.LatestLoadResult>(ops.OP_SKILLS_LATEST_LOAD, { path: {}, query: { resource_id: params.resource_id, kind: params.kind, since: params.since } }, options);
+  latestLoad(params: SkillsLatestLoadParams, options: RequestOptions & { strictResponse: true }): Promise<models.LatestLoadResult>;
+  latestLoad(params: SkillsLatestLoadParams, options?: RequestOptions): Promise<unknown>;
+  latestLoad(params: SkillsLatestLoadParams, options?: RequestOptions): Promise<unknown> {
+    return this._t.call<unknown>(ops.OP_SKILLS_LATEST_LOAD, { path: {}, query: { resource_id: params.resource_id, kind: params.kind, since: params.since } }, options);
   }
 
   /**

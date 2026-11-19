@@ -1,5 +1,5 @@
-import type { Context, Span } from "@opentelemetry/api";
-import { allowlisted, Attributes, carrierAttributes, CARRIER_KEY, mode, PROCESSOR_KEY, REGISTRY_KEY, safe } from "./otel";
+import type { Attributes, Context, Span } from "./bridge-types";
+import { allowlisted, carrierAttributes, CARRIER_KEY, mode, PROCESSOR_KEY, REGISTRY_KEY, safe } from "./otel";
 
 interface StartSpan extends Span { readonly attributes?: Record<string, unknown>; }
 interface RegistryReader { v: number; get(traceId: string): Attributes | undefined; }
