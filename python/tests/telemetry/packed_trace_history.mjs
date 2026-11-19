@@ -156,7 +156,7 @@ for (const entry of ['load_only', 'on']) for (const completion of ['load_only','
     assert.deepEqual(events('context.load').map(s => s.attributes[VERSION]), [b.version,c.version]);
   });
 }
-for (const wrapped of [false, true]) for (const scoped of ['automatic','agent','plain']) {
+for (const wrapped of [false, true]) for (const scoped of ['automatic','agent','context','plain']) {
   for (const linked of [false,true]) for (const writer of ['automatic','start','single','bulk']) {
     test(`public provenance wrapped=${wrapped} scope=${scoped} linked=${linked} writer=${writer}`, async () => {
       memory.reset(); mode(false,'on');
@@ -179,7 +179,7 @@ for (const wrapped of [false, true]) for (const scoped of ['automatic','agent','
       await tracer.startActiveSpan('parent', async parent => { try {
         await a.snapshot.readFile('AGENTS.md');
         if (scoped === 'automatic') await run();
-        else await withAgentScope(scoped === 'plain' ? {} : {agent:'scope'},run);
+        else await withAgentScope(scoped === 'context' ? {context:a.snapshot} : scoped === 'agent' ? {agent:'scope'} : {},run);
         tracer.startSpan('outside').end();
       } finally { parent.end(); } });
       const standing = scoped === 'agent' ? 'scope' : 'beta';

@@ -271,7 +271,7 @@ def test_reselection_never_exports_new_identity_with_old_session(pair, wrapped):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('wrapped', [False, True], ids=['native', 'FITracer'])
-@pytest.mark.parametrize('scope_kind', ['automatic', 'agent', 'plain'])
+@pytest.mark.parametrize('scope_kind', ['automatic', 'agent', 'context', 'plain'])
 @pytest.mark.parametrize('operation', ['root', 'linked', 'async-root', 'async-linked'])
 @pytest.mark.parametrize('writer', ['automatic', 'start', 'single', 'bulk'])
 async def test_public_name_provenance(pair, wrapped, scope_kind, operation, writer):
@@ -304,7 +304,9 @@ async def test_public_name_provenance(pair, wrapped, scope_kind, operation, writ
     framework = {NAME: child_name} if writer == 'start' else {}
     agent_id = 'gen_ai.agent.id'
     with native.start_as_current_span('parent'):
-        with (agent_scope(agent='scope') if scope_kind == 'agent' else agent_scope() if scope_kind == 'plain' else nullcontext()):
+        scopes = {'automatic': nullcontext(), 'agent': agent_scope(agent='scope'),
+                  'context': agent_scope(context=a), 'plain': agent_scope()}
+        with scopes[scope_kind]:
             assert a.read_file(ROOT) == 'Support agent'
             with tracer.start_as_current_span('child', attributes={**framework, agent_id: 'child-id'}) as child:
                 assert trace.get_current_span() is child
