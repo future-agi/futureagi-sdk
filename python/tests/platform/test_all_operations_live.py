@@ -9,12 +9,17 @@ exists once traces are indexed); those accept the typed error the backend sends,
 
 from __future__ import annotations
 
+import json
 import os
+import re
 import time
+import unicodedata
 import uuid
 import warnings
 from datetime import datetime, timedelta, timezone
+from ipaddress import ip_address
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import fi.platform as fi
 import httpx
@@ -146,9 +151,65 @@ def _poll_sql_result(get_result, job_id, project_id, *, clock=time.monotonic, sl
     raise AssertionError(f"SQL job {job_id} did not finish in 150s: {state}")
 
 
+def _sql_collector_url(raw, collector_port):
+    """Only the standalone API origin may select a credentialed collector on the same loopback host."""
+    __tracebackhide__ = True  # pytest must not display a rejected URL containing userinfo
+    try:
+        base = urlsplit(raw)
+        host = base.hostname or ""
+        if host != "localhost":
+            address = ip_address(host)  # literal only; never resolve a configured hostname
+            if not address.is_loopback or "%" in host:
+                raise ValueError
+            if address.version == 6:
+                host = f"[{host}]"
+        # Compare the whole input, not just .hostname: reject userinfo, paths,
+        # malformed authorities and characters that URL parsers would discard.
+        origin = f"{base.scheme}://{host}" + (f":{base.port}" if base.port is not None else "")
+        if base.scheme not in {"http", "https"} or base.port == 0 or raw.lower() not in (origin, origin + "/"):
+            raise ValueError
+    except ValueError:
+        raise ValueError("SQL fixture requires an HTTP(S) loopback API origin") from None
+    if not re.fullmatch(r"[1-9][0-9]{0,4}", collector_port) or int(collector_port) > 65535:
+        raise ValueError("SQL fixture requires a valid collector port")
+    return f"{base.scheme}://{host}:{collector_port}/v1/traces"
+
+
+def _clean_sql_otlp_receipt(body):
+    """The released e2e/lib/otlp.ts accepts an empty body or a receipt with no losses or warnings."""
+    def invalid_constant(_):  # Python accepts NaN/Infinity by default; JSON.parse does not.
+        raise ValueError
+
+    try:
+        text = body.decode("utf-8")
+        # String.trim() treats Unicode separators and BOM as whitespace, not arbitrary controls.
+        if all(ch in "\t\n\v\f\r\ufeff" or unicodedata.category(ch).startswith("Z") for ch in text):
+            return True
+        receipt = json.loads(text, parse_constant=invalid_constant)
+    except (ValueError, RecursionError):
+        return False
+
+    counts = {"rejectedSpans", "rejected_spans"}
+    messages = {"errorMessage", "error_message"}
+    if not isinstance(receipt, dict) or receipt.keys() - {"partialSuccess", "partial_success"}:
+        return False
+    for partial in receipt.values():  # both aliases may be present
+        if not isinstance(partial, dict) or partial.keys() - (counts | messages):
+            return False
+        for key, value in partial.items():
+            if key in counts:
+                zero = type(value) in (int, float) and value == 0
+                if not zero and not (isinstance(value, str) and re.fullmatch(r"0+", value)):
+                    return False
+            elif value != "":
+                return False
+    return True
+
+
 @pytest.fixture
 def sql_project(client):
     """Seed ClickHouse via the released standalone collector, as in OBS-E2E-061."""
+    url = _sql_collector_url(os.environ["FI_BASE_URL"], os.environ.get("FI_COLLECTOR_OTLP_HTTP_PORT", "24318"))
     name = f"sdk-sql-{uuid.uuid4().hex}"
     trace_id, session_id = uuid.uuid4().hex, str(uuid.uuid4())
     start = time.time_ns() - 1_000_000_000
@@ -166,15 +227,16 @@ def sql_project(client):
     resource = {"attributes": [attr("project_name", name), attr("project_type", "observe"), attr("service.name", name)]}
     payload = {"resourceSpans": [{"resource": resource, "scopeSpans": [{"scope": {"name": "sdk-e2e"}, "spans": spans}]}]}
 
-    # Use the same standalone host, not an arbitrary OTLP destination, for the API key pair.
-    base = httpx.URL(os.environ["FI_BASE_URL"])
-    assert base.scheme == "https" or base.host in {"localhost", "127.0.0.1", "::1"}, "collector credentials require HTTPS or loopback"
-    port = int(os.environ.get("FI_COLLECTOR_OTLP_HTTP_PORT", "24318"))  # standalone-e2e.env
-    url = base.copy_with(port=port, path="/v1/traces", query=None, fragment=None)
     with httpx.Client(trust_env=False, follow_redirects=False, timeout=30) as http:
-        reply = http.post(url, json=payload, headers={"X-Api-Key": os.environ["FI_API_KEY"], "X-Secret-Key": os.environ["FI_SECRET_KEY"]})
-        reply.raise_for_status()
-        assert int(reply.json().get("partialSuccess", {}).get("rejectedSpans", 0)) == 0
+        headers = {"X-Api-Key": os.environ["FI_API_KEY"], "X-Secret-Key": os.environ["FI_SECRET_KEY"]}
+        try:
+            reply = http.post(url, json=payload, headers=headers)
+        except httpx.RequestError:
+            raise ValueError("SQL fixture collector request failed") from None
+        if not reply.is_success:
+            raise ValueError(f"SQL fixture collector returned HTTP {reply.status_code}")
+        if not _clean_sql_otlp_receipt(reply.content):
+            pytest.fail("SQL fixture collector returned an invalid or partial OTLP receipt", pytrace=False)
 
     def matching_projects():
         return [p["id"] for p in client.projects.list(name=name)["projects"] if p["name"] == name]
