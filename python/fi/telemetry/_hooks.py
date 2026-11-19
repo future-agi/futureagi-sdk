@@ -52,10 +52,20 @@ def _emit(name, attrs, provider, start, *, failed=False):
     bounded = {}
     for key in sorted(attrs, key=lambda key: (not key.startswith("fi.skill."), key)):
         value = attrs[key]
+        # OTel accepts homogeneous arrays and numbers as attributes. The
+        # agent identity fields on a load are strings, regardless of which
+        # host or scope supplied them. Reject one bad field, not the receipt.
+        if key in (_agent_name.NAME, "gen_ai.agent.id") and not isinstance(value, str):
+            continue
         if isinstance(value, str):
-            value = value.encode("utf-8")[:256].decode("utf-8", errors="ignore")
+            value = value.encode("utf-8", errors="replace")[:256].decode("utf-8", errors="ignore")
         elif isinstance(value, (tuple, list)):
-            value = tuple(item.encode("utf-8")[:256].decode("utf-8", errors="ignore") for item in value[:32])
+            items = value[:32]
+            if not all(isinstance(item, str) for item in items):
+                continue
+            value = tuple(item.encode("utf-8", errors="replace")[:256].decode("utf-8", errors="ignore") for item in items)
+        elif type(value) not in (bool, int, float):
+            continue
         bounded[key] = value
         if len(bounded) == 64:
             break

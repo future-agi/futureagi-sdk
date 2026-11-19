@@ -358,3 +358,35 @@ def test_fitracer_current_writer_not_inherited_stamp(pair, scope, writer):
     event = attrs(exporter, 'context.load')[-1]
     assert (event[VERSION], event[NAME]) == (b.identity.version_id, 'alpha' if writer else expected)
     assert attrs(exporter, 'observed')[0][NAME] == expected
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('asynchronous', [False, True], ids=['sync', 'async'])
+@pytest.mark.parametrize('agent_id', [(1, 2), ('string', 'array'), 123, 'valid-id'])
+async def test_linked_load_validates_agent_fields_independently(pair, asynchronous, agent_id):
+    from fi_instrumentation import FITracer
+
+    native, exporter = pair
+    src = source('beta')
+    if asynchronous:
+        class AsyncTransport:
+            async def chunk(self, *args, **kwargs):
+                return src.chunk(*args, **kwargs)
+        b = AsyncContextSnapshot(ordinary(src).manifest, AsyncTransport())
+        expected_receipt = {}
+    else:
+        b, expected_receipt, _, _ = session(src)
+    # Authenticate the closure independently, never by setting snapshot fields.
+    with native.start_as_current_span('verify-closure'):
+        verified = await b.read_all() if asynchronous else b.read_all()
+        assert verified.files[LINK] == 'Refund instructions'
+    with native.start_as_current_span('parent'), agent_scope():
+        with FITracer(native).start_as_current_span('worker') as child:
+            child.set_attributes({NAME: 'worker', 'gen_ai.agent.id': agent_id})
+            data = await b.read_file(LINK) if asynchronous else b.read_file(LINK)
+            assert data == 'Refund instructions'
+    load, = attrs(exporter, 'skill.load')
+    assert (load[NAME], load[VERSION], receipt(load)) == ('worker', b.identity.version_id, expected_receipt)
+    assert load['fi.skill.via_context.version_id'] == b.identity.version_id
+    assert load['fi.skill.load.evidence'] == 'delivered'
+    assert load.get('gen_ai.agent.id') == (agent_id if isinstance(agent_id, str) else None)

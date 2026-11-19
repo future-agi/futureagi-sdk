@@ -40,11 +40,8 @@ function atCompletion(ticket: ReadTicket): DeliveryTicket | undefined {
     state.attrs = allowlisted(source);
     state.agentSource = inheritedSource(source);
   }
-  const {name: framework, automatic} = agentIdentity(current);
-  if (!state.attrs["gen_ai.agent.name"] && typeof framework === "string" && !automatic) {
-    state.attrs = allowlisted({ ...state.attrs, "gen_ai.agent.name": framework });
-    state.agentSource = "framework";
-  }
+  // Framework identity belongs to the active span. scopeAttrs overlays it on
+  // this evidence only; it must not become a later sibling's standing name.
   return { ...ticket, state, mode: activeMode };
 }
 function scopeAttrs(ticket: DeliveryTicket): Attributes {

@@ -4,7 +4,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { after, test } from 'node:test';
 import { trace, context as otelContext } from '@opentelemetry/api';
-import { InMemorySpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { BasicTracerProvider, InMemorySpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
 const require = createRequire(import.meta.url);
 const load = (form, name) => form === 'cjs' ? require(name) : import(name);
 const [coreForm, sdkForm] = process.argv.slice(2);
@@ -216,4 +216,67 @@ for (const scoped of [true,false]) for (const write of [true,false]) {
     assert.equal(events('observed')[0].attributes[NAME],expected);
   });
 }
+// The first read must be B: preselecting A masks an accidental standing-name write.
+for (const scope of ['automatic', 'plain', 'explicit']) test(`first selection in named FI child ${scope}`, async () => {
+  memory.reset(); mode(false, 'on');
+  const b = fixture('agent_context', 'beta');
+  await tracer.startActiveSpan('parent', async parent => { try {
+    const run = async () => {
+      await new FITracer({tracer}).startActiveSpan('child', {attributes:{[NAME]:'worker'}}, async child => {
+        try { assert.equal(await b.snapshot.readFile('AGENTS.md'), 'beta'); } finally { child.end(); }
+      });
+      tracer.startSpan('sibling').end();
+    };
+    if (scope === 'automatic') await run();
+    else await withAgentScope(scope === 'plain' ? {} : {agent:'standing'}, run);
+  } finally { parent.end(); } });
+  const [load] = events('context.load'), [sibling] = events('sibling');
+  assert.deepEqual([load.attributes[NAME],load.attributes[VERSION]], ['worker',b.version]);
+  assert.deepEqual([sibling.attributes[NAME],sibling.attributes[VERSION]], [scope === 'explicit' ? 'standing' : 'beta',b.version]);
+});
+
+const localSdk = await load(sdkForm, '@future-agi/sdk/telemetry');
+const ID = 'gen_ai.agent.id';
+// The host gets its independent native handle through public processor.onStart.
+// Use an ordinary SDK provider/exporter for new loads: no FI export sanitizer.
+async function plainHost(onStart, run, traceConfig) {
+  const out = new InMemorySpanExporter();
+  const p = new BasicTracerProvider({spanProcessors:[{onStart, onEnd() {}, async shutdown() {}, async forceFlush() {}},new SimpleSpanProcessor(out)]});
+  localSdk.configure({skillsTracing:'on',tracerProvider:p});
+  try { await run(new FITracer({tracer:p.getTracer('external-host'),traceConfig}), out); }
+  finally { localSdk.configure(); await p.shutdown(); }
+}
+for (const setter of ['single','bulk']) for (const write of ['different','same']) test(`native writer then unrelated FI replay ${setter} ${write}`, async () => {
+  const a = fixture('agent_context','alpha'), b = fixture('agent_context','beta');
+  let native;
+  await plainHost(span => { if (span.name === 'wrapped') native=span; }, async (fi, out) => {
+    await fi.startActiveSpan('wrapped', {attributes:{[ID]:'original-id'}}, async wrapper => { try {
+      assert.notEqual(wrapper,native);
+      assert.equal(await a.snapshot.readFile('AGENTS.md'),'alpha');
+      const name = write === 'different' ? 'worker' : 'alpha';
+      if (setter === 'single') { native.setAttribute(NAME,name); native.setAttribute(ID,'worker-id'); }
+      else native.setAttributes({[NAME]:name,[ID]:'worker-id'});
+      wrapper.setAttribute('unrelated.field',true);
+      assert.equal(await b.snapshot.readFile('AGENTS.md'),'beta');
+    } finally { wrapper.end(); } });
+    const loads=out.getFinishedSpans().filter(s=>s.name==='context.load');
+    assert.equal(loads.length,2);
+    for (const span of [loads[1],out.getFinishedSpans().find(s=>s.name==='wrapped')]) {
+      assert.deepEqual([span.attributes[NAME],span.attributes[ID],span.attributes[VERSION]],[write==='different'?'worker':'alpha','worker-id',b.version]);
+    }
+  });
+});
+for (const pii of [false,true]) test(`host identity copied only under FI privacy policy pii=${pii}`,async () => {
+  const raw='host@example.test', rawId='owner@example.test', b=fixture('agent_context','beta');
+  await plainHost(span => { if(span.name==='wrapped') span.setAttributes({[NAME]:raw,[ID]:rawId,'test.host.private':'not-for-load'}); },async (fi,out) => {
+    await fi.startActiveSpan('wrapped',async wrapper=>{ try {
+      await withAgentScope({},()=>b.snapshot.readFile('AGENTS.md'));
+    } finally {wrapper.end();} });
+    const [load]=out.getFinishedSpans().filter(s=>s.name==='context.load');
+    assert.equal(load.attributes[VERSION],b.version);
+    assert.equal(load.attributes['test.host.private'],undefined);
+    if (pii) { assert.ok(!JSON.stringify(load.attributes).includes('@example.test')); }
+    else assert.deepEqual([load.attributes[NAME],load.attributes[ID]],[raw,rawId]);
+  },{piiRedaction:pii});
+});
 after(async () => { delete process.env.FI_SKILLS_TRACING; configure(); await provider.shutdown(); });
