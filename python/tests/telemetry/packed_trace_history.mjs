@@ -8,7 +8,7 @@ import { BasicTracerProvider, InMemorySpanExporter, SimpleSpanProcessor } from '
 const require = createRequire(import.meta.url);
 const load = (form, name) => form === 'cjs' ? require(name) : import(name);
 const [coreForm, sdkForm] = process.argv.slice(2);
-const {register, FITracer} = await load(coreForm, '@traceai/fi-core');
+const {register, FITracer, FutureAGIRuntimeAttributesSpanProcessor} = await load(coreForm, '@traceai/fi-core');
 const {ContextSnapshot, SnapshotIntegrityError} = await load(sdkForm, '@future-agi/sdk/context');
 const {configure, withAgentScope, declareSkill, FutureAGISkillsSpanProcessor} = await load(sdkForm === 'esm' ? 'cjs' : 'esm', '@future-agi/sdk/telemetry');
 const memory = new InMemorySpanExporter();
@@ -281,10 +281,10 @@ for (const pii of [false,true]) test(`host identity copied only under FI privacy
 });
 // Two providers: limits and native onStart belong only to the host. Inspect
 // the emitted SDK load at an uncapped, ordinary exporter, not through FI.
-async function separateLoadHost({owned=false, spanLimits, onStart, unknown=false, piiRedaction=false}, run) {
+async function separateLoadHost({owned=false, spanLimits, onStart, unknown=false, piiRedaction=false, firstRuntime}, run) {
   const hook = {onStart, onEnd() {}, async forceFlush() {}, async shutdown() {}};
   const host = owned ? register({projectName:'identity',setGlobalTracerProvider:false,
-    runtimeAttributes:!sdkProcessor,spanProcessors:[...(sdkProcessor ? [new FutureAGISkillsSpanProcessor()] : []),hook]}) :
+    runtimeAttributes:firstRuntime ? true : !sdkProcessor,spanProcessors:[...(sdkProcessor ? [new FutureAGISkillsSpanProcessor()] : []),hook,...(firstRuntime ? [firstRuntime] : [])]}) :
     new BasicTracerProvider({spanLimits,spanProcessors:[hook]});
   const out = new InMemorySpanExporter();
   const loads = new BasicTracerProvider({spanProcessors:[new SimpleSpanProcessor(out)]});
@@ -366,6 +366,20 @@ for (const name of ['worker','alpha']) test(`owned native onStart bound setter w
       saved(NAME,name); await b.snapshot.readFile('AGENTS.md'); assert.equal(span.attributes[NAME],name);
     } finally { span.end(); } });
     assert.deepEqual(out.getFinishedSpans().map(s=>[s.attributes[NAME],s.attributes[VERSION]]),[['alpha',a.version],[name,b.version]]);
+  });
+});
+test('caller-supplied leading runtime has already seen the native setter',async () => {
+  const a=fixture('agent_context','alpha'), b=fixture('agent_context','beta'); let native,saved;
+  const firstRuntime = new class extends FutureAGIRuntimeAttributesSpanProcessor {
+    onStart(span,parent) { native=span; saved=span.setAttribute.bind(span,NAME); super.onStart(span,parent); }
+  }();
+  await separateLoadHost({owned:true,onStart() {},firstRuntime}, async (fi,out) => {
+    await fi.startActiveSpan('wrapped',async active=>{ try {
+      await a.snapshot.readFile('AGENTS.md'); assert.equal(native.attributes[NAME],undefined);
+      saved('alpha'); await b.snapshot.readFile('AGENTS.md');
+    } finally { active.end(); } });
+    assert.equal(native.attributes[NAME],'alpha');
+    assert.deepEqual(out.getFinishedSpans().map(s=>[s.attributes[NAME],s.attributes[VERSION]]),[['alpha',a.version],['alpha',b.version]]);
   });
 });
 after(async () => { delete process.env.FI_SKILLS_TRACING; configure(); await provider.shutdown(); });
