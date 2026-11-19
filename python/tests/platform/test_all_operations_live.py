@@ -9,6 +9,7 @@ exists once traces are indexed); those accept the typed error the backend sends,
 
 from __future__ import annotations
 
+import os
 import time
 import uuid
 import warnings
@@ -16,6 +17,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import fi.platform as fi
+import httpx
 import pytest
 import yaml
 
@@ -144,14 +146,52 @@ def _poll_sql_result(get_result, job_id, project_id, *, clock=time.monotonic, sl
     raise AssertionError(f"SQL job {job_id} did not finish in 150s: {state}")
 
 
-def test_sql_job_on_synthetic_spans(client, project):
+@pytest.fixture
+def sql_project(client):
+    """Seed ClickHouse via the released standalone collector, as in OBS-E2E-061."""
+    name = f"sdk-sql-{uuid.uuid4().hex}"
+    trace_id, session_id = uuid.uuid4().hex, str(uuid.uuid4())
+    start = time.time_ns() - 1_000_000_000
+
+    def attr(key, value):
+        return {"key": key, "value": {"stringValue": value}}
+
+    spans = [
+        {"traceId": trace_id, "spanId": uuid.uuid4().hex[:16], "name": f"sql-{role}", "kind": 1,
+         "startTimeUnixNano": str(start), "endTimeUnixNano": str(start + 50_000_000), "status": {"code": 1},
+         "attributes": [attr("fi.span.kind", "llm"), attr("session.id", session_id)]}
+        for role in ("root", "child")
+    ]
+    spans[1]["parentSpanId"] = spans[0]["spanId"]
+    resource = {"attributes": [attr("project_name", name), attr("project_type", "observe"), attr("service.name", name)]}
+    payload = {"resourceSpans": [{"resource": resource, "scopeSpans": [{"scope": {"name": "sdk-e2e"}, "spans": spans}]}]}
+
+    # Use the same standalone host, not an arbitrary OTLP destination, for the API key pair.
+    base = httpx.URL(os.environ["FI_BASE_URL"])
+    assert base.scheme == "https" or base.host in {"localhost", "127.0.0.1", "::1"}, "collector credentials require HTTPS or loopback"
+    port = int(os.environ.get("FI_COLLECTOR_OTLP_HTTP_PORT", "24318"))  # standalone-e2e.env
+    url = base.copy_with(port=port, path="/v1/traces", query=None, fragment=None)
+    with httpx.Client(trust_env=False, follow_redirects=False, timeout=30) as http:
+        reply = http.post(url, json=payload, headers={"X-Api-Key": os.environ["FI_API_KEY"], "X-Secret-Key": os.environ["FI_SECRET_KEY"]})
+        reply.raise_for_status()
+        assert int(reply.json().get("partialSuccess", {}).get("rejectedSpans", 0)) == 0
+
+    def matching_projects():
+        return [p["id"] for p in client.projects.list(name=name)["projects"] if p["name"] == name]
+
+    assert wait_until(lambda: len(matching_projects()) == 1, timeout=60), "collector project was not created"
+    project_id, = matching_projects()
+    return project_id, name, spans
+
+
+def test_sql_job_on_synthetic_spans(client, sql_project):
     """Run a bounded read on this test's own project and cancel only the job it created."""
-    project_id, spans, _ = project
-    assert client.projects.get(project_id).name == spans[0]["project_name"]
+    project_id, project_name, spans = sql_project
+    assert client.projects.get(project_id).name == project_name
     assert client.sql.get_catalog(project_id=project_id).max_window_days >= 1
     # The ClickHouse list and the SQL scan must see the fixture after async ingestion.
     assert wait_until(lambda: len(client.spans.list(project_id=project_id).table) == len(spans))
-    start = datetime.fromtimestamp(spans[0]["start_time"] / 1e9, tz=timezone.utc) - timedelta(minutes=1)
+    start = datetime.fromtimestamp(int(spans[0]["startTimeUnixNano"]) / 1e9, tz=timezone.utc) - timedelta(minutes=1)
     job = client.sql.run(project_id=project_id, sql="SELECT count() AS n FROM spans", start=start.isoformat(),
                          end=datetime.now(timezone.utc).isoformat(), reuse=False)
     assert job.id and job.project_id == project_id
