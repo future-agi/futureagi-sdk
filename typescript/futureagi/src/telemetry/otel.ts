@@ -17,6 +17,9 @@ interface ApiGlobal {
     with<T>(context: Context, callback: () => T): T;
   };
 }
+const CONFIG_KEY = Symbol.for("futureagi.runtime.skills.config.v1");
+interface ModeReader { readonly v: 1; mode(): Mode }
+const globals = globalThis as unknown as Record<symbol, ModeReader | undefined>;
 let configuredMode: Mode | undefined;
 let configuredProvider: TracerProvider | undefined;
 let debugged = false;
@@ -24,10 +27,24 @@ let debugged = false;
 export function configure(options: { skillsTracing?: Mode; tracerProvider?: TracerProvider } = {}): void {
   configuredMode = options.skillsTracing;
   configuredProvider = options.tracerProvider;
+  // Share only the mode reader with traceAI and other ESM/CJS SDK instances.
+  // Do not publish the provider, install an exporter or require OTel on import.
+  try { globals[CONFIG_KEY] = modeReader; } catch { /* locked host global: keep local behavior */ }
 }
-export function mode(): Mode {
+function localMode(): Mode {
   const value = configuredMode ?? (typeof process !== "undefined" ? process.env.FI_SKILLS_TRACING : undefined);
   return value === "off" || value === "load_only" ? value : "on";
+}
+const modeReader: ModeReader = Object.freeze({ v: 1, mode: localMode });
+export function mode(): Mode {
+  try {
+    const reader = globals[CONFIG_KEY];
+    if (reader?.v === 1 && reader !== modeReader && typeof reader.mode === "function") {
+      const value = reader.mode();
+      if (value === "on" || value === "off" || value === "load_only") return value;
+    }
+  } catch { /* An optional bridge must not interrupt consumption. */ }
+  return localMode();
 }
 export function api(): ApiGlobal | undefined {
   return (globalThis as unknown as Record<symbol, ApiGlobal>)[Symbol.for("opentelemetry.js.api.1")];

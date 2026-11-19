@@ -1,0 +1,53 @@
+---
+title: "Skills response models"
+description: "The 38 response models returned by the skills resources of the Future AGI Python and TypeScript SDKs, with every field and its type."
+---
+
+The models returned by `client.skills`, `client.contexts`, `client.skill_consumption`, `client.context_credentials`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call. In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)); TypeScript has no strict mode.
+
+## Models
+
+<div class="sdk-ref-table">
+
+| Model | Fields |
+|---|---|
+| <span id="latestfetch">`LatestFetch`</span> | `sdk_version: string`, `tracing_mode: string`, `can_record: boolean`, `client: string` |
+| <span id="latestload">`LatestLoad`</span> | `version: integer`, `agent:` [`LoadAgent`](#loadagent), `project:` [`LoadProject`](#loadproject), `received_at: string` |
+| <span id="latestloadresult">`LatestLoadResult`</span> | `load: any`, `fetch: any` |
+| <span id="loadagent">`LoadAgent`</span> | `key: string[]`, `name: string`, `service: string`, `project_id: string`, `project_name: string`, `name_source: string` |
+| <span id="loadproject">`LoadProject`</span> | `id: string`, `name: string` |
+| <span id="runtimeusageresult">`RuntimeUsageResult`</span> | `rows: any[]`, `summary: any`, `coverage: any`, `diagnosis: any`, `failed_loads: any`, `mismatch: any`, `move: any`, `next_cursor: string`, `totals_note: string`, `truncated: boolean`, `agent: any`, `contexts: any[]`, `links_summary: any[]`, `linked_not_loaded: any[]`, `loaded_not_linked: any[]`, `series: any[]`, `markers: any[]` |
+| <span id="skillscontextaccesscheck">`SkillsContextAccessCheck`</span> | `allowed: boolean`, `version_id: string`, `digest: string`, `checked_at: string` |
+| <span id="skillscontextconsumegrant">`SkillsContextConsumeGrant`</span> | `kind: string`, `resource_id: string`, `labels: string[]`, `version_ids: string[]` |
+| <span id="skillscontextconsumptionchunk">`SkillsContextConsumptionChunk`</span> | `path: string`, `sha256: string`, `size_bytes: integer`, `total_chars: integer`, `offset: integer`, `next_offset: integer`, `eof: boolean`, `text: string`, `resource_id: string`, `version_id: string`, `digest: string` |
+| <span id="skillscontextconsumptionmanifest">`SkillsContextConsumptionManifest`</span> | `resource_id: string`, `kind: string`, `name: string`, `description: string`, `version: integer`, `version_id: string`, `digest: string`, `requested:` [`SkillsContextSelector`](#skillscontextselector), `entrypoint: string`, `descriptor_path: string`, `files:` [`SkillsContextFileMeta`](#skillscontextfilemeta)[], `file_count: integer`, `file_offset: integer`, `next_file_offset: integer`, `created_at: string`, `resolution_id: string`, `resolution_expires_at: string` |
+| <span id="skillscontextcontextlabelsummary">`SkillsContextContextLabelSummary`</span> | `name: string`, `version: integer`, `version_id: string` |
+| <span id="skillscontextcontextreleaselabel">`SkillsContextContextReleaseLabel`</span> | `name: string`, `version: integer`, `version_id: string`, `updated_at: string`, `updated_by: object`, `is_protected: boolean`, `can_move: boolean`, `can_remove: boolean`, `release_revision: integer` |
+| <span id="skillscontextcontextreleasepermissions">`SkillsContextContextReleasePermissions`</span> | `can_publish: boolean`, `can_promote: boolean`, `can_manage_protection: boolean`, `can_quarantine: boolean`, `can_issue_credentials: boolean` |
+| <span id="skillscontextcontextreleasestate">`SkillsContextContextReleaseState`</span> | `latest_version: integer`, `release_revision: integer`, `security_revision: integer`, `protected_label_names: string[]`, `labels:` [`SkillsContextContextReleaseLabel`](#skillscontextcontextreleaselabel)[], `permissions:` [`SkillsContextContextReleasePermissions`](#skillscontextcontextreleasepermissions) |
+| <span id="skillscontextcontextsummary">`SkillsContextContextSummary`</span> | `id: string`, `kind: string`, `name: string`, `description: string`, `tags: string[]`, `metadata_revision: integer`, `latest_version: integer`, `labels:` [`SkillsContextContextLabelSummary`](#skillscontextcontextlabelsummary)[], `release_revision: integer`, `security_revision: integer`, `protected_label_names: string[]`, `has_draft: boolean`, `updated_at: string`, `updated_by: object` |
+| <span id="skillscontextcredentialissued">`SkillsContextCredentialIssued`</span> | `id: string`, `secret: string`, `secret_available: boolean`, `metadata:` [`SkillsContextCredentialMetadata`](#skillscontextcredentialmetadata) |
+| <span id="skillscontextcredentialmetadata">`SkillsContextCredentialMetadata`</span> | `purpose: string`, `grants:` [`SkillsContextConsumeGrant`](#skillscontextconsumegrant)[], `binding_ids: string[]`, `expires_at: string`, `id: string`, `created_at: string`, `revoked_at: string`, `last_used_at: string` |
+| <span id="skillscontextdetail">`SkillsContextDetail`</span> | `release_state:` [`SkillsContextContextReleaseState`](#skillscontextcontextreleasestate), `latest: object`, `own_draft: any`, `context:` [`SkillsContextContextSummary`](#skillscontextcontextsummary) |
+| <span id="skillscontextfilemeta">`SkillsContextFileMeta`</span> | `path: string`, `sha256: string`, `size_bytes: integer`, `origin:` [`SkillsContextFileOrigin`](#skillscontextfileorigin) |
+| <span id="skillscontextfileorigin">`SkillsContextFileOrigin`</span> | `kind: string`, `skill_id: string`, `version_id: string`, `source_path: string` |
+| <span id="skillscontextimmutablemanifest">`SkillsContextImmutableManifest`</span> | `resource_id: string`, `kind: string`, `name: string`, `description: string`, `version: integer`, `version_id: string`, `digest: string`, `requested:` [`SkillsContextSelector`](#skillscontextselector), `entrypoint: string`, `descriptor_path: string`, `files:` [`SkillsContextFileMeta`](#skillscontextfilemeta)[], `file_count: integer`, `file_offset: integer`, `next_file_offset: integer`, `created_at: string` |
+| <span id="skillscontextlockedlink">`SkillsContextLockedLink`</span> | `mount: string`, `skill_id: string`, `requested:` [`SkillsContextSelector`](#skillscontextselector), `version: integer`, `version_id: string`, `digest: string` |
+| <span id="skillscontextowndraft">`SkillsContextOwnDraft`</span> | `revision: integer`, `base_version: integer` |
+| <span id="skillscontextselector">`SkillsContextSelector`</span> | `version: integer`, `label: string` |
+| <span id="skillscontextsnapshotdescriptor">`SkillsContextSnapshotDescriptor`</span> | `schema: integer`, `kind: string`, `name: string`, `description: string`, `entrypoint: string`, `descriptor_path: string`, `owned_paths: string[]`, `links:` [`SkillsContextLockedLink`](#skillscontextlockedlink)[] |
+| <span id="skillscontextversioninspection">`SkillsContextVersionInspection`</span> | `descriptor:` [`SkillsContextSnapshotDescriptor`](#skillscontextsnapshotdescriptor), `manifest:` [`SkillsContextImmutableManifest`](#skillscontextimmutablemanifest), `distribution_blocked: boolean`, `reason: string` |
+| <span id="skillshubdraftsummary">`SkillsHubDraftSummary`</span> | `user: object`, `updated_at: string`, `base_version: integer`, `is_mine: boolean` |
+| <span id="skillshubevidencecurrentness">`SkillsHubEvidenceCurrentness`</span> | `content: boolean`, `baseline: boolean`, `suite: boolean`, `competitors: boolean`, `payload_available: boolean` |
+| <span id="skillshubfilechunk">`SkillsHubFileChunk`</span> | `path: string`, `sha256: string`, `size_bytes: integer`, `total_chars: integer`, `offset: integer`, `next_offset: integer`, `eof: boolean`, `text: string` |
+| <span id="skillshublabelout">`SkillsHubLabelOut`</span> | `name: string`, `version: integer`, `version_id: string`, `updated_at: string`, `updated_by: object`, `is_protected: boolean`, `can_move: boolean`, `can_remove: boolean`, `release_revision: integer` |
+| <span id="skillshublabelsummary">`SkillsHubLabelSummary`</span> | `name: string`, `version: integer` |
+| <span id="skillshubmanifest">`SkillsHubManifest`</span> | `skill_id: string`, `name: string`, `description: string`, `version: integer`, `version_id: string`, `digest: string`, `requested:` [`SkillsHubRequested`](#skillshubrequested), `frontmatter: any`, `files:` [`SkillsHubManifestFile`](#skillshubmanifestfile)[], `file_count: integer`, `file_offset: integer`, `next_file_offset: integer`, `created_at: string` |
+| <span id="skillshubmanifestfile">`SkillsHubManifestFile`</span> | `path: string`, `size_bytes: integer`, `sha256: string`, `content: string` |
+| <span id="skillshubpushresult">`SkillsHubPushResult`</span> | `release_revision: integer`, `evidence: object`, `skill:` [`SkillsHubSkillSummary`](#skillshubskillsummary), `version: object`, `unchanged: boolean` |
+| <span id="skillshubrequested">`SkillsHubRequested`</span> | `label: string`, `version: integer` |
+| <span id="skillshubskilldetail">`SkillsHubSkillDetail`</span> | `release_revision: integer`, `protected_label_names: string[]`, `id: string`, `name: string`, `description: string`, `tags: string[]`, `latest_version: integer`, `labels:` [`SkillsHubLabelOut`](#skillshublabelout)[], `has_draft: boolean`, `updated_at: string`, `updated_by: object`, `created_at: string`, `fetches_7d: integer`, `file_count: integer`, `source: any`, `created_by: object`, `latest: object`, `drafts:` [`SkillsHubDraftSummary`](#skillshubdraftsummary)[], `permissions:` [`SkillsHubSkillPermissions`](#skillshubskillpermissions) |
+| <span id="skillshubskillpermissions">`SkillsHubSkillPermissions`</span> | `can_manage_label_protection: boolean`, `can_archive: boolean`, `can_run_tests: boolean` |
+| <span id="skillshubskillsummary">`SkillsHubSkillSummary`</span> | `release_revision: integer`, `protected_label_names: string[]`, `id: string`, `name: string`, `description: string`, `tags: string[]`, `latest_version: integer`, `labels:` [`SkillsHubLabelSummary`](#skillshublabelsummary)[], `has_draft: boolean`, `updated_at: string`, `updated_by: object`, `created_at: string`, `fetches_7d: integer`, `file_count: integer` |
+
+</div>

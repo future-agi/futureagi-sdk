@@ -1,0 +1,531 @@
+---
+title: "Contexts"
+description: "Reference for client.contexts in the Future AGI Python and TypeScript SDKs: contexts.check_access, contexts.get, contexts.inspect_snapshot, contexts.list, contexts.list_versions, contexts.manifest and 2 more."
+---
+
+`client.contexts` on `fi.Client` (Python) and `client.contexts` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Skills response models](/docs/sdk/reference/skills-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+<div class="sdk-ref-table">
+
+| Method | Description |
+|---|---|
+| [`contexts.check_access`](#contextscheck_access) |  |
+| [`contexts.get`](#contextsget) |  |
+| [`contexts.inspect_snapshot`](#contextsinspect_snapshot) |  |
+| [`contexts.list`](#contextslist) |  |
+| [`contexts.list_versions`](#contextslist_versions) |  |
+| [`contexts.manifest`](#contextsmanifest) |  |
+| [`contexts.read_file`](#contextsread_file) |  |
+| [`contexts.resolve`](#contextsresolve) |  |
+
+</div>
+
+## client.contexts
+
+### contexts.check_access
+
+
+
+<ApiEndpoint method="POST" path="/model-hub/skills/contexts/{resource_id}/versions/{number}/access-check/" />
+
+<Warning>
+  **Beta.** This method may change without notice; calling it emits a one-time warning.
+</Warning>
+
+<CodeGroup>
+
+```python Python
+result = client.contexts.check_access(
+    "your-resource-id",
+    1,
+    resolution_id="your-X-Context-Resolution",
+)
+```
+
+```typescript TypeScript
+const result = await client.contexts.checkAccess("your-resource-id", 1, { resolution_id: "your-X-Context-Resolution" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.contexts.check_access(
+    resource_id: str,
+    number: int,
+    *,
+    resolution_id: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SkillsContextAccessCheck
+```
+
+```typescript TypeScript
+client.contexts.checkAccess(resourceId: string, number: number, params: ContextsCheckAccessParams, options?: RequestOptions): Promise<models.SkillsContextAccessCheck>
+
+export interface ContextsCheckAccessParams {
+  resolution_id: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="resource_id" type="string" required>
+  Positional argument `resource_id`.
+</ParamField>
+<ParamField path="number" type="integer" required>
+  Positional argument `number`.
+</ParamField>
+<ParamField header="X-Context-Resolution" type="string" required>
+  SDK argument `resolution_id`.
+</ParamField>
+
+#### Returns
+
+[`SkillsContextAccessCheck`](/docs/sdk/reference/skills-models#skillscontextaccesscheck).
+
+### contexts.get
+
+
+
+<ApiEndpoint method="GET" path="/model-hub/skills/contexts/{context_id}/" />
+
+**MCP tool**: `get_agent_context`
+
+<CodeGroup>
+
+```python Python
+result = client.contexts.get("your-context-id")
+```
+
+```typescript TypeScript
+const result = await client.contexts.get("your-context-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.contexts.get(
+    context_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SkillsContextDetail
+```
+
+```typescript TypeScript
+client.contexts.get(contextId: string, options?: RequestOptions): Promise<models.SkillsContextDetail>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="context_id" type="string" required>
+  Positional argument `context_id`.
+</ParamField>
+
+#### Returns
+
+[`SkillsContextDetail`](/docs/sdk/reference/skills-models#skillscontextdetail).
+
+### contexts.inspect_snapshot
+
+
+
+<ApiEndpoint method="GET" path="/model-hub/skills/contexts/{context_id}/versions/{number}/inspection/" />
+
+**MCP tool**: `get_agent_context_snapshot`
+
+<CodeGroup>
+
+```python Python
+result = client.contexts.inspect_snapshot("your-context-id", 1)
+```
+
+```typescript TypeScript
+const result = await client.contexts.inspectSnapshot("your-context-id", 1);
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.contexts.inspect_snapshot(
+    context_id: str,
+    number: int,
+    *,
+    file_offset: int | None | NotGiven = NOT_GIVEN,
+    file_limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SkillsContextVersionInspection
+```
+
+```typescript TypeScript
+client.contexts.inspectSnapshot(contextId: string, number: number, params: ContextsInspectSnapshotParams = {}, options?: RequestOptions): Promise<models.SkillsContextVersionInspection>
+
+export interface ContextsInspectSnapshotParams {
+  file_offset?: number | null;
+  file_limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="context_id" type="string" required>
+  Positional argument `context_id`.
+</ParamField>
+<ParamField path="number" type="integer" required>
+  Positional argument `number`.
+</ParamField>
+<ParamField query="file_offset" type="integer" optional />
+<ParamField query="file_limit" type="integer" optional />
+
+#### Returns
+
+[`SkillsContextVersionInspection`](/docs/sdk/reference/skills-models#skillscontextversioninspection).
+
+### contexts.list
+
+
+
+<ApiEndpoint method="GET" path="/model-hub/skills/contexts/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_agent_contexts`
+
+<CodeGroup>
+
+```python Python
+for item in client.contexts.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.contexts.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.contexts.list(
+    *,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    tag: str | None | NotGiven = NOT_GIVEN,
+    label: str | None | NotGiven = NOT_GIVEN,
+    sort: Literal['updated', 'name', 'created'] | None | NotGiven = NOT_GIVEN,
+    order: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.SkillsContextContextSummary]
+```
+
+```typescript TypeScript
+client.contexts.list(params: ContextsListParams = {}, options?: RequestOptions): Pager<models.SkillsContextContextSummary>
+
+export interface ContextsListParams {
+  page_size?: number | null;
+  search?: string | null;
+  tag?: string | null;
+  label?: string | null;
+  sort?: "updated" | "name" | "created" | null;
+  order?: "asc" | "desc" | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="page_size" type="integer" optional />
+<ParamField query="search" type="string" optional />
+<ParamField query="tag" type="string" optional />
+<ParamField query="label" type="string" optional />
+<ParamField query="sort" type="string" optional enum={["updated", "name", "created"]} />
+<ParamField query="order" type="string" optional enum={["asc", "desc"]} />
+
+The pager sends `page` itself; pass `page_size` to change the page size.
+
+#### Returns
+
+A pager of [`SkillsContextContextSummary`](/docs/sdk/reference/skills-models#skillscontextcontextsummary) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### contexts.list_versions
+
+
+
+<ApiEndpoint method="GET" path="/model-hub/skills/contexts/{context_id}/versions/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_agent_context_versions`
+
+<CodeGroup>
+
+```python Python
+for item in client.contexts.list_versions("your-context-id"):
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.contexts.listVersions("your-context-id")) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.contexts.list_versions(
+    context_id: str,
+    *,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[dict[str, Any]]
+```
+
+```typescript TypeScript
+client.contexts.listVersions(contextId: string, params: ContextsListVersionsParams = {}, options?: RequestOptions): Pager<Record<string, unknown>>
+
+export interface ContextsListVersionsParams {
+  page_size?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="context_id" type="string" required>
+  Positional argument `context_id`.
+</ParamField>
+<ParamField query="page_size" type="integer" optional />
+
+The pager sends `page` itself; pass `page_size` to change the page size.
+
+#### Returns
+
+A pager of `object` items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### contexts.manifest
+
+
+
+<ApiEndpoint method="GET" path="/model-hub/skills/contexts/{resource_id}/versions/{number}/manifest/" />
+
+<Warning>
+  **Beta.** This method may change without notice; calling it emits a one-time warning.
+</Warning>
+
+<CodeGroup>
+
+```python Python
+result = client.contexts.manifest(
+    "your-resource-id",
+    1,
+    resolution_id="your-X-Context-Resolution",
+)
+```
+
+```typescript TypeScript
+const result = await client.contexts.manifest("your-resource-id", 1, { resolution_id: "your-X-Context-Resolution" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.contexts.manifest(
+    resource_id: str,
+    number: int,
+    *,
+    resolution_id: str,
+    file_offset: int | None | NotGiven = NOT_GIVEN,
+    file_limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SkillsContextConsumptionManifest
+```
+
+```typescript TypeScript
+client.contexts.manifest(resourceId: string, number: number, params: ContextsManifestParams, options?: RequestOptions): Promise<models.SkillsContextConsumptionManifest>
+
+export interface ContextsManifestParams {
+  resolution_id: string;
+  file_offset?: number | null;
+  file_limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="resource_id" type="string" required>
+  Positional argument `resource_id`.
+</ParamField>
+<ParamField path="number" type="integer" required>
+  Positional argument `number`.
+</ParamField>
+<ParamField query="file_offset" type="integer" optional />
+<ParamField query="file_limit" type="integer" optional />
+<ParamField header="X-Context-Resolution" type="string" required>
+  SDK argument `resolution_id`.
+</ParamField>
+
+#### Returns
+
+[`SkillsContextConsumptionManifest`](/docs/sdk/reference/skills-models#skillscontextconsumptionmanifest).
+
+### contexts.read_file
+
+
+
+<ApiEndpoint method="GET" path="/model-hub/skills/contexts/{resource_id}/versions/{number}/files/" />
+
+<Warning>
+  **Beta.** This method may change without notice; calling it emits a one-time warning.
+</Warning>
+
+<CodeGroup>
+
+```python Python
+result = client.contexts.read_file(
+    "your-resource-id",
+    1,
+    path="your-path",
+    resolution_id="your-X-Context-Resolution",
+)
+```
+
+```typescript TypeScript
+const result = await client.contexts.readFile("your-resource-id", 1, {
+  path: "your-path",
+  resolution_id: "your-X-Context-Resolution",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.contexts.read_file(
+    resource_id: str,
+    number: int,
+    *,
+    path: str,
+    resolution_id: str,
+    offset: int | None | NotGiven = NOT_GIVEN,
+    max_bytes: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SkillsContextConsumptionChunk
+```
+
+```typescript TypeScript
+client.contexts.readFile(resourceId: string, number: number, params: ContextsReadFileParams, options?: RequestOptions): Promise<models.SkillsContextConsumptionChunk>
+
+export interface ContextsReadFileParams {
+  path: string;
+  resolution_id: string;
+  offset?: number | null;
+  max_bytes?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="resource_id" type="string" required>
+  Positional argument `resource_id`.
+</ParamField>
+<ParamField path="number" type="integer" required>
+  Positional argument `number`.
+</ParamField>
+<ParamField query="path" type="string" required />
+<ParamField query="offset" type="integer" optional />
+<ParamField query="max_bytes" type="integer" optional />
+<ParamField header="X-Context-Resolution" type="string" required>
+  SDK argument `resolution_id`.
+</ParamField>
+
+#### Returns
+
+[`SkillsContextConsumptionChunk`](/docs/sdk/reference/skills-models#skillscontextconsumptionchunk).
+
+### contexts.resolve
+
+
+
+<ApiEndpoint method="GET" path="/model-hub/skills/contexts/resolve/" />
+
+<Warning>
+  **Beta.** This method may change without notice; calling it emits a one-time warning.
+</Warning>
+
+<CodeGroup>
+
+```python Python
+result = client.contexts.resolve(name="your-name")
+```
+
+```typescript TypeScript
+const result = await client.contexts.resolve({ name: "your-name" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.contexts.resolve(
+    *,
+    name: str,
+    version: int | None | NotGiven = NOT_GIVEN,
+    label: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SkillsContextConsumptionManifest
+```
+
+```typescript TypeScript
+client.contexts.resolve(params: ContextsResolveParams, options?: RequestOptions): Promise<models.SkillsContextConsumptionManifest>
+
+export interface ContextsResolveParams {
+  name: string;
+  version?: number | null;
+  label?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="name" type="string" required />
+<ParamField query="version" type="integer" optional />
+<ParamField query="label" type="string" optional />
+
+#### Returns
+
+[`SkillsContextConsumptionManifest`](/docs/sdk/reference/skills-models#skillscontextconsumptionmanifest).

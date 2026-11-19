@@ -2,8 +2,8 @@
 """Response models.
 
 Every field is typed optional, so a response that leaves one out or adds one never breaks a
-call by default. The fields the contract marks required (and not nullable) are listed in each
-model's `__required__`; `Client(strict_responses=True)` rejects a response that misses one.
+call by default. Strict wire models validate the raw JSON, including required nullable keys,
+before parsing; legacy models check their required non-null fields in strict mode.
 """
 
 from __future__ import annotations
@@ -11,11 +11,13 @@ from __future__ import annotations
 # typing aliases (not `X | None`): pydantic evaluates these at runtime, and the SDK supports Python 3.9
 from typing import Any, ClassVar, Dict, FrozenSet, List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, model_validator
+from pydantic import BaseModel, Field, ValidationInfo, model_validator
+
+from ._wire import RESPONSE_CONFIG, WireResponse
 
 
 class _Model(BaseModel):
-    model_config = ConfigDict(extra="allow", populate_by_name=True, protected_namespaces=(), coerce_numbers_to_str=True)
+    model_config = RESPONSE_CONFIG
     __required__: ClassVar[FrozenSet[str]] = frozenset()
 
     @model_validator(mode="after")
@@ -1104,6 +1106,28 @@ class KnowledgeBaseItem(_Model):
     updated_at: Optional[str] = Field(default=None)
 
 
+class LatestFetch(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['can_record', 'client'])
+    sdk_version: Optional[str] = Field(default=None)
+    tracing_mode: Optional[str] = Field(default=None)
+    can_record: Optional[bool] = Field(default=None)
+    client: Optional[str] = Field(default=None)
+
+
+class LatestLoad(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent', 'project', 'received_at', 'version'])
+    version: Optional[int] = Field(default=None)
+    agent: Optional[LoadAgent] = Field(default=None)
+    project: Optional[LoadProject] = Field(default=None)
+    received_at: Optional[str] = Field(default=None)
+
+
+class LatestLoadResult(WireResponse):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['fetch', 'load'])
+    load: Optional[LatestLoad] = Field(default=None)
+    fetch: Optional[LatestFetch] = Field(default=None)
+
+
 class LegacyKnowledgeBaseCreateResult(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['detail', 'file_ids', 'kb_id', 'kb_name'])
     detail: Optional[str] = Field(default=None)
@@ -1176,6 +1200,22 @@ class LegacyKnowledgeBaseTableRow(_Model):
     error: Optional[str] = Field(default=None)
     updated_at: Optional[str] = Field(default=None)
     created_by: Optional[str] = Field(default=None)
+
+
+class LoadAgent(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['key', 'name', 'name_source', 'project_id', 'project_name', 'service'])
+    key: Optional[List[Optional[str]]] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    service: Optional[str] = Field(default=None)
+    project_id: Optional[str] = Field(default=None)
+    project_name: Optional[str] = Field(default=None)
+    name_source: Optional[str] = Field(default=None)  # one of: agent, service, project
+
+
+class LoadProject(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'name'])
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
 
 
 class LocalFileDatasetCreateStartedResult(_Model):
@@ -1675,6 +1715,27 @@ class RunTestResponse(_Model):
     deleted_at: Optional[str] = Field(default=None)
 
 
+class RuntimeUsageResult(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['coverage', 'diagnosis', 'failed_loads', 'rows', 'summary', 'totals_note', 'truncated'])
+    rows: Optional[List[Optional[Any]]] = Field(default=None)
+    summary: Optional[Any] = Field(default=None)
+    coverage: Optional[Any] = Field(default=None)
+    diagnosis: Optional[Any] = Field(default=None)
+    failed_loads: Optional[Any] = Field(default=None)
+    mismatch: Optional[Any] = Field(default=None)
+    move: Optional[Any] = Field(default=None)
+    next_cursor: Optional[str] = Field(default=None)
+    totals_note: Optional[str] = Field(default=None)
+    truncated: Optional[bool] = Field(default=None)
+    agent: Optional[Any] = Field(default=None)
+    contexts: Optional[List[Optional[Any]]] = Field(default=None)
+    links_summary: Optional[List[Optional[Any]]] = Field(default=None)
+    linked_not_loaded: Optional[List[Optional[Any]]] = Field(default=None)
+    loaded_not_linked: Optional[List[Optional[Any]]] = Field(default=None)
+    series: Optional[List[Optional[Any]]] = Field(default=None)
+    markers: Optional[List[Optional[Any]]] = Field(default=None)
+
+
 class ScenarioDetailResponse(_Model):
     id: Optional[str] = Field(default=None)
     name: Optional[str] = Field(default=None)
@@ -1771,6 +1832,354 @@ class SimulateEvalConfigResponse(_Model):
     eval_type: Optional[str] = Field(default=None)
     regradable: Optional[bool] = Field(default=None)
     editable: Optional[bool] = Field(default=None)
+
+
+class SkillsContextAccessCheck(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['allowed', 'checked_at', 'digest', 'version_id'])
+    allowed: Optional[bool] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    digest: Optional[str] = Field(default=None)
+    checked_at: Optional[str] = Field(default=None)
+
+
+class SkillsContextConsumeGrant(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['kind', 'labels', 'resource_id', 'version_ids'])
+    kind: Optional[str] = Field(default=None)  # one of: skill, agent_context
+    resource_id: Optional[str] = Field(default=None)
+    labels: Optional[List[Optional[str]]] = Field(default=None)
+    version_ids: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class SkillsContextConsumptionChunk(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['digest', 'eof', 'offset', 'path', 'resource_id', 'sha256', 'size_bytes', 'text', 'total_chars', 'version_id'])
+    path: Optional[str] = Field(default=None)
+    sha256: Optional[str] = Field(default=None)
+    size_bytes: Optional[int] = Field(default=None)
+    total_chars: Optional[int] = Field(default=None)
+    offset: Optional[int] = Field(default=None)
+    next_offset: Optional[int] = Field(default=None)
+    eof: Optional[bool] = Field(default=None)
+    text: Optional[str] = Field(default=None)
+    resource_id: Optional[str] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    digest: Optional[str] = Field(default=None)
+
+
+class SkillsContextConsumptionManifest(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'description', 'digest', 'entrypoint', 'file_count', 'file_offset', 'files', 'kind', 'name', 'requested', 'resolution_expires_at', 'resolution_id', 'resource_id', 'version', 'version_id'])
+    resource_id: Optional[str] = Field(default=None)
+    kind: Optional[str] = Field(default=None)  # one of: skill, agent_context
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    digest: Optional[str] = Field(default=None)
+    requested: Optional[SkillsContextSelector] = Field(default=None)
+    entrypoint: Optional[str] = Field(default=None)
+    descriptor_path: Optional[str] = Field(default=None)
+    files: Optional[List[Optional[SkillsContextFileMeta]]] = Field(default=None)
+    file_count: Optional[int] = Field(default=None)
+    file_offset: Optional[int] = Field(default=None)
+    next_file_offset: Optional[int] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    resolution_id: Optional[str] = Field(default=None)
+    resolution_expires_at: Optional[str] = Field(default=None)
+
+
+class SkillsContextContextLabelSummary(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name', 'version', 'version_id'])
+    name: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+
+
+class SkillsContextContextReleaseLabel(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['can_move', 'can_remove', 'is_protected', 'name', 'release_revision', 'updated_at', 'version', 'version_id'])
+    name: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    updated_at: Optional[str] = Field(default=None)
+    updated_by: Optional[Dict[str, Any]] = Field(default=None)
+    is_protected: Optional[bool] = Field(default=None)
+    can_move: Optional[bool] = Field(default=None)
+    can_remove: Optional[bool] = Field(default=None)
+    release_revision: Optional[int] = Field(default=None)
+
+
+class SkillsContextContextReleasePermissions(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['can_issue_credentials', 'can_manage_protection', 'can_promote', 'can_publish', 'can_quarantine'])
+    can_publish: Optional[bool] = Field(default=None)
+    can_promote: Optional[bool] = Field(default=None)
+    can_manage_protection: Optional[bool] = Field(default=None)
+    can_quarantine: Optional[bool] = Field(default=None)
+    can_issue_credentials: Optional[bool] = Field(default=None)
+
+
+class SkillsContextContextReleaseState(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['labels', 'permissions', 'protected_label_names', 'release_revision', 'security_revision'])
+    latest_version: Optional[int] = Field(default=None)
+    release_revision: Optional[int] = Field(default=None)
+    security_revision: Optional[int] = Field(default=None)
+    protected_label_names: Optional[List[Optional[str]]] = Field(default=None)
+    labels: Optional[List[Optional[SkillsContextContextReleaseLabel]]] = Field(default=None)
+    permissions: Optional[SkillsContextContextReleasePermissions] = Field(default=None)
+
+
+class SkillsContextContextSummary(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['description', 'has_draft', 'id', 'kind', 'labels', 'metadata_revision', 'name', 'protected_label_names', 'release_revision', 'security_revision', 'tags', 'updated_at'])
+    id: Optional[str] = Field(default=None)
+    kind: Optional[str] = Field(default=None)  # one of: agent_context
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    tags: Optional[List[Optional[str]]] = Field(default=None)
+    metadata_revision: Optional[int] = Field(default=None)
+    latest_version: Optional[int] = Field(default=None)
+    labels: Optional[List[Optional[SkillsContextContextLabelSummary]]] = Field(default=None)
+    release_revision: Optional[int] = Field(default=None)
+    security_revision: Optional[int] = Field(default=None)
+    protected_label_names: Optional[List[Optional[str]]] = Field(default=None)
+    has_draft: Optional[bool] = Field(default=None)
+    updated_at: Optional[str] = Field(default=None)
+    updated_by: Optional[Dict[str, Any]] = Field(default=None)
+
+
+class SkillsContextCredentialIssued(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'metadata', 'secret_available'])
+    id: Optional[str] = Field(default=None)
+    secret: Optional[str] = Field(default=None)
+    secret_available: Optional[bool] = Field(default=None)
+    metadata: Optional[SkillsContextCredentialMetadata] = Field(default=None)
+
+
+class SkillsContextCredentialMetadata(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['binding_ids', 'created_at', 'expires_at', 'grants', 'id', 'purpose'])
+    purpose: Optional[str] = Field(default=None)  # one of: consume, report
+    grants: Optional[List[Optional[SkillsContextConsumeGrant]]] = Field(default=None)
+    binding_ids: Optional[List[Optional[str]]] = Field(default=None)
+    expires_at: Optional[str] = Field(default=None)
+    id: Optional[str] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    revoked_at: Optional[str] = Field(default=None)
+    last_used_at: Optional[str] = Field(default=None)
+
+
+class SkillsContextDetail(WireResponse):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['context', 'latest', 'own_draft', 'release_state'])
+    release_state: Optional[SkillsContextContextReleaseState] = Field(default=None)
+    latest: Optional[Dict[str, Any]] = Field(default=None)
+    own_draft: Optional[SkillsContextOwnDraft] = Field(default=None)
+    context: Optional[SkillsContextContextSummary] = Field(default=None)
+
+
+class SkillsContextFileMeta(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['origin', 'path', 'sha256', 'size_bytes'])
+    path: Optional[str] = Field(default=None)
+    sha256: Optional[str] = Field(default=None)
+    size_bytes: Optional[int] = Field(default=None)
+    origin: Optional[SkillsContextFileOrigin] = Field(default=None)
+
+
+class SkillsContextFileOrigin(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['kind'])
+    kind: Optional[str] = Field(default=None)  # one of: owned, linked, generated
+    skill_id: Optional[str] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    source_path: Optional[str] = Field(default=None)
+
+
+class SkillsContextImmutableManifest(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'description', 'digest', 'entrypoint', 'file_count', 'file_offset', 'files', 'kind', 'name', 'requested', 'resource_id', 'version', 'version_id'])
+    resource_id: Optional[str] = Field(default=None)
+    kind: Optional[str] = Field(default=None)  # one of: skill, agent_context
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    digest: Optional[str] = Field(default=None)
+    requested: Optional[SkillsContextSelector] = Field(default=None)
+    entrypoint: Optional[str] = Field(default=None)
+    descriptor_path: Optional[str] = Field(default=None)
+    files: Optional[List[Optional[SkillsContextFileMeta]]] = Field(default=None)
+    file_count: Optional[int] = Field(default=None)
+    file_offset: Optional[int] = Field(default=None)
+    next_file_offset: Optional[int] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+
+
+class SkillsContextLockedLink(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['digest', 'mount', 'requested', 'skill_id', 'version', 'version_id'])
+    mount: Optional[str] = Field(default=None)
+    skill_id: Optional[str] = Field(default=None)
+    requested: Optional[SkillsContextSelector] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    digest: Optional[str] = Field(default=None)
+
+
+class SkillsContextOwnDraft(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['revision'])
+    revision: Optional[int] = Field(default=None)
+    base_version: Optional[int] = Field(default=None)
+
+
+class SkillsContextSelector(_Model):
+    version: Optional[int] = Field(default=None)
+    label: Optional[str] = Field(default=None)
+
+
+class SkillsContextSnapshotDescriptor(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['description', 'entrypoint', 'kind', 'name'])
+    schema_: Optional[int] = Field(default=None, alias='schema')
+    kind: Optional[str] = Field(default=None)  # one of: skill, agent_context
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    entrypoint: Optional[str] = Field(default=None)
+    descriptor_path: Optional[str] = Field(default=None)
+    owned_paths: Optional[List[Optional[str]]] = Field(default=None)
+    links: Optional[List[Optional[SkillsContextLockedLink]]] = Field(default=None)
+
+
+class SkillsContextVersionInspection(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['descriptor', 'distribution_blocked', 'manifest'])
+    descriptor: Optional[SkillsContextSnapshotDescriptor] = Field(default=None)
+    manifest: Optional[SkillsContextImmutableManifest] = Field(default=None)
+    distribution_blocked: Optional[bool] = Field(default=None)
+    reason: Optional[str] = Field(default=None)
+
+
+class SkillsHubDraftSummary(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['updated_at', 'user'])
+    user: Optional[Dict[str, Any]] = Field(default=None)
+    updated_at: Optional[str] = Field(default=None)
+    base_version: Optional[int] = Field(default=None)
+    is_mine: Optional[bool] = Field(default=None)
+
+
+class SkillsHubEvidenceCurrentness(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['content', 'payload_available'])
+    content: Optional[bool] = Field(default=None)
+    baseline: Optional[bool] = Field(default=None)
+    suite: Optional[bool] = Field(default=None)
+    competitors: Optional[bool] = Field(default=None)
+    payload_available: Optional[bool] = Field(default=None)
+
+
+class SkillsHubFileChunk(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['eof', 'offset', 'path', 'sha256', 'size_bytes', 'text', 'total_chars'])
+    path: Optional[str] = Field(default=None)
+    sha256: Optional[str] = Field(default=None)
+    size_bytes: Optional[int] = Field(default=None)
+    total_chars: Optional[int] = Field(default=None)
+    offset: Optional[int] = Field(default=None)
+    next_offset: Optional[int] = Field(default=None)
+    eof: Optional[bool] = Field(default=None)
+    text: Optional[str] = Field(default=None)
+
+
+class SkillsHubLabelOut(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name', 'release_revision', 'updated_at', 'version', 'version_id'])
+    name: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    updated_at: Optional[str] = Field(default=None)
+    updated_by: Optional[Dict[str, Any]] = Field(default=None)
+    is_protected: Optional[bool] = Field(default=None)
+    can_move: Optional[bool] = Field(default=None)
+    can_remove: Optional[bool] = Field(default=None)
+    release_revision: Optional[int] = Field(default=None)
+
+
+class SkillsHubLabelSummary(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name', 'version'])
+    name: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+
+
+class SkillsHubManifest(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'description', 'digest', 'file_count', 'file_offset', 'files', 'name', 'requested', 'skill_id', 'version', 'version_id'])
+    skill_id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    digest: Optional[str] = Field(default=None)
+    requested: Optional[SkillsHubRequested] = Field(default=None)
+    frontmatter: Optional[Any] = Field(default=None)
+    files: Optional[List[Optional[SkillsHubManifestFile]]] = Field(default=None)
+    file_count: Optional[int] = Field(default=None)
+    file_offset: Optional[int] = Field(default=None)
+    next_file_offset: Optional[int] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+
+
+class SkillsHubManifestFile(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['path', 'sha256', 'size_bytes'])
+    path: Optional[str] = Field(default=None)
+    size_bytes: Optional[int] = Field(default=None)
+    sha256: Optional[str] = Field(default=None)
+    content: Optional[str] = Field(default=None)
+
+
+class SkillsHubPushResult(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['release_revision', 'skill', 'unchanged', 'version'])
+    release_revision: Optional[int] = Field(default=None)
+    evidence: Optional[Dict[str, Any]] = Field(default=None)
+    skill: Optional[SkillsHubSkillSummary] = Field(default=None)
+    version: Optional[Dict[str, Any]] = Field(default=None)
+    unchanged: Optional[bool] = Field(default=None)
+
+
+class SkillsHubRequested(_Model):
+    label: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+
+
+class SkillsHubSkillDetail(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'description', 'id', 'labels', 'name', 'protected_label_names', 'release_revision', 'source', 'tags', 'updated_at'])
+    release_revision: Optional[int] = Field(default=None)
+    protected_label_names: Optional[List[Optional[str]]] = Field(default=None)
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    tags: Optional[List[Optional[str]]] = Field(default=None)
+    latest_version: Optional[int] = Field(default=None)
+    labels: Optional[List[Optional[SkillsHubLabelOut]]] = Field(default=None)
+    has_draft: Optional[bool] = Field(default=None)
+    updated_at: Optional[str] = Field(default=None)
+    updated_by: Optional[Dict[str, Any]] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    fetches_7d: Optional[int] = Field(default=None)
+    file_count: Optional[int] = Field(default=None)
+    source: Optional[Any] = Field(default=None)
+    created_by: Optional[Dict[str, Any]] = Field(default=None)
+    latest: Optional[Dict[str, Any]] = Field(default=None)
+    drafts: Optional[List[Optional[SkillsHubDraftSummary]]] = Field(default=None)
+    permissions: Optional[SkillsHubSkillPermissions] = Field(default=None)
+
+
+class SkillsHubSkillPermissions(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['can_archive', 'can_manage_label_protection', 'can_run_tests'])
+    can_manage_label_protection: Optional[bool] = Field(default=None)
+    can_archive: Optional[bool] = Field(default=None)
+    can_run_tests: Optional[bool] = Field(default=None)
+
+
+class SkillsHubSkillSummary(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'description', 'id', 'labels', 'name', 'protected_label_names', 'release_revision', 'tags', 'updated_at'])
+    release_revision: Optional[int] = Field(default=None)
+    protected_label_names: Optional[List[Optional[str]]] = Field(default=None)
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    tags: Optional[List[Optional[str]]] = Field(default=None)
+    latest_version: Optional[int] = Field(default=None)
+    labels: Optional[List[Optional[SkillsHubLabelSummary]]] = Field(default=None)
+    has_draft: Optional[bool] = Field(default=None)
+    updated_at: Optional[str] = Field(default=None)
+    updated_by: Optional[Dict[str, Any]] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    fetches_7d: Optional[int] = Field(default=None)
+    file_count: Optional[int] = Field(default=None)
 
 
 class SpanListColumnConfig(_Model):
@@ -2331,6 +2740,9 @@ GatewayStatus.model_rebuild()
 GatewaySummaryResult.model_rebuild()
 KeyMoment.model_rebuild()
 KnowledgeBaseItem.model_rebuild()
+LatestFetch.model_rebuild()
+LatestLoad.model_rebuild()
+LatestLoadResult.model_rebuild()
 LegacyKnowledgeBaseCreateResult.model_rebuild()
 LegacyKnowledgeBaseFileRow.model_rebuild()
 LegacyKnowledgeBaseFilesResult.model_rebuild()
@@ -2340,6 +2752,8 @@ LegacyKnowledgeBaseOption.model_rebuild()
 LegacyKnowledgeBaseTableColumn.model_rebuild()
 LegacyKnowledgeBaseTableResult.model_rebuild()
 LegacyKnowledgeBaseTableRow.model_rebuild()
+LoadAgent.model_rebuild()
+LoadProject.model_rebuild()
 LocalFileDatasetCreateStartedResult.model_rebuild()
 ModelHubPaginatedResponse.model_rebuild()
 ModelHubSuccessMessageResult.model_rebuild()
@@ -2388,12 +2802,45 @@ RepresentativeTrace.model_rebuild()
 RunEnvironmentRef.model_rebuild()
 RunTestExecutionResponse.model_rebuild()
 RunTestResponse.model_rebuild()
+RuntimeUsageResult.model_rebuild()
 ScenarioDetailResponse.model_rebuild()
 ScenarioEditResponse.model_rebuild()
 ScenarioPromptItem.model_rebuild()
 ScenarioResponse.model_rebuild()
 Score.model_rebuild()
 SimulateEvalConfigResponse.model_rebuild()
+SkillsContextAccessCheck.model_rebuild()
+SkillsContextConsumeGrant.model_rebuild()
+SkillsContextConsumptionChunk.model_rebuild()
+SkillsContextConsumptionManifest.model_rebuild()
+SkillsContextContextLabelSummary.model_rebuild()
+SkillsContextContextReleaseLabel.model_rebuild()
+SkillsContextContextReleasePermissions.model_rebuild()
+SkillsContextContextReleaseState.model_rebuild()
+SkillsContextContextSummary.model_rebuild()
+SkillsContextCredentialIssued.model_rebuild()
+SkillsContextCredentialMetadata.model_rebuild()
+SkillsContextDetail.model_rebuild()
+SkillsContextFileMeta.model_rebuild()
+SkillsContextFileOrigin.model_rebuild()
+SkillsContextImmutableManifest.model_rebuild()
+SkillsContextLockedLink.model_rebuild()
+SkillsContextOwnDraft.model_rebuild()
+SkillsContextSelector.model_rebuild()
+SkillsContextSnapshotDescriptor.model_rebuild()
+SkillsContextVersionInspection.model_rebuild()
+SkillsHubDraftSummary.model_rebuild()
+SkillsHubEvidenceCurrentness.model_rebuild()
+SkillsHubFileChunk.model_rebuild()
+SkillsHubLabelOut.model_rebuild()
+SkillsHubLabelSummary.model_rebuild()
+SkillsHubManifest.model_rebuild()
+SkillsHubManifestFile.model_rebuild()
+SkillsHubPushResult.model_rebuild()
+SkillsHubRequested.model_rebuild()
+SkillsHubSkillDetail.model_rebuild()
+SkillsHubSkillPermissions.model_rebuild()
+SkillsHubSkillSummary.model_rebuild()
 SpanListColumnConfig.model_rebuild()
 SpanListMetadata.model_rebuild()
 SpanObserveListResult.model_rebuild()
@@ -2516,6 +2963,9 @@ __all__ = [
     'GatewaySummaryResult',
     'KeyMoment',
     'KnowledgeBaseItem',
+    'LatestFetch',
+    'LatestLoad',
+    'LatestLoadResult',
     'LegacyKnowledgeBaseCreateResult',
     'LegacyKnowledgeBaseFileRow',
     'LegacyKnowledgeBaseFilesResult',
@@ -2525,6 +2975,8 @@ __all__ = [
     'LegacyKnowledgeBaseTableColumn',
     'LegacyKnowledgeBaseTableResult',
     'LegacyKnowledgeBaseTableRow',
+    'LoadAgent',
+    'LoadProject',
     'LocalFileDatasetCreateStartedResult',
     'ModelHubPaginatedResponse',
     'ModelHubSuccessMessageResult',
@@ -2573,12 +3025,45 @@ __all__ = [
     'RunEnvironmentRef',
     'RunTestExecutionResponse',
     'RunTestResponse',
+    'RuntimeUsageResult',
     'ScenarioDetailResponse',
     'ScenarioEditResponse',
     'ScenarioPromptItem',
     'ScenarioResponse',
     'Score',
     'SimulateEvalConfigResponse',
+    'SkillsContextAccessCheck',
+    'SkillsContextConsumeGrant',
+    'SkillsContextConsumptionChunk',
+    'SkillsContextConsumptionManifest',
+    'SkillsContextContextLabelSummary',
+    'SkillsContextContextReleaseLabel',
+    'SkillsContextContextReleasePermissions',
+    'SkillsContextContextReleaseState',
+    'SkillsContextContextSummary',
+    'SkillsContextCredentialIssued',
+    'SkillsContextCredentialMetadata',
+    'SkillsContextDetail',
+    'SkillsContextFileMeta',
+    'SkillsContextFileOrigin',
+    'SkillsContextImmutableManifest',
+    'SkillsContextLockedLink',
+    'SkillsContextOwnDraft',
+    'SkillsContextSelector',
+    'SkillsContextSnapshotDescriptor',
+    'SkillsContextVersionInspection',
+    'SkillsHubDraftSummary',
+    'SkillsHubEvidenceCurrentness',
+    'SkillsHubFileChunk',
+    'SkillsHubLabelOut',
+    'SkillsHubLabelSummary',
+    'SkillsHubManifest',
+    'SkillsHubManifestFile',
+    'SkillsHubPushResult',
+    'SkillsHubRequested',
+    'SkillsHubSkillDetail',
+    'SkillsHubSkillPermissions',
+    'SkillsHubSkillSummary',
     'SpanListColumnConfig',
     'SpanListMetadata',
     'SpanObserveListResult',

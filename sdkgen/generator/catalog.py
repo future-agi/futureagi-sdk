@@ -461,7 +461,15 @@ def _load_one(spec: dict, entry: dict, seen_mcp: set[str]) -> Op:
         raise CatalogError(f"{op_id}: path placeholders {placeholders} != path params {path_params}")
 
     # What the caller gets back: unwrap the {status, result} envelope, then the page items.
-    ok = contract_op["responses"].get("200") or contract_op["responses"].get("201") or contract_op["responses"].get("202") or {}
+    # Typing an existing 202 acknowledgement changes the public method signature.
+    # Preserve existing 200/201 behavior unless the catalog explicitly selects 202.
+    responses = contract_op["responses"]
+    if "response_status" in entry["operation"]:
+        if entry["operation"]["response_status"] != 202 or "202" not in responses:
+            raise CatalogError(f"{op_id}: operation.response_status requires a declared 202 response")
+        ok = responses["202"]
+    else:
+        ok = responses.get("200") or responses.get("201") or {}
     returns = ok.get("schema")
     resolved = resolve(spec, returns) or {}
     unwrap = None

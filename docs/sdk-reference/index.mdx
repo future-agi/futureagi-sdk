@@ -5,7 +5,7 @@ description: "Every method of the Future AGI platform client in Python and TypeS
 
 <TLDR>
 - One client, every API: `fi.Client` (Python, `pip install futureagi`) and `Client` from `@future-agi/sdk` (TypeScript)
-- 164 methods across 25 resources, generated from the API contract; each page lists parameters, return types and the REST endpoint
+- 188 methods across 29 resources, generated from the API contract; each page lists parameters, return types and the REST endpoint
 - Omitted arguments are not sent, `None` / `null` is; list calls return pagers; HTTP errors raise typed exceptions
 </TLDR>
 
@@ -270,5 +270,25 @@ A method marked **Beta** may change without notice; the first call emits a `Beta
   </Card>
   <Card title="Response models" href="/docs/sdk/reference/gateway-models">
     What the gateway methods return.
+  </Card>
+</CardGroup>
+
+### Skills
+
+<CardGroup cols={2}>
+  <Card title="Skills" href="/docs/sdk/reference/skills">
+    `client.skills`: 9 methods.
+  </Card>
+  <Card title="Contexts" href="/docs/sdk/reference/contexts">
+    `client.contexts`: 8 methods.
+  </Card>
+  <Card title="Skill consumption" href="/docs/sdk/reference/skill-consumption">
+    `client.skill_consumption`: 4 methods.
+  </Card>
+  <Card title="Context credentials" href="/docs/sdk/reference/context-credentials">
+    `client.context_credentials`: 3 methods.
+  </Card>
+  <Card title="Response models" href="/docs/sdk/reference/skills-models">
+    What the skills methods return.
   </Card>
 </CardGroup>

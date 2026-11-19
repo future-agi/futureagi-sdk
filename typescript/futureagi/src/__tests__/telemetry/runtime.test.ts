@@ -66,6 +66,24 @@ async function request(callback: () => Promise<void>) {
   });
 }
 
+it("publishes a live mode-only reader; explicit mode wins until reset", () => {
+  const key = Symbol.for("futureagi.runtime.skills.config.v1");
+  const reader = (globalThis as unknown as Record<symbol, {v: number; mode(): string}>)[key];
+  expect(Object.keys(reader).sort()).toEqual(["mode", "v"]);
+  expect(reader.v).toBe(1);
+  process.env.FI_SKILLS_TRACING = "off";
+  expect(reader.mode()).toBe("on");
+  configure({skillsTracing: "load_only"});
+  expect(reader.mode()).toBe("load_only");
+  process.env.FI_SKILLS_TRACING = "on";
+  configure({skillsTracing: "off"});
+  expect(reader.mode()).toBe("off");
+  configure();
+  expect(reader.mode()).toBe("on");
+  process.env.FI_SKILLS_TRACING = "off";
+  expect(reader.mode()).toBe("off");
+});
+
 it("V2 reads the real OTel 1.x provider and context manager from their registered global", async () => {
   expect(api()?.trace).toBeDefined();
   expect(api()?.context).toBeDefined();

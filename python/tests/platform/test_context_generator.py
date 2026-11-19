@@ -43,10 +43,20 @@ SPEC = {
     },
 }
 CATALOG = {"operations": [
-    {"id": "fixture.start", "operation": {"method": "POST", "path": "/fixture/start/"}, "surfaces": {"sdk": {}}},
+    {"id": "fixture.start", "operation": {"method": "POST", "path": "/fixture/start/", "response_status": 202}, "surfaces": {"sdk": {}}},
     {"id": "fixture.manifest", "operation": {"method": "GET", "path": "/fixture/manifest/"}, "surfaces": {"sdk": {}}},
     {"id": "fixture.download", "operation": {"method": "GET", "path": "/fixture/download/", "decode": "bytes"}, "surfaces": {"sdk": {}}},
 ]}
+
+
+def test_accepted_response_typing_is_opt_in():
+    existing = copy.deepcopy(CATALOG)
+    del existing["operations"][0]["operation"]["response_status"]
+    assert catalog.load(copy.deepcopy(SPEC), existing)[0].returns is None
+    spec = copy.deepcopy(SPEC)
+    del spec["paths"]["/fixture/start/"]["post"]["responses"]["202"]
+    with pytest.raises(catalog.CatalogError, match="declared 202"):
+        catalog.load(spec, CATALOG)
 
 
 def test_header_and_download_signatures_match_both_languages():

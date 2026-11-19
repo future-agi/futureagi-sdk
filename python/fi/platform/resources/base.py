@@ -23,6 +23,7 @@ from .._transport import (
     NotGiven,
     RequestOptions,
     SyncTransport,
+    operation_options,
 )
 
 
@@ -1159,6 +1160,150 @@ class AnnotationsResource(Resource):
         return self._t.call(_ops.OP_ANNOTATIONS_BULK_CREATE, path=path, query=query, body=body, model=models.BulkAnnotationResponseResult, options=options)
 
 
+class ContextCredentialsResource(Resource):
+    """`client.context_credentials`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+
+    def issue(self, *, purpose: Literal['consume', 'report'], grants: List[Dict[str, Any]], binding_ids: List[str], expires_at: str, idempotency_key: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextCredentialIssued:
+        """
+
+        .. beta:: this method may change without notice.
+
+        POST /model-hub/skills/contexts/credentials/
+        """
+        _stability('context_credentials.issue', 'beta')
+        options = operation_options(options, {'Idempotency-Key': idempotency_key}, required=('Idempotency-Key',))
+        path = None
+        query = {**(extra_query or {})}
+        body = {'purpose': purpose, 'grants': grants, 'binding_ids': binding_ids, 'expires_at': expires_at, **(extra_body or {})}
+        return self._t.call(_ops.OP_CONTEXT_CREDENTIALS_ISSUE, path=path, query=query, body=body, model=models.SkillsContextCredentialIssued, options=options)
+
+    def list(self, *, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.SkillsContextCredentialMetadata]:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/credentials/
+        """
+        _stability('context_credentials.list', 'beta')
+        path = None
+        query = {'page_size': page_size, **(extra_query or {})}
+        return self._t.paginate(_ops.OP_CONTEXT_CREDENTIALS_LIST, path=path, query=query, model=models.SkillsContextCredentialMetadata, options=options)
+
+    def revoke(self, credential_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+        """
+
+        .. beta:: this method may change without notice.
+
+        DELETE /model-hub/skills/contexts/credentials/{credential_id}/
+        """
+        _stability('context_credentials.revoke', 'beta')
+        path = {'credential_id': credential_id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(_ops.OP_CONTEXT_CREDENTIALS_REVOKE, path=path, query=query, body=body, model=None, options=options)
+
+
+class ContextsResource(Resource):
+    """`client.contexts`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+
+    def check_access(self, resource_id: str, number: int, *, resolution_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextAccessCheck:
+        """
+
+        .. beta:: this method may change without notice.
+
+        POST /model-hub/skills/contexts/{resource_id}/versions/{number}/access-check/
+        """
+        _stability('contexts.check_access', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(_ops.OP_CONTEXTS_CHECK_ACCESS, path=path, query=query, body=body, model=models.SkillsContextAccessCheck, options=options)
+
+    def get(self, context_id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextDetail:
+        """
+
+        GET /model-hub/skills/contexts/{context_id}/
+        """
+        path = {'context_id': context_id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_CONTEXTS_GET, path=path, query=query, body=body, model=models.SkillsContextDetail, options=options)
+
+    def inspect_snapshot(self, context_id: str, number: int, *, file_offset: int | None | NotGiven = NOT_GIVEN, file_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextVersionInspection:
+        """
+
+        GET /model-hub/skills/contexts/{context_id}/versions/{number}/inspection/
+        """
+        path = {'context_id': context_id, 'number': number}
+        query = {'file_offset': file_offset, 'file_limit': file_limit, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_CONTEXTS_INSPECT_SNAPSHOT, path=path, query=query, body=body, model=models.SkillsContextVersionInspection, options=options)
+
+    def list(self, *, page_size: int | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, tag: str | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, sort: Literal['updated', 'name', 'created'] | None | NotGiven = NOT_GIVEN, order: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.SkillsContextContextSummary]:
+        """
+
+        GET /model-hub/skills/contexts/
+        """
+        path = None
+        query = {'page_size': page_size, 'search': search, 'tag': tag, 'label': label, 'sort': sort, 'order': order, **(extra_query or {})}
+        return self._t.paginate(_ops.OP_CONTEXTS_LIST, path=path, query=query, model=models.SkillsContextContextSummary, options=options)
+
+    def list_versions(self, context_id: str, *, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[Dict[str, Any]]:
+        """
+
+        GET /model-hub/skills/contexts/{context_id}/versions/
+        """
+        path = {'context_id': context_id}
+        query = {'page_size': page_size, **(extra_query or {})}
+        return self._t.paginate(_ops.OP_CONTEXTS_LIST_VERSIONS, path=path, query=query, model=None, options=options)
+
+    def manifest(self, resource_id: str, number: int, *, resolution_id: str, file_offset: int | None | NotGiven = NOT_GIVEN, file_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/{resource_id}/versions/{number}/manifest/
+        """
+        _stability('contexts.manifest', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {'file_offset': file_offset, 'file_limit': file_limit, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_CONTEXTS_MANIFEST, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+    def read_file(self, resource_id: str, number: int, *, path: str, resolution_id: str, offset: int | None | NotGiven = NOT_GIVEN, max_bytes: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionChunk:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/{resource_id}/versions/{number}/files/
+        """
+        _stability('contexts.read_file', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        _path = {'resource_id': resource_id, 'number': number}
+        query = {'path': path, 'offset': offset, 'max_bytes': max_bytes, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_CONTEXTS_READ_FILE, path=_path, query=query, body=body, model=models.SkillsContextConsumptionChunk, options=options)
+
+    def resolve(self, *, name: str, version: int | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/resolve/
+        """
+        _stability('contexts.resolve', 'beta')
+        path = None
+        query = {'name': name, 'version': version, 'label': label, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_CONTEXTS_RESOLVE, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+
 class DashboardsResource(Resource):
     """`client.dashboards`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -1437,8 +1582,8 @@ class FileKnowledgeBasesResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'name': name, **(extra_body or {})}
-        files = {'file': files}
-        return self._t.call(_ops.OP_FILE_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseCreateResult, options=options)
+        _files = {'file': files}
+        return self._t.call(_ops.OP_FILE_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=_files, model=models.LegacyKnowledgeBaseCreateResult, options=options)
 
     def delete(self, *, kb_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Delete file knowledge bases by id.
@@ -1478,8 +1623,8 @@ class FileKnowledgeBasesResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'kb_id': kb_id, 'name': name, **(extra_body or {})}
-        files = {'file': files}
-        return self._t.call(_ops.OP_FILE_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseMutationResult, options=options)
+        _files = {'file': files}
+        return self._t.call(_ops.OP_FILE_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, files=_files, model=models.LegacyKnowledgeBaseMutationResult, options=options)
 
 
 class GatewayResource(Resource):
@@ -1886,6 +2031,162 @@ class SimulationResource(Resource):
     scenarios: SimulationScenariosResource
     tests: SimulationTestsResource
     _children: Dict[str, type] = {'executions': SimulationExecutionsResource, 'scenarios': SimulationScenariosResource, 'tests': SimulationTestsResource}
+
+
+class SkillConsumptionResource(Resource):
+    """`client.skill_consumption`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+
+    def check_access(self, resource_id: str, number: int, *, resolution_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextAccessCheck:
+        """
+
+        .. beta:: this method may change without notice.
+
+        POST /model-hub/skills/consumption/{resource_id}/versions/{number}/access-check/
+        """
+        _stability('skill_consumption.check_access', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(_ops.OP_SKILL_CONSUMPTION_CHECK_ACCESS, path=path, query=query, body=body, model=models.SkillsContextAccessCheck, options=options)
+
+    def manifest(self, resource_id: str, number: int, *, resolution_id: str, file_offset: int | None | NotGiven = NOT_GIVEN, file_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/consumption/{resource_id}/versions/{number}/manifest/
+        """
+        _stability('skill_consumption.manifest', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {'file_offset': file_offset, 'file_limit': file_limit, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SKILL_CONSUMPTION_MANIFEST, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+    def read_file(self, resource_id: str, number: int, *, path: str, resolution_id: str, offset: int | None | NotGiven = NOT_GIVEN, max_bytes: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionChunk:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/consumption/{resource_id}/versions/{number}/files/
+        """
+        _stability('skill_consumption.read_file', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        _path = {'resource_id': resource_id, 'number': number}
+        query = {'path': path, 'offset': offset, 'max_bytes': max_bytes, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SKILL_CONSUMPTION_READ_FILE, path=_path, query=query, body=body, model=models.SkillsContextConsumptionChunk, options=options)
+
+    def resolve(self, *, name: str, version: int | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/consumption/resolve/
+        """
+        _stability('skill_consumption.resolve', 'beta')
+        path = None
+        query = {'name': name, 'version': version, 'label': label, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SKILL_CONSUMPTION_RESOLVE, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+
+class SkillsResource(Resource):
+    """`client.skills`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+
+    def latest_load(self, *, resource_id: str, kind: Literal['skill', 'agent_context'], since: str, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LatestLoadResult:
+        """A recorded load is client-reported delivery, never proof of skill use.
+Both resource kinds share this read and the caller's workspace scope.
+
+        GET /model-hub/skills/loads/
+        """
+        path = None
+        query = {'resource_id': resource_id, 'kind': kind, 'since': since, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SKILLS_LATEST_LOAD, path=path, query=query, body=body, model=models.LatestLoadResult, options=options)
+
+    def list(self, *, page_size: int | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, tag: str | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, sort: Literal['updated', 'name', 'created'] | None | NotGiven = NOT_GIVEN, order: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.SkillsHubSkillSummary]:
+        """
+
+        GET /model-hub/skills/
+        """
+        path = None
+        query = {'page_size': page_size, 'search': search, 'tag': tag, 'label': label, 'sort': sort, 'order': order, **(extra_query or {})}
+        return self._t.paginate(_ops.OP_SKILLS_LIST, path=path, query=query, model=models.SkillsHubSkillSummary, options=options)
+
+    def list_versions(self, skill_id: str, *, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[Dict[str, Any]]:
+        """
+
+        GET /model-hub/skills/{skill_id}/versions/
+        """
+        path = {'skill_id': skill_id}
+        query = {'page_size': page_size, **(extra_query or {})}
+        return self._t.paginate(_ops.OP_SKILLS_LIST_VERSIONS, path=path, query=query, model=None, options=options)
+
+    def publish(self, *, files: List[Dict[str, Any]], expected_digest: str | None | NotGiven = NOT_GIVEN, expected_release_revision: int | None | NotGiven = NOT_GIVEN, evidence_run_id: str | None | NotGiven = NOT_GIVEN, note: str | None | NotGiven = NOT_GIVEN, labels: List[str] | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, acknowledge_warnings: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubPushResult:
+        """
+
+        POST /model-hub/skills/publish/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'files': files, 'expected_digest': expected_digest, 'expected_release_revision': expected_release_revision, 'evidence_run_id': evidence_run_id, 'note': note, 'labels': labels, 'tags': tags, 'acknowledge_warnings': acknowledge_warnings, **(extra_body or {})}
+        return self._t.call(_ops.OP_SKILLS_PUBLISH, path=path, query=query, body=body, model=models.SkillsHubPushResult, options=options)
+
+    def read_file(self, skill_id: str, number: int, *, path: str, offset: int | None | NotGiven = NOT_GIVEN, max_bytes: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubFileChunk:
+        """
+
+        GET /model-hub/skills/{skill_id}/versions/{number}/files/
+        """
+        _path = {'skill_id': skill_id, 'number': number}
+        query = {'path': path, 'offset': offset, 'max_bytes': max_bytes, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SKILLS_READ_FILE, path=_path, query=query, body=body, model=models.SkillsHubFileChunk, options=options)
+
+    def resolve(self, *, name: str, label: str | None | NotGiven = NOT_GIVEN, version: int | None | NotGiven = NOT_GIVEN, include_content: bool | None | NotGiven = NOT_GIVEN, file_offset: int | None | NotGiven = NOT_GIVEN, file_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubManifest:
+        """Resolve an immutable skill manifest. Returns ETag: "<digest>". Send If-None-Match with that value for HTTP 304; a missing label never falls back. Optional file_offset/file_limit page the file inventory; follow next_file_offset with the returned version pinned. MCP defaults to 25 files per page and omits frontmatter and file contents; read SKILL.md in chunks for the original metadata.
+
+        GET /model-hub/skills/resolve/
+        """
+        path = None
+        query = {'name': name, 'label': label, 'version': version, 'include_content': include_content, 'file_offset': file_offset, 'file_limit': file_limit, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SKILLS_RESOLVE, path=path, query=query, body=body, model=models.SkillsHubManifest, options=options)
+
+    def set_label(self, skill_id: str, label: str, *, version: int, expected_release_revision: int | None | NotGiven = NOT_GIVEN, expected_version: int | None | NotGiven = NOT_GIVEN, expected_digest: str | None | NotGiven = NOT_GIVEN, evidence_run_id: str | None | NotGiven = NOT_GIVEN, note: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubLabelOut:
+        """
+
+        PUT /model-hub/skills/{skill_id}/labels/{label}/
+        """
+        path = {'skill_id': skill_id, 'label': label}
+        query = {**(extra_query or {})}
+        body = {'version': version, 'expected_release_revision': expected_release_revision, 'expected_version': expected_version, 'expected_digest': expected_digest, 'evidence_run_id': evidence_run_id, 'note': note, **(extra_body or {})}
+        return self._t.call(_ops.OP_SKILLS_SET_LABEL, path=path, query=query, body=body, model=models.SkillsHubLabelOut, options=options)
+
+    def update_tags(self, skill_id: str, *, tags: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubSkillDetail:
+        """
+
+        PATCH /model-hub/skills/{skill_id}/
+        """
+        path = {'skill_id': skill_id}
+        query = {**(extra_query or {})}
+        body = {'tags': tags, **(extra_body or {})}
+        return self._t.call(_ops.OP_SKILLS_UPDATE_TAGS, path=path, query=query, body=body, model=models.SkillsHubSkillDetail, options=options)
+
+    def usage(self, *, to: str, from_: str, cursor: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, resource_id: str | None | NotGiven = NOT_GIVEN, kind: Literal['skill', 'agent_context'] | None | NotGiven = NOT_GIVEN, group_by: Literal['skill', 'version', 'agent', 'context'] | None | NotGiven = NOT_GIVEN, project_ids: str | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, version_ids: str | None | NotGiven = NOT_GIVEN, skill_ids: str | None | NotGiven = NOT_GIVEN, context_version_id: str | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, service: str | None | NotGiven = NOT_GIVEN, agent: str | None | NotGiven = NOT_GIVEN, projection: Literal['table', 'series'] | None | NotGiven = NOT_GIVEN, metric: str | None | NotGiven = NOT_GIVEN, bucket: Literal['hour', 'day'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.RuntimeUsageResult:
+        """Shared, cursor-paged runtime cohorts; loads never imply use.
+
+        GET /model-hub/skills/usage/
+        """
+        path = None
+        query = {'to': to, 'from': from_, 'cursor': cursor, 'limit': limit, 'resource_id': resource_id, 'kind': kind, 'group_by': group_by, 'project_ids': project_ids, 'project_id': project_id, 'version_ids': version_ids, 'skill_ids': skill_ids, 'context_version_id': context_version_id, 'label': label, 'service': service, 'agent': agent, 'projection': projection, 'metric': metric, 'bucket': bucket, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SKILLS_USAGE, path=path, query=query, body=body, model=models.RuntimeUsageResult, options=options)
 
 
 class SpansResource(Resource):
@@ -3127,6 +3428,150 @@ class AsyncAnnotationsResource(Resource):
         return await self._t.acall(_ops.OP_ANNOTATIONS_BULK_CREATE, path=path, query=query, body=body, model=models.BulkAnnotationResponseResult, options=options)
 
 
+class AsyncContextCredentialsResource(Resource):
+    """`client.context_credentials`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+
+    async def issue(self, *, purpose: Literal['consume', 'report'], grants: List[Dict[str, Any]], binding_ids: List[str], expires_at: str, idempotency_key: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextCredentialIssued:
+        """
+
+        .. beta:: this method may change without notice.
+
+        POST /model-hub/skills/contexts/credentials/
+        """
+        _stability('context_credentials.issue', 'beta')
+        options = operation_options(options, {'Idempotency-Key': idempotency_key}, required=('Idempotency-Key',))
+        path = None
+        query = {**(extra_query or {})}
+        body = {'purpose': purpose, 'grants': grants, 'binding_ids': binding_ids, 'expires_at': expires_at, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_CONTEXT_CREDENTIALS_ISSUE, path=path, query=query, body=body, model=models.SkillsContextCredentialIssued, options=options)
+
+    def list(self, *, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.SkillsContextCredentialMetadata]:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/credentials/
+        """
+        _stability('context_credentials.list', 'beta')
+        path = None
+        query = {'page_size': page_size, **(extra_query or {})}
+        return self._t.apaginate(_ops.OP_CONTEXT_CREDENTIALS_LIST, path=path, query=query, model=models.SkillsContextCredentialMetadata, options=options)
+
+    async def revoke(self, credential_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+        """
+
+        .. beta:: this method may change without notice.
+
+        DELETE /model-hub/skills/contexts/credentials/{credential_id}/
+        """
+        _stability('context_credentials.revoke', 'beta')
+        path = {'credential_id': credential_id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(_ops.OP_CONTEXT_CREDENTIALS_REVOKE, path=path, query=query, body=body, model=None, options=options)
+
+
+class AsyncContextsResource(Resource):
+    """`client.contexts`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+
+    async def check_access(self, resource_id: str, number: int, *, resolution_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextAccessCheck:
+        """
+
+        .. beta:: this method may change without notice.
+
+        POST /model-hub/skills/contexts/{resource_id}/versions/{number}/access-check/
+        """
+        _stability('contexts.check_access', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(_ops.OP_CONTEXTS_CHECK_ACCESS, path=path, query=query, body=body, model=models.SkillsContextAccessCheck, options=options)
+
+    async def get(self, context_id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextDetail:
+        """
+
+        GET /model-hub/skills/contexts/{context_id}/
+        """
+        path = {'context_id': context_id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_CONTEXTS_GET, path=path, query=query, body=body, model=models.SkillsContextDetail, options=options)
+
+    async def inspect_snapshot(self, context_id: str, number: int, *, file_offset: int | None | NotGiven = NOT_GIVEN, file_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextVersionInspection:
+        """
+
+        GET /model-hub/skills/contexts/{context_id}/versions/{number}/inspection/
+        """
+        path = {'context_id': context_id, 'number': number}
+        query = {'file_offset': file_offset, 'file_limit': file_limit, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_CONTEXTS_INSPECT_SNAPSHOT, path=path, query=query, body=body, model=models.SkillsContextVersionInspection, options=options)
+
+    def list(self, *, page_size: int | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, tag: str | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, sort: Literal['updated', 'name', 'created'] | None | NotGiven = NOT_GIVEN, order: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.SkillsContextContextSummary]:
+        """
+
+        GET /model-hub/skills/contexts/
+        """
+        path = None
+        query = {'page_size': page_size, 'search': search, 'tag': tag, 'label': label, 'sort': sort, 'order': order, **(extra_query or {})}
+        return self._t.apaginate(_ops.OP_CONTEXTS_LIST, path=path, query=query, model=models.SkillsContextContextSummary, options=options)
+
+    def list_versions(self, context_id: str, *, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[Dict[str, Any]]:
+        """
+
+        GET /model-hub/skills/contexts/{context_id}/versions/
+        """
+        path = {'context_id': context_id}
+        query = {'page_size': page_size, **(extra_query or {})}
+        return self._t.apaginate(_ops.OP_CONTEXTS_LIST_VERSIONS, path=path, query=query, model=None, options=options)
+
+    async def manifest(self, resource_id: str, number: int, *, resolution_id: str, file_offset: int | None | NotGiven = NOT_GIVEN, file_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/{resource_id}/versions/{number}/manifest/
+        """
+        _stability('contexts.manifest', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {'file_offset': file_offset, 'file_limit': file_limit, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_CONTEXTS_MANIFEST, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+    async def read_file(self, resource_id: str, number: int, *, path: str, resolution_id: str, offset: int | None | NotGiven = NOT_GIVEN, max_bytes: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionChunk:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/{resource_id}/versions/{number}/files/
+        """
+        _stability('contexts.read_file', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        _path = {'resource_id': resource_id, 'number': number}
+        query = {'path': path, 'offset': offset, 'max_bytes': max_bytes, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_CONTEXTS_READ_FILE, path=_path, query=query, body=body, model=models.SkillsContextConsumptionChunk, options=options)
+
+    async def resolve(self, *, name: str, version: int | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/contexts/resolve/
+        """
+        _stability('contexts.resolve', 'beta')
+        path = None
+        query = {'name': name, 'version': version, 'label': label, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_CONTEXTS_RESOLVE, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+
 class AsyncDashboardsResource(Resource):
     """`client.dashboards`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -3405,8 +3850,8 @@ class AsyncFileKnowledgeBasesResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'name': name, **(extra_body or {})}
-        files = {'file': files}
-        return await self._t.acall(_ops.OP_FILE_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseCreateResult, options=options)
+        _files = {'file': files}
+        return await self._t.acall(_ops.OP_FILE_KNOWLEDGE_BASES_CREATE, path=path, query=query, body=body, files=_files, model=models.LegacyKnowledgeBaseCreateResult, options=options)
 
     async def delete(self, *, kb_ids: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
         """Delete file knowledge bases by id.
@@ -3446,8 +3891,8 @@ class AsyncFileKnowledgeBasesResource(Resource):
         path = None
         query = {**(extra_query or {})}
         body = {'kb_id': kb_id, 'name': name, **(extra_body or {})}
-        files = {'file': files}
-        return await self._t.acall(_ops.OP_FILE_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, files=files, model=models.LegacyKnowledgeBaseMutationResult, options=options)
+        _files = {'file': files}
+        return await self._t.acall(_ops.OP_FILE_KNOWLEDGE_BASES_UPDATE, path=path, query=query, body=body, files=_files, model=models.LegacyKnowledgeBaseMutationResult, options=options)
 
 
 class AsyncGatewayResource(Resource):
@@ -3856,6 +4301,162 @@ class AsyncSimulationResource(Resource):
     _children: Dict[str, type] = {'executions': AsyncSimulationExecutionsResource, 'scenarios': AsyncSimulationScenariosResource, 'tests': AsyncSimulationTestsResource}
 
 
+class AsyncSkillConsumptionResource(Resource):
+    """`client.skill_consumption`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+
+    async def check_access(self, resource_id: str, number: int, *, resolution_id: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextAccessCheck:
+        """
+
+        .. beta:: this method may change without notice.
+
+        POST /model-hub/skills/consumption/{resource_id}/versions/{number}/access-check/
+        """
+        _stability('skill_consumption.check_access', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(_ops.OP_SKILL_CONSUMPTION_CHECK_ACCESS, path=path, query=query, body=body, model=models.SkillsContextAccessCheck, options=options)
+
+    async def manifest(self, resource_id: str, number: int, *, resolution_id: str, file_offset: int | None | NotGiven = NOT_GIVEN, file_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/consumption/{resource_id}/versions/{number}/manifest/
+        """
+        _stability('skill_consumption.manifest', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        path = {'resource_id': resource_id, 'number': number}
+        query = {'file_offset': file_offset, 'file_limit': file_limit, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SKILL_CONSUMPTION_MANIFEST, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+    async def read_file(self, resource_id: str, number: int, *, path: str, resolution_id: str, offset: int | None | NotGiven = NOT_GIVEN, max_bytes: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionChunk:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/consumption/{resource_id}/versions/{number}/files/
+        """
+        _stability('skill_consumption.read_file', 'beta')
+        options = operation_options(options, {'X-Context-Resolution': resolution_id}, required=('X-Context-Resolution',))
+        _path = {'resource_id': resource_id, 'number': number}
+        query = {'path': path, 'offset': offset, 'max_bytes': max_bytes, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SKILL_CONSUMPTION_READ_FILE, path=_path, query=query, body=body, model=models.SkillsContextConsumptionChunk, options=options)
+
+    async def resolve(self, *, name: str, version: int | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsContextConsumptionManifest:
+        """
+
+        .. beta:: this method may change without notice.
+
+        GET /model-hub/skills/consumption/resolve/
+        """
+        _stability('skill_consumption.resolve', 'beta')
+        path = None
+        query = {'name': name, 'version': version, 'label': label, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SKILL_CONSUMPTION_RESOLVE, path=path, query=query, body=body, model=models.SkillsContextConsumptionManifest, options=options)
+
+
+class AsyncSkillsResource(Resource):
+    """`client.skills`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+
+    async def latest_load(self, *, resource_id: str, kind: Literal['skill', 'agent_context'], since: str, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.LatestLoadResult:
+        """A recorded load is client-reported delivery, never proof of skill use.
+Both resource kinds share this read and the caller's workspace scope.
+
+        GET /model-hub/skills/loads/
+        """
+        path = None
+        query = {'resource_id': resource_id, 'kind': kind, 'since': since, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SKILLS_LATEST_LOAD, path=path, query=query, body=body, model=models.LatestLoadResult, options=options)
+
+    def list(self, *, page_size: int | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, tag: str | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, sort: Literal['updated', 'name', 'created'] | None | NotGiven = NOT_GIVEN, order: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.SkillsHubSkillSummary]:
+        """
+
+        GET /model-hub/skills/
+        """
+        path = None
+        query = {'page_size': page_size, 'search': search, 'tag': tag, 'label': label, 'sort': sort, 'order': order, **(extra_query or {})}
+        return self._t.apaginate(_ops.OP_SKILLS_LIST, path=path, query=query, model=models.SkillsHubSkillSummary, options=options)
+
+    def list_versions(self, skill_id: str, *, page_size: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[Dict[str, Any]]:
+        """
+
+        GET /model-hub/skills/{skill_id}/versions/
+        """
+        path = {'skill_id': skill_id}
+        query = {'page_size': page_size, **(extra_query or {})}
+        return self._t.apaginate(_ops.OP_SKILLS_LIST_VERSIONS, path=path, query=query, model=None, options=options)
+
+    async def publish(self, *, files: List[Dict[str, Any]], expected_digest: str | None | NotGiven = NOT_GIVEN, expected_release_revision: int | None | NotGiven = NOT_GIVEN, evidence_run_id: str | None | NotGiven = NOT_GIVEN, note: str | None | NotGiven = NOT_GIVEN, labels: List[str] | None | NotGiven = NOT_GIVEN, tags: List[str] | None | NotGiven = NOT_GIVEN, acknowledge_warnings: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubPushResult:
+        """
+
+        POST /model-hub/skills/publish/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'files': files, 'expected_digest': expected_digest, 'expected_release_revision': expected_release_revision, 'evidence_run_id': evidence_run_id, 'note': note, 'labels': labels, 'tags': tags, 'acknowledge_warnings': acknowledge_warnings, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SKILLS_PUBLISH, path=path, query=query, body=body, model=models.SkillsHubPushResult, options=options)
+
+    async def read_file(self, skill_id: str, number: int, *, path: str, offset: int | None | NotGiven = NOT_GIVEN, max_bytes: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubFileChunk:
+        """
+
+        GET /model-hub/skills/{skill_id}/versions/{number}/files/
+        """
+        _path = {'skill_id': skill_id, 'number': number}
+        query = {'path': path, 'offset': offset, 'max_bytes': max_bytes, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SKILLS_READ_FILE, path=_path, query=query, body=body, model=models.SkillsHubFileChunk, options=options)
+
+    async def resolve(self, *, name: str, label: str | None | NotGiven = NOT_GIVEN, version: int | None | NotGiven = NOT_GIVEN, include_content: bool | None | NotGiven = NOT_GIVEN, file_offset: int | None | NotGiven = NOT_GIVEN, file_limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubManifest:
+        """Resolve an immutable skill manifest. Returns ETag: "<digest>". Send If-None-Match with that value for HTTP 304; a missing label never falls back. Optional file_offset/file_limit page the file inventory; follow next_file_offset with the returned version pinned. MCP defaults to 25 files per page and omits frontmatter and file contents; read SKILL.md in chunks for the original metadata.
+
+        GET /model-hub/skills/resolve/
+        """
+        path = None
+        query = {'name': name, 'label': label, 'version': version, 'include_content': include_content, 'file_offset': file_offset, 'file_limit': file_limit, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SKILLS_RESOLVE, path=path, query=query, body=body, model=models.SkillsHubManifest, options=options)
+
+    async def set_label(self, skill_id: str, label: str, *, version: int, expected_release_revision: int | None | NotGiven = NOT_GIVEN, expected_version: int | None | NotGiven = NOT_GIVEN, expected_digest: str | None | NotGiven = NOT_GIVEN, evidence_run_id: str | None | NotGiven = NOT_GIVEN, note: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubLabelOut:
+        """
+
+        PUT /model-hub/skills/{skill_id}/labels/{label}/
+        """
+        path = {'skill_id': skill_id, 'label': label}
+        query = {**(extra_query or {})}
+        body = {'version': version, 'expected_release_revision': expected_release_revision, 'expected_version': expected_version, 'expected_digest': expected_digest, 'evidence_run_id': evidence_run_id, 'note': note, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SKILLS_SET_LABEL, path=path, query=query, body=body, model=models.SkillsHubLabelOut, options=options)
+
+    async def update_tags(self, skill_id: str, *, tags: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.SkillsHubSkillDetail:
+        """
+
+        PATCH /model-hub/skills/{skill_id}/
+        """
+        path = {'skill_id': skill_id}
+        query = {**(extra_query or {})}
+        body = {'tags': tags, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SKILLS_UPDATE_TAGS, path=path, query=query, body=body, model=models.SkillsHubSkillDetail, options=options)
+
+    async def usage(self, *, to: str, from_: str, cursor: str | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, resource_id: str | None | NotGiven = NOT_GIVEN, kind: Literal['skill', 'agent_context'] | None | NotGiven = NOT_GIVEN, group_by: Literal['skill', 'version', 'agent', 'context'] | None | NotGiven = NOT_GIVEN, project_ids: str | None | NotGiven = NOT_GIVEN, project_id: str | None | NotGiven = NOT_GIVEN, version_ids: str | None | NotGiven = NOT_GIVEN, skill_ids: str | None | NotGiven = NOT_GIVEN, context_version_id: str | None | NotGiven = NOT_GIVEN, label: str | None | NotGiven = NOT_GIVEN, service: str | None | NotGiven = NOT_GIVEN, agent: str | None | NotGiven = NOT_GIVEN, projection: Literal['table', 'series'] | None | NotGiven = NOT_GIVEN, metric: str | None | NotGiven = NOT_GIVEN, bucket: Literal['hour', 'day'] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.RuntimeUsageResult:
+        """Shared, cursor-paged runtime cohorts; loads never imply use.
+
+        GET /model-hub/skills/usage/
+        """
+        path = None
+        query = {'to': to, 'from': from_, 'cursor': cursor, 'limit': limit, 'resource_id': resource_id, 'kind': kind, 'group_by': group_by, 'project_ids': project_ids, 'project_id': project_id, 'version_ids': version_ids, 'skill_ids': skill_ids, 'context_version_id': context_version_id, 'label': label, 'service': service, 'agent': agent, 'projection': projection, 'metric': metric, 'bucket': bucket, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SKILLS_USAGE, path=path, query=query, body=body, model=models.RuntimeUsageResult, options=options)
+
+
 class AsyncSpansResource(Resource):
     """`client.spans`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -3973,6 +4574,8 @@ __all__ = [
     'AnnotationQueuesItemsResource',
     'AnnotationsResource',
     'AnnotationsLabelsResource',
+    'ContextCredentialsResource',
+    'ContextsResource',
     'DashboardsResource',
     'DashboardsMetricsResource',
     'DashboardsWidgetsResource',
@@ -4009,6 +4612,8 @@ __all__ = [
     'SimulationExecutionsResource',
     'SimulationScenariosResource',
     'SimulationTestsResource',
+    'SkillConsumptionResource',
+    'SkillsResource',
     'SpansResource',
     'TracesResource',
     'TracesPropertiesResource',
@@ -4024,6 +4629,8 @@ __all__ = [
     'AsyncAnnotationQueuesItemsResource',
     'AsyncAnnotationsResource',
     'AsyncAnnotationsLabelsResource',
+    'AsyncContextCredentialsResource',
+    'AsyncContextsResource',
     'AsyncDashboardsResource',
     'AsyncDashboardsMetricsResource',
     'AsyncDashboardsWidgetsResource',
@@ -4060,6 +4667,8 @@ __all__ = [
     'AsyncSimulationExecutionsResource',
     'AsyncSimulationScenariosResource',
     'AsyncSimulationTestsResource',
+    'AsyncSkillConsumptionResource',
+    'AsyncSkillsResource',
     'AsyncSpansResource',
     'AsyncTracesResource',
     'AsyncTracesPropertiesResource',

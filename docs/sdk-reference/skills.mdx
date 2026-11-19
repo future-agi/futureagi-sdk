@@ -1,0 +1,658 @@
+---
+title: "Skills"
+description: "Reference for client.skills in the Future AGI Python and TypeScript SDKs: skills.latest_load, skills.list, skills.list_versions, skills.publish, skills.read_file, skills.resolve and 3 more."
+---
+
+`client.skills` on `fi.Client` (Python) and `client.skills` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Skills response models](/docs/sdk/reference/skills-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+<div class="sdk-ref-table">
+
+| Method | Description |
+|---|---|
+| [`skills.latest_load`](#skillslatest_load) | A recorded load is client-reported delivery, never proof of skill use. |
+| [`skills.list`](#skillslist) |  |
+| [`skills.list_versions`](#skillslist_versions) |  |
+| [`skills.publish`](#skillspublish) |  |
+| [`skills.read_file`](#skillsread_file) |  |
+| [`skills.resolve`](#skillsresolve) | Resolve an immutable skill manifest. |
+| [`skills.set_label`](#skillsset_label) |  |
+| [`skills.update_tags`](#skillsupdate_tags) |  |
+| [`skills.usage`](#skillsusage) | Shared, cursor-paged runtime cohorts; loads never imply use. |
+
+</div>
+
+## client.skills
+
+### skills.latest_load
+
+A recorded load is client-reported delivery, never proof of skill use. Both resource kinds share this read and the caller's workspace scope.
+
+<ApiEndpoint method="GET" path="/model-hub/skills/loads/" />
+
+**MCP tool**: `get_latest_skill_load`
+
+<CodeGroup>
+
+```python Python
+result = client.skills.latest_load(
+    resource_id="your-resource-id",
+    kind="skill",
+    since="your-since",
+)
+```
+
+```typescript TypeScript
+const result = await client.skills.latestLoad({
+  resource_id: "your-resource-id",
+  kind: "skill",
+  since: "your-since",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.skills.latest_load(
+    *,
+    resource_id: str,
+    kind: Literal['skill', 'agent_context'],
+    since: str,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.LatestLoadResult
+```
+
+```typescript TypeScript
+client.skills.latestLoad(params: SkillsLatestLoadParams, options?: RequestOptions): Promise<models.LatestLoadResult>
+
+export interface SkillsLatestLoadParams {
+  resource_id: string;
+  kind: "skill" | "agent_context";
+  since: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="resource_id" type="string" required />
+<ParamField query="kind" type="string" required enum={["skill", "agent_context"]} />
+<ParamField query="since" type="string" required />
+
+#### Returns
+
+[`LatestLoadResult`](/docs/sdk/reference/skills-models#latestloadresult).
+
+### skills.list
+
+
+
+<ApiEndpoint method="GET" path="/model-hub/skills/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_skills`
+
+<CodeGroup>
+
+```python Python
+for item in client.skills.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.skills.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.skills.list(
+    *,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    tag: str | None | NotGiven = NOT_GIVEN,
+    label: str | None | NotGiven = NOT_GIVEN,
+    sort: Literal['updated', 'name', 'created'] | None | NotGiven = NOT_GIVEN,
+    order: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.SkillsHubSkillSummary]
+```
+
+```typescript TypeScript
+client.skills.list(params: SkillsListParams = {}, options?: RequestOptions): Pager<models.SkillsHubSkillSummary>
+
+export interface SkillsListParams {
+  page_size?: number | null;
+  search?: string | null;
+  tag?: string | null;
+  label?: string | null;
+  sort?: "updated" | "name" | "created" | null;
+  order?: "asc" | "desc" | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="page_size" type="integer" optional />
+<ParamField query="search" type="string" optional />
+<ParamField query="tag" type="string" optional />
+<ParamField query="label" type="string" optional />
+<ParamField query="sort" type="string" optional enum={["updated", "name", "created"]} />
+<ParamField query="order" type="string" optional enum={["asc", "desc"]} />
+
+The pager sends `page` itself; pass `page_size` to change the page size.
+
+#### Returns
+
+A pager of [`SkillsHubSkillSummary`](/docs/sdk/reference/skills-models#skillshubskillsummary) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### skills.list_versions
+
+
+
+<ApiEndpoint method="GET" path="/model-hub/skills/{skill_id}/versions/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_skill_versions`
+
+<CodeGroup>
+
+```python Python
+for item in client.skills.list_versions("your-skill-id"):
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.skills.listVersions("your-skill-id")) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.skills.list_versions(
+    skill_id: str,
+    *,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[dict[str, Any]]
+```
+
+```typescript TypeScript
+client.skills.listVersions(skillId: string, params: SkillsListVersionsParams = {}, options?: RequestOptions): Pager<Record<string, unknown>>
+
+export interface SkillsListVersionsParams {
+  page_size?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="skill_id" type="string" required>
+  Positional argument `skill_id`.
+</ParamField>
+<ParamField query="page_size" type="integer" optional />
+
+The pager sends `page` itself; pass `page_size` to change the page size.
+
+#### Returns
+
+A pager of `object` items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### skills.publish
+
+
+
+<ApiEndpoint method="POST" path="/model-hub/skills/publish/" />
+
+**MCP tool**: `publish_skill`
+
+<CodeGroup>
+
+```python Python
+result = client.skills.publish(files=[])
+```
+
+```typescript TypeScript
+const result = await client.skills.publish({ files: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.skills.publish(
+    *,
+    files: list[dict[str, Any]],
+    expected_digest: str | None | NotGiven = NOT_GIVEN,
+    expected_release_revision: int | None | NotGiven = NOT_GIVEN,
+    evidence_run_id: str | None | NotGiven = NOT_GIVEN,
+    note: str | None | NotGiven = NOT_GIVEN,
+    labels: list[str] | None | NotGiven = NOT_GIVEN,
+    tags: list[str] | None | NotGiven = NOT_GIVEN,
+    acknowledge_warnings: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SkillsHubPushResult
+```
+
+```typescript TypeScript
+client.skills.publish(params: SkillsPublishParams, options?: RequestOptions): Promise<models.SkillsHubPushResult>
+
+export interface SkillsPublishParams {
+  files: Array<Record<string, unknown>>;
+  expected_digest?: string | null;
+  expected_release_revision?: number | null;
+  evidence_run_id?: string | null;
+  note?: string | null;
+  labels?: Array<string> | null;
+  tags?: Array<string> | null;
+  acknowledge_warnings?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="files" type="object[]" required />
+<ParamField body="expected_digest" type="string" optional />
+<ParamField body="expected_release_revision" type="integer" optional />
+<ParamField body="evidence_run_id" type="string" optional />
+<ParamField body="note" type="string" optional />
+<ParamField body="labels" type="string[]" optional />
+<ParamField body="tags" type="string[]" optional />
+<ParamField body="acknowledge_warnings" type="boolean" optional />
+
+#### Returns
+
+[`SkillsHubPushResult`](/docs/sdk/reference/skills-models#skillshubpushresult).
+
+### skills.read_file
+
+
+
+<ApiEndpoint method="GET" path="/model-hub/skills/{skill_id}/versions/{number}/files/" />
+
+**MCP tool**: `read_skill_file`
+
+<CodeGroup>
+
+```python Python
+result = client.skills.read_file(
+    "your-skill-id",
+    1,
+    path="your-path",
+)
+```
+
+```typescript TypeScript
+const result = await client.skills.readFile("your-skill-id", 1, { path: "your-path" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.skills.read_file(
+    skill_id: str,
+    number: int,
+    *,
+    path: str,
+    offset: int | None | NotGiven = NOT_GIVEN,
+    max_bytes: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SkillsHubFileChunk
+```
+
+```typescript TypeScript
+client.skills.readFile(skillId: string, number: number, params: SkillsReadFileParams, options?: RequestOptions): Promise<models.SkillsHubFileChunk>
+
+export interface SkillsReadFileParams {
+  path: string;
+  offset?: number | null;
+  max_bytes?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="skill_id" type="string" required>
+  Positional argument `skill_id`.
+</ParamField>
+<ParamField path="number" type="integer" required>
+  Positional argument `number`.
+</ParamField>
+<ParamField query="path" type="string" required />
+<ParamField query="offset" type="integer" optional />
+<ParamField query="max_bytes" type="integer" optional />
+
+#### Returns
+
+[`SkillsHubFileChunk`](/docs/sdk/reference/skills-models#skillshubfilechunk).
+
+### skills.resolve
+
+Resolve an immutable skill manifest. Returns ETag: "\<digest>". Send If-None-Match with that value for HTTP 304; a missing label never falls back. Optional file_offset/file_limit page the file inventory; follow next_file_offset with the returned version pinned. MCP defaults to 25 files per page and omits frontmatter and file contents; read SKILL.md in chunks for the original metadata.
+
+<ApiEndpoint method="GET" path="/model-hub/skills/resolve/" />
+
+**MCP tool**: `get_skill`
+
+<CodeGroup>
+
+```python Python
+result = client.skills.resolve(name="your-name")
+```
+
+```typescript TypeScript
+const result = await client.skills.resolve({ name: "your-name" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.skills.resolve(
+    *,
+    name: str,
+    label: str | None | NotGiven = NOT_GIVEN,
+    version: int | None | NotGiven = NOT_GIVEN,
+    include_content: bool | None | NotGiven = NOT_GIVEN,
+    file_offset: int | None | NotGiven = NOT_GIVEN,
+    file_limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SkillsHubManifest
+```
+
+```typescript TypeScript
+client.skills.resolve(params: SkillsResolveParams, options?: RequestOptions): Promise<models.SkillsHubManifest>
+
+export interface SkillsResolveParams {
+  name: string;
+  label?: string | null;
+  version?: number | null;
+  include_content?: boolean | null;
+  /** Zero-based file offset. Pin version when following next_file_offset. */
+  file_offset?: number | null;
+  /** Files per manifest page (1–25). REST defaults to all files; MCP defaults to 25. */
+  file_limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="name" type="string" required />
+<ParamField query="label" type="string" optional />
+<ParamField query="version" type="integer" optional />
+<ParamField query="include_content" type="boolean" optional />
+<ParamField query="file_offset" type="integer" optional>
+  Zero-based file offset. Pin version when following next_file_offset.
+</ParamField>
+<ParamField query="file_limit" type="integer" optional>
+  Files per manifest page (1–25). REST defaults to all files; MCP defaults to 25.
+</ParamField>
+
+#### Returns
+
+[`SkillsHubManifest`](/docs/sdk/reference/skills-models#skillshubmanifest).
+
+### skills.set_label
+
+
+
+<ApiEndpoint method="PUT" path="/model-hub/skills/{skill_id}/labels/{label}/" />
+
+**MCP tool**: `set_skill_label`
+
+<CodeGroup>
+
+```python Python
+result = client.skills.set_label(
+    "your-skill-id",
+    "your-label",
+    version=1,
+)
+```
+
+```typescript TypeScript
+const result = await client.skills.setLabel("your-skill-id", "your-label", { version: 1 });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.skills.set_label(
+    skill_id: str,
+    label: str,
+    *,
+    version: int,
+    expected_release_revision: int | None | NotGiven = NOT_GIVEN,
+    expected_version: int | None | NotGiven = NOT_GIVEN,
+    expected_digest: str | None | NotGiven = NOT_GIVEN,
+    evidence_run_id: str | None | NotGiven = NOT_GIVEN,
+    note: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SkillsHubLabelOut
+```
+
+```typescript TypeScript
+client.skills.setLabel(skillId: string, label: string, params: SkillsSetLabelParams, options?: RequestOptions): Promise<models.SkillsHubLabelOut>
+
+export interface SkillsSetLabelParams {
+  version: number;
+  expected_release_revision?: number | null;
+  expected_version?: number | null;
+  expected_digest?: string | null;
+  evidence_run_id?: string | null;
+  note?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="skill_id" type="string" required>
+  Positional argument `skill_id`.
+</ParamField>
+<ParamField path="label" type="string" required>
+  Positional argument `label`.
+</ParamField>
+<ParamField body="version" type="integer" required />
+<ParamField body="expected_release_revision" type="integer" optional />
+<ParamField body="expected_version" type="integer" optional />
+<ParamField body="expected_digest" type="string" optional />
+<ParamField body="evidence_run_id" type="string" optional />
+<ParamField body="note" type="string" optional />
+
+#### Returns
+
+[`SkillsHubLabelOut`](/docs/sdk/reference/skills-models#skillshublabelout).
+
+### skills.update_tags
+
+
+
+<ApiEndpoint method="PATCH" path="/model-hub/skills/{skill_id}/" />
+
+**MCP tool**: `update_skill_tags`
+
+<CodeGroup>
+
+```python Python
+result = client.skills.update_tags("your-skill-id")
+```
+
+```typescript TypeScript
+const result = await client.skills.updateTags("your-skill-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.skills.update_tags(
+    skill_id: str,
+    *,
+    tags: list[str] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.SkillsHubSkillDetail
+```
+
+```typescript TypeScript
+client.skills.updateTags(skillId: string, params: SkillsUpdateTagsParams = {}, options?: RequestOptions): Promise<models.SkillsHubSkillDetail>
+
+export interface SkillsUpdateTagsParams {
+  tags?: Array<string> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="skill_id" type="string" required>
+  Positional argument `skill_id`.
+</ParamField>
+<ParamField body="tags" type="string[]" optional />
+
+#### Returns
+
+[`SkillsHubSkillDetail`](/docs/sdk/reference/skills-models#skillshubskilldetail).
+
+### skills.usage
+
+Shared, cursor-paged runtime cohorts; loads never imply use.
+
+<ApiEndpoint method="GET" path="/model-hub/skills/usage/" />
+
+**MCP tool**: `get_skill_usage`
+
+<CodeGroup>
+
+```python Python
+result = client.skills.usage(to="your-to", from_="your-from")
+```
+
+```typescript TypeScript
+const result = await client.skills.usage({
+  to: "your-to",
+  from: "your-from",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.skills.usage(
+    *,
+    to: str,
+    from_: str,
+    cursor: str | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    resource_id: str | None | NotGiven = NOT_GIVEN,
+    kind: Literal['skill', 'agent_context'] | None | NotGiven = NOT_GIVEN,
+    group_by: Literal['skill', 'version', 'agent', 'context'] | None | NotGiven = NOT_GIVEN,
+    project_ids: str | None | NotGiven = NOT_GIVEN,
+    project_id: str | None | NotGiven = NOT_GIVEN,
+    version_ids: str | None | NotGiven = NOT_GIVEN,
+    skill_ids: str | None | NotGiven = NOT_GIVEN,
+    context_version_id: str | None | NotGiven = NOT_GIVEN,
+    label: str | None | NotGiven = NOT_GIVEN,
+    service: str | None | NotGiven = NOT_GIVEN,
+    agent: str | None | NotGiven = NOT_GIVEN,
+    projection: Literal['table', 'series'] | None | NotGiven = NOT_GIVEN,
+    metric: str | None | NotGiven = NOT_GIVEN,
+    bucket: Literal['hour', 'day'] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.RuntimeUsageResult
+```
+
+```typescript TypeScript
+client.skills.usage(params: SkillsUsageParams, options?: RequestOptions): Promise<models.RuntimeUsageResult>
+
+export interface SkillsUsageParams {
+  to: string;
+  from: string;
+  cursor?: string | null;
+  limit?: number | null;
+  resource_id?: string | null;
+  kind?: "skill" | "agent_context" | null;
+  group_by?: "skill" | "version" | "agent" | "context" | null;
+  project_ids?: string | null;
+  project_id?: string | null;
+  version_ids?: string | null;
+  skill_ids?: string | null;
+  context_version_id?: string | null;
+  label?: string | null;
+  service?: string | null;
+  agent?: string | null;
+  projection?: "table" | "series" | null;
+  metric?: string | null;
+  bucket?: "hour" | "day" | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="to" type="string" required />
+<ParamField query="from" type="string" required />
+<ParamField query="cursor" type="string" optional />
+<ParamField query="limit" type="integer" optional />
+<ParamField query="resource_id" type="string" optional />
+<ParamField query="kind" type="string" optional enum={["skill", "agent_context"]} />
+<ParamField query="group_by" type="string" optional enum={["skill", "version", "agent", "context"]} />
+<ParamField query="project_ids" type="string" optional />
+<ParamField query="project_id" type="string" optional />
+<ParamField query="version_ids" type="string" optional />
+<ParamField query="skill_ids" type="string" optional />
+<ParamField query="context_version_id" type="string" optional />
+<ParamField query="label" type="string" optional />
+<ParamField query="service" type="string" optional />
+<ParamField query="agent" type="string" optional />
+<ParamField query="projection" type="string" optional enum={["table", "series"]} />
+<ParamField query="metric" type="string" optional />
+<ParamField query="bucket" type="string" optional enum={["hour", "day"]} />
+
+#### Returns
+
+[`RuntimeUsageResult`](/docs/sdk/reference/skills-models#runtimeusageresult).
