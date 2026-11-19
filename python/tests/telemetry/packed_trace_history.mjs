@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { after, test } from 'node:test';
-import { trace } from '@opentelemetry/api';
+import { trace, context as otelContext } from '@opentelemetry/api';
 import { InMemorySpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
 const require = createRequire(import.meta.url);
 const load = (form, name) => form === 'cjs' ? require(name) : import(name);
 const [coreForm, sdkForm] = process.argv.slice(2);
-const {register} = await load(coreForm, '@traceai/fi-core');
+const {register, FITracer} = await load(coreForm, '@traceai/fi-core');
 const {ContextSnapshot, SnapshotIntegrityError} = await load(sdkForm, '@future-agi/sdk/context');
 const {configure, withAgentScope, declareSkill, FutureAGISkillsSpanProcessor} = await load(sdkForm === 'esm' ? 'cjs' : 'esm', '@future-agi/sdk/telemetry');
 const memory = new InMemorySpanExporter();
@@ -17,9 +17,15 @@ const provider = register({projectName: 'history', runtimeAttributes: !sdkProces
   spanProcessors: [...(sdkProcessor ? [new FutureAGISkillsSpanProcessor()] : []), new SimpleSpanProcessor(memory)]});
 const tracer = trace.getTracer('history');
 const hash = v => createHash('sha256').update(v).digest('hex');
-function fixture(kind, name, tracing = true) {
+function fixture(kind, name, tracing = true, linked = false) {
   const files = kind === 'skill' ? {'SKILL.md': 'root', 'reference/help.md': 'help'} : {'AGENTS.md': name};
-  const metadata = Object.entries(files).map(([path, text]) => ({path, sha256: hash(text), sizeBytes: text.length}));
+  if (linked) {
+    const child = {digest:'sha256:' + hash(JSON.stringify([['SKILL.md',hash('policy')]])), mount:'skills/refund/', requested:{version:1}, skill_id:randomUUID(), version:1, version_id:randomUUID()};
+    files['skills/refund/SKILL.md'] = 'policy';
+    // Descriptor and manifest are canonical and independently verified by readAll().
+    files['.futureagi/context.json'] = JSON.stringify({entrypoint:'AGENTS.md', kind, links:[child], name, owned_paths:['AGENTS.md'], schema:1});
+  }
+  const metadata = Object.entries(files).sort(([a],[b]) => a < b ? -1 : a > b ? 1 : 0).map(([path, text]) => ({path, sha256: hash(text), sizeBytes: text.length}));
   const identity = {kind, resourceId: randomUUID(), versionId: randomUUID(), version: 1, name,
     digest: 'sha256:' + hash(JSON.stringify(metadata.map(f => [f.path, f.sha256])))};
   const source = { corrupt: false, pause: undefined, async chunk(id, path) {
@@ -148,6 +154,66 @@ for (const entry of ['load_only', 'on']) for (const completion of ['load_only','
       assert.equal(event[VERSION], context?.version, label); assert.equal(event[NAME], context?.snapshot.identity.name, label);
     }
     assert.deepEqual(events('context.load').map(s => s.attributes[VERSION]), [b.version,c.version]);
+  });
+}
+for (const wrapped of [false, true]) for (const scoped of ['automatic','agent','plain']) {
+  for (const linked of [false,true]) for (const writer of ['automatic','start','single','bulk']) {
+    test(`public provenance wrapped=${wrapped} scope=${scoped} linked=${linked} writer=${writer}`, async () => {
+      memory.reset(); mode(false,'on');
+      const a = fixture('agent_context','alpha'), b = fixture('agent_context','beta',true,linked);
+      if (linked) await b.snapshot.readAll();
+      const api = wrapped ? new FITracer({tracer}) : tracer;
+      const oldName = scoped === 'agent' ? 'scope' : 'alpha';
+      const childName = writer === 'single' ? 'different' : oldName;
+      const id = 'gen_ai.agent.id';
+      const run = () => api.startActiveSpan('child', {attributes:{[id]:'child-id', ...(writer === 'start' ? {[NAME]:childName} : {})}}, async child => {
+        try {
+          assert.equal(trace.getSpan(otelContext.active()), child);
+          if (writer === 'single') child.setAttribute(NAME,childName);
+          if (writer === 'bulk') child.setAttributes({[NAME]:childName});
+          child.setAttribute('test.unrelated',true);
+          assert.equal(await b.snapshot.readFile(linked ? 'skills/refund/SKILL.md' : 'AGENTS.md'),linked ? 'policy' : 'beta');
+          tracer.startSpan('later').end();
+        } finally { child.end(); }
+      });
+      await tracer.startActiveSpan('parent', async parent => { try {
+        await a.snapshot.readFile('AGENTS.md');
+        if (scoped === 'automatic') await run();
+        else await withAgentScope(scoped === 'plain' ? {} : {agent:'scope'},run);
+        tracer.startSpan('outside').end();
+      } finally { parent.end(); } });
+      const standing = scoped === 'agent' ? 'scope' : 'beta';
+      const expected = writer === 'automatic' ? standing : childName;
+      const selected = events('context.load').at(-1).attributes;
+      for (const data of [selected,...(linked ? [events('skill.load').at(-1).attributes] : [])]) {
+        assert.deepEqual([data[VERSION],data['fi.context.id'],data[NAME],data[id],data['fi.context.session_id'],data['fi.context.binding_id']],
+          [b.version,b.snapshot.identity.resourceId,expected,'child-id',undefined,undefined]);
+      }
+      if (linked) assert.equal(events('skill.load')[0].attributes['fi.skill.via_context.version_id'],b.version);
+      const later = events('later')[0].attributes, outside = events('outside')[0].attributes;
+      assert.deepEqual([later[VERSION],later[NAME],later[id]],[b.version,standing,undefined]);
+      assert.deepEqual([outside[VERSION],outside[NAME]],scoped === 'automatic' ? [b.version,'beta'] : [a.version,'alpha']);
+      const child = events('child')[0].attributes;
+      assert.equal(child[id],'child-id');
+      assert.equal(child[NAME],scoped === 'automatic' ? expected : writer === 'automatic' ? oldName : childName);
+    });
+  }
+}
+for (const scoped of [true,false]) for (const write of [true,false]) {
+  test(`standalone root, nested scope=${scoped}, explicit same string=${write}`,async () => {
+    memory.reset(); mode(false,'on');
+    const a = fixture('agent_context','alpha'), b = fixture('agent_context','beta');
+    const run = () => new FITracer({tracer}).startActiveSpan('fi-root',async active => { try {
+      await a.snapshot.readFile('AGENTS.md');
+      if (write) active.setAttributes({[NAME]:'alpha'});
+      active.setAttribute('test.other',true);
+      const select = async () => { await b.snapshot.readFile('AGENTS.md'); tracer.startSpan('observed').end(); };
+      if (scoped) await withAgentScope({agent:'inner'},select); else await select();
+    } finally { active.end(); } });
+    if (scoped) await withAgentScope({agent:'alpha'},run); else await run();
+    const expected = scoped ? 'inner' : 'beta', event = events('context.load').at(-1).attributes;
+    assert.deepEqual([event[VERSION],event[NAME]],[b.version,write ? 'alpha' : expected]);
+    assert.equal(events('observed')[0].attributes[NAME],expected);
   });
 }
 after(async () => { delete process.env.FI_SKILLS_TRACING; configure(); await provider.shutdown(); });

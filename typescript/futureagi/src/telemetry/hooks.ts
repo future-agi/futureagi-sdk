@@ -1,7 +1,7 @@
 import type { Context, Span, TracerProvider } from "@opentelemetry/api";
 import type { Selector, SnapshotIdentity } from "../context/types";
-import { activeContext, allowlisted, Attributes, carrierAttributes, CARRIER_KEY, mode, provider, recording, safe, SCOPE_KEY, setAttributes } from "./otel";
-import { automaticName, markContextName } from "./agent-name";
+import { activeContext, allowlisted, Attributes, carrierSource, CARRIER_KEY, mode, provider, recording, safe, SCOPE_KEY, setAttributes } from "./otel";
+import { agentIdentity, inheritedSource, markInheritedName } from "./agent-name";
 import { closure, errorType, identityAttrs, linkedSkill, selectorAttrs, SnapshotLike, validIdentity } from "./identity";
 import { deliveryState, ScopeState } from "./registry";
 import { logFirstLoad, recordLastLoad } from "./status";
@@ -35,9 +35,13 @@ function atCompletion(ticket: ReadTicket): DeliveryTicket | undefined {
   const traceId = current.spanContext().traceId;
   const explicit = parent.getValue(SCOPE_KEY) as ScopeState | undefined;
   const state = deliveryState(traceId, activeMode, explicit);
-  if (!explicit && Object.keys(state.attrs).length === 0) state.attrs = carrierAttributes(parent.getValue(CARRIER_KEY));
-  const framework = (current as Span & { attributes?: Attributes }).attributes?.["gen_ai.agent.name"];
-  if (!state.attrs["gen_ai.agent.name"] && typeof framework === "string" && !automaticName(current)) {
+  if (!explicit && Object.keys(state.attrs).length === 0) {
+    const source = carrierSource(parent.getValue(CARRIER_KEY));
+    state.attrs = allowlisted(source);
+    state.agentSource = inheritedSource(source);
+  }
+  const {name: framework, automatic} = agentIdentity(current);
+  if (!state.attrs["gen_ai.agent.name"] && typeof framework === "string" && !automatic) {
     state.attrs = allowlisted({ ...state.attrs, "gen_ai.agent.name": framework });
     state.agentSource = "framework";
   }
@@ -45,10 +49,9 @@ function atCompletion(ticket: ReadTicket): DeliveryTicket | undefined {
 }
 function scopeAttrs(ticket: DeliveryTicket): Attributes {
   const attrs = Object.fromEntries(Object.entries(ticket.state.attrs).filter(([key]) => /^(fi\.context\.(id|version_id|digest|name|version|requested_label|requested_version|binding_id|session_id)|gen_ai\.agent\.(name|id))$/.test(key)));
-  const explicit = (ticket.current as Span & { attributes?: Attributes }).attributes;
-  for (const key of ["gen_ai.agent.name", "gen_ai.agent.id"]) {
-    if (explicit?.[key] !== undefined && !(key === "gen_ai.agent.name" && automaticName(ticket.current))) attrs[key] = explicit[key];
-  }
+  const {name, id, automatic} = agentIdentity(ticket.current);
+  if (name !== undefined && !automatic) attrs['gen_ai.agent.name'] = name;
+  if (id !== undefined) attrs['gen_ai.agent.id'] = id;
   return allowlisted(attrs);
 }
 function emit(ticket: DeliveryTicket, name: string, attrs: Attributes, failed = false): boolean {
@@ -77,11 +80,12 @@ function enrich(ticket: DeliveryTicket, resetSkills = false): void {
       setAttributes(ticket.current, { "fi.skills.version_ids": [], "fi.skills.ids": [], "fi.skills.refs": [],
         "fi.skills.count": 0, ...(explicit["fi.skills.truncated"] === undefined ? {} : { "fi.skills.truncated": false }) });
     }
+    const {name, id, automatic} = agentIdentity(ticket.current);
     const attrs = Object.fromEntries(Object.entries(ticket.state.attrs).filter(([key]) =>
-      !key.startsWith("gen_ai.agent.") || explicit?.[key] === undefined ||
-      (key === "gen_ai.agent.name" && automaticName(ticket.current))));
+      key === "gen_ai.agent.name" ? name === undefined || automatic :
+      key === "gen_ai.agent.id" ? id === undefined : !key.startsWith("gen_ai.agent.") || explicit?.[key] === undefined));
     setAttributes(ticket.current, attrs);
-    if (ticket.state.agentSource === "context" && attrs["gen_ai.agent.name"]) markContextName(ticket.current);
+    if (ticket.state.agentSource === "context" && attrs["gen_ai.agent.name"]) markInheritedName(ticket.current);
   }
 }
 function loadContext(ticket: DeliveryTicket, snapshot: SnapshotLike, enrichCurrent = true): void {

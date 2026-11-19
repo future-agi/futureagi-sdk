@@ -1,7 +1,8 @@
 import type { Context } from "@opentelemetry/api";
-import { activeContext, allowlisted, api, carrierAttributes, CARRIER_KEY, configure, debugFailure, mode, recording, safe, SCOPE_KEY } from "./otel";
+import { activeContext, allowlisted, api, carrierSource, CARRIER_KEY, configure, debugFailure, mode, recording, safe, SCOPE_KEY } from "./otel";
 import { identityAttrs, LockedSkill, SnapshotLike } from "./identity";
 import { declareIdentity, enterContext } from "./hooks";
+import { inheritedSource } from "./agent-name";
 import { ScopeState, sharedRegistry } from "./registry";
 
 export { configure };
@@ -40,14 +41,15 @@ export function withAgentScope<T>(options: { agent?: string; context?: SnapshotL
     const previous = parent.getValue(SCOPE_KEY) as ScopeState | undefined;
     const span = recording(parent);
     const carrier = parent.getValue(CARRIER_KEY);
-    const inherited = previous?.attrs ?? (carrier !== undefined ? carrierAttributes(carrier) : span ? sharedRegistry()?.get(span.spanContext().traceId) : undefined) ?? {};
+    const source = carrier !== undefined ? carrierSource(carrier) : span ? sharedRegistry()?.get(span.spanContext().traceId) : undefined;
+    const inherited = previous?.attrs ?? allowlisted(source);
     let attrs = { ...inherited };
     if (options.context) {
       attrs = Object.fromEntries(Object.entries(attrs).filter(([key]) => !/^(fi\.context\.|fi\.skills\.|gen_ai\.agent\.)/.test(key)));
     }
     if (options.agent !== undefined) attrs["gen_ai.agent.name"] = options.agent;
     const state = new ScopeState(allowlisted(attrs));
-    state.agentSource = options.agent !== undefined ? "agent_scope" : options.context ? "none" : previous?.agentSource ?? "none";
+    state.agentSource = options.agent !== undefined ? "agent_scope" : options.context ? "none" : previous?.agentSource ?? inheritedSource(source);
     if (options.context) state.view(entryMode).selectContext(identityAttrs(options.context.identity, options.context.manifest.requested), options.context.identity.name);
     return { manager, context: new ScopeContext(parent, state, !!options.context) };
   });

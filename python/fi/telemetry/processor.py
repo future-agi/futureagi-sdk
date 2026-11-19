@@ -34,8 +34,8 @@ class FutureAGISkillsSpanProcessor:
             existing = getattr(span, "attributes", None) or {}
             for key, value in attrs.items():
                 if key not in existing:
-                    if key == _agent_name.NAME and state is not None and state.agent_source == "context":
-                        _agent_name.write_context_name(span, value)
+                    if key == _agent_name.NAME and state is not None and state.agent_source in ("agent_scope", "context"):
+                        _agent_name.write_inherited_name(span, value)
                     else:
                         span.set_attribute(key, value)
         except Exception:

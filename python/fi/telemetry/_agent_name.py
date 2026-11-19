@@ -9,13 +9,24 @@ class _Origin:
 
 
 def automatic(span):
+    bridge = getattr(span, '_fi_agent_source_v1', None)
+    if bridge is not None:
+        return bridge() is True
     origin = getattr(getattr(span, 'set_attribute', None), '_fi_agent_origin', None)
     return type(origin) is _Origin and origin.automatic
 
 
-def write_context_name(span, name):
+def write_inherited_name(span, name):
+    span.set_attribute(NAME, name)
+    bridge = getattr(span, '_fi_agent_source_v1', None)
+    if bridge is not None:
+        bridge(mark=True)
+    else:
+        mark_native(span)
+
+
+def mark_native(span):
     setter = span.set_attribute
-    setter(NAME, name)
     origin = getattr(setter, '_fi_agent_origin', None)
     if type(origin) is not _Origin:
         # Even a later write of the *same* string is a framework override. OTel

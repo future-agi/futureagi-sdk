@@ -267,3 +267,92 @@ def test_reselection_never_exports_new_identity_with_old_session(pair, wrapped):
     nested, = attrs(exporter, 'nested')
     assert (nested[VERSION], nested[NAME], receipt(nested)) == (
         (a.identity.version_id, 'alpha', expected_a) if wrapped else (b.identity.version_id, 'beta', {}))
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('wrapped', [False, True], ids=['native', 'FITracer'])
+@pytest.mark.parametrize('scope_kind', ['automatic', 'agent', 'plain'])
+@pytest.mark.parametrize('operation', ['root', 'linked', 'async-root', 'async-linked'])
+@pytest.mark.parametrize('writer', ['automatic', 'start', 'single', 'bulk'])
+async def test_public_name_provenance(pair, wrapped, scope_kind, operation, writer):
+    from contextlib import nullcontext
+    from fi_instrumentation import FITracer
+    from opentelemetry import trace
+
+    native, exporter = pair
+    tracer = FITracer(native) if wrapped else native
+    a = ordinary(source('alpha'))
+    b, expected_receipt, _, _ = session(source('beta'))
+    root = operation.endswith('root')
+    if operation.startswith('async'):
+        # Async clients do not issue binding receipts. Verify their own closure
+        # via public read_all; never copy the synchronous producer's receipt.
+        base = ordinary(source('beta'))
+        class AsyncTransport:
+            async def chunk(self, *args, **kwargs):
+                await asyncio.sleep(0)
+                return base._source.chunk(*args, **kwargs)
+        b, expected_receipt = AsyncContextSnapshot(base.manifest, AsyncTransport()), {}
+    if not root:
+        with native.start_as_current_span('prime'):
+            result = b.read_all()
+            if operation.startswith('async'):
+                result = await result
+            assert result.files[LINK] == 'Refund instructions'
+    expected_standing = 'scope' if scope_kind == 'agent' else 'alpha'
+    child_name = 'different' if writer == 'single' else expected_standing
+    framework = {NAME: child_name} if writer == 'start' else {}
+    agent_id = 'gen_ai.agent.id'
+    with native.start_as_current_span('parent'):
+        with (agent_scope(agent='scope') if scope_kind == 'agent' else agent_scope() if scope_kind == 'plain' else nullcontext()):
+            assert a.read_file(ROOT) == 'Support agent'
+            with tracer.start_as_current_span('child', attributes={**framework, agent_id: 'child-id'}) as child:
+                assert trace.get_current_span() is child
+                if writer == 'single':
+                    child.set_attribute(NAME, child_name)
+                if writer == 'bulk':
+                    child.set_attributes({NAME: child_name})
+                child.set_attribute('test.unrelated', True)
+                data = b.read_file(ROOT if root else LINK)
+                if operation.startswith('async'):
+                    data = await data
+                assert data == ('Support agent' if root else 'Refund instructions')
+                native.start_span('following').end()
+    load = (attrs(exporter, 'context.load') if root else attrs(exporter, 'skill.load'))[-1]
+    expected = child_name if writer != 'automatic' else 'scope' if scope_kind == 'agent' else 'beta'
+    assert (load[VERSION], load['fi.context.id'], receipt(load), load[NAME], load.get(agent_id)) == (
+        b.identity.version_id, b.identity.resource_id, expected_receipt, expected, 'child-id')
+    if not root:
+        assert load['fi.skill.via_context.version_id'] == b.identity.version_id
+    standing = b if root else a
+    later, = attrs(exporter, 'following')
+    assert (later[VERSION], later[NAME], receipt(later), later.get(agent_id)) == (
+        standing.identity.version_id, 'scope' if scope_kind == 'agent' else standing.identity.name,
+        expected_receipt if root else {}, None)
+    finished, = attrs(exporter, 'child')
+    assert finished[agent_id] == 'child-id'
+    if root and scope_kind == 'automatic':
+        assert (finished[VERSION], finished[NAME], receipt(finished)) == (b.identity.version_id, expected, expected_receipt)
+
+
+@pytest.mark.parametrize('scope', [True, False], ids=['nested-scope', 'direct-root'])
+@pytest.mark.parametrize('writer', [True, False], ids=['same-string', 'derived'])
+def test_fitracer_current_writer_not_inherited_stamp(pair, scope, writer):
+    from contextlib import nullcontext
+    from fi_instrumentation import FITracer
+
+    native, exporter = pair
+    tracer = FITracer(native)
+    a, b = ordinary(source('alpha')), ordinary(source('beta'))
+    with (agent_scope(agent='alpha') if scope else nullcontext()):
+        with tracer.start_as_current_span('fi-root') as active:
+            assert a.read_file(ROOT) == 'Support agent'
+            if writer:
+                active.set_attributes({NAME: 'alpha'})
+            with (agent_scope(agent='inner') if scope else nullcontext()):
+                assert b.read_file(ROOT) == 'Support agent'
+                native.start_span('observed').end()
+    expected = 'inner' if scope else 'beta'
+    event = attrs(exporter, 'context.load')[-1]
+    assert (event[VERSION], event[NAME]) == (b.identity.version_id, 'alpha' if writer else expected)
+    assert attrs(exporter, 'observed')[0][NAME] == expected

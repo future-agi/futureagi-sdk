@@ -37,10 +37,9 @@ def _scope_attrs(state, span, *, linked_context=None):
         if _agent_name.NAME not in attrs or state.agent_source == "context":
             attrs[_agent_name.NAME] = linked_context.identity.name
     existing = getattr(span, "attributes", None) or {}
-    if _otel._scope.get() is None:
-        for key in ("gen_ai.agent.name", "gen_ai.agent.id"):
-            if key in existing and not (key == "gen_ai.agent.name" and _agent_name.automatic(span)):
-                attrs[key] = existing[key]
+    for key in (_agent_name.NAME, "gen_ai.agent.id"):
+        if key in existing and not (key == _agent_name.NAME and _agent_name.automatic(span)):
+            attrs[key] = existing[key]
     return attrs
 
 
@@ -99,7 +98,7 @@ def _enrich(state, current, mode, *, reset_skills=False):
         ):
             continue
         if key == _agent_name.NAME and state.agent_source == "context":
-            _agent_name.write_context_name(current, value)
+            _agent_name.write_inherited_name(current, value)
         else:
             current.set_attribute(key, value)
 

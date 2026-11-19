@@ -86,9 +86,12 @@ export function allowlisted(input: unknown): Attributes {
   }
   return Object.freeze(result);
 }
+export function carrierSource(value: unknown): unknown {
+  if (!value || typeof value !== "object" || !("v" in value) || value.v !== 1 || !("attrs" in value)) return undefined;
+  return value.attrs;
+}
 export function carrierAttributes(value: unknown): Attributes {
-  if (!value || typeof value !== "object" || !("v" in value) || value.v !== 1 || !("attrs" in value)) return {};
-  return allowlisted(value.attrs);
+  return allowlisted(carrierSource(value));
 }
 export function recording(context = activeContext()): Span | undefined {
   const span = currentSpan(context);
