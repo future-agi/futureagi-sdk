@@ -58,7 +58,10 @@ class agent_scope:
             current = _otel.current()
             if self.context is not None and current is not None and current.is_recording():
                 from ._hooks import load_context
-                load_context(self.context, self.state, current, provider, time_ns(), enrich=False)
+                with self.state.lock:
+                    mode = _otel.mode()
+                    if mode != "off":
+                        load_context(self.context, self.state.view(mode), current, provider, time_ns(), mode, enrich=False)
         except Exception:
             _otel.debug_failure()
         return self

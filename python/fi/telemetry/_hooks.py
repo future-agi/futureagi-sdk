@@ -2,9 +2,8 @@
 from __future__ import annotations
 
 import sys
-from contextlib import nullcontext
-from contextvars import ContextVar
 from time import time_ns
+from weakref import WeakKeyDictionary
 
 from . import _otel, _status
 from ._identity import (
@@ -15,25 +14,10 @@ from ._identity import (
     selector_attrs,
     verified_links,
 )
-from ._registry import State, registry
+from ._registry import registry
 
-_load_only = ContextVar("futureagi.skills.load_only", default=None)
-
-
-def _state(span):
-    scope = _otel._scope.get()
-    if scope is not None:
-        return scope
-    if _otel.mode() == "load_only":
-        # A single execution-context-local evidence set, not a propagation
-        # registry. No current/later span attributes are changed in this mode.
-        trace_id = span.get_span_context().trace_id
-        entry = _load_only.get()
-        if entry is None or entry[0] != trace_id:
-            entry = (trace_id, State())
-            _load_only.set(entry)
-        return entry[1]
-    return registry.get(span.get_span_context().trace_id, create=True)
+# Distinguish our automatic context-derived name from a framework's explicit name.
+_context_agents = WeakKeyDictionary()
 
 
 def _scope_attrs(state, span):
@@ -47,7 +31,7 @@ def _scope_attrs(state, span):
     existing = getattr(span, "attributes", None) or {}
     if _otel._scope.get() is None:
         for key in ("gen_ai.agent.name", "gen_ai.agent.id"):
-            if key in existing:
+            if key in existing and not (key == "gen_ai.agent.name" and existing[key] == _context_agents.get(span)):
                 attrs[key] = existing[key]
     return attrs
 
@@ -70,6 +54,8 @@ def _emit(name, attrs, provider, start, *, failed=False):
             break
     span = tracer.start_span(name, kind=trace.SpanKind.INTERNAL, attributes=bounded, start_time=start)
     try:
+        if not span.is_recording():
+            return False
         if failed:
             span.set_status(trace.Status(trace.StatusCode.ERROR))
     finally:
@@ -77,40 +63,35 @@ def _emit(name, attrs, provider, start, *, failed=False):
     return True
 
 
-def _enrich(state, current):
-    if state is None or _otel.mode() != "on":
+def _enrich(state, current, mode):
+    if mode != "on":
         return
+    if _otel._scope.get() is not None:
+        # The active span can be an ancestor shared by concurrent explicit scopes.
+        _otel.publish(state)
+        return
+    existing = getattr(current, "attributes", None) or {}
     for key, value in state.attrs.items():
-        if key.startswith("gen_ai.agent.") and key in (getattr(current, "attributes", None) or {}):
+        if key.startswith("gen_ai.agent.") and key in existing and not (
+            key == "gen_ai.agent.name" and existing[key] == _context_agents.get(current)
+        ):
             continue
         current.set_attribute(key, value)
-    if _otel._scope.get() is not None:
-        _otel.publish(state)
+        if key == "gen_ai.agent.name" and state.agent_source == "context":
+            _context_agents[current] = value
 
 
-def load_context(snapshot, state, current, provider, start, *, enrich=True):
+def load_context(snapshot, state, current, provider, start, mode, *, enrich=True):
     attrs = context_attrs(snapshot)
-    if state is not None:
-        version = snapshot.identity.version_id
-        if version in state.contexts:
-            return
-        # Automatic context switches start a fresh skill list. Explicit scopes
-        # are isolated at entry; never mutate another scope or an ancestor.
-        if state.attrs.get("fi.context.version_id") != version:
-            state.attrs = {k: v for k, v in state.attrs.items()
-                           if not k.startswith(("fi.context.", "fi.skills."))}
-            state.loads.clear()
-        state.attrs.update(attrs)
-        state.attrs.setdefault("gen_ai.agent.name", snapshot.identity.name)
-        attrs.update(_scope_attrs(state, current))
-    else:
-        attrs.setdefault("gen_ai.agent.name", snapshot.identity.name)
-    attrs["fi.context.linked_skill_version_ids"] = tuple(link["version_id"] for link in verified_links(snapshot))
-    _emit("context.load", attrs, provider, start)
-    if state is not None:
-        state.contexts.add(version)
+    version = snapshot.identity.version_id
+    state.select_context(attrs, snapshot.identity.name)
+    if version not in state.history.contexts:
+        attrs = {**_scope_attrs(state, current), **attrs}
+        attrs["fi.context.linked_skill_version_ids"] = tuple(link["version_id"] for link in verified_links(snapshot))
+        if _emit("context.load", attrs, provider, start):
+            state.history.contexts.add(version)
     if enrich:
-        _enrich(state, current)
+        _enrich(state, current, mode)
 
 
 class Read:
@@ -130,7 +111,7 @@ class Read:
             _status.first_load()
             if self.current is None or not self.current.is_recording():
                 return self
-            self.state = _state(self.current)
+            self.scope = _otel._scope.get()
             self.start = time_ns()
             self.active = True
             # Applies to read_all and adapter reads alike. Private verification
@@ -154,17 +135,19 @@ class Read:
 
     def _record(self, error=None):
         snapshot = self.snapshot
-        state = self.state
-        # Shared automatic traces can be used by several application threads.
-        lock = state.lock if state else nullcontext()
-        with lock:
-            # A read (including a failed one) may have waited for transport or
-            # for another reader. Off at completion forbids new evidence.
-            if _otel.mode() == "off":
+        if _otel.mode() == "off":
+            return
+        owner = self.scope or registry.get(self.current.get_span_context().trace_id, create=True)
+        with owner.lock:
+            mode = _otel.mode()
+            if mode == "off":
                 return
+            state = owner.view(mode)
+            if mode == "on":
+                _otel.install(self.provider)
             attrs = _scope_attrs(state, self.current)
             if snapshot.identity.kind == "agent_context" and self.path in (None, "AGENTS.md") and error is None:
-                load_context(snapshot, state, self.current, self.provider, self.start)
+                load_context(snapshot, state, self.current, self.provider, self.start, mode)
                 return
             if snapshot.identity.kind == "skill":
                 skill = identity_attrs(snapshot.identity, "fi.skill")
@@ -192,28 +175,24 @@ class Read:
                 kind = error_type(error)
                 attrs.update({"fi.skill.name": skill["fi.skill.name"], "error.type": kind})
                 key = (skill["fi.skill.name"], tuple(sorted(requested.items())), kind)
-                if state and key in state.failures:
+                if key in state.history.failures:
                     return
-                _emit("skill.load", attrs, self.provider, self.start, failed=True)
-                if state:
-                    state.failures.add(key)
+                if _emit("skill.load", attrs, self.provider, self.start, failed=True):
+                    state.history.failures.add(key)
                 return
             key = (skill["fi.skill.version_id"], self.evidence)
-            if state and key in state.loads:
-                return
             attrs.update(skill)
             attrs.update({"fi.skill.load.evidence": self.evidence, "fi.skill.load.cached": self.cached,
                           "fi.skill.load.root_file": root})
             if snapshot.identity.kind == "skill":
                 attrs["fi.skill.files"] = len(snapshot.manifest.files)
                 attrs["fi.skill.bytes"] = sum(item.size_bytes for item in snapshot.manifest.files)
-            if _emit("skill.load", attrs, self.provider, self.start):
+            if key not in state.history.loads and _emit("skill.load", attrs, self.provider, self.start):
+                state.history.loads.add(key)
                 _status.recorded(attrs, self.evidence)
-            if state:
-                state.loads.add(key)
-                if _otel.mode() == "on":
-                    state.add_skill(attrs)
-            _enrich(state, self.current)
+            if mode == "on":
+                state.add_skill(attrs)
+                _enrich(state, self.current, mode)
 
     def __exit__(self, exc_type, error, tb):
         try:

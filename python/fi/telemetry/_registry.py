@@ -8,16 +8,37 @@ from time import monotonic
 
 
 @dataclass
-class State:
-    attrs: dict = field(default_factory=dict)
+class History:
     loads: set = field(default_factory=set)
     failures: set = field(default_factory=set)
     contexts: set = field(default_factory=set)
+
+
+@dataclass
+class State:
+    attrs: dict = field(default_factory=dict)
+    history: History = field(default_factory=History)
+    agent_source: str = "none"
+    _evidence: State | None = field(default=None, repr=False)
     lock: RLock = field(default_factory=RLock, repr=False)
 
-    def child(self, *, reset=False):
-        # A child has its own load evidence and lists, never mutates its parent.
-        return State(attrs={} if reset else dict(self.attrs))
+    def view(self, mode):
+        # Caller holds the owner lock through mode selection, emission and state update.
+        if mode == "on":
+            return self
+        if self._evidence is None:
+            self._evidence = State(dict(self.attrs), self.history, self.agent_source, lock=self.lock)
+        return self._evidence
+
+    def select_context(self, attrs, name):
+        changed = self.attrs.get("fi.context.version_id") != attrs["fi.context.version_id"]
+        self.attrs = {k: v for k, v in self.attrs.items() if not k.startswith("fi.context.")
+                      and not (changed and k.startswith("fi.skills."))}
+        self.attrs.update(attrs)
+        if not self.attrs.get("gen_ai.agent.name") or self.agent_source == "context":
+            self.attrs["gen_ai.agent.name"] = name
+            self.agent_source = "context"
+        self._evidence = None
 
     def add_skill(self, attrs):
         ids = tuple(self.attrs.get("fi.skills.version_ids", ()))
