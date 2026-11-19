@@ -9,8 +9,10 @@ export interface ReadTicket {
   readonly parent: Context;
   readonly current: Span;
   readonly provider?: TracerProvider;
-  readonly state: ScopeState;
   readonly started: number;
+}
+interface DeliveryTicket extends ReadTicket {
+  readonly state: ScopeState;
   readonly mode: "on" | "load_only";
 }
 export function beginRead(enabled = true): ReadTicket | undefined {
@@ -20,21 +22,28 @@ export function beginRead(enabled = true): ReadTicket | undefined {
     const parent = activeContext();
     const current = recording(parent);
     if (!parent || !current) return undefined;
-    const selected = provider();
-    const activeMode = mode() as "on" | "load_only";
-    const traceId = current.spanContext().traceId;
-    const explicit = parent.getValue(SCOPE_KEY) as ScopeState | undefined;
-    const state = explicit ?? (activeMode === "on" ? sharedRegistry(true)!.state(traceId, true)! : evidenceState(traceId));
-    if (!explicit && Object.keys(state.attrs).length === 0) state.attrs = carrierAttributes(parent.getValue(CARRIER_KEY));
-    const framework = (current as Span & { attributes?: Attributes }).attributes?.["gen_ai.agent.name"];
-    if (!state.attrs["gen_ai.agent.name"] && typeof framework === "string") {
-      state.attrs = allowlisted({ ...state.attrs, "gen_ai.agent.name": framework });
-      state.agentSource = "framework";
-    }
-    return { parent, current, provider: selected.value, state, started: Date.now(), mode: activeMode };
+    return { parent, current, provider: provider().value, started: Date.now() };
   });
 }
-function scopeAttrs(ticket: ReadTicket): Attributes {
+// Capture parent/time before I/O, not the mode or a writable attribution state.
+// Completion selects which evidence store can be mutated; off never records.
+function atCompletion(ticket: ReadTicket): DeliveryTicket | undefined {
+  const activeMode = mode();
+  if (activeMode === "off") return undefined;
+  const { current, parent } = ticket;
+  const traceId = current.spanContext().traceId;
+  const explicit = parent.getValue(SCOPE_KEY) as ScopeState | undefined;
+  const state = activeMode === "on" ? explicit ?? sharedRegistry(true)!.state(traceId, true)!
+    : explicit?.evidenceOnly() ?? evidenceState(traceId);
+  if (!explicit && Object.keys(state.attrs).length === 0) state.attrs = carrierAttributes(parent.getValue(CARRIER_KEY));
+  const framework = (current as Span & { attributes?: Attributes }).attributes?.["gen_ai.agent.name"];
+  if (!state.attrs["gen_ai.agent.name"] && typeof framework === "string") {
+    state.attrs = allowlisted({ ...state.attrs, "gen_ai.agent.name": framework });
+    state.agentSource = "framework";
+  }
+  return { ...ticket, state, mode: activeMode };
+}
+function scopeAttrs(ticket: DeliveryTicket): Attributes {
   const attrs = Object.fromEntries(Object.entries(ticket.state.attrs).filter(([key]) => /^(fi\.context\.(id|version_id|digest|name|version|requested_label|requested_version|binding_id|session_id)|gen_ai\.agent\.(name|id))$/.test(key)));
   const explicit = (ticket.current as Span & { attributes?: Attributes }).attributes;
   for (const key of ["gen_ai.agent.name", "gen_ai.agent.id"]) {
@@ -42,7 +51,7 @@ function scopeAttrs(ticket: ReadTicket): Attributes {
   }
   return allowlisted(attrs);
 }
-function emit(ticket: ReadTicket, name: string, attrs: Attributes, failed = false): boolean {
+function emit(ticket: DeliveryTicket, name: string, attrs: Attributes, failed = false): boolean {
   if (!ticket.provider) return false;
   const span = ticket.provider.getTracer(name === "context.load" ? "futureagi.context" : "futureagi.skills")
     .startSpan(name, { kind: 0, startTime: ticket.started }, ticket.parent);
@@ -55,7 +64,7 @@ function emit(ticket: ReadTicket, name: string, attrs: Attributes, failed = fals
   } finally { span.end(); }
   return recorded;
 }
-function enrich(ticket: ReadTicket): void {
+function enrich(ticket: DeliveryTicket): void {
   // An explicit scope may have been entered inside an ancestor span shared by
   // parallel agents. Never mutate that ancestor; its future children read the
   // scope carrier. Current-span enrichment is the automatic-mode contract.
@@ -66,7 +75,7 @@ function enrich(ticket: ReadTicket): void {
     setAttributes(ticket.current, attrs);
   }
 }
-export function loadContext(ticket: ReadTicket, snapshot: SnapshotLike, enrichCurrent = true): void {
+function loadContext(ticket: DeliveryTicket, snapshot: SnapshotLike, enrichCurrent = true): void {
   const attrs = identityAttrs(snapshot.identity, snapshot.manifest.requested);
   const version = snapshot.identity.versionId;
   if (!attrs["fi.context.version_id"] || ticket.state.contexts.has(version)) return;
@@ -83,7 +92,7 @@ export function loadContext(ticket: ReadTicket, snapshot: SnapshotLike, enrichCu
   if (emit(ticket, "context.load", { ...scopeAttrs(ticket), ...attrs, ...linked })) ticket.state.contexts.add(version);
   if (enrichCurrent) enrich(ticket);
 }
-function loadSkill(ticket: ReadTicket, id: SnapshotIdentity, selector: Selector, via: string, evidence: string, root: boolean, extra: Attributes = {}): void {
+function loadSkill(ticket: DeliveryTicket, id: SnapshotIdentity, selector: Selector, via: string, evidence: string, root: boolean, extra: Attributes = {}): void {
   if (!validIdentity(id)) return;
   const key = `${id.versionId}:${evidence}`;
   if (ticket.state.loads.has(key)) return;
@@ -97,9 +106,16 @@ function loadSkill(ticket: ReadTicket, id: SnapshotIdentity, selector: Selector,
   if (ticket.mode === "on") ticket.state.addSkill(attrs);
   enrich(ticket);
 }
-export function finishRead(ticket: ReadTicket | undefined, snapshot: SnapshotLike, path?: string): void {
-  if (!ticket || mode() === "off") return;
+export function enterContext(snapshot: SnapshotLike): void {
+  const read = beginRead();
+  const delivery = read && atCompletion(read);
+  if (delivery) loadContext(delivery, snapshot, false);
+}
+export function finishRead(read: ReadTicket | undefined, snapshot: SnapshotLike, path?: string): void {
+  if (!read) return;
   safe(() => {
+    const ticket = atCompletion(read);
+    if (!ticket) return;
     if (snapshot.identity.kind === "skill") {
       loadSkill(ticket, snapshot.identity, snapshot.manifest.requested, path === undefined ? "sdk.read_all" : "sdk.read_file", "delivered", path === undefined || path === "SKILL.md", {
         "fi.skill.files": snapshot.manifest.files.length,
@@ -115,9 +131,11 @@ export function finishRead(ticket: ReadTicket | undefined, snapshot: SnapshotLik
     }
   });
 }
-export function failRead(ticket: ReadTicket | undefined, snapshot: SnapshotLike, error: unknown, path?: string): void {
-  if (!ticket || mode() === "off") return;
+export function failRead(read: ReadTicket | undefined, snapshot: SnapshotLike, error: unknown, path?: string): void {
+  if (!read) return;
   safe(() => {
+    const ticket = atCompletion(read);
+    if (!ticket) return;
     const link = path ? linkedSkill(snapshot, path) : undefined;
     // A context selector is not a child's selector. Until the consumption
     // interface supplies verified closure metadata, omit an unattributable
@@ -133,6 +151,9 @@ export function failRead(ticket: ReadTicket | undefined, snapshot: SnapshotLike,
   });
 }
 export function declareIdentity(id: SnapshotIdentity, selector: Selector, via: "explicit" | "lock", cached: boolean): void {
-  const ticket = beginRead();
-  if (ticket) safe(() => loadSkill(ticket, id, selector, via, "declared", true, { "fi.skill.load.cached": cached }));
+  const read = beginRead();
+  if (read) safe(() => {
+    const ticket = atCompletion(read);
+    if (ticket) loadSkill(ticket, id, selector, via, "declared", true, { "fi.skill.load.cached": cached });
+  });
 }

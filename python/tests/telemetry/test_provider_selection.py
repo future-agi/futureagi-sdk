@@ -60,3 +60,28 @@ def test_real_traceai_registry_preserves_existing_exporter(make_snapshot):
     finally:
         configure()
         provider.shutdown()
+
+
+def test_last_traceai_global_shutdown_is_no_otel(monkeypatch, make_snapshot):
+    from fi.telemetry._otel import wire_mode
+    from opentelemetry import trace
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+
+    backend = pytest.importorskip("fi_instrumentation.otel")
+    monkeypatch.setattr(trace, "_TRACER_PROVIDER", None)
+    monkeypatch.setattr(trace, "_TRACER_PROVIDER_SET_ONCE", type(trace._TRACER_PROVIDER_SET_ONCE)())
+    exporter = InMemorySpanExporter()
+    provider = backend.register(project_name="last-live", set_global_tracer_provider=True,
+                                span_exporter=exporter, batch=False, verbose=False)
+    try:
+        configure(skills_tracing="on")
+        snapshot, _ = make_snapshot()
+        with provider.get_tracer(__name__).start_as_current_span("live"):
+            snapshot.read_file("SKILL.md")
+        assert [s.name for s in exporter.get_finished_spans()] == ["skill.load", "live"]
+    finally:
+        provider.shutdown()
+        configure()
+    assert trace.get_tracer_provider() is provider
+    assert select_provider() == (None, "none")
+    assert wire_mode() == "no_otel"

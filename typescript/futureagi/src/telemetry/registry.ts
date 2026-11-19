@@ -7,6 +7,9 @@ export class ScopeState {
   readonly contexts = new Set<string>();
   agentSource = "none";
   constructor(attrs: Attributes = {}) { this.attrs = allowlisted(attrs); }
+  // Scoped load-only dedup must not mutate the carrier revived by a later on.
+  private evidence?: ScopeState;
+  evidenceOnly(): ScopeState { return this.evidence ??= new ScopeState(this.attrs); }
   addSkill(attrs: Attributes): void {
     const versions = (this.attrs["fi.skills.version_ids"] ?? []) as readonly string[];
     const version = attrs["fi.skill.version_id"] as string;

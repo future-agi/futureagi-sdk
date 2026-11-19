@@ -1,7 +1,7 @@
 import type { Context } from "@opentelemetry/api";
 import { activeContext, allowlisted, api, carrierAttributes, CARRIER_KEY, configure, debugFailure, mode, recording, safe, SCOPE_KEY } from "./otel";
 import { identityAttrs, LockedSkill, SnapshotLike } from "./identity";
-import { beginRead, declareIdentity, loadContext } from "./hooks";
+import { declareIdentity, enterContext } from "./hooks";
 import { ScopeState, sharedRegistry } from "./registry";
 
 export { configure };
@@ -57,10 +57,7 @@ export function withAgentScope<T>(options: { agent?: string; context?: SnapshotL
   try {
     return setup.manager.with(setup.context, () => {
       invoked = true;
-      if (options.context) safe(() => {
-        const ticket = beginRead();
-        if (ticket) loadContext(ticket, options.context!, false);
-      });
+      if (options.context) safe(() => enterContext(options.context!));
       return callback();
     });
   } catch (error) {

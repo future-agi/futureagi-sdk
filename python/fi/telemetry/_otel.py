@@ -51,16 +51,19 @@ def select_provider():
     trace = sys.modules.get("opentelemetry.trace")
     if trace is None:
         return None, "none"
-    if _configured_provider is not None:
-        return _configured_provider, "configured"
     otel = sys.modules.get("fi_instrumentation.otel")
+    # Optional lifecycle contract: OTel retains the first global even after
+    # shutdown. Older backends and unrelated host providers keep their fallback.
+    closed = getattr(otel, "is_tracer_provider_shutdown", None)
+    if _configured_provider is not None and not (closed and closed(_configured_provider)):
+        return _configured_provider, "configured"
     if otel is not None:
         get_providers = getattr(otel, "get_registered_tracer_providers", None)
         providers = tuple(get_providers()) if get_providers else ()
         if providers:
             return providers[-1], "traceai"
     provider = trace.get_tracer_provider()
-    if type(provider).__name__ in ("ProxyTracerProvider", "NoOpTracerProvider"):
+    if type(provider).__name__ in ("ProxyTracerProvider", "NoOpTracerProvider") or (closed and closed(provider)):
         return None, "none"
     return provider, "global"
 

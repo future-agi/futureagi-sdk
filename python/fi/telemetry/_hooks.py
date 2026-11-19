@@ -141,7 +141,7 @@ class Read:
         return self
 
     def success(self, result):
-        if not self.active:
+        if not self.active or _otel.mode() == "off":
             return
         try:
             snapshot = self.snapshot
@@ -158,6 +158,10 @@ class Read:
         # Shared automatic traces can be used by several application threads.
         lock = state.lock if state else nullcontext()
         with lock:
+            # A read (including a failed one) may have waited for transport or
+            # for another reader. Off at completion forbids new evidence.
+            if _otel.mode() == "off":
+                return
             attrs = _scope_attrs(state, self.current)
             if snapshot.identity.kind == "agent_context" and self.path in (None, "AGENTS.md") and error is None:
                 load_context(snapshot, state, self.current, self.provider, self.start)
