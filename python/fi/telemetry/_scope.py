@@ -19,7 +19,8 @@ class agent_scope:
 
     def __enter__(self):
         self._token = self._carrier_token = None
-        if _otel.mode() == "off" or sys.modules.get("opentelemetry.trace") is None:
+        entry_mode = _otel.mode()
+        if entry_mode == "off" or sys.modules.get("opentelemetry.trace") is None:
             return self
         try:
             if self._resume_state is not None:
@@ -41,7 +42,7 @@ class agent_scope:
             self.state = State(attrs=_otel.allowlisted(attrs))
             self.state.agent_source = "agent_scope" if self.agent is not None else "none" if self.context is not None else getattr(parent, "agent_source", "none")
             if self.context is not None:
-                self.state.view(_otel.mode()).select_context(context_attrs(self.context), self.context.identity.name)
+                self.state.view(entry_mode).select_context(context_attrs(self.context), self.context.identity.name)
             self._token = _otel._scope.set(self.state)
             self._carrier_token = _otel.bind_scope(self.state, reset=self.context is not None)
             provider, _ = _otel.select_provider()
@@ -50,9 +51,8 @@ class agent_scope:
             if self.context is not None and current is not None and current.is_recording():
                 from ._hooks import load_context
                 with self.state.lock:
-                    mode = _otel.mode()
-                    if mode != "off":
-                        load_context(self.context, self.state.view(mode), current, provider, time_ns(), mode, enrich=False)
+                    if _otel.mode() != "off":
+                        load_context(self.context, self.state.view(entry_mode), current, provider, time_ns(), entry_mode, enrich=False)
         except Exception:
             _otel.debug_failure()
         return self

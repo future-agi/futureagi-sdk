@@ -13,12 +13,12 @@ from ._identity import (
     selector_attrs,
     verified_links,
 )
-from ._registry import State, registry
+from ._registry import registry
 
 _EMPTY_CARRIER = _otel.carrier({})
 
 
-def _scope_attrs(state, span):
+def _scope_attrs(state, span, *, linked_context=None):
     attrs = {}
     context = sys.modules.get("opentelemetry.context")
     value = context.get_value(_otel.CARRIER_KEY) if context else None
@@ -29,6 +29,13 @@ def _scope_attrs(state, span):
             # prior context's optional receipt or selector from an older carrier.
             attrs = {k: v for k, v in attrs.items() if not k.startswith(("fi.context.", "fi.skills."))}
     attrs.update(_otel.allowlisted(state.attrs))
+    if linked_context is not None:
+        # Build evidence for the actual file source, not the prior selection.
+        # A linked read does not itself change the trace's standing context.
+        attrs = {k: v for k, v in attrs.items() if not k.startswith(("fi.context.", "fi.skills."))}
+        attrs.update(context_attrs(linked_context))
+        if _agent_name.NAME not in attrs or state.agent_source == "context":
+            attrs[_agent_name.NAME] = linked_context.identity.name
     existing = getattr(span, "attributes", None) or {}
     if _otel._scope.get() is None:
         for key in ("gen_ai.agent.name", "gen_ai.agent.id"):
@@ -160,7 +167,7 @@ class Read:
             state = owner.view(mode)
             if mode == "on":
                 _otel.install(self.provider)
-            attrs = _scope_attrs(state, self.current)
+            linked_context = None
             if snapshot.identity.kind == "agent_context" and self.path in (None, "AGENTS.md") and error is None:
                 load_context(snapshot, state, self.current, self.provider, self.start, mode)
                 return
@@ -180,14 +187,10 @@ class Read:
                     requested, root = snapshot.manifest.requested, True
                 else:
                     skill, requested, root = linked
-                    # Linked-file evidence belongs to its source, not whichever
-                    # context was last selected on this trace. Do not select it
-                    # for future spans just to describe this individual read.
-                    selected = State(attrs=dict(state.attrs), agent_source=state.agent_source)
-                    selected.select_context(context_attrs(snapshot), snapshot.identity.name)
-                    attrs = _scope_attrs(selected, self.current)
+                    linked_context = snapshot
                     skill["fi.skill.via_context.version_id"] = snapshot.identity.version_id
                 via = self.via or "context.read"
+            attrs = _scope_attrs(state, self.current, linked_context=linked_context)
             attrs.update(selector_attrs(requested))
             attrs["fi.skill.load.via"] = via
             if error is not None:

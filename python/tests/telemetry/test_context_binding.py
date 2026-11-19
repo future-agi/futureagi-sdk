@@ -80,7 +80,10 @@ def test_link_uses_own_source(pair, session_second, override):
     authorized, expected, _, _ = session(session_src)
     plain = ordinary(other_src)
     first, second = (plain, authorized) if session_second else (authorized, plain)
-    second.read_all()  # Verify linked closure before selecting A in a fresh request.
+    # The telemetry closure is learned only by a delivered read. Prime it on
+    # an independent recording trace, not by fabricating snapshot metadata.
+    with tracer.start_as_current_span("verified-closure"):
+        assert second.read_all().files[LINK] == "Refund instructions"
     with tracer.start_as_current_span('parent', attributes={NAME: first.identity.name} if override else {}):
         assert first.read_file(ROOT) == 'Support agent'
         assert second.read_file(LINK) == 'Refund instructions'
@@ -195,3 +198,44 @@ async def test_scope_entry_and_actual_suspended_coroutine(pair, entry, completio
         assert event.get(VERSION) == (snapshot.identity.version_id if snapshot else None), label
         assert event.get(NAME) == (snapshot.identity.name if snapshot else None), label
     assert [e[VERSION] for e in attrs(exporter, 'context.load')] == [b.identity.version_id, c.identity.version_id]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('entry,end', [('load_only', 'on'), ('on', 'load_only'), ('off', 'on'), ('on', 'off')])
+@pytest.mark.parametrize('scoped', [False, True])
+@pytest.mark.parametrize('corrupt', [False, True])
+@pytest.mark.parametrize('whole', [False, True], ids=['read_file', 'read_all'])
+async def test_verified_async_delivery_mode_at_completion(pair, entry, end, scoped, corrupt, whole):
+    from contextlib import nullcontext
+    from fi.context.snapshot import SnapshotIntegrityError
+    tracer, exporter = pair
+    src = source('coroutine'); lazy = ordinary(src)
+    entered, release = asyncio.Event(), asyncio.Event()
+    class Transport:
+        async def chunk(self, *args, **kwargs):
+            entered.set()
+            await asyncio.wait_for(release.wait(), 5)
+            return src.chunk(*args, **kwargs)
+    pending = AsyncContextSnapshot(lazy.manifest, Transport())
+    configure(skills_tracing=entry)
+    with tracer.start_as_current_span('parent'), agent_scope(agent='agent') if scoped else nullcontext():
+        read = asyncio.create_task(pending.read_all() if whole else pending.read_file(ROOT))
+        await asyncio.wait_for(entered.wait(), 5)
+        src.corrupt = corrupt
+        configure(skills_tracing=end); release.set()
+        if corrupt:
+            with pytest.raises(SnapshotIntegrityError):
+                await read
+        else:
+            data = await read
+            assert (data.files[ROOT] if whole else data) == 'Support agent'
+        configure(skills_tracing='on'); tracer.start_span('observer').end()
+    delivered = entry != 'off' and end != 'off'
+    event = attrs(exporter, 'skill.load' if corrupt else 'context.load')
+    assert len(event) == int(delivered)
+    if delivered and corrupt:
+        assert event[0]['error.type'] == 'integrity'
+        assert VERSION not in event[0]
+    elif delivered:
+        assert event[0][VERSION] == lazy.identity.version_id
+    assert attrs(exporter, 'observer')[0].get(VERSION) == (lazy.identity.version_id if delivered and end == 'on' and not corrupt else None)
