@@ -126,6 +126,24 @@ def project(client):
 # --------------------------------------------------------------------------- #
 
 
+def _poll_sql_result(get_result, job_id, project_id, *, clock=time.monotonic, sleep=time.sleep):
+    # The backend allows 90s queued, then 45s from execution start; allow 15s for transport.
+    deadline = clock() + 150
+    state = "not polled"
+    while (remaining := deadline - clock()) > 0:
+        page = get_result(job_id, project_id=project_id, offset=0, limit=1,
+                          options=fi.RequestOptions(timeout=remaining, max_retries=0))
+        assert page.id == job_id and page.project_id == project_id
+        state = page.state
+        remaining = deadline - clock()
+        if remaining <= 0:
+            break
+        if state in {"succeeded", "failed", "cancelled"}:
+            return page
+        sleep(min(0.5, remaining))
+    raise AssertionError(f"SQL job {job_id} did not finish in 150s: {state}")
+
+
 def test_sql_job_on_synthetic_spans(client, project):
     """Run a bounded read on this test's own project and cancel only the job it created."""
     project_id, spans, _ = project
@@ -138,14 +156,7 @@ def test_sql_job_on_synthetic_spans(client, project):
                          end=datetime.now(timezone.utc).isoformat(), reuse=False)
     assert job.id and job.project_id == project_id
     try:
-        deadline = time.monotonic() + 45
-        while True:
-            page = client.sql.get_result(job.id, project_id=project_id, offset=0, limit=1)
-            assert page.id == job.id and page.project_id == project_id
-            if page.state not in {"queued", "running"}:
-                break
-            assert time.monotonic() < deadline, f"SQL job did not finish: {page.state}"
-            time.sleep(0.5)
+        page = _poll_sql_result(client.sql.get_result, job.id, project_id)
         assert page.state == "succeeded", page.error
         assert page.result.rows == [[len(spans)]] and page.result.has_more is False
     finally:
