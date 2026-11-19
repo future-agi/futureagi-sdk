@@ -39,8 +39,8 @@ def context_attrs(snapshot):
     from fi.context._receipt import session_receipt
     receipt = session_receipt(snapshot)
     if receipt is not None:
-        attrs["fi.context.binding_id"] = receipt.binding_id
-        attrs["fi.context.session_id"] = receipt.session_id
+        attrs["fi.context.binding_id"] = _uuid(receipt.binding_id)
+        attrs["fi.context.session_id"] = _uuid(receipt.session_id)
     return attrs
 
 

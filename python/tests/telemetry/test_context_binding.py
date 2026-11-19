@@ -49,7 +49,7 @@ def session(src):
         if path.endswith('/manifest/') and method == 'GET':
             assert kwargs['options'].resolution_id == page['resolution_id']
             return page
-        assert method == 'POST' and path.endswith(f'/sessions/{receipt}/access-check/')
+        assert method == 'POST' and path == f'/model-hub/skills/contexts/bindings/{binding}/sessions/{receipt}/access-check/'
         return permission
     def call(op, **kwargs):
         assert kwargs['options'].resolution_id == page['resolution_id']
@@ -94,12 +94,16 @@ def test_link_uses_own_source(pair, session_second, override):
     assert event['fi.context.requested_label'] == ('stable' if session_second else 'production')
 
 
-@pytest.mark.parametrize('variant', ['authentic', 'constructor', 'copy', 'replace', 'changed_session', 'changed_binding', 'changed_identity', 'changed_selector'])
+@pytest.mark.parametrize('variant', ['authentic', 'constructor', 'copy', 'replace', 'changed_session', 'changed_binding', 'changed_identity', 'changed_selector', 'client_binding_disagrees'])
 def test_receipt_bound_to_verified_instance_and_values(pair, variant):
     tracer, exporter = pair
-    original, expected, _, _ = session(source('alpha'))
+    original, expected, client, opened = session(source('alpha'))
     snap = original
-    if variant == 'constructor':
+    if variant == 'client_binding_disagrees':
+        # The actual authorized session route remains under the original binding.
+        client.binding_id = str(uuid4())
+        snap = client.snapshot(opened)
+    elif variant == 'constructor':
         snap = ContextSnapshot(original.manifest, original._source, _telemetry_binding_id=expected[BINDING], _telemetry_session_id=expected[SESSION])
     elif variant == 'copy':
         snap = copy.copy(original)
