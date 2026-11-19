@@ -34,9 +34,9 @@ function mode(environment, value) {
   process.env.FI_SKILLS_TRACING = environment ? value : value === 'on' ? 'off' : 'on';
   configure(environment ? {} : {skillsTracing: value});
 }
-function request(name, scoped, body) {
+function request(name, scoped, body, context) {
   return tracer.startActiveSpan(name, async parent => {
-    try { return await (scoped ? withAgentScope({agent: 'explicit'}, () => body(parent)) : body(parent)); }
+    try { return await (scoped ? withAgentScope({agent: 'explicit', context}, () => body(parent)) : body(parent)); }
     finally { parent.end(); }
   });
 }
@@ -77,13 +77,25 @@ for (const scoped of [false, true]) for (const env of [false, true]) {
     memory.reset(); mode(env, 'on'); const a = fixture('agent_context', 'alpha'), b = fixture('agent_context', 'beta');
     await request('context', scoped, async parent => {
       for (const [context, selected, propagated] of [[a,'on',a], [b,middle,middle==='on'?b:a], [a,'on',a]]) {
-        mode(env, selected); await context.snapshot.readFile('AGENTS.md'); mode(env, 'on');
+        mode(env, selected); await context.snapshot.readFile('AGENTS.md');
+        if (context === b) {
+          const skill = fixture('skill','inside');
+          await skill.snapshot.readFile('reference/help.md');
+          assert.equal(events('skill.load').at(-1).attributes['fi.context.version_id'], b.version);
+          mode(env, 'on');
+          assert.deepEqual(observer('fi.skills.version_ids'), middle === 'on' ? [skill.version] : undefined);
+          await skill.snapshot.readFile('SKILL.md');
+          assert.equal(events('skill.load').length, 1);
+          assert.deepEqual(observer('fi.skills.version_ids'), [skill.version]);
+        }
+        mode(env, 'on');
         assert.equal(observer('fi.context.version_id'), propagated.version);
         assert.equal(observer('gen_ai.agent.name'), scoped ? 'explicit' : propagated.snapshot.identity.name);
         assert.equal(parent.attributes['fi.context.version_id'], scoped ? undefined : propagated.version);
       }
+      if (middle === 'on' && !scoped) { assert.equal(parent.attributes['fi.skills.count'], 0); assert.deepEqual(parent.attributes['fi.skills.version_ids'], []); }
       assert.deepEqual(events('context.load').map(s => s.attributes['fi.context.version_id']), [a.version,b.version]);
-    });
+    }, a.snapshot);
   });
 }
 after(async () => { delete process.env.FI_SKILLS_TRACING; configure(); await provider.shutdown(); });

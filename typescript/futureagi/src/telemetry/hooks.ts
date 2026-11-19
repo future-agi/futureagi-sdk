@@ -65,14 +65,22 @@ function emit(ticket: DeliveryTicket, name: string, attrs: Attributes, failed = 
   } finally { span.end(); }
   return recorded;
 }
-function enrich(ticket: DeliveryTicket): void {
+function enrich(ticket: DeliveryTicket, resetSkills = false): void {
   // An explicit scope may have been entered inside an ancestor span shared by
   // parallel agents. Never mutate that ancestor; its future children read the
   // scope carrier. Current-span enrichment is the automatic-mode contract.
   if (ticket.parent.getValue(SCOPE_KEY)) return;
   if (ticket.mode === "on" && mode() === "on") {
     const explicit = (ticket.current as Span & { attributes?: Attributes }).attributes;
-    const attrs = Object.fromEntries(Object.entries(ticket.state.attrs).filter(([key]) => !key.startsWith("gen_ai.agent.") || explicit?.[key] === undefined || (key === "gen_ai.agent.name" && explicit[key] === contextAgents.get(ticket.current))));
+    // OTel has setters, not a delete operation. On an already enriched span
+    // replace its previous context's list with a truthful empty list/count.
+    if (resetSkills && explicit?.["fi.skills.count"] !== undefined) {
+      setAttributes(ticket.current, { "fi.skills.version_ids": [], "fi.skills.ids": [], "fi.skills.refs": [],
+        "fi.skills.count": 0, ...(explicit["fi.skills.truncated"] === undefined ? {} : { "fi.skills.truncated": false }) });
+    }
+    const attrs = Object.fromEntries(Object.entries(ticket.state.attrs).filter(([key]) =>
+      !key.startsWith("gen_ai.agent.") || explicit?.[key] === undefined ||
+      (key === "gen_ai.agent.name" && explicit[key] === contextAgents.get(ticket.current))));
     setAttributes(ticket.current, attrs);
     if (ticket.state.agentSource === "context" && attrs["gen_ai.agent.name"]) contextAgents.set(ticket.current, attrs["gen_ai.agent.name"]);
   }
@@ -81,12 +89,13 @@ function loadContext(ticket: DeliveryTicket, snapshot: SnapshotLike, enrichCurre
   const attrs = identityAttrs(snapshot.identity, snapshot.manifest.requested);
   const version = snapshot.identity.versionId;
   if (!attrs["fi.context.version_id"]) return;
+  const changed = ticket.state.attrs["fi.context.version_id"] !== version;
   ticket.state.selectContext(attrs, snapshot.identity.name);
   const links = closure(snapshot);
   // Do not assert an empty closure when lazy manifest metadata does not supply it.
   const linked: Attributes = links ? { "fi.context.linked_skill_version_ids": links.map(link => link.identity.versionId) } : {};
   if (!ticket.state.history.contexts.has(version) && emit(ticket, "context.load", { ...scopeAttrs(ticket), ...attrs, ...linked })) ticket.state.history.contexts.add(version);
-  if (enrichCurrent) enrich(ticket);
+  if (enrichCurrent) enrich(ticket, changed);
 }
 function loadSkill(ticket: DeliveryTicket, id: SnapshotIdentity, selector: Selector, via: string, evidence: string, root: boolean, extra: Attributes = {}): void {
   if (!validIdentity(id)) return;

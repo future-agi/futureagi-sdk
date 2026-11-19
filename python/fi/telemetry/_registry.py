@@ -19,12 +19,14 @@ class State:
     attrs: dict = field(default_factory=dict)
     history: History = field(default_factory=History)
     agent_source: str = "none"
+    visible: bool = False
     _evidence: State | None = field(default=None, repr=False)
     lock: RLock = field(default_factory=RLock, repr=False)
 
     def view(self, mode):
         # Caller holds the owner lock through mode selection, emission and state update.
         if mode == "on":
+            self.visible = True
             return self
         if self._evidence is None:
             self._evidence = State(dict(self.attrs), self.history, self.agent_source, lock=self.lock)
@@ -64,6 +66,16 @@ class Registry:
         self._lock = RLock()
 
     def get(self, trace_id, *, create=False):
+        """Propagation reader: private load-only traces are indistinguishable from misses."""
+        state = self._lookup(trace_id, create)
+        if state is not None and create:
+            state.visible = True
+        return state if state is not None and state.visible else None
+
+    def owner(self, trace_id):
+        return self._lookup(trace_id, True)
+
+    def _lookup(self, trace_id, create):
         now = self.clock()
         with self._lock:
             # TTL is absolute (not renewed on read). Capacity also bounds expired

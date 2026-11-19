@@ -20,6 +20,13 @@ from ._registry import registry
 _context_agents = WeakKeyDictionary()
 
 
+def _context_agent(span):
+    try:
+        return _context_agents.get(span)
+    except TypeError:  # A custom host span need not support weak references.
+        return None
+
+
 def _scope_attrs(state, span):
     attrs = {}
     context = sys.modules.get("opentelemetry.context")
@@ -31,7 +38,7 @@ def _scope_attrs(state, span):
     existing = getattr(span, "attributes", None) or {}
     if _otel._scope.get() is None:
         for key in ("gen_ai.agent.name", "gen_ai.agent.id"):
-            if key in existing and not (key == "gen_ai.agent.name" and existing[key] == _context_agents.get(span)):
+            if key in existing and not (key == "gen_ai.agent.name" and existing[key] == _context_agent(span)):
                 attrs[key] = existing[key]
     return attrs
 
@@ -63,7 +70,7 @@ def _emit(name, attrs, provider, start, *, failed=False):
     return True
 
 
-def _enrich(state, current, mode):
+def _enrich(state, current, mode, *, reset_skills=False):
     if mode != "on":
         return
     if _otel._scope.get() is not None:
@@ -71,19 +78,31 @@ def _enrich(state, current, mode):
         _otel.publish(state)
         return
     existing = getattr(current, "attributes", None) or {}
+    if reset_skills and "fi.skills.count" in existing:
+        # OTel cannot delete an attribute. Clear the former context's skill
+        # list on the already-enriched span, not on unrelated future children.
+        for key in ("fi.skills.version_ids", "fi.skills.ids", "fi.skills.refs"):
+            current.set_attribute(key, ())
+        current.set_attribute("fi.skills.count", 0)
+        if "fi.skills.truncated" in existing:
+            current.set_attribute("fi.skills.truncated", False)
     for key, value in state.attrs.items():
         if key.startswith("gen_ai.agent.") and key in existing and not (
-            key == "gen_ai.agent.name" and existing[key] == _context_agents.get(current)
+            key == "gen_ai.agent.name" and existing[key] == _context_agent(current)
         ):
             continue
         current.set_attribute(key, value)
         if key == "gen_ai.agent.name" and state.agent_source == "context":
-            _context_agents[current] = value
+            try:
+                _context_agents[current] = value
+            except TypeError:
+                pass  # Without provenance, preserve the existing agent name next time.
 
 
 def load_context(snapshot, state, current, provider, start, mode, *, enrich=True):
     attrs = context_attrs(snapshot)
     version = snapshot.identity.version_id
+    changed = state.attrs.get("fi.context.version_id") != version
     state.select_context(attrs, snapshot.identity.name)
     if version not in state.history.contexts:
         attrs = {**_scope_attrs(state, current), **attrs}
@@ -91,7 +110,7 @@ def load_context(snapshot, state, current, provider, start, mode, *, enrich=True
         if _emit("context.load", attrs, provider, start):
             state.history.contexts.add(version)
     if enrich:
-        _enrich(state, current, mode)
+        _enrich(state, current, mode, reset_skills=changed)
 
 
 class Read:
@@ -137,7 +156,7 @@ class Read:
         snapshot = self.snapshot
         if _otel.mode() == "off":
             return
-        owner = self.scope or registry.get(self.current.get_span_context().trace_id, create=True)
+        owner = self.scope or registry.owner(self.current.get_span_context().trace_id)
         with owner.lock:
             mode = _otel.mode()
             if mode == "off":

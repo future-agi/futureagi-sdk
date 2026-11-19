@@ -9,6 +9,7 @@ class History {
 export class ScopeState {
   attrs: Attributes;
   agentSource = "none";
+  visible = false;
   constructor(attrs: Attributes = {}, readonly history = new History()) { this.attrs = allowlisted(attrs); }
   // Scoped load-only dedup must not mutate the carrier revived by a later on.
   private evidence?: ScopeState;
@@ -54,19 +55,23 @@ export class TraceRegistry {
   readonly v = 1;
   private readonly entries = new Map<string, { born: number; state: ScopeState }>();
   constructor(readonly capacity = 4096, readonly ttl = 3600000, private readonly clock = Date.now) {}
-  state(traceId: string, create = false): ScopeState | undefined {
+  state(traceId: string, create = false, publish = create): ScopeState | undefined {
     const now = this.clock();
     let entry = this.entries.get(traceId);
     if (entry && now - entry.born >= this.ttl) { this.entries.delete(traceId); entry = undefined; }
     if (!entry && create) entry = { born: now, state: new ScopeState() };
     if (entry) {
+      if (publish) entry.state.visible = true;
       this.entries.delete(traceId);
       this.entries.set(traceId, entry);
       while (this.entries.size > this.capacity) this.entries.delete(this.entries.keys().next().value!);
     }
     return entry?.state;
   }
-  get(traceId: string): Attributes | undefined { return this.state(traceId)?.attrs; }
+  get(traceId: string): Attributes | undefined {
+    const state = this.state(traceId);
+    return state?.visible ? state.attrs : undefined;
+  }
   get size(): number { return this.entries.size; }
 }
 export function sharedRegistry(create = false): TraceRegistry | undefined {
@@ -83,6 +88,6 @@ function localRegistry(): TraceRegistry {
   return globals[LOCAL] ??= new TraceRegistry();
 }
 export function deliveryState(traceId: string, mode: "on" | "load_only", explicit?: ScopeState): ScopeState {
-  const owner = explicit ?? (sharedRegistry(mode === "on") ?? localRegistry()).state(traceId, true)!;
+  const owner = explicit ?? (sharedRegistry(mode === "on") ?? localRegistry()).state(traceId, true, mode === "on")!;
   return owner.view(mode);
 }

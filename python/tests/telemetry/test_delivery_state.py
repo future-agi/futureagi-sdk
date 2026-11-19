@@ -72,6 +72,9 @@ def test_completion_routes_public_read(pair, make_snapshot, monkeypatch, control
                 with tracer.start_as_current_span("following") as child:
                     assert child.attributes.get(key) == expected
                 assert parent.attributes.get(key) == (None if scoped else expected)
+            if scoped:
+                with tracer.start_as_current_span("outside-scope") as outside:
+                    assert key not in outside.attributes
 
     with ThreadPoolExecutor(max_workers=1) as pool:
         result = pool.submit(consume)
@@ -100,6 +103,7 @@ def test_history_across_modes(pair, make_snapshot, monkeypatch, control, scoped,
     with tracer.start_as_current_span("parent"), agent_scope(agent="explicit") if scoped else nullcontext():
         for m in [first, second]:
             set_mode(control, m, monkeypatch)
+            source.corrupt = False
             snapshot.read_file("SKILL.md", trace=False)
             make_snapshot(tracing=False)[0].read_all()
             source.corrupt = True
@@ -129,22 +133,37 @@ def test_history_across_modes(pair, make_snapshot, monkeypatch, control, scoped,
 @pytest.mark.parametrize("control", ["env", "configured"])
 @pytest.mark.parametrize("scoped", [False, True])
 @pytest.mark.parametrize("middle", ["on", "load_only"])
-def test_context_is_current_even_if_event_already_sent(pair, monkeypatch, control, scoped, middle):
+def test_context_is_current_even_if_event_already_sent(pair, make_snapshot, monkeypatch, control, scoped, middle):
     tracer, exporter = pair
     def context(name):
         source = Source("agent_context")
         source.id, source.version_id, source.name = str(uuid4()), str(uuid4()), name
         return SnapshotClient(source, kind="agent_context").resolve(name)
     a, b = context("alpha"), context("beta")
-    with tracer.start_as_current_span("parent") as parent, agent_scope(agent="explicit") if scoped else nullcontext():
+    with tracer.start_as_current_span("parent") as parent, agent_scope(agent="explicit", context=a) if scoped else nullcontext():
         for snapshot, selected, propagated in [(a, "on", a), (b, middle, b if middle == "on" else a), (a, "on", a)]:
             set_mode(control, selected, monkeypatch)
             snapshot.read_file("AGENTS.md")
+            if snapshot is b:
+                skill, _ = make_snapshot()
+                skill.read_file("reference/policy.md")
+                loads = [s for s in exporter.get_finished_spans() if s.name == "skill.load"]
+                assert loads[-1].attributes["fi.context.version_id"] == b.identity.version_id
+                set_mode(control, "on", monkeypatch)
+                with tracer.start_as_current_span("visibility") as peek:
+                    assert peek.attributes.get("fi.skills.version_ids") == ((skill.identity.version_id,) if middle == "on" else None)
+                skill.read_file("SKILL.md")
+                assert len([s for s in exporter.get_finished_spans() if s.name == "skill.load"]) == 1
+                with tracer.start_as_current_span("after-repeat") as peek:
+                    assert peek.attributes["fi.skills.version_ids"] == (skill.identity.version_id,)
             set_mode(control, "on", monkeypatch)
             with tracer.start_as_current_span("following") as child:
                 assert child.attributes["fi.context.version_id"] == propagated.identity.version_id
                 assert child.attributes["gen_ai.agent.name"] == ("explicit" if scoped else propagated.identity.name)
             assert parent.attributes.get("fi.context.version_id") == (None if scoped else propagated.identity.version_id)
+        if middle == "on" and not scoped:
+            assert parent.attributes["fi.skills.count"] == 0
+            assert parent.attributes["fi.skills.version_ids"] == ()
     loads = [s for s in exporter.get_finished_spans() if s.name == "context.load"]
     assert [s.attributes["fi.context.version_id"] for s in loads] == [a.identity.version_id, b.identity.version_id]
 
