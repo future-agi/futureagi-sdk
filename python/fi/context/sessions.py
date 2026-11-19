@@ -18,12 +18,15 @@ from .source import ConsumptionSource, validate_access
 
 
 class ContextSessionClient:
-    def __init__(self, client: Client, *, context_id: str, binding_id: str) -> None:
+    def __init__(
+        self, client: Client, *, context_id: str, binding_id: str, tracing: bool = True
+    ) -> None:
         self.client = client
         self.context_id = str(UUID(context_id))
         self.binding_id = str(UUID(binding_id))
+        self.tracing = tracing
         self.path = f"/model-hub/skills/contexts/bindings/{self.binding_id}/sessions/"
-        self.source = ConsumptionSource(client, kind="agent_context")
+        self.source = ConsumptionSource(client, kind="agent_context", tracing=tracing)
 
     def open(self, request: dict, *, idempotency_key: str) -> dict:
         """Explicit fresh/resume operation; no retry or fallback to a fresh thread."""
@@ -67,8 +70,10 @@ class ContextSessionClient:
             collector.add(self.source.manifest(collector.identity,
                 offset=collector.next_offset, options=RequestOptions(resolution_id=resolution)))
         binding, session_id = self.binding_id, str(UUID(session["session_id"]))
-        snapshot = ContextSnapshot(collector.finish(), self.source,
-            _telemetry_binding_id=binding, _telemetry_session_id=session_id)
+        snapshot = ContextSnapshot(
+            collector.finish(), self.source, _tracing=self.tracing,
+            _telemetry_binding_id=binding, _telemetry_session_id=session_id,
+        )
         self.check_access(session, snapshot)
         # The access-check uses the bound route. If mutable client metadata
         # disagrees with it, bytes remain usable but do not attest a receipt.

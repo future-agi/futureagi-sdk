@@ -182,7 +182,7 @@ class ContextSnapshot:
     def read_all(self) -> VerifiedSnapshot:
         files = {item.path: self.read_file(item.path, trace=False) for item in self.manifest.files}
         self.manifest.lease.require_live()
-        return verified_handoff(self, VerifiedSnapshot(self.manifest, files))
+        return verified_handoff(self, VerifiedSnapshot(self.manifest, files, _tracing=self._tracing))
 
 
 @dataclass(frozen=True)
@@ -218,7 +218,7 @@ class AsyncContextSnapshot:
             item.path: await self.read_file(item.path, trace=False) for item in self.manifest.files
         }
         self.manifest.lease.require_live()
-        return VerifiedSnapshot(self.manifest, files)
+        return verified_handoff(self, VerifiedSnapshot(self.manifest, files, _tracing=self._tracing))
 
 
 class SnapshotClient:

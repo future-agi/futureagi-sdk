@@ -1,6 +1,6 @@
-import type { Context, Span } from "@opentelemetry/api";
+import type { Attributes, Context, Span } from "./bridge-types";
 import { AGENT_NAME, markPublishedName } from "./agent-name";
-import { allowlisted, Attributes, CARRIER_KEY, mode, PROCESSOR_KEY, REGISTRY_KEY, safe } from "./otel";
+import { allowlisted, carrierSource, CARRIER_KEY, mode, PROCESSOR_KEY, REGISTRY_KEY, safe } from "./otel";
 
 interface StartSpan extends Span { readonly attributes?: Record<string, unknown>; }
 interface RegistryReader { v: number; get(traceId: string): Attributes | undefined; }
@@ -18,7 +18,7 @@ export class FutureAGISkillsSpanProcessor {
       const carrier = parentContext.getValue(CARRIER_KEY);
       const registry = globals[REGISTRY_KEY] as RegistryReader | undefined;
       const source = carrier != null
-        ? (typeof carrier === "object" && "v" in carrier && carrier.v === 1 && "attrs" in carrier ? carrier.attrs : undefined)
+        ? carrierSource(carrier)
         : registry?.v === 1 ? registry.get(traceId) : undefined;
       const attrs = allowlisted(source);
       for (const [key, value] of Object.entries(attrs)) {

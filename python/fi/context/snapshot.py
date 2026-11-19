@@ -371,6 +371,9 @@ class VerifiedSnapshot:
 
     manifest: SnapshotManifest
     files: Mapping[str, str] = field(repr=False)
+    _tracing: bool = field(default=True, repr=False)
+    _telemetry_binding_id: str | None = field(default=None, repr=False)
+    _telemetry_session_id: str | None = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
         copied = dict(self.files)

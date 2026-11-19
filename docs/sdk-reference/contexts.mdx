@@ -122,7 +122,7 @@ client.contexts.get(
 ```
 
 ```typescript TypeScript
-client.contexts.get(contextId: string, options?: RequestOptions): Promise<models.SkillsContextDetail>
+client.contexts.get(contextId: string, options?: RequestOptions): Promise<unknown>
 ```
 
 </Expandable>
@@ -135,7 +135,7 @@ client.contexts.get(contextId: string, options?: RequestOptions): Promise<models
 
 #### Returns
 
-[`SkillsContextDetail`](/docs/sdk/reference/skills-models#skillscontextdetail).
+TypeScript returns `unknown` by default because parsing is tolerant. Pass `{ strictResponse: true }` as the per-call options to validate the response and receive [`SkillsContextDetail`](/docs/sdk/reference/skills-models#skillscontextdetail). A client configured with `strictResponses: true` also validates the response at runtime.
 
 ### contexts.inspect_snapshot
 

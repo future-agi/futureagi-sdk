@@ -67,7 +67,7 @@ client.skills.latest_load(
 ```
 
 ```typescript TypeScript
-client.skills.latestLoad(params: SkillsLatestLoadParams, options?: RequestOptions): Promise<models.LatestLoadResult>
+client.skills.latestLoad(params: SkillsLatestLoadParams, options?: RequestOptions): Promise<unknown>
 
 export interface SkillsLatestLoadParams {
   resource_id: string;
@@ -86,7 +86,7 @@ export interface SkillsLatestLoadParams {
 
 #### Returns
 
-[`LatestLoadResult`](/docs/sdk/reference/skills-models#latestloadresult).
+TypeScript returns `unknown` by default because parsing is tolerant. Pass `{ strictResponse: true }` as the per-call options to validate the response and receive [`LatestLoadResult`](/docs/sdk/reference/skills-models#latestloadresult). A client configured with `strictResponses: true` also validates the response at runtime.
 
 ### skills.list
 

@@ -321,6 +321,14 @@ def typescript_signature(op: Op) -> str:
 
 
 def _returns(op: Op, homes: dict[str, str]) -> str:
+    if op.id in {"contexts.get", "skills.latest_load"}:
+        returns = op.returns or {}
+        model = _model_link(class_name(returns["$ref"]), homes, None)
+        return (
+            f"TypeScript returns `unknown` by default because parsing is tolerant. "
+            f"Pass `{{ strictResponse: true }}` as the per-call options to validate the response and receive {model}. "
+            "A client configured with `strictResponses: true` also validates the response at runtime."
+        )
     returns = op.returns or {}
     if op.decode == "bytes":
         return "The response body as bytes."
@@ -505,11 +513,21 @@ def models_page(
     title = f"{area} response models"
     description = f"The {len(names)} response models returned by the {area.lower()} resources of the Future AGI Python and TypeScript SDKs, with every field and its type."
     out = [_frontmatter(title, description)]
+    if area == "Datasets & evals":
+        # This generated page is a frozen release input; leave its bytes pinned.
+        strict_note = (
+            f"In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview]({SITE_PATH}#strict-mode)); TypeScript has no strict mode.\n\n"
+        )
+    else:
+        strict_note = (
+            f"In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires; in TypeScript, `Client({{ strictResponses: true }})` validates strict-wire operations. "
+            f"For typed TypeScript results from `contexts.get` and `skills.latest_load`, pass `{{ strictResponse: true }}` in the per-call options; without it those methods return `unknown`. See the [overview]({SITE_PATH}#strict-mode).\n\n"
+        )
     out.append(
         f"The models returned by {resources}, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). "
         "Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. "
         "Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call. "
-        f"In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview]({SITE_PATH}#strict-mode)); TypeScript has no strict mode.\n\n"
+        + strict_note
     )
     out.append(
         '## Models\n\n<div class="sdk-ref-table">\n\n| Model | Fields |\n|---|---|\n'
@@ -571,7 +589,7 @@ def index_page(
         '<ParamField name="timeout" type="number" optional>\n  Per-request timeout: seconds in Python (default 60), milliseconds in TypeScript (default 60000).\n</ParamField>\n'
         '<ParamField name="max_retries / maxRetries" type="integer" optional>\n  Default 2. Retries 429 on every call, and timeouts and 5xx on calls that are safe to repeat.\n</ParamField>\n'
         '<ParamField name="default_headers / defaultHeaders" type="object" optional>\n  Sent with every request.\n</ParamField>\n'
-        '<ParamField name="strict_responses" type="boolean" optional>\n  Python only. Reject a response that misses a field the contract marks required (see Strict mode).\n</ParamField>\n'
+        '<ParamField name="strict_responses" type="boolean" optional>\n  Python `strict_responses` and TypeScript `strictResponses` reject malformed responses for generated operations marked strict-wire (see Strict mode).\n</ParamField>\n'
         '<ParamField name="http_client / fetch" type="object" optional>\n  Python: an `httpx.Client` (or `httpx.AsyncClient`) to use instead of the SDK\'s own. TypeScript: a replacement for the global `fetch`.\n</ParamField>\n\n'
         "## Conventions\n\n"
         "### Arguments\n\n"
@@ -591,8 +609,9 @@ def index_page(
         "Parsing is tolerant: a field the backend leaves out is `None` / `undefined`, an extra field is kept. "
         "The backend's `{status, result}` envelope is unwrapped for you.\n\n"
         "### Strict mode\n\n"
-        "`Client(strict_responses=True)` (Python) raises `ResponseValidationError` when a response misses a field the contract marks required. "
-        "Use it in tests to catch contract drift; leave it off in production.\n\n"
+        "`Client(strict_responses=True)` (Python) and `new Client({ strictResponses: true })` (TypeScript) validate responses for operations marked strict-wire, including required-key presence and field values; they never coerce the wire response. "
+        "TypeScript `contexts.get` and `skills.latest_load` return `unknown` when called tolerantly; pass `{ strictResponse: true }` in that call's options to validate and receive the corresponding model type. The per-call option only enables validation and cannot disable client strict mode. "
+        "Use strict validation in tests to catch contract drift; leave it off in production unless the stricter behavior is wanted.\n\n"
         "### Errors\n\n"
         "HTTP errors raise a subclass of `APIError` with `status_code` / `status`, `body`, `detail` and `request_id` / `requestId`. "
         "Import the error classes from `fi.platform` (Python) and from **`@future-agi/sdk/platform`** (TypeScript): the package root does not export them, "

@@ -22,13 +22,19 @@ fi
 cd "$work"
 npm init -y >/dev/null
 npm install --no-audit --no-fund --silent "./$tarball" "typescript@5.6.3"
+if node -e 'require.resolve("@opentelemetry/api")' >/dev/null 2>&1; then
+  echo "consumer unexpectedly installed the optional OpenTelemetry peer" >&2
+  exit 1
+fi
 cp "$pkg"/consumer/*.mts "$pkg"/consumer/*.mjs "$pkg"/consumer/tsconfig.json .
 # Every TypeScript example of the generated reference, and its documented imports, as one
 # more consumer module: an example that does not compile against the packed package fails here.
 node "$pkg/scripts/docs-examples.mjs" "$pkg/../../docs/sdk-reference" docs-examples.mts
 
-echo "consumer: tsc against $tarball (consumer-types.mts + docs-examples.mts)"
+echo "consumer: NodeNext tsc against $tarball"
 npx tsc -p tsconfig.json
+echo "consumer: Bundler tsc against $tarball"
+npx tsc -p tsconfig.json --module ESNext --moduleResolution Bundler
 node context-consumer.mjs
 
 echo "consumer: ESM import"

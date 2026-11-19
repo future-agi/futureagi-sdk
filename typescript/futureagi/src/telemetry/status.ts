@@ -1,5 +1,18 @@
 import { activeContext, api, carrierAttributes, CARRIER_KEY, currentSpan, mode, PROCESSOR_KEY, provider, safe, SCOPE_KEY } from "./otel";
+import type { Mode } from "./bridge-types";
 import { ScopeState, sharedRegistry } from "./registry";
+
+interface TelemetryStatus {
+  otel_found: boolean;
+  provider: "configured" | "global" | "none";
+  processor_installed: boolean;
+  mode: Mode;
+  truth_table_row: string;
+  agent_name: string | null;
+  agent_name_source: string;
+  rule: string;
+  last_load: { name: string; version: number; evidence: string; time: string } | null;
+}
 
 export const LOAD_RULE = "A load is recorded on the first read of any file of a skill version inside a trace";
 let lastLoad: { name: string; version: number; evidence: string; time: string } | null = null;
@@ -7,7 +20,7 @@ const logged = new Set<string>();
 export function recordLastLoad(name: string, version: number, evidence: string): void {
   lastLoad = { name, version, evidence, time: new Date().toISOString() };
 }
-export function status() {
+export function status(): TelemetryStatus {
   return safe(() => {
     const selected = provider();
     const context = activeContext();
