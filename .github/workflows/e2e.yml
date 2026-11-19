@@ -14,6 +14,8 @@ name: E2E
 # The compose files come from the same release tag as the image (main for
 # :latest): a newer stack definition can mount code or gateway config that an
 # older image cannot load, and the app then exits before it is healthy.
+# The v1.59.0 stack is missing one read-only E2E mount (future-agi#4200);
+# only that verified release pair gets the compatibility overlay below.
 # The monorepo runs the same suites against every pull request's own build in
 # its E2E CI, so a backend change that breaks the SDK fails there before it is
 # released.
@@ -117,8 +119,13 @@ jobs:
         env:
           FUTURE_AGI_VERSION: ${{ env.BACKEND_VERSION }}
         run: |
-          docker compose --env-file e2e/stack/standalone-e2e.env \
-            -f docker-compose.yml -f e2e/stack/docker-compose.standalone-e2e.yml \
+          files=(-f docker-compose.yml -f e2e/stack/docker-compose.standalone-e2e.yml)
+          if [[ "$FUTURE_AGI_VERSION" == v1.59.0 ]]; then
+            compat="$RUNNER_TEMP/sdk-v1.59.0.yml"
+            python3 "$GITHUB_WORKSPACE/.github/scripts/release_stack.py" > "$compat"
+            files+=(-f "$compat")
+          fi
+          docker compose --env-file e2e/stack/standalone-e2e.env "${files[@]}" \
             -p futureagi-e2e-standalone \
             up -d --wait --wait-timeout 1500 app postgres clickhouse mock-llm
           # A first boot migrates an empty database before the API answers.
@@ -131,6 +138,16 @@ jobs:
             sleep 5
           done
           echo "backend healthy after ${SECONDS}s"
+          if [[ "$FUTURE_AGI_VERSION" == v1.59.0 ]]; then
+            # bin/e2e wait_ready: witness the storage schema before invoking
+            # the release's guarded standalone-only, read-only SQL provisioner.
+            compose=(docker compose --env-file e2e/stack/standalone-e2e.env "${files[@]}" -p futureagi-e2e-standalone)
+            "${compose[@]}" exec -T clickhouse clickhouse-client --query 'SELECT count() FROM spans LIMIT 0'
+            "${compose[@]}" exec -T clickhouse clickhouse-client --param_database="${PROPERTY_CATALOG_DATABASE:-property_catalog}" \
+              --query "SELECT throwIf(count() != 2, 'observed indexes missing') FROM system.tables WHERE database={database:String} AND name IN ('observed_attribute_keys', 'observed_attribute_values')"
+            "${compose[@]}" exec -T -w /app/backend -e FUTURE_AGI_E2E_FIXTURE=sql-workbench \
+              app python - < e2e/stack/backend/bootstrap_sql.py
+          fi
 
       - uses: actions/setup-python@v5
         with:

@@ -221,8 +221,9 @@ The one-time setup is required before automatic releases work. Missing app crede
 
 ### Reproduce the four SQL mappings before the next backend sync
 
-The SQL REST operations and their MCP mappings come from product dev, not the
-`BACKEND_VERSION` image (v1.58.0). Other operations keep the SDK dev contract.
+The four SQL mappings were sourced from the product dev commit below. The SDK
+tests against the v1.59.0 release pinned in `BACKEND_VERSION`; other operations
+keep the existing SDK dev contract.
 The two input commits and byte hashes are recorded in `x-contract-sources` in
 the committed Swagger slice. From the SDK checkout:
 
