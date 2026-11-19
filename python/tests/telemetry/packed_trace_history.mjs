@@ -346,6 +346,52 @@ for (const owned of [true,false]) for (const setter of ['single','bulk']) for (c
     });
   });
 }
+// The active wrapper and the load exporter are separate. An unrelated native
+// event can exhaust the whole-span inspection without making identity vacant.
+for (const refusal of [false,true]) for (const write of ['different','same','none']) {
+  test(`default write authority refusal=${refusal} framework=${write}`, async () => {
+    const a=fixture('agent_context','alpha'), b=fixture('agent_context','beta');
+    const expected=write==='different' ? 'worker' : write==='same' ? 'alpha' : 'beta';
+    let native,saved;
+    await separateLoadHost({owned:true,onStart(span){native=span;saved=span.setAttributes.bind(span);}}, async (fi,out) => {
+      await fi.startActiveSpan('wrapped',async wrapper=>{ try {
+        const carrier=otelContext.active().setValue(Symbol.for('futureagi.runtime.span_attributes.v1'),
+          {v:1,attrs:{[ID]:'carried-id'}});
+        await otelContext.with(carrier,async()=>{
+          assert.equal(native.attributes[NAME],undefined);
+          if (refusal && write==='none') native.addEvent('unrelated',{samples:Array(16385).fill(1)});
+          await a.snapshot.readFile('AGENTS.md');
+          assert.deepEqual([native.attributes[NAME],native.attributes[ID]],['alpha','carried-id']);
+          if (write!=='none') saved({[NAME]:expected,[ID]:'framework-id'});
+          if (refusal && write!=='none') native.addEvent('unrelated',{samples:Array(16385).fill(1)});
+          await b.snapshot.readFile('AGENTS.md');
+          assert.deepEqual([native.attributes[NAME],native.attributes[ID]],
+            [expected,write==='none' ? 'carried-id' : 'framework-id']);
+        });
+      } finally { wrapper.end(); } });
+      const loads=out.getFinishedSpans(); assert.deepEqual(loads.map(s=>s.name),['context.load','context.load']);
+      assert.deepEqual([loads[1].attributes[VERSION],loads[1].attributes[NAME],loads[1].attributes[ID]],
+        [b.version,refusal ? 'beta' : expected,refusal || write==='none' ? 'carried-id' : 'framework-id']);
+      assert.equal(native.attributes[NAME],expected);
+    });
+  });
+}
+test('default write authority rechecks after ordinary enrichment invokes a framework setter',async () => {
+  const b=fixture('agent_context','beta'); let native,saved;
+  await separateLoadHost({owned:true,onStart(span){native=span;saved=span.setAttributes.bind(span);}},async (fi,out)=>{
+    await fi.startActiveSpan('wrapped',async wrapper=>{ try {
+      const ordinary=wrapper.setAttribute.bind(wrapper);
+      wrapper.setAttribute=function(key,value) {
+        if (key===VERSION) saved({[NAME]:'late-worker',[ID]:'late-id'});
+        return ordinary(key,value);
+      };
+      const carrier=otelContext.active().setValue(Symbol.for('futureagi.runtime.span_attributes.v1'),{v:1,attrs:{[ID]:'carried-id'}});
+      await otelContext.with(carrier,()=>b.snapshot.readFile('AGENTS.md'));
+    } finally { wrapper.end(); } });
+    assert.deepEqual([native.attributes[NAME],native.attributes[ID]],['late-worker','late-id']);
+    assert.equal(out.getFinishedSpans()[0].attributes[VERSION],b.version);
+  });
+});
 test('opaque adapter cannot claim an empty underlying name slot at end',async () => {
   const a=fixture('agent_context','alpha'), b=fixture('agent_context','beta');
   let native,saved;

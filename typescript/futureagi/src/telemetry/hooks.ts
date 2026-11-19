@@ -1,7 +1,7 @@
 import type { Context, Span, TracerProvider } from "@opentelemetry/api";
 import type { Selector, SnapshotIdentity } from "../context/types";
 import { activeContext, allowlisted, Attributes, carrierSource, CARRIER_KEY, mode, provider, recording, safe, SCOPE_KEY, setAttributes } from "./otel";
-import { agentIdentity, inheritedSource, writeContextName } from "./agent-name";
+import { agentIdentity, fillIdentity, inheritedSource, writeContextName } from "./agent-name";
 import { closure, errorType, identityAttrs, linkedSkill, selectorAttrs, SnapshotLike, validIdentity } from "./identity";
 import { deliveryState, ScopeState } from "./registry";
 import { logFirstLoad, recordLastLoad } from "./status";
@@ -77,14 +77,15 @@ function enrich(ticket: DeliveryTicket, resetSkills = false): void {
       setAttributes(ticket.current, { "fi.skills.version_ids": [], "fi.skills.ids": [], "fi.skills.refs": [],
         "fi.skills.count": 0, ...(explicit["fi.skills.truncated"] === undefined ? {} : { "fi.skills.truncated": false }) });
     }
-    const {name, id, automatic} = agentIdentity(ticket.current);
-    const attrs = Object.fromEntries(Object.entries(ticket.state.attrs).filter(([key]) =>
-      key === "gen_ai.agent.name" ? name === undefined || automatic :
-      key === "gen_ai.agent.id" ? id === undefined : !key.startsWith("gen_ai.agent.") || explicit?.[key] === undefined));
-    const contextName = ticket.state.agentSource === "context" ? attrs["gen_ai.agent.name"] : undefined;
-    if (typeof contextName === "string") delete attrs["gen_ai.agent.name"];
-    setAttributes(ticket.current, attrs);
-    if (typeof contextName === "string") writeContextName(ticket.current, contextName);
+    const {nameWritable, idWritable} = agentIdentity(ticket.current);
+    const { ["gen_ai.agent.name"]: name, ["gen_ai.agent.id"]: id, ...rest } = ticket.state.attrs;
+    setAttributes(ticket.current, Object.fromEntries(Object.entries(rest).filter(([key]) =>
+      !key.startsWith("gen_ai.agent.") || explicit?.[key] === undefined)));
+    if (idWritable && id !== undefined) fillIdentity(ticket.current, "gen_ai.agent.id", id);
+    if (nameWritable && name !== undefined) {
+      if (ticket.state.agentSource === "context" && typeof name === "string") writeContextName(ticket.current, name);
+      else fillIdentity(ticket.current, "gen_ai.agent.name", name);
+    }
   }
 }
 function loadContext(ticket: DeliveryTicket, snapshot: SnapshotLike, enrichCurrent = true): void {
