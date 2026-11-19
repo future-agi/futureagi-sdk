@@ -77,9 +77,9 @@ function enrich(ticket: DeliveryTicket, resetSkills = false): void {
       setAttributes(ticket.current, { "fi.skills.version_ids": [], "fi.skills.ids": [], "fi.skills.refs": [],
         "fi.skills.count": 0, ...(explicit["fi.skills.truncated"] === undefined ? {} : { "fi.skills.truncated": false }) });
     }
-    const {name, id, automatic} = agentIdentity(ticket.current);
+    const {name, id, automatic, canStampName} = agentIdentity(ticket.current);
     const attrs = Object.fromEntries(Object.entries(ticket.state.attrs).filter(([key]) =>
-      key === "gen_ai.agent.name" ? name === undefined || automatic :
+      key === "gen_ai.agent.name" ? canStampName !== false && (name === undefined || automatic) :
       key === "gen_ai.agent.id" ? id === undefined : !key.startsWith("gen_ai.agent.") || explicit?.[key] === undefined));
     setAttributes(ticket.current, attrs);
     if (ticket.state.agentSource === "context" && attrs["gen_ai.agent.name"]) markInheritedName(ticket.current);

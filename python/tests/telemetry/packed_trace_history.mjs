@@ -279,4 +279,71 @@ for (const pii of [false,true]) test(`host identity copied only under FI privacy
     else assert.deepEqual([load.attributes[NAME],load.attributes[ID]],[raw,rawId]);
   },{piiRedaction:pii});
 });
+// Two providers: limits and native onStart belong only to the host. Inspect
+// the emitted SDK load at an uncapped, ordinary exporter, not through FI.
+async function separateLoadHost({owned=false, spanLimits, onStart, unknown=false}, run) {
+  const hook = {onStart, onEnd() {}, async forceFlush() {}, async shutdown() {}};
+  const host = owned ? register({projectName:'identity',setGlobalTracerProvider:false,
+    runtimeAttributes:!sdkProcessor,spanProcessors:[...(sdkProcessor ? [new FutureAGISkillsSpanProcessor()] : []),hook]}) :
+    new BasicTracerProvider({spanLimits,spanProcessors:[hook]});
+  const out = new InMemorySpanExporter();
+  const loads = new BasicTracerProvider({spanProcessors:[new SimpleSpanProcessor(out)]});
+  localSdk.configure({skillsTracing:'on',tracerProvider:loads});
+  try {
+    const native = host.getTracer('framework');
+    // A public-only adapter forwards writes to a real, limited recording span;
+    // its readable attributes do not attest the provider's value limit.
+    const adapter = unknown ? {startSpan(...args) {
+      const span = native.startSpan(...args);
+      return {attributes:span.attributes,spanContext:span.spanContext.bind(span),
+        isRecording:span.isRecording.bind(span),setAttribute:span.setAttribute.bind(span),
+        setAttributes:span.setAttributes.bind(span),end:span.end.bind(span)};
+    }} : native;
+    await run(new FITracer({tracer:adapter,traceConfig:{piiRedaction:true}}),out);
+  } finally { localSdk.configure(); await loads.shutdown(); await host.shutdown(); }
+}
+for (const boundary of ['finite','unknown','complete']) test(`identity export to distinct plain load ${boundary}`, async () => {
+  const b = fixture('agent_context','beta');
+  const local = 'samplemarker', identifier = 'anotherprobe';
+  const full = boundary === 'complete';
+  const values = full ? ['framework','framework-id'] : [local+'@example.test',identifier+'@example.test'];
+  let native;
+  await separateLoadHost({spanLimits:{attributeValueLengthLimit:full ? 256 : local.length}, unknown:boundary==='unknown',
+    onStart(span) { native=span; span.setAttributes({[NAME]:values[0],[ID]:values[1],'test.private':'exclude'}); }}, async (fi,out) => {
+    await fi.startActiveSpan('wrapped',async active => { try {
+      assert.deepEqual([native.attributes[NAME],native.attributes[ID]],full ? values : [local,identifier]);
+      assert.equal(await withAgentScope({},()=>b.snapshot.readFile('AGENTS.md')),'beta');
+    } finally { active.end(); } });
+    const spans = out.getFinishedSpans(); assert.deepEqual(spans.map(s=>s.name),['context.load']);
+    const [load] = spans; assert.equal(load.parentSpanContext.spanId,native.spanContext().spanId);
+    assert.equal(load.attributes[VERSION],b.version); assert.equal(load.attributes['test.private'],undefined);
+    if (full) assert.deepEqual([load.attributes[NAME],load.attributes[ID]],values);
+    else for (const marker of [local,identifier]) assert.ok(!JSON.stringify(load.attributes).includes(marker));
+  });
+});
+for (const owned of [true,false]) for (const setter of ['single','bulk']) for (const write of ['different','same','absent']) {
+  test(`prebound native setter owned=${owned} ${setter} ${write}`, async () => {
+    const a=fixture('agent_context','alpha'), b=fixture('agent_context','beta');
+    let native, saved;
+    await separateLoadHost({owned,onStart(span) {
+      native=span;
+      // Bind the actual method while onStart runs, before selecting A.
+      saved=setter==='single' ? span.setAttribute.bind(span,NAME) : span.setAttributes.bind(span);
+    }}, async (fi,out) => {
+      const value=write==='same' ? 'alpha' : 'worker';
+      await fi.startActiveSpan('wrapped',async active => { try {
+        assert.notEqual(active,native); assert.equal(await a.snapshot.readFile('AGENTS.md'),'alpha');
+        assert.equal(native.attributes[NAME],owned ? 'alpha' : undefined);
+        if (write!=='absent') saved(setter==='single' ? value : {[NAME]:value});
+        active.setAttribute('unrelated.field',true);
+        assert.equal(await b.snapshot.readFile('AGENTS.md'),'beta');
+      } finally { active.end(); } });
+      const loads=out.getFinishedSpans(); assert.deepEqual(loads.map(s=>s.name),['context.load','context.load']);
+      assert.deepEqual(loads.map(s=>[s.attributes[VERSION],s.attributes[NAME]]),
+        [[a.version,'alpha'],[b.version,write==='absent'?'beta':value]]);
+      assert.equal(native.attributes[VERSION],b.version);
+      assert.equal(native.attributes[NAME],write==='absent' ? owned ? 'beta' : undefined : value);
+    });
+  });
+}
 after(async () => { delete process.env.FI_SKILLS_TRACING; configure(); await provider.shutdown(); });

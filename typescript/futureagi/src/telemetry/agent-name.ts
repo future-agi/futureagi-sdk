@@ -2,7 +2,7 @@
 // optional SDK/OTel declarations. Standard recording spans expose both APIs.
 import type { Attributes } from './otel';
 const VIEW = Symbol.for('futureagi.runtime.agent-identity.v1');
-interface View { name?: string; id?: string; automatic: boolean }
+interface View { name?: string; id?: string; automatic: boolean; canStampName?: boolean }
 interface Writers {
   [VIEW]?(mark?: true): View;
   setAttribute(key: string, value: unknown): unknown;
