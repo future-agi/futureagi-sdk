@@ -53,3 +53,39 @@ def test_accepted_response_selection_is_explicit_and_fails_on_removed_status():
     del spec["paths"]["/tracer/sql-query/run/"]["post"]["responses"]["202"]
     with pytest.raises(CatalogError, match="requires a declared 202 response"):
         load(spec, catalog)
+
+
+def test_scoped_sync_rejects_mismatched_source_bytes_and_shared_definitions(monkeypatch):
+    """Exercise the two-input gate without depending on Git history in a shallow CI checkout."""
+    import hashlib
+
+    monkeypatch.syspath_prepend(str(ROOT / "sdkgen"))
+    import sync_sql_contract as sync
+
+    spec, sql = sql_contract()
+    baseline = {**spec, "paths": {p: v for p, v in spec["paths"].items() if not p.startswith("/tracer/sql-query/")},
+                "definitions": {k: v for k, v in spec["definitions"].items() if not k.startswith("SQL")},
+                "x-source-sha256": "baseline-hash"}
+    source = json.dumps(spec).encode()
+    manifest = {"tool_count": 4, "source_contract_sha256": hashlib.sha256(source).hexdigest(), "tools": []}
+    for entry in sql["operations"]:
+        operation = entry["operation"]
+        path, method = operation["path"], operation["method"]
+        manifest["tools"].append({
+            "name": entry["surfaces"]["mcp"]["name"], "group": "observability", "response": {"unwrap": None},
+            "request": {"method": method, "path": path}, "source": {"operationId": spec["paths"][path][method.lower()]["operationId"]},
+            "annotations": {"readOnlyHint": True, "destructiveHint": False, "openWorldHint": False, "idempotentHint": method == "GET"},
+            "inputSchema": {"properties": {"limit": {"maximum": 100}}},
+        })
+
+    def blob(_repo, _commit, path):
+        return {"sdkgen/contracts/swagger.json": json.dumps(baseline).encode(), sync.SWAGGER: source,
+                sync.MCP: json.dumps(manifest).encode()}[path]
+
+    monkeypatch.setattr(sync, "_blob", blob)
+    baseline["definitions"]["ManagementAPIErrorResponse"]["title"] = "conflicting baseline shape"
+    with pytest.raises(ValueError, match="collides"):
+        sync.compose(ROOT, "0" * 40, "1" * 40)
+    manifest["source_contract_sha256"] = "wrong"
+    with pytest.raises(ValueError, match="hashes disagree"):
+        sync.compose(ROOT, "0" * 40, "1" * 40)

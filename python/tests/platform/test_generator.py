@@ -150,10 +150,12 @@ def test_surfaces_ship_independently():
 
 
 def test_mcp_names_keep_existing_tools_or_follow_the_id():
-    # Every catalog entry keeps the monorepo's MCP tool name: 107 tools, same names.
+    # The 107 release mappings plus four named SQL tools from the scoped product source.
     ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
     names = {op_id: ops[op_id].surfaces["mcp"]["name"] for op_id in MCP_IDS}
-    assert len(names) == 107
+    sql_names = {name for key, name in names.items() if key.startswith("sql.")}
+    assert sql_names == {"run_sql", "get_sql_result", "cancel_sql", "get_sql_catalog"}
+    assert len(names) == 111
     assert names["datasets.list"] == "list_datasets"
     assert names["traces.list"] == "search_traces"
     # Without an override the name follows the id.

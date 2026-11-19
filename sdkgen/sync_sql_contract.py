@@ -15,9 +15,8 @@ import re
 import subprocess
 from pathlib import Path
 
-import yaml
-
 import sync_contract
+import yaml
 
 TOOLS = {"run_sql", "get_sql_result", "cancel_sql", "get_sql_catalog"}
 SWAGGER = "api_contracts/openapi/swagger.json"
@@ -52,7 +51,16 @@ def compose(product: Path, commit: str, baseline_sdk: str) -> dict:
         if method.lower() not in source["paths"].get(path, {}):
             raise ValueError(f"selected operation missing on product: {method} {path}")
         if is_sql:
-            tool = tools[entry["surfaces"]["mcp"]["name"]]
+            mapping = entry["surfaces"]["mcp"]
+            tool = tools[mapping["name"]]
+            hints = tool["annotations"]
+            if (mapping["group"] != tool["group"] or mapping["access"] != "read"
+                    or not hints["readOnlyHint"] or hints["destructiveHint"] or hints["openWorldHint"]
+                    or hints["idempotentHint"] != (method == "GET") or tool["response"]["unwrap"] is not None):
+                raise ValueError(f"SQL MCP exposure mismatch: {entry['id']}")
+            for field, cap in mapping.get("max_page_size", {}).items():
+                if tool["inputSchema"]["properties"][field].get("maximum") != cap:
+                    raise ValueError(f"SQL MCP page limit mismatch: {entry['id']}.{field}")
             if (tool["request"]["method"], tool["request"]["path"], tool["source"]["operationId"]) != (
                 method, path, source["paths"][path][method.lower()]["operationId"]
             ):
