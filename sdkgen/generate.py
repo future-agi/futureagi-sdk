@@ -39,10 +39,11 @@ def main() -> int:
         for path in missing:
             print(f"missing scaffold: {path.relative_to(ROOT)} (run python sdkgen/generate.py)", file=sys.stderr)
         return 1 if stale or missing else 0
-    for path, text in generated.items():
+    for path in stale:
+        text = generated[path]
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text)
-        print(f"{'updated' if path in stale else 'unchanged'}: {path.relative_to(ROOT)}")
+        print(f"updated: {path.relative_to(ROOT)}")
     for path in missing:
         path.write_text(once[path])
         print(f"scaffolded: {path.relative_to(ROOT)}")

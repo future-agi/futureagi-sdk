@@ -117,8 +117,17 @@ jobs:
         env:
           FUTURE_AGI_VERSION: ${{ env.BACKEND_VERSION }}
         run: |
+          # Exercise the opt-in consumption facade on this disposable backend.
+          # An unsupported release fails the live suite; no catalog exclusions.
+          cat > "$RUNNER_TEMP/sdk-context.yml" <<'YAML'
+          services:
+            app:
+              environment:
+                SKILLS_CONTEXT_CONSUMPTION_ENABLED: "true"
+          YAML
           docker compose --env-file e2e/stack/standalone-e2e.env \
             -f docker-compose.yml -f e2e/stack/docker-compose.standalone-e2e.yml \
+            -f "$RUNNER_TEMP/sdk-context.yml" \
             -p futureagi-e2e-standalone \
             up -d --wait --wait-timeout 1500 app postgres clickhouse mock-llm
           # A first boot migrates an empty database before the API answers.
@@ -142,7 +151,7 @@ jobs:
           python -m pip install -e ./python pytest pyyaml
 
       - name: Sign up an account and write .env.local
-        run: python sdkgen/local_api_key.py --signup --base-url "$FI_BASE_URL" --label "gh${{ github.run_id }}"
+        run: python sdkgen/local_api_key.py --signup --workspace-user-key --base-url "$FI_BASE_URL" --label "gh${{ github.run_id }}"
 
       - name: Python live suite (every catalog operation)
         run: PYTHONPATH=python pytest -q python/tests/platform

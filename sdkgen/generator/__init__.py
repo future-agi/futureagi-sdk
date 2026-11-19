@@ -31,7 +31,7 @@ from pathlib import Path
 import yaml
 
 from . import docs, python, typescript
-from .catalog import CatalogError, Op, Param, load
+from .catalog import CatalogError, Op, Param, load, model_refs, wire_models
 
 ROOT = Path(__file__).resolve().parents[2]
 SDKGEN = ROOT / "sdkgen"
@@ -63,16 +63,35 @@ def load_ops() -> tuple[dict, list[Op], str]:
     return spec, ops, hashlib.sha256(raw).hexdigest()
 
 
+def wire_definitions(spec: dict, ops: list[Op]) -> dict:
+    """Project only the named responses opting in to strict raw-JSON validation."""
+    def convert(value):
+        if isinstance(value, list):
+            return [convert(v) for v in value]
+        if not isinstance(value, dict):
+            return value
+        schema = {k: convert(v) for k, v in value.items() if k != "x-nullable"}
+        return {"anyOf": [schema, {"type": "null"}]} if value.get("x-nullable") else schema
+
+    roots = [{"$ref": f"#/definitions/{n}"} for n in wire_models(ops)]
+    return {name: convert(spec["definitions"][name]) for name in model_refs(spec, roots)}
+
+
 def build(targets: tuple[str, ...] = TARGETS) -> dict[Path, str]:
     """Generated files: {path: text}. Each one is overwritten on every run."""
     spec, ops, _ = load_ops()
     out: dict[Path, str] = {}
     if "python" in targets:
+        out[PY_PLATFORM / "_wire_definitions.json"] = json.dumps(wire_definitions(spec, ops), indent=2) + "\n"
         out[PY_PLATFORM / "models.py"] = python.emit_models(spec, ops)
         out[PY_PLATFORM / "_operations.py"] = python.emit_operations(ops)
         out[PY_PLATFORM / "resources" / "base.py"] = python.emit_resources(ops)
         out[PY_PLATFORM / "resources" / "__init__.py"] = python.emit_resource_index(ops)
     if "typescript" in targets:
+        definitions = json.dumps(wire_definitions(spec, ops), indent=2)
+        out[TS_PLATFORM / "_wireDefinitions.ts"] = (
+            typescript.HEADER + "export const definitions = " + definitions + ";\n"
+        )
         out[TS_PLATFORM / "models.ts"] = typescript.emit_models(spec, ops)
         out[TS_PLATFORM / "_operations.ts"] = typescript.emit_operations(ops)
         out[TS_PLATFORM / "resources" / "base.ts"] = typescript.emit_resources(ops)

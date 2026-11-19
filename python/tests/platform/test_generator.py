@@ -150,10 +150,14 @@ def test_surfaces_ship_independently():
 
 
 def test_mcp_names_keep_existing_tools_or_follow_the_id():
-    # Every catalog entry keeps the monorepo's MCP tool name: 107 tools, same names.
+    # The exact product pin is authoritative for Preview, including every existing MCP name.
     ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
     names = {op_id: ops[op_id].surfaces["mcp"]["name"] for op_id in MCP_IDS}
-    assert len(names) == 107
+    manifest = ROOT / "sdkgen/contracts/mcp-tools.json"
+    if manifest.exists() or "x-skills-only-baseline-sha256" in CONTRACT:
+        pinned = json.loads(manifest.read_text())
+        assert set(names.values()) == {tool["name"] for tool in pinned["tools"]}
+    assert len(set(names.values())) == len(MCP_IDS)
     assert names["datasets.list"] == "list_datasets"
     assert names["traces.list"] == "search_traces"
     # Without an override the name follows the id.

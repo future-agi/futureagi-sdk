@@ -13,10 +13,96 @@
 #   pagination: how the SDK auto-paginates (page param, size param, first page,
 #               where the items are, and `next` or `total_pages` to know when to stop)
 #
-# Imported from future-agi/futureagi/mcp_server/catalog/tools.yaml (all 105 tools).
+# MCP names are checked against the manifest of the pinned backend.
 
 version: 1
 operations:
+
+# Isolated consumption; no legacy route fallback or implicit lease renewal.
+- id: contexts.resolve
+  operation: {method: GET, path: /model-hub/skills/contexts/resolve/}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: contexts.manifest
+  operation: {method: GET, path: '/model-hub/skills/contexts/{resource_id}/versions/{number}/manifest/'}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: contexts.read_file
+  operation: {method: GET, path: '/model-hub/skills/contexts/{resource_id}/versions/{number}/files/'}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: contexts.check_access
+  operation: {method: POST, path: '/model-hub/skills/contexts/{resource_id}/versions/{number}/access-check/'}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: skill_consumption.resolve
+  operation: {method: GET, path: /model-hub/skills/consumption/resolve/}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: skill_consumption.manifest
+  operation: {method: GET, path: '/model-hub/skills/consumption/{resource_id}/versions/{number}/manifest/'}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: skill_consumption.read_file
+  operation: {method: GET, path: '/model-hub/skills/consumption/{resource_id}/versions/{number}/files/'}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: skill_consumption.check_access
+  operation: {method: POST, path: '/model-hub/skills/consumption/{resource_id}/versions/{number}/access-check/'}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+
+# Human/admin authentication, distinct from the isolated consumption principal.
+- id: context_credentials.issue
+  operation: {method: POST, path: /model-hub/skills/contexts/credentials/}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: context_credentials.list
+  operation: {method: GET, path: /model-hub/skills/contexts/credentials/}
+  pagination: {page_param: page, size_param: page_size, first_page: 1, items: results, total_pages: total_pages}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+- id: context_credentials.revoke
+  operation: {method: DELETE, path: '/model-hub/skills/contexts/credentials/{credential_id}/'}
+  surfaces: {sdk: {stability: beta}, mcp: false}
+
+
+# Workspace-authenticated Skills and Context inspection (read-only).
+- id: skills.list_versions
+  operation: {method: GET, path: '/model-hub/skills/{skill_id}/versions/'}
+  pagination: {page_param: page, size_param: page_size, first_page: 1, items: results, total_pages: total_pages}
+  surfaces: {sdk: {}, mcp: {name: list_skill_versions, group: skills, access: read, max_page_size: {page_size: 25}}}
+- id: contexts.list
+  operation: {method: GET, path: '/model-hub/skills/contexts/'}
+  pagination: {page_param: page, size_param: page_size, first_page: 1, items: results, total_pages: total_pages}
+  surfaces: {sdk: {}, mcp: {name: list_agent_contexts, group: skills, access: read, max_page_size: {page_size: 25}}}
+- id: contexts.get
+  operation: {method: GET, path: '/model-hub/skills/contexts/{context_id}/'}
+  surfaces: {sdk: {strict_wire: true}, mcp: {name: get_agent_context, group: skills, access: read}}
+- id: contexts.list_versions
+  operation: {method: GET, path: '/model-hub/skills/contexts/{context_id}/versions/'}
+  pagination: {page_param: page, size_param: page_size, first_page: 1, items: results, total_pages: total_pages}
+  surfaces: {sdk: {}, mcp: {name: list_agent_context_versions, group: skills, access: read, max_page_size: {page_size: 25}}}
+- id: contexts.inspect_snapshot
+  operation: {method: GET, path: '/model-hub/skills/contexts/{context_id}/versions/{number}/inspection/'}
+  surfaces: {sdk: {}, mcp: {name: get_agent_context_snapshot, group: skills, access: read}}
+- id: skills.usage
+  operation: {method: GET, path: '/model-hub/skills/usage/'}
+  surfaces: {sdk: {}, mcp: {name: get_skill_usage, group: skills, access: read, max_page_size: {limit: 100}}}
+- id: skills.latest_load
+  operation: {method: GET, path: '/model-hub/skills/loads/'}
+  surfaces: {sdk: {strict_wire: true}, mcp: {name: get_latest_skill_load, group: skills, access: read}}
+
+# Existing skill-only operations; their MCP names are unchanged.
+- id: skills.list
+  operation: {method: GET, path: /model-hub/skills/}
+  pagination: {page_param: page, size_param: page_size, first_page: 1, items: results, total_pages: total_pages}
+  surfaces: {sdk: {}, mcp: {name: list_skills, group: skills, access: read}}
+- id: skills.resolve
+  operation: {method: GET, path: /model-hub/skills/resolve/}
+  surfaces: {sdk: {}, mcp: {name: get_skill, group: skills, access: read}}
+- id: skills.read_file
+  operation: {method: GET, path: '/model-hub/skills/{skill_id}/versions/{number}/files/'}
+  surfaces: {sdk: {}, mcp: {name: read_skill_file, group: skills, access: read}}
+- id: skills.publish
+  operation: {method: POST, path: /model-hub/skills/publish/}
+  surfaces: {sdk: {}, mcp: {name: publish_skill, group: skills, access: write}}
+- id: skills.set_label
+  operation: {method: PUT, path: '/model-hub/skills/{skill_id}/labels/{label}/'}
+  surfaces: {sdk: {}, mcp: {name: set_skill_label, group: skills, access: write}}
+- id: skills.update_tags
+  operation: {method: PATCH, path: '/model-hub/skills/{skill_id}/'}
+  surfaces: {sdk: {}, mcp: {name: update_skill_tags, group: skills, access: write}}
 
 - id: account.whoami
   description: Return the authenticated user, organization, and workspace context.

@@ -13,7 +13,16 @@ from typing import Any
 
 import fi
 import httpx
-from fi.platform import NOT_GIVEN, Client, ResponseValidationError, models
+from fi.platform import (
+    NOT_GIVEN,
+    ApiKeyAuth,
+    AsyncClient,
+    Client,
+    ContextAuth,
+    RequestOptions,
+    ResponseValidationError,
+    models,
+)
 from fi.platform.models import DashboardDetail, KnowledgeBaseItem, PromptsRunResult
 
 SEEN: list[dict[str, Any]] = []
@@ -75,4 +84,17 @@ assert client.datasets.create(new_dataset_name="x").dataset_id is None
 # The escape hatches keep their types.
 whole: Any = client.request("GET", "/x/", unwrap=None)
 assert whole == {"status": True, "result": {"value": 1}}
+# Explicit auth and immutable continuation remain usable from the installed wheel.
+def context_handler(request: httpx.Request) -> httpx.Response:
+    assert request.headers["authorization"] == "Context synthetic-context"
+    assert request.headers["x-context-resolution"] == "synthetic-lease"
+    assert not {"x-api-key", "x-secret-key"} & set(request.headers)
+    return httpx.Response(200, content=b"PK\x00\xff")
+
+
+context = Client(auth=ContextAuth("synthetic-context"), base_url="https://backend.test", http_client=httpx.Client(transport=httpx.MockTransport(context_handler)))
+assert context.request("GET", "/fixture/", decode="bytes", options=RequestOptions(resolution_id="synthetic-lease")) == b"PK\x00\xff"
+explicit = Client(auth=ApiKeyAuth("x", "y"), base_url="http://backend.test", http_client=httpx.Client(transport=httpx.MockTransport(handler)))
+assert explicit.request("GET", "/x/") == {"value": 1}
+async_context = AsyncClient(auth=ContextAuth("synthetic-context"), base_url="https://backend.test")
 print(f"consumer: ok ({len(SEEN)} requests, template {template_id})")

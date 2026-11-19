@@ -20,11 +20,12 @@ export {
   PaymentRequiredError,
   PermissionDeniedError,
   RateLimitError,
+  ResponseValidationError,
   UnprocessableEntityError,
 } from "./errors";
 export { Page, Pager } from "./pagination";
 export { Resource } from "./resource";
-export { FileInput, JsonValue, Operation, RequestArgs, RequestOptions, Transport } from "./transport";
+export { Auth, FileInput, JsonValue, Operation, RequestArgs, RequestOptions, Transport } from "./transport";
 // The resource classes behind `client.<name>` (subclass them to add methods), their generated base
 // classes, every method's `params` type, and the `Resources` map that lists them.
 export * from "./resources";

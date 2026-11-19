@@ -53,6 +53,7 @@ AREAS: list[tuple[str, list[str]]] = [
     ("Simulation", ["agents", "simulation"]),
     ("Knowledge bases", ["knowledge_bases", "file_knowledge_bases"]),
     ("Gateway", ["gateway", "models", "provider_keys"]),
+    ("Skills", ["skills", "contexts", "skill_consumption", "context_credentials"]),
 ]
 OTHER_AREA = "Other"
 
@@ -226,6 +227,8 @@ def _example_for(
 
 def _placeholder(p: Param) -> str:
     """A path argument's example value: `"your-dataset-id"`."""
+    if p.schema.get("type") in {"integer", "number"}:
+        return "1"
     return json.dumps(f"your-{py.arg_name(p).replace('_', '-')}")
 
 
@@ -266,7 +269,7 @@ def typescript_example(op: Op, definitions: dict) -> str:
     call = f"client.{dotted(op.namespace, 'typescript')}.{ts.ts_method(op)}"
     args = [_placeholder(p) for p in op.params_in("path")]
     fields = [
-        f"{ts.prop_key(p.name)}: {_example_value(p, 'typescript', definitions)}"
+        f"{ts.prop_key(ts.param_key(p))}: {_example_value(p, 'typescript', definitions)}"
         for p in _example_params(op)
     ]
     if len(fields) > 1:
@@ -291,7 +294,7 @@ def python_signature(op: Op) -> str:
 
 def typescript_signature(op: Op) -> str:
     interface, fields = ts._params_interface(op)
-    args = [f"{ts.ts_arg(p)}: string" for p in op.params_in("path")]
+    args = [f"{ts.ts_arg(p)}: {ts.ts_type(p.schema, for_input=True)}" for p in op.params_in("path")]
     if fields:
         optional = "" if any(p.required for p in fields) else " = {}"
         args.append(f"params: {ts.ts_params_type(op)}{optional}")
@@ -319,6 +322,8 @@ def typescript_signature(op: Op) -> str:
 
 def _returns(op: Op, homes: dict[str, str]) -> str:
     returns = op.returns or {}
+    if op.decode == "bytes":
+        return "The response body as bytes."
     if op.decode == "text":
         return "The response body as text."
     if op.decode == "auto":
@@ -337,13 +342,15 @@ def _returns(op: Op, homes: dict[str, str]) -> str:
 
 
 def _param_field(p: Param) -> str:
-    kind = {"path": "path", "query": "query", "body": "body"}[p.location]
+    kind = {"path": "path", "query": "query", "body": "body", "header": "header"}[p.location]
     attrs = [f'{kind}="{p.name}"', f'type="{doc_type(p.schema, for_input=True)}"']
     attrs.append("required" if p.required else "optional")
     schema = p.schema or {}
     if "enum" in schema:
         attrs.append(f"enum={{{json.dumps([str(v) for v in schema['enum']])}}}")
     text = md(real_description(p.name, p.description))
+    if p.location == "header":
+        text = f"SDK argument `{ts.param_key(p)}`." + (f" {text}" if text else "")
     if p.location == "path" and not text:
         text = f"Positional argument `{py.arg_name(p)}`."
     if not text:
@@ -394,7 +401,7 @@ def _method_section(op: Op, homes: dict[str, str], definitions: dict) -> str:
     page_params = {op.pagination["page_param"]} if op.pagination else set()
     params = [p for p in op.params if p.name not in page_params]
     params.sort(
-        key=lambda p: ({"path": 0, "query": 1, "body": 2}[p.location], not p.required)
+        key=lambda p: ({"path": 0, "query": 1, "body": 2, "header": 3}[p.location], not p.required)
     )
     out.append("#### Parameters\n\n")
     if params:

@@ -35,6 +35,9 @@ export class APIError extends FutureAGIError {
   }
 }
 
+/** A successful response did not satisfy its checked public schema. Never includes body values. */
+export class ResponseValidationError extends FutureAGIError {}
+
 export class BadRequestError extends APIError {}
 export class AuthenticationError extends APIError {}
 /** Feature not on the organization's plan. */

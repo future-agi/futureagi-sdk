@@ -9,10 +9,10 @@ Two ways in, same endpoints the UI uses:
     # a fresh account on a throwaway stack (CI, the monorepo's E2E stack)
     python sdkgen/local_api_key.py --signup --base-url http://localhost:8100
 
---signup follows e2e/lib/provisioning.ts in the monorepo: POST /accounts/signup/,
-POST /accounts/token/, GET /accounts/user-info/ until the default workspace exists,
-GET /accounts/keys/ for the organization's system key. The login path calls
-POST /accounts/token/ and POST /accounts/key/generate_secret_key/ instead.
+--signup calls POST /accounts/signup/, POST /accounts/token/, and
+GET /accounts/user-info/ until the default workspace exists. By default it reads the
+system key as before. Add --workspace-user-key to provision the user-owned key required
+for private context authoring and scoped credential administration.
 
 The tests read .env.local (python/tests/platform/conftest.py, src/platform/__tests__/live.test.ts).
 """
@@ -44,7 +44,7 @@ def login_keys(http: httpx.Client, email: str, password: str) -> dict:
     return created.json()["result"]
 
 
-def signup_keys(http: httpx.Client, label: str) -> dict:
+def signup_keys(http: httpx.Client, label: str, *, workspace_user_key: bool = False) -> dict:
     # futureagi.com addresses skip the captcha the way the monorepo's E2E harness does.
     run_id = f"{int(time.time()):x}-{secrets.token_hex(3)}"
     email = f"sdk-e2e-{label}-{run_id}@futureagi.com"
@@ -54,7 +54,7 @@ def signup_keys(http: httpx.Client, label: str) -> dict:
         json={"email": email, "full_name": f"SDK E2E {label}", "password": password, "company_name": "SDK E2E"},
     )
     if signup.status_code >= 400:
-        sys.exit(f"signup failed ({signup.status_code}): {signup.text[:300]}")
+        sys.exit(f"signup failed ({signup.status_code})")
     login = http.post("/accounts/token/", json={"email": email, "password": password, "remember_me": True})
     login.raise_for_status()
     headers = {"Authorization": f"Bearer {login.json()['access']}"}
@@ -70,22 +70,33 @@ def signup_keys(http: httpx.Client, label: str) -> dict:
         if organization_id and workspace_id:
             break
         if time.monotonic() > deadline:
-            sys.exit(f"no default workspace for {email} after 60s: {body}")
+            sys.exit("no default workspace for the staging account after 60s")
         time.sleep(1)
 
-    keys = http.get(
-        "/accounts/keys/",
-        headers={**headers, "X-Organization-Id": organization_id, "X-Workspace-Id": workspace_id},
+    scope = {**headers, "X-Organization-Id": organization_id, "X-Workspace-Id": workspace_id}
+    if not workspace_user_key:
+        keys = http.get("/accounts/keys/", headers=scope)
+        keys.raise_for_status()
+        data = keys.json()["data"]
+        return {"api_key": data["api_key"], "secret_key": data["secret_key"],
+                "masked_api_key": data["api_key"][:6] + "…", "email": email}
+
+    # Private context authoring/credential administration require a human-owned
+    # user key, not the signup organization's broad system key.
+    keys = http.post(
+        "/accounts/key/generate_secret_key/",
+        json={"key_name": f"sdk-live-{run_id}"},
+        headers=scope,
     )
     keys.raise_for_status()
-    data = keys.json()["data"]
-    return {"api_key": data["api_key"], "secret_key": data["secret_key"], "masked_api_key": data["api_key"][:6] + "…", "email": email}
+    return {**keys.json()["result"], "email": email, "workspace_id": workspace_id}
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--base-url", default=os.environ.get("FI_BASE_URL", "http://localhost:8000"))
     parser.add_argument("--signup", action="store_true", help="create a fresh account instead of logging in")
+    parser.add_argument("--workspace-user-key", action="store_true", help="--signup: request a user-owned key for Skills administration")
     parser.add_argument("--label", default="ci", help="--signup: part of the generated email address")
     parser.add_argument("--email", default=os.environ.get("FAGI_ADMIN_EMAIL"))
     parser.add_argument("--password-file", help="file holding the password (keeps it off the command line)")
@@ -94,7 +105,7 @@ def main() -> int:
 
     with httpx.Client(base_url=args.base_url, timeout=60) as http:
         if args.signup:
-            result = signup_keys(http, args.label)
+            result = signup_keys(http, args.label, workspace_user_key=args.workspace_user_key)
         else:
             password = Path(args.password_file).read_text().strip() if args.password_file else os.environ.get("FAGI_ADMIN_PASSWORD")
             if not args.email or not password:
@@ -102,10 +113,12 @@ def main() -> int:
             result = login_keys(http, args.email, password)
 
     env = Path(args.output)
-    env.write_text(f"FI_BASE_URL={args.base_url}\nFI_API_KEY={result['api_key']}\nFI_SECRET_KEY={result['secret_key']}\n")
+    content = f"FI_BASE_URL={args.base_url}\nFI_API_KEY={result['api_key']}\nFI_SECRET_KEY={result['secret_key']}\n"
+    if result.get("workspace_id"):
+        content += f"FI_WORKSPACE_ID={result['workspace_id']}\n"
+    env.write_text(content)
     env.chmod(0o600)
-    who = f" as {result['email']}" if "email" in result else ""
-    print(f"wrote {env} (key {result['masked_api_key']}){who}")
+    print(f"wrote staging credentials to {env}")
     return 0
 
 
