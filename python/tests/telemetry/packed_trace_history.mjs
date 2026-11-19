@@ -281,7 +281,7 @@ for (const pii of [false,true]) test(`host identity copied only under FI privacy
 });
 // Two providers: limits and native onStart belong only to the host. Inspect
 // the emitted SDK load at an uncapped, ordinary exporter, not through FI.
-async function separateLoadHost({owned=false, spanLimits, onStart, unknown=false}, run) {
+async function separateLoadHost({owned=false, spanLimits, onStart, unknown=false, piiRedaction=false}, run) {
   const hook = {onStart, onEnd() {}, async forceFlush() {}, async shutdown() {}};
   const host = owned ? register({projectName:'identity',setGlobalTracerProvider:false,
     runtimeAttributes:!sdkProcessor,spanProcessors:[...(sdkProcessor ? [new FutureAGISkillsSpanProcessor()] : []),hook]}) :
@@ -295,11 +295,11 @@ async function separateLoadHost({owned=false, spanLimits, onStart, unknown=false
     // its readable attributes do not attest the provider's value limit.
     const adapter = unknown ? {startSpan(...args) {
       const span = native.startSpan(...args);
-      return {attributes:span.attributes,spanContext:span.spanContext.bind(span),
+      return {attributes:unknown === 'stale' ? {} : span.attributes,spanContext:span.spanContext.bind(span),
         isRecording:span.isRecording.bind(span),setAttribute:span.setAttribute.bind(span),
         setAttributes:span.setAttributes.bind(span),end:span.end.bind(span)};
     }} : native;
-    await run(new FITracer({tracer:adapter,traceConfig:{piiRedaction:true}}),out);
+    await run(new FITracer({tracer:adapter,traceConfig:{piiRedaction}}),out,native);
   } finally { localSdk.configure(); await loads.shutdown(); await host.shutdown(); }
 }
 for (const boundary of ['finite','unknown','complete']) test(`identity export to distinct plain load ${boundary}`, async () => {
@@ -308,7 +308,7 @@ for (const boundary of ['finite','unknown','complete']) test(`identity export to
   const full = boundary === 'complete';
   const values = full ? ['framework','framework-id'] : [local+'@example.test',identifier+'@example.test'];
   let native;
-  await separateLoadHost({spanLimits:{attributeValueLengthLimit:full ? 256 : local.length}, unknown:boundary==='unknown',
+  await separateLoadHost({spanLimits:{attributeValueLengthLimit:full ? 256 : local.length}, unknown:boundary==='unknown', piiRedaction:true,
     onStart(span) { native=span; span.setAttributes({[NAME]:values[0],[ID]:values[1],'test.private':'exclude'}); }}, async (fi,out) => {
     await fi.startActiveSpan('wrapped',async active => { try {
       assert.deepEqual([native.attributes[NAME],native.attributes[ID]],full ? values : [local,identifier]);
@@ -342,8 +342,30 @@ for (const owned of [true,false]) for (const setter of ['single','bulk']) for (c
       assert.deepEqual(loads.map(s=>[s.attributes[VERSION],s.attributes[NAME]]),
         [[a.version,'alpha'],[b.version,write==='absent'?'beta':value]]);
       assert.equal(native.attributes[VERSION],b.version);
-      assert.equal(native.attributes[NAME],write==='absent' ? owned ? 'beta' : undefined : value);
+      assert.equal(native.attributes[NAME],write==='absent' ? 'beta' : value);
     });
   });
 }
+test('opaque adapter cannot claim an empty underlying name slot at end',async () => {
+  const a=fixture('agent_context','alpha'), b=fixture('agent_context','beta');
+  let native,saved;
+  await separateLoadHost({unknown:'stale',onStart(span){native=span;saved=span.setAttribute.bind(span);}},async (fi,out) => {
+    await fi.startActiveSpan('wrapped',async active=>{ try {
+      await a.snapshot.readFile('AGENTS.md'); saved(NAME,'worker');
+      await b.snapshot.readFile('AGENTS.md');
+    } finally { active.end(); } });
+    assert.deepEqual(out.getFinishedSpans().map(s=>s.attributes[NAME]),['alpha','beta']);
+    assert.equal(native.attributes[NAME],'worker');
+  });
+});
+for (const name of ['worker','alpha']) test(`owned native onStart bound setter writes ${name}`,async () => {
+  const a=fixture('agent_context','alpha'), b=fixture('agent_context','beta'); let saved;
+  await separateLoadHost({owned:true,onStart(span){saved=span.setAttribute.bind(span);}},async (_fi,out,nativeTracer) => {
+    await nativeTracer.startActiveSpan('plain',async span=>{ try {
+      await a.snapshot.readFile('AGENTS.md'); assert.equal(span.attributes[NAME],'alpha');
+      saved(NAME,name); await b.snapshot.readFile('AGENTS.md'); assert.equal(span.attributes[NAME],name);
+    } finally { span.end(); } });
+    assert.deepEqual(out.getFinishedSpans().map(s=>[s.attributes[NAME],s.attributes[VERSION]]),[['alpha',a.version],[name,b.version]]);
+  });
+});
 after(async () => { delete process.env.FI_SKILLS_TRACING; configure(); await provider.shutdown(); });

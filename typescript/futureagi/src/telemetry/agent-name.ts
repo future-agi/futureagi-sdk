@@ -2,9 +2,11 @@
 // optional SDK/OTel declarations. Standard recording spans expose both APIs.
 import type { Attributes } from './otel';
 const VIEW = Symbol.for('futureagi.runtime.agent-identity.v1');
-interface View { name?: string; id?: string; automatic: boolean; canStampName?: boolean }
+const SET_CONTEXT_NAME = Symbol.for('futureagi.runtime.set-context-name.v1');
+interface View { name?: string; id?: string; automatic: boolean }
 interface Writers {
   [VIEW]?(mark?: true): View;
+  [SET_CONTEXT_NAME]?(name: string): void;
   setAttribute(key: string, value: unknown): unknown;
   setAttributes?(attributes: Readonly<Record<string, unknown>>): unknown;
 }
@@ -57,6 +59,14 @@ export function markInheritedName(span: Writers): void {
     origin = tracked;
   }
   origin.automatic = true;
+}
+
+// Keep the generated write and its mark adjacent. A standalone FI wrapper
+// can safely defer the write if the host already distributed native setters.
+export function writeContextName(span: Writers, name: string): void {
+  if (span[SET_CONTEXT_NAME]) { span[SET_CONTEXT_NAME](name); return; }
+  span.setAttribute(AGENT_NAME, name);
+  markInheritedName(span);
 }
 
 const markScope = Object.assign((span: Writers) => markInheritedName(span), {source: 'agent_scope' as const});
