@@ -214,11 +214,9 @@ def _clean_sql_otlp_receipt(body):
     return True
 
 
-@pytest.fixture
-def sql_project(client):
-    """Seed ClickHouse via the released standalone collector, as in OBS-E2E-061."""
-    url = _sql_collector_url(os.environ["FI_BASE_URL"], os.environ.get("FI_COLLECTOR_OTLP_HTTP_PORT", "24318"))
-    name = f"sdk-sql-{uuid.uuid4().hex}"
+def _seed_sql_spans(url, name):
+    """Keep the collector exchange out of subsequent project-discovery tracebacks."""
+    __tracebackhide__ = True
     trace_id, session_id = uuid.uuid4().hex, str(uuid.uuid4())
     start = time.time_ns() - 1_000_000_000
 
@@ -247,13 +245,30 @@ def sql_project(client):
             pytest.fail(f"SQL fixture collector returned HTTP {reply.status_code}", pytrace=False)
         if not _clean_sql_otlp_receipt(reply.content):
             pytest.fail("SQL fixture collector returned an invalid or partial OTLP receipt", pytrace=False)
+    return spans
 
+
+def _discover_sql_project(client, name):
     def matching_projects():
-        return [p["id"] for p in client.projects.list(name=name)["projects"] if p["name"] == name]
+        try:
+            return [p["id"] for p in client.projects.list(name=name)["projects"] if p["name"] == name]
+        except fi.FutureAGIError:
+            pass  # The SDK error may include a response body; fail outside its exception handler.
+        pytest.fail("SQL fixture project lookup failed", pytrace=False)
 
     assert wait_until(lambda: len(matching_projects()) == 1, timeout=60), "collector project was not created"
     project_id, = matching_projects()
-    return project_id, name, spans
+    return project_id
+
+
+@pytest.fixture
+def sql_project(client):
+    """Seed ClickHouse via the released standalone collector, as in OBS-E2E-061."""
+    __tracebackhide__ = True  # Keep the span payload out of a discovery failure's locals, too.
+    url = _sql_collector_url(os.environ["FI_BASE_URL"], os.environ.get("FI_COLLECTOR_OTLP_HTTP_PORT", "24318"))
+    name = f"sdk-sql-{uuid.uuid4().hex}"
+    spans = _seed_sql_spans(url, name)
+    return _discover_sql_project(client, name), name, spans
 
 
 def test_sql_job_on_synthetic_spans(client, sql_project):

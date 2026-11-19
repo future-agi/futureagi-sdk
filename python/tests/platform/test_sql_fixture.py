@@ -1,6 +1,7 @@
 """Exercise the SQL seed fixture without a backend, real credentials or network I/O."""
 
 import os
+import secrets
 import socket
 import subprocess
 import sys
@@ -12,7 +13,7 @@ import test_all_operations_live as live
 
 
 @pytest.fixture
-def wire(monkeypatch):
+def collector(monkeypatch):
     monkeypatch.setenv("FI_API_KEY", "synthetic-api")
     monkeypatch.setenv("FI_SECRET_KEY", "synthetic-secret")
     monkeypatch.setenv("FI_BASE_URL", "http://localhost:8100")
@@ -23,7 +24,7 @@ def wire(monkeypatch):
     requests = []
     client = httpx.Client
 
-    def seed(body=b"{}", status=200, error=None):
+    def configure(body=b"{}", status=200, error=None):
         def record(request):
             requests.append(request)
             if error:
@@ -35,6 +36,16 @@ def wire(monkeypatch):
             return client(transport=httpx.MockTransport(record), **kwargs)
 
         monkeypatch.setattr(httpx, "Client", mock_client)
+
+    return configure, requests, sdk
+
+
+@pytest.fixture
+def wire(collector):
+    configure, requests, sdk = collector
+
+    def seed(*args, **kwargs):
+        configure(*args, **kwargs)
         return live.sql_project.__wrapped__(sdk)
 
     return seed, requests, sdk
@@ -139,27 +150,57 @@ def test_sql_seed_does_not_replay_after_ambiguous_transport_error(wire):
     assert len(requests) == 1 and not sdk.mock_calls
 
 
+@pytest.fixture(params=["transport", "status", "invalid", "timeout", "lookup", "sdk_error"])
+def diagnostic_client(collector, monkeypatch, request):
+    """Configure the child pytest's real sql_project fixture before it runs."""
+    configure, requests, sdk = collector
+    monkeypatch.setenv("FI_API_KEY", os.environ["PROBE_KEY"])
+    monkeypatch.setenv("FI_SECRET_KEY", os.environ["PROBE_SECRET"])
+    scenario = request.param
+    if scenario == "transport":
+        configure(error=httpx.ReadError(os.environ["PROBE_DETAIL"]))
+    elif scenario in ("status", "invalid"):
+        configure(os.environ["PROBE_BODY"].encode(), 503 if scenario == "status" else 200)
+    else:
+        configure(b'{"partialSuccess":{"rejectedSpans":"00000000000000000000"}}')
+        wait = live.wait_until
+        monkeypatch.setattr(live, "wait_until", lambda predicate, **_: wait(predicate, timeout=0))
+        sdk.projects.list.side_effect = None
+        sdk.projects.list.return_value = {"projects": []}
+        if scenario == "lookup":
+            sdk.projects.list.side_effect = LookupError("simulated lookup exception")
+        elif scenario == "sdk_error":
+            sdk.projects.list.side_effect = live.fi.APIConnectionError(os.environ["PROBE_DETAIL"])
+    yield sdk
+    assert len(requests) == 1
+    assert sdk.projects.list.call_count == int(scenario in ("timeout", "lookup", "sdk_error"))
+
+
 def test_sql_seed_failure_output_is_sanitized(tmp_path):
     script = tmp_path / "failure_test.py"
     script.write_text(
-        "import httpx\n"
-        "from test_sql_fixture import wire\n\n"
-        "def test_transport(wire):\n"
-        "    wire[0](error=httpx.ReadError('opaque-transport-detail'))\n\n"
-        "def test_status(wire):\n"
-        "    wire[0](b'opaque-body', 503)\n",
+        "from test_sql_fixture import collector, diagnostic_client as client\n"
+        "from test_all_operations_live import sql_project\n\n"
+        "def test_seed(sql_project):\n"
+        "    raise AssertionError('fixture unexpectedly succeeded')\n",
         encoding="utf-8",
     )
+    probes = {key: secrets.token_hex(12) for key in ("PROBE_KEY", "PROBE_SECRET", "PROBE_BODY", "PROBE_DETAIL")}
     result = subprocess.run(
         [sys.executable, "-m", "pytest", "--showlocals", "--tb=long", "-q", str(script)],
         cwd=tmp_path, capture_output=True, text=True, timeout=45,
-        env={**os.environ, "PYTHONPATH": os.pathsep.join(sys.path), "PYTEST_ADDOPTS": "",
+        env={**os.environ, **probes, "PYTHONPATH": os.pathsep.join(sys.path), "PYTEST_ADDOPTS": "",
              "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1"},
     )
     output = (result.stdout + result.stderr).lower()
-    assert result.returncode == pytest.ExitCode.TESTS_FAILED and "2 failed" in output
+    for marker in (*probes.values(), "00000000000000000000", "resourcespans", "fi.span.kind", "opaque-header",
+                   "x-api-key", "x-secret-key", "location", "<response [", "<httpx.client"):
+        if marker in output:
+            pytest.fail("SQL fixture debug output exposed collector exchange data", pytrace=False)
+    assert result.returncode == pytest.ExitCode.TESTS_FAILED and "6 errors" in output
     assert "sql fixture collector request failed" in output
     assert "sql fixture collector returned http 503" in output
-    for marker in ("synthetic-api", "synthetic-secret", "opaque-body", "opaque-header",
-                   "opaque-transport-detail", "x-api-key", "x-secret-key", "location"):
-        assert marker not in output
+    assert "sql fixture collector returned an invalid or partial otlp receipt" in output
+    assert "collector project was not created" in output
+    assert "lookuperror: simulated lookup exception" in output
+    assert "sql fixture project lookup failed" in output
