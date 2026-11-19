@@ -8,15 +8,23 @@ export interface Context {
   deleteValue(key: symbol): Context;
 }
 
-export interface Span {
+/** Only the operations used on the child span emitted by the bridge. */
+interface EmittedSpan<MutationResult = void> {
   isRecording(): boolean;
-  spanContext(): { traceId: string };
-  setAttribute(key: string, value: string | number | boolean | string[]): Span;
-  setStatus(status: { code: number; message?: string }): Span;
+  setAttribute(key: string, value: string | number | boolean | string[]): MutationResult;
+  setStatus(status: { code: number; message?: string }): MutationResult;
   end(): void;
+}
+
+export interface Span extends EmittedSpan<Span> {
+  spanContext(): { traceId: string };
+}
+
+interface Tracer {
+  startSpan(name: string, options: { kind: 0; startTime: number }, parent: Context): EmittedSpan;
 }
 
 /** Runtime-compatible configuration shape; provider implementation stays optional. */
 export interface TracerProvider {
-  getTracer(name: string): unknown;
+  getTracer(name: string): Tracer;
 }

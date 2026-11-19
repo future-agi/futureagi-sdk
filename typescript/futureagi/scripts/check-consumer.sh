@@ -31,8 +31,10 @@ cp "$pkg"/consumer/*.mts "$pkg"/consumer/*.mjs "$pkg"/consumer/tsconfig.json .
 # more consumer module: an example that does not compile against the packed package fails here.
 node "$pkg/scripts/docs-examples.mjs" "$pkg/../../docs/sdk-reference" docs-examples.mts
 
-echo "consumer: tsc against $tarball (consumer-types.mts + docs-examples.mts)"
+echo "consumer: NodeNext tsc against $tarball"
 npx tsc -p tsconfig.json
+echo "consumer: Bundler tsc against $tarball"
+npx tsc -p tsconfig.json --module ESNext --moduleResolution Bundler
 node context-consumer.mjs
 
 echo "consumer: ESM import"
