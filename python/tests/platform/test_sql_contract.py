@@ -151,7 +151,9 @@ def test_scoped_sync_rejects_mcp_input_schema_drift(scoped_sync, field, value):
     compose, _, manifest = scoped_sync
     reader = next(tool for tool in manifest["tools"] if tool["name"] == "get_sql_result")
     reader["inputSchema"]["properties"]["limit"][field] = value
-    with pytest.raises(ValueError, match=r"SQL MCP input schema mismatch: sql\.get_result\.limit"):
+    message = (r"SQL MCP input schema mismatch: sql\.get_result\.limit"
+               if field == "type" else r"SQL MCP page limit mismatch: sql\.get_result\.limit")
+    with pytest.raises(ValueError, match=message):
         compose()
 
 
