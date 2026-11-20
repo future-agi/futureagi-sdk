@@ -29,6 +29,9 @@ import pytest
 import yaml
 
 CATALOG = Path(__file__).resolve().parents[3] / "sdkgen" / "catalog" / "operations.yaml"
+SQL_TOTAL_TIMEOUT = 150.0
+SQL_CLEANUP_TIMEOUT = 10.0
+TERMINAL_SQL_STATES = {"succeeded", "failed", "cancelled"}
 
 CODE_EVAL = "def evaluate(input, **kwargs):\n    return {'result': True, 'reason': 'ok'}\n"
 
@@ -137,7 +140,7 @@ def project(client):
 
 def _poll_sql_result(get_result, job_id, project_id, *, clock=time.monotonic, sleep=time.sleep):
     # The backend allows 90s queued, then 45s from execution start; allow 15s for transport.
-    deadline = clock() + 150
+    deadline = clock() + SQL_TOTAL_TIMEOUT
     state = "not polled"
     while (remaining := deadline - clock()) > 0:
         page = get_result(job_id, project_id=project_id, offset=0, limit=1,
@@ -147,16 +150,31 @@ def _poll_sql_result(get_result, job_id, project_id, *, clock=time.monotonic, sl
         remaining = deadline - clock()
         if remaining <= 0:
             break
-        if state in {"succeeded", "failed", "cancelled"}:
+        if state in TERMINAL_SQL_STATES:
             return page
         sleep(min(0.5, remaining))
     raise AssertionError(f"SQL job {job_id} did not finish in 150s: {state}")
 
 
-async def _poll_sql_result_async(client, job_id, project_id):
-    deadline = time.monotonic() + 150
+def _sql_request_options(deadline, *, clock=time.monotonic):
+    remaining = deadline - clock()
+    if remaining <= 0:
+        raise AssertionError("SQL request deadline exceeded")
+    return fi.RequestOptions(timeout=remaining, max_retries=0)
+
+
+async def _poll_sql_result_async(
+    client,
+    job_id,
+    project_id,
+    *,
+    clock=time.monotonic,
+    sleep=asyncio.sleep,
+    deadline=None,
+):
+    deadline = clock() + SQL_TOTAL_TIMEOUT if deadline is None else deadline
     state = "not polled"
-    while (remaining := deadline - time.monotonic()) > 0:
+    while (remaining := deadline - clock()) > 0:
         page = await client.sql.get_result(
             job_id,
             project_id=project_id,
@@ -166,10 +184,60 @@ async def _poll_sql_result_async(client, job_id, project_id):
         )
         assert page.id == job_id and page.project_id == project_id
         state = page.state
-        if state in {"succeeded", "failed", "cancelled"}:
+        remaining = deadline - clock()
+        if remaining <= 0:
+            break
+        if state in TERMINAL_SQL_STATES:
             return page
-        await asyncio.sleep(min(0.5, remaining))
+        await sleep(min(0.5, remaining))
     raise AssertionError(f"SQL async job {job_id} did not finish in 150s: {state}")
+
+
+def _cancel_sql_job_bounded(client, job_id, project_id, *, timeout=SQL_CLEANUP_TIMEOUT,
+                            clock=time.monotonic, sleep=time.sleep):
+    deadline = clock() + timeout
+    state = "unknown"
+    while (remaining := deadline - clock()) > 0:
+        result = client.sql.cancel(
+            job_id,
+            project_id=project_id,
+            options=fi.RequestOptions(timeout=remaining, max_retries=0),
+        )
+        state = result.state
+        if state in TERMINAL_SQL_STATES:
+            return result
+        remaining = deadline - clock()
+        if remaining <= 0:
+            break
+        sleep(min(0.5, remaining))
+    raise AssertionError(f"SQL job {job_id} remained {state} after bounded cleanup")
+
+
+async def _cancel_sql_job_bounded_async(
+    client,
+    job_id,
+    project_id,
+    *,
+    timeout=SQL_CLEANUP_TIMEOUT,
+    clock=time.monotonic,
+    sleep=asyncio.sleep,
+):
+    deadline = clock() + timeout
+    state = "unknown"
+    while (remaining := deadline - clock()) > 0:
+        result = await client.sql.cancel(
+            job_id,
+            project_id=project_id,
+            options=_sql_request_options(deadline, clock=clock),
+        )
+        state = result.state
+        if state in TERMINAL_SQL_STATES:
+            return result
+        remaining = deadline - clock()
+        if remaining <= 0:
+            break
+        await sleep(min(0.5, remaining))
+    raise AssertionError(f"SQL async job {job_id} remained {state} after bounded cleanup")
 
 
 def _run_with_cleanup_preserving_primary(work, cleanup):
@@ -182,6 +250,32 @@ def _run_with_cleanup_preserving_primary(work, cleanup):
         primary = exc
     try:
         cleanup()
+    except BaseException as exc:
+        cleanup_error = exc
+    if primary is not None:
+        if cleanup_error is not None:
+            warnings.warn(
+                "SQL cleanup failed after the primary failure "
+                f"({type(cleanup_error).__name__})",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+        raise primary.with_traceback(primary.__traceback__)
+    if cleanup_error is not None:
+        raise cleanup_error.with_traceback(cleanup_error.__traceback__)
+    return result
+
+
+async def _run_async_with_cleanup_preserving_primary(work, cleanup):
+    """Run async cleanup without replacing a failure from the operation under test."""
+    primary = cleanup_error = None
+    result = None
+    try:
+        result = await work()
+    except BaseException as exc:
+        primary = exc
+    try:
+        await cleanup()
     except BaseException as exc:
         cleanup_error = exc
     if primary is not None:
@@ -352,7 +446,7 @@ def test_sql_job_on_synthetic_spans(client, sql_project):
     def cleanup():
         nonlocal final
         # Cancelling an already completed job returns its unchanged terminal snapshot.
-        final = client.sql.cancel(job.id, project_id=project_id)
+        final = _cancel_sql_job_bounded(client, job.id, project_id)
         assert final.id == job.id and final.project_id == project_id
         assert final.state == "succeeded"
 
@@ -360,19 +454,46 @@ def test_sql_job_on_synthetic_spans(client, sql_project):
 
     # A tiny fixture often completes before the cancellation request reaches the API. Do not
     # call that a cancellation proof; the explicit pending path keeps the gate honest.
-    active_job = client.sql.run(
-        project_id=project_id,
-        sql="SELECT name FROM spans ORDER BY name",
-        start=start.isoformat(),
-        end=datetime.now(timezone.utc).isoformat(),
-        reuse=False,
-    )
-    if active_job.state in {"succeeded", "failed", "cancelled"}:
-        pytest.skip(f"pending active SQL cancellation: fixture job was already {active_job.state}")
-    cancelled = client.sql.cancel(active_job.id, project_id=project_id)
-    if cancelled.state != "cancelled":
-        pytest.skip(f"pending active SQL cancellation: job reached {cancelled.state} before cancel")
-    assert cancelled.id == active_job.id and cancelled.project_id == project_id
+    active_job = None
+    active_job_id = None
+    active_state = None
+
+    def active_work():
+        nonlocal active_job, active_job_id, active_state
+        active_job = client.sql.run(
+            project_id=project_id,
+            sql="SELECT name FROM spans ORDER BY name",
+            start=start.isoformat(),
+            end=datetime.now(timezone.utc).isoformat(),
+            reuse=False,
+            options=fi.RequestOptions(timeout=SQL_TOTAL_TIMEOUT, max_retries=0),
+        )
+        active_job_id = active_job.id
+        active_state = active_job.state
+        assert active_job_id and active_job.project_id == project_id
+        if active_state in TERMINAL_SQL_STATES:
+            pytest.skip(f"pending active SQL cancellation: fixture job was already {active_state}")
+        cancelled = client.sql.cancel(
+            active_job_id,
+            project_id=project_id,
+            options=fi.RequestOptions(timeout=SQL_CLEANUP_TIMEOUT, max_retries=0),
+        )
+        active_state = cancelled.state
+        if active_state != "cancelled":
+            pytest.skip(f"pending active SQL cancellation: job reached {active_state} before cancel")
+        assert cancelled.id == active_job_id and cancelled.project_id == project_id
+
+    def active_cleanup():
+        nonlocal active_state
+        if active_state in TERMINAL_SQL_STATES:
+            return
+        if not active_job_id:
+            raise AssertionError("owned active SQL job did not return an id")
+        final = _cancel_sql_job_bounded(client, active_job_id, project_id)
+        active_state = final.state
+        assert active_state in TERMINAL_SQL_STATES
+
+    _run_with_cleanup_preserving_primary(active_work, active_cleanup)
 
 
 def test_sql_job_async_on_synthetic_spans(sql_project):
@@ -380,29 +501,55 @@ def test_sql_job_async_on_synthetic_spans(sql_project):
     project_id, _, spans = sql_project
 
     async def run():
+        deadline = time.monotonic() + SQL_TOTAL_TIMEOUT
         async with fi.AsyncClient(
             api_key=os.environ["FI_API_KEY"],
             secret_key=os.environ["FI_SECRET_KEY"],
             base_url=os.environ["FI_BASE_URL"],
             strict_responses=True,
         ) as client:
-            catalog = await client.sql.get_catalog(project_id=project_id)
-            assert catalog.max_window_days >= 1
-            start = datetime.fromtimestamp(
-                int(spans[0]["startTimeUnixNano"]) / 1e9, tz=timezone.utc
-            ) - timedelta(minutes=1)
-            job = await client.sql.run(
-                project_id=project_id,
-                sql="SELECT count() AS n FROM spans",
-                start=start.isoformat(),
-                end=datetime.now(timezone.utc).isoformat(),
-            )
-            assert job.id and job.project_id == project_id
-            page = await _poll_sql_result_async(client, job.id, project_id)
-            assert page.state == "succeeded", page.error
-            assert page.result.rows == [[len(spans)]]
-            final = await client.sql.cancel(job.id, project_id=project_id)
-            assert final.id == job.id and final.project_id == project_id
+            job = None
+            known_state = None
+
+            async def work():
+                nonlocal job, known_state
+                catalog = await client.sql.get_catalog(
+                    project_id=project_id,
+                    options=_sql_request_options(deadline),
+                )
+                assert catalog.max_window_days >= 1
+                start = datetime.fromtimestamp(
+                    int(spans[0]["startTimeUnixNano"]) / 1e9, tz=timezone.utc
+                ) - timedelta(minutes=1)
+                job = await client.sql.run(
+                    project_id=project_id,
+                    sql="SELECT count() AS n FROM spans",
+                    start=start.isoformat(),
+                    end=datetime.now(timezone.utc).isoformat(),
+                    options=_sql_request_options(deadline),
+                )
+                known_state = job.state
+                assert job.id and job.project_id == project_id
+                page = await _poll_sql_result_async(
+                    client, job.id, project_id, deadline=deadline
+                )
+                known_state = page.state
+                assert page.state == "succeeded", page.error
+                assert page.result.rows == [[len(spans)]]
+
+            async def cleanup():
+                if job is None:
+                    return
+                if not job.id:
+                    raise AssertionError("owned async SQL job did not return an id")
+                final = await _cancel_sql_job_bounded_async(
+                    client, job.id, project_id
+                )
+                assert final.id == job.id and final.project_id == project_id
+                if known_state == "succeeded":
+                    assert final.state == "succeeded"
+
+            await _run_async_with_cleanup_preserving_primary(work, cleanup)
 
     asyncio.run(run())
 
