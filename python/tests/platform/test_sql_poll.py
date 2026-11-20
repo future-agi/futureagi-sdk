@@ -3,7 +3,7 @@
 from types import SimpleNamespace
 
 import pytest
-from test_all_operations_live import _poll_sql_result
+from test_all_operations_live import _poll_sql_result, _run_with_cleanup_preserving_primary
 
 
 @pytest.mark.parametrize("terminal", ["succeeded", "failed", "cancelled", None])
@@ -33,3 +33,23 @@ def test_sql_poll_waits_for_known_terminal_state_or_deadline(terminal):
     else:
         assert poll().state == terminal
         assert now == 133
+
+
+def test_sql_cleanup_failure_is_reported_without_masking_primary_failure():
+    def work():
+        raise ValueError("primary assertion")
+
+    def cleanup():
+        raise RuntimeError("cleanup transport")
+
+    with pytest.warns(RuntimeWarning, match="RuntimeError"):
+        with pytest.raises(ValueError, match="primary assertion"):
+            _run_with_cleanup_preserving_primary(work, cleanup)
+
+
+def test_sql_cleanup_failure_is_raised_when_the_work_succeeds():
+    def cleanup():
+        raise RuntimeError("cleanup transport")
+
+    with pytest.raises(RuntimeError, match="cleanup transport"):
+        _run_with_cleanup_preserving_primary(lambda: "ok", cleanup)

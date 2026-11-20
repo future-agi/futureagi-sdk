@@ -1,4 +1,5 @@
 import { Client } from "../client";
+import { APIConnectionError } from "../errors";
 import type { SQLCatalog, SQLExecution } from "../models";
 
 // A fake fetch records requests. There is no SQL server or query execution.
@@ -77,6 +78,41 @@ test("SQL retries use the validated body and query overrides for the entire call
   await client.sql.getResult("job", { project_id }, { extraQuery });
   const page = { project_id, limit: "1", offset: "0" };
   expect(sent).toEqual([false, false, page, page]);
+});
+
+test("SQL request timeout is bounded while a retried call keeps validated options", async () => {
+  jest.useFakeTimers();
+  try {
+    const extraBody = { reuse: false as boolean | null };
+    let calls = 0;
+    const client = new Client({ apiKey: "example", secretKey: "example", maxRetries: 1, fetch: async (_url, init) => {
+      calls++;
+      if (calls === 1) {
+        expect(JSON.parse(String(init.body)).reuse).toBe(false);
+        extraBody.reuse = null;
+        return new Response(null, { status: 429, headers: { "Retry-After": "0" } });
+      }
+      expect(JSON.parse(String(init.body)).reuse).toBe(false);
+      await new Promise<never>((_resolve, reject) => {
+        init.signal?.addEventListener("abort", () => reject(new Error("request aborted")), { once: true });
+      });
+      throw new Error("unreachable");
+    } });
+    const request = client.sql.run(
+      { project_id: "project", sql: "mock input", start: "start", end: "end" },
+      { extraBody, timeout: 25, maxRetries: 1 },
+    );
+    await Promise.resolve();
+    await jest.advanceTimersByTimeAsync(0);
+    expect(calls).toBe(2);
+    await jest.advanceTimersByTimeAsync(24);
+    expect(calls).toBe(2);
+    await jest.advanceTimersByTimeAsync(1);
+    await expect(request).rejects.toBeInstanceOf(APIConnectionError);
+    expect(calls).toBe(2);
+  } finally {
+    jest.useRealTimers();
+  }
 });
 
 

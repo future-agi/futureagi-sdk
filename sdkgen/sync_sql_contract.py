@@ -30,17 +30,37 @@ def _blob(repo: Path, commit: str, path: str) -> bytes:
     return subprocess.check_output(["git", "-C", str(repo), "show", f"{commit}:{path}"])
 
 
-def _check_mcp_parameters(op: Op, tool: dict) -> None:
-    """Compare the generated SDK inputs to the MCP wire mapping, not just its route."""
+_SCHEMA_KEYS = ("type", "format", "enum", "minimum", "maximum", "minLength", "maxLength", "default")
+
+
+def _wire_schema(schema: dict) -> dict:
+    """Keep only input constraints that must agree across OpenAPI and MCP."""
+    result = {key: schema[key] for key in _SCHEMA_KEYS if key in schema}
+    if "items" in schema:
+        result["items"] = _wire_schema(schema["items"])
+    if "x-nullable" in schema:
+        result["nullable"] = schema["x-nullable"]
+    return result
+
+
+def _check_mcp_parameters(op: Op, tool: dict, *, max_page_size: dict | None = None) -> None:
+    """Compare SQL MCP placement, requiredness and schemas to OpenAPI."""
     expected = {loc: sorted(p.name for p in op.params_in(loc)) for loc in ("path", "query", "body")}
     actual = tool["request"]["parameters"]
     if {loc: sorted(names) for loc, names in actual.items()} != expected:
         raise ValueError(f"SQL MCP parameter placement mismatch: {op.id}")
     schema = tool["inputSchema"]
-    if set(schema["properties"]) != {p.name for p in op.params}:
+    params = {p.name: p for p in op.params}
+    if set(schema["properties"]) != set(params):
         raise ValueError(f"SQL MCP input properties mismatch: {op.id}")
     if sorted(schema.get("required", [])) != sorted(p.name for p in op.params if p.required):
         raise ValueError(f"SQL MCP required parameters mismatch: {op.id}")
+    for name, param in params.items():
+        expected_schema = _wire_schema(param.schema)
+        if max_page_size and name in max_page_size:
+            expected_schema["maximum"] = max_page_size[name]
+        if _wire_schema(schema["properties"][name]) != expected_schema:
+            raise ValueError(f"SQL MCP input schema mismatch: {op.id}.{name}")
 
 
 def compose(product: Path, commit: str, baseline_sdk: str) -> dict:
@@ -83,7 +103,8 @@ def compose(product: Path, commit: str, baseline_sdk: str) -> dict:
     if len(sql) != len(TOOLS) or {e["surfaces"]["mcp"]["name"] for e in sql} != TOOLS:
         raise ValueError("expected exactly four public SQL mappings")
     for op in load(source, {"operations": sql}):
-        _check_mcp_parameters(op, tools[op.surfaces["mcp"]["name"]])
+        mapping = op.surfaces["mcp"]
+        _check_mcp_parameters(op, tools[mapping["name"]], max_page_size=mapping.get("max_page_size"))
     old_paths, old_defs = sync_contract.project(old, existing)
     if old_paths != old["paths"] or old_defs != old["definitions"]:
         raise ValueError("SQL projection would alter the SDK baseline")

@@ -80,7 +80,18 @@ def scoped_sync(monkeypatch):
         path, method = operation["path"], operation["method"]
         tool_name = entry["surfaces"]["mcp"]["name"]
         path_names, query, body, required = projections[tool_name]
-        props = {k: {} for k in path_names + query + body}
+        operation_spec = spec["paths"][path][method.lower()]
+        raw_params = spec["paths"][path].get("parameters", []) + operation_spec.get("parameters", [])
+        props = {}
+        for parameter in raw_params:
+            if parameter["in"] == "body":
+                ref = parameter["schema"]["$ref"].split("/")[-1]
+                props.update(copy.deepcopy(spec["definitions"][ref]["properties"]))
+            else:
+                props[parameter["name"]] = {
+                    key: value for key, value in parameter.items()
+                    if key not in {"name", "in", "required", "description"}
+                }
         if "limit" in props:
             props["limit"]["maximum"] = 100
         manifest["tools"].append({
@@ -132,6 +143,15 @@ def test_scoped_sync_rejects_mcp_input_projection_drift(scoped_sync, drift, mess
     else:
         reader["inputSchema"]["properties"]["unknown"] = {}
     with pytest.raises(ValueError, match=message):
+        compose()
+
+
+@pytest.mark.parametrize("field, value", [("type", "string"), ("maximum", 99)])
+def test_scoped_sync_rejects_mcp_input_schema_drift(scoped_sync, field, value):
+    compose, _, manifest = scoped_sync
+    reader = next(tool for tool in manifest["tools"] if tool["name"] == "get_sql_result")
+    reader["inputSchema"]["properties"]["limit"][field] = value
+    with pytest.raises(ValueError, match=r"SQL MCP input schema mismatch: sql\.get_result\.limit"):
         compose()
 
 

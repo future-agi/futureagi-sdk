@@ -13,6 +13,8 @@ import { join } from "node:path";
 
 import { Client } from "../client";
 import { APIError, BadRequestError, NotFoundError } from "../errors";
+import type { SQLExecution } from "../models";
+import type { RequestOptions } from "../transport";
 
 const ENV_FILE = join(__dirname, "..", "..", "..", "..", "..", ".env.local");
 if (existsSync(ENV_FILE)) {
@@ -43,6 +45,10 @@ async function allow<T>(fn: () => Promise<T>, ...statuses: number[]): Promise<T 
   }
 }
 
+const SQL_TOTAL_BUDGET_MS = 150_000;
+const SQL_REQUEST_TIMEOUT_CAP_MS = 60_000;
+const SQL_CLEANUP_BUDGET_MS = 10_000;
+
 /** Poll a backend state change made by a background worker. */
 async function waitUntil(predicate: () => Promise<boolean>, ms = 20_000): Promise<boolean> {
   const deadline = Date.now() + ms;
@@ -55,8 +61,116 @@ async function waitUntil(predicate: () => Promise<boolean>, ms = 20_000): Promis
   return true;
 }
 
+/** Return a positive, bounded request budget without allowing a retry to exceed the test deadline. */
+function sqlRequestOptions(deadline: number): RequestOptions {
+  const remaining = deadline - Date.now();
+  if (!Number.isFinite(remaining) || remaining <= 0) {
+    throw new Error("SQL live-test deadline exceeded");
+  }
+  return { timeout: Math.min(remaining, SQL_REQUEST_TIMEOUT_CAP_MS), maxRetries: 0 };
+}
+
+/** Poll SQL until it is terminal, charging every request and wait to the caller's deadline. */
+async function pollSqlResult(client: Client, jobId: string, projectId: string, deadline: number): Promise<SQLExecution> {
+  let state = "not polled";
+  while (Date.now() < deadline) {
+    const page = await client.sql.getResult(
+      jobId,
+      { project_id: projectId, offset: 0, limit: 1 },
+      sqlRequestOptions(deadline),
+    );
+    state = page.state ?? "unknown";
+    if (state === "succeeded" || state === "failed" || state === "cancelled") {
+      return page;
+    }
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) {
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, Math.min(500, remaining)));
+  }
+  throw new Error(`SQL job ${jobId} did not finish in 150s: ${state}`);
+}
+
+function terminalSqlState(state: string | null | undefined): boolean {
+  return state === "succeeded" || state === "failed" || state === "cancelled";
+}
+
+/** Try cancellation repeatedly for a short, independent cleanup window. */
+async function cleanupSqlJob(client: Client, jobId: string, projectId: string): Promise<void> {
+  const deadline = Date.now() + SQL_CLEANUP_BUDGET_MS;
+  let state: string | null | undefined;
+  while (Date.now() < deadline) {
+    const result = await client.sql.cancel(jobId, { project_id: projectId }, sqlRequestOptions(deadline));
+    state = result.state;
+    if (terminalSqlState(state)) {
+      if (state !== "cancelled") {
+        console.warn(`PENDING active SQL cancellation: cleanup observed terminal state ${state}`);
+      }
+      return;
+    }
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) {
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, Math.min(250, remaining)));
+  }
+  throw new Error(`SQL job ${jobId} remained ${state ?? "unknown"} after bounded cleanup`);
+}
+
+/** Poll the fixture's span index using the same total deadline as the SQL job. */
+async function waitUntilSql(predicate: (options: RequestOptions) => Promise<boolean>, deadline: number): Promise<boolean> {
+  while (Date.now() < deadline) {
+    if (await predicate(sqlRequestOptions(deadline))) {
+      return true;
+    }
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) {
+      return false;
+    }
+    await new Promise((resolve) => setTimeout(resolve, Math.min(250, remaining)));
+  }
+  return false;
+}
+
+async function createSqlFixture(client: Client, deadline: number): Promise<{ projectId: string; start: string; end: string; count: number }> {
+  const projectName = name("sql");
+  const now = Date.now() * 1_000_000;
+  const traceId = randomUUID().replace(/-/g, "");
+  const spans = ["root", "child"].map((role) => ({
+    project_name: projectName,
+    project_type: "observe",
+    trace_id: traceId,
+    span_id: randomUUID().replace(/-/g, "").slice(0, 16),
+    name: `sql-${role}`,
+    start_time: now - 2_000_000_000,
+    end_time: now - 1_000_000_000,
+    latency: 1000,
+    status: "OK",
+    attributes: { "gen_ai.span.kind": "LLM", "session.id": "sdk-ts-sql-session" },
+  }));
+  const ids: string[] = [];
+  for (const span of spans) {
+    ids.push(...((await client.spans.ingest([span], sqlRequestOptions(deadline))).ids ?? []));
+  }
+  expect(ids).toHaveLength(spans.length);
+  const projects = (await client.projects.list({ name: projectName }, sqlRequestOptions(deadline))) as { projects: Array<{ id: string }> };
+  expect(projects.projects).toHaveLength(1);
+  const projectId = projects.projects[0]!.id;
+  expect(await waitUntilSql(async (options) => {
+    const page = (await client.spans.list({ project_id: projectId }, options)) as { table?: unknown[] };
+    return page.table?.length === spans.length;
+  }, deadline)).toBe(true);
+  return {
+    projectId,
+    start: new Date(Math.floor(now / 1_000_000) - 60_000).toISOString(),
+    end: new Date().toISOString(),
+    count: spans.length,
+  };
+}
+
 live("platform client against a live backend", () => {
-  jest.setTimeout(120_000);
+  jest.setTimeout(180_000);
   // Built in beforeAll: jest evaluates a skipped describe's body too, and the
   // constructor throws without credentials.
   let client: Client;
@@ -167,6 +281,90 @@ live("platform client against a live backend", () => {
     // Served from ClickHouse, which fills asynchronously after ingestion: the page exists, rows may not yet.
     const traces = await client.traces.list({ project_id: projects.projects[0]!.id });
     expect(traces.metadata).toBeTruthy();
+  });
+
+  test("sql: owned fixture, default reuse, pages, and bounded cancellation", async () => {
+    // Start the budget before fixture setup so ingestion/indexing cannot add another full poll window.
+    const deadline = Date.now() + SQL_TOTAL_BUDGET_MS;
+    let ownedJobId: string | undefined;
+    let ownedProjectId: string | undefined;
+    let primaryFailed = false;
+    try {
+      const fixture = await createSqlFixture(client, deadline);
+      ownedProjectId = fixture.projectId;
+      const catalog = await client.sql.getCatalog({ project_id: fixture.projectId }, sqlRequestOptions(deadline));
+      expect(catalog.max_window_days).toBeGreaterThanOrEqual(1);
+
+      // Omitting reuse exercises the server default instead of forcing the false branch.
+      const job = await client.sql.run({
+        project_id: fixture.projectId,
+        sql: "SELECT name FROM spans ORDER BY name",
+        start: fixture.start,
+        end: fixture.end,
+      }, sqlRequestOptions(deadline));
+      ownedJobId = job.id ?? undefined;
+      expect(job.id).toBeTruthy();
+      expect(job.project_id).toBe(fixture.projectId);
+      const first = await pollSqlResult(client, job.id!, fixture.projectId, deadline);
+      // A returned terminal snapshot is no longer an active owned job, even if a later assertion fails.
+      ownedJobId = undefined;
+      expect(first.state).toBe("succeeded");
+      expect(first.result?.rows).toHaveLength(1);
+      expect(first.result?.has_more).toBe(true);
+      expect(first.result?.next_offset).toBeDefined();
+      const second = await client.sql.getResult(job.id!, {
+        project_id: fixture.projectId,
+        offset: first.result!.next_offset!,
+        limit: 1,
+      }, sqlRequestOptions(deadline));
+      expect(second.state).toBe("succeeded");
+      expect(second.result?.rows).toHaveLength(1);
+      expect(second.result?.has_more).toBe(false);
+      const completedCancel = await client.sql.cancel(job.id!, { project_id: fixture.projectId }, sqlRequestOptions(deadline));
+      expect(completedCancel.id).toBe(job.id);
+      expect(completedCancel.state).toBe("succeeded");
+
+      const active = await client.sql.run({
+        project_id: fixture.projectId,
+        sql: "SELECT name FROM spans ORDER BY name",
+        start: fixture.start,
+        end: fixture.end,
+        reuse: false,
+      }, sqlRequestOptions(deadline));
+      ownedJobId = active.id ?? undefined;
+      expect(active.id).toBeTruthy();
+      if (terminalSqlState(active.state)) {
+        // The fast backend may finish before cancel is sent; do not call that in-flight cancellation.
+        console.warn(`PENDING active SQL cancellation: fixture job completed as ${active.state}`);
+        ownedJobId = undefined;
+        return;
+      }
+      const cancelled = await client.sql.cancel(active.id!, { project_id: fixture.projectId }, sqlRequestOptions(deadline));
+      if (terminalSqlState(cancelled.state)) {
+        ownedJobId = undefined;
+      }
+      if (cancelled.state !== "cancelled") {
+        console.warn(`PENDING active SQL cancellation: job reached ${cancelled.state ?? "unknown"} before cancel`);
+        return;
+      }
+      expect(cancelled.id).toBe(active.id);
+      expect(cancelled.project_id).toBe(fixture.projectId);
+    } catch (error) {
+      primaryFailed = true;
+      throw error;
+    } finally {
+      if (ownedJobId && ownedProjectId) {
+        try {
+          await cleanupSqlJob(client, ownedJobId, ownedProjectId);
+        } catch (cleanupError) {
+          if (primaryFailed) {
+            console.warn(`PENDING SQL cleanup after primary failure: ${cleanupError instanceof Error ? cleanupError.message : String(cleanupError)}`);
+          } else {
+            throw cleanupError;
+          }
+        }
+      }
+    }
   });
 
   test("annotation labels and queues", async () => {

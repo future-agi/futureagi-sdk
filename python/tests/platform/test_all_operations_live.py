@@ -9,6 +9,7 @@ exists once traces are indexed); those accept the typed error the backend sends,
 
 from __future__ import annotations
 
+import asyncio
 import decimal
 import json
 import os
@@ -152,6 +153,51 @@ def _poll_sql_result(get_result, job_id, project_id, *, clock=time.monotonic, sl
     raise AssertionError(f"SQL job {job_id} did not finish in 150s: {state}")
 
 
+async def _poll_sql_result_async(client, job_id, project_id):
+    deadline = time.monotonic() + 150
+    state = "not polled"
+    while (remaining := deadline - time.monotonic()) > 0:
+        page = await client.sql.get_result(
+            job_id,
+            project_id=project_id,
+            offset=0,
+            limit=1,
+            options=fi.RequestOptions(timeout=remaining, max_retries=0),
+        )
+        assert page.id == job_id and page.project_id == project_id
+        state = page.state
+        if state in {"succeeded", "failed", "cancelled"}:
+            return page
+        await asyncio.sleep(min(0.5, remaining))
+    raise AssertionError(f"SQL async job {job_id} did not finish in 150s: {state}")
+
+
+def _run_with_cleanup_preserving_primary(work, cleanup):
+    """Run cleanup without replacing a failure from the operation under test."""
+    primary = cleanup_error = None
+    result = None
+    try:
+        result = work()
+    except BaseException as exc:
+        primary = exc
+    try:
+        cleanup()
+    except BaseException as exc:
+        cleanup_error = exc
+    if primary is not None:
+        if cleanup_error is not None:
+            warnings.warn(
+                "SQL cleanup failed after the primary failure "
+                f"({type(cleanup_error).__name__})",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+        raise primary.with_traceback(primary.__traceback__)
+    if cleanup_error is not None:
+        raise cleanup_error.with_traceback(cleanup_error.__traceback__)
+    return result
+
+
 def _sql_collector_url(raw, collector_port):
     """Only the standalone API origin may select a credentialed collector on the same loopback host."""
     __tracebackhide__ = True  # pytest must not display a rejected URL containing userinfo
@@ -272,25 +318,93 @@ def sql_project(client):
 
 
 def test_sql_job_on_synthetic_spans(client, sql_project):
-    """Run a bounded read on this test's own project and cancel only the job it created."""
+    """Exercise default reuse omission, multiple result pages, and cancellation cleanup."""
     project_id, project_name, spans = sql_project
     assert client.projects.get(project_id).name == project_name
     assert client.sql.get_catalog(project_id=project_id).max_window_days >= 1
     # The ClickHouse list and the SQL scan must see the fixture after async ingestion.
     assert wait_until(lambda: len(client.spans.list(project_id=project_id).table) == len(spans))
     start = datetime.fromtimestamp(int(spans[0]["startTimeUnixNano"]) / 1e9, tz=timezone.utc) - timedelta(minutes=1)
-    job = client.sql.run(project_id=project_id, sql="SELECT count() AS n FROM spans", start=start.isoformat(),
-                         end=datetime.now(timezone.utc).isoformat(), reuse=False)
+    job = client.sql.run(
+        project_id=project_id,
+        sql="SELECT name FROM spans ORDER BY name",
+        start=start.isoformat(),
+        end=datetime.now(timezone.utc).isoformat(),
+    )
     assert job.id and job.project_id == project_id
-    try:
-        page = _poll_sql_result(client.sql.get_result, job.id, project_id)
-        assert page.state == "succeeded", page.error
-        assert page.result.rows == [[len(spans)]] and page.result.has_more is False
-    finally:
+    final = None
+
+    def read_pages():
+        nonlocal final
+        first = _poll_sql_result(client.sql.get_result, job.id, project_id)
+        assert first.state == "succeeded", first.error
+        assert first.result.rows and len(first.result.rows) == 1
+        assert first.result.has_more is True
+        assert first.result.next_offset is not None
+        second = client.sql.get_result(
+            job.id, project_id=project_id, offset=first.result.next_offset, limit=1
+        )
+        assert second.state == "succeeded", second.error
+        assert second.result.rows and len(second.result.rows) == 1
+        assert second.result.has_more is False
+        assert {row[0] for row in first.result.rows + second.result.rows} == {f"sql-{role}" for role in ("root", "child")}
+
+    def cleanup():
+        nonlocal final
         # Cancelling an already completed job returns its unchanged terminal snapshot.
         final = client.sql.cancel(job.id, project_id=project_id)
         assert final.id == job.id and final.project_id == project_id
-    assert final.state == "succeeded"
+        assert final.state == "succeeded"
+
+    _run_with_cleanup_preserving_primary(read_pages, cleanup)
+
+    # A tiny fixture often completes before the cancellation request reaches the API. Do not
+    # call that a cancellation proof; the explicit pending path keeps the gate honest.
+    active_job = client.sql.run(
+        project_id=project_id,
+        sql="SELECT name FROM spans ORDER BY name",
+        start=start.isoformat(),
+        end=datetime.now(timezone.utc).isoformat(),
+        reuse=False,
+    )
+    if active_job.state in {"succeeded", "failed", "cancelled"}:
+        pytest.skip(f"pending active SQL cancellation: fixture job was already {active_job.state}")
+    cancelled = client.sql.cancel(active_job.id, project_id=project_id)
+    if cancelled.state != "cancelled":
+        pytest.skip(f"pending active SQL cancellation: job reached {cancelled.state} before cancel")
+    assert cancelled.id == active_job.id and cancelled.project_id == project_id
+
+
+def test_sql_job_async_on_synthetic_spans(sql_project):
+    """Exercise the real AsyncClient against the same owned fixture used by the sync path."""
+    project_id, _, spans = sql_project
+
+    async def run():
+        async with fi.AsyncClient(
+            api_key=os.environ["FI_API_KEY"],
+            secret_key=os.environ["FI_SECRET_KEY"],
+            base_url=os.environ["FI_BASE_URL"],
+            strict_responses=True,
+        ) as client:
+            catalog = await client.sql.get_catalog(project_id=project_id)
+            assert catalog.max_window_days >= 1
+            start = datetime.fromtimestamp(
+                int(spans[0]["startTimeUnixNano"]) / 1e9, tz=timezone.utc
+            ) - timedelta(minutes=1)
+            job = await client.sql.run(
+                project_id=project_id,
+                sql="SELECT count() AS n FROM spans",
+                start=start.isoformat(),
+                end=datetime.now(timezone.utc).isoformat(),
+            )
+            assert job.id and job.project_id == project_id
+            page = await _poll_sql_result_async(client, job.id, project_id)
+            assert page.state == "succeeded", page.error
+            assert page.result.rows == [[len(spans)]]
+            final = await client.sql.cancel(job.id, project_id=project_id)
+            assert final.id == job.id and final.project_id == project_id
+
+    asyncio.run(run())
 
 
 def test_context(client):

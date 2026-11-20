@@ -534,7 +534,7 @@ def index_page(
         "<TLDR>\n"
         "- One client, every API: `fi.Client` (Python, `pip install futureagi`) and `Client` from `@future-agi/sdk` (TypeScript)\n"
         f"- {total} methods across {len(roots)} resources, generated from the API contract; each page lists parameters, return types and the REST endpoint\n"
-        "- Omitted arguments are not sent, `None` / `null` is; list calls return pagers; HTTP errors raise typed exceptions\n"
+        "- Omitted arguments are not sent; nullable JSON body fields accept `None` / `null`, nullable query parameters omit them, and SQL `reuse`, `limit`, and `offset` must be omitted rather than null; list calls return pagers; HTTP errors raise typed exceptions\n"
         "</TLDR>\n\n"
     )
     out.append(
