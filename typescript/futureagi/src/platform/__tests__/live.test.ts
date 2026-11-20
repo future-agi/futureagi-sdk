@@ -296,6 +296,25 @@ async function seedSqlSpans(url: string, projectName: string, deadline: number, 
   return { startMs, count: spans.length };
 }
 
+/** The fixture's span names, in the `ORDER BY name` order the paged SQL query must return them. */
+const SQL_FIXTURE_NAMES = ["sql-child", "sql-root"];
+
+/**
+ * Page one and page two of `SELECT name FROM spans ORDER BY name` must together be exactly the
+ * fixture's rows, one per page and in order: a duplicate, missing or foreign row fails, as the Python
+ * analogue's exact {sql-root, sql-child} set check does.
+ */
+function expectedSqlPagesError(first: unknown, second: unknown): string | null {
+  const pages = [first, second];
+  if (!pages.every((rows) => Array.isArray(rows) && rows.length === 1 && Array.isArray(rows[0]) && rows[0].length === 1)) {
+    return "each SQL page must hold exactly one single-column row";
+  }
+  const names = pages.map((rows) => (rows as unknown[][])[0]![0]);
+  return JSON.stringify(names) === JSON.stringify(SQL_FIXTURE_NAMES)
+    ? null
+    : `SQL pages returned ${JSON.stringify(names)}, expected ${JSON.stringify(SQL_FIXTURE_NAMES)}`;
+}
+
 /** The collector creates the project asynchronously: wait for exactly one project with this exact name. */
 async function discoverSqlProject(client: Client, projectName: string, deadline: number): Promise<string> {
   let ids: string[] = [];
@@ -484,6 +503,7 @@ live("platform client against a live backend", () => {
       expect(second.state).toBe("succeeded");
       expect(second.result?.rows).toHaveLength(1);
       expect(second.result?.has_more).toBe(false);
+      expect(expectedSqlPagesError(first.result?.rows, second.result?.rows)).toBeNull();
       const completedCancel = await client.sql.cancel(job.id!, { project_id: fixture.projectId }, sqlRequestOptions(deadline));
       expect(completedCancel.id).toBe(job.id);
       expect(completedCancel.state).toBe("succeeded");
@@ -720,6 +740,22 @@ describe("sql collector seed fixture", () => {
     expect(error).toEqual(new Error("SQL fixture collector request failed"));
     expect(String(error.stack)).not.toContain("synthetic-secret");
     expect(calls).toHaveLength(1);
+  });
+
+  test("the two SQL pages must be exactly the fixture rows, in order", () => {
+    expect(expectedSqlPagesError([["sql-child"]], [["sql-root"]])).toBeNull();
+    for (const [first, second] of [
+      [[["sql-root"]], [["sql-root"]]], // duplicate
+      [[["sql-child"]], [["sql-child"]]], // duplicate
+      [[["sql-root"]], [["sql-child"]]], // ORDER BY name not honoured
+      [[["sql-child"]], [["other"]]], // foreign row
+      [[["sql-child"]], []], // missing row
+      [[["sql-child"], ["sql-root"]], [["sql-root"]]], // page larger than limit=1
+      [[["sql-child", "x"]], [["sql-root"]]], // extra column
+      [undefined, [["sql-root"]]], // no result
+    ] as Array<[unknown, unknown]>) {
+      expect(expectedSqlPagesError(first, second)).not.toBeNull();
+    }
   });
 
   test("project discovery reports a lookup failure without the SDK error", async () => {
