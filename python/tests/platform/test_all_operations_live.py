@@ -266,6 +266,15 @@ def _run_with_cleanup_preserving_primary(work, cleanup):
     return result
 
 
+async def _async_wait_until(predicate, deadline: float, every: float = 0.25) -> bool:
+    """Poll an async backend state change without exceeding the caller's deadline."""
+    while (remaining := deadline - time.monotonic()) > 0:
+        if await predicate():
+            return True
+        await asyncio.sleep(min(every, remaining))
+    return False
+
+
 async def _run_async_with_cleanup_preserving_primary(work, cleanup):
     """Run async cleanup without replacing a failure from the operation under test."""
     primary = cleanup_error = None
@@ -513,6 +522,14 @@ def test_sql_job_async_on_synthetic_spans(sql_project):
 
             async def work():
                 nonlocal job, known_state
+                async def spans_ready():
+                    page = await client.spans.list(
+                        project_id=project_id,
+                        options=_sql_request_options(deadline),
+                    )
+                    return len(page.table) == len(spans)
+
+                assert await _async_wait_until(spans_ready, deadline), "async fixture spans were not indexed"
                 catalog = await client.sql.get_catalog(
                     project_id=project_id,
                     options=_sql_request_options(deadline),
