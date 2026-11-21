@@ -18,8 +18,9 @@ jobs:
   promote:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    environment: release-promote
     steps:
-      - uses: actions/create-github-app-token@v2
+      - uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349  # v2.2.2
         id: app-token
         with:
           app-id: ${{ vars.RELEASE_BOT_APP_ID || secrets.RELEASE_BOT_APP_ID }}
