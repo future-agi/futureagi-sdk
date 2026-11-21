@@ -173,7 +173,8 @@ def _params_interface(op: Op) -> tuple[str, list[Param]]:
         ts = ts_type(p.schema, for_input=True)
         # Optional: left out when undefined, sent as null when null (clears a nullable field). A file
         # field has no null form: it is either uploaded or left out.
-        nullable = not p.required and not is_file(p.schema)
+        # Required but nullable (x-nullable): must be passed, and null is a valid answer.
+        nullable = (not p.required or bool((p.schema or {}).get("x-nullable"))) and not is_file(p.schema)
         out.append(f"{desc}  {prop_key(p.name)}{'' if p.required else '?'}: {ts + ' | null' if nullable else ts};\n")
     out.append("}\n\n")
     return "".join(out), fields
