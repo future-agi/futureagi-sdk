@@ -1533,6 +1533,66 @@ export interface RunTestResponse {
   deleted_at?: string | null;
 }
 
+export interface SQLCatalog {
+  identity_semantics?: string | null;
+  version?: number | null;
+  datasets?: Array<SQLDataset | null> | null;
+  examples?: Array<SQLExample | null> | null;
+  max_rows?: number | null;
+  max_window_days?: number | null;
+  can_save?: boolean | null;
+}
+
+export interface SQLColumn {
+  name?: string | null;
+  type?: string | null;
+}
+
+export interface SQLDataset {
+  available?: boolean | null;
+  unavailable_reason?: string | null;
+  name?: string | null;
+  description?: string | null;
+  columns?: Array<SQLColumn | null> | null;
+}
+
+export interface SQLExample {
+  id?: string | null;
+  title?: string | null;
+  description?: string | null;
+  sql?: string | null;
+  datasets?: Array<string | null> | null;
+}
+
+export interface SQLExecution {
+  id?: string | null;
+  project_id?: string | null;
+  sql?: string | null;
+  state?: "queued" | "running" | "succeeded" | "failed" | "cancelled" | (string & Record<never, never>) | null; // one of: queued, running, succeeded, failed, cancelled
+  created_at?: string | null;
+  expires_at?: string | null;
+  finished_at?: string | null;
+  reused?: boolean | null;
+  error?: string | null;
+  result?: SQLResult | null;
+  expired?: boolean | null;
+}
+
+export interface SQLResult {
+  columns?: Array<SQLColumn | null> | null;
+  rows?: Array<Array<unknown | null> | null> | null;
+  truncated?: boolean | null;
+  row_count?: number | null;
+  result_bytes?: number | null;
+  elapsed_ms?: number | null;
+  offset?: number | null;
+  next_offset?: number | null;
+  has_more?: boolean | null;
+  page_row_count?: number | null;
+  previewed?: boolean | null;
+  retrieval_note?: string | null;
+}
+
 export interface ScenarioDetailResponse {
   id?: string | null;
   name?: string | null;

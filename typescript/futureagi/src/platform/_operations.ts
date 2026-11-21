@@ -167,3 +167,7 @@ export const OP_ANNOTATION_QUEUES_ITEMS_REMOVE: Operation = {"id": "annotation_q
 export const OP_ANNOTATION_QUEUES_ITEMS_SKIP: Operation = {"id": "annotation_queues.items.skip", "method": "POST", "path": "/model-hub/annotation-queues/{queue_id}/items/{id}/skip/", "unwrap": "result", "pagination": null};
 export const OP_ANNOTATION_QUEUES_ITEMS_LIST_ANNOTATIONS: Operation = {"id": "annotation_queues.items.list_annotations", "method": "GET", "path": "/model-hub/annotation-queues/{queue_id}/items/{id}/annotations/", "unwrap": "result", "pagination": null};
 export const OP_ANNOTATION_QUEUES_ITEMS_IMPORT_ANNOTATIONS: Operation = {"id": "annotation_queues.items.import_annotations", "method": "POST", "path": "/model-hub/annotation-queues/{queue_id}/items/{id}/annotations/import/", "unwrap": "result", "pagination": null};
+export const OP_SQL_RUN: Operation = {"id": "sql.run", "method": "POST", "path": "/tracer/sql-query/run/", "unwrap": null, "pagination": null};
+export const OP_SQL_GET_RESULT: Operation = {"id": "sql.get_result", "method": "GET", "path": "/tracer/sql-query/{id}/", "unwrap": null, "pagination": null};
+export const OP_SQL_CANCEL: Operation = {"id": "sql.cancel", "method": "POST", "path": "/tracer/sql-query/{id}/cancel/", "unwrap": null, "pagination": null};
+export const OP_SQL_GET_CATALOG: Operation = {"id": "sql.get_catalog", "method": "GET", "path": "/tracer/sql-query/catalog/", "unwrap": null, "pagination": null};

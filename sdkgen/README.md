@@ -218,3 +218,35 @@ The one-time setup is required before automatic releases work. Missing app crede
 - Run `generate.py --check`, `pytest python/tests/platform` and `pnpm test` in CI against a backend started from the monorepo.
 - Move `operations.yaml` into the monorepo next to the MCP catalog (`tools.yaml`), so one file drives MCP and the SDKs and the sync workflow copies it here with the contract.
 - Deprecate the hand-written modules (`fi.datasets`, `fi.prompt`, `fi.kb`, `fi.queues`, `fi.annotations`, and their TypeScript counterparts) in favour of the generated client, then remove them in a major release.
+
+### Reproduce the four SQL mappings before the next backend sync
+
+The four SQL mappings were sourced from the product dev commit below. The SDK
+tests against the v1.59.0 release pinned in `BACKEND_VERSION`; other operations
+keep the existing SDK dev contract.
+The two input commits and byte hashes are recorded in `x-contract-sources` in
+the committed Swagger slice. From the SDK checkout:
+
+```sh
+product_commit=6fc655b986f862ccbdd475bfc87fc09c4ef459e9
+sdk_baseline=5b8a98f8275812aa0e83afbf0929bf4dca126566
+python sdkgen/sync_sql_contract.py "$PRODUCT_REPO" "$product_commit" "$sdk_baseline"
+python sdkgen/generate.py
+python sdkgen/check_mcp_parity.py --ref "$product_commit"
+```
+
+The parity command checks the **entire** MCP name list of that commit. It does
+not qualify a later product ref, the release image, or a combined Skills build.
+The normal release sync replaces this scoped slice; no release pin changes here.
+
+The four SQL calls opt in to `surfaces.sdk.declared_optional_nullability`. An
+optional request field may be omitted; it accepts null only if its Swagger
+schema has `x-nullable: true`. Omitting `run.reuse` leaves the server default
+(`true`) alone; passing `false` sends `false`. The result reader likewise
+leaves `limit` and `offset` off the query string unless supplied. Passing null
+for any of these three fields fails before a request is sent. Existing SDK
+operations keep their previous input types and wire behavior.
+
+`SQLExecution.state` reports the current server string, including future job
+states, without losing the typed snapshot. In strict Python reads, a required
+nullable response key such as `finished_at` must be present, but may be null.

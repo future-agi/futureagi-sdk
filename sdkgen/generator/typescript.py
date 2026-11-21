@@ -23,6 +23,7 @@ from .catalog import (
     Param,
     children_of,
     class_name,
+    declared_response_models,
     is_file,
     is_json_value,
     is_method_field,
@@ -105,6 +106,7 @@ def _doc(lines: list[str], indent: str = "") -> str:
 
 
 def emit_models(spec: dict, ops: list[Op]) -> str:
+    declared_models = declared_response_models(ops)
     names = model_refs(spec, [op.returns for op in sdk_ops(ops) if op.returns])
     out = [HEADER, "// Response models. Every field is optional so a missing or new field never breaks a call.\n\n"]
     for name in names:
@@ -112,6 +114,9 @@ def emit_models(spec: dict, ops: list[Op]) -> str:
         out.append(f"export interface {name} {{\n")
         for prop_name, prop in props.items():
             ts = ("unknown[]" if prop.get("type") == "array" else "unknown") if is_method_field(prop) else ts_type(prop, for_input=False).replace("models.", "")
+            if name in declared_models and prop.get("type") == "string" and "enum" in prop:
+                # Keep completions for documented states without closing the wire enum.
+                ts = ts_type(prop, for_input=True) + " | (string & Record<never, never>)"
             comment = f" // one of: {', '.join(map(str, prop['enum']))}" if "enum" in prop else ""
             out.append(f"  {prop_key(prop_name)}?: {ts} | null;{comment}\n")
         out.append("}\n\n")
@@ -173,7 +178,7 @@ def _params_interface(op: Op) -> tuple[str, list[Param]]:
         ts = ts_type(p.schema, for_input=True)
         # Optional: left out when undefined, sent as null when null (clears a nullable field). A file
         # field has no null form: it is either uploaded or left out.
-        nullable = not p.required and not is_file(p.schema)
+        nullable = not p.required and not is_file(p.schema) and not op.rejects_optional_null(p)
         out.append(f"{desc}  {prop_key(p.name)}{'' if p.required else '?'}: {ts + ' | null' if nullable else ts};\n")
     out.append("}\n\n")
     return "".join(out), fields
@@ -193,21 +198,47 @@ def _method(op: Op, fields: list[Param]) -> str:
     if stability == "deprecated":
         doc.append("@deprecated")
     lines = [_doc(doc, "  ")]
-    lines.append(f"  {ts_method(op)}({', '.join(args)}): {_return_type(op)} {{\n")
+    nonnullable = [p for p in fields if op.rejects_optional_null(p)]
+    # A validation error on a promise-returning method must reject, not throw synchronously.
+    async_prefix = "async " if nonnullable and not op.pagination else ""
+    lines.append(f"  {async_prefix}{ts_method(op)}({', '.join(args)}): {_return_type(op)} {{\n")
     if stability != "stable":
         lines.append(f"    warnStability({json.dumps(op.id)}, {json.dumps(stability)});\n")
+    snapshots = set()
     path = ", ".join(f"{prop_key(p.name)}: {ts_arg(p)}" for p in path_params)
     parts = [f"path: {{ {path} }}" if path else "path: {}"]
     for location in ("query", "body") if op.sends_body else ("query",):
         group = [p for p in fields if p.location == location and not (location == "body" and is_file(p.schema))]
         items = ", ".join(f"{prop_key(p.name)}: params.{prop_key(p.name)}" if _IDENTIFIER.match(p.name) else f"{prop_key(p.name)}: params[{prop_key(p.name)}]" for p in group)
-        parts.append(f"{location}: {{ {items} }}" if items else f"{location}: {{}}")
+        guarded = [p for p in nonnullable if p.location == location]
+        if not guarded:
+            parts.append(f"{location}: {{ {items} }}" if items else f"{location}: {{}}")
+            continue
+        # Read each SDK argument and override once. Transport rebuilds request bodies on retry.
+        extra = "extraQuery" if location == "query" else "extraBody"
+        lines.append(f"    const {location} = {{ {items} }};\n    const {extra} = {{ ...options?.{extra} }};\n")
+        for p in guarded:
+            key = json.dumps(p.name)
+            lines.append(f"    if ({location}[{key}] === null || {extra}[{key}] === null) {{\n")
+            lines.append(f'      throw new TypeError("{op.id}: {p.name} cannot be null; omit it instead");\n    }}\n')
+        parts.append(location)
+        snapshots.add(extra)
     if op.multipart:
         uploads = ", ".join(f"{prop_key(p.name)}: params.{prop_key(p.name)}" for p in fields if p.location == "body" and is_file(p.schema))
         parts.append(f"files: {{ {uploads} }}")
     call = "paginate" if op.pagination else "call"
     generic = _return_type(op)[len("Pager<") if op.pagination else len("Promise<") : -1]
-    lines.append(f"    return this._t.{call}<{generic}>(ops.{op_constant(op)}, {{ {', '.join(parts)} }}, options);\n")
+    options_arg = "options"
+    if snapshots:
+        # Forward other options on the original receiver (including headers read again on retry).
+        # The mapped type makes adding a public RequestOptions key a compile-time reminder.
+        lines.append("    const callOptions = {\n")
+        for key in ("headers", "timeout", "maxRetries", "extraQuery", "extraBody"):
+            prop = key if key in snapshots else f"get {key}() {{ return options?.{key}; }}"
+            lines.append(f"      {prop},\n")
+        lines.append("    } satisfies Record<keyof RequestOptions, unknown>;\n")
+        options_arg = "callOptions"
+    lines.append(f"    return this._t.{call}<{generic}>(ops.{op_constant(op)}, {{ {', '.join(parts)} }}, {options_arg});\n")
     lines.append("  }\n")
     return "".join(lines)
 

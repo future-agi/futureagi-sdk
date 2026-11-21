@@ -1369,3 +1369,32 @@ operations:
   description: Import existing annotations onto a queue item, optionally on behalf of an annotator.
   operation: {method: POST, path: '/model-hub/annotation-queues/{queue_id}/items/{id}/annotations/import/'}
   surfaces: {sdk: {}, mcp: false}
+
+# The SDK calls the REST operations directly; the MCP tool has its own lower page cap.
+- id: sql.run
+  description: Start or reuse a personal read-only SQL job in a project. Supply SQL and a time window of at most 31 days; reuse defaults to true. The 202 response is a job snapshot, not a page of rows. Poll sql.get_result using its id.
+  operation: {method: POST, path: /tracer/sql-query/run/, response_status: 202}
+  surfaces:
+    sdk: {declared_response_fields: true, declared_optional_nullability: true}
+    mcp: {name: run_sql, group: observability, access: read}
+
+- id: sql.get_result
+  description: Read the caller's job in the given project. Omit limit for the full bounded REST snapshot, or pass 1–1000 and follow result.next_offset while has_more is true (offset 0–10000). MCP defaults to and caps pages at 100. Wide cells may be previewed; results expire after 24 hours.
+  operation: {method: GET, path: '/tracer/sql-query/{id}/'}
+  surfaces:
+    sdk: {declared_response_fields: true, declared_optional_nullability: true}
+    mcp: {name: get_sql_result, group: observability, access: read, max_page_size: {limit: 100}}
+
+- id: sql.cancel
+  description: Request cancellation of the caller's SQL job without changing project data. Returns its job snapshot; an already finished job need not change state.
+  operation: {method: POST, path: '/tracer/sql-query/{id}/cancel/'}
+  surfaces:
+    sdk: {declared_response_fields: true, declared_optional_nullability: true}
+    mcp: {name: cancel_sql, group: observability, access: read}
+
+- id: sql.get_catalog
+  description: Read the available scoped SQL sources, their columns, examples, and query limits for a project.
+  operation: {method: GET, path: /tracer/sql-query/catalog/}
+  surfaces:
+    sdk: {declared_optional_nullability: true}
+    mcp: {name: get_sql_catalog, group: observability, access: read}
