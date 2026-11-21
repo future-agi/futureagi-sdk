@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/future-agi/futureagi-sdk/compare/typescript-v0.2.0...typescript-v0.3.0) (2026-11-21)
+
+
+### Features
+
+* **sdkgen:** generate the platform SDK reference for docs.futureagi.com ([#42](https://github.com/future-agi/futureagi-sdk/issues/42)) ([d9625dc](https://github.com/future-agi/futureagi-sdk/commit/d9625dc2e150f82208b1cc586587f87477ce5f63))
+
 ## [0.2.0](https://github.com/future-agi/futureagi-sdk/compare/typescript-v0.1.2...typescript-v0.2.0) (2026-11-05)
 
 
