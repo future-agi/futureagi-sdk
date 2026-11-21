@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/future-agi/futureagi-sdk/compare/python-v0.7.0...python-v0.8.0) (2026-11-21)
+
+
+### Features
+
+* **sdkgen:** generate the platform SDK reference for docs.futureagi.com ([#42](https://github.com/future-agi/futureagi-sdk/issues/42)) ([d9625dc](https://github.com/future-agi/futureagi-sdk/commit/d9625dc2e150f82208b1cc586587f87477ce5f63))
+
+
+### Bug Fixes
+
+* handle UnboundLocalError in Prompt._handle_error on 400 responses ([5b8a98f](https://github.com/future-agi/futureagi-sdk/commit/5b8a98f8275812aa0e83afbf0929bf4dca126566))
+
 ## [0.7.0](https://github.com/future-agi/futureagi-sdk/compare/python-v0.6.14...python-v0.7.0) (2026-11-05)
 
 
