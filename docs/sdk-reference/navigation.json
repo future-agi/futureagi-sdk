@@ -1,0 +1,182 @@
+{
+  "group": "Platform SDK Reference",
+  "icon": "code",
+  "items": [
+    {
+      "title": "Overview",
+      "href": "/docs/sdk/reference"
+    },
+    {
+      "title": "Account",
+      "items": [
+        {
+          "title": "Account",
+          "href": "/docs/sdk/reference/account"
+        },
+        {
+          "title": "Workspaces",
+          "href": "/docs/sdk/reference/workspaces"
+        },
+        {
+          "title": "Usage",
+          "href": "/docs/sdk/reference/usage"
+        },
+        {
+          "title": "Response models",
+          "href": "/docs/sdk/reference/account-models"
+        }
+      ]
+    },
+    {
+      "title": "Datasets & evals",
+      "items": [
+        {
+          "title": "Datasets",
+          "href": "/docs/sdk/reference/datasets"
+        },
+        {
+          "title": "Evals",
+          "href": "/docs/sdk/reference/evals"
+        },
+        {
+          "title": "Experiments",
+          "href": "/docs/sdk/reference/experiments"
+        },
+        {
+          "title": "Optimizations",
+          "href": "/docs/sdk/reference/optimizations"
+        },
+        {
+          "title": "Response models",
+          "href": "/docs/sdk/reference/datasets-evals-models"
+        }
+      ]
+    },
+    {
+      "title": "Prompts",
+      "items": [
+        {
+          "title": "Prompts",
+          "href": "/docs/sdk/reference/prompts"
+        },
+        {
+          "title": "Response models",
+          "href": "/docs/sdk/reference/prompts-models"
+        }
+      ]
+    },
+    {
+      "title": "Observability",
+      "items": [
+        {
+          "title": "Projects",
+          "href": "/docs/sdk/reference/projects"
+        },
+        {
+          "title": "Traces",
+          "href": "/docs/sdk/reference/traces"
+        },
+        {
+          "title": "Spans",
+          "href": "/docs/sdk/reference/spans"
+        },
+        {
+          "title": "Sessions",
+          "href": "/docs/sdk/reference/sessions"
+        },
+        {
+          "title": "Dashboards",
+          "href": "/docs/sdk/reference/dashboards"
+        },
+        {
+          "title": "Error clusters",
+          "href": "/docs/sdk/reference/error-clusters"
+        },
+        {
+          "title": "Alerts",
+          "href": "/docs/sdk/reference/alerts"
+        },
+        {
+          "title": "Response models",
+          "href": "/docs/sdk/reference/observability-models"
+        }
+      ]
+    },
+    {
+      "title": "Annotation",
+      "items": [
+        {
+          "title": "Annotation queues",
+          "href": "/docs/sdk/reference/annotation-queues"
+        },
+        {
+          "title": "Annotations",
+          "href": "/docs/sdk/reference/annotations"
+        },
+        {
+          "title": "Scores",
+          "href": "/docs/sdk/reference/scores"
+        },
+        {
+          "title": "Response models",
+          "href": "/docs/sdk/reference/annotation-models"
+        }
+      ]
+    },
+    {
+      "title": "Simulation",
+      "items": [
+        {
+          "title": "Agents",
+          "href": "/docs/sdk/reference/agents"
+        },
+        {
+          "title": "Simulation",
+          "href": "/docs/sdk/reference/simulation"
+        },
+        {
+          "title": "Response models",
+          "href": "/docs/sdk/reference/simulation-models"
+        }
+      ]
+    },
+    {
+      "title": "Knowledge bases",
+      "items": [
+        {
+          "title": "Knowledge bases",
+          "href": "/docs/sdk/reference/knowledge-bases"
+        },
+        {
+          "title": "File knowledge bases",
+          "href": "/docs/sdk/reference/file-knowledge-bases"
+        },
+        {
+          "title": "Response models",
+          "href": "/docs/sdk/reference/knowledge-bases-models"
+        }
+      ]
+    },
+    {
+      "title": "Gateway",
+      "items": [
+        {
+          "title": "Gateway",
+          "href": "/docs/sdk/reference/gateway"
+        },
+        {
+          "title": "Models",
+          "href": "/docs/sdk/reference/models"
+        },
+        {
+          "title": "Provider keys",
+          "href": "/docs/sdk/reference/provider-keys"
+        },
+        {
+          "title": "Response models",
+          "href": "/docs/sdk/reference/gateway-models"
+        }
+      ]
+    }
+  ]
+}

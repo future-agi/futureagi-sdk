@@ -1,0 +1,244 @@
+---
+title: "Scores"
+description: "Reference for client.scores in the Future AGI Python and TypeScript SDKs: scores.create, scores.create_bulk, scores.list_for_source."
+---
+
+`client.scores` on `fi.Client` (Python) and `client.scores` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Annotation response models](/docs/sdk/reference/annotation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+<div class="sdk-ref-table">
+
+| Method | Description |
+|---|---|
+| [`scores.create`](#scorescreate) | Record one score (annotation value) against a source such as a span or dataset row. |
+| [`scores.create_bulk`](#scorescreate_bulk) | Record several scores against one source in a single call. |
+| [`scores.list_for_source`](#scoreslist_for_source) | List the scores recorded against one source. |
+
+</div>
+
+## client.scores
+
+### scores.create
+
+Record one score (annotation value) against a source such as a span or dataset row.
+
+<ApiEndpoint method="POST" path="/model-hub/scores/" />
+
+<CodeGroup>
+
+```python Python
+result = client.scores.create(
+    source_type="dataset_row",
+    source_id="your-source-id",
+    label_id="your-label-id",
+    value="your-value",
+)
+```
+
+```typescript TypeScript
+const result = await client.scores.create({
+  source_type: "dataset_row",
+  source_id: "your-source-id",
+  label_id: "your-label-id",
+  value: "your-value",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.scores.create(
+    *,
+    source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'],
+    source_id: str,
+    label_id: str,
+    value: Any,
+    notes: str | None | NotGiven = NOT_GIVEN,
+    score_source: Literal['human', 'api', 'auto', 'imported'] | None | NotGiven = NOT_GIVEN,
+    queue_item_id: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.Score
+```
+
+```typescript TypeScript
+client.scores.create(params: ScoresCreateParams, options?: RequestOptions): Promise<models.Score>
+
+export interface ScoresCreateParams {
+  source_type: "dataset_row" | "trace" | "observation_span" | "prototype_run" | "call_execution" | "trace_session";
+  source_id: string;
+  label_id: string;
+  value: JsonValue;
+  notes?: string | null;
+  score_source?: "human" | "api" | "auto" | "imported" | null;
+  queue_item_id?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="source_type" type="string" required enum={["dataset_row", "trace", "observation_span", "prototype_run", "call_execution", "trace_session"]} />
+<ParamField body="source_id" type="string" required />
+<ParamField body="label_id" type="string" required />
+<ParamField body="value" type="any JSON value" required />
+<ParamField body="notes" type="string" optional />
+<ParamField body="score_source" type="string" optional enum={["human", "api", "auto", "imported"]} />
+<ParamField body="queue_item_id" type="string" optional />
+
+#### Returns
+
+[`Score`](/docs/sdk/reference/annotation-models#score).
+
+### scores.create_bulk
+
+Record several scores against one source in a single call.
+
+<ApiEndpoint method="POST" path="/model-hub/scores/bulk/" />
+
+<CodeGroup>
+
+```python Python
+result = client.scores.create_bulk(
+    source_type="dataset_row",
+    source_id="your-source-id",
+    scores=[],
+)
+```
+
+```typescript TypeScript
+const result = await client.scores.createBulk({
+  source_type: "dataset_row",
+  source_id: "your-source-id",
+  scores: [],
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.scores.create_bulk(
+    *,
+    source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'],
+    source_id: str,
+    scores: list[dict[str, Any]],
+    notes: str | None | NotGiven = NOT_GIVEN,
+    span_notes: str | None | NotGiven = NOT_GIVEN,
+    span_notes_source_id: str | None | NotGiven = NOT_GIVEN,
+    queue_item_id: str | None | NotGiven = NOT_GIVEN,
+    project_id: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.BulkCreateScoresResult
+```
+
+```typescript TypeScript
+client.scores.createBulk(params: ScoresCreateBulkParams, options?: RequestOptions): Promise<models.BulkCreateScoresResult>
+
+export interface ScoresCreateBulkParams {
+  source_type: "dataset_row" | "trace" | "observation_span" | "prototype_run" | "call_execution" | "trace_session";
+  source_id: string;
+  scores: Array<Record<string, unknown>>;
+  notes?: string | null;
+  span_notes?: string | null;
+  span_notes_source_id?: string | null;
+  queue_item_id?: string | null;
+  project_id?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="source_type" type="string" required enum={["dataset_row", "trace", "observation_span", "prototype_run", "call_execution", "trace_session"]} />
+<ParamField body="source_id" type="string" required />
+<ParamField body="scores" type="object[]" required />
+<ParamField body="notes" type="string" optional />
+<ParamField body="span_notes" type="string" optional />
+<ParamField body="span_notes_source_id" type="string" optional />
+<ParamField body="queue_item_id" type="string" optional />
+<ParamField body="project_id" type="string" optional />
+
+#### Returns
+
+[`BulkCreateScoresResult`](/docs/sdk/reference/annotation-models#bulkcreatescoresresult).
+
+### scores.list_for_source
+
+List the scores recorded against one source.
+
+<ApiEndpoint method="GET" path="/model-hub/scores/for-source/" />
+
+<CodeGroup>
+
+```python Python
+result = client.scores.list_for_source(source_type="dataset_row", source_id="your-source-id")
+```
+
+```typescript TypeScript
+const result = await client.scores.listForSource({
+  source_type: "dataset_row",
+  source_id: "your-source-id",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.scores.list_for_source(
+    *,
+    source_type: Literal['dataset_row', 'trace', 'observation_span', 'prototype_run', 'call_execution', 'trace_session'],
+    source_id: str,
+    page: int | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    project_id: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> List[models.Score]
+```
+
+```typescript TypeScript
+client.scores.listForSource(params: ScoresListForSourceParams, options?: RequestOptions): Promise<Array<models.Score>>
+
+export interface ScoresListForSourceParams {
+  source_type: "dataset_row" | "trace" | "observation_span" | "prototype_run" | "call_execution" | "trace_session";
+  source_id: string;
+  /** A page number within the paginated result set. */
+  page?: number | null;
+  /** Number of results to return per page. */
+  limit?: number | null;
+  /** Tracer project the trace / span was opened from. The same id can exist in several projects; when supplied, only that project's scores are listed. */
+  project_id?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="source_type" type="string" required enum={["dataset_row", "trace", "observation_span", "prototype_run", "call_execution", "trace_session"]} />
+<ParamField query="source_id" type="string" required />
+<ParamField query="page" type="integer" optional>
+  A page number within the paginated result set.
+</ParamField>
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+<ParamField query="project_id" type="string" optional>
+  Tracer project the trace / span was opened from. The same id can exist in several projects; when supplied, only that project's scores are listed.
+</ParamField>
+
+#### Returns
+
+A list of [`Score`](/docs/sdk/reference/annotation-models#score).

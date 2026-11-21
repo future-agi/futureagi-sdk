@@ -125,7 +125,7 @@ pip install -e ./python pytest pyyaml
 
 python sdkgen/sync_contract.py ../future-agi/api_contracts/openapi/swagger.json   # refresh the contract slice
 python sdkgen/generate.py                            # regenerate everything, scaffold new resources
-python sdkgen/generate.py --only python              # one or both of: python, typescript
+python sdkgen/generate.py --only python              # any of: python, typescript, docs
 python sdkgen/generate.py --check                    # CI: exit 1 if generated code is stale or a scaffold is missing
 
 # Live tests against a real backend, e.g. a local install of the monorepo (./bin/install)
@@ -136,6 +136,8 @@ cd typescript/futureagi && pnpm install && pnpm test:live   # TypeScript: transp
 ```
 
 Without `.env.local` or `FI_*` env vars, the live tests are skipped and only the generator and transport tests run. With `FI_E2E_REQUIRED=1` (CI) they fail instead.
+
+The `docs` target writes `docs/sdk-reference/`: the platform SDK reference for docs.futureagi.com (one MDX page per resource with every method's parameters, signatures and examples, one response-models page per product area, an overview, and the sidebar group as `navigation.json`, grouped by the product areas in `docs.AREAS`), built from the same catalog so it can never list a method the SDK lacks. The docs repository (`future-agi/docs`) copies it in with `node scripts/sync-sdk-reference.mjs --from <this checkout>`; its `sdk-reference-sync` workflow does that from a given SDK ref (dispatch, weekly, or a `sdk-release` repository dispatch) and opens the PR.
 
 `sdkgen/generator/` is one module per concern: `catalog.py` loads and validates (every emitter starts from its `Op` list), `python.py` and `typescript.py` only emit text, and `__init__.py` maps outputs to paths. Adding a surface is a new emitter plus one entry in `build()`.
 

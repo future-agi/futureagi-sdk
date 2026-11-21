@@ -1,0 +1,274 @@
+---
+title: "Platform SDK reference"
+description: "Every method of the Future AGI platform client in Python and TypeScript: the client, conventions for arguments, pagination, errors and strict mode, and one page per resource."
+---
+
+<TLDR>
+- One client, every API: `fi.Client` (Python, `pip install futureagi`) and `Client` from `@future-agi/sdk` (TypeScript)
+- 164 methods across 25 resources, generated from the API contract; each page lists parameters, return types and the REST endpoint
+- Omitted arguments are not sent, `None` / `null` is; list calls return pagers; HTTP errors raise typed exceptions
+</TLDR>
+
+The platform client is generated from the Future AGI API contract, so every REST operation has one method with the same name in Python and TypeScript. This reference is generated from the same source as the SDKs. For narrative guides, see the [SDK overview](/docs/sdk).
+
+## The client
+
+Credentials come from the constructor or from the environment: `FI_API_KEY`, `FI_SECRET_KEY`, and optionally `FI_BASE_URL` and `FI_WORKSPACE_ID`.
+
+<CodeGroup>
+
+```python Python
+from fi import Client
+
+client = Client()  # or Client(api_key=..., secret_key=..., base_url=...)
+for dataset in client.datasets.list():
+    print(dataset.name)
+```
+
+```typescript TypeScript
+import { Client } from "@future-agi/sdk";
+
+const client = new Client(); // or new Client({ apiKey, secretKey, baseUrl })
+for await (const dataset of client.datasets.list()) {
+  console.log(dataset.name);
+}
+```
+
+</CodeGroup>
+
+Python also ships `AsyncClient` with the same methods, awaited (`await client.datasets.get(...)`, `async for` over pagers).
+
+<ParamField name="api_key / apiKey" type="string" optional>
+  Defaults to `FI_API_KEY`.
+</ParamField>
+<ParamField name="secret_key / secretKey" type="string" optional>
+  Defaults to `FI_SECRET_KEY`.
+</ParamField>
+<ParamField name="base_url / baseUrl" type="string" optional>
+  Defaults to `FI_BASE_URL`, then `https://api.futureagi.com`.
+</ParamField>
+<ParamField name="workspace_id / workspaceId" type="string" optional>
+  Defaults to `FI_WORKSPACE_ID`. Sent as `X-Workspace-Id`.
+</ParamField>
+<ParamField name="timeout" type="number" optional>
+  Per-request timeout: seconds in Python (default 60), milliseconds in TypeScript (default 60000).
+</ParamField>
+<ParamField name="max_retries / maxRetries" type="integer" optional>
+  Default 2. Retries 429 on every call, and timeouts and 5xx on calls that are safe to repeat.
+</ParamField>
+<ParamField name="default_headers / defaultHeaders" type="object" optional>
+  Sent with every request.
+</ParamField>
+<ParamField name="strict_responses" type="boolean" optional>
+  Python only. Reject a response that misses a field the contract marks required (see Strict mode).
+</ParamField>
+<ParamField name="http_client / fetch" type="object" optional>
+  Python: an `httpx.Client` (or `httpx.AsyncClient`) to use instead of the SDK's own. TypeScript: a replacement for the global `fetch`.
+</ParamField>
+
+## Conventions
+
+### Arguments
+
+Path parameters are positional; every other parameter is a keyword argument in Python and a field of the `params` object in TypeScript. An argument you leave out is not sent. Passing `None` (Python) or `null` (TypeScript) sends `null`, which clears a nullable field. In Python the omitted-argument sentinel is `fi.platform.NOT_GIVEN`.
+
+A `PATCH` is always a partial update: send only the fields you want to change.
+
+Fields the contract does not describe yet go through the escape hatches: `extra_query=` and `extra_body=` in Python, `options.extraQuery` and `options.extraBody` in TypeScript.
+
+### Per-call options
+
+Every method accepts `options` (`fi.platform.RequestOptions` / `RequestOptions`) with `headers`, `timeout` and `max_retries` / `maxRetries` overrides for that one call.
+
+### Pagination
+
+A method marked *paginated* returns a pager instead of a list and fetches pages as you iterate. Python `SyncPager` / `AsyncPager`: iterate, or `first_page()` for one `Page` (`items`, `number`, `raw`), or `to_list(limit=None)`. TypeScript `Pager`: `for await`, or `firstPage()`, or `toArray(limit?)`.
+
+### Responses
+
+Responses are parsed into models (`fi.platform.models` / `@future-agi/sdk/platform/models`), documented on the response-models page of each area below. Parsing is tolerant: a field the backend leaves out is `None` / `undefined`, an extra field is kept. The backend's `{status, result}` envelope is unwrapped for you.
+
+### Strict mode
+
+`Client(strict_responses=True)` (Python) raises `ResponseValidationError` when a response misses a field the contract marks required. Use it in tests to catch contract drift; leave it off in production.
+
+### Errors
+
+HTTP errors raise a subclass of `APIError` with `status_code` / `status`, `body`, `detail` and `request_id` / `requestId`. Import the error classes from `fi.platform` (Python) and from **`@future-agi/sdk/platform`** (TypeScript): the package root does not export them, and its `RateLimitError` is an older, unrelated class that an `instanceof` check against platform errors never matches.
+
+<CodeGroup>
+```python Python
+from fi.platform import APIError, NotFoundError, RateLimitError
+```
+
+```typescript TypeScript
+import { APIError, NotFoundError, RateLimitError } from "@future-agi/sdk/platform";
+```
+</CodeGroup>
+
+<div class="sdk-ref-table">
+
+| Status | Error |
+|---|---|
+| 400 | `BadRequestError` |
+| 401 | `AuthenticationError` |
+| 402 | `PaymentRequiredError` |
+| 403 | `PermissionDeniedError` |
+| 404 | `NotFoundError` |
+| 409 | `ConflictError` |
+| 422 | `UnprocessableEntityError` |
+| 429 | `RateLimitError` |
+| 5xx | `InternalServerError` |
+
+</div>
+
+Network failures raise `APIConnectionError`. All of them extend `FutureAGIError`.
+
+### Stability
+
+A method marked **Beta** may change without notice; the first call emits a `BetaWarning` (Python) or a console warning (TypeScript).
+
+### Any endpoint
+
+`client.request(method, path, ...)` calls any endpoint under the base URL with the client's authentication, retries and error handling, for operations this reference does not list yet.
+
+## Resources
+
+### Account
+
+<CardGroup cols={2}>
+  <Card title="Account" href="/docs/sdk/reference/account">
+    `client.account`: 1 method.
+  </Card>
+  <Card title="Workspaces" href="/docs/sdk/reference/workspaces">
+    `client.workspaces`: 2 methods.
+  </Card>
+  <Card title="Usage" href="/docs/sdk/reference/usage">
+    `client.usage`: 1 method.
+  </Card>
+  <Card title="Response models" href="/docs/sdk/reference/account-models">
+    What the account methods return.
+  </Card>
+</CardGroup>
+
+### Datasets & evals
+
+<CardGroup cols={2}>
+  <Card title="Datasets" href="/docs/sdk/reference/datasets">
+    `client.datasets`: 20 methods.
+  </Card>
+  <Card title="Evals" href="/docs/sdk/reference/evals">
+    `client.evals`: 15 methods.
+  </Card>
+  <Card title="Experiments" href="/docs/sdk/reference/experiments">
+    `client.experiments`: 3 methods.
+  </Card>
+  <Card title="Optimizations" href="/docs/sdk/reference/optimizations">
+    `client.optimizations`: 3 methods.
+  </Card>
+  <Card title="Response models" href="/docs/sdk/reference/datasets-evals-models">
+    What the datasets & evals methods return.
+  </Card>
+</CardGroup>
+
+### Prompts
+
+<CardGroup cols={2}>
+  <Card title="Prompts" href="/docs/sdk/reference/prompts">
+    `client.prompts`: 22 methods.
+  </Card>
+  <Card title="Response models" href="/docs/sdk/reference/prompts-models">
+    What the prompts methods return.
+  </Card>
+</CardGroup>
+
+### Observability
+
+<CardGroup cols={2}>
+  <Card title="Projects" href="/docs/sdk/reference/projects">
+    `client.projects`: 2 methods.
+  </Card>
+  <Card title="Traces" href="/docs/sdk/reference/traces">
+    `client.traces`: 4 methods.
+  </Card>
+  <Card title="Spans" href="/docs/sdk/reference/spans">
+    `client.spans`: 2 methods.
+  </Card>
+  <Card title="Sessions" href="/docs/sdk/reference/sessions">
+    `client.sessions`: 2 methods.
+  </Card>
+  <Card title="Dashboards" href="/docs/sdk/reference/dashboards">
+    `client.dashboards`: 13 methods.
+  </Card>
+  <Card title="Error clusters" href="/docs/sdk/reference/error-clusters">
+    `client.error_clusters`: 4 methods.
+  </Card>
+  <Card title="Alerts" href="/docs/sdk/reference/alerts">
+    `client.alerts`: 2 methods.
+  </Card>
+  <Card title="Response models" href="/docs/sdk/reference/observability-models">
+    What the observability methods return.
+  </Card>
+</CardGroup>
+
+### Annotation
+
+<CardGroup cols={2}>
+  <Card title="Annotation queues" href="/docs/sdk/reference/annotation-queues">
+    `client.annotation_queues`: 23 methods.
+  </Card>
+  <Card title="Annotations" href="/docs/sdk/reference/annotations">
+    `client.annotations`: 5 methods.
+  </Card>
+  <Card title="Scores" href="/docs/sdk/reference/scores">
+    `client.scores`: 3 methods.
+  </Card>
+  <Card title="Response models" href="/docs/sdk/reference/annotation-models">
+    What the annotation methods return.
+  </Card>
+</CardGroup>
+
+### Simulation
+
+<CardGroup cols={2}>
+  <Card title="Agents" href="/docs/sdk/reference/agents">
+    `client.agents`: 5 methods.
+  </Card>
+  <Card title="Simulation" href="/docs/sdk/reference/simulation">
+    `client.simulation`: 11 methods.
+  </Card>
+  <Card title="Response models" href="/docs/sdk/reference/simulation-models">
+    What the simulation methods return.
+  </Card>
+</CardGroup>
+
+### Knowledge bases
+
+<CardGroup cols={2}>
+  <Card title="Knowledge bases" href="/docs/sdk/reference/knowledge-bases">
+    `client.knowledge_bases`: 5 methods.
+  </Card>
+  <Card title="File knowledge bases" href="/docs/sdk/reference/file-knowledge-bases">
+    `client.file_knowledge_bases`: 7 methods.
+  </Card>
+  <Card title="Response models" href="/docs/sdk/reference/knowledge-bases-models">
+    What the knowledge bases methods return.
+  </Card>
+</CardGroup>
+
+### Gateway
+
+<CardGroup cols={2}>
+  <Card title="Gateway" href="/docs/sdk/reference/gateway">
+    `client.gateway`: 7 methods.
+  </Card>
+  <Card title="Models" href="/docs/sdk/reference/models">
+    `client.models`: 1 method.
+  </Card>
+  <Card title="Provider keys" href="/docs/sdk/reference/provider-keys">
+    `client.provider_keys`: 1 method.
+  </Card>
+  <Card title="Response models" href="/docs/sdk/reference/gateway-models">
+    What the gateway methods return.
+  </Card>
+</CardGroup>

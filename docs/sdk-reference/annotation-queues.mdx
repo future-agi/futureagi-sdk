@@ -1,0 +1,1409 @@
+---
+title: "Annotation queues"
+description: "Reference for client.annotation_queues in the Future AGI Python and TypeScript SDKs: annotation_queues.add_label, annotation_queues.agreement, annotation_queues.analytics, annotation_queues.create, annotation_queues.delete, annotation_queues.export and 17 more."
+---
+
+`client.annotation_queues` on `fi.Client` (Python) and `client.annotationQueues` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.annotation_queues.items`. The models these methods return are on [Annotation response models](/docs/sdk/reference/annotation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+<div class="sdk-ref-table">
+
+| Method | Description |
+|---|---|
+| [`annotation_queues.add_label`](#annotation_queuesadd_label) | Add an annotation label to a queue. |
+| [`annotation_queues.agreement`](#annotation_queuesagreement) | Inter-annotator agreement for a queue. |
+| [`annotation_queues.analytics`](#annotation_queuesanalytics) | Throughput, annotator performance and label distribution for a queue. |
+| [`annotation_queues.create`](#annotation_queuescreate) | Create an annotation queue with its labels and annotators. |
+| [`annotation_queues.delete`](#annotation_queuesdelete) | Delete an annotation queue. |
+| [`annotation_queues.export`](#annotation_queuesexport) | Export a queue's annotations, as JSON or, with `export_format=csv`, as CSV text. |
+| [`annotation_queues.export_to_dataset`](#annotation_queuesexport_to_dataset) | Write a queue's annotations into a new or existing dataset. |
+| [`annotation_queues.get`](#annotation_queuesget) | Return an annotation queue by its identifier. |
+| [`annotation_queues.list`](#annotation_queueslist) | List annotation queues in the current workspace. |
+| [`annotation_queues.progress`](#annotation_queuesprogress) | Item counts by status and per-annotator progress for a queue. |
+| [`annotation_queues.remove_label`](#annotation_queuesremove_label) | Remove an annotation label from a queue. |
+| [`annotation_queues.update`](#annotation_queuesupdate) | Update selected fields of an annotation queue. |
+| [`annotation_queues.update_status`](#annotation_queuesupdate_status) | Change a queue's status (draft, active, paused, completed, archived). |
+| [`annotation_queues.items.add`](#annotation_queuesitemsadd) | Add items (spans, traces, dataset rows) to a queue, by id or by a selection filter. |
+| [`annotation_queues.items.annotate_detail`](#annotation_queuesitemsannotate_detail) | Return everything needed to annotate one queue item; reserve=true acquires an editing reservation for the caller. |
+| [`annotation_queues.items.assign`](#annotation_queuesitemsassign) | Assign or unassign queue items to annotators. |
+| [`annotation_queues.items.complete`](#annotation_queuesitemscomplete) | Mark an annotated queue item complete and return the next item to work on. |
+| [`annotation_queues.items.import_annotations`](#annotation_queuesitemsimport_annotations) | Import existing annotations onto a queue item, optionally on behalf of an annotator. |
+| [`annotation_queues.items.list`](#annotation_queuesitemslist) | List items belonging to an annotation queue. |
+| [`annotation_queues.items.list_annotations`](#annotation_queuesitemslist_annotations) | List the annotations recorded on a queue item. |
+| [`annotation_queues.items.remove`](#annotation_queuesitemsremove) | Remove items from a queue. |
+| [`annotation_queues.items.skip`](#annotation_queuesitemsskip) | Skip a queue item and return the next one to work on. |
+| [`annotation_queues.items.submit`](#annotation_queuesitemssubmit) | Submit annotation values for an item in an annotation queue. |
+
+</div>
+
+## client.annotation_queues
+
+### annotation_queues.add_label
+
+Add an annotation label to a queue.
+
+<ApiEndpoint method="POST" path="/model-hub/annotation-queues/{id}/add-label/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.add_label("your-id", label_id="your-label-id")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.addLabel("your-id", { label_id: "your-label-id" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.add_label(
+    id: str,
+    *,
+    label_id: str,
+    required: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.QueueAddLabelResult
+```
+
+```typescript TypeScript
+client.annotationQueues.addLabel(id: string, params: AnnotationQueuesAddLabelParams, options?: RequestOptions): Promise<models.QueueAddLabelResult>
+
+export interface AnnotationQueuesAddLabelParams {
+  label_id: string;
+  required?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this annotation queue.
+</ParamField>
+<ParamField body="label_id" type="string" required />
+<ParamField body="required" type="boolean" optional />
+
+#### Returns
+
+[`QueueAddLabelResult`](/docs/sdk/reference/annotation-models#queueaddlabelresult).
+
+### annotation_queues.agreement
+
+Inter-annotator agreement for a queue.
+
+<ApiEndpoint method="GET" path="/model-hub/annotation-queues/{id}/agreement/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.agreement("your-id")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.agreement("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.agreement(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.QueueAgreementResult
+```
+
+```typescript TypeScript
+client.annotationQueues.agreement(id: string, options?: RequestOptions): Promise<models.QueueAgreementResult>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this annotation queue.
+</ParamField>
+
+#### Returns
+
+[`QueueAgreementResult`](/docs/sdk/reference/annotation-models#queueagreementresult).
+
+### annotation_queues.analytics
+
+Throughput, annotator performance and label distribution for a queue.
+
+<ApiEndpoint method="GET" path="/model-hub/annotation-queues/{id}/analytics/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.analytics("your-id")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.analytics("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.analytics(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.QueueAnalyticsResult
+```
+
+```typescript TypeScript
+client.annotationQueues.analytics(id: string, options?: RequestOptions): Promise<models.QueueAnalyticsResult>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this annotation queue.
+</ParamField>
+
+#### Returns
+
+[`QueueAnalyticsResult`](/docs/sdk/reference/annotation-models#queueanalyticsresult).
+
+### annotation_queues.create
+
+Create an annotation queue with its labels and annotators.
+
+<ApiEndpoint method="POST" path="/model-hub/annotation-queues/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.create(name="your-name", label_ids=[])
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.create({
+  name: "your-name",
+  label_ids: [],
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.create(
+    *,
+    name: str,
+    label_ids: list[str],
+    description: str | None | NotGiven = NOT_GIVEN,
+    instructions: str | None | NotGiven = NOT_GIVEN,
+    assignment_strategy: Literal['manual', 'round_robin', 'load_balanced'] | None | NotGiven = NOT_GIVEN,
+    annotations_required: int | None | NotGiven = NOT_GIVEN,
+    reservation_timeout_minutes: int | None | NotGiven = NOT_GIVEN,
+    requires_review: bool | None | NotGiven = NOT_GIVEN,
+    auto_assign: bool | None | NotGiven = NOT_GIVEN,
+    annotator_ids: list[str] | None | NotGiven = NOT_GIVEN,
+    annotator_roles: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AnnotationQueue
+```
+
+```typescript TypeScript
+client.annotationQueues.create(params: AnnotationQueuesCreateParams, options?: RequestOptions): Promise<models.AnnotationQueue>
+
+export interface AnnotationQueuesCreateParams {
+  name: string;
+  label_ids: Array<string>;
+  description?: string | null;
+  instructions?: string | null;
+  assignment_strategy?: "manual" | "round_robin" | "load_balanced" | null;
+  annotations_required?: number | null;
+  reservation_timeout_minutes?: number | null;
+  requires_review?: boolean | null;
+  auto_assign?: boolean | null;
+  annotator_ids?: Array<string> | null;
+  annotator_roles?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="name" type="string" required />
+<ParamField body="label_ids" type="string[]" required />
+<ParamField body="description" type="string" optional />
+<ParamField body="instructions" type="string" optional />
+<ParamField body="assignment_strategy" type="string" optional enum={["manual", "round_robin", "load_balanced"]} />
+<ParamField body="annotations_required" type="integer" optional />
+<ParamField body="reservation_timeout_minutes" type="integer" optional />
+<ParamField body="requires_review" type="boolean" optional />
+<ParamField body="auto_assign" type="boolean" optional />
+<ParamField body="annotator_ids" type="string[]" optional />
+<ParamField body="annotator_roles" type="object" optional />
+
+#### Returns
+
+[`AnnotationQueue`](/docs/sdk/reference/annotation-models#annotationqueue).
+
+### annotation_queues.delete
+
+Delete an annotation queue.
+
+<ApiEndpoint method="DELETE" path="/model-hub/annotation-queues/{id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.delete("your-id")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.delete("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.delete(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.annotationQueues.delete(id: string, options?: RequestOptions): Promise<unknown>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this annotation queue.
+</ParamField>
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### annotation_queues.export
+
+Export a queue's annotations, as JSON or, with `export_format=csv`, as CSV text.
+
+<ApiEndpoint method="GET" path="/model-hub/annotation-queues/{id}/export/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.export("your-id")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.export("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.export(
+    id: str,
+    *,
+    export_format: Literal['json', 'csv'] | None | NotGiven = NOT_GIVEN,
+    status: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.annotationQueues.export(id: string, params: AnnotationQueuesExportParams = {}, options?: RequestOptions): Promise<unknown>
+
+export interface AnnotationQueuesExportParams {
+  export_format?: "json" | "csv" | null;
+  status?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this annotation queue.
+</ParamField>
+<ParamField query="export_format" type="string" optional enum={["json", "csv"]} />
+<ParamField query="status" type="string" optional />
+
+#### Returns
+
+The decoded JSON when the response is JSON, else the body as text.
+
+### annotation_queues.export_to_dataset
+
+Write a queue's annotations into a new or existing dataset.
+
+<ApiEndpoint method="POST" path="/model-hub/annotation-queues/{id}/export-to-dataset/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.export_to_dataset("your-id")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.exportToDataset("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.export_to_dataset(
+    id: str,
+    *,
+    dataset_id: str | None | NotGiven = NOT_GIVEN,
+    dataset_name: str | None | NotGiven = NOT_GIVEN,
+    status_filter: str | None | NotGiven = NOT_GIVEN,
+    column_mapping: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.QueueExportToDatasetResult
+```
+
+```typescript TypeScript
+client.annotationQueues.exportToDataset(id: string, params: AnnotationQueuesExportToDatasetParams = {}, options?: RequestOptions): Promise<models.QueueExportToDatasetResult>
+
+export interface AnnotationQueuesExportToDatasetParams {
+  dataset_id?: string | null;
+  dataset_name?: string | null;
+  status_filter?: string | null;
+  column_mapping?: Array<Record<string, unknown>> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this annotation queue.
+</ParamField>
+<ParamField body="dataset_id" type="string" optional />
+<ParamField body="dataset_name" type="string" optional />
+<ParamField body="status_filter" type="string" optional />
+<ParamField body="column_mapping" type="object[]" optional />
+
+#### Returns
+
+[`QueueExportToDatasetResult`](/docs/sdk/reference/annotation-models#queueexporttodatasetresult).
+
+### annotation_queues.get
+
+Return an annotation queue by its identifier.
+
+<ApiEndpoint method="GET" path="/model-hub/annotation-queues/{id}/" />
+
+**MCP tool**: `get_annotation_queue`
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.get(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AnnotationQueue
+```
+
+```typescript TypeScript
+client.annotationQueues.get(id: string, options?: RequestOptions): Promise<models.AnnotationQueue>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this annotation queue.
+</ParamField>
+
+#### Returns
+
+[`AnnotationQueue`](/docs/sdk/reference/annotation-models#annotationqueue).
+
+### annotation_queues.list
+
+List annotation queues in the current workspace.
+
+<ApiEndpoint method="GET" path="/model-hub/annotation-queues/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_annotation_queues`
+
+<CodeGroup>
+
+```python Python
+for item in client.annotation_queues.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.annotationQueues.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.list(
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    status: str | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    include_counts: bool | None | NotGiven = NOT_GIVEN,
+    archived: bool | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.AnnotationQueue]
+```
+
+```typescript TypeScript
+client.annotationQueues.list(params: AnnotationQueuesListParams = {}, options?: RequestOptions): Pager<models.AnnotationQueue>
+
+export interface AnnotationQueuesListParams {
+  /** Number of results to return per page. */
+  limit?: number | null;
+  status?: string | null;
+  search?: string | null;
+  include_counts?: boolean | null;
+  archived?: boolean | null;
+  page_size?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+<ParamField query="status" type="string" optional />
+<ParamField query="search" type="string" optional />
+<ParamField query="include_counts" type="boolean" optional />
+<ParamField query="archived" type="boolean" optional />
+<ParamField query="page_size" type="integer" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`AnnotationQueue`](/docs/sdk/reference/annotation-models#annotationqueue) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### annotation_queues.progress
+
+Item counts by status and per-annotator progress for a queue.
+
+<ApiEndpoint method="GET" path="/model-hub/annotation-queues/{id}/progress/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.progress("your-id")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.progress("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.progress(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.QueueProgressResult
+```
+
+```typescript TypeScript
+client.annotationQueues.progress(id: string, options?: RequestOptions): Promise<models.QueueProgressResult>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this annotation queue.
+</ParamField>
+
+#### Returns
+
+[`QueueProgressResult`](/docs/sdk/reference/annotation-models#queueprogressresult).
+
+### annotation_queues.remove_label
+
+Remove an annotation label from a queue.
+
+<ApiEndpoint method="POST" path="/model-hub/annotation-queues/{id}/remove-label/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.remove_label("your-id", label_id="your-label-id")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.removeLabel("your-id", { label_id: "your-label-id" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.remove_label(
+    id: str,
+    *,
+    label_id: str,
+    required: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.QueueRemoveLabelResult
+```
+
+```typescript TypeScript
+client.annotationQueues.removeLabel(id: string, params: AnnotationQueuesRemoveLabelParams, options?: RequestOptions): Promise<models.QueueRemoveLabelResult>
+
+export interface AnnotationQueuesRemoveLabelParams {
+  label_id: string;
+  required?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this annotation queue.
+</ParamField>
+<ParamField body="label_id" type="string" required />
+<ParamField body="required" type="boolean" optional />
+
+#### Returns
+
+[`QueueRemoveLabelResult`](/docs/sdk/reference/annotation-models#queueremovelabelresult).
+
+### annotation_queues.update
+
+Update selected fields of an annotation queue.
+
+<ApiEndpoint method="PATCH" path="/model-hub/annotation-queues/{id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.update("your-id")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.update("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.update(
+    id: str,
+    *,
+    name: str | None | NotGiven = NOT_GIVEN,
+    description: str | None | NotGiven = NOT_GIVEN,
+    instructions: str | None | NotGiven = NOT_GIVEN,
+    assignment_strategy: Literal['manual', 'round_robin', 'load_balanced'] | None | NotGiven = NOT_GIVEN,
+    annotations_required: int | None | NotGiven = NOT_GIVEN,
+    reservation_timeout_minutes: int | None | NotGiven = NOT_GIVEN,
+    requires_review: bool | None | NotGiven = NOT_GIVEN,
+    auto_assign: bool | None | NotGiven = NOT_GIVEN,
+    label_ids: list[str] | None | NotGiven = NOT_GIVEN,
+    annotator_ids: list[str] | None | NotGiven = NOT_GIVEN,
+    annotator_roles: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AnnotationQueue
+```
+
+```typescript TypeScript
+client.annotationQueues.update(id: string, params: AnnotationQueuesUpdateParams = {}, options?: RequestOptions): Promise<models.AnnotationQueue>
+
+export interface AnnotationQueuesUpdateParams {
+  name?: string | null;
+  description?: string | null;
+  instructions?: string | null;
+  assignment_strategy?: "manual" | "round_robin" | "load_balanced" | null;
+  annotations_required?: number | null;
+  reservation_timeout_minutes?: number | null;
+  requires_review?: boolean | null;
+  auto_assign?: boolean | null;
+  label_ids?: Array<string> | null;
+  annotator_ids?: Array<string> | null;
+  annotator_roles?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this annotation queue.
+</ParamField>
+<ParamField body="name" type="string" optional />
+<ParamField body="description" type="string" optional />
+<ParamField body="instructions" type="string" optional />
+<ParamField body="assignment_strategy" type="string" optional enum={["manual", "round_robin", "load_balanced"]} />
+<ParamField body="annotations_required" type="integer" optional />
+<ParamField body="reservation_timeout_minutes" type="integer" optional />
+<ParamField body="requires_review" type="boolean" optional />
+<ParamField body="auto_assign" type="boolean" optional />
+<ParamField body="label_ids" type="string[]" optional />
+<ParamField body="annotator_ids" type="string[]" optional />
+<ParamField body="annotator_roles" type="object" optional />
+
+#### Returns
+
+[`AnnotationQueue`](/docs/sdk/reference/annotation-models#annotationqueue).
+
+### annotation_queues.update_status
+
+Change a queue's status (draft, active, paused, completed, archived).
+
+<ApiEndpoint method="POST" path="/model-hub/annotation-queues/{id}/update-status/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.update_status("your-id", status="draft")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.updateStatus("your-id", { status: "draft" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.update_status(
+    id: str,
+    *,
+    status: Literal['draft', 'active', 'paused', 'completed'],
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AnnotationQueue
+```
+
+```typescript TypeScript
+client.annotationQueues.updateStatus(id: string, params: AnnotationQueuesUpdateStatusParams, options?: RequestOptions): Promise<models.AnnotationQueue>
+
+export interface AnnotationQueuesUpdateStatusParams {
+  status: "draft" | "active" | "paused" | "completed";
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  A UUID string identifying this annotation queue.
+</ParamField>
+<ParamField body="status" type="string" required enum={["draft", "active", "paused", "completed"]} />
+
+#### Returns
+
+[`AnnotationQueue`](/docs/sdk/reference/annotation-models#annotationqueue).
+
+## client.annotation_queues.items
+
+TypeScript: `client.annotationQueues.items`.
+
+### annotation_queues.items.add
+
+Add items (spans, traces, dataset rows) to a queue, by id or by a selection filter.
+
+<ApiEndpoint method="POST" path="/model-hub/annotation-queues/{queue_id}/items/add-items/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.items.add("your-queue-id")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.items.add("your-queue-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.items.add(
+    queue_id: str,
+    *,
+    items: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    selection: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    project_id: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.QueueAddItemsResult
+```
+
+```typescript TypeScript
+client.annotationQueues.items.add(queueId: string, params: AnnotationQueuesItemsAddParams = {}, options?: RequestOptions): Promise<models.QueueAddItemsResult>
+
+export interface AnnotationQueuesItemsAddParams {
+  items?: Array<Record<string, unknown>> | null;
+  selection?: Record<string, unknown> | null;
+  project_id?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="queue_id" type="string" required>
+  Positional argument `queue_id`.
+</ParamField>
+<ParamField body="items" type="object[]" optional />
+<ParamField body="selection" type="object" optional />
+<ParamField body="project_id" type="string" optional />
+
+#### Returns
+
+[`QueueAddItemsResult`](/docs/sdk/reference/annotation-models#queueadditemsresult).
+
+### annotation_queues.items.annotate_detail
+
+Return everything needed to annotate one queue item; reserve=true acquires an editing reservation for the caller. Includes its source content, the queue instructions, every label with its settings (the allowed values a submitted value must match), any annotations already recorded, and the next/previous item ids. Call this before submit_annotation; the label settings are not available anywhere else.
+
+<ApiEndpoint method="GET" path="/model-hub/annotation-queues/{queue_id}/items/{id}/annotate-detail/" />
+
+**MCP tool**: `get_annotation_item_detail`
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.items.annotate_detail("your-queue-id", "your-id")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.items.annotateDetail("your-queue-id", "your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.items.annotate_detail(
+    queue_id: str,
+    id: str,
+    *,
+    annotator_id: str | None | NotGiven = NOT_GIVEN,
+    include_completed: bool | None | NotGiven = NOT_GIVEN,
+    view_mode: str | None | NotGiven = NOT_GIVEN,
+    review_status: str | None | NotGiven = NOT_GIVEN,
+    exclude_review_status: str | None | NotGiven = NOT_GIVEN,
+    include_all_annotations: bool | None | NotGiven = NOT_GIVEN,
+    reserve: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.QueueAnnotateDetailResult
+```
+
+```typescript TypeScript
+client.annotationQueues.items.annotateDetail(queueId: string, id: string, params: AnnotationQueuesItemsAnnotateDetailParams = {}, options?: RequestOptions): Promise<models.QueueAnnotateDetailResult>
+
+export interface AnnotationQueuesItemsAnnotateDetailParams {
+  annotator_id?: string | null;
+  include_completed?: boolean | null;
+  view_mode?: string | null;
+  review_status?: string | null;
+  exclude_review_status?: string | null;
+  include_all_annotations?: boolean | null;
+  reserve?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="queue_id" type="string" required>
+  Positional argument `queue_id`.
+</ParamField>
+<ParamField path="id" type="string" required>
+  A UUID string identifying this queue item.
+</ParamField>
+<ParamField query="annotator_id" type="string" optional />
+<ParamField query="include_completed" type="boolean" optional />
+<ParamField query="view_mode" type="string" optional />
+<ParamField query="review_status" type="string" optional />
+<ParamField query="exclude_review_status" type="string" optional />
+<ParamField query="include_all_annotations" type="boolean" optional />
+<ParamField query="reserve" type="boolean" optional />
+
+#### Returns
+
+[`QueueAnnotateDetailResult`](/docs/sdk/reference/annotation-models#queueannotatedetailresult).
+
+### annotation_queues.items.assign
+
+Assign or unassign queue items to annotators.
+
+<ApiEndpoint method="POST" path="/model-hub/annotation-queues/{queue_id}/items/assign/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.items.assign("your-queue-id", item_ids=[])
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.items.assign("your-queue-id", { item_ids: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.items.assign(
+    queue_id: str,
+    *,
+    item_ids: list[str],
+    user_ids: list[str] | None | NotGiven = NOT_GIVEN,
+    action: Literal['add', 'set', 'remove'] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.QueueAssignItemsResult
+```
+
+```typescript TypeScript
+client.annotationQueues.items.assign(queueId: string, params: AnnotationQueuesItemsAssignParams, options?: RequestOptions): Promise<models.QueueAssignItemsResult>
+
+export interface AnnotationQueuesItemsAssignParams {
+  item_ids: Array<string>;
+  user_ids?: Array<string> | null;
+  action?: "add" | "set" | "remove" | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="queue_id" type="string" required>
+  Positional argument `queue_id`.
+</ParamField>
+<ParamField body="item_ids" type="string[]" required />
+<ParamField body="user_ids" type="string[]" optional />
+<ParamField body="action" type="string" optional enum={["add", "set", "remove"]} />
+
+#### Returns
+
+[`QueueAssignItemsResult`](/docs/sdk/reference/annotation-models#queueassignitemsresult).
+
+### annotation_queues.items.complete
+
+Mark an annotated queue item complete and return the next item to work on. Required to finish an item - submit_annotation alone leaves it in_progress and the queue never closes.
+
+<ApiEndpoint method="POST" path="/model-hub/annotation-queues/{queue_id}/items/{id}/complete/" />
+
+**MCP tool**: `complete_annotation_item`
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.items.complete("your-queue-id", "your-id")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.items.complete("your-queue-id", "your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.items.complete(
+    queue_id: str,
+    id: str,
+    *,
+    exclude: list[str] | None | NotGiven = NOT_GIVEN,
+    exclude_review_status: str | None | NotGiven = NOT_GIVEN,
+    include_completed: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.QueueNavigationResult
+```
+
+```typescript TypeScript
+client.annotationQueues.items.complete(queueId: string, id: string, params: AnnotationQueuesItemsCompleteParams = {}, options?: RequestOptions): Promise<models.QueueNavigationResult>
+
+export interface AnnotationQueuesItemsCompleteParams {
+  exclude?: Array<string> | null;
+  exclude_review_status?: string | null;
+  include_completed?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="queue_id" type="string" required>
+  Positional argument `queue_id`.
+</ParamField>
+<ParamField path="id" type="string" required>
+  A UUID string identifying this queue item.
+</ParamField>
+<ParamField body="exclude" type="string[]" optional />
+<ParamField body="exclude_review_status" type="string" optional />
+<ParamField body="include_completed" type="boolean" optional />
+
+#### Returns
+
+[`QueueNavigationResult`](/docs/sdk/reference/annotation-models#queuenavigationresult).
+
+### annotation_queues.items.import_annotations
+
+Import existing annotations onto a queue item, optionally on behalf of an annotator.
+
+<ApiEndpoint method="POST" path="/model-hub/annotation-queues/{queue_id}/items/{id}/annotations/import/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.items.import_annotations(
+    "your-queue-id",
+    "your-id",
+    annotations=[],
+)
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.items.importAnnotations("your-queue-id", "your-id", { annotations: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.items.import_annotations(
+    queue_id: str,
+    id: str,
+    *,
+    annotations: list[dict[str, Any]],
+    annotator_id: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.QueueImportAnnotationsResult
+```
+
+```typescript TypeScript
+client.annotationQueues.items.importAnnotations(queueId: string, id: string, params: AnnotationQueuesItemsImportAnnotationsParams, options?: RequestOptions): Promise<models.QueueImportAnnotationsResult>
+
+export interface AnnotationQueuesItemsImportAnnotationsParams {
+  annotations: Array<Record<string, unknown>>;
+  annotator_id?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="queue_id" type="string" required>
+  Positional argument `queue_id`.
+</ParamField>
+<ParamField path="id" type="string" required>
+  A UUID string identifying this queue item.
+</ParamField>
+<ParamField body="annotations" type="object[]" required />
+<ParamField body="annotator_id" type="string" optional />
+
+#### Returns
+
+[`QueueImportAnnotationsResult`](/docs/sdk/reference/annotation-models#queueimportannotationsresult).
+
+### annotation_queues.items.list
+
+List items belonging to an annotation queue.
+
+<ApiEndpoint method="GET" path="/model-hub/annotation-queues/{queue_id}/items/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_annotation_queue_items`
+
+<CodeGroup>
+
+```python Python
+for item in client.annotation_queues.items.list("your-queue-id"):
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.annotationQueues.items.list("your-queue-id")) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.items.list(
+    queue_id: str,
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    status: list[str] | None | NotGiven = NOT_GIVEN,
+    source_type: list[str] | None | NotGiven = NOT_GIVEN,
+    assigned_to: str | None | NotGiven = NOT_GIVEN,
+    review_status: str | None | NotGiven = NOT_GIVEN,
+    ordering: Literal['created_at', '-created_at'] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.QueueItem]
+```
+
+```typescript TypeScript
+client.annotationQueues.items.list(queueId: string, params: AnnotationQueuesItemsListParams = {}, options?: RequestOptions): Pager<models.QueueItem>
+
+export interface AnnotationQueuesItemsListParams {
+  /** Number of results to return per page. */
+  limit?: number | null;
+  status?: Array<string> | null;
+  source_type?: Array<string> | null;
+  assigned_to?: string | null;
+  review_status?: string | null;
+  ordering?: "created_at" | "-created_at" | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="queue_id" type="string" required>
+  Positional argument `queue_id`.
+</ParamField>
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+<ParamField query="status" type="string[]" optional />
+<ParamField query="source_type" type="string[]" optional />
+<ParamField query="assigned_to" type="string" optional />
+<ParamField query="review_status" type="string" optional />
+<ParamField query="ordering" type="string" optional enum={["created_at", "-created_at"]} />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`QueueItem`](/docs/sdk/reference/annotation-models#queueitem) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### annotation_queues.items.list_annotations
+
+List the annotations recorded on a queue item.
+
+<ApiEndpoint method="GET" path="/model-hub/annotation-queues/{queue_id}/items/{id}/annotations/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.items.list_annotations("your-queue-id", "your-id")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.items.listAnnotations("your-queue-id", "your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.items.list_annotations(
+    queue_id: str,
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> List[models.Score]
+```
+
+```typescript TypeScript
+client.annotationQueues.items.listAnnotations(queueId: string, id: string, options?: RequestOptions): Promise<Array<models.Score>>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="queue_id" type="string" required>
+  Positional argument `queue_id`.
+</ParamField>
+<ParamField path="id" type="string" required>
+  A UUID string identifying this queue item.
+</ParamField>
+
+#### Returns
+
+A list of [`Score`](/docs/sdk/reference/annotation-models#score).
+
+### annotation_queues.items.remove
+
+Remove items from a queue.
+
+<ApiEndpoint method="POST" path="/model-hub/annotation-queues/{queue_id}/items/bulk-remove/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.items.remove("your-queue-id", item_ids=[])
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.items.remove("your-queue-id", { item_ids: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.items.remove(
+    queue_id: str,
+    *,
+    item_ids: list[str],
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.QueueBulkRemoveItemsResult
+```
+
+```typescript TypeScript
+client.annotationQueues.items.remove(queueId: string, params: AnnotationQueuesItemsRemoveParams, options?: RequestOptions): Promise<models.QueueBulkRemoveItemsResult>
+
+export interface AnnotationQueuesItemsRemoveParams {
+  item_ids: Array<string>;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="queue_id" type="string" required>
+  Positional argument `queue_id`.
+</ParamField>
+<ParamField body="item_ids" type="string[]" required />
+
+#### Returns
+
+[`QueueBulkRemoveItemsResult`](/docs/sdk/reference/annotation-models#queuebulkremoveitemsresult).
+
+### annotation_queues.items.skip
+
+Skip a queue item and return the next one to work on.
+
+<ApiEndpoint method="POST" path="/model-hub/annotation-queues/{queue_id}/items/{id}/skip/" />
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.items.skip("your-queue-id", "your-id")
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.items.skip("your-queue-id", "your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.items.skip(
+    queue_id: str,
+    id: str,
+    *,
+    exclude: list[str] | None | NotGiven = NOT_GIVEN,
+    exclude_review_status: str | None | NotGiven = NOT_GIVEN,
+    include_completed: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.QueueNavigationResult
+```
+
+```typescript TypeScript
+client.annotationQueues.items.skip(queueId: string, id: string, params: AnnotationQueuesItemsSkipParams = {}, options?: RequestOptions): Promise<models.QueueNavigationResult>
+
+export interface AnnotationQueuesItemsSkipParams {
+  exclude?: Array<string> | null;
+  exclude_review_status?: string | null;
+  include_completed?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="queue_id" type="string" required>
+  Positional argument `queue_id`.
+</ParamField>
+<ParamField path="id" type="string" required>
+  A UUID string identifying this queue item.
+</ParamField>
+<ParamField body="exclude" type="string[]" optional />
+<ParamField body="exclude_review_status" type="string" optional />
+<ParamField body="include_completed" type="boolean" optional />
+
+#### Returns
+
+[`QueueNavigationResult`](/docs/sdk/reference/annotation-models#queuenavigationresult).
+
+### annotation_queues.items.submit
+
+Submit annotation values for an item in an annotation queue. The value shape must match the label's settings from get_annotation_item_detail. Submitting moves the item to in_progress only; call complete_annotation_item to finish it.
+
+<ApiEndpoint method="POST" path="/model-hub/annotation-queues/{queue_id}/items/{id}/annotations/submit/" />
+
+**MCP tool**: `submit_annotation`
+
+<CodeGroup>
+
+```python Python
+result = client.annotation_queues.items.submit(
+    "your-queue-id",
+    "your-id",
+    annotations=[],
+)
+```
+
+```typescript TypeScript
+const result = await client.annotationQueues.items.submit("your-queue-id", "your-id", { annotations: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.annotation_queues.items.submit(
+    queue_id: str,
+    id: str,
+    *,
+    annotations: list[dict[str, Any]],
+    notes: str | None | NotGiven = NOT_GIVEN,
+    item_notes: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.QueueSubmitAnnotationsResult
+```
+
+```typescript TypeScript
+client.annotationQueues.items.submit(queueId: string, id: string, params: AnnotationQueuesItemsSubmitParams, options?: RequestOptions): Promise<models.QueueSubmitAnnotationsResult>
+
+export interface AnnotationQueuesItemsSubmitParams {
+  annotations: Array<Record<string, unknown>>;
+  notes?: string | null;
+  item_notes?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="queue_id" type="string" required>
+  Positional argument `queue_id`.
+</ParamField>
+<ParamField path="id" type="string" required>
+  A UUID string identifying this queue item.
+</ParamField>
+<ParamField body="annotations" type="object[]" required />
+<ParamField body="notes" type="string" optional />
+<ParamField body="item_notes" type="string" optional />
+
+#### Returns
+
+[`QueueSubmitAnnotationsResult`](/docs/sdk/reference/annotation-models#queuesubmitannotationsresult).

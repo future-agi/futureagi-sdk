@@ -109,7 +109,9 @@ jobs:
     # wheel installed into an empty virtualenv, the npm tarball installed into
     # an empty project. python/consumer/consumer.py and
     # typescript/futureagi/consumer/consumer-types.mts hold the public calls
-    # that must run and type-check from there (mypy --strict, tsc --strict).
+    # that must run and type-check from there (mypy --strict, tsc --strict),
+    # and every example in the generated reference (docs/sdk-reference) must
+    # bind (Python) and compile (TypeScript) against the installed package.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

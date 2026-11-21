@@ -1,0 +1,1163 @@
+---
+title: "Evals"
+description: "Reference for client.evals in the Future AGI Python and TypeScript SDKs: evals.test, evals.configs.create, evals.configs.list, evals.groups.get, evals.groups.list, evals.tasks.create and 9 more."
+---
+
+`client.evals` on `fi.Client` (Python) and `client.evals` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.evals.configs`, `client.evals.groups`, `client.evals.tasks`, `client.evals.templates`. The models these methods return are on [Datasets & evals response models](/docs/sdk/reference/datasets-evals-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+<div class="sdk-ref-table">
+
+| Method | Description |
+|---|---|
+| [`evals.test`](#evalstest) | Execute an evaluation template against supplied test inputs. |
+| [`evals.configs.create`](#evalsconfigscreate) | Create a custom evaluation configuration from an eval template so it can be attached to an online evaluation task. |
+| [`evals.configs.list`](#evalsconfigslist) | List the custom evaluation configurations available for online evaluation tasks. |
+| [`evals.groups.get`](#evalsgroupsget) | Return an evaluation group by its identifier. |
+| [`evals.groups.list`](#evalsgroupslist) | List evaluation groups in the current workspace. |
+| [`evals.tasks.create`](#evalstaskscreate) | Create an online evaluation task. |
+| [`evals.tasks.get`](#evalstasksget) | Return an online evaluation task by its identifier. |
+| [`evals.tasks.list`](#evalstaskslist) | List online evaluation tasks in the current workspace. |
+| [`evals.tasks.pause`](#evalstaskspause) | Pause a running online evaluation task by eval_task_id. |
+| [`evals.tasks.resume`](#evalstasksresume) | Resume a paused online evaluation task by eval_task_id, scheduling remaining evaluations. |
+| [`evals.tasks.update`](#evalstasksupdate) | Update and rerun an online evaluation task using eval_task_id and edit_type. |
+| [`evals.templates.create`](#evalstemplatescreate) | Create an evaluation template. |
+| [`evals.templates.get`](#evalstemplatesget) | Return an evaluation template by its identifier. |
+| [`evals.templates.list`](#evalstemplateslist) | List evaluation templates using the supplied filters. |
+| [`evals.templates.update`](#evalstemplatesupdate) | Update an existing evaluation template. |
+
+</div>
+
+## client.evals
+
+### evals.test
+
+Execute an evaluation template against supplied test inputs.
+
+<ApiEndpoint method="POST" path="/model-hub/test-evaluation/" />
+
+**MCP tool**: `test_evaluation`
+
+<CodeGroup>
+
+```python Python
+result = client.evals.test(
+    config={},
+    name="your-name",
+    output_type="your-output-type",
+)
+```
+
+```typescript TypeScript
+const result = await client.evals.test({
+  config: {},
+  name: "your-name",
+  output_type: "your-output-type",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.evals.test(
+    *,
+    config: dict[str, Any],
+    name: str,
+    output_type: str,
+    model: str | None | NotGiven = NOT_GIVEN,
+    eval_tags: list[str] | None | NotGiven = NOT_GIVEN,
+    criteria: str | None | NotGiven = NOT_GIVEN,
+    multi_choice: bool | None | NotGiven = NOT_GIVEN,
+    choices: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    input_data_types: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    description: str | None | NotGiven = NOT_GIVEN,
+    check_internet: bool | None | NotGiven = NOT_GIVEN,
+    required_keys: list[str] | None | NotGiven = NOT_GIVEN,
+    template_type: str | None | NotGiven = NOT_GIVEN,
+    eval_type_id: str | None | NotGiven = NOT_GIVEN,
+    template_id: str | None | NotGiven = NOT_GIVEN,
+    eval_type: str | None | NotGiven = NOT_GIVEN,
+    error_localizer: bool | None | NotGiven = NOT_GIVEN,
+    reason_column: bool | None | NotGiven = NOT_GIVEN,
+    optional_keys: list[str] | None | NotGiven = NOT_GIVEN,
+    variable_keys: Any | None | NotGiven = NOT_GIVEN,
+    run_prompt_column: bool | None | NotGiven = NOT_GIVEN,
+    template_name: str | None | NotGiven = NOT_GIVEN,
+    mapping: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    output: str | None | NotGiven = NOT_GIVEN,
+    config_params_desc: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    config_params_option: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvalExecutionResponseResult
+```
+
+```typescript TypeScript
+client.evals.test(params: EvalsTestParams, options?: RequestOptions): Promise<models.EvalExecutionResponseResult>
+
+export interface EvalsTestParams {
+  config: Record<string, unknown>;
+  name: string;
+  output_type: string;
+  model?: string | null;
+  eval_tags?: Array<string> | null;
+  criteria?: string | null;
+  multi_choice?: boolean | null;
+  choices?: Record<string, unknown> | null;
+  input_data_types?: Record<string, unknown> | null;
+  description?: string | null;
+  check_internet?: boolean | null;
+  required_keys?: Array<string> | null;
+  template_type?: string | null;
+  eval_type_id?: string | null;
+  template_id?: string | null;
+  eval_type?: string | null;
+  error_localizer?: boolean | null;
+  reason_column?: boolean | null;
+  optional_keys?: Array<string> | null;
+  variable_keys?: JsonValue | null;
+  run_prompt_column?: boolean | null;
+  template_name?: string | null;
+  mapping?: Record<string, unknown> | null;
+  output?: string | null;
+  config_params_desc?: Record<string, unknown> | null;
+  config_params_option?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="config" type="object" required />
+<ParamField body="name" type="string" required />
+<ParamField body="output_type" type="string" required />
+<ParamField body="model" type="string" optional />
+<ParamField body="eval_tags" type="string[]" optional />
+<ParamField body="criteria" type="string" optional />
+<ParamField body="multi_choice" type="boolean" optional />
+<ParamField body="choices" type="object" optional />
+<ParamField body="input_data_types" type="object" optional />
+<ParamField body="description" type="string" optional />
+<ParamField body="check_internet" type="boolean" optional />
+<ParamField body="required_keys" type="string[]" optional />
+<ParamField body="template_type" type="string" optional />
+<ParamField body="eval_type_id" type="string" optional />
+<ParamField body="template_id" type="string" optional />
+<ParamField body="eval_type" type="string" optional />
+<ParamField body="error_localizer" type="boolean" optional />
+<ParamField body="reason_column" type="boolean" optional />
+<ParamField body="optional_keys" type="string[]" optional />
+<ParamField body="variable_keys" type="any JSON value" optional />
+<ParamField body="run_prompt_column" type="boolean" optional />
+<ParamField body="template_name" type="string" optional />
+<ParamField body="mapping" type="object" optional />
+<ParamField body="output" type="string" optional />
+<ParamField body="config_params_desc" type="object" optional />
+<ParamField body="config_params_option" type="object" optional />
+
+#### Returns
+
+[`EvalExecutionResponseResult`](/docs/sdk/reference/datasets-evals-models#evalexecutionresponseresult).
+
+## client.evals.configs
+
+TypeScript: `client.evals.configs`.
+
+### evals.configs.create
+
+Create a custom evaluation configuration from an eval template so it can be attached to an online evaluation task. Use when list_eval_configs has no entry for the template you want to run over spans.
+
+<ApiEndpoint method="POST" path="/tracer/custom-eval-config/" />
+
+**MCP tool**: `create_eval_config`
+
+<CodeGroup>
+
+```python Python
+result = client.evals.configs.create(eval_template="your-eval-template", project="your-project")
+```
+
+```typescript TypeScript
+const result = await client.evals.configs.create({
+  eval_template: "your-eval-template",
+  project: "your-project",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.evals.configs.create(
+    *,
+    eval_template: str,
+    project: str,
+    name: str | None | NotGiven = NOT_GIVEN,
+    config: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    mapping: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    filters: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    error_localizer: bool | None | NotGiven = NOT_GIVEN,
+    kb_id: str | None | NotGiven = NOT_GIVEN,
+    model: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvalsConfigsCreateResult
+```
+
+```typescript TypeScript
+client.evals.configs.create(params: EvalsConfigsCreateParams, options?: RequestOptions): Promise<models.EvalsConfigsCreateResult>
+
+export interface EvalsConfigsCreateParams {
+  eval_template: string;
+  project: string;
+  name?: string | null;
+  config?: Record<string, unknown> | null;
+  mapping?: Record<string, unknown> | null;
+  filters?: Record<string, unknown> | null;
+  error_localizer?: boolean | null;
+  kb_id?: string | null;
+  model?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="eval_template" type="string" required />
+<ParamField body="project" type="string" required />
+<ParamField body="name" type="string" optional />
+<ParamField body="config" type="object" optional />
+<ParamField body="mapping" type="object" optional />
+<ParamField body="filters" type="object" optional />
+<ParamField body="error_localizer" type="boolean" optional />
+<ParamField body="kb_id" type="string" optional />
+<ParamField body="model" type="string" optional />
+
+#### Returns
+
+[`EvalsConfigsCreateResult`](/docs/sdk/reference/datasets-evals-models#evalsconfigscreateresult).
+
+### evals.configs.list
+
+List the custom evaluation configurations available for online evaluation tasks. The ids returned here are what create_eval_task takes in its `evals` argument - eval templates are a different object and their ids are not accepted there.
+
+<ApiEndpoint method="GET" path="/tracer/custom-eval-config/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_eval_configs`
+
+<CodeGroup>
+
+```python Python
+for item in client.evals.configs.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.evals.configs.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.evals.configs.list(
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.CustomEvalConfig]
+```
+
+```typescript TypeScript
+client.evals.configs.list(params: EvalsConfigsListParams = {}, options?: RequestOptions): Pager<models.CustomEvalConfig>
+
+export interface EvalsConfigsListParams {
+  /** Number of results to return per page. */
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="limit" type="integer" optional>
+  Number of results to return per page.
+</ParamField>
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`CustomEvalConfig`](/docs/sdk/reference/datasets-evals-models#customevalconfig) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+## client.evals.groups
+
+TypeScript: `client.evals.groups`.
+
+### evals.groups.get
+
+Return an evaluation group by its identifier.
+
+<ApiEndpoint method="GET" path="/model-hub/eval-groups/{id}/" />
+
+**MCP tool**: `get_eval_group`
+
+<CodeGroup>
+
+```python Python
+result = client.evals.groups.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.evals.groups.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.evals.groups.get(
+    id: str,
+    *,
+    name: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvalGroup
+```
+
+```typescript TypeScript
+client.evals.groups.get(id: string, params: EvalsGroupsGetParams = {}, options?: RequestOptions): Promise<models.EvalGroup>
+
+export interface EvalsGroupsGetParams {
+  name?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField query="name" type="string" optional />
+
+#### Returns
+
+[`EvalGroup`](/docs/sdk/reference/datasets-evals-models#evalgroup).
+
+### evals.groups.list
+
+List evaluation groups in the current workspace.
+
+<ApiEndpoint method="GET" path="/model-hub/eval-groups/" />
+
+**MCP tool**: `list_eval_groups`
+
+<CodeGroup>
+
+```python Python
+result = client.evals.groups.list()
+```
+
+```typescript TypeScript
+const result = await client.evals.groups.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.evals.groups.list(
+    *,
+    name: str | None | NotGiven = NOT_GIVEN,
+    page_number: int | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.evals.groups.list(params: EvalsGroupsListParams = {}, options?: RequestOptions): Promise<unknown>
+
+export interface EvalsGroupsListParams {
+  name?: string | null;
+  page_number?: number | null;
+  page_size?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="name" type="string" optional />
+<ParamField query="page_number" type="integer" optional />
+<ParamField query="page_size" type="integer" optional />
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+## client.evals.tasks
+
+TypeScript: `client.evals.tasks`.
+
+### evals.tasks.create
+
+Create an online evaluation task.
+
+<ApiEndpoint method="POST" path="/tracer/eval-task/" />
+
+**MCP tool**: `create_eval_task`
+
+<CodeGroup>
+
+```python Python
+result = client.evals.tasks.create(
+    project="your-project",
+    name="your-name",
+    sampling_rate=1.0,
+    run_type="continuous",
+    evals=[],
+)
+```
+
+```typescript TypeScript
+const result = await client.evals.tasks.create({
+  project: "your-project",
+  name: "your-name",
+  sampling_rate: 1.0,
+  run_type: "continuous",
+  evals: [],
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.evals.tasks.create(
+    *,
+    project: str,
+    name: str,
+    sampling_rate: float,
+    run_type: Literal['continuous', 'historical'],
+    evals: list[str],
+    filters: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    last_run: str | None | NotGiven = NOT_GIVEN,
+    spans_limit: int | None | NotGiven = NOT_GIVEN,
+    row_type: Literal['spans', 'traces', 'sessions', 'voiceCalls'] | None | NotGiven = NOT_GIVEN,
+    status: Literal['pending', 'running', 'completed', 'failed', 'paused', 'deleted'] | None | NotGiven = NOT_GIVEN,
+    start_time: str | None | NotGiven = NOT_GIVEN,
+    end_time: str | None | NotGiven = NOT_GIVEN,
+    evals_details: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    failed_spans: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvalTaskCreateResult
+```
+
+```typescript TypeScript
+client.evals.tasks.create(params: EvalsTasksCreateParams, options?: RequestOptions): Promise<models.EvalTaskCreateResult>
+
+export interface EvalsTasksCreateParams {
+  project: string;
+  name: string;
+  sampling_rate: number;
+  run_type: "continuous" | "historical";
+  evals: Array<string>;
+  filters?: Record<string, unknown> | null;
+  last_run?: string | null;
+  spans_limit?: number | null;
+  row_type?: "spans" | "traces" | "sessions" | "voiceCalls" | null;
+  status?: "pending" | "running" | "completed" | "failed" | "paused" | "deleted" | null;
+  start_time?: string | null;
+  end_time?: string | null;
+  evals_details?: Record<string, unknown> | null;
+  failed_spans?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="project" type="string" required />
+<ParamField body="name" type="string" required />
+<ParamField body="sampling_rate" type="number" required />
+<ParamField body="run_type" type="string" required enum={["continuous", "historical"]} />
+<ParamField body="evals" type="string[]" required />
+<ParamField body="filters" type="object" optional />
+<ParamField body="last_run" type="string" optional />
+<ParamField body="spans_limit" type="integer" optional />
+<ParamField body="row_type" type="string" optional enum={["spans", "traces", "sessions", "voiceCalls"]} />
+<ParamField body="status" type="string" optional enum={["pending", "running", "completed", "failed", "paused", "deleted"]} />
+<ParamField body="start_time" type="string" optional />
+<ParamField body="end_time" type="string" optional />
+<ParamField body="evals_details" type="object" optional />
+<ParamField body="failed_spans" type="object" optional />
+
+#### Returns
+
+[`EvalTaskCreateResult`](/docs/sdk/reference/datasets-evals-models#evaltaskcreateresult).
+
+### evals.tasks.get
+
+Return an online evaluation task by its identifier.
+
+<ApiEndpoint method="GET" path="/tracer/eval-task/{id}/" />
+
+**MCP tool**: `get_eval_task`
+
+<CodeGroup>
+
+```python Python
+result = client.evals.tasks.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.evals.tasks.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.evals.tasks.get(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvalTask
+```
+
+```typescript TypeScript
+client.evals.tasks.get(id: string, options?: RequestOptions): Promise<models.EvalTask>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`EvalTask`](/docs/sdk/reference/datasets-evals-models#evaltask).
+
+### evals.tasks.list
+
+List online evaluation tasks in the current workspace.
+
+<ApiEndpoint method="GET" path="/tracer/eval-task/list_eval_tasks/" />
+
+**MCP tool**: `list_eval_tasks`
+
+<CodeGroup>
+
+```python Python
+result = client.evals.tasks.list()
+```
+
+```typescript TypeScript
+const result = await client.evals.tasks.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.evals.tasks.list(
+    *,
+    project_id: str | None | NotGiven = NOT_GIVEN,
+    name: str | None | NotGiven = NOT_GIVEN,
+    filters: str | None | NotGiven = NOT_GIVEN,
+    sort_params: str | None | NotGiven = NOT_GIVEN,
+    page_number: int | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models._EvalTaskListResultResponse
+```
+
+```typescript TypeScript
+client.evals.tasks.list(params: EvalsTasksListParams = {}, options?: RequestOptions): Promise<models._EvalTaskListResultResponse>
+
+export interface EvalsTasksListParams {
+  project_id?: string | null;
+  name?: string | null;
+  filters?: string | null;
+  sort_params?: string | null;
+  page_number?: number | null;
+  page_size?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="project_id" type="string" optional />
+<ParamField query="name" type="string" optional />
+<ParamField query="filters" type="string" optional />
+<ParamField query="sort_params" type="string" optional />
+<ParamField query="page_number" type="integer" optional />
+<ParamField query="page_size" type="integer" optional />
+
+#### Returns
+
+[`_EvalTaskListResultResponse`](/docs/sdk/reference/datasets-evals-models#_evaltasklistresultresponse).
+
+### evals.tasks.pause
+
+Pause a running online evaluation task by eval_task_id. Already-launched evaluations may finish before the worker stops.
+
+<ApiEndpoint method="POST" path="/tracer/eval-task/pause_eval_task/" />
+
+**MCP tool**: `pause_eval_task`
+
+<CodeGroup>
+
+```python Python
+result = client.evals.tasks.pause(eval_task_id="your-eval-task-id")
+```
+
+```typescript TypeScript
+const result = await client.evals.tasks.pause({ eval_task_id: "your-eval-task-id" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.evals.tasks.pause(
+    *,
+    eval_task_id: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvalTaskMessageResult
+```
+
+```typescript TypeScript
+client.evals.tasks.pause(params: EvalsTasksPauseParams, options?: RequestOptions): Promise<models.EvalTaskMessageResult>
+
+export interface EvalsTasksPauseParams {
+  eval_task_id: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="eval_task_id" type="string" required />
+
+#### Returns
+
+[`EvalTaskMessageResult`](/docs/sdk/reference/datasets-evals-models#evaltaskmessageresult).
+
+### evals.tasks.resume
+
+Resume a paused online evaluation task by eval_task_id, scheduling remaining evaluations. May incur evaluation charges.
+
+<ApiEndpoint method="POST" path="/tracer/eval-task/unpause_eval_task/" />
+
+**MCP tool**: `resume_eval_task`
+
+<CodeGroup>
+
+```python Python
+result = client.evals.tasks.resume(eval_task_id="your-eval-task-id")
+```
+
+```typescript TypeScript
+const result = await client.evals.tasks.resume({ eval_task_id: "your-eval-task-id" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.evals.tasks.resume(
+    *,
+    eval_task_id: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvalTaskMessageResult
+```
+
+```typescript TypeScript
+client.evals.tasks.resume(params: EvalsTasksResumeParams, options?: RequestOptions): Promise<models.EvalTaskMessageResult>
+
+export interface EvalsTasksResumeParams {
+  eval_task_id: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="eval_task_id" type="string" required />
+
+#### Returns
+
+[`EvalTaskMessageResult`](/docs/sdk/reference/datasets-evals-models#evaltaskmessageresult).
+
+### evals.tasks.update
+
+Update and rerun an online evaluation task using eval_task_id and edit_type. Pause a running task first. edit_rerun preserves existing results; fresh_run DELETES previous results and starts again. May incur evaluation charges.
+
+<ApiEndpoint method="PATCH" path="/tracer/eval-task/update_eval_task/" />
+
+**MCP tool**: `update_eval_task`
+
+<CodeGroup>
+
+```python Python
+result = client.evals.tasks.update(edit_type="edit_rerun", eval_task_id="your-eval-task-id")
+```
+
+```typescript TypeScript
+const result = await client.evals.tasks.update({
+  edit_type: "edit_rerun",
+  eval_task_id: "your-eval-task-id",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.evals.tasks.update(
+    *,
+    edit_type: Literal['edit_rerun', 'fresh_run'],
+    eval_task_id: str,
+    name: str | None | NotGiven = NOT_GIVEN,
+    filters: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    sampling_rate: float | None | NotGiven = NOT_GIVEN,
+    spans_limit: int | None | NotGiven = NOT_GIVEN,
+    run_type: Literal['continuous', 'historical'] | None | NotGiven = NOT_GIVEN,
+    row_type: Literal['spans', 'traces', 'sessions', 'voiceCalls'] | None | NotGiven = NOT_GIVEN,
+    status: Literal['pending', 'running', 'completed', 'failed', 'paused', 'deleted'] | None | NotGiven = NOT_GIVEN,
+    evals: list[str] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvalTaskUpdateResult
+```
+
+```typescript TypeScript
+client.evals.tasks.update(params: EvalsTasksUpdateParams, options?: RequestOptions): Promise<models.EvalTaskUpdateResult>
+
+export interface EvalsTasksUpdateParams {
+  edit_type: "edit_rerun" | "fresh_run";
+  eval_task_id: string;
+  name?: string | null;
+  filters?: Record<string, unknown> | null;
+  sampling_rate?: number | null;
+  spans_limit?: number | null;
+  run_type?: "continuous" | "historical" | null;
+  row_type?: "spans" | "traces" | "sessions" | "voiceCalls" | null;
+  status?: "pending" | "running" | "completed" | "failed" | "paused" | "deleted" | null;
+  evals?: Array<string> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="edit_type" type="string" required enum={["edit_rerun", "fresh_run"]} />
+<ParamField body="eval_task_id" type="string" required />
+<ParamField body="name" type="string" optional />
+<ParamField body="filters" type="object" optional />
+<ParamField body="sampling_rate" type="number" optional />
+<ParamField body="spans_limit" type="integer" optional />
+<ParamField body="run_type" type="string" optional enum={["continuous", "historical"]} />
+<ParamField body="row_type" type="string" optional enum={["spans", "traces", "sessions", "voiceCalls"]} />
+<ParamField body="status" type="string" optional enum={["pending", "running", "completed", "failed", "paused", "deleted"]} />
+<ParamField body="evals" type="string[]" optional />
+
+#### Returns
+
+[`EvalTaskUpdateResult`](/docs/sdk/reference/datasets-evals-models#evaltaskupdateresult).
+
+## client.evals.templates
+
+TypeScript: `client.evals.templates`.
+
+### evals.templates.create
+
+Create an evaluation template.
+
+<ApiEndpoint method="POST" path="/model-hub/eval-templates/create-v2/" />
+
+**MCP tool**: `create_eval_template`
+
+<CodeGroup>
+
+```python Python
+result = client.evals.templates.create()
+```
+
+```typescript TypeScript
+const result = await client.evals.templates.create();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.evals.templates.create(
+    *,
+    name: str | None | NotGiven = NOT_GIVEN,
+    is_draft: bool | None | NotGiven = NOT_GIVEN,
+    eval_type: Literal['llm', 'code', 'agent'] | None | NotGiven = NOT_GIVEN,
+    instructions: str | None | NotGiven = NOT_GIVEN,
+    model: str | None | NotGiven = NOT_GIVEN,
+    output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None | NotGiven = NOT_GIVEN,
+    pass_threshold: float | None | NotGiven = NOT_GIVEN,
+    choice_scores: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    description: str | None | NotGiven = NOT_GIVEN,
+    tags: list[str] | None | NotGiven = NOT_GIVEN,
+    check_internet: bool | None | NotGiven = NOT_GIVEN,
+    code: str | None | NotGiven = NOT_GIVEN,
+    code_language: Literal['python', 'javascript'] | None | NotGiven = NOT_GIVEN,
+    messages: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    few_shot_examples: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    mode: Literal['auto', 'agent', 'quick'] | None | NotGiven = NOT_GIVEN,
+    tools: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    knowledge_bases: list[str] | None | NotGiven = NOT_GIVEN,
+    data_injection: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    summary: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    error_localizer_enabled: bool | None | NotGiven = NOT_GIVEN,
+    template_format: Literal['mustache', 'jinja'] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvalTemplateCreateResponseResult
+```
+
+```typescript TypeScript
+client.evals.templates.create(params: EvalsTemplatesCreateParams = {}, options?: RequestOptions): Promise<models.EvalTemplateCreateResponseResult>
+
+export interface EvalsTemplatesCreateParams {
+  name?: string | null;
+  is_draft?: boolean | null;
+  eval_type?: "llm" | "code" | "agent" | null;
+  instructions?: string | null;
+  model?: string | null;
+  output_type?: "pass_fail" | "percentage" | "deterministic" | null;
+  pass_threshold?: number | null;
+  choice_scores?: Record<string, unknown> | null;
+  description?: string | null;
+  tags?: Array<string> | null;
+  check_internet?: boolean | null;
+  code?: string | null;
+  code_language?: "python" | "javascript" | null;
+  messages?: Array<Record<string, unknown>> | null;
+  few_shot_examples?: Array<Record<string, unknown>> | null;
+  mode?: "auto" | "agent" | "quick" | null;
+  tools?: Record<string, unknown> | null;
+  knowledge_bases?: Array<string> | null;
+  data_injection?: Record<string, unknown> | null;
+  summary?: Record<string, unknown> | null;
+  error_localizer_enabled?: boolean | null;
+  template_format?: "mustache" | "jinja" | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="name" type="string" optional />
+<ParamField body="is_draft" type="boolean" optional />
+<ParamField body="eval_type" type="string" optional enum={["llm", "code", "agent"]} />
+<ParamField body="instructions" type="string" optional />
+<ParamField body="model" type="string" optional />
+<ParamField body="output_type" type="string" optional enum={["pass_fail", "percentage", "deterministic"]} />
+<ParamField body="pass_threshold" type="number" optional />
+<ParamField body="choice_scores" type="object" optional />
+<ParamField body="description" type="string" optional />
+<ParamField body="tags" type="string[]" optional />
+<ParamField body="check_internet" type="boolean" optional />
+<ParamField body="code" type="string" optional />
+<ParamField body="code_language" type="string" optional enum={["python", "javascript"]} />
+<ParamField body="messages" type="object[]" optional />
+<ParamField body="few_shot_examples" type="object[]" optional />
+<ParamField body="mode" type="string" optional enum={["auto", "agent", "quick"]} />
+<ParamField body="tools" type="object" optional />
+<ParamField body="knowledge_bases" type="string[]" optional />
+<ParamField body="data_injection" type="object" optional />
+<ParamField body="summary" type="object" optional />
+<ParamField body="error_localizer_enabled" type="boolean" optional />
+<ParamField body="template_format" type="string" optional enum={["mustache", "jinja"]} />
+
+#### Returns
+
+[`EvalTemplateCreateResponseResult`](/docs/sdk/reference/datasets-evals-models#evaltemplatecreateresponseresult).
+
+### evals.templates.get
+
+Return an evaluation template by its identifier.
+
+<ApiEndpoint method="GET" path="/model-hub/eval-templates/{template_id}/detail/" />
+
+**MCP tool**: `get_eval_template`
+
+<CodeGroup>
+
+```python Python
+result = client.evals.templates.get("your-template-id")
+```
+
+```typescript TypeScript
+const result = await client.evals.templates.get("your-template-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.evals.templates.get(
+    template_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvalTemplateDetailResponseResult
+```
+
+```typescript TypeScript
+client.evals.templates.get(templateId: string, options?: RequestOptions): Promise<models.EvalTemplateDetailResponseResult>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="template_id" type="string" required>
+  Positional argument `template_id`.
+</ParamField>
+
+#### Returns
+
+[`EvalTemplateDetailResponseResult`](/docs/sdk/reference/datasets-evals-models#evaltemplatedetailresponseresult).
+
+### evals.templates.list
+
+List evaluation templates using the supplied filters.
+
+<ApiEndpoint method="POST" path="/model-hub/eval-templates/list/" />
+
+**MCP tool**: `list_eval_templates`
+
+<CodeGroup>
+
+```python Python
+result = client.evals.templates.list()
+```
+
+```typescript TypeScript
+const result = await client.evals.templates.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.evals.templates.list(
+    *,
+    page: int | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    owner_filter: Literal['all', 'user', 'system'] | None | NotGiven = NOT_GIVEN,
+    filters: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    sort_by: Literal['name', 'updated_at', 'created_at'] | None | NotGiven = NOT_GIVEN,
+    sort_order: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvalTemplateListResponseResult
+```
+
+```typescript TypeScript
+client.evals.templates.list(params: EvalsTemplatesListParams = {}, options?: RequestOptions): Promise<models.EvalTemplateListResponseResult>
+
+export interface EvalsTemplatesListParams {
+  page?: number | null;
+  page_size?: number | null;
+  search?: string | null;
+  owner_filter?: "all" | "user" | "system" | null;
+  filters?: Record<string, unknown> | null;
+  sort_by?: "name" | "updated_at" | "created_at" | null;
+  sort_order?: "asc" | "desc" | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="page" type="integer" optional />
+<ParamField body="page_size" type="integer" optional />
+<ParamField body="search" type="string" optional />
+<ParamField body="owner_filter" type="string" optional enum={["all", "user", "system"]} />
+<ParamField body="filters" type="object" optional />
+<ParamField body="sort_by" type="string" optional enum={["name", "updated_at", "created_at"]} />
+<ParamField body="sort_order" type="string" optional enum={["asc", "desc"]} />
+
+#### Returns
+
+[`EvalTemplateListResponseResult`](/docs/sdk/reference/datasets-evals-models#evaltemplatelistresponseresult).
+
+### evals.templates.update
+
+Update an existing evaluation template.
+
+<ApiEndpoint method="PUT" path="/model-hub/eval-templates/{template_id}/update/" />
+
+**MCP tool**: `update_eval_template`
+
+<CodeGroup>
+
+```python Python
+result = client.evals.templates.update("your-template-id")
+```
+
+```typescript TypeScript
+const result = await client.evals.templates.update("your-template-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.evals.templates.update(
+    template_id: str,
+    *,
+    name: str | None | NotGiven = NOT_GIVEN,
+    eval_type: Literal['llm', 'code', 'agent'] | None | NotGiven = NOT_GIVEN,
+    instructions: str | None | NotGiven = NOT_GIVEN,
+    model: str | None | NotGiven = NOT_GIVEN,
+    output_type: Literal['pass_fail', 'percentage', 'deterministic'] | None | NotGiven = NOT_GIVEN,
+    pass_threshold: float | None | NotGiven = NOT_GIVEN,
+    choice_scores: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    multi_choice: bool | None | NotGiven = NOT_GIVEN,
+    description: str | None | NotGiven = NOT_GIVEN,
+    tags: list[str] | None | NotGiven = NOT_GIVEN,
+    check_internet: bool | None | NotGiven = NOT_GIVEN,
+    code: str | None | NotGiven = NOT_GIVEN,
+    code_language: Literal['python', 'javascript'] | None | NotGiven = NOT_GIVEN,
+    messages: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    few_shot_examples: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    mode: Literal['auto', 'agent', 'quick'] | None | NotGiven = NOT_GIVEN,
+    tools: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    knowledge_bases: list[str] | None | NotGiven = NOT_GIVEN,
+    data_injection: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    summary: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    error_localizer_enabled: bool | None | NotGiven = NOT_GIVEN,
+    publish: bool | None | NotGiven = NOT_GIVEN,
+    template_format: Literal['mustache', 'jinja'] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvalTemplateUpdateResponseResult
+```
+
+```typescript TypeScript
+client.evals.templates.update(templateId: string, params: EvalsTemplatesUpdateParams = {}, options?: RequestOptions): Promise<models.EvalTemplateUpdateResponseResult>
+
+export interface EvalsTemplatesUpdateParams {
+  name?: string | null;
+  eval_type?: "llm" | "code" | "agent" | null;
+  instructions?: string | null;
+  model?: string | null;
+  output_type?: "pass_fail" | "percentage" | "deterministic" | null;
+  pass_threshold?: number | null;
+  choice_scores?: Record<string, unknown> | null;
+  multi_choice?: boolean | null;
+  description?: string | null;
+  tags?: Array<string> | null;
+  check_internet?: boolean | null;
+  code?: string | null;
+  code_language?: "python" | "javascript" | null;
+  messages?: Array<Record<string, unknown>> | null;
+  few_shot_examples?: Array<Record<string, unknown>> | null;
+  mode?: "auto" | "agent" | "quick" | null;
+  tools?: Record<string, unknown> | null;
+  knowledge_bases?: Array<string> | null;
+  data_injection?: Record<string, unknown> | null;
+  summary?: Record<string, unknown> | null;
+  error_localizer_enabled?: boolean | null;
+  publish?: boolean | null;
+  template_format?: "mustache" | "jinja" | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="template_id" type="string" required>
+  Positional argument `template_id`.
+</ParamField>
+<ParamField body="name" type="string" optional />
+<ParamField body="eval_type" type="string" optional enum={["llm", "code", "agent"]} />
+<ParamField body="instructions" type="string" optional />
+<ParamField body="model" type="string" optional />
+<ParamField body="output_type" type="string" optional enum={["pass_fail", "percentage", "deterministic"]} />
+<ParamField body="pass_threshold" type="number" optional />
+<ParamField body="choice_scores" type="object" optional />
+<ParamField body="multi_choice" type="boolean" optional />
+<ParamField body="description" type="string" optional />
+<ParamField body="tags" type="string[]" optional />
+<ParamField body="check_internet" type="boolean" optional />
+<ParamField body="code" type="string" optional />
+<ParamField body="code_language" type="string" optional enum={["python", "javascript"]} />
+<ParamField body="messages" type="object[]" optional />
+<ParamField body="few_shot_examples" type="object[]" optional />
+<ParamField body="mode" type="string" optional enum={["auto", "agent", "quick"]} />
+<ParamField body="tools" type="object" optional />
+<ParamField body="knowledge_bases" type="string[]" optional />
+<ParamField body="data_injection" type="object" optional />
+<ParamField body="summary" type="object" optional />
+<ParamField body="error_localizer_enabled" type="boolean" optional />
+<ParamField body="publish" type="boolean" optional />
+<ParamField body="template_format" type="string" optional enum={["mustache", "jinja"]} />
+
+#### Returns
+
+[`EvalTemplateUpdateResponseResult`](/docs/sdk/reference/datasets-evals-models#evaltemplateupdateresponseresult).

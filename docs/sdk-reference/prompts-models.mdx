@@ -1,0 +1,21 @@
+---
+title: "Prompts response models"
+description: "The 6 response models returned by the prompts resources of the Future AGI Python and TypeScript SDKs, with every field and its type."
+---
+
+The models returned by `client.prompts`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call. In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)); TypeScript has no strict mode.
+
+## Models
+
+<div class="sdk-ref-table">
+
+| Model | Fields |
+|---|---|
+| <span id="prompthistoryexecution">`PromptHistoryExecution`</span> | `id: string`, `template_version: string`, `output: any`, `prompt_config_snapshot: any`, `template_name: string`, `original_template: string`, `metadata: any`, `variable_names: any`, `evaluation_results: any`, `evaluation_configs: any`, `created_at: string`, `is_default: boolean`, `commit_message: string`, `updated_at: string`, `is_draft: boolean`, `labels: any`, `placeholders: any`, `prompt_base_template: string` |
+| <span id="promptlabel">`PromptLabel`</span> | `id: string`, `organization: string`, `name: string`, `type: string`, `metadata: any`, `created_at: string`, `updated_at: string` |
+| <span id="promptrunstatusresult">`PromptRunStatusResult`</span> | `status: string`, `error_message: string`, `executions_result:` [`PromptHistoryExecution`](#prompthistoryexecution) |
+| <span id="prompttemplate">`PromptTemplate`</span> | `id: string`, `name: string`, `description: string`, `variable_names: any`, `organization: string`, `prompt_folder: string`, `placeholders: any`, `created_by: string` |
+| <span id="prompttemplatepatch">`PromptTemplatePatch`</span> | `id: string`, `name: string`, `description: string`, `variable_names: any`, `organization: string`, `prompt_folder: string`, `placeholders: any`, `created_by: string` |
+| <span id="promptsrunresult">`PromptsRunResult`</span> | `template_id: string`, `prompt_config: any[]`, `variable_names: any`, `evaluation_configs: any[]`, `placeholders: any` |
+
+</div>

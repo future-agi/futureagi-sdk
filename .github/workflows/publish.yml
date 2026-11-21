@@ -203,3 +203,40 @@ jobs:
           console.log("ESM import ok");
           EOF
           node smoke.mjs
+
+  docs:
+    name: Docs reference
+    # The last link of the chain backend contract -> SDK -> docs: tell
+    # future-agi/docs which exact SDK commit was published so its
+    # sdk-reference-sync workflow opens, or marks ready, the reference PR for
+    # these versions. Runs only after THIS tag's package is on its registry and
+    # the reinstall smoke test passed; the docs side re-checks both registries
+    # before a PR leaves draft, so docs never describe an uninstallable SDK.
+    needs: [verify, python, typescript]
+    if: >-
+      !cancelled() && needs.verify.result == 'success'
+      && (needs.python.result == 'success' || needs.typescript.result == 'success')
+      && needs.python.result != 'failure' && needs.typescript.result != 'failure'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # A docs hiccup never fails a publication: re-run docs' sdk-reference-sync by hand.
+    continue-on-error: true
+    steps:
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.RELEASE_BOT_APP_ID || secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+          owner: future-agi
+          repositories: docs
+          permission-contents: write
+      - name: Dispatch sdk-release to future-agi/docs
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          SHA: ${{ needs.verify.outputs.sha }}
+          SOURCE: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          jq -n --arg ref "$SHA" --arg tag "$TAG" --arg source "$SOURCE" \
+            '{event_type:"sdk-release",client_payload:{ref:$ref,stage:"released",tag:$tag,source:$source}}' \
+            | gh api --method POST repos/future-agi/docs/dispatches --input -
+          echo "future-agi/docs sdk-reference-sync dispatched: $TAG published at $SHA"

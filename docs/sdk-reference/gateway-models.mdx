@@ -1,0 +1,23 @@
+---
+title: "Gateway response models"
+description: "The 8 response models returned by the gateway resources of the Future AGI Python and TypeScript SDKs, with every field and its type."
+---
+
+The models returned by `client.gateway`, `client.models`, `client.provider_keys`, importable from `fi.platform.models` (Python) and `@future-agi/sdk/platform/models` (TypeScript). Types are language-neutral: `string[]` is a Python `list[str]` and a TypeScript `string[]`, and a type named after another model links to that model. Parsing is tolerant by default: a response that leaves a field out or adds one never breaks a call. In Python, `Client(strict_responses=True)` rejects a response that misses a field the contract requires (see the [overview](/docs/sdk/reference#strict-mode)); TypeScript has no strict mode.
+
+## Models
+
+<div class="sdk-ref-table">
+
+| Model | Fields |
+|---|---|
+| <span id="agentccrequestlog">`AgentccRequestLog`</span> | `id: string`, `request_id: string`, `model: string`, `provider: string`, `resolved_model: string`, `latency_ms: integer`, `started_at: string`, `input_tokens: integer`, `output_tokens: integer`, `total_tokens: integer`, `cost: string`, `status_code: integer`, `is_stream: boolean`, `is_error: boolean`, `error_message: string`, `cache_hit: boolean`, `fallback_used: boolean`, `guardrail_triggered: boolean`, `api_key_id: string`, `user_id: string`, `session_id: string`, `routing_strategy: string`, `metadata: any`, `organization: string`, `workspace: string`, `created_at: string` |
+| <span id="agentccsession">`AgentccSession`</span> | `id: string`, `organization: string`, `session_id: string`, `name: string`, `status: string`, `metadata: any`, `created_at: string`, `updated_at: string` |
+| <span id="apikeyresponse">`ApiKeyResponse`</span> | `id: string`, `provider: string`, `organization: string`, `masked_actual_key: any` |
+| <span id="gatewayconfigprovider">`GatewayConfigProvider`</span> | `id: string`, `name: string`, `display_name: string`, `base_url: string`, `api_format: string`, `api_path_prefix: string`, `models: any[]`, `is_active: boolean`, `default_timeout: integer`, `max_concurrent: integer`, `conn_pool_size: integer` |
+| <span id="gatewayconfigresult">`GatewayConfigResult`</span> | `id: string`, `organization: string`, `version: integer`, `guardrails: any`, `routing: any`, `cache: any`, `rate_limiting: any`, `budgets: any`, `cost_tracking: any`, `ip_acl: any`, `alerting: any`, `privacy: any`, `tool_policy: any`, `mcp: any`, `a2a: any`, `audit: any`, `model_database: any`, `model_map: any`, `is_active: boolean`, `created_by: string`, `change_description: string`, `created_at: string`, `updated_at: string`, `providers: any`, `gateway:` [`GatewayStatus`](#gatewaystatus) |
+| <span id="gatewaystatus">`GatewayStatus`</span> | `status: string` |
+| <span id="gatewaysummaryresult">`GatewaySummaryResult`</span> | `id: string`, `name: string`, `base_url: string`, `status: string`, `provider_count: integer`, `model_count: integer` |
+| <span id="modelhubpaginatedresponse">`ModelHubPaginatedResponse`</span> | `count: integer`, `next: string`, `previous: string`, `results: any[]` |
+
+</div>

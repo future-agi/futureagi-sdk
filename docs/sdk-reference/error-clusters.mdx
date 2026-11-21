@@ -1,0 +1,265 @@
+---
+title: "Error clusters"
+description: "Reference for client.error_clusters in the Future AGI Python and TypeScript SDKs: error_clusters.get, error_clusters.list, error_clusters.list_traces, error_clusters.overview."
+---
+
+`client.error_clusters` on `fi.Client` (Python) and `client.errorClusters` on `Client` from `@future-agi/sdk` (TypeScript). The models these methods return are on [Observability response models](/docs/sdk/reference/observability-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+<div class="sdk-ref-table">
+
+| Method | Description |
+|---|---|
+| [`error_clusters.get`](#error_clustersget) | Return an error issue and its grouped trace information. |
+| [`error_clusters.list`](#error_clusterslist) | List grouped error issues detected in project traces. |
+| [`error_clusters.list_traces`](#error_clusterslist_traces) | List the traces grouped into a cluster with each one's score, latency, tokens and cost, alongside cluster-wide aggregates. |
+| [`error_clusters.overview`](#error_clustersoverview) | Return a cluster's pattern summary (the statistical insights that separate its failing traces from the passing baseline), its daily error counts, and representative traces with their evidence and agent flow. |
+
+</div>
+
+## client.error_clusters
+
+### error_clusters.get
+
+Return an error issue and its grouped trace information.
+
+<ApiEndpoint method="GET" path="/tracer/feed/issues/{cluster_id}/" />
+
+**MCP tool**: `get_error_cluster`
+
+<CodeGroup>
+
+```python Python
+result = client.error_clusters.get("your-cluster-id")
+```
+
+```typescript TypeScript
+const result = await client.errorClusters.get("your-cluster-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.error_clusters.get(
+    cluster_id: str,
+    *,
+    project_id: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.FeedDetailCore
+```
+
+```typescript TypeScript
+client.errorClusters.get(clusterId: string, params: ErrorClustersGetParams = {}, options?: RequestOptions): Promise<models.FeedDetailCore>
+
+export interface ErrorClustersGetParams {
+  project_id?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="cluster_id" type="string" required>
+  Positional argument `cluster_id`.
+</ParamField>
+<ParamField query="project_id" type="string" optional />
+
+#### Returns
+
+[`FeedDetailCore`](/docs/sdk/reference/observability-models#feeddetailcore).
+
+### error_clusters.list
+
+List grouped error issues detected in project traces.
+
+<ApiEndpoint method="GET" path="/tracer/feed/issues/" />
+
+**MCP tool**: `list_error_clusters`
+
+<CodeGroup>
+
+```python Python
+result = client.error_clusters.list()
+```
+
+```typescript TypeScript
+const result = await client.errorClusters.list();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.error_clusters.list(
+    *,
+    project_id: str | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    status: Literal['escalating', 'for_review', 'acknowledged', 'resolved'] | None | NotGiven = NOT_GIVEN,
+    severity: Literal['critical', 'high', 'medium', 'low'] | None | NotGiven = NOT_GIVEN,
+    fix_layer: str | None | NotGiven = NOT_GIVEN,
+    source: Literal['scanner', 'eval'] | None | NotGiven = NOT_GIVEN,
+    issue_group: str | None | NotGiven = NOT_GIVEN,
+    time_range_days: int | None | NotGiven = NOT_GIVEN,
+    sort_by: Literal['last_seen', 'first_seen', 'error_count', 'unique_traces', 'severity'] | None | NotGiven = NOT_GIVEN,
+    sort_dir: Literal['asc', 'desc'] | None | NotGiven = NOT_GIVEN,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    offset: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.FeedListResponse
+```
+
+```typescript TypeScript
+client.errorClusters.list(params: ErrorClustersListParams = {}, options?: RequestOptions): Promise<models.FeedListResponse>
+
+export interface ErrorClustersListParams {
+  project_id?: string | null;
+  search?: string | null;
+  status?: "escalating" | "for_review" | "acknowledged" | "resolved" | null;
+  severity?: "critical" | "high" | "medium" | "low" | null;
+  fix_layer?: string | null;
+  source?: "scanner" | "eval" | null;
+  issue_group?: string | null;
+  time_range_days?: number | null;
+  sort_by?: "last_seen" | "first_seen" | "error_count" | "unique_traces" | "severity" | null;
+  sort_dir?: "asc" | "desc" | null;
+  limit?: number | null;
+  offset?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="project_id" type="string" optional />
+<ParamField query="search" type="string" optional />
+<ParamField query="status" type="string" optional enum={["escalating", "for_review", "acknowledged", "resolved"]} />
+<ParamField query="severity" type="string" optional enum={["critical", "high", "medium", "low"]} />
+<ParamField query="fix_layer" type="string" optional />
+<ParamField query="source" type="string" optional enum={["scanner", "eval"]} />
+<ParamField query="issue_group" type="string" optional />
+<ParamField query="time_range_days" type="integer" optional />
+<ParamField query="sort_by" type="string" optional enum={["last_seen", "first_seen", "error_count", "unique_traces", "severity"]} />
+<ParamField query="sort_dir" type="string" optional enum={["asc", "desc"]} />
+<ParamField query="limit" type="integer" optional />
+<ParamField query="offset" type="integer" optional />
+
+#### Returns
+
+[`FeedListResponse`](/docs/sdk/reference/observability-models#feedlistresponse).
+
+### error_clusters.list_traces
+
+List the traces grouped into a cluster with each one's score, latency, tokens and cost, alongside cluster-wide aggregates.
+
+<ApiEndpoint method="GET" path="/tracer/feed/issues/{cluster_id}/traces/" />
+
+**MCP tool**: `list_error_cluster_traces`
+
+<CodeGroup>
+
+```python Python
+result = client.error_clusters.list_traces("your-cluster-id")
+```
+
+```typescript TypeScript
+const result = await client.errorClusters.listTraces("your-cluster-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.error_clusters.list_traces(
+    cluster_id: str,
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    offset: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.TracesTabResponse
+```
+
+```typescript TypeScript
+client.errorClusters.listTraces(clusterId: string, params: ErrorClustersListTracesParams = {}, options?: RequestOptions): Promise<models.TracesTabResponse>
+
+export interface ErrorClustersListTracesParams {
+  limit?: number | null;
+  offset?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="cluster_id" type="string" required>
+  Positional argument `cluster_id`.
+</ParamField>
+<ParamField query="limit" type="integer" optional />
+<ParamField query="offset" type="integer" optional />
+
+#### Returns
+
+[`TracesTabResponse`](/docs/sdk/reference/observability-models#tracestabresponse).
+
+### error_clusters.overview
+
+Return a cluster's pattern summary (the statistical insights that separate its failing traces from the passing baseline), its daily error counts, and representative traces with their evidence and agent flow. Representative traces carry inputs, outputs and conversation reels, so start with a small `rep_limit`.
+
+<ApiEndpoint method="GET" path="/tracer/feed/issues/{cluster_id}/overview/" />
+
+**MCP tool**: `get_error_cluster_overview`
+
+<CodeGroup>
+
+```python Python
+result = client.error_clusters.overview("your-cluster-id")
+```
+
+```typescript TypeScript
+const result = await client.errorClusters.overview("your-cluster-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.error_clusters.overview(
+    cluster_id: str,
+    *,
+    rep_limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.OverviewResponse
+```
+
+```typescript TypeScript
+client.errorClusters.overview(clusterId: string, params: ErrorClustersOverviewParams = {}, options?: RequestOptions): Promise<models.OverviewResponse>
+
+export interface ErrorClustersOverviewParams {
+  rep_limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="cluster_id" type="string" required>
+  Positional argument `cluster_id`.
+</ParamField>
+<ParamField query="rep_limit" type="integer" optional />
+
+#### Returns
+
+[`OverviewResponse`](/docs/sdk/reference/observability-models#overviewresponse).

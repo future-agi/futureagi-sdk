@@ -282,6 +282,9 @@ def test_observability(client, project, code_template):
     client.alerts.logs.list().first_page()
     allow(lambda: client.error_clusters.list(), 402)  # plan-gated
     allow(lambda: client.error_clusters.get(str(uuid.uuid4())), 400, 402, 404)
+    # Added in backend v1.58.0 (MCP tools get_error_cluster_overview / list_error_cluster_traces).
+    allow(lambda: client.error_clusters.overview(str(uuid.uuid4()), rep_limit=1), 400, 402, 404)
+    allow(lambda: client.error_clusters.list_traces(str(uuid.uuid4()), limit=5), 400, 402, 404)
 
 
 def test_annotation_labels(client, text_label, project):

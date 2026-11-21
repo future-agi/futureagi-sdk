@@ -1,0 +1,1283 @@
+---
+title: "Datasets"
+description: "Reference for client.datasets in the Future AGI Python and TypeScript SDKs: datasets.create, datasets.create_from_file, datasets.create_from_huggingface, datasets.delete, datasets.get, datasets.list and 14 more."
+---
+
+`client.datasets` on `fi.Client` (Python) and `client.datasets` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.datasets.cells`, `client.datasets.columns`, `client.datasets.evals`, `client.datasets.prompts`, `client.datasets.rows`. The models these methods return are on [Datasets & evals response models](/docs/sdk/reference/datasets-evals-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+
+## Methods
+
+<div class="sdk-ref-table">
+
+| Method | Description |
+|---|---|
+| [`datasets.create`](#datasetscreate) | Create an empty dataset in the current workspace. |
+| [`datasets.create_from_file`](#datasetscreate_from_file) | Create a dataset by uploading a local CSV, JSON, JSONL or Excel file. |
+| [`datasets.create_from_huggingface`](#datasetscreate_from_huggingface) | Create a dataset from a Hugging Face dataset split. |
+| [`datasets.delete`](#datasetsdelete) | Soft-delete one or more datasets by passing dataset_ids. |
+| [`datasets.get`](#datasetsget) | Return the rows, columns, and metadata for a dataset. |
+| [`datasets.list`](#datasetslist) | List datasets available in the current workspace. |
+| [`datasets.list_names`](#datasetslist_names) | Return the id and name of every dataset in the workspace, without paging. |
+| [`datasets.cells.update`](#datasetscellsupdate) | Set the value of a single dataset cell. |
+| [`datasets.columns.add`](#datasetscolumnsadd) | Add columns to a dataset. |
+| [`datasets.columns.add_static`](#datasetscolumnsadd_static) | Create a named static input column before adding dataset rows. |
+| [`datasets.columns.rename`](#datasetscolumnsrename) | Rename an existing dataset column. |
+| [`datasets.evals.add`](#datasetsevalsadd) | Attach an evaluation template to a dataset with a lowercase name (letters, digits, hyphens or underscores; no spaces) and config.mapping column mappings. |
+| [`datasets.evals.list`](#datasetsevalslist) | List evaluations attached to a dataset by supplying eval_type=user, including their IDs, configuration and status. |
+| [`datasets.evals.run`](#datasetsevalsrun) | Start the configured evaluations for a dataset. |
+| [`datasets.evals.stats`](#datasetsevalsstats) | Per-evaluation score statistics for a dataset. |
+| [`datasets.prompts.add`](#datasetspromptsadd) | Create a dataset prompt output column and immediately schedule processing of dataset rows. |
+| [`datasets.prompts.run`](#datasetspromptsrun) | Queue configured dataset prompts by run_prompt_ids. |
+| [`datasets.prompts.stats`](#datasetspromptsstats) | Return dataset prompt IDs and token, cost and timing statistics. |
+| [`datasets.prompts.update`](#datasetspromptsupdate) | Update a dataset prompt column using dataset_id, column_id and config. |
+| [`datasets.rows.add`](#datasetsrowsadd) | Add rows to an existing dataset using cells with column_name and value. |
+
+</div>
+
+## client.datasets
+
+### datasets.create
+
+Create an empty dataset in the current workspace. Use create_dataset_column before add_dataset_rows.
+
+<ApiEndpoint method="POST" path="/model-hub/develops/create-empty-dataset/" />
+
+**MCP tool**: `create_dataset`
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.create(new_dataset_name="your-new-dataset-name")
+```
+
+```typescript TypeScript
+const result = await client.datasets.create({ new_dataset_name: "your-new-dataset-name" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.create(
+    *,
+    new_dataset_name: str,
+    model_type: str | None | NotGiven = NOT_GIVEN,
+    is_sdk: bool | None | NotGiven = NOT_GIVEN,
+    row: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DatasetCreateStartedResult
+```
+
+```typescript TypeScript
+client.datasets.create(params: DatasetsCreateParams, options?: RequestOptions): Promise<models.DatasetCreateStartedResult>
+
+export interface DatasetsCreateParams {
+  new_dataset_name: string;
+  model_type?: string | null;
+  is_sdk?: boolean | null;
+  row?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="new_dataset_name" type="string" required />
+<ParamField body="model_type" type="string" optional />
+<ParamField body="is_sdk" type="boolean" optional />
+<ParamField body="row" type="integer" optional />
+
+#### Returns
+
+[`DatasetCreateStartedResult`](/docs/sdk/reference/datasets-evals-models#datasetcreatestartedresult).
+
+### datasets.create_from_file
+
+Create a dataset by uploading a local CSV, JSON, JSONL or Excel file. Processing is asynchronous; read datasets.get for the result.
+
+<ApiEndpoint method="POST" path="/model-hub/develops/create-dataset-from-local-file/" />
+
+**Multipart upload**: file parameters take a path, bytes or an open file
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.create_from_file(
+    file="path/to/file",
+    new_dataset_name="your-new-dataset-name",
+    model_type="your-model-type",
+)
+```
+
+```typescript TypeScript
+const result = await client.datasets.createFromFile({
+  file: "path/to/file",
+  new_dataset_name: "your-new-dataset-name",
+  model_type: "your-model-type",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.create_from_file(
+    *,
+    file: FileInput,
+    new_dataset_name: str,
+    model_type: str,
+    source: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.LocalFileDatasetCreateStartedResult
+```
+
+```typescript TypeScript
+client.datasets.createFromFile(params: DatasetsCreateFromFileParams, options?: RequestOptions): Promise<models.LocalFileDatasetCreateStartedResult>
+
+export interface DatasetsCreateFromFileParams {
+  file: FileInput;
+  new_dataset_name: string;
+  model_type: string;
+  source?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="file" type="file" required />
+<ParamField body="new_dataset_name" type="string" required />
+<ParamField body="model_type" type="string" required />
+<ParamField body="source" type="string" optional />
+
+#### Returns
+
+[`LocalFileDatasetCreateStartedResult`](/docs/sdk/reference/datasets-evals-models#localfiledatasetcreatestartedresult).
+
+### datasets.create_from_huggingface
+
+Create a dataset from a Hugging Face dataset split.
+
+<ApiEndpoint method="POST" path="/model-hub/develops/create-dataset-from-huggingface/" />
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.create_from_huggingface(huggingface_dataset_name="your-huggingface-dataset-name", huggingface_dataset_split="your-huggingface-dataset-split")
+```
+
+```typescript TypeScript
+const result = await client.datasets.createFromHuggingface({
+  huggingface_dataset_name: "your-huggingface-dataset-name",
+  huggingface_dataset_split: "your-huggingface-dataset-split",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.create_from_huggingface(
+    *,
+    huggingface_dataset_name: str,
+    huggingface_dataset_split: str,
+    name: str | None | NotGiven = NOT_GIVEN,
+    model_type: str | None | NotGiven = NOT_GIVEN,
+    num_rows: int | None | NotGiven = NOT_GIVEN,
+    huggingface_dataset_config: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DatasetCreateStartedResult
+```
+
+```typescript TypeScript
+client.datasets.createFromHuggingface(params: DatasetsCreateFromHuggingfaceParams, options?: RequestOptions): Promise<models.DatasetCreateStartedResult>
+
+export interface DatasetsCreateFromHuggingfaceParams {
+  huggingface_dataset_name: string;
+  huggingface_dataset_split: string;
+  name?: string | null;
+  model_type?: string | null;
+  num_rows?: number | null;
+  huggingface_dataset_config?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="huggingface_dataset_name" type="string" required />
+<ParamField body="huggingface_dataset_split" type="string" required />
+<ParamField body="name" type="string" optional />
+<ParamField body="model_type" type="string" optional />
+<ParamField body="num_rows" type="integer" optional />
+<ParamField body="huggingface_dataset_config" type="string" optional />
+
+#### Returns
+
+[`DatasetCreateStartedResult`](/docs/sdk/reference/datasets-evals-models#datasetcreatestartedresult).
+
+### datasets.delete
+
+Soft-delete one or more datasets by passing dataset_ids. This is the only way to remove a dataset created earlier; deletion cascades to the dataset's rows, columns and attached evaluations.
+
+<ApiEndpoint method="DELETE" path="/model-hub/develops/delete_dataset/" />
+
+**MCP tool**: `delete_datasets`
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.delete(dataset_ids=[])
+```
+
+```typescript TypeScript
+const result = await client.datasets.delete({ dataset_ids: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.delete(
+    *,
+    dataset_ids: list[str],
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> str
+```
+
+```typescript TypeScript
+client.datasets.delete(params: DatasetsDeleteParams, options?: RequestOptions): Promise<string>
+
+export interface DatasetsDeleteParams {
+  dataset_ids: Array<string>;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="dataset_ids" type="string[]" required />
+
+#### Returns
+
+`string`.
+
+### datasets.get
+
+Return the rows, columns, and metadata for a dataset.
+
+<ApiEndpoint method="GET" path="/model-hub/develops/{dataset_id}/get-dataset-table/" />
+
+**MCP tool**: `get_dataset`
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.get("your-dataset-id")
+```
+
+```typescript TypeScript
+const result = await client.datasets.get("your-dataset-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.get(
+    dataset_id: str,
+    *,
+    filters: str | None | NotGiven = NOT_GIVEN,
+    sort: str | None | NotGiven = NOT_GIVEN,
+    search: str | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    current_page_index: int | None | NotGiven = NOT_GIVEN,
+    column_config_only: bool | None | NotGiven = NOT_GIVEN,
+    exact_snapshot: bool | None | NotGiven = NOT_GIVEN,
+    cursor: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DatasetTableResult
+```
+
+```typescript TypeScript
+client.datasets.get(datasetId: string, params: DatasetsGetParams = {}, options?: RequestOptions): Promise<models.DatasetTableResult>
+
+export interface DatasetsGetParams {
+  filters?: string | null;
+  sort?: string | null;
+  search?: string | null;
+  page_size?: number | null;
+  current_page_index?: number | null;
+  column_config_only?: boolean | null;
+  /** Start an exact MVCC-bound dataset read. Exact reads start at page 0 and return a signed next_cursor when more rows remain. */
+  exact_snapshot?: boolean | null;
+  /** Signed next_cursor from the preceding exact dataset page. Keep the same page_size and current_page_index sequence. */
+  cursor?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dataset_id" type="string" required>
+  Positional argument `dataset_id`.
+</ParamField>
+<ParamField query="filters" type="string" optional />
+<ParamField query="sort" type="string" optional />
+<ParamField query="search" type="string" optional />
+<ParamField query="page_size" type="integer" optional />
+<ParamField query="current_page_index" type="integer" optional />
+<ParamField query="column_config_only" type="boolean" optional />
+<ParamField query="exact_snapshot" type="boolean" optional>
+  Start an exact MVCC-bound dataset read. Exact reads start at page 0 and return a signed next_cursor when more rows remain.
+</ParamField>
+<ParamField query="cursor" type="string" optional>
+  Signed next_cursor from the preceding exact dataset page. Keep the same page_size and current_page_index sequence.
+</ParamField>
+
+#### Returns
+
+[`DatasetTableResult`](/docs/sdk/reference/datasets-evals-models#datasettableresult).
+
+### datasets.list
+
+List datasets available in the current workspace.
+
+<ApiEndpoint method="GET" path="/model-hub/develops/get-datasets/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_datasets`
+
+<CodeGroup>
+
+```python Python
+for item in client.datasets.list():
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.datasets.list()) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.list(
+    *,
+    search_text: str | None | NotGiven = NOT_GIVEN,
+    page_size: int | None | NotGiven = NOT_GIVEN,
+    sort: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.DatasetListItem]
+```
+
+```typescript TypeScript
+client.datasets.list(params: DatasetsListParams = {}, options?: RequestOptions): Pager<models.DatasetListItem>
+
+export interface DatasetsListParams {
+  search_text?: string | null;
+  page_size?: number | null;
+  sort?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="search_text" type="string" optional />
+<ParamField query="page_size" type="integer" optional />
+<ParamField query="sort" type="string" optional />
+
+The pager sends `page` itself; pass `page_size` to change the page size.
+
+#### Returns
+
+A pager of [`DatasetListItem`](/docs/sdk/reference/datasets-evals-models#datasetlistitem) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### datasets.list_names
+
+Return the id and name of every dataset in the workspace, without paging.
+
+<ApiEndpoint method="GET" path="/model-hub/develops/get-datasets-names/" />
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.list_names()
+```
+
+```typescript TypeScript
+const result = await client.datasets.listNames();
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.list_names(
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DatasetNamesResult
+```
+
+```typescript TypeScript
+client.datasets.listNames(options?: RequestOptions): Promise<models.DatasetNamesResult>
+```
+
+</Expandable>
+
+#### Parameters
+
+This method takes no parameters beyond the per-call `options`.
+
+#### Returns
+
+[`DatasetNamesResult`](/docs/sdk/reference/datasets-evals-models#datasetnamesresult).
+
+## client.datasets.cells
+
+TypeScript: `client.datasets.cells`.
+
+### datasets.cells.update
+
+Set the value of a single dataset cell. Use this to correct one value; add_dataset_rows only appends and cannot edit an existing row.
+
+<ApiEndpoint method="POST" path="/model-hub/develops/{dataset_id}/update_cell_value/" />
+
+**MCP tool**: `update_dataset_cell`
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.cells.update(
+    "your-dataset-id",
+    row_id="your-row-id",
+    column_id="your-column-id",
+)
+```
+
+```typescript TypeScript
+const result = await client.datasets.cells.update("your-dataset-id", {
+  row_id: "your-row-id",
+  column_id: "your-column-id",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.cells.update(
+    dataset_id: str,
+    *,
+    row_id: str,
+    column_id: str,
+    new_value: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> str
+```
+
+```typescript TypeScript
+client.datasets.cells.update(datasetId: string, params: DatasetsCellsUpdateParams, options?: RequestOptions): Promise<string>
+
+export interface DatasetsCellsUpdateParams {
+  row_id: string;
+  column_id: string;
+  new_value?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dataset_id" type="string" required>
+  Positional argument `dataset_id`.
+</ParamField>
+<ParamField body="row_id" type="string" required />
+<ParamField body="column_id" type="string" required />
+<ParamField body="new_value" type="string" optional />
+
+#### Returns
+
+`string`.
+
+## client.datasets.columns
+
+TypeScript: `client.datasets.columns`.
+
+### datasets.columns.add
+
+Add columns to a dataset.
+
+<ApiEndpoint method="POST" path="/model-hub/develops/{dataset_id}/add_columns/" />
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.columns.add("your-dataset-id", new_columns_data=[])
+```
+
+```typescript TypeScript
+const result = await client.datasets.columns.add("your-dataset-id", { new_columns_data: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.columns.add(
+    dataset_id: str,
+    *,
+    new_columns_data: list[dict[str, Any]],
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DatasetColumnsMutationResult
+```
+
+```typescript TypeScript
+client.datasets.columns.add(datasetId: string, params: DatasetsColumnsAddParams, options?: RequestOptions): Promise<models.DatasetColumnsMutationResult>
+
+export interface DatasetsColumnsAddParams {
+  new_columns_data: Array<Record<string, unknown>>;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dataset_id" type="string" required>
+  Positional argument `dataset_id`.
+</ParamField>
+<ParamField body="new_columns_data" type="object[]" required />
+
+#### Returns
+
+[`DatasetColumnsMutationResult`](/docs/sdk/reference/datasets-evals-models#datasetcolumnsmutationresult).
+
+### datasets.columns.add_static
+
+Create a named static input column before adding dataset rows. Supply column_type using the API schema.
+
+<ApiEndpoint method="POST" path="/model-hub/develops/{dataset_id}/add_static_column/" />
+
+**MCP tool**: `create_dataset_column`
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.columns.add_static(
+    "your-dataset-id",
+    new_column_name="your-new-column-name",
+    column_type="your-column-type",
+)
+```
+
+```typescript TypeScript
+const result = await client.datasets.columns.addStatic("your-dataset-id", {
+  new_column_name: "your-new-column-name",
+  column_type: "your-column-type",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.columns.add_static(
+    dataset_id: str,
+    *,
+    new_column_name: str,
+    column_type: str,
+    source: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> str
+```
+
+```typescript TypeScript
+client.datasets.columns.addStatic(datasetId: string, params: DatasetsColumnsAddStaticParams, options?: RequestOptions): Promise<string>
+
+export interface DatasetsColumnsAddStaticParams {
+  new_column_name: string;
+  column_type: string;
+  source?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dataset_id" type="string" required>
+  Positional argument `dataset_id`.
+</ParamField>
+<ParamField body="new_column_name" type="string" required />
+<ParamField body="column_type" type="string" required />
+<ParamField body="source" type="string" optional />
+
+#### Returns
+
+`string`.
+
+### datasets.columns.rename
+
+Rename an existing dataset column. This does not change its type or cell values.
+
+<ApiEndpoint method="PUT" path="/model-hub/develops/{dataset_id}/update_column_name/{column_id}/" />
+
+**MCP tool**: `rename_dataset_column`
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.columns.rename(
+    "your-dataset-id",
+    "your-column-id",
+    new_column_name="your-new-column-name",
+)
+```
+
+```typescript TypeScript
+const result = await client.datasets.columns.rename("your-dataset-id", "your-column-id", { new_column_name: "your-new-column-name" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.columns.rename(
+    dataset_id: str,
+    column_id: str,
+    *,
+    new_column_name: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> str
+```
+
+```typescript TypeScript
+client.datasets.columns.rename(datasetId: string, columnId: string, params: DatasetsColumnsRenameParams, options?: RequestOptions): Promise<string>
+
+export interface DatasetsColumnsRenameParams {
+  new_column_name: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dataset_id" type="string" required>
+  Positional argument `dataset_id`.
+</ParamField>
+<ParamField path="column_id" type="string" required>
+  Positional argument `column_id`.
+</ParamField>
+<ParamField body="new_column_name" type="string" required />
+
+#### Returns
+
+`string`.
+
+## client.datasets.evals
+
+TypeScript: `client.datasets.evals`.
+
+### datasets.evals.add
+
+Attach an evaluation template to a dataset with a lowercase name (letters, digits, hyphens or underscores; no spaces) and config.mapping column mappings. Set run=false for setup only; run=true marks it for processing. Use list_dataset_evaluations to discover the attached evaluation ID.
+
+<ApiEndpoint method="POST" path="/model-hub/develops/{dataset_id}/add_user_eval/" />
+
+**MCP tool**: `configure_dataset_evaluation`
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.evals.add(
+    "your-dataset-id",
+    name="your-name",
+    template_id="your-template-id",
+    config={},
+)
+```
+
+```typescript TypeScript
+const result = await client.datasets.evals.add("your-dataset-id", {
+  name: "your-name",
+  template_id: "your-template-id",
+  config: {},
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.evals.add(
+    dataset_id: str,
+    *,
+    name: str,
+    template_id: str,
+    config: dict[str, Any],
+    kb_id: str | None | NotGiven = NOT_GIVEN,
+    error_localizer: bool | None | NotGiven = NOT_GIVEN,
+    model: str | None | NotGiven = NOT_GIVEN,
+    eval_type: str | None | NotGiven = NOT_GIVEN,
+    run: bool | None | NotGiven = NOT_GIVEN,
+    save_as_template: bool | None | NotGiven = NOT_GIVEN,
+    experiment_id: str | None | NotGiven = NOT_GIVEN,
+    composite_weight_overrides: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> str
+```
+
+```typescript TypeScript
+client.datasets.evals.add(datasetId: string, params: DatasetsEvalsAddParams, options?: RequestOptions): Promise<string>
+
+export interface DatasetsEvalsAddParams {
+  name: string;
+  template_id: string;
+  config: Record<string, unknown>;
+  kb_id?: string | null;
+  error_localizer?: boolean | null;
+  model?: string | null;
+  eval_type?: string | null;
+  run?: boolean | null;
+  save_as_template?: boolean | null;
+  experiment_id?: string | null;
+  composite_weight_overrides?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dataset_id" type="string" required>
+  Positional argument `dataset_id`.
+</ParamField>
+<ParamField body="name" type="string" required />
+<ParamField body="template_id" type="string" required />
+<ParamField body="config" type="object" required />
+<ParamField body="kb_id" type="string" optional />
+<ParamField body="error_localizer" type="boolean" optional />
+<ParamField body="model" type="string" optional />
+<ParamField body="eval_type" type="string" optional />
+<ParamField body="run" type="boolean" optional />
+<ParamField body="save_as_template" type="boolean" optional />
+<ParamField body="experiment_id" type="string" optional />
+<ParamField body="composite_weight_overrides" type="object" optional />
+
+#### Returns
+
+`string`.
+
+### datasets.evals.list
+
+List evaluations attached to a dataset by supplying eval_type=user, including their IDs, configuration and status. These IDs, not template IDs, are used by run_dataset_evals. Without eval_type=user, the API lists available evaluation templates.
+
+<ApiEndpoint method="GET" path="/model-hub/develops/{dataset_id}/get_evals_list/" />
+
+**MCP tool**: `list_dataset_evaluations`
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.evals.list("your-dataset-id")
+```
+
+```typescript TypeScript
+const result = await client.datasets.evals.list("your-dataset-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.evals.list(
+    dataset_id: str,
+    *,
+    eval_type: str | None | NotGiven = NOT_GIVEN,
+    search_text: str | None | NotGiven = NOT_GIVEN,
+    eval_categories: str | None | NotGiven = NOT_GIVEN,
+    eval_tags: list[str] | None | NotGiven = NOT_GIVEN,
+    use_cases: list[str] | None | NotGiven = NOT_GIVEN,
+    experiment_id: str | None | NotGiven = NOT_GIVEN,
+    order: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvalListResult
+```
+
+```typescript TypeScript
+client.datasets.evals.list(datasetId: string, params: DatasetsEvalsListParams = {}, options?: RequestOptions): Promise<models.EvalListResult>
+
+export interface DatasetsEvalsListParams {
+  /** Use user to list evaluations attached to this dataset, including their runnable IDs. */
+  eval_type?: string | null;
+  search_text?: string | null;
+  eval_categories?: string | null;
+  eval_tags?: Array<string> | null;
+  use_cases?: Array<string> | null;
+  experiment_id?: string | null;
+  order?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dataset_id" type="string" required>
+  Positional argument `dataset_id`.
+</ParamField>
+<ParamField query="eval_type" type="string" optional>
+  Use user to list evaluations attached to this dataset, including their runnable IDs.
+</ParamField>
+<ParamField query="search_text" type="string" optional />
+<ParamField query="eval_categories" type="string" optional />
+<ParamField query="eval_tags" type="string[]" optional />
+<ParamField query="use_cases" type="string[]" optional />
+<ParamField query="experiment_id" type="string" optional />
+<ParamField query="order" type="string" optional />
+
+#### Returns
+
+[`EvalListResult`](/docs/sdk/reference/datasets-evals-models#evallistresult).
+
+### datasets.evals.run
+
+Start the configured evaluations for a dataset.
+
+<ApiEndpoint method="POST" path="/model-hub/develops/{dataset_id}/start_evals_process/" />
+
+**MCP tool**: `run_dataset_evals`
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.evals.run("your-dataset-id", user_eval_ids=[])
+```
+
+```typescript TypeScript
+const result = await client.datasets.evals.run("your-dataset-id", { user_eval_ids: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.evals.run(
+    dataset_id: str,
+    *,
+    user_eval_ids: list[str],
+    experiment_id: str | None | NotGiven = NOT_GIVEN,
+    failed_only: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> str
+```
+
+```typescript TypeScript
+client.datasets.evals.run(datasetId: string, params: DatasetsEvalsRunParams, options?: RequestOptions): Promise<string>
+
+export interface DatasetsEvalsRunParams {
+  user_eval_ids: Array<string>;
+  experiment_id?: string | null;
+  failed_only?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dataset_id" type="string" required>
+  Positional argument `dataset_id`.
+</ParamField>
+<ParamField body="user_eval_ids" type="string[]" required />
+<ParamField body="experiment_id" type="string" optional />
+<ParamField body="failed_only" type="boolean" optional />
+
+#### Returns
+
+`string`.
+
+### datasets.evals.stats
+
+Per-evaluation score statistics for a dataset.
+
+<ApiEndpoint method="GET" path="/model-hub/dataset/{dataset_id}/eval-stats/" />
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.evals.stats("your-dataset-id")
+```
+
+```typescript TypeScript
+const result = await client.datasets.evals.stats("your-dataset-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.evals.stats(
+    dataset_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> List[models.DatasetEvalStatsItem]
+```
+
+```typescript TypeScript
+client.datasets.evals.stats(datasetId: string, options?: RequestOptions): Promise<Array<models.DatasetEvalStatsItem>>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dataset_id" type="string" required>
+  Positional argument `dataset_id`.
+</ParamField>
+
+#### Returns
+
+A list of [`DatasetEvalStatsItem`](/docs/sdk/reference/datasets-evals-models#datasetevalstatsitem).
+
+## client.datasets.prompts
+
+TypeScript: `client.datasets.prompts`.
+
+### datasets.prompts.add
+
+Create a dataset prompt output column and immediately schedule processing of dataset rows. This can incur model usage charges. Supply dataset_id, name and config; this is separate from workbench run_prompt.
+
+<ApiEndpoint method="POST" path="/model-hub/develops/add_run_prompt_column/" />
+
+**MCP tool**: `add_dataset_prompt`
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.prompts.add(dataset_id="your-dataset-id", name="your-name")
+```
+
+```typescript TypeScript
+const result = await client.datasets.prompts.add({
+  dataset_id: "your-dataset-id",
+  name: "your-name",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.prompts.add(
+    *,
+    dataset_id: str,
+    name: str,
+    config: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> str
+```
+
+```typescript TypeScript
+client.datasets.prompts.add(params: DatasetsPromptsAddParams, options?: RequestOptions): Promise<string>
+
+export interface DatasetsPromptsAddParams {
+  dataset_id: string;
+  name: string;
+  config?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="dataset_id" type="string" required />
+<ParamField body="name" type="string" required />
+<ParamField body="config" type="object" optional />
+
+#### Returns
+
+`string`.
+
+### datasets.prompts.run
+
+Queue configured dataset prompts by run_prompt_ids. Supply row_ids for selected rows, or selected_all_rows=true for all rows; with selected_all_rows=true, row_ids are EXCLUDED. Poll get_dataset for cell results and status.
+
+<ApiEndpoint method="POST" path="/model-hub/run-prompt-for-rows/" />
+
+**MCP tool**: `run_dataset_prompts`
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.prompts.run(run_prompt_ids=[])
+```
+
+```typescript TypeScript
+const result = await client.datasets.prompts.run({ run_prompt_ids: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.prompts.run(
+    *,
+    run_prompt_ids: list[str],
+    row_ids: list[str] | None | NotGiven = NOT_GIVEN,
+    selected_all_rows: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.ModelHubSuccessMessageResult
+```
+
+```typescript TypeScript
+client.datasets.prompts.run(params: DatasetsPromptsRunParams, options?: RequestOptions): Promise<models.ModelHubSuccessMessageResult>
+
+export interface DatasetsPromptsRunParams {
+  run_prompt_ids: Array<string>;
+  row_ids?: Array<string> | null;
+  selected_all_rows?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="run_prompt_ids" type="string[]" required />
+<ParamField body="row_ids" type="string[]" optional />
+<ParamField body="selected_all_rows" type="boolean" optional />
+
+#### Returns
+
+[`ModelHubSuccessMessageResult`](/docs/sdk/reference/datasets-evals-models#modelhubsuccessmessageresult).
+
+### datasets.prompts.stats
+
+Return dataset prompt IDs and token, cost and timing statistics. This is not execution status; use get_dataset for cell outputs and status.
+
+<ApiEndpoint method="GET" path="/model-hub/dataset/{dataset_id}/run-prompt-stats/" />
+
+**MCP tool**: `get_dataset_prompt_stats`
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.prompts.stats("your-dataset-id")
+```
+
+```typescript TypeScript
+const result = await client.datasets.prompts.stats("your-dataset-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.prompts.stats(
+    dataset_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.DatasetRunPromptStatsResult
+```
+
+```typescript TypeScript
+client.datasets.prompts.stats(datasetId: string, options?: RequestOptions): Promise<models.DatasetRunPromptStatsResult>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dataset_id" type="string" required>
+  Positional argument `dataset_id`.
+</ParamField>
+
+#### Returns
+
+[`DatasetRunPromptStatsResult`](/docs/sdk/reference/datasets-evals-models#datasetrunpromptstatsresult).
+
+### datasets.prompts.update
+
+Update a dataset prompt column using dataset_id, column_id and config. This can schedule processing and incur model usage charges.
+
+<ApiEndpoint method="POST" path="/model-hub/develops/edit_run_prompt_column/" />
+
+**MCP tool**: `update_dataset_prompt`
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.prompts.update(dataset_id="your-dataset-id", column_id="your-column-id")
+```
+
+```typescript TypeScript
+const result = await client.datasets.prompts.update({
+  dataset_id: "your-dataset-id",
+  column_id: "your-column-id",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.prompts.update(
+    *,
+    dataset_id: str,
+    column_id: str,
+    name: str | None | NotGiven = NOT_GIVEN,
+    config: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> str
+```
+
+```typescript TypeScript
+client.datasets.prompts.update(params: DatasetsPromptsUpdateParams, options?: RequestOptions): Promise<string>
+
+export interface DatasetsPromptsUpdateParams {
+  dataset_id: string;
+  column_id: string;
+  name?: string | null;
+  config?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="dataset_id" type="string" required />
+<ParamField body="column_id" type="string" required />
+<ParamField body="name" type="string" optional />
+<ParamField body="config" type="object" optional />
+
+#### Returns
+
+`string`.
+
+## client.datasets.rows
+
+TypeScript: `client.datasets.rows`.
+
+### datasets.rows.add
+
+Add rows to an existing dataset using cells with column_name and value. Column names must already exist in the dataset.
+
+<ApiEndpoint method="POST" path="/model-hub/develops/{dataset_id}/add_rows/" />
+
+**MCP tool**: `add_dataset_rows`
+
+<Warning>
+  **Beta.** This method may change without notice; calling it emits a one-time warning.
+</Warning>
+
+<CodeGroup>
+
+```python Python
+result = client.datasets.rows.add("your-dataset-id", rows=[])
+```
+
+```typescript TypeScript
+const result = await client.datasets.rows.add("your-dataset-id", { rows: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.datasets.rows.add(
+    dataset_id: str,
+    *,
+    rows: list[dict[str, Any]],
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> str
+```
+
+```typescript TypeScript
+client.datasets.rows.add(datasetId: string, params: DatasetsRowsAddParams, options?: RequestOptions): Promise<string>
+
+export interface DatasetsRowsAddParams {
+  rows: Array<Record<string, unknown>>;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="dataset_id" type="string" required>
+  Positional argument `dataset_id`.
+</ParamField>
+<ParamField body="rows" type="object[]" required />
+
+#### Returns
+
+`string`.
