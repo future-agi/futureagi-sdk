@@ -376,7 +376,6 @@ class KnowledgeBase(APIKeyAuth):
         try:
             data = {"name": final_kb_name}
                 
-            method = HttpMethod.POST
             url = self._base_url + "/" + Routes.knowledge_base.value
             
             files = []
@@ -406,13 +405,8 @@ class KnowledgeBase(APIKeyAuth):
                     'X-Secret-Key': self._fi_secret_key,
                 }
                 
-                response = requests.post(
-                    url=url,
-                    data=data,
-                    files=files,  
-                    headers=headers,
-                    timeout=300
-                )
+                body = {"data": data, "files": files} if files else {"json": data}
+                response = requests.post(url=url, headers=headers, timeout=300, **body)
                 KBResponseHandler._handle_error(response)
                 parsed_result_data = KBResponseHandler._parse_success(response)
 

@@ -1,4 +1,5 @@
 import re
+import warnings
 from typing import Any, Dict, List, Optional, Union
 
 from requests import Response
@@ -214,8 +215,11 @@ class AnnotationQueue(APIKeyAuth):
 
         client = AnnotationQueue(fi_api_key="...", fi_secret_key="...")
 
-        # Create a queue
-        queue = client.create(name="Review Queue", instructions="Rate quality 1-5")
+        # Use the ID of an existing annotation label
+        quality_label_id = "00000000-0000-4000-8000-000000000001"
+        queue = client.create(
+            "Review Queue", label_ids=[quality_label_id], instructions="Rate quality 1-5"
+        )
 
         # Add items
         client.add_items(queue.id, items=[
@@ -224,7 +228,7 @@ class AnnotationQueue(APIKeyAuth):
 
         # Import annotations programmatically
         client.import_annotations(queue.id, item_id, annotations=[
-            {"label_id": "lbl_1", "value": "positive"},
+            {"label_id": quality_label_id, "value": "positive"},
         ])
 
         # Check progress
@@ -276,6 +280,7 @@ class AnnotationQueue(APIKeyAuth):
         self,
         name: str,
         *,
+        label_ids: List[str],
         description: Optional[str] = None,
         instructions: Optional[str] = None,
         assignment_strategy: Optional[str] = None,
@@ -287,8 +292,19 @@ class AnnotationQueue(APIKeyAuth):
         agent_definition: Optional[str] = None,
         timeout: Optional[int] = None,
     ) -> QueueDetail:
-        """Create a new annotation queue."""
-        body: Dict[str, Any] = {"name": name}
+        """Create a queue with at least one existing label ID from ``list_labels``.
+
+        The server does not set scope on create. Legacy ``project``, ``dataset``
+        and ``agent_definition`` keywords are accepted with a warning, but are
+        not sent and do not attach the new queue.
+        """
+        if not isinstance(label_ids, list):
+            raise TypeError("label_ids must be a list of annotation label IDs")
+        if not label_ids:
+            raise ValueError("label_ids must include at least one annotation label ID")
+        if any(not isinstance(label_id, str) or not label_id.strip() for label_id in label_ids):
+            raise ValueError("label_ids must contain non-empty ID strings")
+        body: Dict[str, Any] = {"name": name, "label_ids": label_ids}
         if description is not None:
             body["description"] = description
         if instructions is not None:
@@ -301,12 +317,13 @@ class AnnotationQueue(APIKeyAuth):
             body["reservation_timeout_minutes"] = reservation_timeout_minutes
         if requires_review is not None:
             body["requires_review"] = requires_review
-        if project is not None:
-            body["project"] = project
-        if dataset is not None:
-            body["dataset"] = dataset
-        if agent_definition is not None:
-            body["agent_definition"] = agent_definition
+        if any(value is not None for value in (project, dataset, agent_definition)):
+            warnings.warn(
+                "project, dataset and agent_definition are read-only when creating "
+                "an annotation queue. The new queue will not be scoped by these fields.",
+                UserWarning,
+                stacklevel=2,
+            )
 
         logger.info("Creating annotation queue '%s'", name)
         config = RequestConfig(
