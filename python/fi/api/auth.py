@@ -1,5 +1,6 @@
 import os
 import time
+import warnings
 from abc import ABC, abstractmethod
 from typing import Dict, Generic, Optional, TypeVar, Union
 
@@ -114,9 +115,22 @@ class HttpClient:
         self._session.close()
 
 
+class _InstanceCredential:
+    """Value-free class access; instance attributes shadow this non-data descriptor."""
+
+    def __get__(self, instance, owner=None) -> Optional[str]:
+        if instance is None:
+            warnings.warn(
+                "Class-level credential access is deprecated; read credentials from the client instance.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        return None
+
+
 class APIKeyAuth(HttpClient):
-    _fi_api_key: str = None
-    _fi_secret_key: str = None
+    _fi_api_key = _InstanceCredential()
+    _fi_secret_key = _InstanceCredential()
 
     def __init__(
         self,
@@ -125,8 +139,9 @@ class APIKeyAuth(HttpClient):
         fi_base_url: Optional[str] = None,
         **kwargs,
     ):
-        self.__class__._fi_api_key = fi_api_key or os.environ.get(API_KEY_ENVVAR_NAME)
-        self.__class__._fi_secret_key = fi_secret_key or os.environ.get(
+        # Keep credentials on each client instance, including subclass instances.
+        self._fi_api_key = fi_api_key or os.environ.get(API_KEY_ENVVAR_NAME)
+        self._fi_secret_key = fi_secret_key or os.environ.get(
             SECRET_KEY_ENVVAR_NAME
         )
         if self._fi_api_key is None or self._fi_secret_key is None:
@@ -143,6 +158,13 @@ class APIKeyAuth(HttpClient):
 
 
 class APIKeyManager(APIKeyAuth):
+    """Process-scoped singleton with environment-derived client credentials and
+    provider keys, never a per-tenant store. ``set_api_key`` changes provider keys
+    for the whole process; credential isolation applies only to separate
+    ``APIKeyAuth`` client instances.
+    Behaviour is unchanged in 0.7.0; deprecation is planned for 0.7.x.
+    """
+
     _instance = None
 
     def __new__(cls):
@@ -173,6 +195,9 @@ class APIKeyManager(APIKeyAuth):
         return self._api_keys[provider]
 
     def set_api_key(self, provider: ApiKeyName, key: str) -> None:
+        """Set a provider key for the whole process, never for a single tenant.
+        Behaviour is unchanged in 0.7.0; deprecation is planned for 0.7.x.
+        """
         self._api_keys[provider] = key
 
     def validate_required_keys(self, required_providers: list[ApiKeyName]) -> bool:
