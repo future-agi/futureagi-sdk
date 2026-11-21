@@ -268,7 +268,8 @@ class LabelManagementMixin:
         history = history_resp.json().get("results", [])
         matched = None
         for entry in history:
-            if str(entry.get("template_version")) == version:
+            entry_version = entry.get("template_version")
+            if str(entry_version) == version:
                 matched = entry
                 break
         if not matched:
@@ -328,7 +329,8 @@ class LabelManagementMixin:
         history = history_resp.json().get("results", [])
         version_id = None
         for entry in history:
-            if str(entry.get("template_version")) == version:
+            entry_version = entry.get("template_version")
+            if str(entry_version) == version:
                 for key in ("id", "version_id", "execution_id"):
                     if entry.get(key):
                         version_id = str(entry.get(key))
@@ -357,8 +359,8 @@ class LabelManagementMixin:
         """Lookup internal version_id by version name via history endpoint."""
         history = self._fetch_template_version_history()
         for entry in history:
-            if str(entry.get("template_version")) == version_name:
-                # Try common id keys
+            entry_version = entry.get("template_version")
+            if str(entry_version) == version_name:
                 for key in ("id", "version_id", "execution_id"):
                     if entry.get(key):
                         return str(entry[key])
