@@ -20,6 +20,24 @@ it.each(vectors.vectors)("$name", vector => {
   expect(attributes).toEqual(vector.expected);
 });
 
+// The same 256-key scan cap as @traceai/fi-core and traceAI's Python writer.
+it("ignores carrier keys past the scan cap", () => {
+  configure({ skillsTracing: "on" });
+  const stamp = (attrs: Record<string, unknown>) => {
+    const attributes: Record<string, unknown> = {};
+    const span = { attributes, spanContext: () => ({ traceId: "trace" }), setAttribute: (key: string, value: unknown) => { attributes[key] = value; } } as unknown as Span;
+    new FutureAGISkillsSpanProcessor().onStart(span, ROOT_CONTEXT.setValue(CARRIER_KEY, { v: 1, attrs }));
+    return attributes;
+  };
+  const late: Record<string, unknown> = {};
+  for (let i = 0; i < 300; i++) late[`x.k${i}`] = i;
+  late["fi.context.name"] = "late";
+  expect(stamp(late)).toEqual({});
+  const early: Record<string, unknown> = { "fi.context.name": "early" };
+  for (let i = 0; i < 300; i++) early[`x.k${i}`] = i;
+  expect(stamp(early)).toEqual({ "fi.context.name": "early" });
+});
+
 it("is bounded by LRU capacity and absolute TTL without timers", () => {
   let now = 0;
   const registry = new TraceRegistry(2, 10, () => now);

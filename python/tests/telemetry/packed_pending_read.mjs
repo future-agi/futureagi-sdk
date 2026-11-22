@@ -13,7 +13,8 @@ const core = await load(coreForm, '@traceai/fi-core');
 const { configure, withAgentScope } = await load(sdkForm === 'cjs' ? 'esm' : 'cjs', '@future-agi/sdk/telemetry');
 const { ContextSnapshot } = await load(sdkForm, '@future-agi/sdk/context');
 const exporter = new InMemorySpanExporter();
-const provider = core.register({projectName: 'pending-read', spanProcessors: [new SimpleSpanProcessor(exporter)]});
+// traceAI runtime attribution is opt-in per provider.
+const provider = core.register({projectName: 'pending-read', runtimeAttributes: true, spanProcessors: [new SimpleSpanProcessor(exporter)]});
 const tracer = trace.getTracer('pending');
 const key = 'fi.skills.version_ids';
 const versionId = '22222222-2222-4222-8222-222222222222';

@@ -27,7 +27,8 @@ class FutureAGISkillsSpanProcessor:
             elif value is not None:
                 if not isinstance(value, Mapping) or value.get("v") != 1 or not isinstance(value.get("attrs"), Mapping):
                     return
-                attrs = _otel.allowlisted(value["attrs"])
+                # Shared bounded contract, pinned by the processor_v1 vectors.
+                attrs = _otel.normalized_carrier(value["attrs"])
             else:
                 state = registry.get(span.get_span_context().trace_id)
                 attrs = dict(state.attrs) if state else {}

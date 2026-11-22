@@ -112,6 +112,69 @@ def allowlisted(attrs):
     return result
 
 
+
+# The shared carrier-consumer contract, identical to traceAI's Python carrier
+# writer and @traceai/fi-core's runtime attribute processor; pinned by the
+# shared processor_v1.json vectors (byte-identical across the repositories).
+_SKILL_LIST_KEYS = ("fi.skills.version_ids", "fi.skills.ids", "fi.skills.refs")
+_MAX_CARRIER_ATTRIBUTES = 64
+_MAX_CARRIER_SKILLS = 32
+_MAX_CARRIER_SCAN = 256
+
+
+def _short_string(value):
+    if not isinstance(value, str):
+        return False
+    try:
+        return len(value.encode("utf-8")) <= 256
+    except UnicodeEncodeError:
+        return False
+
+
+def normalized_carrier(mapping):
+    """Bounded normalization of a foreign carrier before stamping.
+
+    At most 62 copied keys plus the derived skill count and truncation flag;
+    at most 256 keys examined. Over-long strings and invalid lists are dropped.
+    """
+    attrs = {}
+    truncated = False
+    for scanned, (key, value) in enumerate(mapping.items(), 1):
+        if scanned > _MAX_CARRIER_SCAN:
+            break
+        if not _short_string(key) or not key.startswith(("fi.skills.", "fi.context.", "gen_ai.agent.")):
+            continue
+        if key == "fi.context.linked_skill_version_ids":
+            continue
+        if isinstance(value, str):
+            if not _short_string(value):
+                continue
+        elif type(value) in (bool, int, float):
+            pass
+        elif isinstance(value, (list, tuple)):
+            limit = _MAX_CARRIER_SKILLS if key in _SKILL_LIST_KEYS else _MAX_CARRIER_ATTRIBUTES
+            if not all(_short_string(item) for item in value[:limit]):
+                continue
+            if key in _SKILL_LIST_KEYS:
+                truncated = truncated or len(value) > _MAX_CARRIER_SKILLS
+            elif len(value) > limit:
+                continue
+            value = tuple(value[:limit])
+        else:
+            continue
+        attrs[key] = value
+        if len(attrs) == _MAX_CARRIER_ATTRIBUTES - 2:
+            break
+    versions = attrs.get("fi.skills.version_ids")
+    if isinstance(versions, tuple):
+        attrs["fi.skills.count"] = len(versions)
+    if truncated:
+        attrs["fi.skills.truncated"] = True
+    elif attrs.get("fi.skills.truncated") is not True:
+        attrs.pop("fi.skills.truncated", None)
+    return attrs
+
+
 _EMPTY_ATTRS = MappingProxyType({})
 
 

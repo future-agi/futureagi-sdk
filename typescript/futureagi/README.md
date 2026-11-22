@@ -240,8 +240,27 @@ await withAgentScope({ agent: 'refund-agent' }, async () => {
 For **vanilla OTel JS**, also list `new FutureAGISkillsSpanProcessor()` from
 `@future-agi/sdk/telemetry` in the provider constructor's `spanProcessors`
 list, alongside the application's exporter processor. Do not replace that
-exporter. OTel JS 2.x cannot add processors after construction. The corresponding
-traceAI integration supplies its own conforming processor; do not install both.
+exporter. OTel JS 2.x cannot add processors after construction.
+
+With **traceAI** (`@traceai/fi-core`), skill and agent-context attribution is
+opt-in per provider. Pass `runtimeAttributes: true` to `register()` (or to the
+provider), or list traceAI's `FutureAGIRuntimeAttributesSpanProcessor` in
+`spanProcessors`; do not install both processors:
+
+```ts
+import { register } from '@traceai/fi-core';
+
+const provider = register({ projectName: 'support', runtimeAttributes: true });
+```
+
+Without that opt-in the provider installs no runtime processor, and its spans,
+contexts and exports are unchanged. `configure()` cannot opt a provider in; on a
+provider that opted in it can only narrow behaviour (`'off'`, `'load_only'`).
+Listing only `FutureAGISkillsSpanProcessor` on a traceAI provider stamps later
+spans, but it does **not** enable traceAI's span identity calls; those run only
+on spans started by a provider that opted in. Agent identity read back from a
+traceAI span is always PII-redacted.
+
 No code to record the load. One scope line names the agent; the provider must
 also have the processor to stamp later spans. This is not a claim that every
 already-started span can be changed.

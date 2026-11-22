@@ -125,6 +125,10 @@ packed_typescript() {
   for mode in on load_only off; do
     node probe.mjs "$mode" || return
   done
+  cp "$SDK_ROOT/python/tests/telemetry/packed_traceai_opt_in.mjs" "$fixture/opt-in.mjs"
+  for mode in off on; do
+    node opt-in.mjs "$mode" || return
+  done
 }
 run packed-typescript-interop packed_typescript
 run sdk-vector-parity cmp "$SDK_ROOT/python/tests/telemetry/vectors/processor_v1.json" \

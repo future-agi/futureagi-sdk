@@ -29,6 +29,30 @@ def test_processor_contract(tracing, vector):
     assert span.attributes == vector["expected"]
 
 
+
+def test_foreign_carrier_keys_past_the_scan_cap_are_ignored(tracing):
+    """The same 256-key scan cap as traceAI's writer and @traceai/fi-core."""
+    from opentelemetry.context import Context, set_value
+
+    def stamp(attrs):
+        class Span:
+            def __init__(self):
+                self.attributes = {}
+            def get_span_context(self):
+                return SimpleNamespace(trace_id=43)
+            def set_attribute(self, key, value):
+                self.attributes[key] = value
+        span = Span()
+        FutureAGISkillsSpanProcessor().on_start(span, set_value(CARRIER_KEY, {"v": 1, "attrs": attrs}, Context()))
+        return span.attributes
+
+    late = {f"x.k{i}": i for i in range(300)}
+    late["fi.context.name"] = "late"
+    assert stamp(late) == {}
+    early = {"fi.context.name": "early"}
+    early.update({f"x.k{i}": i for i in range(300)})
+    assert stamp(early) == {"fi.context.name": "early"}
+
 def test_attribute_limits():
     assert len(allowlisted({f"fi.context.k{i}": i for i in range(100)})) == 64
     attrs = allowlisted({"fi.context.name": "é" * 256, "fi.skills.refs": ["a"] * 40})

@@ -1,6 +1,7 @@
 import type { Attributes, Context, Span } from "./bridge-types";
 import { AGENT_NAME, markPublishedName } from "./agent-name";
-import { allowlisted, carrierSource, CARRIER_KEY, mode, PROCESSOR_KEY, REGISTRY_KEY, safe } from "./otel";
+import { carrierSource, CARRIER_KEY, mode, PROCESSOR_KEY, REGISTRY_KEY, safe } from "./otel";
+import { normalizedCarrier } from "./normalize";
 
 interface StartSpan extends Span { readonly attributes?: Record<string, unknown>; }
 interface RegistryReader { v: number; get(traceId: string): Attributes | undefined; }
@@ -20,7 +21,8 @@ export class FutureAGISkillsSpanProcessor {
       const source = carrier != null
         ? carrierSource(carrier)
         : registry?.v === 1 ? registry.get(traceId) : undefined;
-      const attrs = allowlisted(source);
+      // The same bounded contract as @traceai/fi-core, pinned by the shared vectors.
+      const attrs = normalizedCarrier(source);
       for (const [key, value] of Object.entries(attrs)) {
         if (Object.prototype.hasOwnProperty.call(span.attributes ?? {}, key)) continue;
         span.setAttribute(key, Array.isArray(value) ? [...value] : value as string | number | boolean);

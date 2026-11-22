@@ -12,8 +12,10 @@ const mode = process.argv[2];
 assert.ok(["on", "load_only", "off"].includes(mode));
 configure({ skillsTracing: mode });
 const exporter = new InMemorySpanExporter();
+// traceAI runtime attribution is opt-in per provider.
 const provider = register({
   projectName: "synthetic-package-qualification",
+  runtimeAttributes: true,
   spanProcessors: [new SimpleSpanProcessor(exporter)],
 });
 const text = "verified policy";
