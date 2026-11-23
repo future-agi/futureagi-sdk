@@ -13,7 +13,7 @@ import urllib.request
 
 PACKAGES = {
     "python": ("python/pyproject.toml", "python/fi/__init__.py", "python/CHANGELOG.md"),
-    "typescript/futureagi": ("typescript/futureagi/package.json", "typescript/futureagi/CHANGELOG.md"),
+    "typescript/futureagi": ("typescript/futureagi/package.json", "typescript/futureagi/package-lock.json", "typescript/futureagi/CHANGELOG.md"),
 }
 MANIFEST = ".release-please-manifest.json"
 RELEASE_BRANCH = "release-please--branches--main"
@@ -60,11 +60,19 @@ def validate_version_changes(before, after):
                 require(after[path].strip(), "Empty changelog")
                 continue
             a, b = before[path], after[path]
-            if path.endswith('package.json'):
+            if path.endswith(('package.json', 'package-lock.json')):
                 a, b = json.loads(a), json.loads(b)
                 require(a.get('version') == old[name] and b.get('version') == new[name], "Package version disagrees with manifest")
                 a.pop('version'); b.pop('version')
-                require(a == b, "package.json changes more than its version")
+                if path.endswith('package-lock.json'):
+                    root_a = a.get('packages', {}).get('')
+                    root_b = b.get('packages', {}).get('')
+                    require(isinstance(root_a, dict) and isinstance(root_b, dict), "Lockfile must contain the root package")
+                    require(root_a.get('version') == old[name] and root_b.get('version') == new[name], "Lockfile root version disagrees with manifest")
+                    root_a.pop('version'); root_b.pop('version')
+                # Every dependency entry, constraint, integrity/resolved value,
+                # script, and metadata field must remain byte-value equivalent.
+                require(a == b, f"{path} changes more than its root package version")
             else:
                 field = '__version__' if path.endswith('__init__.py') else 'version'
                 pattern = rf'(?m)^({field}\s*=\s*")[^"]+("[^\n]*)$'
@@ -127,22 +135,30 @@ class GitHub:
     def checks_passed(self, sha):
         return self.check_state(sha) == 'success'
 
-    def validate_pr(self, number, bot):
+    def validate_pr(self, number, bot, *, require_current=True):
         pr = self.api(f'pulls/{number}')
         require(pr['state'] == 'open' and not pr['draft'], 'Release PR is not open and ready')
         require(pr['user']['login'] == bot and pr['user']['type'] == 'Bot', 'PR was not opened by the configured release bot')
         require(pr['base']['ref'] == 'main' and pr['head']['ref'] == RELEASE_BRANCH, 'Not the release-please version PR')
         require(pr['head']['repo']['full_name'] == self.repo, 'Release PR is from a fork')
         base, head = pr['base']['sha'], pr['head']['sha']
-        require(base == self.main_sha(), 'Main changed; wait for the next release run')
-        comparison = self.api(f'compare/{base}...{head}')
-        require(comparison['behind_by'] == 0, 'Release PR must be up to date with main')
+        main = self.main_sha()
+        comparison = self.api(f'compare/{main}...{head}')
+        if require_current:
+            require(base == main, 'Main changed; wait for the next release run')
+            require(comparison['behind_by'] == 0, 'Release PR must be up to date with main')
+        else:
+            # The PR files endpoint describes a three-dot diff. Before a stale
+            # branch is updated, compare its version edits with that merge base,
+            # not newer main code it has not received yet. Recheck against current
+            # main after updating; approval never permits a behind branch.
+            base = comparison['merge_base_commit']['sha']
         files = self.api(f'pulls/{number}/files?per_page=100')
-        require(len(files) == pr['changed_files'] and 0 < len(files) <= 6, 'Unexpected or truncated release diff')
+        allowed = {MANIFEST} | {path for package in PACKAGES.values() for path in package}
+        require(len(files) == pr['changed_files'] and 0 < len(files) <= len(allowed), 'Unexpected or truncated release diff')
         require(all(f['status'] in ('modified', 'added') for f in files), 'Release PR renames or deletes files')
         paths = {f['filename'] for f in files}
         require(MANIFEST in paths, 'Release manifest is missing from the diff')
-        allowed = {MANIFEST} | {path for package in PACKAGES.values() for path in package}
         require(paths <= allowed, 'Release PR includes code or workflow changes')
         before = {path: self.content(path, base, optional=path.endswith('/CHANGELOG.md')) for path in paths}
         after = {path: self.content(path, head) for path in paths}
@@ -150,6 +166,39 @@ class GitHub:
         # Bind approval to the validated commit; stale reviews are dismissed by the org rule.
         require(self.api(f'pulls/{number}')['head']['sha'] == head, 'Release PR changed during validation')
         return head
+
+    def reconcile(self, bot, wait_seconds=120):
+        """Recover an unchanged release PR after a failed run without bypassing its guard.
+
+        The app may update only its validated version branch, never main. The
+        separate approval step validates the updated diff again with a review token.
+        """
+        owner = self.repo.split('/')[0]
+        head_filter = urllib.parse.quote(f'{owner}:{RELEASE_BRANCH}', safe='')
+        prs = self.api(f'pulls?state=open&base=main&head={head_filter}&per_page=100')
+        require(len(prs) <= 1, 'Expected at most one open manifest release PR')
+        if not prs:
+            return None
+        number = prs[0]['number']
+        head = self.validate_pr(number, bot, require_current=False)
+        main = self.main_sha()
+        require(self.checks_passed(main), 'Current main must pass CI/E2E before release reconciliation')
+        comparison = self.api(f'compare/{main}...{head}')
+        if comparison['behind_by'] > 0:
+            self.api(f'pulls/{number}/update-branch', method='PUT', data={'expected_head_sha': head})
+            deadline = time.monotonic() + wait_seconds
+            while True:
+                require(self.main_sha() == main, 'Main changed during release-branch update; retry after its checks')
+                current = self.api(f'pulls/{number}')
+                require(current['state'] == 'open', 'Release PR closed during reconciliation')
+                updated_head = current['head']['sha']
+                updated = self.api(f'compare/{main}...{updated_head}')
+                if updated_head != head and current['base']['sha'] == main and updated['behind_by'] == 0:
+                    break
+                require(time.monotonic() < deadline, 'Timed out waiting for the release branch to update')
+                time.sleep(5)
+        self.validate_pr(number, bot)  # full guard again, after any update
+        return number
 
     def approve(self, number, bot):
         head = self.validate_pr(number, bot)
@@ -196,7 +245,7 @@ def output(name, value):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['check-main', 'approve', 'validate-tag'])
+    parser.add_argument('action', choices=['check-main', 'reconcile', 'approve', 'validate-tag'])
     parser.add_argument('--repo', default=os.environ.get('GITHUB_REPOSITORY', 'future-agi/futureagi-sdk'))
     parser.add_argument('--sha', default='')
     parser.add_argument('--number', type=int)
@@ -209,6 +258,9 @@ def main():
         sha = github.main_sha()
         ready = (not args.sha or args.sha == sha) and github.checks_passed(sha)
         output('ready', 'true' if ready else 'false')
+    elif args.action == 'reconcile':
+        number = github.reconcile(args.bot)
+        output('number', '' if number is None else str(number))
     elif args.action == 'approve':
         require(args.number is not None, '--number is required')
         output('head', github.approve(args.number, args.bot))
