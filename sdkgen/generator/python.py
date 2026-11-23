@@ -97,8 +97,9 @@ def emit_models(spec: dict, ops: list[Op]) -> str:
         HEADER,
         '"""Response models.\n\n',
         "Every field is typed optional, so a response that leaves one out or adds one never breaks a\n",
-        "call by default. The fields the contract marks required (and not nullable) are listed in each\n",
-        "model's `__required__`; `Client(strict_responses=True)` rejects a response that misses one.\n",
+        "call by default. The fields the contract marks required (and not nullable, and not a nested\n",
+        "object, which the contract cannot mark nullable) are listed in each model's `__required__`;\n",
+        "`Client(strict_responses=True)` rejects a response that misses one.\n",
         '"""\n\n',
         "from __future__ import annotations\n\n",
         "# typing aliases (not `X | None`): pydantic evaluates these at runtime, and the SDK supports Python 3.9\n",
@@ -124,7 +125,15 @@ def emit_models(spec: dict, ops: list[Op]) -> str:
         if not props:
             out.append("    pass\n\n\n")
             continue
-        required = sorted(field_name(n) for n in definition.get("required", []) if n in props and not props[n].get("x-nullable"))
+        # A nested serializer field (a bare `$ref`) can be `allow_null=True`, which drf-yasg cannot
+        # write next to a `$ref` (no x-nullable), so the contract never says. Insights' `report`
+        # and `summary`, and a version's `created_by`, are null in valid responses: strict mode
+        # requires nested objects only when present is all a `$ref` can promise.
+        required = sorted(
+            field_name(n)
+            for n in definition.get("required", [])
+            if n in props and not props[n].get("x-nullable") and "$ref" not in props[n]
+        )
         if required:
             out.append(f"    __required__: ClassVar[FrozenSet[str]] = frozenset({required!r})\n")
         for prop_name, prop in props.items():
@@ -199,7 +208,11 @@ def _signature(op: Op) -> tuple[list[str], list[tuple[Param, str]]]:
     for p in rest:
         py = py_type(p.schema, for_input=True)
         # Optional: NOT_GIVEN is left out of the request, an explicit None is sent as null.
-        args.append(f"{arg_name(p)}: {py}" if p.required else f"{arg_name(p)}: {py} | None | NotGiven = NOT_GIVEN")
+        # Required but nullable (x-nullable): must be passed, and None is a valid answer.
+        if p.required:
+            args.append(f"{arg_name(p)}: {py} | None" if (p.schema or {}).get("x-nullable") else f"{arg_name(p)}: {py}")
+        else:
+            args.append(f"{arg_name(p)}: {py} | None | NotGiven = NOT_GIVEN")
         named.append((p, arg_name(p)))
     # Escape hatches: fields the contract does not (yet) describe, and per-call request options.
     args.append("extra_query: dict[str, Any] | None = None")
