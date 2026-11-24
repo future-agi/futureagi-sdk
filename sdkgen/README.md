@@ -229,7 +229,7 @@ the committed Swagger slice. From the SDK checkout:
 
 ```sh
 product_commit=6fc655b986f862ccbdd475bfc87fc09c4ef459e9
-sdk_baseline=5b8a98f8275812aa0e83afbf0929bf4dca126566
+sdk_baseline=198f1f8bf23836072d5016976a9a6c235c52ee2b
 python sdkgen/sync_sql_contract.py "$PRODUCT_REPO" "$product_commit" "$sdk_baseline"
 python sdkgen/generate.py
 python sdkgen/check_mcp_parity.py --ref "$product_commit"
