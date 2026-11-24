@@ -364,6 +364,12 @@ def _contract_params(op_id: str, spec: dict, method: str, item: dict, contract_o
         elif p["in"] in ("path", "query"):
             schema = {k: v for k, v in p.items() if k not in ("name", "in", "required", "description")}
             params.append(Param(p["name"], p["in"], schema, p["in"] == "path" or p.get("required", False), p.get("description", "")))
+        elif p["in"] == "formData":
+            # A real multipart form (drf-yasg writes one for a view with MultiPartParser):
+            # form fields and files are both body params, and the entry needs
+            # `operation.multipart: true`, which _load_one enforces for the file fields.
+            schema = {k: v for k, v in p.items() if k not in ("name", "in", "required", "description")}
+            params.append(Param(p["name"], "body", schema, p.get("required", False), p.get("description", "")))
         else:
             raise CatalogError(f"{op_id}: unsupported parameter location {p['in']!r}")
     return params
@@ -418,7 +424,9 @@ def _load_one(spec: dict, entry: dict, seen_mcp: set[str]) -> Op:
         raise CatalogError(f"{op_id}: path placeholders {placeholders} != path params {path_params}")
 
     # What the caller gets back: unwrap the {status, result} envelope, then the page items.
-    ok = contract_op["responses"].get("200") or contract_op["responses"].get("201") or {}
+    # 202 Accepted is a success too (an async receipt: a run, a job, a queued grading).
+    responses = contract_op["responses"]
+    ok = responses.get("200") or responses.get("201") or responses.get("202") or {}
     returns = ok.get("schema")
     resolved = resolve(spec, returns) or {}
     unwrap = None
