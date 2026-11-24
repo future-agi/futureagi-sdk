@@ -21,10 +21,31 @@
       "import": "./dist/esm/platform/models.js",
       "require": "./dist/src/platform/models.js",
       "types": "./dist/esm/platform/models.d.ts"
+    },
+    "./gateway": {
+      "import": "./dist/esm/gateway/index.js",
+      "require": "./dist/src/gateway/index.js",
+      "types": "./dist/esm/gateway/index.d.ts"
+    },
+    "./gateway/testing": {
+      "import": "./dist/esm/gateway/testing.js",
+      "require": "./dist/src/gateway/testing.js",
+      "types": "./dist/esm/gateway/testing.d.ts"
+    },
+    "./gateway/express": {
+      "import": "./dist/esm/gateway/express.js",
+      "require": "./dist/src/gateway/express.js",
+      "types": "./dist/esm/gateway/express.d.ts"
+    },
+    "./gateway/nextjs": {
+      "import": "./dist/esm/gateway/nextjs.js",
+      "require": "./dist/src/gateway/nextjs.js",
+      "types": "./dist/esm/gateway/nextjs.d.ts"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/__tests__"
   ],
   "scripts": {
     "prebuild": "rimraf dist",

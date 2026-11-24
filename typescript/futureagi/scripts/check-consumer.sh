@@ -47,11 +47,43 @@ node --input-type=module -e '
     server.close();
   }
 '
+echo "consumer: the gateway client streams from a real HTTP server, as ESM"
+node --input-type=module -e '
+  import http from "node:http";
+  import { Gateway } from "@future-agi/sdk/gateway";
+  import { Gateway as FromRoot, gateway } from "@future-agi/sdk";
+  if (FromRoot !== Gateway || gateway.Gateway !== Gateway) throw new Error("the root and @future-agi/sdk/gateway export different Gateway classes");
+  const seen = [];
+  const server = http.createServer((req, res) => {
+    seen.push(`${req.method} ${req.url} ${req.headers.authorization}`);
+    res.writeHead(200, { "content-type": "text/event-stream", "x-agentcc-provider": "openai" });
+    const chunk = (content) => `data: ${JSON.stringify({ id: "c", object: "chat.completion.chunk", created: 1, model: "m", choices: [{ index: 0, delta: { content }, finish_reason: null }] })}\r\n\r\n`;
+    res.write(chunk("Hel"));
+    setTimeout(() => res.end(chunk("lo") + "data: [DONE]\r\n\r\n"), 20);
+  });
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const gw = new Gateway({ apiKey: "sk-agentcc-x", baseUrl: `http://127.0.0.1:${server.address().port}/v1`, maxRetries: 0, timeout: 5000 });
+  try {
+    const stream = await gw.chat.completions.stream({ model: "m", messages: [{ role: "user", content: "hi" }] });
+    let text = "";
+    for await (const piece of stream.textStream()) text += piece;
+    if (text !== "Hello" || stream.agentcc.provider !== "openai") throw new Error(`stream read ${JSON.stringify(text)} from ${stream.agentcc.provider}`);
+    if (seen[0] !== "POST /v1/chat/completions Bearer sk-agentcc-x") throw new Error(`unexpected request: ${seen[0]}`);
+  } finally {
+    server.close();
+  }
+'
 echo "consumer: CommonJS require"
 node -e '
   const { Client } = require("@future-agi/sdk");
   const { Datasets } = require("@future-agi/sdk/platform");
   const c = new Client({ apiKey: "x", secretKey: "y", baseUrl: "http://127.0.0.1:9", maxRetries: 0, timeout: 500 });
   if (!(c.datasets instanceof Datasets)) throw new Error("@future-agi/sdk/platform does not export the resource classes");
+  const { Gateway, AgentCC } = require("@future-agi/sdk/gateway");
+  const { mockCompletion } = require("@future-agi/sdk/gateway/testing");
+  require("@future-agi/sdk/gateway/express");
+  require("@future-agi/sdk/gateway/nextjs");
+  const gw = new Gateway({ apiKey: "x" });
+  if (!(gw instanceof AgentCC) || typeof gw.chat.completions.create !== "function" || mockCompletion("hi").choices[0].message.content !== "hi") throw new Error("@future-agi/sdk/gateway does not load as CommonJS");
 '
 echo "consumer: ok"

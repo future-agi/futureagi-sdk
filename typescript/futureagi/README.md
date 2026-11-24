@@ -110,6 +110,30 @@ adding methods in `src/platform/resources/<name>.ts` (never regenerated) or pass
 
 The classes below (`Dataset`, `Prompt`, `KnowledgeBase`, ...) keep working unchanged.
 
+### Gateway (Agent Command Center)
+
+Call any LLM through the Future AGI gateway with an OpenAI-compatible client. This is the AgentCC
+TypeScript client (formerly the separate `@agentcc/client` package), now part of `@future-agi/sdk`:
+
+```ts
+import { Gateway } from '@future-agi/sdk/gateway';
+
+const gw = new Gateway({ sessionId: 'checkout-flow' });   // FI_GATEWAY_API_KEY (sk-agentcc-...), FI_GATEWAY_URL
+const reply = await gw.chat.completions.create({
+  model: 'gpt-4o-mini',
+  messages: [{ role: 'user', content: 'Hello' }],
+});
+console.log(reply.choices[0].message.content, reply.agentcc?.cost);
+
+const stream = await gw.chat.completions.stream({ model: 'gpt-4o-mini', messages: [{ role: 'user', content: 'Hello' }] });
+for await (const text of stream.textStream()) process.stdout.write(text);
+```
+
+- Routing, fallbacks, caching and guardrails: pass `config: { cache: { ttl: 300 }, fallback: { targets: [...] } }`.
+- The gateway uses its own virtual keys (`sk-agentcc-*`), not `FI_API_KEY`/`FI_SECRET_KEY`. `AGENTCC_API_KEY` and `AGENTCC_BASE_URL` still work, and the URL may end in `/v1` or not.
+- Code written for `@agentcc/client` keeps working by changing the import: `import { AgentCC } from '@future-agi/sdk/gateway'`. Its `testing`, `express` and `nextjs` entry points are `@future-agi/sdk/gateway/testing`, `/express` and `/nextjs`.
+- Managing gateways (keys, providers, request logs, analytics) is a platform API: `new Client().gateway`.
+
 ### 1. Create a dataset & add rows
 
 ```ts
