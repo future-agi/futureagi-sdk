@@ -130,11 +130,16 @@ def emit_models(spec: dict, ops: list[Op]) -> str:
         # A nested serializer field (a bare `$ref`) can be `allow_null=True`, which drf-yasg cannot
         # write next to a `$ref` (no x-nullable), so the contract never says. Insights' `report`
         # and `summary`, and a version's `created_by`, are null in valid responses: strict mode
-        # requires nested objects only when present is all a `$ref` can promise.
+        # requires nested objects only when present is all a `$ref` can promise. A declared response
+        # model (catalog `declared_response_fields`) was checked against its serializer, so there a
+        # required nested object stays required: SQLExecution.result is a non-null
+        # SQLResultSerializer() the product always sets.
         required = sorted(
             field_name(n)
             for n in definition.get("required", [])
-            if n in props and not props[n].get("x-nullable") and "$ref" not in props[n]
+            if n in props
+            and not props[n].get("x-nullable")
+            and ("$ref" not in props[n] or name in declared_models)
         )
         if required:
             out.append(f"    __required__: ClassVar[FrozenSet[str]] = frozenset({required!r})\n")

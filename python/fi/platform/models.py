@@ -2506,7 +2506,7 @@ class SQLExample(_Model):
 
 
 class SQLExecution(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'error', 'expired', 'expires_at', 'id', 'project_id', 'sql', 'state'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'error', 'expired', 'expires_at', 'id', 'project_id', 'result', 'sql', 'state'])
     id: Optional[str] = Field(default=None)
     project_id: Optional[str] = Field(default=None)
     sql: Optional[str] = Field(default=None)

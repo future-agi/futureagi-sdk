@@ -44,6 +44,17 @@ def test_four_public_mappings_preserve_distinct_rest_and_mcp_limits():
     assert run["sql"].schema["maxLength"] == 32768 and run["reuse"].schema["default"] is True
 
 
+def test_a_declared_sql_snapshot_requires_its_nested_result():
+    """The SQL operations declare their response fields, checked against the product serializer.
+    SQLExecution.result is a non-null SQLResultSerializer() that the product always sets (product
+    6fc655b9, tracer/serializers/sql_query.py; {} when expired), so strict reads require it.
+    Undeclared models keep the general rule: a required nested object is not enforced."""
+    from fi.platform import models
+
+    assert "result" in models.SQLExecution.__required__
+    assert not {"report", "summary"} & models.TestExecutionDebugAnalysisResponse.__required__
+
+
 def test_accepted_response_selection_is_explicit_and_fails_on_removed_status():
     spec, catalog = sql_contract()
     entry = copy.deepcopy(next(e for e in catalog["operations"] if e["id"] == "sql.run"))
