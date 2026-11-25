@@ -3,13 +3,21 @@ name: CI
 # Fast checks on every pull request and on dev/main: the generated code is
 # current, the Python SDK's unit suite passes on the oldest and newest
 # supported interpreters, and the TypeScript package type-checks, tests and
-# builds. Nothing here talks to a backend; that is e2e.yml.
+# builds. Nothing here talks to a backend; that is e2e.yml. The MCP parity
+# check reads the product's tool list at the pinned release on main and at
+# one paired product commit everywhere else
+# (.github/scripts/resolve_product_ref.py).
 
 on:
   pull_request:
   push:
     branches: [dev, main]
   workflow_dispatch:
+    inputs:
+      product-ref:
+        description: "future-agi branch, tag or full commit to pair with (default: the branch resolution in .github/scripts/resolve_product_ref.py)"
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -36,12 +44,67 @@ jobs:
         # differs from what the contract and catalog produce, or when a
         # resource scaffold is missing.
         run: python sdkgen/generate.py --check
+      - name: Pick the product revision to pair with
+        id: product
+        # pinned: a push to main or a pull request into main compares with the
+        # release in sdkgen/contracts/BACKEND_VERSION, as before. paired: every
+        # other run (pull requests into dev or other branches, pushes to dev,
+        # dispatches) compares with one product commit, resolved from the PR head
+        # branch, then its base (the pushed branch), then dev, then main.
+        env:
+          PRODUCT_REF_INPUT: ${{ inputs.product-ref }}
+          QUEUE_BASE_REF: ${{ github.event.merge_group.base_ref }}
+        run: python .github/scripts/resolve_product_ref.py
       - name: Catalog MCP names match the monorepo's tool list at the pinned backend release
         # The catalog records, per operation, the MCP tool it corresponds to; the
         # tool list is generated in the monorepo. Compared at the release in
         # sdkgen/contracts/BACKEND_VERSION, so a backend sync that brings new tools
         # fails here until the catalog gets their entries.
-        run: python sdkgen/check_mcp_parity.py
+        if: steps.product.outputs.mode == 'pinned'
+        run: python sdkgen/check_mcp_parity.py --ref "$(tr -d '[:space:]' < sdkgen/contracts/BACKEND_VERSION)"
+      - name: Check out the paired product commit (contract and MCP catalog only)
+        id: product_checkout
+        if: steps.product.outputs.mode == 'paired'
+        uses: actions/checkout@v4
+        with:
+          repository: future-agi/future-agi
+          ref: ${{ steps.product.outputs.sha }}
+          path: future-agi
+          sparse-checkout: |
+            api_contracts/openapi
+            futureagi/mcp_server/catalog
+          fetch-depth: 1
+          filter: blob:none
+          persist-credentials: false
+      - name: The scoped contract slice matches the paired product commit
+        # sdkgen/pair_check.py: the sql and epoch operations and their
+        # definitions project identically from the product commit and from
+        # sdkgen/contracts/swagger.json, the epoch MCP tools and descriptions
+        # match the product catalog, and pair.json records the commit, the branch
+        # it came from and the product file hashes.
+        if: steps.product.outputs.mode == 'paired'
+        env:
+          PRODUCT_SHA: ${{ steps.product.outputs.sha }}
+          PRODUCT_BRANCH: ${{ steps.product.outputs.branch }}
+        run: python sdkgen/pair_check.py --product future-agi --sha "$PRODUCT_SHA" --branch "$PRODUCT_BRANCH" --out "$RUNNER_TEMP/pair/pair.json"
+      - name: Catalog MCP names match the paired product commit's tool list (both directions)
+        # Reported even when the slice check above failed, so one run shows both.
+        if: ${{ !cancelled() && steps.product.outputs.mode == 'paired' }}
+        env:
+          PRODUCT_SHA: ${{ steps.product.outputs.sha }}
+        run: python sdkgen/check_mcp_parity.py --ref "$PRODUCT_SHA"
+      - name: Upload the product pairing record
+        if: ${{ !cancelled() && steps.product.outputs.mode == 'paired' && steps.product_checkout.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pair-ci
+          path: ${{ runner.temp }}/pair/pair.json
+          if-no-files-found: error
+      - name: Fail closed on an unknown pairing mode
+        if: steps.product.outputs.mode != 'pinned' && steps.product.outputs.mode != 'paired'
+        run: |
+          echo "::error::no pairing mode for this event"
+          exit 1
       - name: Lint the generator, the platform client and its tests
         run: ruff check --isolated --select E,F,W,I --ignore E501 sdkgen python/fi/platform python/tests/platform
 
