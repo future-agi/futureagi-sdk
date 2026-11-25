@@ -98,6 +98,72 @@ class SimulationEnvironmentsEvaluationsResource(Resource):
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_EVALUATIONS_UPDATE, path=path, query=query, body=body, model=None, options=options)
 
 
+class SimulationEnvironmentsEvidenceImportsResource(Resource):
+    """`client.simulation.environments.evidence_imports`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+
+    def add_cases(self, id: str, import_id: str, *, case_ids: List[str], expected_drafts: Dict[str, Any], idempotency_key: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvidenceImportAddResponse:
+        """Add the reviewed, drafted cases of an evidence import to the environment's suite. Reuse the same idempotency_key to repeat a call safely.
+
+        POST /simulate/api/harness-environments/{id}/evidence-imports/{import_id}/add/
+        """
+        path = {'id': id, 'import_id': import_id}
+        query = {**(extra_query or {})}
+        body = {'case_ids': case_ids, 'expected_drafts': expected_drafts, 'idempotency_key': idempotency_key, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_ADD_CASES, path=path, query=query, body=body, model=models.EvidenceImportAddResponse, options=options)
+
+    def create(self, id: str, *, source_kind: Literal['session', 'call', 'trace', 'transcript', 'dataset'], project_id: str | None | NotGiven = NOT_GIVEN, ids: List[str] | None | NotGiven = NOT_GIVEN, dataset_id: str | None | NotGiven = NOT_GIVEN, columns: Dict[str, Any] | None | NotGiven = NOT_GIVEN, transcripts: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, production: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvidenceImport:
+        """Import evidence for an environment's tests from Observe sessions or calls, dataset rows, or transcripts. Returns what each case holds and lacks. Draft its cases with draft_evidence_import.
+
+        POST /simulate/api/harness-environments/{id}/evidence-imports/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'source_kind': source_kind, 'project_id': project_id, 'ids': ids, 'dataset_id': dataset_id, 'columns': columns, 'transcripts': transcripts, 'production': production, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_CREATE, path=path, query=query, body=body, model=models.EvidenceImport, options=options)
+
+    def discard(self, id: str, import_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+        """Discard an evidence import that was never added, with a transcript's stored text. Of an import with added cases, only the cases not added are discarded.
+
+        DELETE /simulate/api/harness-environments/{id}/evidence-imports/{import_id}/
+        """
+        path = {'id': id, 'import_id': import_id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_DISCARD, path=path, query=query, body=body, model=None, options=options)
+
+    def draft(self, id: str, import_id: str, *, case_ids: List[str], shows: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvidenceImport:
+        """Ask the environment's builder to draft a scenario for each waiting case of an evidence import. The builder calls models, so it may incur usage charges. Poll get_evidence_import to review the drafts.
+
+        POST /simulate/api/harness-environments/{id}/evidence-imports/{import_id}/draft/
+        """
+        path = {'id': id, 'import_id': import_id}
+        query = {**(extra_query or {})}
+        body = {'case_ids': case_ids, 'shows': shows, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_DRAFT, path=path, query=query, body=body, model=models.EvidenceImport, options=options)
+
+    def get(self, id: str, import_id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvidenceImport:
+        """Return one evidence import and its cases, read again from their sources, to review the drafted scenarios.
+
+        GET /simulate/api/harness-environments/{id}/evidence-imports/{import_id}/
+        """
+        path = {'id': id, 'import_id': import_id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_GET, path=path, query=query, body=body, model=models.EvidenceImport, options=options)
+
+    def list(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> List[models.EvidenceImportListItem]:
+        """List the evidence imports of an environment that a person can still finish, newest first.
+
+        GET /simulate/api/harness-environments/{id}/evidence-imports/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_LIST, path=path, query=query, body=body, model=List[models.EvidenceImportListItem], options=options)
+
+
 class SimulationEnvironmentsNudgesResource(Resource):
     """`client.simulation.environments.nudges`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -226,13 +292,49 @@ class SimulationEnvironmentsVersionsResource(Resource):
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_SUITE_MEMBERS, path=path, query=query, body=body, model=List[models.HarnessSuiteMember], options=options)
 
 
+class SimulationEpochsCandidatesResource(Resource):
+    """`client.simulation.epochs.candidates`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+
+    def make_default(self, id: str, candidate_id: str, *, override_reason: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixMakeDefault:
+        """Make an Epoch candidate the environment's default agent version, so later runs use it. To ship a candidate that only its must-pass check refused, give override_reason.
+
+        POST /simulate/api/agent-fix-runs/{id}/candidates/{candidate_id}/make-default/
+        """
+        path = {'id': id, 'candidate_id': candidate_id}
+        query = {**(extra_query or {})}
+        body = {'override_reason': override_reason, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_EPOCHS_CANDIDATES_MAKE_DEFAULT, path=path, query=query, body=body, model=models.AgentFixMakeDefault, options=options)
+
+    def open_pull_request(self, id: str, candidate_id: str, *, override_reason: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixPullRequest:
+        """Open a pull request with an Epoch candidate's change on a GitHub agent's repository. It is opened once. To ship a candidate that only its must-pass check refused, give override_reason.
+
+        POST /simulate/api/agent-fix-runs/{id}/candidates/{candidate_id}/pull-request/
+        """
+        path = {'id': id, 'candidate_id': candidate_id}
+        query = {**(extra_query or {})}
+        body = {'override_reason': override_reason, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_EPOCHS_CANDIDATES_OPEN_PULL_REQUEST, path=path, query=query, body=body, model=models.AgentFixPullRequest, options=options)
+
+    def patch(self, id: str, candidate_id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+        """Return an Epoch candidate's change as a git patch on the base agent version, to apply by hand.
+
+        GET /simulate/api/agent-fix-runs/{id}/candidates/{candidate_id}/patch/
+        """
+        path = {'id': id, 'candidate_id': candidate_id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_EPOCHS_CANDIDATES_PATCH, path=path, query=query, body=body, model=None, options=options)
+
+
 class SimulationExecutionsInsightsResource(Resource):
     """`client.simulation.executions.insights`. Subclass to add methods; override `_children` to swap a nested resource."""
 
     _t: SyncTransport
 
     def get(self, test_execution_id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TestExecutionDebugAnalysisResponse:
-        """Return a run's Insights (debug analysis) state and findings; status is not_requested until one is requested.
+        """Return the Debug failures diagnosis of a finished run (test execution), or its progress while it runs.
 
         GET /simulate/test-executions/{test_execution_id}/debug-analysis/
         """
@@ -242,7 +344,7 @@ class SimulationExecutionsInsightsResource(Resource):
         return self._t.call(_ops.OP_SIMULATION_EXECUTIONS_INSIGHTS_GET, path=path, query=query, body=body, model=models.TestExecutionDebugAnalysisResponse, options=options)
 
     def start(self, test_execution_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TestExecutionDebugAnalysisResponse:
-        """Request Insights (debug analysis) of a completed run; a repeat re-arms only failed calls.
+        """Start Debug failures on a finished run (test execution), one analysis job per call. It may incur usage charges. A run that has not finished is refused; poll get_debug_failures for the diagnosis.
 
         POST /simulate/test-executions/{test_execution_id}/debug-analysis/
         """
@@ -1111,10 +1213,11 @@ class SimulationEnvironmentsResource(Resource):
     _t: SyncTransport
     drafts: SimulationEnvironmentsDraftsResource
     evaluations: SimulationEnvironmentsEvaluationsResource
+    evidence_imports: SimulationEnvironmentsEvidenceImportsResource
     nudges: SimulationEnvironmentsNudgesResource
     runs: SimulationEnvironmentsRunsResource
     versions: SimulationEnvironmentsVersionsResource
-    _children: Dict[str, type] = {'drafts': SimulationEnvironmentsDraftsResource, 'evaluations': SimulationEnvironmentsEvaluationsResource, 'nudges': SimulationEnvironmentsNudgesResource, 'runs': SimulationEnvironmentsRunsResource, 'versions': SimulationEnvironmentsVersionsResource}
+    _children: Dict[str, type] = {'drafts': SimulationEnvironmentsDraftsResource, 'evaluations': SimulationEnvironmentsEvaluationsResource, 'evidence_imports': SimulationEnvironmentsEvidenceImportsResource, 'nudges': SimulationEnvironmentsNudgesResource, 'runs': SimulationEnvironmentsRunsResource, 'versions': SimulationEnvironmentsVersionsResource}
 
     def get(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessEnvironmentDetail:
         """Return a simulation environment with its contract, world, scenarios and evaluations.
@@ -1164,6 +1267,73 @@ class SimulationEnvironmentsResource(Resource):
         query = {'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, **(extra_query or {})}
         body = None
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_RUN_PLAN, path=path, query=query, body=body, model=models.HarnessRunPlan, options=options)
+
+
+class SimulationEpochsResource(Resource):
+    """`client.simulation.epochs`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+    candidates: SimulationEpochsCandidatesResource
+    _children: Dict[str, type] = {'candidates': SimulationEpochsCandidatesResource}
+
+    def get(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixRunDetail:
+        """Return one Epoch, with its state and step, the limits it holds to, its candidates, and its result once it has ended.
+
+        GET /simulate/api/agent-fix-runs/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_EPOCHS_GET, path=path, query=query, body=body, model=models.AgentFixRunDetail, options=options)
+
+    def launch(self, *, source_run_id: str, target_scenario_keys: List[str], surfaces: List[Literal['prompt', 'tools', 'settings', 'code']], budget_credits: int, protected_scenario_keys: List[str] | None | NotGiven = NOT_GIVEN, locked_paths: List[str] | None | NotGiven = NOT_GIVEN, max_minutes: int | None | NotGiven = NOT_GIVEN, allowed_models: List[str] | None | NotGiven = NOT_GIVEN, reply_latency_margin_pct: int | None | NotGiven = NOT_GIVEN, cost_margin_pct: int | None | NotGiven = NOT_GIVEN, cost_limit_usd: float | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixRun:
+        """Start an Epoch on a finished run. It spends credits up to budget_credits and calls models, so it may incur usage charges. Take the scenarios, surfaces, budget and time cap from get_epoch_launch_options; allowed_models, reply_latency_margin_pct, cost_margin_pct and cost_limit_usd are its model lock and limits. Poll get_epoch.
+
+        POST /simulate/api/agent-fix-runs/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'source_run_id': source_run_id, 'target_scenario_keys': target_scenario_keys, 'surfaces': surfaces, 'budget_credits': budget_credits, 'protected_scenario_keys': protected_scenario_keys, 'locked_paths': locked_paths, 'max_minutes': max_minutes, 'allowed_models': allowed_models, 'reply_latency_margin_pct': reply_latency_margin_pct, 'cost_margin_pct': cost_margin_pct, 'cost_limit_usd': cost_limit_usd, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_EPOCHS_LAUNCH, path=path, query=query, body=body, model=models.AgentFixRun, options=options)
+
+    def launch_options(self, *, source_run_id: str, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixLaunchOptions:
+        """Return what an Epoch on a finished run starts with, the launch form's default for each limit, and why a launch would be refused now. Supply source_run_id, the run's test execution ID. Read it before launch_epoch.
+
+        GET /simulate/api/agent-fix-runs/launch-options/
+        """
+        path = None
+        query = {'source_run_id': source_run_id, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_EPOCHS_LAUNCH_OPTIONS, path=path, query=query, body=body, model=models.AgentFixLaunchOptions, options=options)
+
+    def list(self, *, environment_id: str, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.AgentFixRun]:
+        """List the Epochs of one environment, newest first, with each Epoch's state and limits. Supply environment_id.
+
+        GET /simulate/api/agent-fix-runs/
+        """
+        path = None
+        query = {'environment_id': environment_id, 'limit': limit, **(extra_query or {})}
+        return self._t.paginate(_ops.OP_SIMULATION_EPOCHS_LIST, path=path, query=query, model=models.AgentFixRun, options=options)
+
+    def retry(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixRun:
+        """Start a failed Epoch again as a new Epoch with the same request. Check runs it finished are reused and not paid twice; the rest may incur usage charges. An Epoch can be retried once.
+
+        POST /simulate/api/agent-fix-runs/{id}/retry/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_EPOCHS_RETRY, path=path, query=query, body=body, model=models.AgentFixRun, options=options)
+
+    def stop(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixRun:
+        """Stop a running Epoch. It ends as Stopped, and the environment does not change.
+
+        POST /simulate/api/agent-fix-runs/{id}/stop/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_EPOCHS_STOP, path=path, query=query, body=body, model=models.AgentFixRun, options=options)
 
 
 class SimulationExecutionsResource(Resource):
@@ -2464,12 +2634,13 @@ class SimulationResource(Resource):
     _t: SyncTransport
     calls: SimulationCallsResource
     environments: SimulationEnvironmentsResource
+    epochs: SimulationEpochsResource
     executions: SimulationExecutionsResource
     jobs: SimulationJobsResource
     personas: SimulationPersonasResource
     scenarios: SimulationScenariosResource
     tests: SimulationTestsResource
-    _children: Dict[str, type] = {'calls': SimulationCallsResource, 'environments': SimulationEnvironmentsResource, 'executions': SimulationExecutionsResource, 'jobs': SimulationJobsResource, 'personas': SimulationPersonasResource, 'scenarios': SimulationScenariosResource, 'tests': SimulationTestsResource}
+    _children: Dict[str, type] = {'calls': SimulationCallsResource, 'environments': SimulationEnvironmentsResource, 'epochs': SimulationEpochsResource, 'executions': SimulationExecutionsResource, 'jobs': SimulationJobsResource, 'personas': SimulationPersonasResource, 'scenarios': SimulationScenariosResource, 'tests': SimulationTestsResource}
 
 
 class SpansResource(Resource):
@@ -2702,6 +2873,72 @@ class AsyncSimulationEnvironmentsEvaluationsResource(Resource):
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_EVALUATIONS_UPDATE, path=path, query=query, body=body, model=None, options=options)
 
 
+class AsyncSimulationEnvironmentsEvidenceImportsResource(Resource):
+    """`client.simulation.environments.evidence_imports`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+
+    async def add_cases(self, id: str, import_id: str, *, case_ids: List[str], expected_drafts: Dict[str, Any], idempotency_key: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvidenceImportAddResponse:
+        """Add the reviewed, drafted cases of an evidence import to the environment's suite. Reuse the same idempotency_key to repeat a call safely.
+
+        POST /simulate/api/harness-environments/{id}/evidence-imports/{import_id}/add/
+        """
+        path = {'id': id, 'import_id': import_id}
+        query = {**(extra_query or {})}
+        body = {'case_ids': case_ids, 'expected_drafts': expected_drafts, 'idempotency_key': idempotency_key, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_ADD_CASES, path=path, query=query, body=body, model=models.EvidenceImportAddResponse, options=options)
+
+    async def create(self, id: str, *, source_kind: Literal['session', 'call', 'trace', 'transcript', 'dataset'], project_id: str | None | NotGiven = NOT_GIVEN, ids: List[str] | None | NotGiven = NOT_GIVEN, dataset_id: str | None | NotGiven = NOT_GIVEN, columns: Dict[str, Any] | None | NotGiven = NOT_GIVEN, transcripts: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, production: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvidenceImport:
+        """Import evidence for an environment's tests from Observe sessions or calls, dataset rows, or transcripts. Returns what each case holds and lacks. Draft its cases with draft_evidence_import.
+
+        POST /simulate/api/harness-environments/{id}/evidence-imports/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'source_kind': source_kind, 'project_id': project_id, 'ids': ids, 'dataset_id': dataset_id, 'columns': columns, 'transcripts': transcripts, 'production': production, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_CREATE, path=path, query=query, body=body, model=models.EvidenceImport, options=options)
+
+    async def discard(self, id: str, import_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+        """Discard an evidence import that was never added, with a transcript's stored text. Of an import with added cases, only the cases not added are discarded.
+
+        DELETE /simulate/api/harness-environments/{id}/evidence-imports/{import_id}/
+        """
+        path = {'id': id, 'import_id': import_id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_DISCARD, path=path, query=query, body=body, model=None, options=options)
+
+    async def draft(self, id: str, import_id: str, *, case_ids: List[str], shows: Dict[str, Any] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvidenceImport:
+        """Ask the environment's builder to draft a scenario for each waiting case of an evidence import. The builder calls models, so it may incur usage charges. Poll get_evidence_import to review the drafts.
+
+        POST /simulate/api/harness-environments/{id}/evidence-imports/{import_id}/draft/
+        """
+        path = {'id': id, 'import_id': import_id}
+        query = {**(extra_query or {})}
+        body = {'case_ids': case_ids, 'shows': shows, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_DRAFT, path=path, query=query, body=body, model=models.EvidenceImport, options=options)
+
+    async def get(self, id: str, import_id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.EvidenceImport:
+        """Return one evidence import and its cases, read again from their sources, to review the drafted scenarios.
+
+        GET /simulate/api/harness-environments/{id}/evidence-imports/{import_id}/
+        """
+        path = {'id': id, 'import_id': import_id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_GET, path=path, query=query, body=body, model=models.EvidenceImport, options=options)
+
+    async def list(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> List[models.EvidenceImportListItem]:
+        """List the evidence imports of an environment that a person can still finish, newest first.
+
+        GET /simulate/api/harness-environments/{id}/evidence-imports/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_EVIDENCE_IMPORTS_LIST, path=path, query=query, body=body, model=List[models.EvidenceImportListItem], options=options)
+
+
 class AsyncSimulationEnvironmentsNudgesResource(Resource):
     """`client.simulation.environments.nudges`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -2830,13 +3067,49 @@ class AsyncSimulationEnvironmentsVersionsResource(Resource):
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_SUITE_MEMBERS, path=path, query=query, body=body, model=List[models.HarnessSuiteMember], options=options)
 
 
+class AsyncSimulationEpochsCandidatesResource(Resource):
+    """`client.simulation.epochs.candidates`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+
+    async def make_default(self, id: str, candidate_id: str, *, override_reason: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixMakeDefault:
+        """Make an Epoch candidate the environment's default agent version, so later runs use it. To ship a candidate that only its must-pass check refused, give override_reason.
+
+        POST /simulate/api/agent-fix-runs/{id}/candidates/{candidate_id}/make-default/
+        """
+        path = {'id': id, 'candidate_id': candidate_id}
+        query = {**(extra_query or {})}
+        body = {'override_reason': override_reason, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_EPOCHS_CANDIDATES_MAKE_DEFAULT, path=path, query=query, body=body, model=models.AgentFixMakeDefault, options=options)
+
+    async def open_pull_request(self, id: str, candidate_id: str, *, override_reason: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixPullRequest:
+        """Open a pull request with an Epoch candidate's change on a GitHub agent's repository. It is opened once. To ship a candidate that only its must-pass check refused, give override_reason.
+
+        POST /simulate/api/agent-fix-runs/{id}/candidates/{candidate_id}/pull-request/
+        """
+        path = {'id': id, 'candidate_id': candidate_id}
+        query = {**(extra_query or {})}
+        body = {'override_reason': override_reason, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_EPOCHS_CANDIDATES_OPEN_PULL_REQUEST, path=path, query=query, body=body, model=models.AgentFixPullRequest, options=options)
+
+    async def patch(self, id: str, candidate_id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> str:
+        """Return an Epoch candidate's change as a git patch on the base agent version, to apply by hand.
+
+        GET /simulate/api/agent-fix-runs/{id}/candidates/{candidate_id}/patch/
+        """
+        path = {'id': id, 'candidate_id': candidate_id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_EPOCHS_CANDIDATES_PATCH, path=path, query=query, body=body, model=None, options=options)
+
+
 class AsyncSimulationExecutionsInsightsResource(Resource):
     """`client.simulation.executions.insights`. Subclass to add methods; override `_children` to swap a nested resource."""
 
     _t: AsyncTransport
 
     async def get(self, test_execution_id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TestExecutionDebugAnalysisResponse:
-        """Return a run's Insights (debug analysis) state and findings; status is not_requested until one is requested.
+        """Return the Debug failures diagnosis of a finished run (test execution), or its progress while it runs.
 
         GET /simulate/test-executions/{test_execution_id}/debug-analysis/
         """
@@ -2846,7 +3119,7 @@ class AsyncSimulationExecutionsInsightsResource(Resource):
         return await self._t.acall(_ops.OP_SIMULATION_EXECUTIONS_INSIGHTS_GET, path=path, query=query, body=body, model=models.TestExecutionDebugAnalysisResponse, options=options)
 
     async def start(self, test_execution_id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.TestExecutionDebugAnalysisResponse:
-        """Request Insights (debug analysis) of a completed run; a repeat re-arms only failed calls.
+        """Start Debug failures on a finished run (test execution), one analysis job per call. It may incur usage charges. A run that has not finished is refused; poll get_debug_failures for the diagnosis.
 
         POST /simulate/test-executions/{test_execution_id}/debug-analysis/
         """
@@ -3715,10 +3988,11 @@ class AsyncSimulationEnvironmentsResource(Resource):
     _t: AsyncTransport
     drafts: AsyncSimulationEnvironmentsDraftsResource
     evaluations: AsyncSimulationEnvironmentsEvaluationsResource
+    evidence_imports: AsyncSimulationEnvironmentsEvidenceImportsResource
     nudges: AsyncSimulationEnvironmentsNudgesResource
     runs: AsyncSimulationEnvironmentsRunsResource
     versions: AsyncSimulationEnvironmentsVersionsResource
-    _children: Dict[str, type] = {'drafts': AsyncSimulationEnvironmentsDraftsResource, 'evaluations': AsyncSimulationEnvironmentsEvaluationsResource, 'nudges': AsyncSimulationEnvironmentsNudgesResource, 'runs': AsyncSimulationEnvironmentsRunsResource, 'versions': AsyncSimulationEnvironmentsVersionsResource}
+    _children: Dict[str, type] = {'drafts': AsyncSimulationEnvironmentsDraftsResource, 'evaluations': AsyncSimulationEnvironmentsEvaluationsResource, 'evidence_imports': AsyncSimulationEnvironmentsEvidenceImportsResource, 'nudges': AsyncSimulationEnvironmentsNudgesResource, 'runs': AsyncSimulationEnvironmentsRunsResource, 'versions': AsyncSimulationEnvironmentsVersionsResource}
 
     async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessEnvironmentDetail:
         """Return a simulation environment with its contract, world, scenarios and evaluations.
@@ -3768,6 +4042,73 @@ class AsyncSimulationEnvironmentsResource(Resource):
         query = {'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, **(extra_query or {})}
         body = None
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_RUN_PLAN, path=path, query=query, body=body, model=models.HarnessRunPlan, options=options)
+
+
+class AsyncSimulationEpochsResource(Resource):
+    """`client.simulation.epochs`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+    candidates: AsyncSimulationEpochsCandidatesResource
+    _children: Dict[str, type] = {'candidates': AsyncSimulationEpochsCandidatesResource}
+
+    async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixRunDetail:
+        """Return one Epoch, with its state and step, the limits it holds to, its candidates, and its result once it has ended.
+
+        GET /simulate/api/agent-fix-runs/{id}/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_EPOCHS_GET, path=path, query=query, body=body, model=models.AgentFixRunDetail, options=options)
+
+    async def launch(self, *, source_run_id: str, target_scenario_keys: List[str], surfaces: List[Literal['prompt', 'tools', 'settings', 'code']], budget_credits: int, protected_scenario_keys: List[str] | None | NotGiven = NOT_GIVEN, locked_paths: List[str] | None | NotGiven = NOT_GIVEN, max_minutes: int | None | NotGiven = NOT_GIVEN, allowed_models: List[str] | None | NotGiven = NOT_GIVEN, reply_latency_margin_pct: int | None | NotGiven = NOT_GIVEN, cost_margin_pct: int | None | NotGiven = NOT_GIVEN, cost_limit_usd: float | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixRun:
+        """Start an Epoch on a finished run. It spends credits up to budget_credits and calls models, so it may incur usage charges. Take the scenarios, surfaces, budget and time cap from get_epoch_launch_options; allowed_models, reply_latency_margin_pct, cost_margin_pct and cost_limit_usd are its model lock and limits. Poll get_epoch.
+
+        POST /simulate/api/agent-fix-runs/
+        """
+        path = None
+        query = {**(extra_query or {})}
+        body = {'source_run_id': source_run_id, 'target_scenario_keys': target_scenario_keys, 'surfaces': surfaces, 'budget_credits': budget_credits, 'protected_scenario_keys': protected_scenario_keys, 'locked_paths': locked_paths, 'max_minutes': max_minutes, 'allowed_models': allowed_models, 'reply_latency_margin_pct': reply_latency_margin_pct, 'cost_margin_pct': cost_margin_pct, 'cost_limit_usd': cost_limit_usd, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_EPOCHS_LAUNCH, path=path, query=query, body=body, model=models.AgentFixRun, options=options)
+
+    async def launch_options(self, *, source_run_id: str, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixLaunchOptions:
+        """Return what an Epoch on a finished run starts with, the launch form's default for each limit, and why a launch would be refused now. Supply source_run_id, the run's test execution ID. Read it before launch_epoch.
+
+        GET /simulate/api/agent-fix-runs/launch-options/
+        """
+        path = None
+        query = {'source_run_id': source_run_id, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_EPOCHS_LAUNCH_OPTIONS, path=path, query=query, body=body, model=models.AgentFixLaunchOptions, options=options)
+
+    def list(self, *, environment_id: str, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.AgentFixRun]:
+        """List the Epochs of one environment, newest first, with each Epoch's state and limits. Supply environment_id.
+
+        GET /simulate/api/agent-fix-runs/
+        """
+        path = None
+        query = {'environment_id': environment_id, 'limit': limit, **(extra_query or {})}
+        return self._t.apaginate(_ops.OP_SIMULATION_EPOCHS_LIST, path=path, query=query, model=models.AgentFixRun, options=options)
+
+    async def retry(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixRun:
+        """Start a failed Epoch again as a new Epoch with the same request. Check runs it finished are reused and not paid twice; the rest may incur usage charges. An Epoch can be retried once.
+
+        POST /simulate/api/agent-fix-runs/{id}/retry/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_EPOCHS_RETRY, path=path, query=query, body=body, model=models.AgentFixRun, options=options)
+
+    async def stop(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixRun:
+        """Stop a running Epoch. It ends as Stopped, and the environment does not change.
+
+        POST /simulate/api/agent-fix-runs/{id}/stop/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_EPOCHS_STOP, path=path, query=query, body=body, model=models.AgentFixRun, options=options)
 
 
 class AsyncSimulationExecutionsResource(Resource):
@@ -5068,12 +5409,13 @@ class AsyncSimulationResource(Resource):
     _t: AsyncTransport
     calls: AsyncSimulationCallsResource
     environments: AsyncSimulationEnvironmentsResource
+    epochs: AsyncSimulationEpochsResource
     executions: AsyncSimulationExecutionsResource
     jobs: AsyncSimulationJobsResource
     personas: AsyncSimulationPersonasResource
     scenarios: AsyncSimulationScenariosResource
     tests: AsyncSimulationTestsResource
-    _children: Dict[str, type] = {'calls': AsyncSimulationCallsResource, 'environments': AsyncSimulationEnvironmentsResource, 'executions': AsyncSimulationExecutionsResource, 'jobs': AsyncSimulationJobsResource, 'personas': AsyncSimulationPersonasResource, 'scenarios': AsyncSimulationScenariosResource, 'tests': AsyncSimulationTestsResource}
+    _children: Dict[str, type] = {'calls': AsyncSimulationCallsResource, 'environments': AsyncSimulationEnvironmentsResource, 'epochs': AsyncSimulationEpochsResource, 'executions': AsyncSimulationExecutionsResource, 'jobs': AsyncSimulationJobsResource, 'personas': AsyncSimulationPersonasResource, 'scenarios': AsyncSimulationScenariosResource, 'tests': AsyncSimulationTestsResource}
 
 
 class AsyncSpansResource(Resource):
@@ -5283,9 +5625,12 @@ __all__ = [
     'SimulationEnvironmentsResource',
     'SimulationEnvironmentsDraftsResource',
     'SimulationEnvironmentsEvaluationsResource',
+    'SimulationEnvironmentsEvidenceImportsResource',
     'SimulationEnvironmentsNudgesResource',
     'SimulationEnvironmentsRunsResource',
     'SimulationEnvironmentsVersionsResource',
+    'SimulationEpochsResource',
+    'SimulationEpochsCandidatesResource',
     'SimulationExecutionsResource',
     'SimulationExecutionsInsightsResource',
     'SimulationJobsResource',
@@ -5347,9 +5692,12 @@ __all__ = [
     'AsyncSimulationEnvironmentsResource',
     'AsyncSimulationEnvironmentsDraftsResource',
     'AsyncSimulationEnvironmentsEvaluationsResource',
+    'AsyncSimulationEnvironmentsEvidenceImportsResource',
     'AsyncSimulationEnvironmentsNudgesResource',
     'AsyncSimulationEnvironmentsRunsResource',
     'AsyncSimulationEnvironmentsVersionsResource',
+    'AsyncSimulationEpochsResource',
+    'AsyncSimulationEpochsCandidatesResource',
     'AsyncSimulationExecutionsResource',
     'AsyncSimulationExecutionsInsightsResource',
     'AsyncSimulationJobsResource',

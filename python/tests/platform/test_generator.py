@@ -150,12 +150,16 @@ def test_surfaces_ship_independently():
 
 
 def test_mcp_names_keep_existing_tools_or_follow_the_id():
-    # The 107 release mappings plus four named SQL tools from the scoped product source.
+    # The 111 tools of the v1.59.0 release, four of them SQL, plus the 17 tools of the product's
+    # `epoch` group from the scoped product source (x-contract-sources.epoch): 128 in all.
     ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
     names = {op_id: ops[op_id].surfaces["mcp"]["name"] for op_id in MCP_IDS}
     sql_names = {name for key, name in names.items() if key.startswith("sql.")}
     assert sql_names == {"run_sql", "get_sql_result", "cancel_sql", "get_sql_catalog"}
-    assert len(names) == 111
+    epoch_names = {name for key, name in names.items() if ops[key].surfaces["mcp"]["group"] == "epoch"}
+    assert epoch_names == set(CONTRACT["x-contract-sources"]["epoch"]["tools"]) and len(epoch_names) == 17
+    assert names["simulation.executions.insights.get"] == "get_debug_failures"
+    assert len(names) == 128
     assert names["datasets.list"] == "list_datasets"
     assert names["traces.list"] == "search_traces"
     # Without an override the name follows the id.
@@ -237,7 +241,7 @@ def test_body_params_on_a_paginated_op_fail_the_build():
 
 
 def test_sdk_only_parity_ops_do_not_reach_mcp():
-    """The hand-written modules' operations ship to the SDK only; the MCP tool list keeps its 107 tools."""
+    """The hand-written modules' operations ship to the SDK only; none of them is an MCP tool."""
     for op_id in (
         "prompts.commit",
         "file_knowledge_bases.create",
