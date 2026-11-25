@@ -74,7 +74,6 @@ jobs:
             api_contracts/openapi
             futureagi/mcp_server/catalog
           fetch-depth: 1
-          filter: blob:none
           persist-credentials: false
       - name: The scoped contract slice matches the paired product commit
         # sdkgen/pair_check.py: the sql and epoch operations and their
