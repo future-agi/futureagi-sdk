@@ -19,6 +19,20 @@ name: E2E
 # The monorepo runs the same suites against every pull request's own build in
 # its E2E CI, so a backend change that breaks the SDK fails there before it is
 # released.
+#
+# Which backend, by event (.github/scripts/resolve_product_ref.py):
+#   pinned  a push to main, a pull request into main, or a dispatch with
+#           backend-version/backend-ref: the release image above, unchanged.
+#   latest  the nightly run: :latest with main's stack, unchanged.
+#   paired  every other run (pull requests into dev or other branches, pushes
+#           to dev, other dispatches): one product commit, resolved from the PR
+#           head branch, then its base (the pushed branch), then dev, then main,
+#           or the dispatched product-ref. The Standalone image is built from
+#           that commit the way the monorepo's E2E CI builds it, pushed to a
+#           registry on the runner and run by digest, with the stack files and
+#           the SQL fixture helper from the same commit. The job uploads
+#           pair.json (sdkgen/pair_check.py) with the commit, the branch, the
+#           contract hashes, the image digests and the helper's hash.
 
 on:
   pull_request:
@@ -37,6 +51,10 @@ on:
         type: string
       backend-ref:
         description: "future-agi ref that provides the compose files (default: the backend version's tag, main for latest)"
+        required: false
+        type: string
+      product-ref:
+        description: "future-agi branch, tag or full commit to build and pair with instead of a release (not with backend-version/backend-ref)"
         required: false
         type: string
 
@@ -60,7 +78,8 @@ jobs:
     # 3.9 build for it ("The version '3.9' ... was not found for Ubuntu 26.04"). Pin the
     # jobs that run the 3.9 floor to 24.04 until the floor moves to 3.10.
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    # Paired runs build the Standalone image from source first (no layer cache).
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -73,7 +92,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Pick the product revision to pair with
+        id: product
+        env:
+          PRODUCT_REF_INPUT: ${{ inputs.product-ref }}
+          BACKEND_VERSION_INPUT: ${{ inputs.backend-version }}
+          BACKEND_REF_INPUT: ${{ inputs.backend-ref }}
+          QUEUE_BASE_REF: ${{ github.event.merge_group.base_ref }}
+        run: |
+          python3 .github/scripts/resolve_product_ref.py
+          case "$(sed -n 's/^mode=//p' "$GITHUB_OUTPUT" | tail -1)" in
+            pinned|latest|paired) ;;
+            *) echo '::error::no pairing mode for this event'; exit 1 ;;
+          esac
+
       - name: Pick the backend image tag and its stack definition
+        if: steps.product.outputs.mode == 'pinned' || steps.product.outputs.mode == 'latest'
         env:
           DISPATCHED: ${{ inputs.backend-version }}
           DISPATCHED_REF: ${{ inputs.backend-ref }}
@@ -115,6 +149,7 @@ jobs:
       - name: Check out the monorepo's stack definition
         # Only the files docker-compose.yml and the E2E overlay mount; the
         # app itself is the published image.
+        if: steps.product.outputs.mode == 'pinned' || steps.product.outputs.mode == 'latest'
         uses: actions/checkout@v4
         with:
           repository: future-agi/future-agi
@@ -129,6 +164,7 @@ jobs:
 
       - name: Boot the Standalone stack
         id: boot
+        if: steps.product.outputs.mode == 'pinned' || steps.product.outputs.mode == 'latest'
         working-directory: future-agi
         env:
           FUTURE_AGI_VERSION: ${{ env.BACKEND_VERSION }}
@@ -181,6 +217,151 @@ jobs:
           done
           echo "backend healthy after ${SECONDS}s"
 
+      - name: Check out the paired product commit
+        # The whole tree: the image is built from it.
+        if: steps.product.outputs.mode == 'paired'
+        uses: actions/checkout@v4
+        with:
+          repository: future-agi/future-agi
+          ref: ${{ steps.product.outputs.sha }}
+          path: future-agi
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Build the paired commit's Standalone image from source
+        # The images, build arguments and order of the monorepo's E2E CI
+        # (e2e-ci.yml, Standalone leg): the slim backend plus its E2E-only
+        # layer, the frontend plus its E2E asset layer, fi-collector and
+        # agentcc-gateway, then `bin/e2e build standalone-app` on the docker
+        # driver. Without the monorepo's ghcr layer cache, which this
+        # repository cannot read, so every build is cold.
+        id: build_paired
+        if: steps.product.outputs.mode == 'paired'
+        working-directory: future-agi
+        env:
+          PRODUCT_SHA: ${{ steps.product.outputs.sha }}
+          RECLAIM_DELETE: background
+        run: |
+          set -euo pipefail
+          head=$(git rev-parse HEAD)
+          if [[ "$head" != "$PRODUCT_SHA" ]]; then
+            echo '::error::product checkout does not match the resolved commit'; exit 1
+          fi
+          # Docker's data moves to /mnt: before any build or container exists.
+          scripts/reclaim-runner-disk.sh
+          tag=$(sed -n 's/^FUTURE_AGI_VERSION=//p' e2e/stack/standalone-e2e.env)
+          if [[ ! "$tag" =~ ^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$ ]]; then
+            echo '::error::no usable FUTURE_AGI_VERSION in e2e/stack/standalone-e2e.env'; exit 1
+          fi
+          echo "PAIRED_TAG=$tag" >> "$GITHUB_ENV"
+          docker build --build-arg IMAGE_VARIANT=slim -t "futureagi/future-agi:$tag" -f futureagi/Dockerfile.oss futureagi
+          docker build --build-arg BASE_TAG="$tag" -t "futureagi/future-agi:$tag" -f e2e/stack/backend/Dockerfile .
+          docker build -t "futureagi/frontend:$tag" -f frontend/Dockerfile frontend
+          docker build --build-arg BASE_TAG="$tag" -t "futureagi/frontend:$tag" -f e2e/stack/frontend/Dockerfile .
+          docker build -t "futureagi/fi-collector:$tag" -f fi-collector/Dockerfile fi-collector
+          docker build -t "futureagi/agentcc-gateway:$tag" -f agentcc-gateway/Dockerfile agentcc-gateway
+          BUILDX_BUILDER=default E2E_STACK=standalone bin/e2e build standalone-app
+          # The build cache is a second copy of every layer; nothing reuses it.
+          docker buildx prune -af >/dev/null || true
+          df -h / /mnt || true
+
+      - name: Pin the built images by registry digest
+        # A tag is never the identity here: the images go to a registry on this
+        # runner, Compose runs them by the digest that registry reports, and the
+        # by-digest image must be the image just built.
+        id: pin_paired
+        if: steps.product.outputs.mode == 'paired'
+        env:
+          REGISTRY_IMAGE: registry:2@sha256:a3d8aaa63ed8681a604f1dea0aa03f100d5895b6a58ace528858a7b332415373
+        run: |
+          set -euo pipefail
+          docker run -d --name sdk-pair-registry -p 127.0.0.1:5000:5000 "$REGISTRY_IMAGE" >/dev/null
+          timeout 60 bash -c 'until curl -fsS http://127.0.0.1:5000/v2/ >/dev/null; do sleep 1; done'
+          accept='application/vnd.oci.image.index.v1+json, application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json'
+          pin() { # image name, env prefix
+            local built="futureagi/$1:$PAIRED_TAG" remote="localhost:5000/futureagi/$1" digest ref built_id pinned_id
+            built_id=$(docker image inspect --format '{{.Id}}' "$built")
+            docker tag "$built" "$remote:$PAIRED_TAG"
+            docker push --quiet "$remote:$PAIRED_TAG" >/dev/null
+            digest=$(curl -fsSI -H "Accept: $accept" "http://127.0.0.1:5000/v2/futureagi/$1/manifests/$PAIRED_TAG" \
+              | tr -d '\r' | awk 'tolower($1) == "docker-content-digest:" { print $2 }')
+            if [[ ! "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]; then
+              echo "::error::the runner registry reported no digest for $remote:$PAIRED_TAG"; return 1
+            fi
+            ref="$remote@$digest"
+            docker pull --quiet "$ref" >/dev/null
+            pinned_id=$(docker image inspect --format '{{.Id}}' "$ref")
+            if [[ ! "$built_id" =~ ^sha256:[a-f0-9]{64}$ || "$pinned_id" != "$built_id" ]]; then
+              echo "::error::$ref is not the image built as $built"; return 1
+            fi
+            echo "$1: $ref (image ID $built_id)"
+            { echo "${2}_IMAGE=$ref"; echo "${2}_DIGEST=$digest"; echo "${2}_ID=$built_id"; } >> "$GITHUB_ENV"
+            printf '%s\n' "$ref" > "$RUNNER_TEMP/sdk-paired-$1.ref"
+          }
+          pin standalone PAIRED_APP
+          pin future-agi PAIRED_GOOGLE
+          # app runs the assembled image; mock-google, which app depends on,
+          # runs the backend image instead of the overlay's :latest default.
+          pinfile="$RUNNER_TEMP/sdk-paired-pin.yml"
+          printf 'services:\n  app:\n    image: %s\n  mock-google:\n    image: %s\n' \
+            "$(cat "$RUNNER_TEMP/sdk-paired-standalone.ref")" "$(cat "$RUNNER_TEMP/sdk-paired-future-agi.ref")" > "$pinfile"
+          echo "PAIRED_PIN=$pinfile" >> "$GITHUB_ENV"
+
+      - name: Boot the Standalone stack from the paired commit
+        id: boot_paired
+        if: steps.product.outputs.mode == 'paired'
+        working-directory: future-agi
+        env:
+          PRODUCT_SHA: ${{ steps.product.outputs.sha }}
+          PRODUCT_BRANCH: ${{ steps.product.outputs.branch }}
+        run: |
+          set -euo pipefail
+          head=$(git rev-parse HEAD)
+          [[ "$head" == "$PRODUCT_SHA" ]]
+          # The SQL fixture helper from the commit the image was built from;
+          # its hash goes into pair.json instead of a fixed pin.
+          helper=e2e/stack/backend/bootstrap_sql.py
+          sql="$RUNNER_TEMP/sdk-bootstrap-sql.py"
+          [[ "$(git ls-tree "$head" -- "$helper" | cut -d' ' -f1)" == 100644 ]]
+          git show "$head:$helper" > "$sql"
+          test ! -L "$helper" && cmp "$sql" "$helper" || exit 1
+          bootstrap=$(sha256sum "$sql" | cut -d' ' -f1)
+          mkdir -p "$RUNNER_TEMP/pair"
+          jq -n --arg tag "$PAIRED_TAG" --arg stack "$head" --arg bootstrap "$bootstrap" \
+            --arg app "$PAIRED_APP_IMAGE" --arg app_digest "$PAIRED_APP_DIGEST" --arg app_id "$PAIRED_APP_ID" \
+            --arg google "$PAIRED_GOOGLE_IMAGE" --arg google_digest "$PAIRED_GOOGLE_DIGEST" --arg google_id "$PAIRED_GOOGLE_ID" \
+            '{image_tag: $tag, stack_commit: $stack, bootstrap_sql_sha256: $bootstrap,
+              app_image: $app, app_image_digest: $app_digest, app_image_id: $app_id,
+              mock_google_image: $google, mock_google_image_digest: $google_digest, mock_google_image_id: $google_id}' \
+            > "$RUNNER_TEMP/pair/stack.json"
+          compose=(docker compose --env-file e2e/stack/standalone-e2e.env -f docker-compose.yml -f e2e/stack/docker-compose.standalone-e2e.yml -f "$PAIRED_PIN" -p futureagi-e2e-standalone)
+          config=$("${compose[@]}" config --format json)
+          [[ "$(jq -er '.services.app.image' <<<"$config")" == "$PAIRED_APP_IMAGE" ]]
+          [[ "$(jq -er '.services["mock-google"].image' <<<"$config")" == "$PAIRED_GOOGLE_IMAGE" ]]
+          rc=0
+          "${compose[@]}" up -d --wait --wait-timeout 1500 app postgres clickhouse mock-llm || rc=$?
+          # The *running containers* must be the pinned images, including on
+          # unhealthy boots.
+          for service in app mock-google; do
+            if [[ "$service" == app ]]; then want="$PAIRED_APP_IMAGE $PAIRED_APP_ID"; else want="$PAIRED_GOOGLE_IMAGE $PAIRED_GOOGLE_ID"; fi
+            container=$("${compose[@]}" ps -a -q "$service")
+            [[ "$container" =~ ^[0-9a-f]+$ ]] || { echo "::error::expected one $service container"; exit 1; }
+            running=$(docker inspect -f '{{.Config.Image}} {{.Image}}' "$container")
+            [[ "$running" == "$want" ]] || { echo "::error::$service runs $running, not $want"; exit 1; }
+          done
+          echo "app $PAIRED_APP_IMAGE (image ID $PAIRED_APP_ID); stack and image from future-agi@$head ($PRODUCT_BRANCH)"
+          (( rc == 0 )) || exit "$rc"
+          # A first boot migrates an empty database before the API answers.
+          deadline=$((SECONDS + 1500))
+          until curl -fsS "$FI_BASE_URL/health/" >/dev/null 2>&1; do
+            if (( SECONDS > deadline )); then
+              echo "::error::backend not healthy on $FI_BASE_URL in 1500s"
+              exit 1
+            fi
+            sleep 5
+          done
+          echo "backend healthy after ${SECONDS}s"
+
       - name: Provision the standalone SQL fixture
         working-directory: future-agi
         run: |
@@ -199,6 +380,7 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Install the Python SDK
+        id: install_sdk
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e ./python pytest pyyaml
@@ -228,6 +410,24 @@ jobs:
         working-directory: typescript/futureagi
         run: pnpm run test:live
 
+      - name: Record the product pairing
+        # After the suites, so a slice mismatch does not hide their results.
+        if: ${{ !cancelled() && steps.product.outputs.mode == 'paired' && steps.install_sdk.outcome == 'success' }}
+        env:
+          PRODUCT_SHA: ${{ steps.product.outputs.sha }}
+          PRODUCT_BRANCH: ${{ steps.product.outputs.branch }}
+        run: >
+          python sdkgen/pair_check.py --product future-agi --sha "$PRODUCT_SHA" --branch "$PRODUCT_BRANCH"
+          --extra-json "$RUNNER_TEMP/pair/stack.json" --out "$RUNNER_TEMP/pair/pair.json"
+
+      - name: Upload the product pairing record
+        if: ${{ !cancelled() && steps.product.outputs.mode == 'paired' && steps.boot_paired.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pair-e2e-python-${{ matrix.python }}
+          path: ${{ runner.temp }}/pair/
+          if-no-files-found: error
+
       - name: Dump the stack on failure
         if: failure()
         working-directory: future-agi
@@ -236,9 +436,11 @@ jobs:
           docker compose -p futureagi-e2e-standalone logs --tail 200 app
 
       - name: Tear the stack down
-        if: always() && steps.boot.outcome != 'skipped'
+        if: always() && (steps.boot.outcome != 'skipped' || steps.boot_paired.outcome != 'skipped')
         working-directory: future-agi
-        run: docker compose -p futureagi-e2e-standalone down -v --remove-orphans || true
+        run: |
+          docker compose -p futureagi-e2e-standalone down -v --remove-orphans || true
+          docker rm -f sdk-pair-registry >/dev/null 2>&1 || true
 
   e2e-tests:
     name: E2E Tests Pass
