@@ -44,6 +44,7 @@ AREAS: list[tuple[str, list[str]]] = [
             "traces",
             "spans",
             "sessions",
+            "sql",
             "dashboards",
             "error_clusters",
             "alerts",
@@ -193,7 +194,8 @@ def _example_for(
     as a placeholder string the compiler rejects.
     """
     if is_file(schema):
-        return '"path/to/file"'
+        # A repeated file field (file[]) takes a list, even of one file.
+        return '["path/to/file"]' if schema.get("type") == "array" else '"path/to/file"'
     if "$ref" in schema and depth < 3:
         target = definitions.get(class_name(schema["$ref"]), {})
         props = target.get("properties", {})
@@ -533,7 +535,7 @@ def index_page(
         "<TLDR>\n"
         "- One client, every API: `fi.Client` (Python, `pip install futureagi`) and `Client` from `@future-agi/sdk` (TypeScript)\n"
         f"- {total} methods across {len(roots)} resources, generated from the API contract; each page lists parameters, return types and the REST endpoint\n"
-        "- Omitted arguments are not sent, `None` / `null` is; list calls return pagers; HTTP errors raise typed exceptions\n"
+        "- Omitted arguments are not sent; nullable JSON body fields accept `None` / `null`, nullable query parameters omit them, and SQL `reuse`, `limit`, and `offset` must be omitted rather than null; list calls return pagers; HTTP errors raise typed exceptions\n"
         "</TLDR>\n\n"
     )
     out.append(
@@ -569,7 +571,9 @@ def index_page(
         "## Conventions\n\n"
         "### Arguments\n\n"
         "Path parameters are positional; every other parameter is a keyword argument in Python and a field of the `params` object in TypeScript. "
-        "An argument you leave out is not sent. Passing `None` (Python) or `null` (TypeScript) sends `null`, which clears a nullable field. "
+        "An argument you leave out is not sent. For nullable JSON body fields, pass `None` (Python) or `null` (TypeScript) to send JSON `null`. "
+        "For nullable query parameters, both SDKs omit the parameter when you pass `None` or `null`, respectively. "
+        "The optional SQL arguments `reuse`, `limit`, and `offset` are not nullable: omit them to use the server defaults. "
         "In Python the omitted-argument sentinel is `fi.platform.NOT_GIVEN`.\n\n"
         "A `PATCH` is always a partial update: send only the fields you want to change.\n\n"
         "Fields the contract does not describe yet go through the escape hatches: `extra_query=` and `extra_body=` in Python, `options.extraQuery` and `options.extraBody` in TypeScript.\n\n"

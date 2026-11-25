@@ -5,8 +5,8 @@ description: "Every method of the Future AGI platform client in Python and TypeS
 
 <TLDR>
 - One client, every API: `fi.Client` (Python, `pip install futureagi`) and `Client` from `@future-agi/sdk` (TypeScript)
-- 164 methods across 25 resources, generated from the API contract; each page lists parameters, return types and the REST endpoint
-- Omitted arguments are not sent, `None` / `null` is; list calls return pagers; HTTP errors raise typed exceptions
+- 218 methods across 26 resources, generated from the API contract; each page lists parameters, return types and the REST endpoint
+- Omitted arguments are not sent; nullable JSON body fields accept `None` / `null`, nullable query parameters omit them, and SQL `reuse`, `limit`, and `offset` must be omitted rather than null; list calls return pagers; HTTP errors raise typed exceptions
 </TLDR>
 
 The platform client is generated from the Future AGI API contract, so every REST operation has one method with the same name in Python and TypeScript. This reference is generated from the same source as the SDKs. For narrative guides, see the [SDK overview](/docs/sdk).
@@ -70,7 +70,7 @@ Python also ships `AsyncClient` with the same methods, awaited (`await client.da
 
 ### Arguments
 
-Path parameters are positional; every other parameter is a keyword argument in Python and a field of the `params` object in TypeScript. An argument you leave out is not sent. Passing `None` (Python) or `null` (TypeScript) sends `null`, which clears a nullable field. In Python the omitted-argument sentinel is `fi.platform.NOT_GIVEN`.
+Path parameters are positional; every other parameter is a keyword argument in Python and a field of the `params` object in TypeScript. An argument you leave out is not sent. For nullable JSON body fields, pass `None` (Python) or `null` (TypeScript) to send JSON `null`. For nullable query parameters, both SDKs omit the parameter when you pass `None` or `null`, respectively. The optional SQL arguments `reuse`, `limit`, and `offset` are not nullable: omit them to use the server defaults. In Python the omitted-argument sentinel is `fi.platform.NOT_GIVEN`.
 
 A `PATCH` is always a partial update: send only the fields you want to change.
 
@@ -197,6 +197,9 @@ A method marked **Beta** may change without notice; the first call emits a `Beta
   <Card title="Sessions" href="/docs/sdk/reference/sessions">
     `client.sessions`: 2 methods.
   </Card>
+  <Card title="Sql" href="/docs/sdk/reference/sql">
+    `client.sql`: 4 methods.
+  </Card>
   <Card title="Dashboards" href="/docs/sdk/reference/dashboards">
     `client.dashboards`: 13 methods.
   </Card>
@@ -232,10 +235,10 @@ A method marked **Beta** may change without notice; the first call emits a `Beta
 
 <CardGroup cols={2}>
   <Card title="Agents" href="/docs/sdk/reference/agents">
-    `client.agents`: 5 methods.
+    `client.agents`: 9 methods.
   </Card>
   <Card title="Simulation" href="/docs/sdk/reference/simulation">
-    `client.simulation`: 11 methods.
+    `client.simulation`: 57 methods.
   </Card>
   <Card title="Response models" href="/docs/sdk/reference/simulation-models">
     What the simulation methods return.

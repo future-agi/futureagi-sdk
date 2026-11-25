@@ -38,17 +38,15 @@ def _refs(node, found: set[str]) -> None:
             _refs(value, found)
 
 
-def sync(source: Path) -> str:
-    spec = json.loads(source.read_text())
-    catalog = yaml.safe_load(CATALOG.read_text())
-
+def project(spec: dict, entries: list[dict]) -> tuple[dict, dict]:
+    """The selected operations, inherited parameters, and their transitive definitions."""
     # Fail closed, and say why, when the backend dropped or moved an endpoint the
     # SDK exposes: that is a breaking change for SDK users and needs a person to
     # retire or remap the catalog entry (sdkgen/catalog/operations.yaml), never a
     # silent sync. sdk-sync in the monorepo surfaces this message as the job error.
     gone = [
         f"{entry['id']}: {entry['operation']['method'].upper()} {entry['operation']['path']}"
-        for entry in catalog["operations"]
+        for entry in entries
         if entry["operation"]["method"].lower()
         not in spec["paths"].get(entry["operation"]["path"], {})
     ]
@@ -60,7 +58,7 @@ def sync(source: Path) -> str:
         )
 
     paths: dict = {}
-    for entry in catalog["operations"]:
+    for entry in entries:
         method = entry["operation"]["method"].lower()
         path = entry["operation"]["path"]
         item = spec["paths"][path]
@@ -78,6 +76,13 @@ def sync(source: Path) -> str:
         done.add(name)
         _refs(spec["definitions"][name], wanted)
 
+    return paths, {name: spec["definitions"][name] for name in sorted(done)}
+
+
+def sync(source: Path) -> str:
+    spec = json.loads(source.read_text())
+    catalog = yaml.safe_load(CATALOG.read_text())
+    paths, definitions = project(spec, catalog["operations"])
     out = {
         "swagger": spec["swagger"],
         "info": spec["info"],
@@ -85,11 +90,11 @@ def sync(source: Path) -> str:
         "security": spec.get("security", []),
         "x-source-sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
         "paths": dict(sorted(paths.items())),
-        "definitions": {name: spec["definitions"][name] for name in sorted(done)},
+        "definitions": definitions,
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, indent=2) + "\n")
-    return f"wrote {OUT.relative_to(ROOT)}: {len(paths)} paths, {len(done)} definitions"
+    return f"wrote {OUT.relative_to(ROOT)}: {len(paths)} paths, {len(definitions)} definitions"
 
 
 def main() -> None:

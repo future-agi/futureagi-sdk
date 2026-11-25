@@ -1,9 +1,9 @@
 ---
 title: "Agents"
-description: "Reference for client.agents in the Future AGI Python and TypeScript SDKs: agents.create, agents.get, agents.list, agents.update, agents.versions.create."
+description: "Reference for client.agents in the Future AGI Python and TypeScript SDKs: agents.create, agents.get, agents.list, agents.update, agents.runs.list, agents.versions.create and 3 more."
 ---
 
-`client.agents` on `fi.Client` (Python) and `client.agents` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.agents.versions`. The models these methods return are on [Simulation response models](/docs/sdk/reference/simulation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+`client.agents` on `fi.Client` (Python) and `client.agents` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.agents.runs`, `client.agents.versions`. The models these methods return are on [Simulation response models](/docs/sdk/reference/simulation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
 
 ## Methods
 
@@ -15,7 +15,11 @@ description: "Reference for client.agents in the Future AGI Python and TypeScrip
 | [`agents.get`](#agentsget) | Return an agent definition by its identifier. |
 | [`agents.list`](#agentslist) | List agent definitions in the current workspace. |
 | [`agents.update`](#agentsupdate) | Edit an agent definition. |
+| [`agents.runs.list`](#agentsrunslist) | List recent simulation runs of an agent across its environments. |
 | [`agents.versions.create`](#agentsversionscreate) | Snapshot agent configuration into a new version and activate it. |
+| [`agents.versions.get`](#agentsversionsget) | Return one version of an agent definition. |
+| [`agents.versions.get_definition`](#agentsversionsget_definition) | Return the agent document stored with an agent version (404 when the version has none). |
+| [`agents.versions.list`](#agentsversionslist) | List the versions of an agent definition, newest first, 10 per page by default. |
 
 </div>
 
@@ -387,6 +391,61 @@ export interface AgentsUpdateParams {
 
 [`AgentDefinitionEditResponse`](/docs/sdk/reference/simulation-models#agentdefinitioneditresponse).
 
+## client.agents.runs
+
+TypeScript: `client.agents.runs`.
+
+### agents.runs.list
+
+List recent simulation runs of an agent across its environments.
+
+<ApiEndpoint method="GET" path="/simulate/agent-definitions/{agent_id}/runs/" />
+
+<CodeGroup>
+
+```python Python
+result = client.agents.runs.list("your-agent-id")
+```
+
+```typescript TypeScript
+const result = await client.agents.runs.list("your-agent-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.agents.runs.list(
+    agent_id: str,
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AgentRunsResponse
+```
+
+```typescript TypeScript
+client.agents.runs.list(agentId: string, params: AgentsRunsListParams = {}, options?: RequestOptions): Promise<models.AgentRunsResponse>
+
+export interface AgentsRunsListParams {
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="agent_id" type="string" required>
+  Positional argument `agent_id`.
+</ParamField>
+<ParamField query="limit" type="integer" optional />
+
+#### Returns
+
+[`AgentRunsResponse`](/docs/sdk/reference/simulation-models#agentrunsresponse).
+
 ## client.agents.versions
 
 TypeScript: `client.agents.versions`.
@@ -510,3 +569,159 @@ export interface AgentsVersionsCreateParams {
 #### Returns
 
 [`AgentVersionCreateResponse`](/docs/sdk/reference/simulation-models#agentversioncreateresponse).
+
+### agents.versions.get
+
+Return one version of an agent definition.
+
+<ApiEndpoint method="GET" path="/simulate/agent-definitions/{agent_id}/versions/{version_id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.agents.versions.get("your-agent-id", "your-version-id")
+```
+
+```typescript TypeScript
+const result = await client.agents.versions.get("your-agent-id", "your-version-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.agents.versions.get(
+    agent_id: str,
+    version_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.agents.versions.get(agentId: string, versionId: string, options?: RequestOptions): Promise<unknown>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="agent_id" type="string" required>
+  Positional argument `agent_id`.
+</ParamField>
+<ParamField path="version_id" type="string" required>
+  Positional argument `version_id`.
+</ParamField>
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### agents.versions.get_definition
+
+Return the agent document stored with an agent version (404 when the version has none).
+
+<ApiEndpoint method="GET" path="/simulate/agent-definitions/{agent_id}/versions/{version_id}/agent/" />
+
+<CodeGroup>
+
+```python Python
+result = client.agents.versions.get_definition("your-agent-id", "your-version-id")
+```
+
+```typescript TypeScript
+const result = await client.agents.versions.getDefinition("your-agent-id", "your-version-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.agents.versions.get_definition(
+    agent_id: str,
+    version_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.StoredAgentResponse
+```
+
+```typescript TypeScript
+client.agents.versions.getDefinition(agentId: string, versionId: string, options?: RequestOptions): Promise<models.StoredAgentResponse>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="agent_id" type="string" required>
+  Positional argument `agent_id`.
+</ParamField>
+<ParamField path="version_id" type="string" required>
+  Positional argument `version_id`.
+</ParamField>
+
+#### Returns
+
+[`StoredAgentResponse`](/docs/sdk/reference/simulation-models#storedagentresponse).
+
+### agents.versions.list
+
+List the versions of an agent definition, newest first, 10 per page by default.
+
+<ApiEndpoint method="GET" path="/simulate/agent-definitions/{agent_id}/versions/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination))
+
+<CodeGroup>
+
+```python Python
+for item in client.agents.versions.list("your-agent-id"):
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.agents.versions.list("your-agent-id")) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.agents.versions.list(
+    agent_id: str,
+    *,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[Any]
+```
+
+```typescript TypeScript
+client.agents.versions.list(agentId: string, params: AgentsVersionsListParams = {}, options?: RequestOptions): Pager<unknown>
+
+export interface AgentsVersionsListParams {
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="agent_id" type="string" required>
+  Positional argument `agent_id`.
+</ParamField>
+<ParamField query="limit" type="integer" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.

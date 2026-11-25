@@ -276,6 +276,22 @@ def test_multipart_operation_sends_form_fields_and_files(tmp_path):
     assert b'name="file"; filename="inline.txt"' in body and b"from bytes" in body
 
 
+def test_a_list_of_plain_values_is_a_repeated_form_field():
+    """DRF reads repeated form fields with getlist (harness-jobs/sources/ reads `paths` so);
+    the TypeScript transport sends the same shape."""
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["body"] = request.read()
+        return httpx.Response(200, json={"status": True, "result": {"kb_id": "kb1", "kb_name": "x", "file_ids": []}})
+
+    client = _client(handler)
+    client.file_knowledge_bases.create(name="x", files=[("a.txt", b"a")], extra_body={"paths": ["a/b.py", "c.txt"]})
+    body = seen["body"]
+    assert body.count(b'name="paths"') == 2
+    assert b'name="paths"\r\n\r\na/b.py' in body and b'name="paths"\r\n\r\nc.txt' in body
+
+
 def test_files_on_a_json_operation_are_rejected():
     client = _client(lambda r: _dataset_response())
     with pytest.raises(TypeError, match="multipart"):

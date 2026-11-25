@@ -5,7 +5,8 @@
 // Each block names the review finding it guards (nik13, PR #35, 2026-11-03).
 
 import { Client } from "@future-agi/sdk";
-import type { JsonValue } from "@future-agi/sdk/platform";
+import type { JsonValue, WaitOptions } from "@future-agi/sdk/platform";
+import { WaitTimeoutError, openQuestion } from "@future-agi/sdk/platform";
 import type { DashboardDetail, KnowledgeBaseItem, PromptsRunResult } from "@future-agi/sdk/platform/models";
 
 declare const c: Client;
@@ -28,6 +29,15 @@ await c.dashboards.get(dashboard.id!);
 const kb: KnowledgeBaseItem = await c.knowledgeBases.create({ name: "k", chunk_size: 256 });
 await c.knowledgeBases.get(kb.id!);
 await c.knowledgeBases.delete(kb.id!);
+
+// The simulation wait helpers and their exported types.
+const waitFast: WaitOptions = { pollIntervalMs: 10, timeoutMs: 1000 };
+const built = await c.simulation.waitForJob("j1", waitFast);
+const question: Record<string, unknown> | null = openQuestion(built);
+const run: { job: Record<string, unknown>; executionStatus: string | null } = await c.simulation.waitForRun("j1", { testExecutionId: "te1" });
+const timedOut: Error = new WaitTimeoutError("job j1", 1000);
+await c.simulation.jobs.uploadSources({ files: [{ name: "a.py", data: "a" }], paths: ["a.py"] });
+export { question, run, timedOut };
 
 // The escape hatches keep their types.
 await c.request("GET", "/x/", { unwrap: null });
