@@ -201,9 +201,20 @@ async function buildBody(op: Operation, args: RequestArgs, options?: RequestOpti
   const fields = cleanBody(args.body ?? {}, options?.extraBody);
   if (isRecord(fields)) {
     for (const [key, value] of Object.entries(fields)) {
-      if (value !== null) {
-        form.append(key, formValue(value)); // a form field cannot carry null
+      if (value === null) {
+        continue; // a form field cannot carry null
       }
+      if (Array.isArray(value) && value.every((item) => item === null || typeof item !== "object")) {
+        // A list of plain values is a repeated field (DRF reads it with getlist), the way
+        // Python's httpx sends one; an array of objects still travels as one JSON string.
+        for (const item of value) {
+          if (item !== null) {
+            form.append(key, formValue(item));
+          }
+        }
+        continue;
+      }
+      form.append(key, formValue(value));
     }
   }
   for (const [field, value] of Object.entries(args.files ?? {})) {

@@ -85,6 +85,10 @@
           "href": "/docs/sdk/reference/sessions"
         },
         {
+          "title": "Sql",
+          "href": "/docs/sdk/reference/sql"
+        },
+        {
           "title": "Dashboards",
           "href": "/docs/sdk/reference/dashboards"
         },
