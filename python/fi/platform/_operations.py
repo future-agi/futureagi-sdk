@@ -217,3 +217,7 @@ OP_SIMULATION_PERSONAS_GET = Operation(**{'id': 'simulation.personas.get', 'meth
 OP_SIMULATION_PERSONAS_CREATE = Operation(**{'id': 'simulation.personas.create', 'method': 'POST', 'path': '/simulate/api/personas/', 'unwrap': None, 'pagination': None})
 OP_SIMULATION_PERSONAS_UPDATE = Operation(**{'id': 'simulation.personas.update', 'method': 'PUT', 'path': '/simulate/api/personas/{id}/', 'unwrap': None, 'pagination': None})
 OP_SIMULATION_PERSONAS_DUPLICATE = Operation(**{'id': 'simulation.personas.duplicate', 'method': 'POST', 'path': '/simulate/api/personas/{id}/duplicate/', 'unwrap': 'result', 'pagination': None})
+OP_SQL_RUN = Operation(**{'id': 'sql.run', 'method': 'POST', 'path': '/tracer/sql-query/run/', 'unwrap': None, 'pagination': None})
+OP_SQL_GET_RESULT = Operation(**{'id': 'sql.get_result', 'method': 'GET', 'path': '/tracer/sql-query/{id}/', 'unwrap': None, 'pagination': None})
+OP_SQL_CANCEL = Operation(**{'id': 'sql.cancel', 'method': 'POST', 'path': '/tracer/sql-query/{id}/cancel/', 'unwrap': None, 'pagination': None})
+OP_SQL_GET_CATALOG = Operation(**{'id': 'sql.get_catalog', 'method': 'GET', 'path': '/tracer/sql-query/catalog/', 'unwrap': None, 'pagination': None})

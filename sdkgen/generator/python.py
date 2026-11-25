@@ -21,6 +21,7 @@ from .catalog import (
     Param,
     children_of,
     class_name,
+    declared_response_models,
     is_file,
     is_json_value,
     is_method_field,
@@ -92,6 +93,7 @@ def py_type(schema: dict | None, *, for_input: bool) -> str:
 
 
 def emit_models(spec: dict, ops: list[Op]) -> str:
+    declared_models = declared_response_models(ops)
     names = model_refs(spec, [op.returns for op in sdk_ops(ops) if op.returns])
     out = [
         HEADER,
@@ -128,11 +130,16 @@ def emit_models(spec: dict, ops: list[Op]) -> str:
         # A nested serializer field (a bare `$ref`) can be `allow_null=True`, which drf-yasg cannot
         # write next to a `$ref` (no x-nullable), so the contract never says. Insights' `report`
         # and `summary`, and a version's `created_by`, are null in valid responses: strict mode
-        # requires nested objects only when present is all a `$ref` can promise.
+        # requires nested objects only when present is all a `$ref` can promise. A declared response
+        # model (catalog `declared_response_fields`) was checked against its serializer, so there a
+        # required nested object stays required: SQLExecution.result is a non-null
+        # SQLResultSerializer() the product always sets.
         required = sorted(
             field_name(n)
             for n in definition.get("required", [])
-            if n in props and not props[n].get("x-nullable") and "$ref" not in props[n]
+            if n in props
+            and not props[n].get("x-nullable")
+            and ("$ref" not in props[n] or name in declared_models)
         )
         if required:
             out.append(f"    __required__: ClassVar[FrozenSet[str]] = frozenset({required!r})\n")
@@ -142,6 +149,18 @@ def emit_models(spec: dict, ops: list[Op]) -> str:
             alias = f", alias={prop_name!r}" if fname != prop_name else ""
             comment = f"  # one of: {', '.join(map(str, prop['enum']))}" if "enum" in prop else ""
             out.append(f"    {fname}: Optional[{py39(py)}] = Field(default=None{alias}){comment}\n")
+        if name in declared_models:
+            nullable = sorted(field_name(n) for n in definition.get("required", []) if props[n].get("x-nullable"))
+            if nullable:
+                out.extend([
+                    '\n    @model_validator(mode="after")\n',
+                    f'    def _required_nullable_keys(self, info: ValidationInfo) -> "{name}":\n',
+                    '        if info.context and info.context.get("strict"):\n',
+                    f'            missing = sorted(set({nullable!r}) - self.model_fields_set)\n',
+                    '            if missing:\n',
+                    '                raise ValueError(f"missing required field(s): {\', \'.join(missing)}")\n',
+                    '        return self\n',
+                ])
         out.append("\n\n")
     out.append("\n".join(f"{n}.model_rebuild()" for n in names) + "\n")
     out.append("\n__all__ = [\n" + "".join(f"    {n!r},\n" for n in names) + "]\n")
@@ -207,12 +226,14 @@ def _signature(op: Op) -> tuple[list[str], list[tuple[Param, str]]]:
     args.append("*")
     for p in rest:
         py = py_type(p.schema, for_input=True)
-        # Optional: NOT_GIVEN is left out of the request, an explicit None is sent as null.
+        # Optional: NOT_GIVEN is left out of the request, an explicit None is sent as null, unless
+        # the operation opts into declared_optional_nullability and the field is not x-nullable.
         # Required but nullable (x-nullable): must be passed, and None is a valid answer.
         if p.required:
             args.append(f"{arg_name(p)}: {py} | None" if (p.schema or {}).get("x-nullable") else f"{arg_name(p)}: {py}")
         else:
-            args.append(f"{arg_name(p)}: {py} | None | NotGiven = NOT_GIVEN")
+            null = "" if op.rejects_optional_null(p) else " | None"
+            args.append(f"{arg_name(p)}: {py}{null} | NotGiven = NOT_GIVEN")
         named.append((p, arg_name(p)))
     # Escape hatches: fields the contract does not (yet) describe, and per-call request options.
     args.append("extra_query: dict[str, Any] | None = None")
@@ -239,6 +260,10 @@ def _method(op: Op, *, is_async: bool) -> str:
         if location in ("query", "body"):
             items = f"{items}, **(extra_{location} or {{}})".lstrip(", ")
         lines.append(f"        {location} = {{{items}}}\n" if items else f"        {location} = None\n")
+        for p, arg in group:
+            if op.rejects_optional_null(p):
+                lines.append(f"        if {arg} is None or {location}[{p.name!r}] is None:\n")
+                lines.append(f'            raise TypeError("{op.id}: {p.name} cannot be null; omit it instead")\n')
     if not op.sends_body and not op.pagination:
         lines.append("        body = None\n")
     if op.multipart:  # file params travel separately from the form fields

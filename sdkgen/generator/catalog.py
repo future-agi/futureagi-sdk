@@ -65,6 +65,10 @@ class Op:
     def params_in(self, location: str) -> list[Param]:
         return [p for p in self.params if p.location == location]
 
+    def rejects_optional_null(self, p: Param) -> bool:
+        """Opted-in SDK calls distinguish optional (may omit) from x-nullable (may send null)."""
+        return bool(self.surfaces.get("sdk", {}).get("declared_optional_nullability") and not p.required and not p.schema.get("x-nullable"))
+
     @property
     def file_params(self) -> list[Param]:
         return [p for p in self.params if p.location == "body" and is_file(p.schema)]
@@ -116,6 +120,17 @@ def is_method_field(prop: dict) -> bool:
         return False
     # Also read-only lists of plain strings: drf-yasg's default for an untyped ListField (seen live: objects).
     return plain(prop) or (prop.get("type") == "array" and plain(prop.get("items", {})))
+
+
+def declared_response_models(ops: list[Op]) -> set[str]:
+    """Named responses opted into required nullable keys and open, documented string enums."""
+    models = set()
+    for op in sdk_ops(ops):
+        if op.surfaces["sdk"].get("declared_response_fields"):
+            if not op.returns or "$ref" not in op.returns:
+                raise CatalogError(f"{op.id}: declared_response_fields needs a named response")
+            models.add(class_name(op.returns["$ref"]))
+    return models
 
 
 def model_refs(spec: dict, roots: list[dict]) -> list[str]:
@@ -424,9 +439,15 @@ def _load_one(spec: dict, entry: dict, seen_mcp: set[str]) -> Op:
         raise CatalogError(f"{op_id}: path placeholders {placeholders} != path params {path_params}")
 
     # What the caller gets back: unwrap the {status, result} envelope, then the page items.
-    # 202 Accepted is a success too (an async receipt: a run, a job, a queued grading).
+    # A 202 Accepted body (an async receipt: a SQL job, a run, a queued grading) is read only when
+    # the entry pins it with operation.response_status: 202, which fails if the contract drops it.
     responses = contract_op["responses"]
-    ok = responses.get("200") or responses.get("201") or responses.get("202") or {}
+    if "response_status" in entry["operation"]:
+        if entry["operation"]["response_status"] != 202 or "202" not in responses:
+            raise CatalogError(f"{op_id}: operation.response_status requires a declared 202 response")
+        ok = responses["202"]
+    else:
+        ok = responses.get("200") or responses.get("201") or {}
     returns = ok.get("schema")
     resolved = resolve(spec, returns) or {}
     unwrap = None

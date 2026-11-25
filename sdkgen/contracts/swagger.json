@@ -33,7 +33,24 @@
       "X-Secret-Key": []
     }
   ],
-  "x-source-sha256": "f4a74ecab77e78df6ca8c6a28b72c655bfd0e4d4f04f91ab376070d60be592d0",
+  "x-contract-sources": {
+    "sql": {
+      "backend_commit": "6fc655b986f862ccbdd475bfc87fc09c4ef459e9",
+      "openapi_sha256": "83db42792537641a476bd6c095ce0ea40ca17aa2c48315f804386ea90a594513",
+      "mcp_sha256": "0464aeb6212890164cf95b0599d89bb7db566f244cc831bf2c995901ba679a30",
+      "tools": [
+        "cancel_sql",
+        "get_sql_catalog",
+        "get_sql_result",
+        "run_sql"
+      ]
+    },
+    "other": {
+      "sdk_commit": "198f1f8bf23836072d5016976a9a6c235c52ee2b",
+      "slice_sha256": "11eb5cf10a002de5ec722b1ed63884f10b75522cfaf58e075be0e7a742f80a5f",
+      "openapi_sha256": "f4a74ecab77e78df6ca8c6a28b72c655bfd0e4d4f04f91ab376070d60be592d0"
+    }
+  },
   "paths": {
     "/accounts/user-info/": {
       "parameters": [],
@@ -12782,6 +12799,180 @@
         "tags": [
           "tracer"
         ],
+        "x-runtime-response-validation": true
+      }
+    },
+    "/tracer/sql-query/catalog/": {
+      "parameters": [],
+      "get": {
+        "operationId": "tracer_sql-query_catalog",
+        "description": "Read-only scans; creating a personal execution record grants no write access.",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SQLCatalog"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/tracer/sql-query/run/": {
+      "parameters": [],
+      "post": {
+        "operationId": "tracer_sql-query_run",
+        "description": "Read-only scans; creating a personal execution record grants no write access.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SQLRun"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SQLExecution"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/tracer/sql-query/{id}/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "operationId": "tracer_sql-query_read",
+        "description": "Read-only scans; creating a personal execution record grants no write access.",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "maximum": 10000,
+            "minimum": 0
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Optional bounded result page; omitted REST requests retain the full snapshot. MCP defaults to 100. Wide rows are explicitly previewed; download for full cells.",
+            "required": false,
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SQLExecution"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/tracer/sql-query/{id}/cancel/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "operationId": "tracer_sql-query_cancel",
+        "description": "Read-only scans; creating a personal execution record grants no write access.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SQLProject"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SQLExecution"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "tracer"
+        ],
+        "x-runtime-request-validation": true,
         "x-runtime-response-validation": true
       }
     },
@@ -35096,6 +35287,332 @@
         }
       },
       "x-nullable": true
+    },
+    "SQLCatalog": {
+      "required": [
+        "identity_semantics",
+        "version",
+        "datasets",
+        "examples",
+        "max_rows",
+        "max_window_days",
+        "can_save"
+      ],
+      "type": "object",
+      "properties": {
+        "identity_semantics": {
+          "title": "Identity semantics",
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        },
+        "datasets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SQLDataset"
+          }
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SQLExample"
+          }
+        },
+        "max_rows": {
+          "title": "Max rows",
+          "type": "integer"
+        },
+        "max_window_days": {
+          "title": "Max window days",
+          "type": "integer"
+        },
+        "can_save": {
+          "title": "Can save",
+          "type": "boolean"
+        }
+      }
+    },
+    "SQLColumn": {
+      "required": [
+        "name",
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "SQLDataset": {
+      "required": [
+        "available",
+        "unavailable_reason",
+        "name",
+        "description",
+        "columns"
+      ],
+      "type": "object",
+      "properties": {
+        "available": {
+          "title": "Available",
+          "type": "boolean"
+        },
+        "unavailable_reason": {
+          "title": "Unavailable reason",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "minLength": 1
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SQLColumn"
+          }
+        }
+      }
+    },
+    "SQLExample": {
+      "required": [
+        "id",
+        "title",
+        "description",
+        "sql",
+        "datasets"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "title": "Title",
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "minLength": 1
+        },
+        "sql": {
+          "title": "Sql",
+          "type": "string",
+          "minLength": 1
+        },
+        "datasets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "SQLExecution": {
+      "required": [
+        "id",
+        "project_id",
+        "sql",
+        "state",
+        "created_at",
+        "expires_at",
+        "finished_at",
+        "error",
+        "result",
+        "expired"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "project_id": {
+          "title": "Project id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "sql": {
+          "title": "Sql",
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "title": "State",
+          "type": "string",
+          "enum": [
+            "queued",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ]
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "title": "Expires at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "finished_at": {
+          "title": "Finished at",
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "reused": {
+          "title": "Reused",
+          "type": "boolean"
+        },
+        "error": {
+          "title": "Error",
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/SQLResult"
+        },
+        "expired": {
+          "title": "Expired",
+          "type": "boolean"
+        }
+      }
+    },
+    "SQLProject": {
+      "required": [
+        "project_id"
+      ],
+      "type": "object",
+      "properties": {
+        "project_id": {
+          "title": "Project id",
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "SQLResult": {
+      "type": "object",
+      "properties": {
+        "columns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SQLColumn"
+          }
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "truncated": {
+          "title": "Truncated",
+          "type": "boolean"
+        },
+        "row_count": {
+          "title": "Row count",
+          "type": "integer"
+        },
+        "result_bytes": {
+          "title": "Result bytes",
+          "type": "integer"
+        },
+        "elapsed_ms": {
+          "title": "Elapsed ms",
+          "type": "integer"
+        },
+        "offset": {
+          "title": "Offset",
+          "type": "integer"
+        },
+        "next_offset": {
+          "title": "Next offset",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "has_more": {
+          "title": "Has more",
+          "type": "boolean"
+        },
+        "page_row_count": {
+          "title": "Page row count",
+          "type": "integer"
+        },
+        "previewed": {
+          "title": "Previewed",
+          "type": "boolean"
+        },
+        "retrieval_note": {
+          "title": "Retrieval note",
+          "type": "string"
+        }
+      }
+    },
+    "SQLRun": {
+      "required": [
+        "project_id",
+        "sql",
+        "start",
+        "end"
+      ],
+      "type": "object",
+      "properties": {
+        "project_id": {
+          "title": "Project id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "sql": {
+          "title": "Sql",
+          "type": "string",
+          "maxLength": 32768,
+          "minLength": 1
+        },
+        "start": {
+          "title": "Start",
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "title": "End",
+          "type": "string",
+          "format": "date-time"
+        },
+        "reuse": {
+          "title": "Reuse",
+          "type": "boolean",
+          "default": true
+        }
+      }
     },
     "ScenarioCreateRequest": {
       "required": [

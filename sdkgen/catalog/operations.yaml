@@ -1435,7 +1435,7 @@ operations:
 
 - id: simulation.environments.run
   description: Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults). Send the same Idempotency-Key header (options headers) to get the same run back on a retry.
-  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/run/'}
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/run/', response_status: 202}
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.environments.versions.list
@@ -1450,12 +1450,12 @@ operations:
 
 - id: simulation.environments.versions.create_agent
   description: Make an environment's next agent version from an uploaded folder (archive_artifact_id from simulation.jobs.upload_sources, alone), a prompt or agent_payload settings; it is checked next, then made the default. The server refuses an empty body.
-  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/versions/agent/'}
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/versions/agent/', response_status: 202}
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.environments.versions.retry_agent
   description: Check again an environment's agent version whose check failed or is stuck pending (422 otherwise); returns every version.
-  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/versions/agent/{version_id}/retry/'}
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/versions/agent/{version_id}/retry/', response_status: 202}
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.environments.versions.set_default
@@ -1518,12 +1518,12 @@ operations:
 
 - id: simulation.environments.runs.add_evaluation
   description: Add an eval by name from inside a finished run and grade that run's finished calls that have no verdict for it; returns the queued and skipped counts. Spends judge credits.
-  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/'}
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/', response_status: 202}
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.environments.runs.regrade
   description: Grade a completed run's calls again with the environment's evals (eval_config_ids), replacing their previous scores; the calls are not rerun. Spends judge credits.
-  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/run/'}
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/runs/{execution_id}/evaluations/run/', response_status: 202}
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.jobs.create
@@ -1549,7 +1549,7 @@ operations:
 
 - id: simulation.jobs.send_message
   description: Send a message to a builder job's chat (a question's answer needs kind user_response or approval, and reply_to); client_request_id deduplicates a resend.
-  operation: {method: POST, path: '/simulate/api/harness-jobs/{id}/conversation/messages/'}
+  operation: {method: POST, path: '/simulate/api/harness-jobs/{id}/conversation/messages/', response_status: 202}
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.jobs.adjust
@@ -1578,7 +1578,7 @@ operations:
 
 - id: simulation.jobs.set_secret_values
   description: Make an environment's next agent version from credential values (environment_values) and files staged with simulation.jobs.upload_secret_file; it is checked next, then made the default.
-  operation: {method: POST, path: /simulate/api/harness-jobs/secret-values/}
+  operation: {method: POST, path: /simulate/api/harness-jobs/secret-values/, response_status: 202}
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.jobs.upload_sources
@@ -1648,7 +1648,7 @@ operations:
 
 - id: simulation.executions.insights.start
   description: Request Insights (debug analysis) of a completed run; a repeat re-arms only failed calls.
-  operation: {method: POST, path: '/simulate/test-executions/{test_execution_id}/debug-analysis/'}
+  operation: {method: POST, path: '/simulate/test-executions/{test_execution_id}/debug-analysis/', response_status: 202}
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.calls.get
@@ -1706,3 +1706,32 @@ operations:
   description: Copy a system or workspace persona into the workspace under a new name; a name already used by a workspace persona returns 400.
   operation: {method: POST, path: '/simulate/api/personas/{id}/duplicate/'}
   surfaces: {sdk: {}, mcp: false}
+
+# The SDK calls the REST operations directly; the MCP tool has its own lower page cap.
+- id: sql.run
+  description: Start or reuse a personal read-only SQL job in a project. Supply SQL and a time window of at most 31 days; reuse defaults to true. The 202 response is a job snapshot, not a page of rows. Poll sql.get_result using its id.
+  operation: {method: POST, path: /tracer/sql-query/run/, response_status: 202}
+  surfaces:
+    sdk: {declared_response_fields: true, declared_optional_nullability: true}
+    mcp: {name: run_sql, group: observability, access: read}
+
+- id: sql.get_result
+  description: Read the caller's job in the given project. Omit limit for the full bounded REST snapshot, or pass 1–1000 and follow result.next_offset while has_more is true (offset 0–10000). MCP defaults to and caps pages at 100. Wide cells may be previewed; results expire after 24 hours.
+  operation: {method: GET, path: '/tracer/sql-query/{id}/'}
+  surfaces:
+    sdk: {declared_response_fields: true, declared_optional_nullability: true}
+    mcp: {name: get_sql_result, group: observability, access: read, max_page_size: {limit: 100}}
+
+- id: sql.cancel
+  description: Request cancellation of the caller's SQL job without changing project data. Returns its job snapshot; an already finished job need not change state.
+  operation: {method: POST, path: '/tracer/sql-query/{id}/cancel/'}
+  surfaces:
+    sdk: {declared_response_fields: true, declared_optional_nullability: true}
+    mcp: {name: cancel_sql, group: observability, access: read}
+
+- id: sql.get_catalog
+  description: Read the available scoped SQL sources, their columns, examples, and query limits for a project.
+  operation: {method: GET, path: /tracer/sql-query/catalog/}
+  surfaces:
+    sdk: {declared_optional_nullability: true}
+    mcp: {name: get_sql_catalog, group: observability, access: read}
