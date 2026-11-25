@@ -76,11 +76,13 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
       - name: The scoped contract slice matches the paired product commit
-        # sdkgen/pair_check.py: the sql and epoch operations and their
-        # definitions project identically from the product commit and from
-        # sdkgen/contracts/swagger.json, the epoch MCP tools and descriptions
-        # match the product catalog, and pair.json records the commit, the branch
-        # it came from and the product file hashes.
+        # sdkgen/pair_check.py: the scoped sync's own checks
+        # (sync_scoped_contract.check_scopes: the sql and epoch tool sets, their
+        # exposure, routes, inputs and epoch descriptions) pass against the
+        # product commit, the scoped operations and their definitions project
+        # identically from that commit and from sdkgen/contracts/swagger.json,
+        # and pair.json records the commit, the branch it came from and the
+        # product file hashes.
         if: steps.product.outputs.mode == 'paired'
         env:
           PRODUCT_SHA: ${{ steps.product.outputs.sha }}

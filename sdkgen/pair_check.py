@@ -6,17 +6,16 @@ Dev and pull-request CI pairs the SDK with a product commit
 (.github/scripts/resolve_product_ref.py). This script reads that commit's
 contract, MCP tool list and tool catalog by Git object ID (never from the working
 tree), and fails unless the scoped part of sdkgen/contracts/swagger.json is what
-the commit serves:
+the commit serves. The scopes and every per-tool rule are the ones the scoped
+sync applies before it writes the slice (sync_scoped_contract.SCOPES and
+check_scopes): today `sql` (the four SQL tools) and `epoch` (every product MCP
+tool in group epoch), each mapped exactly once, with group, access, open-world,
+method, path, operationId, inputs, page caps and unwrap matching the product
+tool, and epoch descriptions equal to product tools.yaml byte for byte.
 
-  sql    the catalog operations with ids under `sql.`;
-  epoch  the catalog operations whose MCP surface is in group `epoch`.
-
-For both scopes, the operations and every definition they reach must project
-identically from the product contract and from the committed slice; drift
-outside the scopes is ignored (the release sync owns it). For `epoch`, the
-catalog's MCP names must be exactly the product's group `epoch` tools, and each
-description must equal the product tools.yaml text byte for byte. Every scoped MCP
-mapping must name the product tool's method and path.
+On top of that, each scope's operations and every definition they reach must
+project identically (sync_contract.project) from the product contract and from
+the committed slice. Drift outside the scopes is ignored; the release sync owns it.
 
 pair.json records the product commit, the branch it was resolved from, the
 sha256 of the product swagger.json, tools.generated.json and tools.yaml, the
@@ -37,43 +36,20 @@ import sys
 from pathlib import Path
 
 import sync_contract
+import sync_scoped_contract
 import yaml
+from generator.catalog import CatalogError
 
 ROOT = sync_contract.ROOT
 SLICE = sync_contract.OUT
 CATALOG = sync_contract.CATALOG
 BACKEND_VERSION = sync_contract.VERSION_FILE
 PRODUCT_REPOSITORY = "future-agi/future-agi"
-SWAGGER = "api_contracts/openapi/swagger.json"
-MCP = "futureagi/mcp_server/catalog/tools.generated.json"
-TOOLS_YAML = "futureagi/mcp_server/catalog/tools.yaml"
-SCOPES = ("epoch", "sql")
+SWAGGER = sync_scoped_contract.SWAGGER
+MCP = sync_scoped_contract.MCP
+TOOLS_YAML = sync_scoped_contract.TOOLS_YAML
+SCOPES = tuple(sorted(sync_scoped_contract.SCOPES))
 FULL_SHA = re.compile(r"[0-9a-f]{40}")
-
-
-def scope_of(entry: dict) -> str | None:
-    if entry["id"].startswith("sql."):
-        return "sql"
-    mcp = (entry.get("surfaces") or {}).get("mcp")
-    if isinstance(mcp, dict) and mcp.get("group") == "epoch":
-        return "epoch"
-    return None
-
-
-def mcp_name(entry: dict) -> str | None:
-    mcp = (entry.get("surfaces") or {}).get("mcp")
-    if mcp in (None, False):
-        return None
-    return (mcp or {}).get("name") or entry["id"].replace(".", "_")
-
-
-def scoped(catalog: dict) -> dict[str, list[dict]]:
-    out: dict[str, list[dict]] = {scope: [] for scope in SCOPES}
-    for entry in catalog["operations"]:
-        scope = scope_of(entry)
-        if scope:
-            out[scope].append(entry)
-    return out
 
 
 def _project(spec: dict, entries: list[dict], where: str) -> tuple[dict, dict]:
@@ -109,39 +85,6 @@ def compare_projection(product: dict, committed: dict, entries: list[dict], scop
     return problems
 
 
-def compare_mcp(manifest: dict, tools_yaml: dict, entries: dict[str, list[dict]]) -> list[str]:
-    problems = []
-    listed = manifest.get("tools") or []
-    tools = {tool["name"]: tool for tool in listed}
-    if len(tools) != len(listed) or manifest.get("tool_count") != len(listed):
-        problems.append("product MCP manifest has duplicate tools or a wrong tool_count")
-    for scope in SCOPES:
-        for entry in entries[scope]:
-            name = mcp_name(entry)
-            if name is None:
-                continue
-            tool = tools.get(name)
-            if tool is None:
-                problems.append(f"{scope}: {entry['id']} maps to MCP tool {name}, which the product does not have")
-                continue
-            want = (entry["operation"]["method"].upper(), entry["operation"]["path"])
-            have = (str(tool["request"]["method"]).upper(), tool["request"]["path"])
-            if want != have:
-                problems.append(f"{scope}: {entry['id']} is {want[0]} {want[1]}, product {name} is {have[0]} {have[1]}")
-    product_epoch = {name for name, tool in tools.items() if tool.get("group") == "epoch"}
-    catalog_epoch = {mcp_name(entry) for entry in entries["epoch"]} - {None}
-    if product_epoch - catalog_epoch:
-        problems.append("epoch: product tools without an epoch catalog entry: " + ", ".join(sorted(product_epoch - catalog_epoch)))
-    if catalog_epoch - product_epoch:
-        problems.append("epoch: catalog entries outside the product's epoch group: " + ", ".join(sorted(catalog_epoch - product_epoch)))
-    texts = {tool["name"]: tool.get("description") for tool in tools_yaml.get("tools") or []}
-    for entry in entries["epoch"]:
-        name = mcp_name(entry)
-        if name in texts and entry.get("description") != texts[name]:
-            problems.append(f"epoch: {entry['id']} description differs from product tools.yaml {name}")
-    return problems
-
-
 def _git(product: Path, *args: str) -> bytes:
     return subprocess.check_output(["git", "-C", str(product), *args])
 
@@ -151,7 +94,10 @@ def _sha256(raw: bytes) -> str:
 
 
 def check(product: Path, sha: str) -> tuple[list[str], dict]:
-    """(problems, facts) for the committed slice and catalog at product commit `sha`."""
+    """(problems, facts) for the committed slice and catalog at product commit `sha`.
+
+    Raises only when the inputs cannot be read; a mismatch is a problem, and the facts
+    (hashes, tool counts, the committed record) are returned either way."""
     head = _git(product, "rev-parse", "HEAD").decode().strip()
     if head != sha:
         raise ValueError(f"product checkout is at {head}, not {sha}")
@@ -160,14 +106,8 @@ def check(product: Path, sha: str) -> tuple[list[str], dict]:
     catalog_raw = CATALOG.read_bytes()
     product_spec = json.loads(raw[SWAGGER])
     manifest = json.loads(raw[MCP])
-    tools_yaml = yaml.safe_load(raw[TOOLS_YAML])
     committed = json.loads(slice_raw)
-    catalog = yaml.safe_load(catalog_raw)
-    entries = scoped(catalog)
-    problems = []
-    for scope in SCOPES:
-        problems += compare_projection(product_spec, committed, entries[scope], scope)
-    problems += compare_mcp(manifest, tools_yaml, entries)
+    entries = yaml.safe_load(catalog_raw)["operations"]
     facts = {
         "hashes": {
             "openapi_sha256": _sha256(raw[SWAGGER]),
@@ -177,9 +117,19 @@ def check(product: Path, sha: str) -> tuple[list[str], dict]:
             "sdk_catalog_sha256": _sha256(catalog_raw),
         },
         "mcp": {"tool_count": manifest.get("tool_count"), "tool_names_sha256": manifest.get("tool_names_sha256")},
-        "scope": {scope: sorted(entry["id"] for entry in entries[scope]) for scope in SCOPES},
         "contract_sources": committed.get("x-contract-sources"),
     }
+    problems = []
+    try:
+        _names, in_scope, _unscoped = sync_scoped_contract.check_scopes(
+            product_spec, raw[SWAGGER], manifest, raw[TOOLS_YAML], entries)
+    except (ValueError, CatalogError, KeyError, TypeError, yaml.YAMLError) as exc:
+        problems.append(f"scoped catalog check: {exc}")
+        in_scope = None
+    if in_scope is not None:
+        facts["scope"] = {scope: sorted(entry["id"] for entry in in_scope[scope]) for scope in SCOPES}
+        for scope in SCOPES:
+            problems += compare_projection(product_spec, committed, in_scope[scope], scope)
     return problems, facts
 
 
@@ -214,7 +164,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         problems, facts = check(args.product, args.sha)
         record.update(facts)
-    except (ValueError, KeyError, TypeError, OSError, subprocess.CalledProcessError) as exc:
+    except (ValueError, KeyError, TypeError, OSError, subprocess.CalledProcessError, yaml.YAMLError) as exc:
         problems = [f"could not read the pairing inputs: {exc}"]
     if args.extra_json:
         try:

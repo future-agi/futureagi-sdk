@@ -1,4 +1,8 @@
-"""sdkgen/pair_check.py: the scoped slice against one product commit, offline."""
+"""sdkgen/pair_check.py: the scoped slice against one product commit, offline.
+
+The product commit is a throwaway Git repository holding the committed contract and the MCP
+manifest and tools.yaml the product would generate for it (_scoped_product.py, shared with the
+scoped sync tests), so the pairing runs the same scope rules as sync_scoped_contract.py."""
 
 import copy
 import json
@@ -9,168 +13,142 @@ from pathlib import Path
 import pytest
 import yaml
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "sdkgen"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # the shared fixture, under any import mode
+
+import _scoped_product as fixture  # noqa: E402
+
+sys.path.insert(0, str(fixture.ROOT / "sdkgen"))
 
 import pair_check as pc  # noqa: E402
+import sync_contract  # noqa: E402
 
-FOO = {"type": "object", "properties": {"bar": {"$ref": "#/definitions/Bar"}}}
-BAR = {"type": "object", "properties": {"name": {"type": "string"}}}
-
-
-def spec():
-    return {
-        "swagger": "2.0",
-        "info": {"title": "t", "version": "1"},
-        "paths": {
-            "/epochs/{id}/": {
-                "parameters": [{"name": "id", "in": "path", "required": True, "type": "string"}],
-                "get": {"operationId": "epochs_read", "responses": {"200": {"description": "", "schema": {"$ref": "#/definitions/Foo"}}}},
-            },
-            "/tracer/sql-query/catalog/": {
-                "get": {"operationId": "sql_catalog", "responses": {"200": {"description": "", "schema": {"$ref": "#/definitions/Bar"}}}},
-            },
-            "/other/": {"get": {"operationId": "other", "responses": {"200": {"description": "ok"}}}},
-        },
-        "definitions": {"Foo": FOO, "Bar": BAR},
-    }
+N_SQL = len(fixture.SQL_PROJECTIONS)
+N_EPOCH = len(fixture.EPOCH_TOOLS)
 
 
-def catalog():
-    return {"operations": [
-        {"id": "simulation.epochs.get", "description": "Return one Epoch.",
-         "operation": {"method": "GET", "path": "/epochs/{id}/"},
-         "surfaces": {"sdk": {}, "mcp": {"name": "get_epoch", "group": "epoch", "access": "read"}}},
-        {"id": "sql.get_catalog", "description": "SQL sources.",
-         "operation": {"method": "GET", "path": "/tracer/sql-query/catalog/"},
-         "surfaces": {"sdk": {}, "mcp": {"name": "get_sql_catalog", "group": "observability", "access": "read"}}},
-        {"id": "other.get", "description": "Other.", "operation": {"method": "GET", "path": "/other/"},
-         "surfaces": {"sdk": {}, "mcp": False}},
-    ]}
-
-
-def manifest():
-    tools = [
-        {"name": "get_epoch", "group": "epoch", "request": {"method": "GET", "path": "/epochs/{id}/"}},
-        {"name": "get_sql_catalog", "group": "observability", "request": {"method": "GET", "path": "/tracer/sql-query/catalog/"}},
-    ]
-    return {"tool_count": len(tools), "tools": tools}
-
-
-def tools_yaml():
-    return {"tools": [{"name": "get_epoch", "group": "epoch", "description": "Return one Epoch."},
-                      {"name": "get_sql_catalog", "group": "observability", "description": "Different words."}]}
-
-
-def test_scopes_are_the_sql_ids_and_the_epoch_group():
-    entries = pc.scoped(catalog())
-    assert [e["id"] for e in entries["epoch"]] == ["simulation.epochs.get"]
-    assert [e["id"] for e in entries["sql"]] == ["sql.get_catalog"]
-
-
-def test_identical_scoped_projection_passes_and_out_of_scope_drift_is_ignored():
-    product, committed = spec(), spec()
-    committed["paths"]["/other/"]["get"]["operationId"] = "renamed"
-    entries = pc.scoped(catalog())
-    for scope in pc.SCOPES:
-        assert pc.compare_projection(product, committed, entries[scope], scope) == []
-    assert pc.compare_mcp(manifest(), tools_yaml(), entries) == []
-
-
-def test_drift_inside_a_scope_fails():
-    entries = pc.scoped(catalog())
-    changed = spec()
-    changed["definitions"]["Bar"] = {"type": "string"}
-    assert pc.compare_projection(changed, spec(), entries["epoch"], "epoch") == ["epoch: definition Bar differs from the product contract"]
-    changed = spec()
-    changed["paths"]["/epochs/{id}/"]["parameters"][0]["type"] = "integer"
-    assert pc.compare_projection(changed, spec(), entries["epoch"], "epoch") == ["epoch: parameters /epochs/{id}/ differs from the product contract"]
-    gone = spec()
-    del gone["paths"]["/tracer/sql-query/catalog/"]
-    (problem,) = pc.compare_projection(gone, spec(), entries["sql"], "sql")
-    assert problem.startswith("sql: product contract: the backend contract no longer has")
-
-
-def test_epoch_tool_set_paths_and_descriptions_must_match_the_product():
-    entries = pc.scoped(catalog())
-    extra = manifest()
-    extra["tools"].append({"name": "stop_epoch", "group": "epoch", "request": {"method": "POST", "path": "/epochs/{id}/stop/"}})
-    extra["tool_count"] += 1
-    assert pc.compare_mcp(extra, tools_yaml(), entries) == ["epoch: product tools without an epoch catalog entry: stop_epoch"]
-    moved = manifest()
-    moved["tools"][0]["request"]["path"] = "/epochs/{id}/v2/"
-    assert pc.compare_mcp(moved, tools_yaml(), entries) == [
-        "epoch: simulation.epochs.get is GET /epochs/{id}/, product get_epoch is GET /epochs/{id}/v2/"]
-    reworded = tools_yaml()
-    reworded["tools"][0]["description"] = "Return one Epoch. "
-    assert pc.compare_mcp(manifest(), reworded, entries) == [
-        "epoch: simulation.epochs.get description differs from product tools.yaml get_epoch"]
-    relabelled = manifest()
-    relabelled["tools"][0]["group"] = "simulation"
-    assert pc.compare_mcp(relabelled, tools_yaml(), entries) == [
-        "epoch: catalog entries outside the product's epoch group: get_epoch"]
-
-
-def _product_repo(path: Path, contract: dict) -> str:
-    files = {pc.SWAGGER: json.dumps(contract), pc.MCP: json.dumps(manifest()), pc.TOOLS_YAML: yaml.safe_dump(tools_yaml())}
+def _commit(path, built) -> str:
+    fixture.fingerprint(built["manifest"])
+    files = {pc.SWAGGER: json.dumps(built["source"]), pc.MCP: json.dumps(built["manifest"]),
+             pc.TOOLS_YAML: yaml.safe_dump(built["tools_yaml"])}
     for name, text in files.items():
         (path / name).parent.mkdir(parents=True, exist_ok=True)
         (path / name).write_text(text)
     git = ["git", "-C", str(path), "-c", "user.name=t", "-c", "user.email=t@example.invalid"]
-    subprocess.run([*git, "init", "-q"], check=True)
+    if not (path / ".git").exists():
+        subprocess.run([*git, "init", "-q"], check=True)
     subprocess.run([*git, "add", "-A"], check=True)
-    subprocess.run([*git, "commit", "-q", "-m", "product"], check=True)
+    subprocess.run([*git, "commit", "-q", "--allow-empty", "-m", "product"], check=True)
     return subprocess.check_output([*git, "rev-parse", "HEAD"], text=True).strip()
 
 
 @pytest.fixture
-def sdk_files(tmp_path, monkeypatch):
-    slice_path, catalog_path = tmp_path / "swagger.json", tmp_path / "operations.yaml"
-    committed = {**spec(), "x-contract-sources": {"sql": {"backend_commit": "0" * 40}}}
-    slice_path.write_text(json.dumps(committed))
-    catalog_path.write_text(yaml.safe_dump(catalog()))
-    monkeypatch.setattr(pc, "SLICE", slice_path)
-    monkeypatch.setattr(pc, "CATALOG", catalog_path)
-    return committed
+def product(tmp_path):
+    """(directory, built product files); tests edit the files, then call _commit."""
+    path = tmp_path / "product"
+    path.mkdir()
+    return path, fixture.product()
 
 
-def test_record_names_the_commit_hashes_and_stack(tmp_path, sdk_files):
-    product = tmp_path / "product"
-    product.mkdir()
-    sha = _product_repo(product, spec())
+def _run(tmp_path, path, sha, *extra):
+    out = tmp_path / "pair" / "pair.json"
+    code = pc.main(["--product", str(path), "--sha", sha, "--out", str(out), *extra])
+    return code, json.loads(out.read_text())
+
+
+def _epoch_only_response_definition() -> str:
+    """A definition reached by an epoch read's response and by no SQL operation."""
+    scoped = fixture.scoped_entries()
+    sql = [e for e in scoped if e["id"].startswith("sql.")]
+    _, sql_defs = sync_contract.project(fixture.SPEC, sql)
+    get_epoch = next(e for e in scoped if fixture.mcp_name(e) == "get_epoch")
+    _, epoch_defs = sync_contract.project(fixture.SPEC, [get_epoch])
+    return sorted(set(epoch_defs) - set(sql_defs))[0]
+
+
+def test_the_committed_slice_pairs_and_the_record_names_the_commit_hashes_and_stack(tmp_path, product):
+    path, built = product
+    sha = _commit(path, built)
     extra = tmp_path / "stack.json"
     extra.write_text(json.dumps({"image_digest": "sha256:" + "1" * 64}))
-    out = tmp_path / "pair" / "pair.json"
-    assert pc.main(["--product", str(product), "--sha", sha, "--branch", "dev", "--out", str(out), "--extra-json", str(extra)]) == 0
-    record = json.loads(out.read_text())
+    code, record = _run(tmp_path, path, sha, "--branch", "dev", "--extra-json", str(extra))
+    assert code == 0, record["problems"]
     assert record["product"] == {"repository": "future-agi/future-agi", "sha": sha, "resolved_branch": "dev"}
     assert record["slice_matches"] is True and record["problems"] == []
-    assert record["scope"] == {"epoch": ["simulation.epochs.get"], "sql": ["sql.get_catalog"]}
-    assert record["contract_sources"] == sdk_files["x-contract-sources"]
+    assert record["scope_groups"] == ["epoch", "sql"]
+    assert len(record["scope"]["sql"]) == N_SQL and all(i.startswith("sql.") for i in record["scope"]["sql"])
+    assert len(record["scope"]["epoch"]) == N_EPOCH
+    assert record["contract_sources"] == fixture.SPEC["x-contract-sources"]
     assert record["stack"] == {"image_digest": "sha256:" + "1" * 64}
-    raw = (product / pc.SWAGGER).read_bytes()
-    assert record["hashes"]["openapi_sha256"] == pc._sha256(raw)
+    assert record["hashes"]["openapi_sha256"] == pc._sha256((path / pc.SWAGGER).read_bytes())
+    assert set(record["hashes"]) == {"openapi_sha256", "mcp_sha256", "tools_yaml_sha256", "sdk_slice_sha256", "sdk_catalog_sha256"}
+    assert record["mcp"]["tool_count"] == N_SQL + N_EPOCH + 1
+
+
+def test_drift_outside_the_scopes_is_ignored(tmp_path, product):
+    path, built = product
+    scoped = {(e["operation"]["method"].lower(), e["operation"]["path"]) for e in fixture.scoped_entries()}
+    method, route = next((e["operation"]["method"].lower(), e["operation"]["path"]) for e in fixture.CATALOG["operations"]
+                         if (e["operation"]["method"].lower(), e["operation"]["path"]) not in scoped)
+    built["source"]["paths"][route][method]["operationId"] = "renamed_on_the_product"
+    code, record = _run(tmp_path, path, _commit(path, built))
+    assert (code, record["problems"]) == (0, [])
+
+
+def test_a_scoped_definition_that_drifted_fails_and_still_writes_the_record(tmp_path, product):
+    path, built = product
+    name = _epoch_only_response_definition()
+    built["source"]["definitions"][name]["title"] = "changed on the product"
+    code, record = _run(tmp_path, path, _commit(path, built))
+    assert code == 1
+    assert record["slice_matches"] is False
+    assert record["problems"] == [f"epoch: definition {name} differs from the product contract"]
     assert set(record["hashes"]) == {"openapi_sha256", "mcp_sha256", "tools_yaml_sha256", "sdk_slice_sha256", "sdk_catalog_sha256"}
 
 
-def test_a_mismatch_still_writes_the_record_and_fails(tmp_path, sdk_files):
-    product = tmp_path / "product"
-    product.mkdir()
-    drifted = copy.deepcopy(spec())
-    drifted["definitions"]["Foo"]["properties"]["added"] = {"type": "string"}
-    sha = _product_repo(product, drifted)
-    out = tmp_path / "pair.json"
-    assert pc.main(["--product", str(product), "--sha", sha, "--out", str(out)]) == 1
-    record = json.loads(out.read_text())
-    assert record["slice_matches"] is False
-    assert record["problems"] == ["epoch: definition Foo differs from the product contract"]
+def test_a_new_product_epoch_tool_fails_with_the_scoped_sync_rule(tmp_path, product):
+    path, built = product
+    built["manifest"]["tools"].append({**copy.deepcopy(built["tools"]["get_epoch"]), "name": "get_epoch_tomorrow"})
+    code, record = _run(tmp_path, path, _commit(path, built))
+    assert code == 1
+    (problem,) = record["problems"]
+    assert problem.startswith("scoped catalog check: expected exactly one catalog mapping per epoch tool: missing ['get_epoch_tomorrow']")
+    assert "scope" not in record and "hashes" in record
 
 
-def test_the_checkout_must_be_at_the_paired_commit(tmp_path, sdk_files):
-    product = tmp_path / "product"
-    product.mkdir()
-    _product_repo(product, spec())
-    out = tmp_path / "pair.json"
-    assert pc.main(["--product", str(product), "--sha", "f" * 40, "--out", str(out)]) == 1
-    assert "not " + "f" * 40 in json.loads(out.read_text())["problems"][0]
+def test_an_epoch_tool_that_left_the_group_fails(tmp_path, product):
+    path, built = product
+    built["tools"]["get_epoch"]["group"] = "simulation"
+    code, record = _run(tmp_path, path, _commit(path, built))
+    assert code == 1
+    (problem,) = record["problems"]
+    assert "epoch scope mismatch: simulation.epochs.get is in MCP group epoch" in problem
+
+
+def test_an_epoch_description_must_match_tools_yaml_byte_for_byte(tmp_path, product):
+    path, built = product
+    entry = next(t for t in built["tools_yaml"]["tools"] if t["name"] == "list_epochs")
+    entry["description"] += " "
+    code, record = _run(tmp_path, path, _commit(path, built))
+    assert code == 1
+    (problem,) = record["problems"]
+    assert "epoch descriptions differ from product tools.yaml" in problem and "list_epochs" in problem
+
+
+def test_a_sql_route_the_product_moved_fails(tmp_path, product):
+    path, built = product
+    built["tools"]["get_sql_catalog"]["request"]["path"] = "/tracer/sql-query/catalog/v2/"
+    code, record = _run(tmp_path, path, _commit(path, built))
+    assert code == 1
+    (problem,) = record["problems"]
+    assert "scoped MCP operation mismatch: sql." in problem
+
+
+def test_the_checkout_must_be_at_the_paired_commit(tmp_path, product):
+    path, built = product
+    _commit(path, built)
+    code, record = _run(tmp_path, path, "f" * 40)
+    assert code == 1
+    assert record["problems"][0].startswith("could not read the pairing inputs:")
+    assert "not " + "f" * 40 in record["problems"][0]
     with pytest.raises(SystemExit):
-        pc.main(["--product", str(product), "--sha", "HEAD", "--out", str(out)])
+        pc.main(["--product", str(path), "--sha", "HEAD", "--out", str(tmp_path / "pair.json")])

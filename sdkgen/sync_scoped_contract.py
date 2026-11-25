@@ -181,14 +181,15 @@ def _merge_paths(baseline: dict, scoped: dict) -> dict:
     return merged
 
 
-def compose(product: Path, commit: str, baseline_sdk: str) -> dict:
-    old_raw = _blob(sync_contract.ROOT, baseline_sdk, "sdkgen/contracts/swagger.json")
-    source_raw = _blob(product, commit, SWAGGER)
-    tools_raw = _blob(product, commit, MCP)
-    yaml_raw = _blob(product, commit, TOOLS_YAML)
-    old, source, manifest = map(json.loads, (old_raw, source_raw, tools_raw))
-    if "x-source-sha256" not in old or "x-contract-sources" in old:
-        raise ValueError("the SDK baseline must be a release slice (sync_contract.py output)")
+def check_scopes(source: dict, source_raw: bytes, manifest: dict, yaml_raw: bytes,
+                 entries: list[dict]) -> tuple[dict[str, set[str]], dict[str, list[dict]], list[dict]]:
+    """Check the scoped catalog entries against one product commit's OpenAPI, MCP manifest and
+    tools.yaml, all passed in already read. Returns (tool names per scope, catalog entries per
+    scope, unscoped entries) and raises ValueError on the first mismatch.
+
+    compose() runs this before it writes the slice; pair_check.py runs it against the product
+    commit a dev or pull-request build is paired with. Unscoped entries are only partitioned
+    here: whether the product still serves them is compose()'s concern, not the pairing's."""
     tools = _manifest_tools(manifest, source_raw)
     scoped_names = {name: scope_tools(name, tools) for name in SCOPES}
     if any(not names for names in scoped_names.values()):
@@ -196,19 +197,23 @@ def compose(product: Path, commit: str, baseline_sdk: str) -> dict:
     if any(a != b and scoped_names[a] & scoped_names[b] for a in SCOPES for b in SCOPES):
         raise ValueError("scopes overlap")
 
-    entries = yaml.safe_load(sync_contract.CATALOG.read_text())["operations"]
     in_scope: dict[str, list[dict]] = {name: [] for name in SCOPES}
     existing: list[dict] = []
     for entry in entries:
         method = entry["operation"]["method"]
         path = entry["operation"]["path"]
         scope = _scope_of(entry, scoped_names)
+        group = (entry.get("surfaces", {}).get("mcp") or {}).get("group")
         for name, spec in SCOPES.items():
             if "id_prefix" in spec:
                 by_id = entry["id"].startswith(spec["id_prefix"])
                 if by_id != path.startswith(spec["path_prefix"]) or by_id != (scope == name):
                     raise ValueError(f"{name} scope mismatch: {entry['id']}")
-        if method.lower() not in source["paths"].get(path, {}):
+            # A catalog entry in a scope's MCP group must name one of that group's product tools.
+            if "product_group" in spec and group == spec["product_group"] and scope != name:
+                raise ValueError(f"{name} scope mismatch: {entry['id']} is in MCP group {group}, "
+                                 f"but the product has no {group} tool of that name")
+        if scope and method.lower() not in source["paths"].get(path, {}):
             raise ValueError(f"selected operation missing on product: {method} {path}")
         (in_scope[scope] if scope else existing).append(entry)
 
@@ -224,10 +229,27 @@ def compose(product: Path, commit: str, baseline_sdk: str) -> dict:
             _check_tool(source, entry, op, tools[op.surfaces["mcp"]["name"]], SCOPES[name])
         if name in DESCRIBED_SCOPES:
             problems = check_mcp_descriptions.compare(
-                {"operations": selected}, check_mcp_descriptions.yaml_tools(yaml_raw), groups=(SCOPES[name]["product_group"],)
+                {"operations": entries}, check_mcp_descriptions.yaml_tools(yaml_raw), groups=(SCOPES[name]["product_group"],)
             )
             if problems:
                 raise ValueError(f"{name} descriptions differ from product tools.yaml: " + "; ".join(problems))
+    return scoped_names, in_scope, existing
+
+
+def compose(product: Path, commit: str, baseline_sdk: str) -> dict:
+    old_raw = _blob(sync_contract.ROOT, baseline_sdk, "sdkgen/contracts/swagger.json")
+    source_raw = _blob(product, commit, SWAGGER)
+    tools_raw = _blob(product, commit, MCP)
+    yaml_raw = _blob(product, commit, TOOLS_YAML)
+    old, source, manifest = map(json.loads, (old_raw, source_raw, tools_raw))
+    if "x-source-sha256" not in old or "x-contract-sources" in old:
+        raise ValueError("the SDK baseline must be a release slice (sync_contract.py output)")
+    entries = yaml.safe_load(sync_contract.CATALOG.read_text())["operations"]
+    scoped_names, in_scope, existing = check_scopes(source, source_raw, manifest, yaml_raw, entries)
+    for entry in existing:
+        method, path = entry["operation"]["method"], entry["operation"]["path"]
+        if method.lower() not in source["paths"].get(path, {}):
+            raise ValueError(f"selected operation missing on product: {method} {path}")
 
     # The baseline holds the catalog's operations and nothing else, and every unscoped operation.
     present = [e for e in entries if e["operation"]["method"].lower() in old["paths"].get(e["operation"]["path"], {})]

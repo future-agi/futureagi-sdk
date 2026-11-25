@@ -4,44 +4,23 @@ SDK baseline slice. Runs on fixtures built from the committed contract, without 
 from __future__ import annotations
 
 import copy
-import hashlib
 import json
+import sys
 from pathlib import Path
 
 import pytest
 import yaml
 
-ROOT = Path(__file__).resolve().parents[3]
-CATALOG = yaml.safe_load((ROOT / "sdkgen/catalog/operations.yaml").read_text())
-SPEC = json.loads((ROOT / "sdkgen/contracts/swagger.json").read_text())
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # the shared fixture, under any import mode
 
-EPOCH_TOOLS = {
-    "get_debug_failures", "run_debug_failures", "list_evidence_imports", "create_evidence_import",
-    "get_evidence_import", "draft_evidence_import", "add_evidence_import_cases", "discard_evidence_import",
-    "get_epoch_launch_options", "list_epochs", "get_epoch", "launch_epoch", "stop_epoch", "retry_epoch",
-    "get_epoch_candidate_patch", "make_epoch_candidate_default", "open_epoch_candidate_pull_request",
-}
-# The SQL tools' MCP inputs, written out rather than derived, so the gate is checked against an
-# independent statement of the product shape: (path, query, body, required).
-SQL_PROJECTIONS = {
-    "run_sql": ([], [], ["project_id", "sql", "start", "end", "reuse"], ["project_id", "sql", "start", "end"]),
-    "get_sql_result": (["id"], ["project_id", "offset", "limit"], [], ["id", "project_id"]),
-    "cancel_sql": (["id"], [], ["project_id"], ["id", "project_id"]),
-    "get_sql_catalog": ([], ["project_id"], [], ["project_id"]),
-}
+import _scoped_product as fixture  # noqa: E402
 
-
-def _mcp_name(entry: dict) -> str | None:
-    mapping = entry["surfaces"].get("mcp")
-    return None if mapping in (None, False) else mapping.get("name") or entry["id"].replace(".", "_")
-
-
-def _mcp_input(schema: dict) -> dict:
-    """An OpenAPI input as the product's MCP generator writes it: x-nullable becomes a null union."""
-    schema = {key: value for key, value in schema.items() if key != "description"}
-    if schema.pop("x-nullable", False):
-        return {"anyOf": [schema, {"type": "null"}]}
-    return schema
+ROOT = fixture.ROOT
+CATALOG = fixture.CATALOG
+SPEC = fixture.SPEC
+EPOCH_TOOLS = fixture.EPOCH_TOOLS
+SQL_PROJECTIONS = fixture.SQL_PROJECTIONS
+_mcp_name = fixture.mcp_name
 
 
 @pytest.fixture
@@ -50,59 +29,26 @@ def scoped_sync(monkeypatch):
     monkeypatch.syspath_prepend(str(ROOT / "sdkgen"))
     import sync_contract
     import sync_scoped_contract as sync
-    from generator.catalog import load
 
-    scoped = [e for e in CATALOG["operations"] if _mcp_name(e) in EPOCH_TOOLS | set(SQL_PROJECTIONS)]
+    scoped = fixture.scoped_entries()
     unscoped = [e for e in CATALOG["operations"] if e not in scoped]
     paths, definitions = copy.deepcopy(sync_contract.project(SPEC, unscoped))  # tests edit the baseline
     baseline = {**{k: SPEC[k] for k in ("swagger", "info", "securityDefinitions", "security")},
                 "x-source-sha256": "baseline-hash", "paths": paths, "definitions": definitions}
-    source = {k: v for k, v in SPEC.items() if k != "x-contract-sources"}
-    source_raw = json.dumps(source).encode()
-
-    tools, described = [], []
-    for op, entry in zip(load(SPEC, {"operations": scoped}), scoped):
-        mapping = op.surfaces["mcp"]
-        name = mapping["name"]
-        placement = {loc: [p.name for p in op.params_in(loc)] for loc in ("path", "query", "body")}
-        required = sorted(p.name for p in op.params if p.required)
-        if name in SQL_PROJECTIONS:
-            path_names, query, body, sql_required = SQL_PROJECTIONS[name]
-            assert {loc: sorted(names) for loc, names in placement.items()} == {
-                "path": sorted(path_names), "query": sorted(query), "body": sorted(body)}
-            assert required == sorted(sql_required)
-        props = {p.name: _mcp_input(p.schema) for p in op.params}
-        for field, cap in mapping.get("max_page_size", {}).items():
-            props[field]["maximum"] = cap
-        tools.append({
-            "name": name, "group": mapping["group"], "description": op.description,
-            "request": {"method": op.method, "path": op.path, "parameters": placement},
-            "response": {"unwrap": None if name in SQL_PROJECTIONS else "result"},
-            "source": {"operationId": op.operation_id},
-            "annotations": {"readOnlyHint": mapping["access"] == "read",
-                            "destructiveHint": mapping["access"] == "destructive",
-                            "openWorldHint": bool(mapping.get("open_world")),
-                            "idempotentHint": op.method == "GET"},
-            "inputSchema": {"type": "object", "properties": props, "required": required},
-        })
-        if mapping["group"] == "epoch":
-            described.append({"name": name, "group": "epoch", "description": entry["description"]})
-    tools.append({"name": "an_unscoped_tool", "group": "datasets"})
-    manifest = {"schema_version": 1, "tool_count": len(tools), "tools": tools,
-                "tool_names_sha256": hashlib.sha256("\n".join(sorted(t["name"] for t in tools)).encode()).hexdigest()}
-    tools_yaml = {"tools": described + [{"name": "an_unscoped_tool", "group": "datasets", "description": "x"}]}
+    built = fixture.product()
+    source_raw = json.dumps(built["source"]).encode()
+    manifest, tools_yaml = built["manifest"], built["tools_yaml"]
 
     def blob(_repo, _commit, path):
         return {"sdkgen/contracts/swagger.json": json.dumps(baseline).encode(), sync.SWAGGER: source_raw,
                 sync.MCP: json.dumps(manifest).encode(), sync.TOOLS_YAML: yaml.safe_dump(tools_yaml).encode()}[path]
 
     monkeypatch.setattr(sync, "_blob", blob)
-    state = {"baseline": baseline, "manifest": manifest, "tools": {t["name"]: t for t in tools}, "tools_yaml": tools_yaml}
+    state = {"baseline": baseline, "manifest": manifest, "tools": built["tools"], "tools_yaml": tools_yaml}
 
     def compose():
         if not state.get("keep_fingerprint"):  # a test that adds a tool gets a consistent manifest
-            manifest["tool_count"] = len(manifest["tools"])
-            manifest["tool_names_sha256"] = hashlib.sha256("\n".join(sorted(t["name"] for t in manifest["tools"])).encode()).hexdigest()
+            fixture.fingerprint(manifest)
         return sync.compose(ROOT, "0" * 40, "1" * 40)
 
     return compose, state
@@ -175,6 +121,13 @@ def test_scoped_sync_rejects_an_unwrap_the_sdk_does_not_share(scoped_sync):
     compose, state = scoped_sync
     state["tools"]["get_epoch"]["response"]["unwrap"] = "data"
     with pytest.raises(ValueError, match=r"unwrap mismatch: simulation\.epochs\.get"):
+        compose()
+
+
+def test_an_epoch_catalog_entry_needs_a_product_epoch_tool(scoped_sync):
+    compose, state = scoped_sync
+    state["tools"]["get_epoch"]["group"] = "simulation"  # the product moved the tool out of the group
+    with pytest.raises(ValueError, match=r"epoch scope mismatch: simulation\.epochs\.get is in MCP group epoch"):
         compose()
 
 
