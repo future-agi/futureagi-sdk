@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       product-ref:
-        description: "future-agi branch, tag or full commit to pair with (default: the branch resolution in .github/scripts/resolve_product_ref.py)"
+        description: "future-agi branch, tag or full commit to pair with (default: the pinned release in sdkgen/contracts/BACKEND_VERSION)"
         required: false
         type: string
 
@@ -46,11 +46,13 @@ jobs:
         run: python sdkgen/generate.py --check
       - name: Pick the product revision to pair with
         id: product
-        # pinned: a push to main or a pull request into main compares with the
-        # release in sdkgen/contracts/BACKEND_VERSION, as before. paired: every
-        # other run (pull requests into dev or other branches, pushes to dev,
-        # dispatches) compares with one product commit, resolved from the PR head
-        # branch, then its base (the pushed branch), then dev, then main.
+        # pinned: a push to main, a pull request into main, or a dispatch without
+        # product-ref compares with the release in sdkgen/contracts/BACKEND_VERSION,
+        # as before. paired: pull requests into dev or other branches, pushes to
+        # dev, and dispatches with product-ref compare with one product commit:
+        # the dispatched one, or the first of the PR head branch, its base (the
+        # pushed branch), dev and main that exists. A branch that exists but lacks
+        # a required file fails the run; it is never passed over.
         env:
           PRODUCT_REF_INPUT: ${{ inputs.product-ref }}
           QUEUE_BASE_REF: ${{ github.event.merge_group.base_ref }}

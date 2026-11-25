@@ -152,3 +152,43 @@ def test_the_checkout_must_be_at_the_paired_commit(tmp_path, product):
     assert "not " + "f" * 40 in record["problems"][0]
     with pytest.raises(SystemExit):
         pc.main(["--product", str(path), "--sha", "HEAD", "--out", str(tmp_path / "pair.json")])
+
+
+def test_the_live_coverage_table_names_every_epoch_operation_once():
+    entries = yaml.safe_load(pc.CATALOG.read_text())["operations"]
+    coverage, problems = pc.live_coverage(entries)
+    assert problems == []
+    assert coverage["tracking"] == "TH-10732"
+    assert sum(coverage["counts"].values()) == 17
+    rows = coverage["operations"]
+    # Only Debug failures succeeds live today; the rest wait for PR2 or cannot succeed.
+    assert {op for op, row in rows.items() if row["bucket"] == "a"} == {
+        "simulation.executions.insights.get", "simulation.executions.insights.start"}
+    assert {op for op, row in rows.items() if row["bucket"] == "c"} == {
+        "simulation.epochs.candidates.open_pull_request"}
+    assert all(row["status"] == "refusal-only until PR2 TH-10732" for row in rows.values() if row["bucket"] == "b")
+
+
+def test_the_record_carries_the_live_coverage_table(tmp_path, product):
+    path, built = product
+    code, record = _run(tmp_path, path, _commit(path, built))
+    assert code == 0, record["problems"]
+    assert record["live_coverage"]["counts"] == {"a": 2, "b": 14, "c": 1}
+
+
+@pytest.mark.parametrize("edit, message", [
+    (lambda t: t["operations"].pop("simulation.epochs.list"), "differs from the epoch-group catalog"),
+    (lambda t: t["operations"].__setitem__("simulation.extra", {"bucket": "a"}), "differs from the epoch-group catalog"),
+    (lambda t: t["operations"]["simulation.epochs.list"].pop("status"), "without the status"),
+    (lambda t: t["operations"]["simulation.epochs.list"].__setitem__("bucket", "covered"), "not a, b or c"),
+    (lambda t: t["operations"]["simulation.epochs.candidates.open_pull_request"].pop("reason"), "without a reason"),
+])
+def test_a_wrong_live_coverage_table_fails(tmp_path, monkeypatch, edit, message):
+    table = yaml.safe_load(pc.COVERAGE.read_text())
+    edit(table)
+    changed = tmp_path / "coverage.yaml"
+    changed.write_text(yaml.safe_dump(table))
+    monkeypatch.setattr(pc, "COVERAGE", changed)
+    entries = yaml.safe_load(pc.CATALOG.read_text())["operations"]
+    _, problems = pc.live_coverage(entries)
+    assert any(message in problem for problem in problems), problems

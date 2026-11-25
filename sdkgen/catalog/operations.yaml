@@ -14,7 +14,8 @@
 #               where the items are, and `next` or `total_pages` to know when to stop)
 #
 # MCP names follow future-agi/futureagi/mcp_server/catalog/tools.yaml: all 128 tools of the
-# product commit in contracts/swagger.json x-contract-sources (sdkgen/check_mcp_parity.py).
+# product commit recorded in contracts/swagger.json x-contract-sources.epoch. Check with
+# `sdkgen/check_mcp_parity.py --ref <that commit>` (its default is BACKEND_VERSION).
 
 version: 1
 operations:

@@ -85,6 +85,9 @@ class ModeTests(unittest.TestCase):
             # A dispatched stack ref alone keeps today's meaning: the pinned release's stack.
             {"GITHUB_EVENT_NAME": "workflow_dispatch", "BACKEND_REF_INPUT": "v1.59.0", "GITHUB_REF_NAME": "dev"},
             {"GITHUB_EVENT_NAME": "merge_group", "QUEUE_BASE_REF": "refs/heads/main"},
+            # A dispatch without a product-ref keeps the release pin, from a branch or a tag.
+            {"GITHUB_EVENT_NAME": "workflow_dispatch", "GITHUB_REF_NAME": "feat/x", "GITHUB_REF": "refs/heads/feat/x"},
+            {"GITHUB_EVENT_NAME": "workflow_dispatch", "GITHUB_REF_NAME": "v1.2.3", "GITHUB_REF": "refs/tags/v1.2.3"},
         ]
         for env in cases:
             with self.subTest(env=env):
@@ -104,11 +107,8 @@ class ModeTests(unittest.TestCase):
             self.mode(GITHUB_EVENT_NAME="push", GITHUB_REF="refs/heads/dev", GITHUB_REF_NAME="dev"),
             ("paired", "", "", "dev"))
         self.assertEqual(
-            self.mode(GITHUB_EVENT_NAME="workflow_dispatch", GITHUB_REF_NAME="feat/x"),
-            ("paired", "", "", "feat/x"))
-        self.assertEqual(
             self.mode(GITHUB_EVENT_NAME="workflow_dispatch", GITHUB_REF_NAME="dev", PRODUCT_REF_INPUT=SHA),
-            ("paired", SHA, "", "dev"))
+            ("paired", SHA, "", ""))
         self.assertEqual(
             self.mode(GITHUB_EVENT_NAME="merge_group", QUEUE_BASE_REF="refs/heads/dev",
                       GITHUB_HEAD_REF="gh-readonly-queue/dev/pr-1"),
@@ -155,22 +155,27 @@ class ChooseTests(unittest.TestCase):
         self.assertEqual(seen, ["feat/x"])
 
     def test_candidates_run_head_base_dev_main(self):
-        probe, seen = scripted({
-            "feat/x": (SHA, ["bin/e2e"]),
-            "feat/base": None,
-            "dev": (OTHER_SHA, ["futureagi/mcp_server/catalog/tools.yaml"]),
-            "main": (THIRD_SHA, []),
-        })
+        probe, seen = scripted({"feat/x": None, "feat/base": None, "dev": None, "main": (THIRD_SHA, [])})
         self.assertEqual(resolver.choose_ref("", "feat/x", "feat/base", probe), (THIRD_SHA, "main"))
         self.assertEqual(seen, ["feat/x", "feat/base", "dev", "main"])
+
+    def test_existing_incomplete_candidate_fails_instead_of_falling_back(self):
+        for incomplete in ["feat/x", "feat/base", "dev"]:
+            with self.subTest(incomplete=incomplete):
+                found = {"feat/x": None, "feat/base": None, "dev": (OTHER_SHA, []), "main": (THIRD_SHA, [])}
+                found[incomplete] = (SHA, ["bin/e2e"])
+                probe, seen = scripted(found)
+                with self.assertRaisesRegex(resolver.ResolutionError, f"product branch {incomplete} lacks required"):
+                    resolver.choose_ref("", "feat/x", "feat/base", probe)
+                self.assertEqual(seen[-1], incomplete)
 
     def test_duplicate_candidates_are_probed_once(self):
         probe, seen = scripted({"dev": (SHA, [])})
         self.assertEqual(resolver.choose_ref("", "", "dev", probe), (SHA, "dev"))
         self.assertEqual(seen, ["dev"])
 
-    def test_no_complete_candidate_is_failure(self):
-        probe, _ = scripted({"dev": (SHA, ["bin/e2e"]), "main": (OTHER_SHA, ["bin/e2e"])})
+    def test_no_existing_candidate_is_failure(self):
+        probe, _ = scripted({"dev": None, "main": None})
         with self.assertRaisesRegex(resolver.ResolutionError, "no product branch"):
             resolver.choose_ref("", "feat/x", "dev", probe)
 
@@ -291,7 +296,7 @@ class ProbeTests(unittest.TestCase):
         probe = FakeGit({"refs/heads/selected": SHA}, modes={"bin/e2e": "100755 blob"})
         self.assertEqual(resolver.choose_ref("selected", "head", "dev", probe), (SHA, "selected"))
 
-    def test_incomplete_head_falls_back_through_the_real_probe(self):
+    def test_incomplete_head_fails_through_the_real_probe(self):
         probe = FakeGit({"refs/heads/feat/x": SHA, "refs/heads/dev": OTHER_SHA})
         original = probe._git
 
@@ -303,9 +308,9 @@ class ProbeTests(unittest.TestCase):
             return original(*args, **kwargs)
 
         probe._git = partial
-        with redirect_stdout(io.StringIO()):
-            self.assertEqual(resolver.choose_ref("", "feat/x", "dev", probe), (OTHER_SHA, "dev"))
-        self.assertEqual(probe.fetches(), ["refs/heads/feat/x", "refs/heads/dev"])
+        with self.assertRaisesRegex(resolver.ResolutionError, "product branch feat/x lacks required"):
+            resolver.choose_ref("", "feat/x", "dev", probe)
+        self.assertEqual(probe.fetches(), ["refs/heads/feat/x"])
 
     def test_transport_diagnostics_are_not_exposed(self):
         probe = resolver.GitProbe.__new__(resolver.GitProbe)

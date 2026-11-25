@@ -19,8 +19,9 @@ the committed slice. Drift outside the scopes is ignored; the release sync owns 
 
 pair.json records the product commit, the branch it was resolved from, the
 sha256 of the product swagger.json, tools.generated.json and tools.yaml, the
-committed slice's sha256 and x-contract-sources record, and the outcome. It is
-written even when the check fails. `--extra-json` merges a JSON object (the E2E
+committed slice's sha256 and x-contract-sources record, the live coverage table
+(sdkgen/contracts/epoch-live-coverage.yaml, which must name exactly the epoch-group
+operations), and the outcome. It is written even when the check fails. `--extra-json` merges a JSON object (the E2E
 job's image digest and bootstrap helper hash) under "stack".
 """
 
@@ -43,6 +44,7 @@ from generator.catalog import CatalogError
 ROOT = sync_contract.ROOT
 SLICE = sync_contract.OUT
 CATALOG = sync_contract.CATALOG
+COVERAGE = ROOT / "sdkgen" / "contracts" / "epoch-live-coverage.yaml"
 BACKEND_VERSION = sync_contract.VERSION_FILE
 PRODUCT_REPOSITORY = "future-agi/future-agi"
 SWAGGER = sync_scoped_contract.SWAGGER
@@ -130,7 +132,46 @@ def check(product: Path, sha: str) -> tuple[list[str], dict]:
         facts["scope"] = {scope: sorted(entry["id"] for entry in in_scope[scope]) for scope in SCOPES}
         for scope in SCOPES:
             problems += compare_projection(product_spec, committed, in_scope[scope], scope)
+    coverage, coverage_problems = live_coverage(entries)
+    facts["live_coverage"] = coverage
+    problems += coverage_problems
     return problems, facts
+
+
+BUCKETS = {"a", "b", "c"}
+
+
+def live_coverage(entries: list) -> tuple[dict | None, list[str]]:
+    """The committed live coverage table, and what is wrong with it: it must name exactly
+    the catalog's epoch-group operations, each in bucket a, b or c; a b entry carries the
+    "refusal-only until PR2 <tracking>" status and a c entry its reason."""
+    try:
+        table = yaml.safe_load(COVERAGE.read_text())
+    except (OSError, yaml.YAMLError) as exc:
+        return None, [f"live coverage: cannot read {COVERAGE.name}: {exc}"]
+    if not isinstance(table, dict) or not isinstance(table.get("operations"), dict):
+        return None, [f"live coverage: {COVERAGE.name} has no operations mapping"]
+    tracking = table.get("tracking", "")
+    operations = table["operations"]
+    epoch = {
+        entry["id"]
+        for entry in entries
+        if isinstance(((entry.get("surfaces") or {}).get("mcp")), dict) and entry["surfaces"]["mcp"].get("group") == "epoch"
+    }
+    problems = []
+    if set(operations) != epoch:
+        missing, extra = sorted(epoch - set(operations)), sorted(set(operations) - epoch)
+        problems.append(f"live coverage: table differs from the epoch-group catalog (missing {missing}, extra {extra})")
+    for op, row in sorted(operations.items()):
+        bucket = (row or {}).get("bucket")
+        if bucket not in BUCKETS:
+            problems.append(f"live coverage: {op} has bucket {bucket!r}, not a, b or c")
+        elif bucket == "b" and row.get("status") != f"refusal-only until PR2 {tracking}":
+            problems.append(f"live coverage: {op} is in bucket b without the status 'refusal-only until PR2 {tracking}'")
+        elif bucket == "c" and not row.get("reason"):
+            problems.append(f"live coverage: {op} is in bucket c without a reason")
+    counts = {bucket: sum(1 for row in operations.values() if (row or {}).get("bucket") == bucket) for bucket in sorted(BUCKETS)}
+    return {"tracking": tracking, "counts": counts, "operations": operations}, problems
 
 
 def _sdk_sha() -> str | None:

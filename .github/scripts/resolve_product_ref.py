@@ -5,20 +5,21 @@
 
 Modes, decided by the triggering event:
 
-  pinned   a push to main, a pull request into main, or a dispatch that names a
-           backend release (backend-version or backend-ref): the run tests the
-           release in sdkgen/contracts/BACKEND_VERSION (or the dispatched one),
-           exactly as before.
+  pinned   a push to main, a pull request into main, or any dispatch without a
+           product-ref: the run tests the release in
+           sdkgen/contracts/BACKEND_VERSION (or the dispatched backend-version or
+           backend-ref), exactly as before.
   latest   the nightly schedule: the newest published release (:latest).
-  paired   everything else (pull requests into dev or other branches, pushes to
-           dev, plain dispatches): the run pairs with one immutable product commit.
-           Candidates, in order: the PR head branch, the PR base branch (the
-           pushed branch on a push), dev, main. A dispatched product-ref is the
-           only candidate and fails closed.
+  paired   pull requests into dev or other branches, pushes to branches other
+           than main, and dispatches that name a product-ref: the run pairs with
+           one immutable product commit. Candidates, in order: the PR head
+           branch, the PR base branch (the pushed branch on a push), dev, main. A
+           dispatched product-ref is the only candidate.
 
-A paired candidate counts only if it resolves to a full 40-hex commit that holds
-every file the pairing needs (REQUIRED_PATHS). Transport errors never fall back to
-the next candidate. Outputs: mode, sha and branch (sha and branch are empty unless
+Only a candidate branch that does not exist is passed over. One that exists must
+resolve to a full 40-hex commit holding every file the pairing needs
+(REQUIRED_PATHS), or the run fails: it never pairs with a later candidate
+instead. Transport errors fail the same way. Outputs: mode, sha and branch (sha and branch are empty unless
 the mode is paired). Standard library only.
 """
 
@@ -102,9 +103,9 @@ def select_mode(env: dict) -> Tuple[str, str, str, str]:
     if event == "workflow_dispatch":
         if explicit and release:
             raise ResolutionError("choose product-ref (paired) or backend-version/backend-ref (pinned), not both")
-        if release:
-            return "pinned", "", "", ""
-        return "paired", explicit, "", env.get("GITHUB_REF_NAME", "")
+        if not explicit:
+            return "pinned", "", "", ""  # A dispatch keeps the release pin unless it names a product-ref.
+        return "paired", explicit, "", ""
     if event == "schedule":
         return "latest", "", "", ""
     if event == "push":
@@ -135,7 +136,8 @@ def select_mode(env: dict) -> Tuple[str, str, str, str]:
 
 
 def choose_ref(explicit: str, head: str, base: str, probe: Probe) -> Tuple[str, str]:
-    """(sha, candidate). An explicit request fails closed; automatic ones must hold REQUIRED_PATHS."""
+    """(sha, candidate). Only a branch that does not exist is passed over; any candidate that
+    exists must hold REQUIRED_PATHS, or resolution fails."""
     candidates = [explicit] if explicit else [ref for ref in (head, base, "dev", "main") if ref]
     for candidate in dict.fromkeys(candidates):
         try:
@@ -155,12 +157,10 @@ def choose_ref(explicit: str, head: str, base: str, probe: Probe) -> Tuple[str, 
         if explicit and FULL_SHA.fullmatch(explicit) and sha != explicit:
             raise ResolutionError("requested product commit identity mismatch")
         if missing:
-            if explicit:
-                raise ResolutionError("requested product ref lacks required files: " + ", ".join(missing))
-            print(f"product ref {candidate} lacks {', '.join(missing)}; checking the next candidate")
-            continue
+            which = "requested product ref" if explicit else f"product branch {candidate}"
+            raise ResolutionError(f"{which} lacks required files: " + ", ".join(missing))
         return sha, candidate
-    raise ResolutionError("no product branch among the candidates holds every required file")
+    raise ResolutionError("no product branch among the candidates exists")
 
 
 class GitProbe:

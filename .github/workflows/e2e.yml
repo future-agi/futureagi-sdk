@@ -21,13 +21,15 @@ name: E2E
 # released.
 #
 # Which backend, by event (.github/scripts/resolve_product_ref.py):
-#   pinned  a push to main, a pull request into main, or a dispatch with
-#           backend-version/backend-ref: the release image above, unchanged.
+#   pinned  a push to main, a pull request into main, or a dispatch without
+#           product-ref: the release image above (or the dispatched
+#           backend-version/backend-ref), unchanged.
 #   latest  the nightly run: :latest with main's stack, unchanged.
-#   paired  every other run (pull requests into dev or other branches, pushes
-#           to dev, other dispatches): one product commit, resolved from the PR
-#           head branch, then its base (the pushed branch), then dev, then main,
-#           or the dispatched product-ref. The Standalone image is built from
+#   paired  pull requests into dev or other branches, pushes to dev, and
+#           dispatches with product-ref: one product commit, the dispatched one
+#           or the first of the PR head branch, its base (the pushed branch), dev
+#           and main that exists (one that exists but lacks a required file fails
+#           the run). The Standalone image is built from
 #           that commit the way the monorepo's E2E CI builds it, pushed to a
 #           registry on the runner and run by digest, with the stack files and
 #           the SQL fixture helper from the same commit. The job uploads
