@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import httpx
 import pytest
-
 from fi.context.client import AsyncContextClient, ContextClient
 from fi.platform import AsyncClient, ContextAuth
-from test_snapshots import Fixture, client as sync_platform
+from test_snapshots import Fixture
+from test_snapshots import client as sync_platform
 
 
 @pytest.mark.parametrize("asynchronous", [False, True])

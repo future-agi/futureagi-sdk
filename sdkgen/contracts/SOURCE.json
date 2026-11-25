@@ -1,7 +1,7 @@
 {
-  "backend_commit": "17ef98737d5b19a72cf4ae2fdce336813c479086",
-  "openapi_sha256": "70c03da3e1750c852322914ca2cbf6c041624a5ebfbd48b03e6b261090f726a3",
-  "mcp_sha256": "570da58adf472a96b8ac3152cd31601a04fa1a6268ea412e9035b332403bab71",
-  "non_skills_sdk_commit": "5b8a98f8275812aa0e83afbf0929bf4dca126566",
-  "non_skills_slice_sha256": "0986e8a40fb643fc2474493784add4617c1986e9762c4bfb7309441105892d8b"
+  "backend_commit": "c0626da7db8348db7f15424470a0f03a217f0abb",
+  "openapi_sha256": "6e6111b068447eab2b02e4c18d0e84ec76566ffa3350db38a10ae7a8e7440ddb",
+  "mcp_sha256": "43b667d5f23eb47b76f77aeee2f5bae340501c587908403a66e2574944754339",
+  "non_skills_sdk_commit": "0a1e6483f4cc30d4dc953f2c3220f54e56b8e6aa",
+  "non_skills_slice_sha256": "309fcdc59d02ae951c30a20dd5320530adb342c3d000610687c5fa1cbef78b6e"
 }

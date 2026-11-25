@@ -9,17 +9,29 @@ exists once traces are indexed); those accept the typed error the backend sends,
 
 from __future__ import annotations
 
+import asyncio
+import decimal
+import json
+import os
+import re
 import time
+import unicodedata
 import uuid
 import warnings
 from datetime import datetime, timedelta, timezone
+from ipaddress import ip_address
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import fi.platform as fi
+import httpx
 import pytest
 import yaml
 
 CATALOG = Path(__file__).resolve().parents[3] / "sdkgen" / "catalog" / "operations.yaml"
+SQL_TOTAL_TIMEOUT = 150.0
+SQL_CLEANUP_TIMEOUT = 10.0
+TERMINAL_SQL_STATES = {"succeeded", "failed", "cancelled"}
 
 CODE_EVAL = "def evaluate(input, **kwargs):\n    return {'result': True, 'reason': 'ok'}\n"
 
@@ -124,6 +136,439 @@ def project(client):
 
 
 # --------------------------------------------------------------------------- #
+
+
+def _poll_sql_result(get_result, job_id, project_id, *, clock=time.monotonic, sleep=time.sleep):
+    # The backend allows 90s queued, then 45s from execution start; allow 15s for transport.
+    deadline = clock() + SQL_TOTAL_TIMEOUT
+    state = "not polled"
+    while (remaining := deadline - clock()) > 0:
+        page = get_result(job_id, project_id=project_id, offset=0, limit=1,
+                          options=fi.RequestOptions(timeout=remaining, max_retries=0))
+        assert page.id == job_id and page.project_id == project_id
+        state = page.state
+        remaining = deadline - clock()
+        if remaining <= 0:
+            break
+        if state in TERMINAL_SQL_STATES:
+            return page
+        sleep(min(0.5, remaining))
+    raise AssertionError(f"SQL job {job_id} did not finish in 150s: {state}")
+
+
+def _sql_request_options(deadline, *, clock=time.monotonic):
+    remaining = deadline - clock()
+    if remaining <= 0:
+        raise AssertionError("SQL request deadline exceeded")
+    return fi.RequestOptions(timeout=remaining, max_retries=0)
+
+
+async def _poll_sql_result_async(
+    client,
+    job_id,
+    project_id,
+    *,
+    clock=time.monotonic,
+    sleep=asyncio.sleep,
+    deadline=None,
+):
+    deadline = clock() + SQL_TOTAL_TIMEOUT if deadline is None else deadline
+    state = "not polled"
+    while (remaining := deadline - clock()) > 0:
+        page = await client.sql.get_result(
+            job_id,
+            project_id=project_id,
+            offset=0,
+            limit=1,
+            options=fi.RequestOptions(timeout=remaining, max_retries=0),
+        )
+        assert page.id == job_id and page.project_id == project_id
+        state = page.state
+        remaining = deadline - clock()
+        if remaining <= 0:
+            break
+        if state in TERMINAL_SQL_STATES:
+            return page
+        await sleep(min(0.5, remaining))
+    raise AssertionError(f"SQL async job {job_id} did not finish in 150s: {state}")
+
+
+def _cancel_sql_job_bounded(client, job_id, project_id, *, timeout=SQL_CLEANUP_TIMEOUT,
+                            clock=time.monotonic, sleep=time.sleep):
+    deadline = clock() + timeout
+    state = "unknown"
+    while (remaining := deadline - clock()) > 0:
+        result = client.sql.cancel(
+            job_id,
+            project_id=project_id,
+            options=fi.RequestOptions(timeout=remaining, max_retries=0),
+        )
+        state = result.state
+        if state in TERMINAL_SQL_STATES:
+            return result
+        remaining = deadline - clock()
+        if remaining <= 0:
+            break
+        sleep(min(0.5, remaining))
+    raise AssertionError(f"SQL job {job_id} remained {state} after bounded cleanup")
+
+
+async def _cancel_sql_job_bounded_async(
+    client,
+    job_id,
+    project_id,
+    *,
+    timeout=SQL_CLEANUP_TIMEOUT,
+    clock=time.monotonic,
+    sleep=asyncio.sleep,
+):
+    deadline = clock() + timeout
+    state = "unknown"
+    while (remaining := deadline - clock()) > 0:
+        result = await client.sql.cancel(
+            job_id,
+            project_id=project_id,
+            options=_sql_request_options(deadline, clock=clock),
+        )
+        state = result.state
+        if state in TERMINAL_SQL_STATES:
+            return result
+        remaining = deadline - clock()
+        if remaining <= 0:
+            break
+        await sleep(min(0.5, remaining))
+    raise AssertionError(f"SQL async job {job_id} remained {state} after bounded cleanup")
+
+
+def _run_with_cleanup_preserving_primary(work, cleanup):
+    """Run cleanup without replacing a failure from the operation under test."""
+    primary = cleanup_error = None
+    result = None
+    try:
+        result = work()
+    except BaseException as exc:
+        primary = exc
+    try:
+        cleanup()
+    except BaseException as exc:
+        cleanup_error = exc
+    if primary is not None:
+        if cleanup_error is not None:
+            warnings.warn(
+                "SQL cleanup failed after the primary failure "
+                f"({type(cleanup_error).__name__})",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+        raise primary.with_traceback(primary.__traceback__)
+    if cleanup_error is not None:
+        raise cleanup_error.with_traceback(cleanup_error.__traceback__)
+    return result
+
+
+async def _async_wait_until(predicate, deadline: float, every: float = 0.25) -> bool:
+    """Poll an async backend state change without exceeding the caller's deadline."""
+    while (remaining := deadline - time.monotonic()) > 0:
+        if await predicate():
+            return True
+        await asyncio.sleep(min(every, remaining))
+    return False
+
+
+async def _run_async_with_cleanup_preserving_primary(work, cleanup):
+    """Run async cleanup without replacing a failure from the operation under test."""
+    primary = cleanup_error = None
+    result = None
+    try:
+        result = await work()
+    except BaseException as exc:
+        primary = exc
+    try:
+        await cleanup()
+    except BaseException as exc:
+        cleanup_error = exc
+    if primary is not None:
+        if cleanup_error is not None:
+            warnings.warn(
+                "SQL cleanup failed after the primary failure "
+                f"({type(cleanup_error).__name__})",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+        raise primary.with_traceback(primary.__traceback__)
+    if cleanup_error is not None:
+        raise cleanup_error.with_traceback(cleanup_error.__traceback__)
+    return result
+
+
+def _sql_collector_url(raw, collector_port):
+    """Only the standalone API origin may select a credentialed collector on the same loopback host."""
+    __tracebackhide__ = True  # pytest must not display a rejected URL containing userinfo
+    try:
+        base = urlsplit(raw)
+        host = base.hostname or ""
+        if host != "localhost":
+            address = ip_address(host)  # literal only; never resolve a configured hostname
+            if not address.is_loopback or "%" in host:
+                raise ValueError
+            if address.version == 6:
+                host = f"[{host}]"
+        # Compare the whole input, not just .hostname: reject userinfo, paths,
+        # malformed authorities and characters that URL parsers would discard.
+        origin = f"{base.scheme}://{host}" + (f":{base.port}" if base.port is not None else "")
+        if base.scheme not in {"http", "https"} or base.port == 0 or raw.lower() not in (origin, origin + "/"):
+            raise ValueError
+    except ValueError:
+        raise ValueError("SQL fixture requires an HTTP(S) loopback API origin") from None
+    if not re.fullmatch(r"[1-9][0-9]{0,4}", collector_port) or int(collector_port) > 65535:
+        raise ValueError("SQL fixture requires a valid collector port")
+    return f"{base.scheme}://{host}:{collector_port}/v1/traces"
+
+
+def _clean_sql_otlp_receipt(body):
+    """The released e2e/lib/otlp.ts accepts an empty body or a receipt with no losses or warnings."""
+    def invalid_constant(_):  # Python accepts NaN/Infinity by default; JSON.parse does not.
+        raise ValueError
+
+    def unique_object(pairs):
+        obj = dict(pairs)
+        if len(obj) != len(pairs):
+            raise ValueError
+        return obj
+
+    try:
+        text = body.decode("utf-8")
+        # String.trim() treats Unicode separators and BOM as whitespace, not arbitrary controls.
+        if all(ch in "\t\n\v\f\r\ufeff" or unicodedata.category(ch).startswith("Z") for ch in text):
+            return True
+        receipt = json.loads(text, object_pairs_hook=unique_object, parse_int=decimal.Decimal,
+                             parse_float=decimal.Decimal, parse_constant=invalid_constant)
+    except (ValueError, RecursionError, decimal.InvalidOperation):
+        return False
+
+    counts = {"rejectedSpans", "rejected_spans"}
+    messages = {"errorMessage", "error_message"}
+    if not isinstance(receipt, dict) or receipt.keys() - {"partialSuccess", "partial_success"}:
+        return False
+    for partial in receipt.values():  # both aliases may be present
+        if not isinstance(partial, dict) or partial.keys() - (counts | messages):
+            return False
+        for key, value in partial.items():
+            if key in counts:
+                zero = isinstance(value, decimal.Decimal) and value.is_zero()
+                if not zero and not (isinstance(value, str) and re.fullmatch(r"0+", value)):
+                    return False
+            elif value != "":
+                return False
+    return True
+
+
+def _seed_sql_spans(url, name):
+    """Keep the collector exchange out of subsequent project-discovery tracebacks."""
+    __tracebackhide__ = True
+    trace_id, session_id = uuid.uuid4().hex, str(uuid.uuid4())
+    start = time.time_ns() - 1_000_000_000
+
+    def attr(key, value):
+        return {"key": key, "value": {"stringValue": value}}
+
+    spans = [
+        {"traceId": trace_id, "spanId": uuid.uuid4().hex[:16], "name": f"sql-{role}", "kind": 1,
+         "startTimeUnixNano": str(start), "endTimeUnixNano": str(start + 50_000_000), "status": {"code": 1},
+         "attributes": [attr("fi.span.kind", "llm"), attr("session.id", session_id)]}
+        for role in ("root", "child")
+    ]
+    spans[1]["parentSpanId"] = spans[0]["spanId"]
+    resource = {"attributes": [attr("project_name", name), attr("project_type", "observe"), attr("service.name", name)]}
+    payload = {"resourceSpans": [{"resource": resource, "scopeSpans": [{"scope": {"name": "sdk-e2e"}, "spans": spans}]}]}
+
+    with httpx.Client(trust_env=False, follow_redirects=False, timeout=30) as http:
+        headers = {"X-Api-Key": os.environ["FI_API_KEY"], "X-Secret-Key": os.environ["FI_SECRET_KEY"]}
+        try:
+            reply = http.post(url, json=payload, headers=headers)
+        except httpx.RequestError:
+            reply = None
+        if reply is None:  # Don't chain a transport exception into pytest's report.
+            pytest.fail("SQL fixture collector request failed", pytrace=False)
+        if not reply.is_success:
+            pytest.fail(f"SQL fixture collector returned HTTP {reply.status_code}", pytrace=False)
+        if not _clean_sql_otlp_receipt(reply.content):
+            pytest.fail("SQL fixture collector returned an invalid or partial OTLP receipt", pytrace=False)
+    return spans
+
+
+def _discover_sql_project(client, name):
+    def matching_projects():
+        try:
+            return [p["id"] for p in client.projects.list(name=name)["projects"] if p["name"] == name]
+        except fi.FutureAGIError:
+            pass  # The SDK error may include a response body; fail outside its exception handler.
+        pytest.fail("SQL fixture project lookup failed", pytrace=False)
+
+    assert wait_until(lambda: len(matching_projects()) == 1, timeout=60), "collector project was not created"
+    project_id, = matching_projects()
+    return project_id
+
+
+@pytest.fixture
+def sql_project(client):
+    """Seed ClickHouse via the released standalone collector, as in OBS-E2E-061."""
+    __tracebackhide__ = True  # Keep the span payload out of a discovery failure's locals, too.
+    url = _sql_collector_url(os.environ["FI_BASE_URL"], os.environ.get("FI_COLLECTOR_OTLP_HTTP_PORT", "24318"))
+    name = f"sdk-sql-{uuid.uuid4().hex}"
+    spans = _seed_sql_spans(url, name)
+    return _discover_sql_project(client, name), name, spans
+
+
+def test_sql_job_on_synthetic_spans(client, sql_project):
+    """Exercise default reuse omission, multiple result pages, and cancellation cleanup."""
+    project_id, project_name, spans = sql_project
+    assert client.projects.get(project_id).name == project_name
+    assert client.sql.get_catalog(project_id=project_id).max_window_days >= 1
+    # The ClickHouse list and the SQL scan must see the fixture after async ingestion.
+    assert wait_until(lambda: len(client.spans.list(project_id=project_id).table) == len(spans))
+    start = datetime.fromtimestamp(int(spans[0]["startTimeUnixNano"]) / 1e9, tz=timezone.utc) - timedelta(minutes=1)
+    job = client.sql.run(
+        project_id=project_id,
+        sql="SELECT name FROM spans ORDER BY name",
+        start=start.isoformat(),
+        end=datetime.now(timezone.utc).isoformat(),
+    )
+    assert job.id and job.project_id == project_id
+    final = None
+
+    def read_pages():
+        nonlocal final
+        first = _poll_sql_result(client.sql.get_result, job.id, project_id)
+        assert first.state == "succeeded", first.error
+        assert first.result.rows and len(first.result.rows) == 1
+        assert first.result.has_more is True
+        assert first.result.next_offset is not None
+        second = client.sql.get_result(
+            job.id, project_id=project_id, offset=first.result.next_offset, limit=1
+        )
+        assert second.state == "succeeded", second.error
+        assert second.result.rows and len(second.result.rows) == 1
+        assert second.result.has_more is False
+        assert {row[0] for row in first.result.rows + second.result.rows} == {f"sql-{role}" for role in ("root", "child")}
+
+    def cleanup():
+        nonlocal final
+        # Cancelling an already completed job returns its unchanged terminal snapshot.
+        final = _cancel_sql_job_bounded(client, job.id, project_id)
+        assert final.id == job.id and final.project_id == project_id
+        assert final.state == "succeeded"
+
+    _run_with_cleanup_preserving_primary(read_pages, cleanup)
+
+    # A tiny fixture often completes before the cancellation request reaches the API. Do not
+    # call that a cancellation proof; the explicit pending path keeps the gate honest.
+    active_job = None
+    active_job_id = None
+    active_state = None
+
+    def active_work():
+        nonlocal active_job, active_job_id, active_state
+        active_job = client.sql.run(
+            project_id=project_id,
+            sql="SELECT name FROM spans ORDER BY name",
+            start=start.isoformat(),
+            end=datetime.now(timezone.utc).isoformat(),
+            reuse=False,
+            options=fi.RequestOptions(timeout=SQL_TOTAL_TIMEOUT, max_retries=0),
+        )
+        active_job_id = active_job.id
+        active_state = active_job.state
+        assert active_job_id and active_job.project_id == project_id
+        if active_state in TERMINAL_SQL_STATES:
+            pytest.skip(f"pending active SQL cancellation: fixture job was already {active_state}")
+        cancelled = client.sql.cancel(
+            active_job_id,
+            project_id=project_id,
+            options=fi.RequestOptions(timeout=SQL_CLEANUP_TIMEOUT, max_retries=0),
+        )
+        active_state = cancelled.state
+        if active_state != "cancelled":
+            pytest.skip(f"pending active SQL cancellation: job reached {active_state} before cancel")
+        assert cancelled.id == active_job_id and cancelled.project_id == project_id
+
+    def active_cleanup():
+        nonlocal active_state
+        if active_state in TERMINAL_SQL_STATES:
+            return
+        if not active_job_id:
+            raise AssertionError("owned active SQL job did not return an id")
+        final = _cancel_sql_job_bounded(client, active_job_id, project_id)
+        active_state = final.state
+        assert active_state in TERMINAL_SQL_STATES
+
+    _run_with_cleanup_preserving_primary(active_work, active_cleanup)
+
+
+def test_sql_job_async_on_synthetic_spans(sql_project):
+    """Exercise the real AsyncClient against the same owned fixture used by the sync path."""
+    project_id, _, spans = sql_project
+
+    async def run():
+        deadline = time.monotonic() + SQL_TOTAL_TIMEOUT
+        async with fi.AsyncClient(
+            api_key=os.environ["FI_API_KEY"],
+            secret_key=os.environ["FI_SECRET_KEY"],
+            base_url=os.environ["FI_BASE_URL"],
+            strict_responses=True,
+        ) as client:
+            job = None
+            known_state = None
+
+            async def work():
+                nonlocal job, known_state
+                async def spans_ready():
+                    page = await client.spans.list(
+                        project_id=project_id,
+                        options=_sql_request_options(deadline),
+                    )
+                    return len(page.table) == len(spans)
+
+                assert await _async_wait_until(spans_ready, deadline), "async fixture spans were not indexed"
+                catalog = await client.sql.get_catalog(
+                    project_id=project_id,
+                    options=_sql_request_options(deadline),
+                )
+                assert catalog.max_window_days >= 1
+                start = datetime.fromtimestamp(
+                    int(spans[0]["startTimeUnixNano"]) / 1e9, tz=timezone.utc
+                ) - timedelta(minutes=1)
+                job = await client.sql.run(
+                    project_id=project_id,
+                    sql="SELECT count() AS n FROM spans",
+                    start=start.isoformat(),
+                    end=datetime.now(timezone.utc).isoformat(),
+                    options=_sql_request_options(deadline),
+                )
+                known_state = job.state
+                assert job.id and job.project_id == project_id
+                page = await _poll_sql_result_async(
+                    client, job.id, project_id, deadline=deadline
+                )
+                known_state = page.state
+                assert page.state == "succeeded", page.error
+                assert page.result.rows == [[len(spans)]]
+
+            async def cleanup():
+                if job is None:
+                    return
+                if not job.id:
+                    raise AssertionError("owned async SQL job did not return an id")
+                final = await _cancel_sql_job_bounded_async(
+                    client, job.id, project_id
+                )
+                assert final.id == job.id and final.project_id == project_id
+                if known_state == "succeeded":
+                    assert final.state == "succeeded"
+
+            await _run_async_with_cleanup_preserving_primary(work, cleanup)
+
+    asyncio.run(run())
 
 
 def test_context(client):
@@ -380,6 +825,12 @@ def test_agents_and_simulation(client, request):
     assert client.agents.update(agent_id, description="updated").agent.description == "updated"
     assert client.agents.versions.create(agent_id, commit_message="v2").version.version_number == 2
     assert agent_id in [a.id for a in client.agents.list(search=agent.agent.agent_name)]
+    versions = client.agents.versions.list(agent_id).to_list()
+    assert sorted(v["version_number"] for v in versions) == [1, 2]
+    assert client.agents.versions.get(agent_id, versions[0]["id"])["id"] == versions[0]["id"]
+    # A version made from settings has no stored agent document.
+    allow(lambda: client.agents.versions.get_definition(agent_id, versions[0]["id"]), 404)
+    assert client.agents.runs.list(agent_id).results == []
 
     ds = client.datasets.create(new_dataset_name=_name("scenario-src"))
     request.addfinalizer(lambda: allow(lambda: client.datasets.delete(dataset_ids=[ds.dataset_id]), 400, 404))
@@ -404,6 +855,92 @@ def test_agents_and_simulation(client, request):
     # Backend bug: an unknown execution id returns 500 instead of 404.
     allow(lambda: client.simulation.executions.get(execution_id).first_page(), 404, 500)
     allow(lambda: client.simulation.executions.analytics(execution_id), 404, 500)
+    executions = client.simulation.tests.list_executions(test.id).to_list()
+    assert not execution or execution.execution_id in [e.id for e in executions]
+    # Empty lists are refused before anything is created (no judge credits).
+    allow(lambda: client.simulation.tests.add_eval_configs(test.id, evaluations_config=[]), 400)
+    allow(lambda: client.simulation.executions.list_calls(execution_id).first_page(), 404)
+    allow(lambda: client.simulation.executions.insights.get(execution_id), 404)
+    allow(lambda: client.simulation.executions.insights.start(execution_id), 400, 404, 409)
+    allow(lambda: client.simulation.executions.rerun_calls(execution_id, rerun_type="eval_only", call_execution_ids=[str(uuid.uuid4())]), 400, 404)
+    allow(lambda: client.simulation.calls.get(str(uuid.uuid4())), 404)
+
+
+def test_simulation_personas(client, request):
+    """Workspace personas: the whole write path, cleaned up through client.request (the SDK
+    deliberately exposes no delete)."""
+    name = _name("persona")
+    persona = client.simulation.personas.create(name=name, description="A patient caller")
+    request.addfinalizer(lambda: allow(lambda: client.request("DELETE", f"/simulate/api/personas/{persona.id}/"), 404))
+    assert persona.persona_type == "workspace"
+    assert client.simulation.personas.get(persona.id).name == name
+    assert client.simulation.personas.update(persona.id, name=name, description="updated").description == "updated"
+    copy = client.simulation.personas.duplicate(persona.id, name=f"{name}-copy")
+    request.addfinalizer(lambda: allow(lambda: client.request("DELETE", f"/simulate/api/personas/{copy.id}/"), 404))
+    assert copy.id != persona.id and copy.description == "updated"
+    assert {name, f"{name}-copy"} <= {p["name"] for p in client.simulation.personas.list(search=name)}
+
+
+def test_simulation_environments_and_jobs(client):
+    """The environment-era surface (the CLI's `fi sim`). Building an environment runs a builder
+    agent and spends credits, so a fresh stack has none: every per-environment call is made
+    against an id that does not exist, which still proves the route, the method, the body and
+    the typed error. Builder writes get invalid bodies that the server refuses before creating
+    anything."""
+    assert isinstance(client.simulation.environments.list().first_page().items, list)
+    env, other = str(uuid.uuid4()), str(uuid.uuid4())
+    environments = client.simulation.environments
+    for call in (
+        lambda: environments.get(env),
+        lambda: environments.rename(env, name="renamed"),
+        lambda: environments.run_plan(env),
+        lambda: environments.run(env, scenario_ids=["1"]),
+        lambda: environments.versions.list(env),
+        lambda: environments.versions.suite_members(env, other),
+        lambda: environments.versions.create_agent(env, prompt="You are a support agent."),
+        lambda: environments.versions.retry_agent(env, other),
+        lambda: environments.versions.set_default(env, "agent", other, expected_default_id=None),
+        lambda: environments.versions.diff(env, "agent", other),
+        lambda: environments.drafts.list(env),
+        lambda: environments.drafts.save(env, drafts=[{"piece": "suite", "expected_parent_id": None}], idempotency_key="sdk-live"),
+        lambda: environments.nudges.list(env),
+        lambda: environments.nudges.answer(env, other, answer="no"),
+        lambda: environments.nudges.stop(env, other),
+        lambda: environments.evaluations.available(env),
+        lambda: environments.evaluations.add(env, name="task_completion"),
+        lambda: environments.evaluations.update(env, other, model="turing_large"),
+        lambda: environments.evaluations.set_tool_call(env, enable_tool_evaluation=True),
+        lambda: environments.runs.add_evaluation(env, other, name="task_completion"),
+        lambda: environments.runs.regrade(env, other, eval_config_ids=[other]),
+    ):
+        with pytest.raises(fi.NotFoundError):
+            call()
+
+    jobs = client.simulation.jobs
+    for call in (
+        lambda: jobs.get(env),
+        lambda: jobs.send_message(env, content="Docker", client_request_id="sdk-live"),
+        lambda: jobs.adjust(env, instruction="Add a refund scenario."),
+        lambda: jobs.extend(env, count=1),
+        lambda: jobs.cancel(env),
+        lambda: jobs.scenarios.list(env),
+    ):
+        with pytest.raises(fi.NotFoundError):
+            call()
+    for call in (
+        lambda: jobs.create(agent={}, artifacts={}),  # connector and level are required
+        lambda: jobs.preflight(agent={}, artifacts={}),
+        lambda: jobs.set_secret_values(environment_id=env, environment_values={}),
+        lambda: jobs.scenarios.amend(env, changes=[]),
+    ):
+        with pytest.raises(fi.BadRequestError):
+            call()
+    staged = jobs.upload_sources(files=[("agent/main.py", b"print('hi')\n"), ("README.md", b"# agent\n")], paths=["agent/main.py", "README.md"], name=_name("source"))
+    assert staged.source_id and staged.file_count == 2  # both repeated form fields arrived
+    # Only a GOOGLE_APPLICATION_CREDENTIALS service-account JSON is accepted today.
+    with pytest.raises(fi.APIError) as refused:
+        jobs.upload_secret_file(file=("creds.json", b"{}"), environment_name="NOT_A_SUPPORTED_NAME")
+    assert refused.value.status_code in (400, 422)
 
 
 def test_gateway_management(client):

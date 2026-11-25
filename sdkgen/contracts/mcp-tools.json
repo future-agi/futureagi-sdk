@@ -1,11 +1,14 @@
 {
-  "x-source-sha256": "570da58adf472a96b8ac3152cd31601a04fa1a6268ea412e9035b332403bab71",
+  "x-source-sha256": "43b667d5f23eb47b76f77aeee2f5bae340501c587908403a66e2574944754339",
   "tools": [
     {
       "name": "add_dataset_prompt"
     },
     {
       "name": "add_dataset_rows"
+    },
+    {
+      "name": "add_evidence_import_cases"
     },
     {
       "name": "cancel_sql"
@@ -44,6 +47,9 @@
       "name": "create_eval_template"
     },
     {
+      "name": "create_evidence_import"
+    },
+    {
       "name": "create_experiment"
     },
     {
@@ -63,6 +69,12 @@
     },
     {
       "name": "delete_datasets"
+    },
+    {
+      "name": "discard_evidence_import"
+    },
+    {
+      "name": "draft_evidence_import"
     },
     {
       "name": "get_agent"
@@ -95,6 +107,18 @@
       "name": "get_dataset_prompt_stats"
     },
     {
+      "name": "get_debug_failures"
+    },
+    {
+      "name": "get_epoch"
+    },
+    {
+      "name": "get_epoch_candidate_patch"
+    },
+    {
+      "name": "get_epoch_launch_options"
+    },
+    {
       "name": "get_error_cluster"
     },
     {
@@ -108,6 +132,9 @@
     },
     {
       "name": "get_eval_template"
+    },
+    {
+      "name": "get_evidence_import"
     },
     {
       "name": "get_experiment"
@@ -179,6 +206,9 @@
       "name": "get_workspace"
     },
     {
+      "name": "launch_epoch"
+    },
+    {
       "name": "list_agent_context_versions"
     },
     {
@@ -212,6 +242,9 @@
       "name": "list_datasets"
     },
     {
+      "name": "list_epochs"
+    },
+    {
       "name": "list_error_cluster_traces"
     },
     {
@@ -228,6 +261,9 @@
     },
     {
       "name": "list_eval_templates"
+    },
+    {
+      "name": "list_evidence_imports"
     },
     {
       "name": "list_experiments"
@@ -293,6 +329,12 @@
       "name": "list_workspaces"
     },
     {
+      "name": "make_epoch_candidate_default"
+    },
+    {
+      "name": "open_epoch_candidate_pull_request"
+    },
+    {
       "name": "pause_eval_task"
     },
     {
@@ -314,10 +356,16 @@
       "name": "resume_eval_task"
     },
     {
+      "name": "retry_epoch"
+    },
+    {
       "name": "run_dataset_evals"
     },
     {
       "name": "run_dataset_prompts"
+    },
+    {
+      "name": "run_debug_failures"
     },
     {
       "name": "run_prompt"
@@ -333,6 +381,9 @@
     },
     {
       "name": "set_skill_label"
+    },
+    {
+      "name": "stop_epoch"
     },
     {
       "name": "submit_annotation"

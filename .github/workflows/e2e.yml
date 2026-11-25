@@ -14,6 +14,8 @@ name: E2E
 # The compose files come from the same release tag as the image (main for
 # :latest): a newer stack definition can mount code or gateway config that an
 # older image cannot load, and the app then exits before it is healthy.
+# The v1.59.0 stack is missing one read-only E2E mount (future-agi#4200);
+# only that verified release pair gets the compatibility overlay below.
 # The monorepo runs the same suites against every pull request's own build in
 # its E2E CI, so a backend change that breaks the SDK fails there before it is
 # released.
@@ -84,7 +86,8 @@ jobs:
             version=$(tr -d '[:space:]' < sdkgen/contracts/BACKEND_VERSION)
           fi
           # Every release image is tagged like its monorepo release (vX.Y.Z), so
-          # the stack definition is read from that tag; :latest tracks main.
+          # the stack comes from that tag. Nightly selects main, independently
+          # of which source revision was used to publish the latest image.
           if [ -n "$DISPATCHED_REF" ]; then
             ref="$DISPATCHED_REF"
           elif [ "$version" = latest ]; then
@@ -92,6 +95,19 @@ jobs:
           else
             ref="$version"
           fi
+          if [[ "$version" == latest ]]; then
+            source=refs/heads/main
+          elif [[ "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            source="refs/tags/$version"
+          else
+            echo '::error::expected latest or a release version'; exit 1
+          fi
+          if [[ "$ref" != "$source" && "$ref" != "${source##*/}" && ! "$ref" =~ ^[0-9a-f]{40}$ ]]; then
+            echo '::error::stack ref must match the selected release tag or latest/main'; exit 1
+          fi
+          # Always check out the canonical upstream ref. An explicit commit is
+          # an assertion about that ref, not permission to run another stack.
+          echo "STACK_SOURCE=$source" >> "$GITHUB_ENV"
           echo "BACKEND_VERSION=${version:?no backend version}" >> "$GITHUB_ENV"
           echo "BACKEND_REF=${ref:?no stack ref}" >> "$GITHUB_ENV"
           echo "backend: futureagi/standalone:$version, stack: future-agi@$ref"
@@ -102,7 +118,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: future-agi/future-agi
-          ref: ${{ env.BACKEND_REF }}
+          ref: ${{ env.STACK_SOURCE }}
           path: future-agi
           sparse-checkout: |
             e2e/stack
@@ -117,6 +133,24 @@ jobs:
         env:
           FUTURE_AGI_VERSION: ${{ env.BACKEND_VERSION }}
         run: |
+          set -o pipefail
+          head=$(git rev-parse HEAD)
+          if [[ "$BACKEND_REF" =~ ^[0-9a-f]{40}$ && "$head" != "$BACKEND_REF" ]]; then
+            echo '::error::explicit commit does not match the selected upstream ref'; exit 1
+          fi
+          echo "stack $STACK_SOURCE at $head"
+          # Only the reviewed helper may reach app stdin, even on moving main.
+          helper=e2e/stack/backend/bootstrap_sql.py
+          sql="$RUNNER_TEMP/sdk-bootstrap-sql.py"
+          git show "$head:$helper" > "$sql"
+          test ! -L "$helper" && cmp "$sql" "$helper" || exit 1
+          echo "a06b2450979431bd6042fa46b17be9a255caa9a7cd2b287e934e5315cd8a8f6c  $sql" | sha256sum --check
+          files=(-f docker-compose.yml -f e2e/stack/docker-compose.standalone-e2e.yml)
+          if [[ "$FUTURE_AGI_VERSION" == v1.59.0 ]]; then
+            compat="$RUNNER_TEMP/sdk-v1.59.0.yml"
+            python3 "$GITHUB_WORKSPACE/.github/scripts/release_stack.py" > "$compat"
+            files+=(-f "$compat")
+          fi
           # Exercise the opt-in consumption facade on this disposable backend.
           # An unsupported release fails the live suite; no catalog exclusions.
           cat > "$RUNNER_TEMP/sdk-context.yml" <<'YAML'
@@ -125,11 +159,26 @@ jobs:
               environment:
                 SKILLS_CONTEXT_CONSUMPTION_ENABLED: "true"
           YAML
-          docker compose --env-file e2e/stack/standalone-e2e.env \
-            -f docker-compose.yml -f e2e/stack/docker-compose.standalone-e2e.yml \
-            -f "$RUNNER_TEMP/sdk-context.yml" \
-            -p futureagi-e2e-standalone \
-            up -d --wait --wait-timeout 1500 app postgres clickhouse mock-llm
+          files+=(-f "$RUNNER_TEMP/sdk-context.yml")
+          compose=(docker compose --env-file e2e/stack/standalone-e2e.env "${files[@]}" -p futureagi-e2e-standalone)
+          selector=$("${compose[@]}" config --format json | jq -er '.services.app.image')
+          image="futureagi/standalone:$FUTURE_AGI_VERSION"
+          if [[ "$FUTURE_AGI_VERSION" == v1.59.0 ]]; then
+            [[ "$selector" == "$image"@sha256:* ]]  # release_stack.py binds the verified index
+          else
+            [[ "$selector" == "$image" ]]
+          fi
+          rc=0
+          "${compose[@]}" up -d --wait --wait-timeout 1500 app postgres clickhouse mock-llm || rc=$?
+          # Report the *actual container's* repository digest, including on
+          # unhealthy boots. Never infer an image's source commit from its tag.
+          app=$("${compose[@]}" ps -a -q app)
+          [[ "$(docker inspect -f '{{.Config.Image}}' "$app")" == "$selector" ]]
+          iid=$(docker inspect -f '{{.Image}}' "$app")
+          digest=$(docker image inspect "$iid" --format '{{range .RepoDigests}}{{println .}}{{end}}' | grep -Ex 'futureagi/standalone@sha256:[a-f0-9]{64}' | sort -u)
+          [[ "$digest" =~ ^futureagi/standalone@sha256:[a-f0-9]{64}$ ]]
+          echo "app $selector => $digest (image ID $iid); stack $head"
+          (( rc == 0 )) || exit "$rc"
           # A first boot migrates an empty database before the API answers.
           deadline=$((SECONDS + 1500))
           until curl -fsS "$FI_BASE_URL/health/" >/dev/null 2>&1; do
@@ -140,6 +189,19 @@ jobs:
             sleep 5
           done
           echo "backend healthy after ${SECONDS}s"
+
+      - name: Provision the standalone SQL fixture
+        working-directory: future-agi
+        run: |
+          # exec targets the already booted project; it does not recreate app.
+          compose=(docker compose --env-file e2e/stack/standalone-e2e.env -f docker-compose.yml -f e2e/stack/docker-compose.standalone-e2e.yml -p futureagi-e2e-standalone)
+          # Every live suite needs this account. Mirror bin/e2e wait_ready:
+          # health, storage schema, then the guarded standalone SQL helper.
+          "${compose[@]}" exec -T clickhouse clickhouse-client --query 'SELECT count() FROM spans LIMIT 0'
+          "${compose[@]}" exec -T clickhouse clickhouse-client --param_database="${PROPERTY_CATALOG_DATABASE:-property_catalog}" \
+            --query "SELECT throwIf(count() != 2, 'observed indexes missing') FROM system.tables WHERE database={database:String} AND name IN ('observed_attribute_keys', 'observed_attribute_values')"
+          "${compose[@]}" exec -T -w /app/backend -e FUTURE_AGI_E2E_FIXTURE=sql-workbench \
+            app python - < "$RUNNER_TEMP/sdk-bootstrap-sql.py"
 
       - uses: actions/setup-python@v5
         with:

@@ -29,5 +29,7 @@ export { Auth, FileInput, JsonValue, Operation, RequestArgs, RequestOptions, Tra
 // The resource classes behind `client.<name>` (subclass them to add methods), their generated base
 // classes, every method's `params` type, and the `Resources` map that lists them.
 export * from "./resources";
+// client.simulation's wait helpers: their options, timeout error and the open-question reader.
+export { CONVERSATION_BUSY, EXECUTION_TERMINAL, INSIGHTS_TERMINAL, JOB_TERMINAL, WaitOptions, WaitTimeoutError, conversationBusy, openQuestion } from "./resources/simulation";
 // Response models, also importable on their own from "@future-agi/sdk/platform/models".
 export * as models from "./models";

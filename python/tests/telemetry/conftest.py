@@ -94,3 +94,20 @@ def tracing(monkeypatch):
     configure()
     provider.shutdown()
     registry._entries.clear()
+
+
+@pytest.fixture
+def pair():
+    from fi.telemetry import configure
+    from fi_instrumentation.otel import register
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
+        InMemorySpanExporter,
+    )
+    exporter = InMemorySpanExporter()
+    provider = register(project_name="paired-history", set_global_tracer_provider=False,
+                        span_exporter=exporter, batch=False, verbose=False)
+    try:
+        yield provider.get_tracer("paired-history"), exporter
+    finally:
+        provider.shutdown()
+        configure()

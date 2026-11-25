@@ -56,7 +56,9 @@ def test_pending_public_read_respects_off_at_completion(make_snapshot, monkeypat
     from threading import Event
 
     from fi.context.snapshot import SnapshotIntegrityError
-    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
+        InMemorySpanExporter,
+    )
 
     backend = pytest.importorskip("fi_instrumentation.otel")
     exporter = InMemorySpanExporter()

@@ -65,7 +65,9 @@ def test_real_traceai_registry_preserves_existing_exporter(make_snapshot):
 def test_last_traceai_global_shutdown_is_no_otel(monkeypatch, make_snapshot):
     from fi.telemetry._otel import wire_mode
     from opentelemetry import trace
-    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
+        InMemorySpanExporter,
+    )
 
     backend = pytest.importorskip("fi_instrumentation.otel")
     monkeypatch.setattr(trace, "_TRACER_PROVIDER", None)

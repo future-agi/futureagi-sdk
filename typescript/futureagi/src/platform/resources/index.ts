@@ -30,6 +30,7 @@ import { Simulation } from "./simulation";
 import { SkillConsumption } from "./skill_consumption";
 import { Skills } from "./skills";
 import { Spans } from "./spans";
+import { Sql } from "./sql";
 import { Traces } from "./traces";
 import { Usage } from "./usage";
 import { Workspaces } from "./workspaces";
@@ -64,6 +65,7 @@ export interface Resources {
   skillConsumption: SkillConsumption;
   skills: Skills;
   spans: Spans;
+  sql: Sql;
   traces: Traces;
   usage: Usage;
   workspaces: Workspaces;
@@ -98,6 +100,7 @@ export const DEFAULT_RESOURCES: ResourceClasses = {
   skillConsumption: SkillConsumption,
   skills: Skills,
   spans: Spans,
+  sql: Sql,
   traces: Traces,
   usage: Usage,
   workspaces: Workspaces,
@@ -139,6 +142,7 @@ export {
   SkillConsumption,
   Skills,
   Spans,
+  Sql,
   Traces,
   Usage,
   Workspaces,

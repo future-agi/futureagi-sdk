@@ -2,7 +2,6 @@ from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
-
 from conftest import Source
 from fi.context.sessions import ContextSessionClient
 

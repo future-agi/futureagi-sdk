@@ -66,6 +66,10 @@ class Op:
     def params_in(self, location: str) -> list[Param]:
         return [p for p in self.params if p.location == location]
 
+    def rejects_optional_null(self, p: Param) -> bool:
+        """Opted-in SDK calls distinguish optional (may omit) from x-nullable (may send null)."""
+        return bool(self.surfaces.get("sdk", {}).get("declared_optional_nullability") and not p.required and not p.schema.get("x-nullable"))
+
     @property
     def file_params(self) -> list[Param]:
         return [p for p in self.params if p.location == "body" and is_file(p.schema)]
@@ -135,6 +139,17 @@ def wire_models(ops: list[Op]) -> set[str]:
                 raise CatalogError(f"{op.id}: strict_wire requires a named response model")
             roots.add(class_name(op.returns["$ref"]))
     return roots
+
+
+def declared_response_models(ops: list[Op]) -> set[str]:
+    """Named responses opted into required nullable keys and open, documented string enums."""
+    models = set()
+    for op in sdk_ops(ops):
+        if op.surfaces["sdk"].get("declared_response_fields"):
+            if not op.returns or "$ref" not in op.returns:
+                raise CatalogError(f"{op.id}: declared_response_fields needs a named response")
+            models.add(class_name(op.returns["$ref"]))
+    return models
 
 
 def model_refs(spec: dict, roots: list[dict]) -> list[str]:
@@ -404,6 +419,12 @@ def _contract_params(op_id: str, spec: dict, method: str, item: dict, contract_o
                 if any(other.location == "header" and other.name.lower() == p["name"].lower() for other in params):
                     raise CatalogError(f"{op_id}: duplicate operation header")
             params.append(Param(p["name"], p["in"], schema, p["in"] == "path" or p.get("required", False), p.get("description", ""), alias))
+        elif p["in"] == "formData":
+            # A real multipart form (drf-yasg writes one for a view with MultiPartParser):
+            # form fields and files are both body params, and the entry needs
+            # `operation.multipart: true`, which _load_one enforces for the file fields.
+            schema = {k: v for k, v in p.items() if k not in ("name", "in", "required", "description")}
+            params.append(Param(p["name"], "body", schema, p.get("required", False), p.get("description", "")))
         else:
             raise CatalogError(f"{op_id}: unsupported parameter location {p['in']!r}")
     return params
@@ -461,8 +482,8 @@ def _load_one(spec: dict, entry: dict, seen_mcp: set[str]) -> Op:
         raise CatalogError(f"{op_id}: path placeholders {placeholders} != path params {path_params}")
 
     # What the caller gets back: unwrap the {status, result} envelope, then the page items.
-    # Typing an existing 202 acknowledgement changes the public method signature.
-    # Preserve existing 200/201 behavior unless the catalog explicitly selects 202.
+    # A 202 Accepted body (an async receipt: a SQL job, a run, a queued grading) is read only when
+    # the entry pins it with operation.response_status: 202, which fails if the contract drops it.
     responses = contract_op["responses"]
     if "response_status" in entry["operation"]:
         if entry["operation"]["response_status"] != 202 or "202" not in responses:

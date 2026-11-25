@@ -13,8 +13,6 @@ from fi.context.sessions import ContextSessionClient
 from fi.context.snapshot import VerifiedSnapshot
 from fi.platform import _operations as ops
 from fi.telemetry import agent_scope, configure
-from test_delivery_state import pair  # noqa: F401 - installed-pair exporter fixture
-
 
 NAME = 'gen_ai.agent.name'
 VERSION = 'fi.context.version_id'
@@ -175,7 +173,9 @@ def test_name_write_origin(pair, nested, override):
 async def test_scope_entry_and_actual_suspended_coroutine(pair, entry, completion, control, monkeypatch):
     from test_delivery_state import set_mode
     tracer, exporter = pair
-    src = source('beta'); b = ordinary(src); c = ordinary(source('gamma'))
+    src = source('beta')
+    b = ordinary(src)
+    c = ordinary(source('gamma'))
     entered, resume = asyncio.Event(), asyncio.Event()
     class PausedTransport:
         async def chunk(self, *args, **kwargs):
@@ -190,9 +190,11 @@ async def test_scope_entry_and_actual_suspended_coroutine(pair, entry, completio
             tracer.start_span('mode-alone').end()
             read = asyncio.create_task(pending.read_file(ROOT))
             await asyncio.wait_for(entered.wait(), 5)
-            set_mode(control, completion, monkeypatch); resume.set()
+            set_mode(control, completion, monkeypatch)
+            resume.set()
             assert await read == 'Support agent'
-            set_mode(control, 'on', monkeypatch); tracer.start_span('after-delivery').end()
+            set_mode(control, 'on', monkeypatch)
+            tracer.start_span('after-delivery').end()
             assert await pending.read_file(ROOT) == 'Support agent'
             tracer.start_span('selected').end()
         tracer.start_span('outside').end()
@@ -211,9 +213,11 @@ async def test_scope_entry_and_actual_suspended_coroutine(pair, entry, completio
 @pytest.mark.parametrize('whole', [False, True], ids=['read_file', 'read_all'])
 async def test_verified_async_delivery_mode_at_completion(pair, entry, end, scoped, corrupt, whole):
     from contextlib import nullcontext
+
     from fi.context.snapshot import SnapshotIntegrityError
     tracer, exporter = pair
-    src = source('coroutine'); lazy = ordinary(src)
+    src = source('coroutine')
+    lazy = ordinary(src)
     entered, release = asyncio.Event(), asyncio.Event()
     class Transport:
         async def chunk(self, *args, **kwargs):
@@ -226,14 +230,16 @@ async def test_verified_async_delivery_mode_at_completion(pair, entry, end, scop
         read = asyncio.create_task(pending.read_all() if whole else pending.read_file(ROOT))
         await asyncio.wait_for(entered.wait(), 5)
         src.corrupt = corrupt
-        configure(skills_tracing=end); release.set()
+        configure(skills_tracing=end)
+        release.set()
         if corrupt:
             with pytest.raises(SnapshotIntegrityError):
                 await read
         else:
             data = await read
             assert (data.files[ROOT] if whole else data) == 'Support agent'
-        configure(skills_tracing='on'); tracer.start_span('observer').end()
+        configure(skills_tracing='on')
+        tracer.start_span('observer').end()
     delivered = entry != 'off' and end != 'off'
     event = attrs(exporter, 'skill.load' if corrupt else 'context.load')
     assert len(event) == int(delivered)
@@ -248,6 +254,7 @@ async def test_verified_async_delivery_mode_at_completion(pair, entry, end, scop
 @pytest.mark.parametrize('wrapped', [False, True], ids=['native', 'opaque-host'])
 def test_reselection_never_exports_new_identity_with_old_session(pair, wrapped):
     from contextlib import nullcontext
+
     from opentelemetry import trace
     from wrapt import ObjectProxy
 
@@ -276,6 +283,7 @@ def test_reselection_never_exports_new_identity_with_old_session(pair, wrapped):
 @pytest.mark.parametrize('writer', ['automatic', 'start', 'single', 'bulk'])
 async def test_public_name_provenance(pair, wrapped, scope_kind, operation, writer):
     from contextlib import nullcontext
+
     from fi_instrumentation import FITracer
     from opentelemetry import trace
 
@@ -341,6 +349,7 @@ async def test_public_name_provenance(pair, wrapped, scope_kind, operation, writ
 @pytest.mark.parametrize('writer', [True, False], ids=['same-string', 'derived'])
 def test_fitracer_current_writer_not_inherited_stamp(pair, scope, writer):
     from contextlib import nullcontext
+
     from fi_instrumentation import FITracer
 
     native, exporter = pair

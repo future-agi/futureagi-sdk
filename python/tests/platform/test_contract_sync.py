@@ -78,6 +78,15 @@ def test_incomplete_provenance_cannot_replace_contract(sources, monkeypatch, opt
     assert not output.exists()
 
 
+def test_scoped_sync_cannot_restore_removed_product_route_from_baseline(sources):
+    source, _, output = sources
+    baseline = json.loads(source.read_bytes())
+    source.write_text(json.dumps({**baseline, "paths": {}}))
+    with pytest.raises(SystemExit, match="fixture.read: GET /fixture/"):
+        sync_contract.sync(source, baseline=baseline)
+    assert not output.exists()
+
+
 def test_duplicate_mcp_names_fail_before_contract_write(sources, monkeypatch):
     source, tools, output = sources
     tools.write_text(json.dumps({"tools": [{"name": "same"}, {"name": "same"}]}))

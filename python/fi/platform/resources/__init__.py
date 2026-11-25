@@ -39,6 +39,7 @@ from .simulation import AsyncSimulation, Simulation
 from .skill_consumption import AsyncSkillConsumption, SkillConsumption
 from .skills import AsyncSkills, Skills
 from .spans import AsyncSpans, Spans
+from .sql import AsyncSql, Sql
 from .traces import AsyncTraces, Traces
 from .usage import AsyncUsage, Usage
 from .workspaces import AsyncWorkspaces, Workspaces
@@ -73,10 +74,11 @@ class Resources(ResourceSet):
     skill_consumption: SkillConsumption
     skills: Skills
     spans: Spans
+    sql: Sql
     traces: Traces
     usage: Usage
     workspaces: Workspaces
-    _resources: Dict[str, type] = {'account': Account, 'agents': Agents, 'alerts': Alerts, 'annotation_queues': AnnotationQueues, 'annotations': Annotations, 'context_credentials': ContextCredentials, 'contexts': Contexts, 'dashboards': Dashboards, 'datasets': Datasets, 'error_clusters': ErrorClusters, 'evals': Evals, 'experiments': Experiments, 'file_knowledge_bases': FileKnowledgeBases, 'gateway': Gateway, 'knowledge_bases': KnowledgeBases, 'models': Models, 'optimizations': Optimizations, 'projects': Projects, 'prompts': Prompts, 'provider_keys': ProviderKeys, 'scores': Scores, 'sessions': Sessions, 'simulation': Simulation, 'skill_consumption': SkillConsumption, 'skills': Skills, 'spans': Spans, 'traces': Traces, 'usage': Usage, 'workspaces': Workspaces}
+    _resources: Dict[str, type] = {'account': Account, 'agents': Agents, 'alerts': Alerts, 'annotation_queues': AnnotationQueues, 'annotations': Annotations, 'context_credentials': ContextCredentials, 'contexts': Contexts, 'dashboards': Dashboards, 'datasets': Datasets, 'error_clusters': ErrorClusters, 'evals': Evals, 'experiments': Experiments, 'file_knowledge_bases': FileKnowledgeBases, 'gateway': Gateway, 'knowledge_bases': KnowledgeBases, 'models': Models, 'optimizations': Optimizations, 'projects': Projects, 'prompts': Prompts, 'provider_keys': ProviderKeys, 'scores': Scores, 'sessions': Sessions, 'simulation': Simulation, 'skill_consumption': SkillConsumption, 'skills': Skills, 'spans': Spans, 'sql': Sql, 'traces': Traces, 'usage': Usage, 'workspaces': Workspaces}
 
 
 class AsyncResources(ResourceSet):
@@ -108,10 +110,11 @@ class AsyncResources(ResourceSet):
     skill_consumption: AsyncSkillConsumption
     skills: AsyncSkills
     spans: AsyncSpans
+    sql: AsyncSql
     traces: AsyncTraces
     usage: AsyncUsage
     workspaces: AsyncWorkspaces
-    _resources: Dict[str, type] = {'account': AsyncAccount, 'agents': AsyncAgents, 'alerts': AsyncAlerts, 'annotation_queues': AsyncAnnotationQueues, 'annotations': AsyncAnnotations, 'context_credentials': AsyncContextCredentials, 'contexts': AsyncContexts, 'dashboards': AsyncDashboards, 'datasets': AsyncDatasets, 'error_clusters': AsyncErrorClusters, 'evals': AsyncEvals, 'experiments': AsyncExperiments, 'file_knowledge_bases': AsyncFileKnowledgeBases, 'gateway': AsyncGateway, 'knowledge_bases': AsyncKnowledgeBases, 'models': AsyncModels, 'optimizations': AsyncOptimizations, 'projects': AsyncProjects, 'prompts': AsyncPrompts, 'provider_keys': AsyncProviderKeys, 'scores': AsyncScores, 'sessions': AsyncSessions, 'simulation': AsyncSimulation, 'skill_consumption': AsyncSkillConsumption, 'skills': AsyncSkills, 'spans': AsyncSpans, 'traces': AsyncTraces, 'usage': AsyncUsage, 'workspaces': AsyncWorkspaces}
+    _resources: Dict[str, type] = {'account': AsyncAccount, 'agents': AsyncAgents, 'alerts': AsyncAlerts, 'annotation_queues': AsyncAnnotationQueues, 'annotations': AsyncAnnotations, 'context_credentials': AsyncContextCredentials, 'contexts': AsyncContexts, 'dashboards': AsyncDashboards, 'datasets': AsyncDatasets, 'error_clusters': AsyncErrorClusters, 'evals': AsyncEvals, 'experiments': AsyncExperiments, 'file_knowledge_bases': AsyncFileKnowledgeBases, 'gateway': AsyncGateway, 'knowledge_bases': AsyncKnowledgeBases, 'models': AsyncModels, 'optimizations': AsyncOptimizations, 'projects': AsyncProjects, 'prompts': AsyncPrompts, 'provider_keys': AsyncProviderKeys, 'scores': AsyncScores, 'sessions': AsyncSessions, 'simulation': AsyncSimulation, 'skill_consumption': AsyncSkillConsumption, 'skills': AsyncSkills, 'spans': AsyncSpans, 'sql': AsyncSql, 'traces': AsyncTraces, 'usage': AsyncUsage, 'workspaces': AsyncWorkspaces}
 
 
 __all__ = [
@@ -143,6 +146,7 @@ __all__ = [
     'SkillConsumption',
     'Skills',
     'Spans',
+    'Sql',
     'Traces',
     'Usage',
     'Workspaces',
@@ -172,6 +176,7 @@ __all__ = [
     'AsyncSkillConsumption',
     'AsyncSkills',
     'AsyncSpans',
+    'AsyncSql',
     'AsyncTraces',
     'AsyncUsage',
     'AsyncWorkspaces',

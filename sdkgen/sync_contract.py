@@ -39,25 +39,48 @@ def _refs(node, found: set[str]) -> None:
             _refs(value, found)
 
 
-def _project(spec: dict, entries: list[dict]) -> tuple[dict, dict]:
-    """Keep the selected HTTP operations, inherited parameters and their closed model graph."""
+def _require_routes(spec: dict, entries: list[dict]) -> None:
+    # Fail closed, and say why, when the backend dropped or moved an endpoint the
+    # SDK exposes: that is a breaking change for SDK users and needs a person to
+    # retire or remap the catalog entry (sdkgen/catalog/operations.yaml), never a
+    # silent sync. sdk-sync in the monorepo surfaces this message as the job error.
+    gone = [
+        f"{entry['id']}: {entry['operation']['method'].upper()} {entry['operation']['path']}"
+        for entry in entries
+        if entry["operation"]["method"].lower()
+        not in spec["paths"].get(entry["operation"]["path"], {})
+    ]
+    if gone:
+        raise SystemExit(
+            "the backend contract no longer has these catalog operations (a breaking "
+            "change; retire or remap them in sdkgen/catalog/operations.yaml before "
+            "syncing):\n  " + "\n  ".join(gone)
+        )
+
+
+def project(spec: dict, entries: list[dict]) -> tuple[dict, dict]:
+    """The selected operations, inherited parameters, and their transitive definitions."""
+    _require_routes(spec, entries)
     paths: dict = {}
     for entry in entries:
         method = entry["operation"]["method"].lower()
         path = entry["operation"]["path"]
         item = spec["paths"][path]
-        selected = paths.setdefault(path, {})
+        sliced = paths.setdefault(path, {})
         if "parameters" in item:
-            selected["parameters"] = item["parameters"]
-        selected[method] = item[method]
+            sliced["parameters"] = item["parameters"]
+        sliced[method] = item[method]
+
+    # Pull in every definition reachable from the selected operations.
     wanted: set[str] = set()
     _refs(paths, wanted)
-    definitions: dict = {}
-    while wanted - definitions.keys():
-        name = (wanted - definitions.keys()).pop()
-        definitions[name] = spec["definitions"][name]
-        _refs(definitions[name], wanted)
-    return paths, definitions
+    done: set[str] = set()
+    while wanted - done:
+        name = (wanted - done).pop()
+        done.add(name)
+        _refs(spec["definitions"][name], wanted)
+
+    return paths, {name: spec["definitions"][name] for name in sorted(done)}
 
 
 def _union(left: dict, right: dict, what: str) -> dict:
@@ -71,27 +94,10 @@ def sync(source: Path, *, baseline: dict | None = None, baseline_hash: str | Non
     spec = json.loads(source.read_text())
     catalog = yaml.safe_load(CATALOG.read_text())
 
-    # Fail closed, and say why, when the backend dropped or moved an endpoint the
-    # SDK exposes: that is a breaking change for SDK users and needs a person to
-    # retire or remap the catalog entry (sdkgen/catalog/operations.yaml), never a
-    # silent sync. sdk-sync in the monorepo surfaces this message as the job error.
-    gone = [
-        f"{entry['id']}: {entry['operation']['method'].upper()} {entry['operation']['path']}"
-        for entry in catalog["operations"]
-        if entry["operation"]["method"].lower()
-        not in spec["paths"].get(entry["operation"]["path"], {})
-    ]
-    if gone:
-        raise SystemExit(
-            "the backend contract no longer has these catalog operations (a breaking "
-            "change; retire or remap them in sdkgen/catalog/operations.yaml before "
-            "syncing):\n  " + "\n  ".join(gone)
-        )
-
     entries = catalog["operations"]
     schemes = spec.get("securityDefinitions", {})
     if baseline is None:
-        paths, definitions = _project(spec, entries)
+        paths, definitions = project(spec, entries)
     else:
         # This is a scoped Preview sync, not an update to the released backend pin.
         # Compare both public path and SDK namespace, so a typo cannot silently
@@ -104,8 +110,10 @@ def sync(source: Path, *, baseline: dict | None = None, baseline_hash: str | Non
             }):
                 raise SystemExit(f"Skills source classification mismatch: {entry['id']}")
             (skills if is_skill else existing).append(entry)
-        old_paths, old_defs = _project(baseline, existing)
-        new_paths, new_defs = _project(spec, skills)
+        # A scoped sync preserves existing schemas, not routes that the product has removed.
+        _require_routes(spec, existing)
+        old_paths, old_defs = project(baseline, existing)
+        new_paths, new_defs = project(spec, skills)
         paths = _union(old_paths, new_paths, "routes")
         definitions = _union(old_defs, new_defs, "definitions")
         schemes = _union(baseline.get("securityDefinitions", {}), schemes, "auth schemes")

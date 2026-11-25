@@ -13,20 +13,6 @@ from fi.context.snapshot import SnapshotIntegrityError
 from fi.telemetry import agent_scope, configure, declare_skill
 
 
-@pytest.fixture
-def pair():
-    from fi_instrumentation.otel import register
-    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
-    exporter = InMemorySpanExporter()
-    provider = register(project_name="paired-history", set_global_tracer_provider=False,
-                        span_exporter=exporter, batch=False, verbose=False)
-    try:
-        yield provider.get_tracer("paired-history"), exporter
-    finally:
-        provider.shutdown()
-        configure()
-
-
 def set_mode(control, value, monkeypatch):
     if control == "env":
         configure()
