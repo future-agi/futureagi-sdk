@@ -1,9 +1,9 @@
 ---
 title: "Simulation"
-description: "Reference for client.simulation in the Future AGI Python and TypeScript SDKs: simulation.calls.get, simulation.environments.get, simulation.environments.list, simulation.environments.rename, simulation.environments.run, simulation.environments.run_plan and 51 more."
+description: "Reference for client.simulation in the Future AGI Python and TypeScript SDKs: simulation.calls.get, simulation.environments.get, simulation.environments.list, simulation.environments.rename, simulation.environments.run, simulation.environments.run_plan and 66 more."
 ---
 
-`client.simulation` on `fi.Client` (Python) and `client.simulation` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.simulation.calls`, `client.simulation.environments`, `client.simulation.environments.drafts`, `client.simulation.environments.evaluations`, `client.simulation.environments.nudges`, `client.simulation.environments.runs`, `client.simulation.environments.versions`, `client.simulation.executions`, `client.simulation.executions.insights`, `client.simulation.jobs`, `client.simulation.jobs.scenarios`, `client.simulation.personas`, `client.simulation.scenarios`, `client.simulation.tests`. The models these methods return are on [Simulation response models](/docs/sdk/reference/simulation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+`client.simulation` on `fi.Client` (Python) and `client.simulation` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.simulation.calls`, `client.simulation.environments`, `client.simulation.environments.drafts`, `client.simulation.environments.evaluations`, `client.simulation.environments.evidence_imports`, `client.simulation.environments.nudges`, `client.simulation.environments.runs`, `client.simulation.environments.versions`, `client.simulation.epochs`, `client.simulation.epochs.candidates`, `client.simulation.executions`, `client.simulation.executions.insights`, `client.simulation.jobs`, `client.simulation.jobs.scenarios`, `client.simulation.personas`, `client.simulation.scenarios`, `client.simulation.tests`. The models these methods return are on [Simulation response models](/docs/sdk/reference/simulation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
 
 ## Methods
 
@@ -23,6 +23,12 @@ description: "Reference for client.simulation in the Future AGI Python and TypeS
 | [`simulation.environments.evaluations.available`](#simulationenvironmentsevaluationsavailable) | List the catalogue evals an environment can still add (its modality, minus those selected); 409 until the environment finishes building. |
 | [`simulation.environments.evaluations.set_tool_call`](#simulationenvironmentsevaluationsset_tool_call) | Turn the tool-call judge on or off for an environment (enable_tool_evaluation); returns the environment. |
 | [`simulation.environments.evaluations.update`](#simulationenvironmentsevaluationsupdate) | Change one of an environment's evals (name, config, mapping, model, filters, error_localizer, kb_id); never grades. |
+| [`simulation.environments.evidence_imports.add_cases`](#simulationenvironmentsevidence_importsadd_cases) | Add the reviewed, drafted cases of an evidence import to the environment's suite. |
+| [`simulation.environments.evidence_imports.create`](#simulationenvironmentsevidence_importscreate) | Import evidence for an environment's tests from Observe sessions or calls, dataset rows, or transcripts. |
+| [`simulation.environments.evidence_imports.discard`](#simulationenvironmentsevidence_importsdiscard) | Discard an evidence import that was never added, with a transcript's stored text. |
+| [`simulation.environments.evidence_imports.draft`](#simulationenvironmentsevidence_importsdraft) | Ask the environment's builder to draft a scenario for each waiting case of an evidence import. |
+| [`simulation.environments.evidence_imports.get`](#simulationenvironmentsevidence_importsget) | Return one evidence import and its cases, read again from their sources, to review the drafted scenarios. |
+| [`simulation.environments.evidence_imports.list`](#simulationenvironmentsevidence_importslist) | List the evidence imports of an environment that a person can still finish, newest first. |
 | [`simulation.environments.nudges.answer`](#simulationenvironmentsnudgesanswer) | Answer a rebuild offer; answer yes queues a rebuild (pending or failed nudges), no skips a pending one. |
 | [`simulation.environments.nudges.list`](#simulationenvironmentsnudgeslist) | List an environment's rebuild offers, newest first (at most 100), optionally filtered by comma-separated states (pending, answered_no, queued, running, applied, no_change, replaced, failed). |
 | [`simulation.environments.nudges.stop`](#simulationenvironmentsnudgesstop) | Stop a queued or running rebuild; it can be answered again later. |
@@ -34,13 +40,22 @@ description: "Reference for client.simulation in the Future AGI Python and TypeS
 | [`simulation.environments.versions.retry_agent`](#simulationenvironmentsversionsretry_agent) | Check again an environment's agent version whose check failed or is stuck pending (422 otherwise); returns every version. |
 | [`simulation.environments.versions.set_default`](#simulationenvironmentsversionsset_default) | Make an agent, environment or suite version (piece) the environment's default; expected_default_id is the default you saw (null for none), and a newer one returns 409. |
 | [`simulation.environments.versions.suite_members`](#simulationenvironmentsversionssuite_members) | List the scenarios in a saved suite version. |
+| [`simulation.epochs.get`](#simulationepochsget) | Return one Epoch, with its state and step, the limits it holds to, its candidates, and its result once it has ended. |
+| [`simulation.epochs.launch`](#simulationepochslaunch) | Start an Epoch on a finished run. |
+| [`simulation.epochs.launch_options`](#simulationepochslaunch_options) | Return what an Epoch on a finished run starts with, the launch form's default for each limit, and why a launch would be refused now. |
+| [`simulation.epochs.list`](#simulationepochslist) | List the Epochs of one environment, newest first, with each Epoch's state and limits. |
+| [`simulation.epochs.retry`](#simulationepochsretry) | Start a failed Epoch again as a new Epoch with the same request. |
+| [`simulation.epochs.stop`](#simulationepochsstop) | Stop a running Epoch. |
+| [`simulation.epochs.candidates.make_default`](#simulationepochscandidatesmake_default) | Make an Epoch candidate the environment's default agent version, so later runs use it. |
+| [`simulation.epochs.candidates.open_pull_request`](#simulationepochscandidatesopen_pull_request) | Open a pull request with an Epoch candidate's change on a GitHub agent's repository. |
+| [`simulation.epochs.candidates.patch`](#simulationepochscandidatespatch) | Return an Epoch candidate's change as a git patch on the base agent version, to apply by hand. |
 | [`simulation.executions.analytics`](#simulationexecutionsanalytics) | Return aggregated analytics for a simulation test execution. |
 | [`simulation.executions.get`](#simulationexecutionsget) | Return a simulation test execution by its identifier. |
 | [`simulation.executions.list`](#simulationexecutionslist) | List simulation test executions. |
 | [`simulation.executions.list_calls`](#simulationexecutionslist_calls) | List a run's calls (a test execution's results) with the run's pinned versions and outcome summary, 50 per page by default. |
 | [`simulation.executions.rerun_calls`](#simulationexecutionsrerun_calls) | Re-run chosen calls of a finished run (rerun_type call_and_eval, call_execution_ids) as a new attempt of the same run, or re-grade them (eval_only). |
-| [`simulation.executions.insights.get`](#simulationexecutionsinsightsget) | Return a run's Insights (debug analysis) state and findings; status is not_requested until one is requested. |
-| [`simulation.executions.insights.start`](#simulationexecutionsinsightsstart) | Request Insights (debug analysis) of a completed run; a repeat re-arms only failed calls. |
+| [`simulation.executions.insights.get`](#simulationexecutionsinsightsget) | Return the Debug failures diagnosis of a finished run (test execution), or its progress while it runs. |
+| [`simulation.executions.insights.start`](#simulationexecutionsinsightsstart) | Start Debug failures on a finished run (test execution), one analysis job per call. |
 | [`simulation.jobs.adjust`](#simulationjobsadjust) | Send a correction to a builder job that is still authoring, applied at its next stage boundary (409 once authoring has finished); client_request_id deduplicates a resend. |
 | [`simulation.jobs.cancel`](#simulationjobscancel) | Request cancellation of a harness job (a build or a run). |
 | [`simulation.jobs.create`](#simulationjobscreate) | Start a builder job (a new environment) from an uploaded source and an agent; artifacts.level is required. |
@@ -739,6 +754,371 @@ export interface SimulationEnvironmentsEvaluationsUpdateParams {
 
 The decoded response. The contract does not describe its shape, so it is untyped.
 
+## client.simulation.environments.evidence_imports
+
+TypeScript: `client.simulation.environments.evidenceImports`.
+
+### simulation.environments.evidence_imports.add_cases
+
+Add the reviewed, drafted cases of an evidence import to the environment's suite. Reuse the same idempotency_key to repeat a call safely.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/evidence-imports/{import_id}/add/" />
+
+**MCP tool**: `add_evidence_import_cases`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.evidence_imports.add_cases(
+    "your-id",
+    "your-import-id",
+    case_ids=[],
+    expected_drafts={"environment": {"id": "your-id", "revision": 1}, "suite": {"id": "your-id", "revision": 1}},
+    idempotency_key="your-idempotency-key",
+)
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.evidenceImports.addCases("your-id", "your-import-id", {
+  case_ids: [],
+  expected_drafts: { environment: { id: "your-id", revision: 1 }, suite: { id: "your-id", revision: 1 } },
+  idempotency_key: "your-idempotency-key",
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.evidence_imports.add_cases(
+    id: str,
+    import_id: str,
+    *,
+    case_ids: list[str],
+    expected_drafts: dict[str, Any],
+    idempotency_key: str,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvidenceImportAddResponse
+```
+
+```typescript TypeScript
+client.simulation.environments.evidenceImports.addCases(id: string, importId: string, params: SimulationEnvironmentsEvidenceImportsAddCasesParams, options?: RequestOptions): Promise<models.EvidenceImportAddResponse>
+
+export interface SimulationEnvironmentsEvidenceImportsAddCasesParams {
+  case_ids: Array<string>;
+  expected_drafts: Record<string, unknown>;
+  idempotency_key: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="import_id" type="string" required>
+  Positional argument `import_id`.
+</ParamField>
+<ParamField body="case_ids" type="string[]" required />
+<ParamField body="expected_drafts" type="object" required />
+<ParamField body="idempotency_key" type="string" required />
+
+#### Returns
+
+[`EvidenceImportAddResponse`](/docs/sdk/reference/simulation-models#evidenceimportaddresponse).
+
+### simulation.environments.evidence_imports.create
+
+Import evidence for an environment's tests from Observe sessions or calls, dataset rows, or transcripts. Returns what each case holds and lacks. Draft its cases with draft_evidence_import.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/evidence-imports/" />
+
+**MCP tool**: `create_evidence_import`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.evidence_imports.create("your-id", source_kind="session")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.evidenceImports.create("your-id", { source_kind: "session" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.evidence_imports.create(
+    id: str,
+    *,
+    source_kind: Literal['session', 'call', 'trace', 'transcript', 'dataset'],
+    project_id: str | None | NotGiven = NOT_GIVEN,
+    ids: list[str] | None | NotGiven = NOT_GIVEN,
+    dataset_id: str | None | NotGiven = NOT_GIVEN,
+    columns: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    transcripts: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    production: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvidenceImport
+```
+
+```typescript TypeScript
+client.simulation.environments.evidenceImports.create(id: string, params: SimulationEnvironmentsEvidenceImportsCreateParams, options?: RequestOptions): Promise<models.EvidenceImport>
+
+export interface SimulationEnvironmentsEvidenceImportsCreateParams {
+  source_kind: "session" | "call" | "trace" | "transcript" | "dataset";
+  project_id?: string | null;
+  ids?: Array<string> | null;
+  dataset_id?: string | null;
+  columns?: Record<string, unknown> | null;
+  transcripts?: Array<Record<string, unknown>> | null;
+  production?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="source_kind" type="string" required enum={["session", "call", "trace", "transcript", "dataset"]} />
+<ParamField body="project_id" type="string" optional />
+<ParamField body="ids" type="string[]" optional />
+<ParamField body="dataset_id" type="string" optional />
+<ParamField body="columns" type="object" optional />
+<ParamField body="transcripts" type="object[]" optional />
+<ParamField body="production" type="boolean" optional />
+
+#### Returns
+
+[`EvidenceImport`](/docs/sdk/reference/simulation-models#evidenceimport).
+
+### simulation.environments.evidence_imports.discard
+
+Discard an evidence import that was never added, with a transcript's stored text. Of an import with added cases, only the cases not added are discarded.
+
+<ApiEndpoint method="DELETE" path="/simulate/api/harness-environments/{id}/evidence-imports/{import_id}/" />
+
+**MCP tool**: `discard_evidence_import`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.evidence_imports.discard("your-id", "your-import-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.evidenceImports.discard("your-id", "your-import-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.evidence_imports.discard(
+    id: str,
+    import_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> Any
+```
+
+```typescript TypeScript
+client.simulation.environments.evidenceImports.discard(id: string, importId: string, options?: RequestOptions): Promise<unknown>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="import_id" type="string" required>
+  Positional argument `import_id`.
+</ParamField>
+
+#### Returns
+
+The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.environments.evidence_imports.draft
+
+Ask the environment's builder to draft a scenario for each waiting case of an evidence import. The builder calls models, so it may incur usage charges. Poll get_evidence_import to review the drafts.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/evidence-imports/{import_id}/draft/" />
+
+**MCP tool**: `draft_evidence_import`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.evidence_imports.draft(
+    "your-id",
+    "your-import-id",
+    case_ids=[],
+)
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.evidenceImports.draft("your-id", "your-import-id", { case_ids: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.evidence_imports.draft(
+    id: str,
+    import_id: str,
+    *,
+    case_ids: list[str],
+    shows: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvidenceImport
+```
+
+```typescript TypeScript
+client.simulation.environments.evidenceImports.draft(id: string, importId: string, params: SimulationEnvironmentsEvidenceImportsDraftParams, options?: RequestOptions): Promise<models.EvidenceImport>
+
+export interface SimulationEnvironmentsEvidenceImportsDraftParams {
+  case_ids: Array<string>;
+  shows?: Record<string, unknown> | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="import_id" type="string" required>
+  Positional argument `import_id`.
+</ParamField>
+<ParamField body="case_ids" type="string[]" required />
+<ParamField body="shows" type="object" optional />
+
+#### Returns
+
+[`EvidenceImport`](/docs/sdk/reference/simulation-models#evidenceimport).
+
+### simulation.environments.evidence_imports.get
+
+Return one evidence import and its cases, read again from their sources, to review the drafted scenarios.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/evidence-imports/{import_id}/" />
+
+**MCP tool**: `get_evidence_import`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.evidence_imports.get("your-id", "your-import-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.evidenceImports.get("your-id", "your-import-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.evidence_imports.get(
+    id: str,
+    import_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.EvidenceImport
+```
+
+```typescript TypeScript
+client.simulation.environments.evidenceImports.get(id: string, importId: string, options?: RequestOptions): Promise<models.EvidenceImport>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="import_id" type="string" required>
+  Positional argument `import_id`.
+</ParamField>
+
+#### Returns
+
+[`EvidenceImport`](/docs/sdk/reference/simulation-models#evidenceimport).
+
+### simulation.environments.evidence_imports.list
+
+List the evidence imports of an environment that a person can still finish, newest first.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/evidence-imports/" />
+
+**MCP tool**: `list_evidence_imports`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.evidence_imports.list("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.evidenceImports.list("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.evidence_imports.list(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> List[models.EvidenceImportListItem]
+```
+
+```typescript TypeScript
+client.simulation.environments.evidenceImports.list(id: string, options?: RequestOptions): Promise<Array<models.EvidenceImportListItem>>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+A list of [`EvidenceImportListItem`](/docs/sdk/reference/simulation-models#evidenceimportlistitem).
+
 ## client.simulation.environments.nudges
 
 TypeScript: `client.simulation.environments.nudges`.
@@ -1368,6 +1748,520 @@ client.simulation.environments.versions.suiteMembers(id: string, versionId: stri
 
 A list of [`HarnessSuiteMember`](/docs/sdk/reference/simulation-models#harnesssuitemember).
 
+## client.simulation.epochs
+
+TypeScript: `client.simulation.epochs`.
+
+### simulation.epochs.get
+
+Return one Epoch, with its state and step, the limits it holds to, its candidates, and its result once it has ended.
+
+<ApiEndpoint method="GET" path="/simulate/api/agent-fix-runs/{id}/" />
+
+**MCP tool**: `get_epoch`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.epochs.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.epochs.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.epochs.get(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AgentFixRunDetail
+```
+
+```typescript TypeScript
+client.simulation.epochs.get(id: string, options?: RequestOptions): Promise<models.AgentFixRunDetail>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`AgentFixRunDetail`](/docs/sdk/reference/simulation-models#agentfixrundetail).
+
+### simulation.epochs.launch
+
+Start an Epoch on a finished run. It spends credits up to budget_credits and calls models, so it may incur usage charges. Take the scenarios, surfaces, budget and time cap from get_epoch_launch_options; allowed_models, reply_latency_margin_pct, cost_margin_pct and cost_limit_usd are its model lock and limits. Poll get_epoch.
+
+<ApiEndpoint method="POST" path="/simulate/api/agent-fix-runs/" />
+
+**MCP tool**: `launch_epoch`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.epochs.launch(
+    source_run_id="your-source-run-id",
+    target_scenario_keys=[],
+    surfaces=[],
+    budget_credits=1,
+)
+```
+
+```typescript TypeScript
+const result = await client.simulation.epochs.launch({
+  source_run_id: "your-source-run-id",
+  target_scenario_keys: [],
+  surfaces: [],
+  budget_credits: 1,
+});
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.epochs.launch(
+    *,
+    source_run_id: str,
+    target_scenario_keys: list[str],
+    surfaces: list[Literal['prompt', 'tools', 'settings', 'code']],
+    budget_credits: int,
+    protected_scenario_keys: list[str] | None | NotGiven = NOT_GIVEN,
+    locked_paths: list[str] | None | NotGiven = NOT_GIVEN,
+    max_minutes: int | None | NotGiven = NOT_GIVEN,
+    allowed_models: list[str] | None | NotGiven = NOT_GIVEN,
+    reply_latency_margin_pct: int | None | NotGiven = NOT_GIVEN,
+    cost_margin_pct: int | None | NotGiven = NOT_GIVEN,
+    cost_limit_usd: float | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AgentFixRun
+```
+
+```typescript TypeScript
+client.simulation.epochs.launch(params: SimulationEpochsLaunchParams, options?: RequestOptions): Promise<models.AgentFixRun>
+
+export interface SimulationEpochsLaunchParams {
+  source_run_id: string;
+  target_scenario_keys: Array<string>;
+  surfaces: Array<"prompt" | "tools" | "settings" | "code">;
+  budget_credits: number;
+  protected_scenario_keys?: Array<string> | null;
+  locked_paths?: Array<string> | null;
+  max_minutes?: number | null;
+  allowed_models?: Array<string> | null;
+  reply_latency_margin_pct?: number | null;
+  cost_margin_pct?: number | null;
+  cost_limit_usd?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField body="source_run_id" type="string" required />
+<ParamField body="target_scenario_keys" type="string[]" required />
+<ParamField body="surfaces" type="string[]" required />
+<ParamField body="budget_credits" type="integer" required />
+<ParamField body="protected_scenario_keys" type="string[]" optional />
+<ParamField body="locked_paths" type="string[]" optional />
+<ParamField body="max_minutes" type="integer" optional />
+<ParamField body="allowed_models" type="string[]" optional />
+<ParamField body="reply_latency_margin_pct" type="integer" optional />
+<ParamField body="cost_margin_pct" type="integer" optional />
+<ParamField body="cost_limit_usd" type="number" optional />
+
+#### Returns
+
+[`AgentFixRun`](/docs/sdk/reference/simulation-models#agentfixrun).
+
+### simulation.epochs.launch_options
+
+Return what an Epoch on a finished run starts with, the launch form's default for each limit, and why a launch would be refused now. Supply source_run_id, the run's test execution ID. Read it before launch_epoch.
+
+<ApiEndpoint method="GET" path="/simulate/api/agent-fix-runs/launch-options/" />
+
+**MCP tool**: `get_epoch_launch_options`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.epochs.launch_options(source_run_id="your-source-run-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.epochs.launchOptions({ source_run_id: "your-source-run-id" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.epochs.launch_options(
+    *,
+    source_run_id: str,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AgentFixLaunchOptions
+```
+
+```typescript TypeScript
+client.simulation.epochs.launchOptions(params: SimulationEpochsLaunchOptionsParams, options?: RequestOptions): Promise<models.AgentFixLaunchOptions>
+
+export interface SimulationEpochsLaunchOptionsParams {
+  source_run_id: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="source_run_id" type="string" required />
+
+#### Returns
+
+[`AgentFixLaunchOptions`](/docs/sdk/reference/simulation-models#agentfixlaunchoptions).
+
+### simulation.epochs.list
+
+List the Epochs of one environment, newest first, with each Epoch's state and limits. Supply environment_id.
+
+<ApiEndpoint method="GET" path="/simulate/api/agent-fix-runs/" />
+
+**Paginated**: returns a pager ([how pagination works](/docs/sdk/reference#pagination)) · **MCP tool**: `list_epochs`
+
+<CodeGroup>
+
+```python Python
+for item in client.simulation.epochs.list(environment_id="your-environment-id"):
+    print(item)
+```
+
+```typescript TypeScript
+for await (const item of client.simulation.epochs.list({ environment_id: "your-environment-id" })) {
+  console.log(item);
+}
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.epochs.list(
+    *,
+    environment_id: str,
+    limit: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> SyncPager[models.AgentFixRun]
+```
+
+```typescript TypeScript
+client.simulation.epochs.list(params: SimulationEpochsListParams, options?: RequestOptions): Pager<models.AgentFixRun>
+
+export interface SimulationEpochsListParams {
+  environment_id: string;
+  limit?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField query="environment_id" type="string" required />
+<ParamField query="limit" type="integer" optional />
+
+The pager sends `page` itself; pass `limit` to change the page size.
+
+#### Returns
+
+A pager of [`AgentFixRun`](/docs/sdk/reference/simulation-models#agentfixrun) items: iterate it, or call `to_list()` (Python) / `toArray()` (TypeScript).
+
+### simulation.epochs.retry
+
+Start a failed Epoch again as a new Epoch with the same request. Check runs it finished are reused and not paid twice; the rest may incur usage charges. An Epoch can be retried once.
+
+<ApiEndpoint method="POST" path="/simulate/api/agent-fix-runs/{id}/retry/" />
+
+**MCP tool**: `retry_epoch`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.epochs.retry("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.epochs.retry("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.epochs.retry(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AgentFixRun
+```
+
+```typescript TypeScript
+client.simulation.epochs.retry(id: string, options?: RequestOptions): Promise<models.AgentFixRun>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`AgentFixRun`](/docs/sdk/reference/simulation-models#agentfixrun).
+
+### simulation.epochs.stop
+
+Stop a running Epoch. It ends as Stopped, and the environment does not change.
+
+<ApiEndpoint method="POST" path="/simulate/api/agent-fix-runs/{id}/stop/" />
+
+**MCP tool**: `stop_epoch`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.epochs.stop("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.epochs.stop("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.epochs.stop(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AgentFixRun
+```
+
+```typescript TypeScript
+client.simulation.epochs.stop(id: string, options?: RequestOptions): Promise<models.AgentFixRun>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`AgentFixRun`](/docs/sdk/reference/simulation-models#agentfixrun).
+
+## client.simulation.epochs.candidates
+
+TypeScript: `client.simulation.epochs.candidates`.
+
+### simulation.epochs.candidates.make_default
+
+Make an Epoch candidate the environment's default agent version, so later runs use it. To ship a candidate that only its must-pass check refused, give override_reason.
+
+<ApiEndpoint method="POST" path="/simulate/api/agent-fix-runs/{id}/candidates/{candidate_id}/make-default/" />
+
+**MCP tool**: `make_epoch_candidate_default`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.epochs.candidates.make_default("your-id", "your-candidate-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.epochs.candidates.makeDefault("your-id", "your-candidate-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.epochs.candidates.make_default(
+    id: str,
+    candidate_id: str,
+    *,
+    override_reason: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AgentFixMakeDefault
+```
+
+```typescript TypeScript
+client.simulation.epochs.candidates.makeDefault(id: string, candidateId: string, params: SimulationEpochsCandidatesMakeDefaultParams = {}, options?: RequestOptions): Promise<models.AgentFixMakeDefault>
+
+export interface SimulationEpochsCandidatesMakeDefaultParams {
+  override_reason?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="candidate_id" type="string" required>
+  Positional argument `candidate_id`.
+</ParamField>
+<ParamField body="override_reason" type="string" optional />
+
+#### Returns
+
+[`AgentFixMakeDefault`](/docs/sdk/reference/simulation-models#agentfixmakedefault).
+
+### simulation.epochs.candidates.open_pull_request
+
+Open a pull request with an Epoch candidate's change on a GitHub agent's repository. It is opened once. To ship a candidate that only its must-pass check refused, give override_reason.
+
+<ApiEndpoint method="POST" path="/simulate/api/agent-fix-runs/{id}/candidates/{candidate_id}/pull-request/" />
+
+**MCP tool**: `open_epoch_candidate_pull_request`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.epochs.candidates.open_pull_request("your-id", "your-candidate-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.epochs.candidates.openPullRequest("your-id", "your-candidate-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.epochs.candidates.open_pull_request(
+    id: str,
+    candidate_id: str,
+    *,
+    override_reason: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.AgentFixPullRequest
+```
+
+```typescript TypeScript
+client.simulation.epochs.candidates.openPullRequest(id: string, candidateId: string, params: SimulationEpochsCandidatesOpenPullRequestParams = {}, options?: RequestOptions): Promise<models.AgentFixPullRequest>
+
+export interface SimulationEpochsCandidatesOpenPullRequestParams {
+  override_reason?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="candidate_id" type="string" required>
+  Positional argument `candidate_id`.
+</ParamField>
+<ParamField body="override_reason" type="string" optional />
+
+#### Returns
+
+[`AgentFixPullRequest`](/docs/sdk/reference/simulation-models#agentfixpullrequest).
+
+### simulation.epochs.candidates.patch
+
+Return an Epoch candidate's change as a git patch on the base agent version, to apply by hand.
+
+<ApiEndpoint method="GET" path="/simulate/api/agent-fix-runs/{id}/candidates/{candidate_id}/patch/" />
+
+**MCP tool**: `get_epoch_candidate_patch`
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.epochs.candidates.patch("your-id", "your-candidate-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.epochs.candidates.patch("your-id", "your-candidate-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.epochs.candidates.patch(
+    id: str,
+    candidate_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> str
+```
+
+```typescript TypeScript
+client.simulation.epochs.candidates.patch(id: string, candidateId: string, options?: RequestOptions): Promise<string>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="candidate_id" type="string" required>
+  Positional argument `candidate_id`.
+</ParamField>
+
+#### Returns
+
+The response body as text.
+
 ## client.simulation.executions
 
 TypeScript: `client.simulation.executions`.
@@ -1689,9 +2583,11 @@ TypeScript: `client.simulation.executions.insights`.
 
 ### simulation.executions.insights.get
 
-Return a run's Insights (debug analysis) state and findings; status is not_requested until one is requested.
+Return the Debug failures diagnosis of a finished run (test execution), or its progress while it runs.
 
 <ApiEndpoint method="GET" path="/simulate/test-executions/{test_execution_id}/debug-analysis/" />
+
+**MCP tool**: `get_debug_failures`
 
 <CodeGroup>
 
@@ -1734,9 +2630,11 @@ client.simulation.executions.insights.get(testExecutionId: string, options?: Req
 
 ### simulation.executions.insights.start
 
-Request Insights (debug analysis) of a completed run; a repeat re-arms only failed calls.
+Start Debug failures on a finished run (test execution), one analysis job per call. It may incur usage charges. A run that has not finished is refused; poll get_debug_failures for the diagnosis.
 
 <ApiEndpoint method="POST" path="/simulate/test-executions/{test_execution_id}/debug-analysis/" />
+
+**MCP tool**: `run_debug_failures`
 
 <CodeGroup>
 

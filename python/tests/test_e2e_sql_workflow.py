@@ -56,13 +56,19 @@ def test_refuses_unapproved_helper_or_wrong_explicit_commit(tmp_path, ref):
     assert ("FAILED" if ref == "main" else "explicit commit does not match") in proc.stdout
 
 
-@pytest.mark.parametrize("version", [PIN, "latest", "v1.60.0"])
-def test_provision_is_unconditional_and_ordered(tmp_path, version):
+@pytest.mark.parametrize(("boot_id", "modes"), [("boot", ("pinned", "latest")), ("boot_paired", ("paired",))])
+def test_provision_is_unconditional_and_ordered(boot_id, modes):
+    boot = next(s for s in STEPS if s.get("id") == boot_id)
     live = next(s for s in STEPS if s.get("name", "").startswith("Python live suite"))
-    assert not any("if" in s for s in (JOB, BOOT, SQL, live))
-    assert STEPS.index(BOOT) < STEPS.index(SQL) < STEPS.index(live)
-    assert 'curl -fsS "$FI_BASE_URL/health/"' in BOOT["run"]
-    assert "FUTURE_AGI_E2E_FIXTURE=" not in BOOT["run"]
+    assert set(boot["if"].split(" || ")) == {f"steps.product.outputs.mode == '{mode}'" for mode in modes}
+    assert not any("if" in s for s in (JOB, SQL, live))
+    assert STEPS.index(boot) < STEPS.index(SQL) < STEPS.index(live)
+    assert 'curl -fsS "$FI_BASE_URL/health/"' in boot["run"]
+    assert "FUTURE_AGI_E2E_FIXTURE=" not in boot["run"]
+
+
+@pytest.mark.parametrize("version", [PIN, "latest", "v1.60.0"])
+def test_provision_commands(tmp_path, version):
     # Capture argv only. Never emulate the helper, account, SDK or backend.
     (tmp_path / "sdk-bootstrap-sql.py").touch()
     proc = shell('docker() { printf "%s\\n" "$*"; };\n' + SQL["run"], tmp_path,

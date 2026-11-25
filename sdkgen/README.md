@@ -2,7 +2,7 @@
 
 `sdkgen` generates the platform client for both SDKs (`fi.Client` in Python, `new Client()` in TypeScript) from the backend's API contract plus a small catalog. The catalog records, for each operation, the MCP tool it corresponds to in the monorepo (`futureagi/mcp_server/catalog/tools.yaml`), so an operation has the same name in the SDKs and in MCP; the MCP server itself is generated and served from the monorepo, not here.
 
-It covers the operations behind the pinned backend's MCP tools (same names), the
+It covers the paired product's 141 MCP tools (same names), the
 SDK-only dataset/prompt/KB/queue/annotation surface, and F12 isolated context/leaf
 consumption. The catalog parity gate checks exact MCP tool-name agreement; snapshot,
 installer and runtime adapters reuse these generated operations and the shared transport.
@@ -142,13 +142,9 @@ The pinned F12 contract provides `contexts` and `skill_consumption` (TypeScript:
 `context_credentials` (`contextCredentials`) issue/list/revoke. Credential administration
 uses ordinary human-bound admin authentication, not a consume token. Issuance requires a
 caller-retained `idempotency_key`; a replay returns the same ID without its one-time secret.
-`contracts/SOURCE.json` identifies the exact unreleased backend commit and source hashes;
-`contracts/mcp-tools.json` pins its generated tool names for offline parity checks. Sync both
-with `sync_contract.py SOURCE --backend-commit SHA --mcp-tools TOOLS --skills-baseline-sdk SDK_SHA`.
-The Skills operations come from that product commit; all other public records and definitions
-come from the exact SDK target. Shared definitions must match. `check_skills_baseline.py` checks
-the two generated operation tables against that target. A subsequent released
-sync clears the commit-specific metadata. No unavailable ZIP/session/report/proposal/campaign
+`contracts/swagger.json` records the Skills product commit and source hashes under
+`x-contract-sources.skills`. The [scoped sync](#reproduce-the-scoped-contract) checks out
+no branches and uses the same scope rules as CI. No unavailable ZIP/session/report/proposal/campaign
 operation is advertised.
 
 ## Snapshot and installer integration (unreleased preview)
@@ -415,8 +411,8 @@ By default, a Python response that still doesn't match gives you the raw JSON an
 `python/tests/platform/test_all_operations_live.py` calls **every** catalog operation against a live backend. Its last test fails if any operation was never called, and prints what each one returned.
 
 Against a local `bin/install` backend:
-- **145 of 158** operations succeed, and their responses validate strictly.
-- **13** return the backend's typed error: plan-gated features (`402`); `usage.overview`, which self-hosted installs don't serve (`404`); trace, span and session reads, which wait on ClickHouse indexing; simulation runs, which wait on scenario generation; `evals.test`, which needs a model provider; `datasets.create_from_huggingface`, which needs outbound access to huggingface.co; lookups of ids that don't exist on a fresh install.
+- Most operations succeed, and their responses validate strictly.
+- The rest return the backend's typed error: plan-gated features (`402`); `usage.overview`, which self-hosted installs don't serve (`404`); trace, span and session reads, which wait on ClickHouse indexing; simulation runs, which wait on scenario generation; `evals.test`, which needs a model provider; `datasets.create_from_huggingface`, which needs outbound access to huggingface.co; the evidence-import and Epoch operations, which need an environment that a fresh install cannot build (each asserts its view's exact refusal); lookups of ids that don't exist on a fresh install.
 
 `typescript/futureagi/src/platform/__tests__/` covers the TypeScript transport and generated code against an injected `fetch` (bodies, encoding, every pagination style, retries, errors, uploads, per-call options, resource overrides) and, with `pnpm test:live`, the same flows against the backend: datasets, uploads, prompts with drafts and labels, the hand-written `spans.ingest`, annotation labels and queues, knowledge bases, typed errors.
 
@@ -426,8 +422,8 @@ Against a local `bin/install` backend:
 
 Two workflows in this repository, both on every pull request and on pushes to `dev` and `main`:
 
-- `.github/workflows/ci.yml`: `generate.py --check`, `check_mcp_parity.py` (the catalog's MCP names against the monorepo's tool list at the backend release in `sdkgen/contracts/BACKEND_VERSION`: a sync that brings new tools fails until the catalog has their entries), ruff on the generator and platform/context/skills modules and tests, the base Python unit suite on 3.9, 3.11 and 3.13, required pinned Deep Agents backend conformance on 3.11, installed wheel/action and npm consumers, and TypeScript type checking, all-client unit tests (including datasets, annotations, knowledge bases, queues and snapshots) and builds. Requires the disposable GCP runner pool described above. Gate: `CI Pass`.
-- `.github/workflows/e2e.yml`: the live suites against a real backend. It boots the Standalone setup the way the monorepo's E2E CI does (its `docker-compose.yml` plus `e2e/stack/docker-compose.standalone-e2e.yml`, the released `futureagi/standalone:latest` image, the mock LLM), signs up a fresh account with `local_api_key.py --signup`, and runs `python/tests/platform` on 3.9 and 3.12 and `pnpm test:live`. Also nightly, and on demand with another image tag. Gate: `E2E Tests Pass`.
+- `.github/workflows/ci.yml`: checks generated outputs, non-Skills baseline identity, exact MCP names and (in paired mode) the product slice. Dev PRs try the **PR head branch**, its base, `dev`, then `main` in the product repo; the first existing branch must provide all required files. The resolver outputs mode, SHA and branch. `pair_check.py` writes the commit, hashes and projection result to `pair.json`. Main and PRs targeting main use the release pin. Other required jobs cover lint, Python unit tests, the paired traceAI wheel and context backend, installed Python/npm consumers, and TypeScript types, tests and builds. Gate: `CI Pass`.
+- `.github/workflows/e2e.yml`: paired runs boot images built from that same product commit, pinned by digest, with the matching stack. Release runs use the published image; nightly runs use `:latest`. The disposable backend enables context consumption and provisions a workspace account before the full Python and TypeScript live suites. Gate: `E2E Tests Pass`.
 
 The monorepo's E2E CI (`future-agi/.github/workflows/e2e-ci.yml`, PRs and pushes on `dev` and `main`) runs the same two live suites against every backend build, so a backend change that breaks the SDK fails there before it is released. It checks out this repository at the branch named like the monorepo PR's branch if one exists, else the base branch (`dev` or `main`).
 
@@ -450,27 +446,43 @@ The one-time setup is required before automatic releases work. Missing app crede
 - Move `operations.yaml` into the monorepo next to the MCP catalog (`tools.yaml`), so one file drives MCP and the SDKs and the sync workflow copies it here with the contract.
 - Deprecate the hand-written modules (`fi.datasets`, `fi.prompt`, `fi.kb`, `fi.queues`, `fi.annotations`, and their TypeScript counterparts) in favour of the generated client, then remove them in a major release.
 
-### Reproduce the four SQL mappings before the next backend sync
+### Reproduce the scoped contract
 
-The four SQL mappings were sourced from the product dev commit below. The SDK
-tests against the v1.59.0 release pinned in `BACKEND_VERSION`; other operations
-keep the existing SDK dev contract.
-The two input commits and byte hashes are recorded in `x-contract-sources` in
-the **non-Skills SDK baseline** Swagger slice. To reproduce that slice, run
-these commands in a checkout of the `non_skills_sdk_commit` from `contracts/SOURCE.json`,
-not in the combined Skills checkout:
+The mixed slice in `sdkgen/contracts/swagger.json` has four `x-contract-sources`
+records. `sql` (4 tools), `epoch` (17 tools), and `skills` (13 tools plus 11
+SDK-only consumption and credential operations) share one immutable product commit.
+Each record fingerprints the product OpenAPI, generated MCP manifest and `tools.yaml`.
+`other` identifies the SDK baseline slice, its byte hash, and the OpenAPI digest
+from which its unscoped operations originated. It may be a release slice, or a
+previous scoped slice whose scopes are all refreshed. The baseline here already
+contains SQL and Epoch; adding Skills does not change any non-Skills operation.
+
+From the SDK checkout, with `PRODUCT_REPO` a clean checkout at the product commit:
 
 ```sh
-product_commit=6fc655b986f862ccbdd475bfc87fc09c4ef459e9
-sdk_baseline=198f1f8bf23836072d5016976a9a6c235c52ee2b
-python sdkgen/sync_sql_contract.py "$PRODUCT_REPO" "$product_commit" "$sdk_baseline"
+product_commit=0703ba32c94186b14eeb0d58f43aa08bd8c027f8
+sdk_baseline=f40bddba45e637d2009040b9d95132357b5d95ae
+catalog="$PRODUCT_REPO/futureagi/mcp_server/catalog"
+python sdkgen/sync_scoped_contract.py "$PRODUCT_REPO" "$product_commit" "$sdk_baseline"
 python sdkgen/generate.py
-python sdkgen/check_mcp_parity.py --ref "$product_commit"
+python sdkgen/generate.py --check
+python sdkgen/check_skills_baseline.py
+python sdkgen/check_mcp_parity.py --tools "$catalog/tools.generated.json"
+python sdkgen/check_mcp_descriptions.py --tools-yaml "$catalog/tools.yaml"
+python sdkgen/pair_check.py --product "$PRODUCT_REPO" --sha "$product_commit" --out pair.json
 ```
 
-The parity command checks the **entire** MCP name list of that commit. It does
-not qualify a later product ref, the release image, or a combined Skills build.
-The normal release sync replaces this scoped slice; no release pin changes here.
+The sync reads Git blobs, verifies all scoped MCP mappings and Epoch descriptions,
+and projects routes and transitive definitions, including SDK-only Skills routes.
+Pairing repeats the checks against the selected product and compares the projections
+and auth schemes. Exact MCP name parity covers **all 141 tools** in both directions;
+`check_skills_baseline.py` also compares non-Skills catalog rows, auth, paths,
+definitions, tool names and emitted Python/TypeScript operation records to the SDK
+baseline. These checks qualify the preview contract, not a release image. The
+unchanged `BACKEND_VERSION` pin (`v1.59.0`) serves 111 of the 141 tool names.
+Before promotion to `main`, sync the full slice with `sync_contract.py` from a
+published backend release with exact MCP parity, update the pin to that release,
+and pass the pinned-image E2E job. A passing paired build is not a substitute.
 
 The four SQL calls opt in to `surfaces.sdk.declared_optional_nullability`. An
 optional request field may be omitted; it accepts null only if its Swagger

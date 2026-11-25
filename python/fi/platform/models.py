@@ -148,6 +148,313 @@ class AgentDefinitionResponse(_Model):
     livekit_max_concurrency: Optional[Any] = Field(default=None)
 
 
+class AgentFixAgent(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['kind', 'name', 'version_id'])
+    name: Optional[str] = Field(default=None)
+    kind: Optional[str] = Field(default=None)
+    version_id: Optional[str] = Field(default=None)
+    version_number: Optional[int] = Field(default=None)
+    ref: Optional[str] = Field(default=None)
+
+
+class AgentFixCandidate(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent_version_id', 'attempt', 'pull_request_url', 'version_number'])
+    id: Optional[str] = Field(default=None)
+    attempt: Optional[int] = Field(default=None)
+    agent_version_id: Optional[str] = Field(default=None)
+    version_number: Optional[int] = Field(default=None)
+    summary: Optional[str] = Field(default=None)
+    outcome: Optional[str] = Field(default=None)  # one of: pending, rejected, finalist, winner
+    verdict: Optional[AgentFixVerdict] = Field(default=None)
+    check_runs: Optional[List[Optional[AgentFixCheckRun]]] = Field(default=None)
+    override: Optional[AgentFixOverride] = Field(default=None)
+    pull_request_url: Optional[str] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+
+
+class AgentFixCeilingNumbers(_Model):
+    baseline: Optional[float] = Field(default=None)
+    candidate: Optional[float] = Field(default=None)
+    allowed: Optional[float] = Field(default=None)
+    limit: Optional[float] = Field(default=None)
+
+
+class AgentFixCheckRun(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['label', 'state'])
+    run_id: Optional[str] = Field(default=None)
+    test_execution_id: Optional[str] = Field(default=None)
+    label: Optional[str] = Field(default=None)
+    state: Optional[str] = Field(default=None)
+
+
+class AgentFixDiagnosis(_Model):
+    causes: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class AgentFixEnvironment(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name'])
+    name: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+    default_agent_version_id: Optional[str] = Field(default=None)
+
+
+class AgentFixEpochIssue(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['cluster_id', 'job_id', 'project_id'])
+    job_id: Optional[str] = Field(default=None)
+    cluster_id: Optional[str] = Field(default=None)
+    project_id: Optional[str] = Field(default=None)
+
+
+class AgentFixEvalWarning(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['base_pass_rate', 'base_trials', 'name', 'pass_rate', 'trials'])
+    name: Optional[str] = Field(default=None)
+    pass_rate: Optional[float] = Field(default=None)
+    base_pass_rate: Optional[float] = Field(default=None)
+    trials: Optional[int] = Field(default=None)
+    base_trials: Optional[int] = Field(default=None)
+
+
+class AgentFixFailure(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['code', 'message'])
+    code: Optional[str] = Field(default=None)
+    message: Optional[str] = Field(default=None)
+
+
+class AgentFixFlakyProtected(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['key', 'passed', 'runs', 'sub_goal'])
+    key: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    sub_goal: Optional[str] = Field(default=None)
+    passed: Optional[int] = Field(default=None)
+    runs: Optional[int] = Field(default=None)
+
+
+class AgentFixLaunchDefaults(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent_calls_unmeasured', 'agent_cost_metered', 'allowed_models', 'budget_credits', 'cost_margin_pct', 'max_minutes', 'reply_latency_margin_pct', 'surfaces'])
+    surfaces: Optional[List[Optional[str]]] = Field(default=None)
+    budget_credits: Optional[int] = Field(default=None)
+    max_minutes: Optional[int] = Field(default=None)
+    allowed_models: Optional[List[Optional[str]]] = Field(default=None)
+    agent_cost_metered: Optional[bool] = Field(default=None)
+    agent_calls_unmeasured: Optional[bool] = Field(default=None)
+    reply_latency_margin_pct: Optional[int] = Field(default=None)
+    cost_margin_pct: Optional[int] = Field(default=None)
+
+
+class AgentFixLaunchEnvironment(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'name'])
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    version: Optional[int] = Field(default=None)
+
+
+class AgentFixLaunchLimits(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['budget_credits_max', 'cases_min', 'max_minutes_max', 'scenarios_max', 'scenarios_min', 'variations_per_case', 'verified_cases_min'])
+    budget_credits_max: Optional[int] = Field(default=None)
+    max_minutes_max: Optional[int] = Field(default=None)
+    scenarios_min: Optional[int] = Field(default=None)
+    cases_min: Optional[int] = Field(default=None)
+    variations_per_case: Optional[int] = Field(default=None)
+    verified_cases_min: Optional[int] = Field(default=None)
+    scenarios_max: Optional[int] = Field(default=None)
+
+
+class AgentFixLaunchOptions(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['scenarios', 'surfaces'])
+    source_run: Optional[AgentFixLaunchSourceRun] = Field(default=None)
+    environment: Optional[AgentFixLaunchEnvironment] = Field(default=None)
+    agent: Optional[AgentFixAgent] = Field(default=None)
+    scenarios: Optional[List[Optional[AgentFixLaunchScenario]]] = Field(default=None)
+    suggested: Optional[AgentFixLaunchSuggested] = Field(default=None)
+    surfaces: Optional[List[Optional[AgentFixLaunchSurface]]] = Field(default=None)
+    defaults: Optional[AgentFixLaunchDefaults] = Field(default=None)
+    limits: Optional[AgentFixLaunchLimits] = Field(default=None)
+    blocked: Optional[AgentFixFailure] = Field(default=None)
+    variations_blocked: Optional[AgentFixFailure] = Field(default=None)
+
+
+class AgentFixLaunchScenario(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['failing_sub_goals', 'key', 'name'])
+    key: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    passed: Optional[bool] = Field(default=None)
+    failing_sub_goals: Optional[List[Optional[str]]] = Field(default=None)
+    evidence_import_id: Optional[str] = Field(default=None)
+
+
+class AgentFixLaunchSourceRun(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'state'])
+    id: Optional[str] = Field(default=None)
+    number: Optional[int] = Field(default=None)
+    state: Optional[str] = Field(default=None)
+    finished_at: Optional[str] = Field(default=None)
+
+
+class AgentFixLaunchSuggested(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['protected_scenario_keys', 'target_scenario_keys'])
+    target_scenario_keys: Optional[List[Optional[str]]] = Field(default=None)
+    protected_scenario_keys: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class AgentFixLaunchSurface(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['allowed', 'id', 'label'])
+    id: Optional[str] = Field(default=None)  # one of: prompt, tools, settings, code
+    label: Optional[str] = Field(default=None)
+    allowed: Optional[bool] = Field(default=None)
+    reason: Optional[str] = Field(default=None)
+
+
+class AgentFixMakeDefault(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['outcome'])
+    outcome: Optional[str] = Field(default=None)
+
+
+class AgentFixOverride(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['allowed', 'reason', 'regressions'])
+    allowed: Optional[bool] = Field(default=None)
+    regressions: Optional[List[Optional[str]]] = Field(default=None)
+    reason: Optional[str] = Field(default=None)
+    by: Optional[HarnessVersionPerson] = Field(default=None)
+    at: Optional[str] = Field(default=None)
+
+
+class AgentFixPlan(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['baseline_spread_pts', 'held_back', 'max_candidates', 'must_pass', 'repeats', 'target'])
+    target: Optional[int] = Field(default=None)
+    held_back: Optional[int] = Field(default=None)
+    must_pass: Optional[int] = Field(default=None)
+    protected: Optional[int] = Field(default=None)
+    max_candidates: Optional[int] = Field(default=None)
+    repeats: Optional[int] = Field(default=None)
+    baseline_spread_pts: Optional[int] = Field(default=None)
+
+
+class AgentFixPullRequest(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['pull_request_url'])
+    pull_request_url: Optional[str] = Field(default=None)
+
+
+class AgentFixReport(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['summary'])
+    ending: Optional[str] = Field(default=None)
+    summary: Optional[str] = Field(default=None)
+    winner_candidate_id: Optional[str] = Field(default=None)
+    flaky_protected: Optional[List[Optional[AgentFixFlakyProtected]]] = Field(default=None)
+
+
+class AgentFixRequest(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['budget_credits', 'failing_sub_goals', 'locked_paths', 'max_minutes', 'surfaces', 'target_scenario_keys'])
+    target_scenario_keys: Optional[List[Optional[str]]] = Field(default=None)
+    protected_scenario_keys: Optional[List[Optional[str]]] = Field(default=None)
+    held_back_scenario_keys: Optional[List[Optional[str]]] = Field(default=None)
+    failing_sub_goals: Optional[List[Optional[str]]] = Field(default=None)
+    surfaces: Optional[List[Optional[str]]] = Field(default=None)
+    locked_paths: Optional[List[Optional[str]]] = Field(default=None)
+    budget_credits: Optional[float] = Field(default=None)
+    max_minutes: Optional[int] = Field(default=None)
+    variations_pending: Optional[bool] = Field(default=None)
+    variation_parents: Optional[Any] = Field(default=None)
+    allowed_models: Optional[List[Optional[str]]] = Field(default=None)
+    reply_latency_margin_pct: Optional[int] = Field(default=None)
+    cost_margin_pct: Optional[int] = Field(default=None)
+    cost_limit_usd: Optional[float] = Field(default=None)
+    observes_models: Optional[bool] = Field(default=None)
+    meters_agent_cost: Optional[bool] = Field(default=None)
+    measured_automatically: Optional[bool] = Field(default=None)
+
+
+class AgentFixRun(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['base_agent_version_id', 'candidates', 'committed_credits', 'environment_id', 'spent_credits'])
+    id: Optional[str] = Field(default=None)
+    number: Optional[int] = Field(default=None)
+    environment_id: Optional[str] = Field(default=None)
+    environment: Optional[AgentFixEnvironment] = Field(default=None)
+    source_run_id: Optional[str] = Field(default=None)
+    source_run_number: Optional[int] = Field(default=None)
+    base_agent_version_id: Optional[str] = Field(default=None)
+    agent: Optional[AgentFixAgent] = Field(default=None)
+    state: Optional[str] = Field(default=None)  # one of: queued, running, stopping, ready, no_improvement, not_reproduced, out_of_budget, stopped, failed, too_few_cases
+    stage: Optional[str] = Field(default=None)
+    step: Optional[str] = Field(default=None)  # one of: variations, reproduce, search, verify, done
+    plan: Optional[AgentFixPlan] = Field(default=None)
+    diagnosis: Optional[AgentFixDiagnosis] = Field(default=None)
+    request: Optional[AgentFixRequest] = Field(default=None)
+    spent_credits: Optional[float] = Field(default=None)
+    committed_credits: Optional[float] = Field(default=None)
+    report: Optional[AgentFixReport] = Field(default=None)
+    failure: Optional[AgentFixFailure] = Field(default=None)
+    retried_from_id: Optional[str] = Field(default=None)
+    retryable: Optional[bool] = Field(default=None)
+    limited_validation: Optional[bool] = Field(default=None)
+    issue: Optional[AgentFixEpochIssue] = Field(default=None)
+    check_runs: Optional[List[Optional[AgentFixCheckRun]]] = Field(default=None)
+    candidates: Optional[List[Optional[AgentFixCandidate]]] = Field(default=None)
+    started_at: Optional[str] = Field(default=None)
+    finished_at: Optional[str] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+
+
+class AgentFixRunDetail(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['base_agent_version_id', 'candidates', 'committed_credits', 'environment_id', 'spent_credits'])
+    id: Optional[str] = Field(default=None)
+    number: Optional[int] = Field(default=None)
+    environment_id: Optional[str] = Field(default=None)
+    environment: Optional[AgentFixEnvironment] = Field(default=None)
+    source_run_id: Optional[str] = Field(default=None)
+    source_run_number: Optional[int] = Field(default=None)
+    base_agent_version_id: Optional[str] = Field(default=None)
+    agent: Optional[AgentFixAgent] = Field(default=None)
+    state: Optional[str] = Field(default=None)  # one of: queued, running, stopping, ready, no_improvement, not_reproduced, out_of_budget, stopped, failed, too_few_cases
+    stage: Optional[str] = Field(default=None)
+    step: Optional[str] = Field(default=None)  # one of: variations, reproduce, search, verify, done
+    plan: Optional[AgentFixPlan] = Field(default=None)
+    diagnosis: Optional[AgentFixDiagnosis] = Field(default=None)
+    request: Optional[AgentFixRequest] = Field(default=None)
+    spent_credits: Optional[float] = Field(default=None)
+    committed_credits: Optional[float] = Field(default=None)
+    report: Optional[AgentFixReport] = Field(default=None)
+    failure: Optional[AgentFixFailure] = Field(default=None)
+    retried_from_id: Optional[str] = Field(default=None)
+    retryable: Optional[bool] = Field(default=None)
+    limited_validation: Optional[bool] = Field(default=None)
+    issue: Optional[AgentFixEpochIssue] = Field(default=None)
+    check_runs: Optional[List[Optional[AgentFixCheckRun]]] = Field(default=None)
+    candidates: Optional[List[Optional[AgentFixCandidate]]] = Field(default=None)
+    started_at: Optional[str] = Field(default=None)
+    finished_at: Optional[str] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    eval_warnings: Optional[List[Optional[AgentFixEvalWarning]]] = Field(default=None)
+    eval_grading: Optional[str] = Field(default=None)  # one of: none, pending, done, incomplete
+
+
+class AgentFixVerdict(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['accepted', 'must_pass_regressions', 'reason'])
+    accepted: Optional[bool] = Field(default=None)
+    reason: Optional[str] = Field(default=None)
+    target_pass_rate: Optional[List[Optional[float]]] = Field(default=None)
+    held_back_pass_rate: Optional[List[Optional[float]]] = Field(default=None)
+    must_pass_regressions: Optional[List[Optional[str]]] = Field(default=None)
+    must_pass_within_noise: Optional[List[Optional[str]]] = Field(default=None)
+    tiers: Optional[List[Optional[AgentFixVerdictTier]]] = Field(default=None)
+
+
+class AgentFixVerdictTier(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name', 'status'])
+    name: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: passed, failed, pending, skipped
+    detail: Optional[str] = Field(default=None)
+    parts: Optional[List[Optional[AgentFixVerdictTierPart]]] = Field(default=None)
+    latency: Optional[AgentFixCeilingNumbers] = Field(default=None)
+    cost: Optional[AgentFixCeilingNumbers] = Field(default=None)
+
+
+class AgentFixVerdictTierPart(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name', 'status'])
+    name: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: passed, failed, skipped
+    detail: Optional[str] = Field(default=None)
+
+
 class AgentFlowGraph(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['edges', 'nodes'])
     nodes: Optional[List[Optional[Any]]] = Field(default=None)
@@ -1063,6 +1370,167 @@ class EventsOverTimePoint(_Model):
     errors: Optional[int] = Field(default=None)
     passing: Optional[int] = Field(default=None)
     users: Optional[int] = Field(default=None)
+
+
+class EvidenceDuplicateOf(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['case_id', 'import_id', 'scenario_name'])
+    import_id: Optional[str] = Field(default=None)
+    case_id: Optional[str] = Field(default=None)
+    scenario_name: Optional[str] = Field(default=None)
+
+
+class EvidenceExpectedOutcome(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['reason', 'status', 'text'])
+    status: Optional[str] = Field(default=None)  # one of: present, partial, truncated, missing, unreadable
+    reason: Optional[str] = Field(default=None)
+    text: Optional[str] = Field(default=None)
+
+
+class EvidenceImport(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['cases', 'created_at', 'drafting', 'environment_id', 'id', 'production', 'simulated', 'source_kind'])
+    id: Optional[str] = Field(default=None)
+    environment_id: Optional[str] = Field(default=None)
+    project_id: Optional[str] = Field(default=None)
+    dataset_id: Optional[str] = Field(default=None)
+    agent_version_id: Optional[str] = Field(default=None)
+    source_kind: Optional[str] = Field(default=None)  # one of: session, call, trace, transcript, dataset
+    created_at: Optional[str] = Field(default=None)
+    simulated: Optional[bool] = Field(default=None)
+    production: Optional[bool] = Field(default=None)
+    drafting: Optional[bool] = Field(default=None)
+    cases: Optional[List[Optional[EvidenceImportCase]]] = Field(default=None)
+    redaction: Optional[EvidenceRedaction] = Field(default=None)
+
+
+class EvidenceImportAddResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['saved'])
+    saved: Optional[bool] = Field(default=None)
+    evidence_import: Optional[EvidenceImport] = Field(default=None)
+
+
+class EvidenceImportCase(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['also_from', 'id', 'name', 'new_checks', 'reason', 'scenario_key', 'scenario_name', 'source_available', 'source_id', 'status', 'trace_ids'])
+    id: Optional[str] = Field(default=None)
+    source_id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: pending, unavailable, drafted, blocked, added, discarded, duplicate
+    reason: Optional[str] = Field(default=None)
+    source_available: Optional[bool] = Field(default=None)
+    scenario_key: Optional[str] = Field(default=None)
+    scenario_name: Optional[str] = Field(default=None)
+    new_checks: Optional[List[Optional[EvidenceNewCheck]]] = Field(default=None)
+    changed_since_import: Optional[bool] = Field(default=None)
+    also_from: Optional[int] = Field(default=None)
+    duplicate_of: Optional[EvidenceDuplicateOf] = Field(default=None)
+    trace_ids: Optional[List[Optional[str]]] = Field(default=None)
+    started_at: Optional[str] = Field(default=None)
+    ended_at: Optional[str] = Field(default=None)
+    transcript: Optional[EvidenceTranscript] = Field(default=None)
+    tool_calls: Optional[EvidenceToolCalls] = Field(default=None)
+    tool_inputs: Optional[EvidencePart] = Field(default=None)
+    tool_outputs: Optional[EvidencePart] = Field(default=None)
+    starting_state: Optional[EvidencePart] = Field(default=None)
+    labels: Optional[EvidenceLabels] = Field(default=None)
+    expected_outcome: Optional[EvidenceExpectedOutcome] = Field(default=None)
+
+
+class EvidenceImportListItem(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['added_count', 'can_discard', 'case_count', 'created_at', 'id', 'source_available', 'source_kind', 'status'])
+    id: Optional[str] = Field(default=None)
+    source_kind: Optional[str] = Field(default=None)  # one of: session, call, trace, transcript, dataset
+    source_name: Optional[str] = Field(default=None)
+    source_available: Optional[bool] = Field(default=None)
+    case_count: Optional[int] = Field(default=None)
+    added_count: Optional[int] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: waiting, drafting, drafted, partly_added, blocked
+    created_at: Optional[str] = Field(default=None)
+    can_discard: Optional[bool] = Field(default=None)
+
+
+class EvidenceLabel(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['kind', 'name', 'notes', 'target'])
+    name: Optional[str] = Field(default=None)
+    kind: Optional[str] = Field(default=None)
+    value: Optional[Any] = Field(default=None)
+    notes: Optional[str] = Field(default=None)
+    target: Optional[str] = Field(default=None)  # one of: session, trace, span, row
+
+
+class EvidenceLabels(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['labels', 'reason', 'status'])
+    status: Optional[str] = Field(default=None)  # one of: present, partial, truncated, missing, unreadable
+    reason: Optional[str] = Field(default=None)
+    labels: Optional[List[Optional[EvidenceLabel]]] = Field(default=None)
+
+
+class EvidenceNewCheck(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name', 'what'])
+    name: Optional[str] = Field(default=None)
+    what: Optional[str] = Field(default=None)
+
+
+class EvidencePart(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['reason', 'status'])
+    status: Optional[str] = Field(default=None)  # one of: present, partial, truncated, missing, unreadable
+    reason: Optional[str] = Field(default=None)
+
+
+class EvidenceRedaction(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['findings', 'method', 'reason', 'total'])
+    method: Optional[str] = Field(default=None)  # one of: presidio, basic
+    reason: Optional[str] = Field(default=None)
+    findings: Optional[List[Optional[EvidenceRedactionFinding]]] = Field(default=None)
+    total: Optional[int] = Field(default=None)
+
+
+class EvidenceRedactionFinding(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['case_id', 'end', 'entity', 'field', 'index', 'part', 'replacement', 'start', 'value'])
+    case_id: Optional[str] = Field(default=None)
+    part: Optional[str] = Field(default=None)  # one of: transcript, tool_calls, labels, expected_outcome
+    index: Optional[int] = Field(default=None)
+    field: Optional[str] = Field(default=None)  # one of: text, input, output, error, notes, value, name
+    entity: Optional[str] = Field(default=None)
+    start: Optional[int] = Field(default=None)
+    end: Optional[int] = Field(default=None)
+    value: Optional[str] = Field(default=None)
+    replacement: Optional[str] = Field(default=None)
+
+
+class EvidenceToolCall(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['at', 'error', 'failed', 'input', 'input_truncated', 'name', 'output', 'output_truncated', 'span_id', 'trace_id'])
+    span_id: Optional[str] = Field(default=None)
+    trace_id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    at: Optional[str] = Field(default=None)
+    failed: Optional[bool] = Field(default=None)
+    error: Optional[str] = Field(default=None)
+    input: Optional[str] = Field(default=None)
+    output: Optional[str] = Field(default=None)
+    input_truncated: Optional[bool] = Field(default=None)
+    output_truncated: Optional[bool] = Field(default=None)
+
+
+class EvidenceToolCalls(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['calls', 'reason', 'status'])
+    status: Optional[str] = Field(default=None)  # one of: present, partial, truncated, missing, unreadable
+    reason: Optional[str] = Field(default=None)
+    calls: Optional[List[Optional[EvidenceToolCall]]] = Field(default=None)
+
+
+class EvidenceTranscript(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['reason', 'status', 'turns'])
+    status: Optional[str] = Field(default=None)  # one of: present, partial, truncated, missing, unreadable
+    reason: Optional[str] = Field(default=None)
+    turns: Optional[List[Optional[EvidenceTurn]]] = Field(default=None)
+
+
+class EvidenceTurn(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['role', 'text', 'trace_id', 'truncated'])
+    role: Optional[str] = Field(default=None)  # one of: user, agent
+    text: Optional[str] = Field(default=None)
+    truncated: Optional[bool] = Field(default=None)
+    trace_id: Optional[str] = Field(default=None)
+    at: Optional[str] = Field(default=None)
 
 
 class ExperimentDetailV2(_Model):
@@ -3670,6 +4138,35 @@ AgentDefinitionDetailResponse.model_rebuild()
 AgentDefinitionEditResponse.model_rebuild()
 AgentDefinitionListResponse.model_rebuild()
 AgentDefinitionResponse.model_rebuild()
+AgentFixAgent.model_rebuild()
+AgentFixCandidate.model_rebuild()
+AgentFixCeilingNumbers.model_rebuild()
+AgentFixCheckRun.model_rebuild()
+AgentFixDiagnosis.model_rebuild()
+AgentFixEnvironment.model_rebuild()
+AgentFixEpochIssue.model_rebuild()
+AgentFixEvalWarning.model_rebuild()
+AgentFixFailure.model_rebuild()
+AgentFixFlakyProtected.model_rebuild()
+AgentFixLaunchDefaults.model_rebuild()
+AgentFixLaunchEnvironment.model_rebuild()
+AgentFixLaunchLimits.model_rebuild()
+AgentFixLaunchOptions.model_rebuild()
+AgentFixLaunchScenario.model_rebuild()
+AgentFixLaunchSourceRun.model_rebuild()
+AgentFixLaunchSuggested.model_rebuild()
+AgentFixLaunchSurface.model_rebuild()
+AgentFixMakeDefault.model_rebuild()
+AgentFixOverride.model_rebuild()
+AgentFixPlan.model_rebuild()
+AgentFixPullRequest.model_rebuild()
+AgentFixReport.model_rebuild()
+AgentFixRequest.model_rebuild()
+AgentFixRun.model_rebuild()
+AgentFixRunDetail.model_rebuild()
+AgentFixVerdict.model_rebuild()
+AgentFixVerdictTier.model_rebuild()
+AgentFixVerdictTierPart.model_rebuild()
 AgentFlowGraph.model_rebuild()
 AgentRunsResponse.model_rebuild()
 AgentVersionCreateResponse.model_rebuild()
@@ -3746,6 +4243,22 @@ EvalTemplateListResponseResult.model_rebuild()
 EvalTemplateUpdateResponseResult.model_rebuild()
 EvalsConfigsCreateResult.model_rebuild()
 EventsOverTimePoint.model_rebuild()
+EvidenceDuplicateOf.model_rebuild()
+EvidenceExpectedOutcome.model_rebuild()
+EvidenceImport.model_rebuild()
+EvidenceImportAddResponse.model_rebuild()
+EvidenceImportCase.model_rebuild()
+EvidenceImportListItem.model_rebuild()
+EvidenceLabel.model_rebuild()
+EvidenceLabels.model_rebuild()
+EvidenceNewCheck.model_rebuild()
+EvidencePart.model_rebuild()
+EvidenceRedaction.model_rebuild()
+EvidenceRedactionFinding.model_rebuild()
+EvidenceToolCall.model_rebuild()
+EvidenceToolCalls.model_rebuild()
+EvidenceTranscript.model_rebuild()
+EvidenceTurn.model_rebuild()
 ExperimentDetailV2.model_rebuild()
 ExperimentListV2.model_rebuild()
 FailedRerunItem.model_rebuild()
@@ -3984,6 +4497,35 @@ __all__ = [
     'AgentDefinitionEditResponse',
     'AgentDefinitionListResponse',
     'AgentDefinitionResponse',
+    'AgentFixAgent',
+    'AgentFixCandidate',
+    'AgentFixCeilingNumbers',
+    'AgentFixCheckRun',
+    'AgentFixDiagnosis',
+    'AgentFixEnvironment',
+    'AgentFixEpochIssue',
+    'AgentFixEvalWarning',
+    'AgentFixFailure',
+    'AgentFixFlakyProtected',
+    'AgentFixLaunchDefaults',
+    'AgentFixLaunchEnvironment',
+    'AgentFixLaunchLimits',
+    'AgentFixLaunchOptions',
+    'AgentFixLaunchScenario',
+    'AgentFixLaunchSourceRun',
+    'AgentFixLaunchSuggested',
+    'AgentFixLaunchSurface',
+    'AgentFixMakeDefault',
+    'AgentFixOverride',
+    'AgentFixPlan',
+    'AgentFixPullRequest',
+    'AgentFixReport',
+    'AgentFixRequest',
+    'AgentFixRun',
+    'AgentFixRunDetail',
+    'AgentFixVerdict',
+    'AgentFixVerdictTier',
+    'AgentFixVerdictTierPart',
     'AgentFlowGraph',
     'AgentRunsResponse',
     'AgentVersionCreateResponse',
@@ -4060,6 +4602,22 @@ __all__ = [
     'EvalTemplateUpdateResponseResult',
     'EvalsConfigsCreateResult',
     'EventsOverTimePoint',
+    'EvidenceDuplicateOf',
+    'EvidenceExpectedOutcome',
+    'EvidenceImport',
+    'EvidenceImportAddResponse',
+    'EvidenceImportCase',
+    'EvidenceImportListItem',
+    'EvidenceLabel',
+    'EvidenceLabels',
+    'EvidenceNewCheck',
+    'EvidencePart',
+    'EvidenceRedaction',
+    'EvidenceRedactionFinding',
+    'EvidenceToolCall',
+    'EvidenceToolCalls',
+    'EvidenceTranscript',
+    'EvidenceTurn',
     'ExperimentDetailV2',
     'ExperimentListV2',
     'FailedRerunItem',

@@ -1,0 +1,92 @@
+# How the live suite (python/tests/platform/test_all_operations_live.py) covers each
+# operation of the product's MCP group `epoch` on a fresh standalone stack. pair_check.py
+# records this table in pair.json and fails when it does not name exactly the catalog's
+# epoch-group operations. test_every_operation_was_called still requires every one of
+# them to be called.
+#
+#   a  succeeds live through public calls
+#   b  can succeed once the stack holds state no public call made by the suite creates yet;
+#      until then the suite asserts the view's exact refusal ("refusal-only until PR2")
+#   c  cannot succeed on an isolated stack; the suite asserts the exact refusal
+tracking: TH-10732
+operations:
+  simulation.executions.insights.get:
+    bucket: a
+    asserts: "not_requested on a real run; 404 in the product's error envelope for an unknown run"
+  simulation.executions.insights.start:
+    bucket: a
+    asserts: "202 pending, or exactly 409 execution_not_completed while the run has not finished"
+  simulation.environments.evidence_imports.list:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"detail": "Environment not found"} on an unknown environment'
+    needs: "a top-level environment job; try simulation.jobs.create first"
+  simulation.environments.evidence_imports.create:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"detail": "Environment not found"} on an unknown environment'
+    needs: "a top-level environment job; try simulation.jobs.create first"
+  simulation.environments.evidence_imports.get:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"detail": "Environment not found"} on an unknown environment'
+    needs: "an evidence import, from create"
+  simulation.environments.evidence_imports.draft:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"detail": "Environment not found"} on an unknown environment'
+    needs: "an environment with an agent and suite version and pending cases"
+  simulation.environments.evidence_imports.add_cases:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"detail": "Environment not found"} on an unknown environment'
+    needs: "drafted cases (product seeder)"
+  simulation.environments.evidence_imports.discard:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"detail": "Environment not found"} on an unknown environment'
+    needs: "an evidence import, from create"
+  simulation.epochs.launch_options:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"error": "not_found"} on an unknown run'
+    needs: "a finished run job on an environment (product seeder)"
+  simulation.epochs.list:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"error": "not_found"} on an unknown environment'
+    needs: "a top-level environment job; try simulation.jobs.create first"
+  simulation.epochs.get:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"error": "not_found"} on an unknown Epoch'
+    needs: "an Epoch, from launch"
+  simulation.epochs.launch:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"error": "not_found"} on an unknown run'
+    needs: "a finished run job with at least 12 failing scenario receipts (product seeder)"
+  simulation.epochs.stop:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"error": "not_found"} on an unknown Epoch'
+    needs: "an Epoch, from launch"
+  simulation.epochs.retry:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"error": "not_found"} on an unknown Epoch'
+    needs: "a FAILED Epoch (product seeder)"
+  simulation.epochs.candidates.patch:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"error": "not_found"} on an unknown Epoch'
+    needs: "an Epoch candidate (product seeder)"
+  simulation.epochs.candidates.make_default:
+    bucket: b
+    status: refusal-only until PR2 TH-10732
+    asserts: '404 {"error": "not_found"} on an unknown Epoch'
+    needs: "an ended Epoch with a winning candidate (product seeder)"
+  simulation.epochs.candidates.open_pull_request:
+    bucket: c
+    asserts: '404 {"error": "not_found"} on an unknown Epoch'
+    reason: "opening the pull request needs a GitHub App installation and real GitHub writes"

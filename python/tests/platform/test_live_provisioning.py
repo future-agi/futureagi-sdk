@@ -40,10 +40,12 @@ def test_live_workflow_enables_consumption_and_runs_full_platform_suite():
     workflow = yaml.safe_load((root / ".github/workflows/e2e.yml").read_text())
     job = workflow["jobs"]["e2e"]
     checkout = next(step for step in job["steps"] if step.get("name") == "Check out the monorepo's stack definition")
-    assert checkout["with"]["ref"] == "${{ env.BACKEND_REF }}"
-    boot = next(step["run"] for step in job["steps"] if step.get("id") == "boot")
-    assert 'SKILLS_CONTEXT_CONSUMPTION_ENABLED: "true"' in boot
-    assert '-f "$RUNNER_TEMP/sdk-context.yml"' in boot
+    assert checkout["with"]["ref"] == "${{ env.STACK_SOURCE }}"
+    overlay = yaml.safe_load((root / ".github/sdk-context.yml").read_text())
+    assert overlay["services"]["app"]["environment"]["SKILLS_CONTEXT_CONSUMPTION_ENABLED"] == "true"
+    for mode in ("boot", "boot_paired"):
+        boot = next(step["run"] for step in job["steps"] if step.get("id") == mode)
+        assert '-f "$GITHUB_WORKSPACE/.github/sdk-context.yml"' in boot
     run = next(step["run"] for step in job["steps"] if step.get("name") == "Python live suite (every catalog operation)")
     assert run == "PYTHONPATH=python pytest -q python/tests/platform"
     typescript = next(step["run"] for step in job["steps"] if step.get("name") == "TypeScript live suite")
