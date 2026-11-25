@@ -6,7 +6,7 @@ from typing import Dict, Generic, Optional, TypeVar, Union
 from requests import Response
 from requests_futures.sessions import FuturesSession
 
-from fi.api.types import RequestConfig
+from fi.api.types import HttpMethod, RequestConfig
 from fi.utils.constants import (
     API_KEY_ENVVAR_NAME,
     get_base_url,
@@ -82,7 +82,9 @@ class HttpClient:
         url = config.url
         headers = {**self._default_headers, **(config.headers or {})}
         params = config.params or {}
-        json = config.json or {}
+        # Don't turn an empty GET configuration into a JSON request body.
+        # Keep explicit nonempty payloads and the existing default for writes.
+        json = config.json or (None if config.method == HttpMethod.GET else {})
         timeout = config.timeout or self._default_timeout
         files = config.files or {}
         data = config.data or {}
