@@ -5,15 +5,20 @@ Checks public generator inputs and emitted operation records; never opens implem
 """
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from sdkgen.generator.catalog import load  # noqa: E402
+
 SKILLS = {"skills", "contexts", "skill_consumption", "context_credentials"}
 
 
@@ -41,6 +46,16 @@ def main() -> None:
     digest = hashlib.sha256(raw).hexdigest()
     before = json.loads(raw)
     after = json.loads((contracts / "swagger.json").read_bytes())
+    # Compare the generated id -> tool mapping, not just a tool count. A new SDK
+    # baseline can add tools, but a scoped sync cannot rename or reassign them.
+    expected_names = {op["id"]: mcp.get("name", op["id"].replace(".", "_")) for op in original
+                      if isinstance(mcp := op["surfaces"].get("mcp"), dict)}
+    # load() applies catalog fixes in memory. Keep the raw schemas for the checks below.
+    ops = load(copy.deepcopy(after), {"operations": selected})
+    names = {op.id: op.surfaces["mcp"]["name"] for op in ops
+             if "mcp" in op.surfaces and op.id.split(".")[0] not in SKILLS}
+    equal(expected_names, names, "MCP mappings")
+    print(f"{len(names)} non-Skills MCP mappings match {commit}")
     equal(digest, metadata["non_skills_slice_sha256"], "baseline slice digest")
     equal(digest, after["x-skills-only-baseline-sha256"], "embedded baseline digest")
     equal(before["paths"], {p: v for p, v in after["paths"].items()

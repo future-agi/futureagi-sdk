@@ -13,7 +13,7 @@ import urllib.request
 
 PACKAGES = {
     "python": ("python/pyproject.toml", "python/fi/__init__.py", "python/CHANGELOG.md"),
-    "typescript/futureagi": ("typescript/futureagi/package.json", "typescript/futureagi/package-lock.json", "typescript/futureagi/CHANGELOG.md"),
+    "typescript/futureagi": ("typescript/futureagi/package.json", "typescript/futureagi/package-lock.json", "typescript/futureagi/src/telemetry/version.ts", "typescript/futureagi/CHANGELOG.md"),
 }
 MANIFEST = ".release-please-manifest.json"
 RELEASE_BRANCH = "release-please--branches--main"
@@ -73,6 +73,10 @@ def validate_version_changes(before, after):
                 # Every dependency entry, constraint, integrity/resolved value,
                 # script, and metadata field must remain byte-value equivalent.
                 require(a == b, f"{path} changes more than its root package version")
+            elif path.endswith('/src/telemetry/version.ts'):
+                # This is executable source: allow only the exact old -> new wire constant.
+                line = 'export const SDK_VERSION = "{}"; // x-release-please-version\n'
+                require((a, b) == (line.format(old[name]), line.format(new[name])), f"Non-version edit or version disagreement: {path}")
             else:
                 field = '__version__' if path.endswith('__init__.py') else 'version'
                 pattern = rf'(?m)^({field}\s*=\s*")[^"]+("[^\n]*)$'

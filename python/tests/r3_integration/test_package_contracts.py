@@ -63,6 +63,20 @@ def test_backend_suite_is_a_required_job_not_a_silent_collection_skip():
     assert "flock /tmp/ctxhub-pytest.lock" in code
 
 
+def test_paired_telemetry_and_no_otel_have_distinct_required_coverage():
+    jobs = workflow()["jobs"]
+    backend = jobs["context-backend"]
+    checkout = next(step for step in backend["steps"] if step.get("with", {}).get("repository") == "future-agi/traceAI")
+    assert checkout["with"]["ref"] == "${{ steps.pair.outputs.commit }}"
+    code = commands(backend)
+    assert code.index("pip wheel --no-deps .traceai/python") < code.index("fi_instrumentation_otel-*.whl") < code.index("python/tests/telemetry")
+    sdk = jobs["python"]
+    assert "3.9" in sdk["strategy"]["matrix"]["python"]
+    assert "python" in jobs["ci-pass"]["needs"]
+    assert "--ignore=python/tests/telemetry" in commands(sdk)
+    assert "pytest -q python/tests/telemetry/test_no_otel.py" in commands(sdk)
+
+
 def test_changed_modules_and_tests_are_in_the_lint_and_typescript_gates():
     jobs = workflow()["jobs"]
     lint = commands(jobs["generated"])

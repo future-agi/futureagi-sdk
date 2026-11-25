@@ -160,9 +160,6 @@ def test_mcp_names_keep_existing_tools_or_follow_the_id():
     assert len(set(names.values())) == len(MCP_IDS)
     sql_names = {name for key, name in names.items() if key.startswith("sql.")}
     assert sql_names == {"run_sql", "get_sql_result", "cancel_sql", "get_sql_catalog"}
-    # The dev baseline has 107 release mappings plus the four named SQL tools.
-    skills = {"skills", "skill_consumption", "contexts", "context_credentials"}
-    assert sum(key.split(".")[0] not in skills for key in names) == 111
     assert names["datasets.list"] == "list_datasets"
     assert names["traces.list"] == "search_traces"
     # Without an override the name follows the id.

@@ -135,3 +135,19 @@ test("SQL validates the same values it sends without losing request option gette
   await client.sql.run(new RunParams(), Object.freeze(new Options()));
   expect(reads).toBe(1);
 });
+
+test("SQL refreshes ordinary headers after a 429 without changing the operation identity", async () => {
+  const sent: Array<Array<string | null>> = [];
+  let attempts = 0, leases = 0;
+  const client = new Client({ apiKey: "example", secretKey: "example", maxRetries: 1, fetch: async (_url, init) => {
+    const headers = new Headers(init.headers);
+    sent.push([headers.get("x-attempt"), headers.get("idempotency-key"), headers.get("x-context-resolution")]);
+    return sent.length === 1 ? new Response(null, { status: 429, headers: { "Retry-After": "0" } }) : new Response("{}");
+  } });
+  await client.sql.run({ project_id: "project", sql: "mock input", start: "start", end: "end" }, {
+    get headers() { return { "X-Attempt": String(++attempts), "Idempotency-Key": `key-${attempts}` }; },
+    get resolutionId() { return `lease-${++leases}`; },
+  });
+  expect(sent).toEqual([["1", "key-1", "lease-1"], ["2", "key-1", "lease-1"]]);
+  expect([attempts, leases]).toEqual([2, 1]);
+});

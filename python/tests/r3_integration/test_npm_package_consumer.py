@@ -31,7 +31,9 @@ def consumer_gate(tmp_path):
         '  install) cp ./package.tgz "$INSTALLED_BYTES";;\n'
         "esac\n",
         "npx": '#!/bin/sh\nexit "${COMPILER_STATUS:-0}"\n',
-        "node": "#!/bin/sh\nexit 0\n",
+        "node": '#!/bin/sh\n'
+        'if [ "$1" = -e ] && [ "$2" = \'require.resolve("@opentelemetry/api")\' ]; then exit 1; fi\n'
+        "exit 0\n",
     }
     for name, content in commands.items():
         binary = binaries / name

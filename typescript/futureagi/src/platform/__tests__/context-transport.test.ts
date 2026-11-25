@@ -59,6 +59,31 @@ describe("exclusive authentication", () => {
     expect(calls).toHaveLength(1);
   });
 
+  test("validates and sends one snapshot of accessor-backed headers", async () => {
+    const { client, calls } = setup(undefined, { workspaceId: "workspace-1" });
+    let reads = 0, valueReads = 0;
+    await client.request("GET", RESOLVE, {}, {
+      get headers() {
+        return {
+          "X-Attempt": String(++reads),
+          get "X-Workspace-Id"() { ++valueReads; return "workspace-1"; },
+        };
+      },
+    });
+    expect(calls[0].headers.get("x-attempt")).toBe("1");
+    expect(calls[0].headers.get("x-workspace-id")).toBe("workspace-1");
+    expect([reads, valueReads]).toEqual([1, 1]);
+  });
+
+  test("revalidates the workspace before transmitting a retry", async () => {
+    const { client, calls } = setup(() => new Response(null, { status: 429, headers: { "Retry-After": "0" } }), { workspaceId: "workspace-1" });
+    let attempt = 0;
+    await expect(client.request("GET", RESOLVE, {}, {
+      get headers() { return { "X-Workspace-Id": `workspace-${++attempt}` }; },
+    })).rejects.toThrow(/workspace header/);
+    expect(calls).toHaveLength(1);
+  });
+
   test("explicit API pair is also exclusive", async () => {
     const { client, calls } = setup(undefined, { auth: { type: "api_key", apiKey: "explicit", secretKey: "pair" } });
     await client.request("GET", RESOLVE);
@@ -149,8 +174,10 @@ describe("immutable continuation", () => {
 });
 
 test("generated headers are allowlisted and cannot replace an operation identity", () => {
-  const original: RequestOptions = { resolutionId: "lease", headers: { "X-Trace": "trace" } };
+  let reads = 0;
+  const original: RequestOptions = { resolutionId: "lease", get headers() { ++reads; return { "X-Trace": "trace" }; } };
   const merged = operationOptions(original, { "X-Context-Resolution": "lease", "Idempotency-Key": "key" });
+  expect(reads).toBe(1);
   expect(merged.headers).toEqual({ "X-Trace": "trace", "X-Context-Resolution": "lease", "Idempotency-Key": "key" });
   expect(original.headers).toEqual({ "X-Trace": "trace" });
   expect(() => operationOptions(original, { "x-context-resolution": "other" })).toThrow(/conflicting/);

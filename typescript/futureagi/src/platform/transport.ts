@@ -124,7 +124,8 @@ function mergeHeaders(...layers: Array<Record<string, string> | undefined>): Rec
 
 /** Merge generated allowlisted headers without replacing a caller's operation/lease identity. */
 export function operationOptions(options: RequestOptions | undefined, headers: Record<string, unknown>, required: string[] = []): RequestOptions {
-  let merged = { ...options?.headers };
+  const { headers: perCall, resolutionId, idempotencyKey, ...rest } = options ?? {};
+  let merged = { ...perCall };
   for (const [name, value] of Object.entries(headers)) {
     if (!OPERATION_HEADERS.has(name.toLowerCase())) throw new Error("operation headers may only carry idempotency or resolution IDs");
     if (value === undefined || value === null) {
@@ -132,13 +133,13 @@ export function operationOptions(options: RequestOptions | undefined, headers: R
       continue;
     }
     headerToken(value, name);
-    const typed = name.toLowerCase() === "x-context-resolution" ? options?.resolutionId : options?.idempotencyKey;
+    const typed = name.toLowerCase() === "x-context-resolution" ? resolutionId : idempotencyKey;
     if ((typed !== undefined && typed !== value) || Object.entries(merged).some(([k, v]) => k.toLowerCase() === name.toLowerCase() && v !== value)) {
       throw new Error(`conflicting ${name} values`);
     }
     merged = mergeHeaders(merged, { [name]: value });
   }
-  return { ...options, headers: merged };
+  return { ...rest, resolutionId, idempotencyKey, headers: merged };
 }
 
 const originOf = (url: string) => new URL(url).origin.toLowerCase();
@@ -338,8 +339,19 @@ export class Transport {
   }
 
   headers(options?: RequestOptions): Record<string, string> {
-    this.validateHeaders(this.config.defaultHeaders);
-    this.validateHeaders(options?.headers);
+    return this.attemptHeaders(options);
+  }
+
+  private attemptHeaders(options?: RequestOptions, pinnedIdentity?: Record<string, string>): Record<string, string> {
+    // Materialize getters only once per attempt. On replay even the *absence* of
+    // an identity header is pinned; only ordinary headers are read again.
+    const snapshot = (layer: Record<string, string> = {}) => Object.fromEntries(Object.keys(layer)
+      .filter(name => !pinnedIdentity || !OPERATION_HEADERS.has(name.toLowerCase()))
+      .map(name => [name, layer[name]]));
+    const defaults = snapshot(this.config.defaultHeaders);
+    const perCall = snapshot(options?.headers);
+    this.validateHeaders(defaults);
+    this.validateHeaders(perCall);
     const headers: Record<string, string> = { "User-Agent": `futureagi-typescript/${SDK_VERSION}` };
     if (this.config.auth?.type === "context") {
       headers.Authorization = `Context ${this.config.auth.credential}`;
@@ -349,12 +361,13 @@ export class Transport {
       headers["X-Secret-Key"] = pair.secretKey!;
     }
     if (this.config.workspaceId) headers["X-Workspace-Id"] = this.config.workspaceId;
-    let merged = mergeHeaders(headers, this.config.defaultHeaders, options?.headers);
+    let merged = mergeHeaders(headers, defaults, perCall);
+    if (pinnedIdentity) return mergeHeaders(merged, pinnedIdentity);
     for (const [name, value] of Object.entries({ "X-Context-Resolution": options?.resolutionId, "Idempotency-Key": options?.idempotencyKey })) {
       if (value === undefined) continue;
       headerToken(value, name);
-      for (const layer of [this.config.defaultHeaders, options?.headers]) {
-        if (Object.entries(layer ?? {}).some(([k, v]) => k.toLowerCase() === name.toLowerCase() && v !== value)) throw new Error(`conflicting ${name} values`);
+      for (const layer of [defaults, perCall]) {
+        if (Object.entries(layer).some(([k, v]) => k.toLowerCase() === name.toLowerCase() && v !== value)) throw new Error(`conflicting ${name} values`);
       }
       merged = mergeHeaders(merged, { [name]: value });
     }
@@ -369,10 +382,13 @@ export class Transport {
     let method = op.method;
     const timeout = options?.timeout ?? this.config.timeout;
     const maxRetries = options?.maxRetries ?? this.config.maxRetries;
-    const requestHeaders = this.headers(options); // Validate once, outside retry handling.
+    let pinnedIdentity: Record<string, string> | undefined;
     let attempt = 0;
     let redirects = 0;
     for (;;) {
+      // A caller option error must not be wrapped or retried as a network failure.
+      const requestHeaders = this.attemptHeaders(options, pinnedIdentity);
+      pinnedIdentity ??= Object.fromEntries(Object.entries(requestHeaders).filter(([name]) => OPERATION_HEADERS.has(name.toLowerCase())));
       // Rebuilt per attempt (a FormData stream is single-use); a request re-issued as a GET after a redirect has no body.
       const { body, headers } = method === op.method ? await buildBody(op, args, options) : { body: undefined, headers: {} };
       let response: Response;
