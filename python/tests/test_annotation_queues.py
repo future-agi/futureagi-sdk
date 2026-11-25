@@ -231,29 +231,69 @@ class TestResponseHandlers:
 class TestQueueCRUD:
 
     def test_create(self, client, mock_request):
+        labels = [
+            "00000000-0000-4000-8000-000000000002",
+            "00000000-0000-4000-8000-000000000001",
+        ]
         mock_request.return_value = QueueDetail(id="q1", name="Test")
         result = client.create(
-            name="Test",
+            "Test",
+            label_ids=labels.copy(),
             description="A test queue",
             instructions="Rate quality",
             assignment_strategy="round_robin",
             annotations_required=2,
+            requires_review=False,
+            timeout=15,
         )
         mock_request.assert_called_once()
-        config = mock_request.call_args[0][0]
+        config, handler = mock_request.call_args.args
         assert config.method == HttpMethod.POST
-        assert "annotation-queues/" in config.url
-        assert config.json["name"] == "Test"
-        assert config.json["description"] == "A test queue"
-        assert config.json["assignment_strategy"] == "round_robin"
-        assert config.json["annotations_required"] == 2
+        assert config.url.endswith("/model-hub/annotation-queues/")
+        assert config.timeout == 15
+        assert config.json == {
+            "name": "Test",
+            "label_ids": labels,
+            "description": "A test queue",
+            "instructions": "Rate quality",
+            "assignment_strategy": "round_robin",
+            "annotations_required": 2,
+            "requires_review": False,
+        }
+        assert handler is _QueueResponseHandler
         assert result.id == "q1"
 
     def test_create_minimal(self, client, mock_request):
+        labels = ["00000000-0000-4000-8000-000000000001"]
         mock_request.return_value = QueueDetail(id="q2", name="Min")
-        client.create(name="Min")
-        config = mock_request.call_args[0][0]
-        assert config.json == {"name": "Min"}
+        client.create(name="Min", label_ids=labels)
+        mock_request.assert_called_once()
+        config = mock_request.call_args.args[0]
+        assert config.json == {"name": "Min", "label_ids": labels}
+
+    def test_create_warns_and_omits_read_only_scope(self, client, mock_request):
+        labels = ["00000000-0000-4000-8000-000000000001"]
+        mock_request.return_value = QueueDetail(id="q3", name="Review")
+        with pytest.warns(UserWarning, match="The new queue will not be scoped"):
+            client.create(
+                "Review", label_ids=labels, project="project-id", dataset="dataset-id",
+                agent_definition="agent-id",
+            )
+        mock_request.assert_called_once()
+        assert mock_request.call_args.args[0].json == {"name": "Review", "label_ids": labels}
+
+    @pytest.mark.parametrize(("options", "error"), [
+        ({}, TypeError),
+        ({"label_ids": None}, TypeError),
+        ({"label_ids": []}, ValueError),
+        ({"label_ids": "not-a-list"}, TypeError),
+        ({"label_ids": ["  "]}, ValueError),
+        ({"label_ids": [123]}, ValueError),
+    ])
+    def test_create_rejects_invalid_labels_before_request(self, client, mock_request, options, error):
+        with pytest.raises(error, match="label_ids"):
+            client.create("Review", **options)
+        mock_request.assert_not_called()
 
     def test_list_queues(self, client, mock_request):
         mock_request.return_value = [QueueDetail(id="q1", name="A")]
