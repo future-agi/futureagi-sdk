@@ -955,6 +955,8 @@ def test_simulation_environments_and_jobs(client):
         lambda: environments.scenarios.restore(env, "refund-flow"),
         lambda: environments.scenarios.records(env, "refund-flow", table="bookings"),
         lambda: environments.scenarios.revisions(env, "refund-flow"),
+        lambda: environments.drafts.review(env),
+        lambda: environments.drafts.validate(env, expected_revisions={"environment": 0}, expected_review_digest="sdk-live"),
         lambda: environments.readiness.get(env),
         lambda: environments.readiness.get_for_scenarios(env, scenario_ids=["refund-flow"]),
         lambda: environments.readiness.cases(env, bucket="blocked"),
