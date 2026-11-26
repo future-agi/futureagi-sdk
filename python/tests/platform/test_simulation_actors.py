@@ -170,3 +170,14 @@ def test_an_error_code_that_is_not_a_string_is_read_as_typescript_reads_it(body,
     response = httpx.Response(400, json=body, request=httpx.Request("GET", "https://x"))
 
     assert fp.APIError("refused", response=response, body=body).code == code
+
+
+
+@pytest.mark.parametrize("actor_id", ["", "  "])
+def test_an_empty_path_value_is_refused_before_any_request(actor_id):
+    sent: list[httpx.Request] = []
+    client = _client(sent, {"status": True, "result": {}})
+
+    with pytest.raises(ValueError, match="actor_id is empty|id is empty"):
+        client.simulation.environments.actors.get(ENV, actor_id)
+    assert sent == []

@@ -164,6 +164,8 @@ export function rawOperation(method: string, path: string, unwrap: string | null
 function buildUrl(config: ResolvedConfig, op: Operation, args: RequestArgs, options?: RequestOptions): string {
   let path = op.path;
   for (const [name, value] of Object.entries(args.path ?? {})) {
+    // An empty value drops a path segment, which reaches another route (often a list) instead of failing.
+    if (!String(value ?? "").trim()) throw new TypeError(`${op.id}: ${name} is empty`);
     path = path.replace(`{${name}}`, encodeURIComponent(String(value)));
   }
   const url = new URL(config.baseUrl + path);

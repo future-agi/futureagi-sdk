@@ -92,6 +92,13 @@ describe("simulation environment actors", () => {
     expect(seen[0].body).toEqual({ scenario_ids: ["refund-flow"] });
   });
 
+  test("an empty path value is refused before any request", async () => {
+    const { fetch, seen } = recording();
+
+    await expect(client(fetch).simulation.environments.actors.get(ENV, " ")).rejects.toThrow(/is empty/);
+    expect(seen).toEqual([]);
+  });
+
   test("a run sends its seed", async () => {
     const { fetch, seen } = recording();
 

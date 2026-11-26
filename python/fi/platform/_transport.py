@@ -216,6 +216,9 @@ def raw_operation(method: str, path: str, *, unwrap: str | None = "result", mult
 def _url(op: Operation, path: dict | None) -> str:
     url = op.path
     for name, value in (path or {}).items():
+        # An empty value drops a path segment, which reaches another route (often a list) instead of failing.
+        if not str(value if value is not None else "").strip():
+            raise ValueError(f"{op.id}: {name} is empty")
         url = url.replace("{" + name + "}", quote(str(value), safe=""))
     return url
 
