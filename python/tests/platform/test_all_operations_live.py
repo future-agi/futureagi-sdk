@@ -935,6 +935,34 @@ def test_simulation_environments_and_jobs(client):
     ):
         with pytest.raises(fi.BadRequestError):
             call()
+    # Actors, scenario checks and lifecycle, readiness and a trial's workers, against ids that do not exist. A backend
+    # release without these routes answers 404 too, which still proves the method, path and body the SDK sends.
+    refused = (400, 404, 405, 409, 422)
+    for call in (
+        lambda: environments.actors.list(env),
+        lambda: environments.actors.get(env, "caller"),
+        lambda: environments.actors.validate(env, op="delete", actor_id="caller"),
+        lambda: environments.actors.create(env, actor={"name": "Dispatcher"}, new_id="dispatcher"),
+        lambda: environments.actors.update(env, "caller", changes={"goal": "Book a ride"}),
+        lambda: environments.actors.delete(env, "caller", expected_revision=1),
+        lambda: environments.actors.set_limits(env, limits={"per_scenario": 2}, expected_revision=1),
+        lambda: environments.actors.accept_unresolved(env, policy="keep", expected_revision=1),
+        lambda: environments.versions.source_changes(env, other),
+        lambda: environments.scenarios.validate(env, keys=["refund-flow"]),
+        lambda: environments.scenarios.validation_status(env, job_id=other),
+        lambda: environments.scenarios.running_validation(env),
+        lambda: environments.scenarios.archive(env, "refund-flow", reason="duplicate"),
+        lambda: environments.scenarios.restore(env, "refund-flow"),
+        lambda: environments.scenarios.records(env, "refund-flow", table="bookings"),
+        lambda: environments.scenarios.revisions(env, "refund-flow"),
+        lambda: environments.readiness.get(env),
+        lambda: environments.readiness.get_for_scenarios(env, scenario_ids=["refund-flow"]),
+        lambda: environments.readiness.cases(env, bucket="blocked"),
+        lambda: environments.readiness.recheck(env),
+        lambda: environments.readiness.history(env),
+        lambda: client.simulation.calls.workers(other),
+    ):
+        allow(call, *refused)
     staged = jobs.upload_sources(files=[("agent/main.py", b"print('hi')\n"), ("README.md", b"# agent\n")], paths=["agent/main.py", "README.md"], name=_name("source"))
     assert staged.source_id and staged.file_count == 2  # both repeated form fields arrived
     # Only a GOOGLE_APPLICATION_CREDENTIALS service-account JSON is accepted today.
