@@ -1,9 +1,9 @@
 ---
 title: "Simulation"
-description: "Reference for client.simulation in the Future AGI Python and TypeScript SDKs: simulation.calls.get, simulation.calls.workers, simulation.environments.get, simulation.environments.list, simulation.environments.rename, simulation.environments.run and 60 more."
+description: "Reference for client.simulation in the Future AGI Python and TypeScript SDKs: simulation.calls.get, simulation.calls.workers, simulation.environments.get, simulation.environments.list, simulation.environments.rename, simulation.environments.run and 73 more."
 ---
 
-`client.simulation` on `fi.Client` (Python) and `client.simulation` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.simulation.calls`, `client.simulation.environments`, `client.simulation.environments.actors`, `client.simulation.environments.drafts`, `client.simulation.environments.evaluations`, `client.simulation.environments.nudges`, `client.simulation.environments.runs`, `client.simulation.environments.versions`, `client.simulation.executions`, `client.simulation.executions.insights`, `client.simulation.jobs`, `client.simulation.jobs.scenarios`, `client.simulation.personas`, `client.simulation.scenarios`, `client.simulation.tests`. The models these methods return are on [Simulation response models](/docs/sdk/reference/simulation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
+`client.simulation` on `fi.Client` (Python) and `client.simulation` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.simulation.calls`, `client.simulation.environments`, `client.simulation.environments.actors`, `client.simulation.environments.drafts`, `client.simulation.environments.evaluations`, `client.simulation.environments.nudges`, `client.simulation.environments.readiness`, `client.simulation.environments.runs`, `client.simulation.environments.scenarios`, `client.simulation.environments.versions`, `client.simulation.executions`, `client.simulation.executions.insights`, `client.simulation.jobs`, `client.simulation.jobs.scenarios`, `client.simulation.personas`, `client.simulation.scenarios`, `client.simulation.tests`. The models these methods return are on [Simulation response models](/docs/sdk/reference/simulation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
 
 ## Methods
 
@@ -35,13 +35,26 @@ description: "Reference for client.simulation in the Future AGI Python and TypeS
 | [`simulation.environments.nudges.answer`](#simulationenvironmentsnudgesanswer) | Answer a rebuild offer; answer yes queues a rebuild (pending or failed nudges), no skips a pending one. |
 | [`simulation.environments.nudges.list`](#simulationenvironmentsnudgeslist) | List an environment's rebuild offers, newest first (at most 100), optionally filtered by comma-separated states (pending, answered_no, queued, running, applied, no_change, replaced, failed). |
 | [`simulation.environments.nudges.stop`](#simulationenvironmentsnudgesstop) | Stop a queued or running rebuild; it can be answered again later. |
+| [`simulation.environments.readiness.cases`](#simulationenvironmentsreadinesscases) | List one page, by scenario number, of the selected scenarios in one readiness bucket (eligible, blocked, stale or untested) or held back by one readiness row; pass the previous page's next as cursor. |
+| [`simulation.environments.readiness.get`](#simulationenvironmentsreadinessget) | Return the run readiness of a pairing of agent, environment and suite versions (absent ones are the defaults), computed now, with its blockers and the selected scenarios it holds back; keys narrows the selection and trials is the trial count planned. |
+| [`simulation.environments.readiness.get_for_scenarios`](#simulationenvironmentsreadinessget_for_scenarios) | Return the same run readiness report as readiness.get for a selection of scenarios too long for a query string (scenario_ids, more than 200 keys). |
+| [`simulation.environments.readiness.history`](#simulationenvironmentsreadinesshistory) | List the version pairings certified on an environment, newest first, with the exact agent, environment and suite versions of each; pass the returned cursor for the next page. |
+| [`simulation.environments.readiness.recheck`](#simulationenvironmentsreadinessrecheck) | Validate a pairing of versions again (absent ones are the defaults) without a run; moves no default. |
 | [`simulation.environments.runs.add_evaluation`](#simulationenvironmentsrunsadd_evaluation) | Add an eval by name from inside a finished run and grade that run's finished calls that have no verdict for it; returns the queued and skipped counts. |
 | [`simulation.environments.runs.regrade`](#simulationenvironmentsrunsregrade) | Grade a completed run's calls again with the environment's evals (eval_config_ids), replacing their previous scores; the calls are not rerun. |
+| [`simulation.environments.scenarios.archive`](#simulationenvironmentsscenariosarchive) | Take one scenario (key) out of future runs, with an optional reason; its identity, runs and evidence are kept, and restore brings it back. |
+| [`simulation.environments.scenarios.records`](#simulationenvironmentsscenariosrecords) | Return the seeded rows of one table of the world, to pick a real record for a scenario (key) whose starting record is missing. |
+| [`simulation.environments.scenarios.restore`](#simulationenvironmentsscenariosrestore) | Bring an archived scenario (key) back, at once when the saved suite still holds it, otherwise as a draft to save. |
+| [`simulation.environments.scenarios.revisions`](#simulationenvironmentsscenariosrevisions) | List each distinct content of one scenario (key) across the environment's saved suite versions, newest first. |
+| [`simulation.environments.scenarios.running_validation`](#simulationenvironmentsscenariosrunning_validation) | Return the validation still running for the environment's default versions, if any, and how many scenarios a validation of those not yet proved would prove. |
+| [`simulation.environments.scenarios.validate`](#simulationenvironmentsscenariosvalidate) | Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and is billed. |
+| [`simulation.environments.scenarios.validation_status`](#simulationenvironmentsscenariosvalidation_status) | Return where one scenario validation (job_id) got to, and whether it recorded its proofs. |
 | [`simulation.environments.versions.create_agent`](#simulationenvironmentsversionscreate_agent) | Make an environment's next agent version from an uploaded folder (archive_artifact_id from simulation.jobs.upload_sources, alone), a prompt or agent_payload settings; it is checked next, then made the default. |
 | [`simulation.environments.versions.diff`](#simulationenvironmentsversionsdiff) | Show what one agent, environment or suite version (piece), or an open draft, changed against its parent, or against the version named by `against`. |
 | [`simulation.environments.versions.list`](#simulationenvironmentsversionslist) | List an environment's saved agent, environment and suite versions, and which of each is the default. |
 | [`simulation.environments.versions.retry_agent`](#simulationenvironmentsversionsretry_agent) | Check again an environment's agent version whose check failed or is stuck pending (422 otherwise); returns every version. |
 | [`simulation.environments.versions.set_default`](#simulationenvironmentsversionsset_default) | Make an agent, environment or suite version (piece) the environment's default; expected_default_id is the default you saw (null for none), and a newer one returns 409. |
+| [`simulation.environments.versions.source_changes`](#simulationenvironmentsversionssource_changes) | Return the rules and files an environment version changed that scenarios cite, with the scenarios citing each. |
 | [`simulation.environments.versions.suite_members`](#simulationenvironmentsversionssuite_members) | List the scenarios in a saved suite version. |
 | [`simulation.executions.analytics`](#simulationexecutionsanalytics) | Return aggregated analytics for a simulation test execution. |
 | [`simulation.executions.get`](#simulationexecutionsget) | Return a simulation test execution by its identifier. |
@@ -61,7 +74,7 @@ description: "Reference for client.simulation in the Future AGI Python and TypeS
 | [`simulation.jobs.upload_secret_file`](#simulationjobsupload_secret_file) | Stage a credential file for an environment (today only a GOOGLE_APPLICATION_CREDENTIALS service-account JSON, as environment_name GOOGLE_APPLICATION_CREDENTIALS; anything else returns 422); pass the returned secret_ref in simulation.jobs.set_secret_values files. |
 | [`simulation.jobs.upload_sources`](#simulationjobsupload_sources) | Upload an agent's source files (one `paths` entry per file, the file's path inside the folder) for simulation.jobs.create or simulation.environments.versions.create_agent; returns the source_id to pass on. |
 | [`simulation.jobs.scenarios.amend`](#simulationjobsscenariosamend) | Drop or edit an environment's authored scenarios, or set a scenario's persona (as a draft where versioning applies); one receipt per change. |
-| [`simulation.jobs.scenarios.list`](#simulationjobsscenarioslist) | List one page of an environment's (or run's) authored scenarios, by number; group_by defaults to goal when omitted (empty for a flat list). |
+| [`simulation.jobs.scenarios.list`](#simulationjobsscenarioslist) | List one page of an environment's (or run's) authored scenarios, by number, each with its lifecycle; group_by defaults to goal when omitted (empty for a flat list), and lifecycle keeps one state (draft, validated, active, archived, source_changed or kept_as_written). |
 | [`simulation.personas.create`](#simulationpersonascreate) | Create a workspace persona; a name already used by a system or workspace persona returns 400. |
 | [`simulation.personas.duplicate`](#simulationpersonasduplicate) | Copy a system or workspace persona into the workspace under a new name; a name already used by a workspace persona returns 400. |
 | [`simulation.personas.get`](#simulationpersonasget) | Return one system or workspace persona you can use. |
@@ -437,6 +450,7 @@ client.simulation.environments.run_plan(
     agent_version_id: str | None | NotGiven = NOT_GIVEN,
     environment_version_id: str | None | NotGiven = NOT_GIVEN,
     suite_version_id: str | None | NotGiven = NOT_GIVEN,
+    scenario_keys: str | None | NotGiven = NOT_GIVEN,
     extra_query: dict[str, Any] | None = None,
     options: RequestOptions | None = None,
 ) -> models.HarnessRunPlan
@@ -449,6 +463,8 @@ export interface SimulationEnvironmentsRunPlanParams {
   agent_version_id?: string | null;
   environment_version_id?: string | null;
   suite_version_id?: string | null;
+  /** The scenarios the run would select, comma-separated; absent or blank selects every scenario. */
+  scenario_keys?: string | null;
 }
 ```
 
@@ -462,6 +478,9 @@ export interface SimulationEnvironmentsRunPlanParams {
 <ParamField query="agent_version_id" type="string" optional />
 <ParamField query="environment_version_id" type="string" optional />
 <ParamField query="suite_version_id" type="string" optional />
+<ParamField query="scenario_keys" type="string" optional>
+  The scenarios the run would select, comma-separated; absent or blank selects every scenario.
+</ParamField>
 
 #### Returns
 
@@ -991,18 +1010,11 @@ Save the named drafts together as new default versions; each needs expected_pare
 <CodeGroup>
 
 ```python Python
-result = client.simulation.environments.drafts.save(
-    "your-id",
-    drafts=[],
-    idempotency_key="your-idempotency-key",
-)
+result = client.simulation.environments.drafts.save("your-id", idempotency_key="your-idempotency-key")
 ```
 
 ```typescript TypeScript
-const result = await client.simulation.environments.drafts.save("your-id", {
-  drafts: [],
-  idempotency_key: "your-idempotency-key",
-});
+const result = await client.simulation.environments.drafts.save("your-id", { idempotency_key: "your-idempotency-key" });
 ```
 
 </CodeGroup>
@@ -1013,8 +1025,11 @@ const result = await client.simulation.environments.drafts.save("your-id", {
 client.simulation.environments.drafts.save(
     id: str,
     *,
-    drafts: list[dict[str, Any]],
     idempotency_key: str,
+    drafts: list[dict[str, Any]] | None | NotGiven = NOT_GIVEN,
+    candidates: dict[str, Any] | None | NotGiven = NOT_GIVEN,
+    expected_review_digest: str | None | NotGiven = NOT_GIVEN,
+    name: str | None | NotGiven = NOT_GIVEN,
     extra_query: dict[str, Any] | None = None,
     extra_body: dict[str, Any] | None = None,
     options: RequestOptions | None = None,
@@ -1025,8 +1040,11 @@ client.simulation.environments.drafts.save(
 client.simulation.environments.drafts.save(id: string, params: SimulationEnvironmentsDraftsSaveParams, options?: RequestOptions): Promise<models.HarnessDraftSaveResponse>
 
 export interface SimulationEnvironmentsDraftsSaveParams {
-  drafts: Array<Record<string, unknown>>;
   idempotency_key: string;
+  drafts?: Array<Record<string, unknown>> | null;
+  candidates?: Record<string, unknown> | null;
+  expected_review_digest?: string | null;
+  name?: string | null;
 }
 ```
 
@@ -1037,8 +1055,11 @@ export interface SimulationEnvironmentsDraftsSaveParams {
 <ParamField path="id" type="string" required>
   Positional argument `id`.
 </ParamField>
-<ParamField body="drafts" type="object[]" required />
 <ParamField body="idempotency_key" type="string" required />
+<ParamField body="drafts" type="object[]" optional />
+<ParamField body="candidates" type="object" optional />
+<ParamField body="expected_review_digest" type="string" optional />
+<ParamField body="name" type="string" optional />
 
 #### Returns
 
@@ -1439,6 +1460,330 @@ client.simulation.environments.nudges.stop(id: string, nudgeId: string, options?
 
 [`HarnessNudge`](/docs/sdk/reference/simulation-models#harnessnudge).
 
+## client.simulation.environments.readiness
+
+TypeScript: `client.simulation.environments.readiness`.
+
+### simulation.environments.readiness.cases
+
+List one page, by scenario number, of the selected scenarios in one readiness bucket (eligible, blocked, stale or untested) or held back by one readiness row; pass the previous page's next as cursor. Writes nothing.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/capabilities/cases/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.readiness.cases("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.readiness.cases("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.readiness.cases(
+    id: str,
+    *,
+    agent_version_id: str | None | NotGiven = NOT_GIVEN,
+    environment_version_id: str | None | NotGiven = NOT_GIVEN,
+    suite_version_id: str | None | NotGiven = NOT_GIVEN,
+    keys: list[str] | None | NotGiven = NOT_GIVEN,
+    trials: int | None | NotGiven = NOT_GIVEN,
+    bucket: Literal['eligible', 'blocked', 'stale', 'untested'] | None | NotGiven = NOT_GIVEN,
+    row: Literal['start', 'message', 'continuity', 'streaming', 'tool_discovery', 'tool_routing', 'state', 'audio', 'files', 'browser', 'children', 'hidden_material', 'reset', 'resume', 'cancel', 'cost'] | None | NotGiven = NOT_GIVEN,
+    cursor: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessCapabilityCasePage
+```
+
+```typescript TypeScript
+client.simulation.environments.readiness.cases(id: string, params: SimulationEnvironmentsReadinessCasesParams = {}, options?: RequestOptions): Promise<models.HarnessCapabilityCasePage>
+
+export interface SimulationEnvironmentsReadinessCasesParams {
+  agent_version_id?: string | null;
+  environment_version_id?: string | null;
+  suite_version_id?: string | null;
+  /** Scenario keys; more than 200 go in the POST body as scenario_ids. */
+  keys?: Array<string> | null;
+  trials?: number | null;
+  bucket?: "eligible" | "blocked" | "stale" | "untested" | null;
+  row?: "start" | "message" | "continuity" | "streaming" | "tool_discovery" | "tool_routing" | "state" | "audio" | "files" | "browser" | "children" | "hidden_material" | "reset" | "resume" | "cancel" | "cost" | null;
+  /** The previous page's next: the number it ended on. */
+  cursor?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField query="agent_version_id" type="string" optional />
+<ParamField query="environment_version_id" type="string" optional />
+<ParamField query="suite_version_id" type="string" optional />
+<ParamField query="keys" type="string[]" optional>
+  Scenario keys; more than 200 go in the POST body as scenario_ids.
+</ParamField>
+<ParamField query="trials" type="integer" optional />
+<ParamField query="bucket" type="string" optional enum={["eligible", "blocked", "stale", "untested"]} />
+<ParamField query="row" type="string" optional enum={["start", "message", "continuity", "streaming", "tool_discovery", "tool_routing", "state", "audio", "files", "browser", "children", "hidden_material", "reset", "resume", "cancel", "cost"]} />
+<ParamField query="cursor" type="integer" optional>
+  The previous page's next: the number it ended on.
+</ParamField>
+
+#### Returns
+
+[`HarnessCapabilityCasePage`](/docs/sdk/reference/simulation-models#harnesscapabilitycasepage).
+
+### simulation.environments.readiness.get
+
+Return the run readiness of a pairing of agent, environment and suite versions (absent ones are the defaults), computed now, with its blockers and the selected scenarios it holds back; keys narrows the selection and trials is the trial count planned. Writes nothing.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/capabilities/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.readiness.get("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.readiness.get("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.readiness.get(
+    id: str,
+    *,
+    agent_version_id: str | None | NotGiven = NOT_GIVEN,
+    environment_version_id: str | None | NotGiven = NOT_GIVEN,
+    suite_version_id: str | None | NotGiven = NOT_GIVEN,
+    keys: list[str] | None | NotGiven = NOT_GIVEN,
+    trials: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessCapabilitySelectionReport
+```
+
+```typescript TypeScript
+client.simulation.environments.readiness.get(id: string, params: SimulationEnvironmentsReadinessGetParams = {}, options?: RequestOptions): Promise<models.HarnessCapabilitySelectionReport>
+
+export interface SimulationEnvironmentsReadinessGetParams {
+  agent_version_id?: string | null;
+  environment_version_id?: string | null;
+  suite_version_id?: string | null;
+  /** Scenario keys; more than 200 go in the POST body as scenario_ids. */
+  keys?: Array<string> | null;
+  trials?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField query="agent_version_id" type="string" optional />
+<ParamField query="environment_version_id" type="string" optional />
+<ParamField query="suite_version_id" type="string" optional />
+<ParamField query="keys" type="string[]" optional>
+  Scenario keys; more than 200 go in the POST body as scenario_ids.
+</ParamField>
+<ParamField query="trials" type="integer" optional />
+
+#### Returns
+
+[`HarnessCapabilitySelectionReport`](/docs/sdk/reference/simulation-models#harnesscapabilityselectionreport).
+
+### simulation.environments.readiness.get_for_scenarios
+
+Return the same run readiness report as readiness.get for a selection of scenarios too long for a query string (scenario_ids, more than 200 keys). Writes nothing.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/capabilities/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.readiness.get_for_scenarios("your-id", scenario_ids=[])
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.readiness.getForScenarios("your-id", { scenario_ids: [] });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.readiness.get_for_scenarios(
+    id: str,
+    *,
+    scenario_ids: list[str],
+    agent_version_id: str | None | NotGiven = NOT_GIVEN,
+    environment_version_id: str | None | NotGiven = NOT_GIVEN,
+    suite_version_id: str | None | NotGiven = NOT_GIVEN,
+    trials: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessCapabilitySelectionReport
+```
+
+```typescript TypeScript
+client.simulation.environments.readiness.getForScenarios(id: string, params: SimulationEnvironmentsReadinessGetForScenariosParams, options?: RequestOptions): Promise<models.HarnessCapabilitySelectionReport>
+
+export interface SimulationEnvironmentsReadinessGetForScenariosParams {
+  scenario_ids: Array<string>;
+  agent_version_id?: string | null;
+  environment_version_id?: string | null;
+  suite_version_id?: string | null;
+  trials?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="scenario_ids" type="string[]" required />
+<ParamField body="agent_version_id" type="string" optional />
+<ParamField body="environment_version_id" type="string" optional />
+<ParamField body="suite_version_id" type="string" optional />
+<ParamField body="trials" type="integer" optional />
+
+#### Returns
+
+[`HarnessCapabilitySelectionReport`](/docs/sdk/reference/simulation-models#harnesscapabilityselectionreport).
+
+### simulation.environments.readiness.history
+
+List the version pairings certified on an environment, newest first, with the exact agent, environment and suite versions of each; pass the returned cursor for the next page.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/capabilities/history/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.readiness.history("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.readiness.history("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.readiness.history(
+    id: str,
+    *,
+    cursor: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessCertifiedPairingPage
+```
+
+```typescript TypeScript
+client.simulation.environments.readiness.history(id: string, params: SimulationEnvironmentsReadinessHistoryParams = {}, options?: RequestOptions): Promise<models.HarnessCertifiedPairingPage>
+
+export interface SimulationEnvironmentsReadinessHistoryParams {
+  /** The previous page's next. */
+  cursor?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField query="cursor" type="integer" optional>
+  The previous page's next.
+</ParamField>
+
+#### Returns
+
+[`HarnessCertifiedPairingPage`](/docs/sdk/reference/simulation-models#harnesscertifiedpairingpage).
+
+### simulation.environments.readiness.recheck
+
+Validate a pairing of versions again (absent ones are the defaults) without a run; moves no default. A pairing not yet certified runs its check in a build sandbox, which is billed.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/capabilities/recheck/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.readiness.recheck("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.readiness.recheck("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.readiness.recheck(
+    id: str,
+    *,
+    agent_version_id: str | None | NotGiven = NOT_GIVEN,
+    environment_version_id: str | None | NotGiven = NOT_GIVEN,
+    suite_version_id: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessCapabilityRecheckResponse
+```
+
+```typescript TypeScript
+client.simulation.environments.readiness.recheck(id: string, params: SimulationEnvironmentsReadinessRecheckParams = {}, options?: RequestOptions): Promise<models.HarnessCapabilityRecheckResponse>
+
+export interface SimulationEnvironmentsReadinessRecheckParams {
+  agent_version_id?: string | null;
+  environment_version_id?: string | null;
+  suite_version_id?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="agent_version_id" type="string" optional />
+<ParamField body="environment_version_id" type="string" optional />
+<ParamField body="suite_version_id" type="string" optional />
+
+#### Returns
+
+[`HarnessCapabilityRecheckResponse`](/docs/sdk/reference/simulation-models#harnesscapabilityrecheckresponse).
+
 ## client.simulation.environments.runs
 
 TypeScript: `client.simulation.environments.runs`.
@@ -1565,6 +1910,387 @@ export interface SimulationEnvironmentsRunsRegradeParams {
 #### Returns
 
 [`HarnessEnvironmentRunEvaluationsQueued`](/docs/sdk/reference/simulation-models#harnessenvironmentrunevaluationsqueued).
+
+## client.simulation.environments.scenarios
+
+TypeScript: `client.simulation.environments.scenarios`.
+
+### simulation.environments.scenarios.archive
+
+Take one scenario (key) out of future runs, with an optional reason; its identity, runs and evidence are kept, and restore brings it back.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/scenarios/{key}/archive/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.scenarios.archive("your-id", "your-key")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.scenarios.archive("your-id", "your-key");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.scenarios.archive(
+    id: str,
+    key: str,
+    *,
+    reason: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessScenarioLifecycleResponse
+```
+
+```typescript TypeScript
+client.simulation.environments.scenarios.archive(id: string, key: string, params: SimulationEnvironmentsScenariosArchiveParams = {}, options?: RequestOptions): Promise<models.HarnessScenarioLifecycleResponse>
+
+export interface SimulationEnvironmentsScenariosArchiveParams {
+  reason?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="key" type="string" required>
+  Positional argument `key`.
+</ParamField>
+<ParamField body="reason" type="string" optional />
+
+#### Returns
+
+[`HarnessScenarioLifecycleResponse`](/docs/sdk/reference/simulation-models#harnessscenariolifecycleresponse).
+
+### simulation.environments.scenarios.records
+
+Return the seeded rows of one table of the world, to pick a real record for a scenario (key) whose starting record is missing. Writes nothing.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/scenarios/{key}/records/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.scenarios.records(
+    "your-id",
+    "your-key",
+    table="your-table",
+)
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.scenarios.records("your-id", "your-key", { table: "your-table" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.scenarios.records(
+    id: str,
+    key: str,
+    *,
+    table: str,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessScenarioRecordsResponse
+```
+
+```typescript TypeScript
+client.simulation.environments.scenarios.records(id: string, key: string, params: SimulationEnvironmentsScenariosRecordsParams, options?: RequestOptions): Promise<models.HarnessScenarioRecordsResponse>
+
+export interface SimulationEnvironmentsScenariosRecordsParams {
+  table: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="key" type="string" required>
+  Positional argument `key`.
+</ParamField>
+<ParamField query="table" type="string" required />
+
+#### Returns
+
+[`HarnessScenarioRecordsResponse`](/docs/sdk/reference/simulation-models#harnessscenariorecordsresponse).
+
+### simulation.environments.scenarios.restore
+
+Bring an archived scenario (key) back, at once when the saved suite still holds it, otherwise as a draft to save.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/scenarios/{key}/restore/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.scenarios.restore("your-id", "your-key")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.scenarios.restore("your-id", "your-key");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.scenarios.restore(
+    id: str,
+    key: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessScenarioLifecycleResponse
+```
+
+```typescript TypeScript
+client.simulation.environments.scenarios.restore(id: string, key: string, options?: RequestOptions): Promise<models.HarnessScenarioLifecycleResponse>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="key" type="string" required>
+  Positional argument `key`.
+</ParamField>
+
+#### Returns
+
+[`HarnessScenarioLifecycleResponse`](/docs/sdk/reference/simulation-models#harnessscenariolifecycleresponse).
+
+### simulation.environments.scenarios.revisions
+
+List each distinct content of one scenario (key) across the environment's saved suite versions, newest first.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/scenarios/{key}/revisions/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.scenarios.revisions("your-id", "your-key")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.scenarios.revisions("your-id", "your-key");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.scenarios.revisions(
+    id: str,
+    key: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessScenarioRevisions
+```
+
+```typescript TypeScript
+client.simulation.environments.scenarios.revisions(id: string, key: string, options?: RequestOptions): Promise<models.HarnessScenarioRevisions>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="key" type="string" required>
+  Positional argument `key`.
+</ParamField>
+
+#### Returns
+
+[`HarnessScenarioRevisions`](/docs/sdk/reference/simulation-models#harnessscenariorevisions).
+
+### simulation.environments.scenarios.running_validation
+
+Return the validation still running for the environment's default versions, if any, and how many scenarios a validation of those not yet proved would prove.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/scenarios/validate/running/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.scenarios.running_validation("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.scenarios.runningValidation("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.scenarios.running_validation(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessScenarioRunningValidation
+```
+
+```typescript TypeScript
+client.simulation.environments.scenarios.runningValidation(id: string, options?: RequestOptions): Promise<models.HarnessScenarioRunningValidation>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`HarnessScenarioRunningValidation`](/docs/sdk/reference/simulation-models#harnessscenariorunningvalidation).
+
+### simulation.environments.scenarios.validate
+
+Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and is billed. Returns a job_id to follow with validation_status.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/scenarios/validate/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.scenarios.validate("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.scenarios.validate("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.scenarios.validate(
+    id: str,
+    *,
+    agent_version_id: str | None | NotGiven = NOT_GIVEN,
+    environment_version_id: str | None | NotGiven = NOT_GIVEN,
+    suite_version_id: str | None | NotGiven = NOT_GIVEN,
+    if_fresh: bool | None | NotGiven = NOT_GIVEN,
+    keys: list[str] | None | NotGiven = NOT_GIVEN,
+    reprove_all: bool | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessScenarioValidateResponse
+```
+
+```typescript TypeScript
+client.simulation.environments.scenarios.validate(id: string, params: SimulationEnvironmentsScenariosValidateParams = {}, options?: RequestOptions): Promise<models.HarnessScenarioValidateResponse>
+
+export interface SimulationEnvironmentsScenariosValidateParams {
+  agent_version_id?: string | null;
+  environment_version_id?: string | null;
+  suite_version_id?: string | null;
+  if_fresh?: boolean | null;
+  keys?: Array<string> | null;
+  reprove_all?: boolean | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="agent_version_id" type="string" optional />
+<ParamField body="environment_version_id" type="string" optional />
+<ParamField body="suite_version_id" type="string" optional />
+<ParamField body="if_fresh" type="boolean" optional />
+<ParamField body="keys" type="string[]" optional />
+<ParamField body="reprove_all" type="boolean" optional />
+
+#### Returns
+
+[`HarnessScenarioValidateResponse`](/docs/sdk/reference/simulation-models#harnessscenariovalidateresponse).
+
+### simulation.environments.scenarios.validation_status
+
+Return where one scenario validation (job_id) got to, and whether it recorded its proofs.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/scenarios/validate/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.scenarios.validation_status("your-id", job_id="your-job-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.scenarios.validationStatus("your-id", { job_id: "your-job-id" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.scenarios.validation_status(
+    id: str,
+    *,
+    job_id: str,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessScenarioValidationStatus
+```
+
+```typescript TypeScript
+client.simulation.environments.scenarios.validationStatus(id: string, params: SimulationEnvironmentsScenariosValidationStatusParams, options?: RequestOptions): Promise<models.HarnessScenarioValidationStatus>
+
+export interface SimulationEnvironmentsScenariosValidationStatusParams {
+  job_id: string;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField query="job_id" type="string" required />
+
+#### Returns
+
+[`HarnessScenarioValidationStatus`](/docs/sdk/reference/simulation-models#harnessscenariovalidationstatus).
 
 ## client.simulation.environments.versions
 
@@ -1850,6 +2576,55 @@ export interface SimulationEnvironmentsVersionsSetDefaultParams {
 #### Returns
 
 [`HarnessVersions`](/docs/sdk/reference/simulation-models#harnessversions).
+
+### simulation.environments.versions.source_changes
+
+Return the rules and files an environment version changed that scenarios cite, with the scenarios citing each.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/versions/environment/{version_id}/source-changes/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.versions.source_changes("your-id", "your-version-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.versions.sourceChanges("your-id", "your-version-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.versions.source_changes(
+    id: str,
+    version_id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessSourceChanges
+```
+
+```typescript TypeScript
+client.simulation.environments.versions.sourceChanges(id: string, versionId: string, options?: RequestOptions): Promise<models.HarnessSourceChanges>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="version_id" type="string" required>
+  Positional argument `version_id`.
+</ParamField>
+
+#### Returns
+
+[`HarnessSourceChanges`](/docs/sdk/reference/simulation-models#harnesssourcechanges).
 
 ### simulation.environments.versions.suite_members
 
@@ -3020,7 +3795,7 @@ The decoded response. The contract does not describe its shape, so it is untyped
 
 ### simulation.jobs.scenarios.list
 
-List one page of an environment's (or run's) authored scenarios, by number; group_by defaults to goal when omitted (empty for a flat list).
+List one page of an environment's (or run's) authored scenarios, by number, each with its lifecycle; group_by defaults to goal when omitted (empty for a flat list), and lifecycle keeps one state (draft, validated, active, archived, source_changed or kept_as_written).
 
 <ApiEndpoint method="GET" path="/simulate/api/harness-jobs/{id}/scenarios/" />
 
@@ -3047,6 +3822,7 @@ client.simulation.jobs.scenarios.list(
     search: str | None | NotGiven = NOT_GIVEN,
     ordering: str | None | NotGiven = NOT_GIVEN,
     group_by: str | None | NotGiven = NOT_GIVEN,
+    lifecycle: str | None | NotGiven = NOT_GIVEN,
     extra_query: dict[str, Any] | None = None,
     options: RequestOptions | None = None,
 ) -> Any
@@ -3061,6 +3837,7 @@ export interface SimulationJobsScenariosListParams {
   search?: string | null;
   ordering?: string | null;
   group_by?: string | null;
+  lifecycle?: string | null;
 }
 ```
 
@@ -3076,6 +3853,7 @@ export interface SimulationJobsScenariosListParams {
 <ParamField query="search" type="string" optional />
 <ParamField query="ordering" type="string" optional />
 <ParamField query="group_by" type="string" optional />
+<ParamField query="lifecycle" type="string" optional />
 
 #### Returns
 

@@ -1556,6 +1556,65 @@ export interface HarnessAgentCredentialsResponse {
   agent_version?: HarnessVersion | null;
 }
 
+export interface HarnessBlockedScenario {
+  key?: string | null;
+  name?: string | null;
+}
+
+export interface HarnessBlockedTool {
+  tool?: string | null;
+  scenarios?: Array<HarnessBlockedScenario | null> | null;
+}
+
+export interface HarnessCapabilityAffected {
+  count?: number | null;
+  of?: number | null;
+  keys?: Array<string | null> | null;
+  truncated?: boolean | null;
+}
+
+export interface HarnessCapabilityAgentTools {
+  read?: boolean | null;
+  count?: number | null;
+}
+
+export interface HarnessCapabilityAnswer {
+  kind?: string | null; // one of: ready, blocked, stale, unchecked, validating
+  worst?: string | null; // one of: supported, partial, blocked, unavailable, untested, stale
+  reason_code?: string | null;
+}
+
+export interface HarnessCapabilityArea {
+  id?: string | null;
+  status?: string | null; // one of: supported, partial, blocked, unavailable, untested, stale
+  rows?: Array<string | null> | null;
+}
+
+export interface HarnessCapabilityCase {
+  key?: string | null;
+  number?: number | null;
+  name?: string | null;
+  persona?: string | null;
+  by?: Array<string | null> | null;
+}
+
+export interface HarnessCapabilityCaseList {
+  keys?: Array<string | null> | null;
+  truncated?: boolean | null;
+}
+
+export interface HarnessCapabilityCaseLists {
+  eligible?: HarnessCapabilityCaseList | null;
+  blocked?: HarnessCapabilityCaseList | null;
+  stale?: HarnessCapabilityCaseList | null;
+  untested?: HarnessCapabilityCaseList | null;
+}
+
+export interface HarnessCapabilityCasePage {
+  items?: Array<HarnessCapabilityCase | null> | null;
+  next?: string | null;
+}
+
 export interface HarnessCapabilityChanged {
   count?: number | null;
   keys?: Array<string | null> | null;
@@ -1568,11 +1627,160 @@ export interface HarnessCapabilityChangedSince {
   suite_version?: RunVersionLabel | null;
 }
 
+export interface HarnessCapabilityCounts {
+  supported?: number | null;
+  partial?: number | null;
+  blocked?: number | null;
+  unavailable?: number | null;
+  untested?: number | null;
+  stale?: number | null;
+}
+
+export interface HarnessCapabilityDroppedCase {
+  key?: string | null;
+  code?: string | null; // one of: scenario_dropped, scenario_ungradable
+  reason?: string | null;
+}
+
+export interface HarnessCapabilityEvidence {
+  check?: string | null;
+  result?: string | null;
+}
+
 export interface HarnessCapabilityExcluded {
   count?: number | null;
   keys?: Array<string | null> | null;
   truncated?: boolean | null;
   reason?: string | null; // one of: not_selected
+}
+
+export interface HarnessCapabilityFix {
+  type?: string | null;
+  category?: string | null; // one of: startup, message_mapping, tool_routing, evidence, agent_version
+  target?: string | null;
+  action?: string | null;
+  would?: string | null;
+  recheck?: HarnessCapabilityFixRecheck | null;
+}
+
+export interface HarnessCapabilityFixRecheck {
+  scope?: string | null; // one of: agent, pair
+  method?: string | null; // one of: POST
+  path?: string | null;
+}
+
+export interface HarnessCapabilityGrading {
+  gradable?: number | null;
+  not_gradable?: Array<HarnessCapabilityNotGradable | null> | null;
+  truncated?: boolean | null;
+}
+
+export interface HarnessCapabilityHeldBy {
+  id?: string | null;
+  name?: string | null;
+  area?: string | null;
+  count?: number | null;
+  reason?: string | null;
+  text?: string | null;
+}
+
+export interface HarnessCapabilityNotGradable {
+  key?: string | null;
+  reason?: string | null; // one of: check_unreadable, no_checks, evidence_not_supported, judge_unavailable
+}
+
+export interface HarnessCapabilityPairing {
+  agent_version?: RunVersionLabel | null;
+  environment_version?: RunVersionLabel | null;
+  suite_version?: RunVersionLabel | null;
+  evidence?: string | null; // one of: pair_certificate, build_certificate, none
+  agent_tools?: HarnessCapabilityAgentTools | null;
+  evidence_unreadable?: boolean | null;
+}
+
+export interface HarnessCapabilityRecheckResponse {
+  validation?: HarnessPairValidation | null;
+}
+
+export interface HarnessCapabilitySelectionCounts {
+  suite_total?: number | null;
+  excluded?: HarnessCapabilityExcluded | null;
+  changed?: HarnessCapabilityChanged | null;
+  requested?: number | null;
+  eligible?: number | null;
+  blocked?: number | null;
+  stale?: number | null;
+  untested?: number | null;
+  lists?: HarnessCapabilityCaseLists | null;
+  held_by?: Array<HarnessCapabilityHeldBy | null> | null;
+  blocking_area?: string | null;
+  dropped?: Array<HarnessCapabilityDroppedCase | null> | null;
+  grading?: HarnessCapabilityGrading | null;
+  requirements_recorded?: boolean | null;
+  next?: string | null; // one of: validate_first, run_unvalidated
+  running?: number | null;
+  held_back?: HarnessRunHeldBack | null;
+  reasons?: unknown | null;
+}
+
+export interface HarnessCapabilitySelectionReport {
+  pairing?: HarnessCapabilityPairing | null;
+  validation?: HarnessPairValidation | null;
+  answer?: HarnessCapabilityAnswer | null;
+  areas?: Array<HarnessCapabilityArea | null> | null;
+  rows?: Array<HarnessCapabilitySelectionRow | null> | null;
+  workers?: Array<WorkerBoundary | null> | null;
+  counts?: HarnessCapabilityCounts | null;
+  blockers?: number | null;
+  catalog_version?: string | null;
+  rules_version?: string | null;
+  computed_at?: string | null;
+  selection?: HarnessCapabilitySelectionCounts | null;
+}
+
+export interface HarnessCapabilitySelectionRow {
+  id?: string | null;
+  label?: string | null;
+  area?: string | null;
+  status?: string | null; // one of: supported, partial, blocked, unavailable, untested, stale
+  measured?: boolean | null;
+  finding?: string | null; // one of: passed, failed, limited, not_applicable, not_run
+  reason_code?: string | null;
+  reason?: string | null;
+  targets?: Array<HarnessCapabilityTarget | null> | null;
+  blocked_by?: string | null;
+  stale_because?: string | null;
+  was?: string | null; // one of: supported, partial, blocked, unavailable, untested, stale
+  evidence?: Array<HarnessCapabilityEvidence | null> | null;
+  checked_at?: string | null;
+  fix?: HarnessCapabilityFix | null;
+  consequence?: string | null;
+  needed_by?: number | null;
+  affected?: HarnessCapabilityAffected | null;
+}
+
+export interface HarnessCapabilityTarget {
+  kind?: string | null; // one of: tool, agent_tool, action, check
+  name?: string | null;
+  result?: string | null;
+}
+
+export interface HarnessCertifiedPairing {
+  bundle_id?: string | null;
+  agent_version?: RunVersionLabel | null;
+  environment_version?: RunVersionLabel | null;
+  suite_version?: RunVersionLabel | null;
+  certified_at?: string | null;
+}
+
+export interface HarnessCertifiedPairingPage {
+  items?: Array<HarnessCertifiedPairing | null> | null;
+  next?: string | null;
+}
+
+export interface HarnessControlStep {
+  tool?: string | null;
+  arguments?: unknown | null;
 }
 
 export interface HarnessConversationEventRead {
@@ -1659,6 +1867,7 @@ export interface HarnessDraftItem {
 export interface HarnessDraftSaveResponse {
   saved?: unknown | null;
   versions?: HarnessVersions | null;
+  not_active?: Array<unknown | null> | null;
 }
 
 export interface HarnessDrafts {
@@ -1924,6 +2133,13 @@ export interface HarnessEnvironmentWorld {
   stores?: Array<HarnessEnvironmentStore | null> | null;
 }
 
+export interface HarnessNegativeControl {
+  name?: string | null;
+  why?: string | null;
+  steps?: Array<HarnessControlStep | null> | null;
+  must_fail?: Array<string | null> | null;
+}
+
 export interface HarnessNudge {
   id?: string | null;
   target?: string | null; // one of: environment, suite
@@ -1998,6 +2214,14 @@ export interface HarnessNudgeVariables {
   unknown?: Array<string | null> | null;
 }
 
+export interface HarnessPairValidation {
+  state?: string | null; // one of: not_run, validating, ready, failed, check_unavailable, retry, unavailable
+  job_id?: string | null;
+  purpose?: string | null; // one of: agent_move, recheck, save
+  finished_at?: string | null;
+  error?: unknown | null;
+}
+
 export interface HarnessPreflightCheck {
   id?: string | null;
   label?: string | null;
@@ -2024,6 +2248,34 @@ export interface HarnessPreflightResponse {
   effective_parallelism?: number | null;
   resource_profile?: unknown | null;
   snapshot?: unknown | null;
+}
+
+export interface HarnessProofControl {
+  name?: string | null;
+  why?: string | null;
+  ran?: boolean | null;
+  failed?: boolean | null;
+  assumed?: Array<string | null> | null;
+}
+
+export interface HarnessProofLeak {
+  who?: string | null;
+  field?: string | null;
+  grader_field?: string | null;
+  excerpt?: string | null;
+}
+
+export interface HarnessReleaseCheckResults {
+  starts?: string | null; // one of: passed, failed, pending
+  resets?: string | null; // one of: passed, failed, pending
+  reference_passes?: string | null; // one of: passed, failed, pending
+  wrong_answer_fails?: string | null; // one of: passed, failed, pending
+  hidden_checks_kept?: string | null; // one of: passed, failed, pending
+}
+
+export interface HarnessReleaseChecks {
+  status?: string | null; // one of: ready, checks_pending, failed
+  checks?: HarnessReleaseCheckResults | null;
 }
 
 export interface HarnessRunCreateResponse {
@@ -2062,6 +2314,10 @@ export interface HarnessRunPlan {
   versions?: HarnessRunPinnedVersions | null;
   warnings?: Array<HarnessRunWarning | null> | null;
   bundle_cached?: boolean | null;
+  blocked_tools?: Array<HarnessBlockedTool | null> | null;
+  runnable?: boolean | null;
+  blocked_code?: string | null; // one of: production_only
+  held_back?: number | null;
 }
 
 export interface HarnessRunReadinessSelection {
@@ -2098,10 +2354,108 @@ export interface HarnessRunWarning {
   scenario_keys?: Array<string | null> | null;
 }
 
+export interface HarnessScenarioLifecycle {
+  state?: string | null; // one of: draft, validated, active, kept_as_written, archived
+  reason?: string | null;
+  held_by?: string | null; // one of: ours, unproved, proof_failed
+  reason_text?: string | null;
+  warning?: string | null;
+  warning_text?: string | null;
+  legacy?: boolean | null;
+  proof?: HarnessScenarioProof | null;
+  sources?: Array<HarnessSourceView | null> | null;
+  source_changed?: Array<string | null> | null;
+  source_changed_version?: number | null;
+  source_changed_version_id?: string | null;
+  must_pass?: boolean | null;
+  negative_controls?: Array<HarnessNegativeControl | null> | null;
+}
+
+export interface HarnessScenarioLifecycleResponse {
+  scenario_key?: string | null;
+  lifecycle?: HarnessScenarioLifecycle | null;
+  live?: boolean | null;
+}
+
+export interface HarnessScenarioProof {
+  proved?: boolean | null;
+  outcome?: string | null;
+  assumed?: Array<string | null> | null;
+  controls?: Array<HarnessProofControl | null> | null;
+  leaks?: Array<HarnessProofLeak | null> | null;
+  judged_only?: boolean | null;
+  proved_at?: string | null;
+  agent_version_id?: string | null;
+  environment_version_id?: string | null;
+  suite_version_id?: string | null;
+}
+
+export interface HarnessScenarioRecordsResponse {
+  table?: string | null;
+  rows?: Array<unknown | null> | null;
+  available?: boolean | null;
+}
+
+export interface HarnessScenarioRevision {
+  revision?: number | null;
+  digest?: string | null;
+  suite_versions?: Array<number | null> | null;
+  first_suite_version?: number | null;
+  changed_fields?: Array<string | null> | null;
+  lifecycle_on_default_environment?: HarnessScenarioLifecycle | null;
+}
+
+export interface HarnessScenarioRevisions {
+  scenario_key?: string | null;
+  revisions?: Array<HarnessScenarioRevision | null> | null;
+  truncated?: boolean | null;
+}
+
+export interface HarnessScenarioRunningValidation {
+  job_id?: string | null;
+  scenario_keys?: Array<string | null> | null;
+  to_prove?: number | null;
+  message?: string | null;
+}
+
+export interface HarnessScenarioValidateResponse {
+  state?: string | null; // one of: validating, ready, unavailable
+  job_id?: string | null;
+  deadline_at?: string | null;
+  finished_at?: string | null;
+  message?: string | null;
+}
+
+export interface HarnessScenarioValidationStatus {
+  state?: string | null; // one of: validating, finished, failed, unavailable
+  job_id?: string | null;
+  deadline_at?: string | null;
+  finished_at?: string | null;
+  proofs_recorded?: boolean | null;
+  message?: string | null;
+  proved?: number | null;
+  total?: number | null;
+}
+
 export interface HarnessSecretFileUploadResponse {
   environment_name?: string | null;
   secret_ref?: SecretReference | null;
   size?: number | null;
+}
+
+export interface HarnessSourceChange {
+  kind?: string | null; // one of: rule, file
+  ref?: string | null;
+  before?: string | null;
+  after?: string | null;
+  cited_by?: Array<string | null> | null;
+}
+
+export interface HarnessSourceChanges {
+  from_version?: number | null;
+  to_version?: number | null;
+  changes?: Array<HarnessSourceChange | null> | null;
+  truncated?: boolean | null;
 }
 
 export interface HarnessSourceUploadResponse {
@@ -2109,6 +2463,17 @@ export interface HarnessSourceUploadResponse {
   name?: string | null;
   file_count?: number | null;
   total_bytes?: number | null;
+}
+
+export interface HarnessSourceView {
+  kind?: string | null;
+  ref?: string | null;
+  quote?: string | null;
+  supports?: string | null;
+  resolved?: boolean | null;
+  label?: string | null;
+  link?: string | null;
+  problem?: string | null;
 }
 
 export interface HarnessSuiteMember {
@@ -2121,7 +2486,8 @@ export interface HarnessSuiteMember {
 export interface HarnessVersion {
   id?: string | null;
   label?: string | null;
-  status?: string | null; // one of: draft, active, discarded
+  name?: string | null;
+  status?: string | null; // one of: draft, candidate, active, discarded
   is_default?: boolean | null;
   created_at?: string | null;
   created_by?: HarnessVersionPerson | null;
@@ -2143,6 +2509,9 @@ export interface HarnessVersion {
   requested_here?: boolean | null;
   pickable?: boolean | null;
   discardable?: boolean | null;
+  release_checks?: HarnessReleaseChecks | null;
+  candidate_state?: string | null; // one of: validating, retry, ready, failed, check_unavailable, superseded, expired
+  saved_without_check?: boolean | null;
 }
 
 export interface HarnessVersionDiff {
@@ -3455,10 +3824,36 @@ export interface UserInfoTwoFactorMethods {
   passkey?: boolean | null;
 }
 
+export interface WorkerBoundary {
+  worker_id?: string | null;
+  name?: string | null;
+  binding?: string | null; // one of: separate, shared
+  status?: string | null; // one of: supported, partial, blocked, unavailable, untested, stale
+  status_label?: string | null;
+  reason_code?: string | null; // one of: evidence_unreadable, worker_channel_bypassed, sealed_before_worker_limits, tool_service_not_fronted, in_process_unbound, no_tool_service, in_process_door, shared_binding, held_at_world_cooperative, worker_not_sealed
+  reason?: string | null;
+  tools?: Array<WorkerTool | null> | null;
+  bypassed?: Array<WorkerBypass | null> | null;
+  bypassed_count?: number | null;
+  fix?: HarnessCapabilityFix | null;
+  checked_at?: string | null;
+}
+
+export interface WorkerBypass {
+  run_id?: string | null;
+  call_execution_id?: string | null;
+}
+
 export interface WorkerCheck {
   name?: string | null;
   passed?: boolean | null;
   result?: string | null; // one of: not_applicable, inconclusive, unmeasured
+}
+
+export interface WorkerTool {
+  tool?: string | null;
+  action?: string | null;
+  boundary?: string | null; // one of: allowed, blocked, not_enforced
 }
 
 export interface WorkspaceManagementItem {

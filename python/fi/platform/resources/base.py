@@ -127,14 +127,14 @@ class SimulationEnvironmentsDraftsResource(Resource):
         body = None
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_LIST, path=path, query=query, body=body, model=models.HarnessDrafts, options=options)
 
-    def save(self, id: str, *, drafts: List[Dict[str, Any]], idempotency_key: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessDraftSaveResponse:
+    def save(self, id: str, *, idempotency_key: str, drafts: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, candidates: Dict[str, Any] | None | NotGiven = NOT_GIVEN, expected_review_digest: str | None | NotGiven = NOT_GIVEN, name: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessDraftSaveResponse:
         """Save the named drafts together as new default versions; each needs expected_parent_id, and the body's idempotency_key replays an earlier save.
 
         POST /simulate/api/harness-environments/{id}/drafts/save/
         """
         path = {'id': id}
         query = {**(extra_query or {})}
-        body = {'drafts': drafts, 'idempotency_key': idempotency_key, **(extra_body or {})}
+        body = {'idempotency_key': idempotency_key, 'drafts': drafts, 'candidates': candidates, 'expected_review_digest': expected_review_digest, 'name': name, **(extra_body or {})}
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_SAVE, path=path, query=query, body=body, model=models.HarnessDraftSaveResponse, options=options)
 
 
@@ -220,6 +220,62 @@ class SimulationEnvironmentsNudgesResource(Resource):
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_NUDGES_STOP, path=path, query=query, body=body, model=models.HarnessNudge, options=options)
 
 
+class SimulationEnvironmentsReadinessResource(Resource):
+    """`client.simulation.environments.readiness`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+
+    def cases(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, keys: List[str] | None | NotGiven = NOT_GIVEN, trials: int | None | NotGiven = NOT_GIVEN, bucket: Literal['eligible', 'blocked', 'stale', 'untested'] | None | NotGiven = NOT_GIVEN, row: Literal['start', 'message', 'continuity', 'streaming', 'tool_discovery', 'tool_routing', 'state', 'audio', 'files', 'browser', 'children', 'hidden_material', 'reset', 'resume', 'cancel', 'cost'] | None | NotGiven = NOT_GIVEN, cursor: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessCapabilityCasePage:
+        """List one page, by scenario number, of the selected scenarios in one readiness bucket (eligible, blocked, stale or untested) or held back by one readiness row; pass the previous page's next as cursor. Writes nothing.
+
+        GET /simulate/api/harness-environments/{id}/capabilities/cases/
+        """
+        path = {'id': id}
+        query = {'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, 'keys': keys, 'trials': trials, 'bucket': bucket, 'row': row, 'cursor': cursor, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_READINESS_CASES, path=path, query=query, body=body, model=models.HarnessCapabilityCasePage, options=options)
+
+    def get(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, keys: List[str] | None | NotGiven = NOT_GIVEN, trials: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessCapabilitySelectionReport:
+        """Return the run readiness of a pairing of agent, environment and suite versions (absent ones are the defaults), computed now, with its blockers and the selected scenarios it holds back; keys narrows the selection and trials is the trial count planned. Writes nothing.
+
+        GET /simulate/api/harness-environments/{id}/capabilities/
+        """
+        path = {'id': id}
+        query = {'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, 'keys': keys, 'trials': trials, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_READINESS_GET, path=path, query=query, body=body, model=models.HarnessCapabilitySelectionReport, options=options)
+
+    def get_for_scenarios(self, id: str, *, scenario_ids: List[str], agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, trials: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessCapabilitySelectionReport:
+        """Return the same run readiness report as readiness.get for a selection of scenarios too long for a query string (scenario_ids, more than 200 keys). Writes nothing.
+
+        POST /simulate/api/harness-environments/{id}/capabilities/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'scenario_ids': scenario_ids, 'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, 'trials': trials, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_READINESS_GET_FOR_SCENARIOS, path=path, query=query, body=body, model=models.HarnessCapabilitySelectionReport, options=options)
+
+    def history(self, id: str, *, cursor: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessCertifiedPairingPage:
+        """List the version pairings certified on an environment, newest first, with the exact agent, environment and suite versions of each; pass the returned cursor for the next page.
+
+        GET /simulate/api/harness-environments/{id}/capabilities/history/
+        """
+        path = {'id': id}
+        query = {'cursor': cursor, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_READINESS_HISTORY, path=path, query=query, body=body, model=models.HarnessCertifiedPairingPage, options=options)
+
+    def recheck(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessCapabilityRecheckResponse:
+        """Validate a pairing of versions again (absent ones are the defaults) without a run; moves no default. A pairing not yet certified runs its check in a build sandbox, which is billed.
+
+        POST /simulate/api/harness-environments/{id}/capabilities/recheck/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_READINESS_RECHECK, path=path, query=query, body=body, model=models.HarnessCapabilityRecheckResponse, options=options)
+
+
 class SimulationEnvironmentsRunsResource(Resource):
     """`client.simulation.environments.runs`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -244,6 +300,82 @@ class SimulationEnvironmentsRunsResource(Resource):
         query = {**(extra_query or {})}
         body = {'eval_config_ids': eval_config_ids, 'enable_tool_evaluation': enable_tool_evaluation, **(extra_body or {})}
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_RUNS_REGRADE, path=path, query=query, body=body, model=models.HarnessEnvironmentRunEvaluationsQueued, options=options)
+
+
+class SimulationEnvironmentsScenariosResource(Resource):
+    """`client.simulation.environments.scenarios`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+
+    def archive(self, id: str, key: str, *, reason: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioLifecycleResponse:
+        """Take one scenario (key) out of future runs, with an optional reason; its identity, runs and evidence are kept, and restore brings it back.
+
+        POST /simulate/api/harness-environments/{id}/scenarios/{key}/archive/
+        """
+        path = {'id': id, 'key': key}
+        query = {**(extra_query or {})}
+        body = {'reason': reason, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_ARCHIVE, path=path, query=query, body=body, model=models.HarnessScenarioLifecycleResponse, options=options)
+
+    def records(self, id: str, key: str, *, table: str, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioRecordsResponse:
+        """Return the seeded rows of one table of the world, to pick a real record for a scenario (key) whose starting record is missing. Writes nothing.
+
+        GET /simulate/api/harness-environments/{id}/scenarios/{key}/records/
+        """
+        path = {'id': id, 'key': key}
+        query = {'table': table, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_RECORDS, path=path, query=query, body=body, model=models.HarnessScenarioRecordsResponse, options=options)
+
+    def restore(self, id: str, key: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioLifecycleResponse:
+        """Bring an archived scenario (key) back, at once when the saved suite still holds it, otherwise as a draft to save.
+
+        POST /simulate/api/harness-environments/{id}/scenarios/{key}/restore/
+        """
+        path = {'id': id, 'key': key}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_RESTORE, path=path, query=query, body=body, model=models.HarnessScenarioLifecycleResponse, options=options)
+
+    def revisions(self, id: str, key: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioRevisions:
+        """List each distinct content of one scenario (key) across the environment's saved suite versions, newest first.
+
+        GET /simulate/api/harness-environments/{id}/scenarios/{key}/revisions/
+        """
+        path = {'id': id, 'key': key}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_REVISIONS, path=path, query=query, body=body, model=models.HarnessScenarioRevisions, options=options)
+
+    def running_validation(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioRunningValidation:
+        """Return the validation still running for the environment's default versions, if any, and how many scenarios a validation of those not yet proved would prove.
+
+        GET /simulate/api/harness-environments/{id}/scenarios/validate/running/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_RUNNING_VALIDATION, path=path, query=query, body=body, model=models.HarnessScenarioRunningValidation, options=options)
+
+    def validate(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, if_fresh: bool | None | NotGiven = NOT_GIVEN, keys: List[str] | None | NotGiven = NOT_GIVEN, reprove_all: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioValidateResponse:
+        """Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and is billed. Returns a job_id to follow with validation_status.
+
+        POST /simulate/api/harness-environments/{id}/scenarios/validate/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, 'if_fresh': if_fresh, 'keys': keys, 'reprove_all': reprove_all, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_VALIDATE, path=path, query=query, body=body, model=models.HarnessScenarioValidateResponse, options=options)
+
+    def validation_status(self, id: str, *, job_id: str, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioValidationStatus:
+        """Return where one scenario validation (job_id) got to, and whether it recorded its proofs.
+
+        GET /simulate/api/harness-environments/{id}/scenarios/validate/
+        """
+        path = {'id': id}
+        query = {'job_id': job_id, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_VALIDATION_STATUS, path=path, query=query, body=body, model=models.HarnessScenarioValidationStatus, options=options)
 
 
 class SimulationEnvironmentsVersionsResource(Resource):
@@ -301,6 +433,16 @@ class SimulationEnvironmentsVersionsResource(Resource):
         body = {'expected_default_id': expected_default_id, **(extra_body or {})}
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_SET_DEFAULT, path=path, query=query, body=body, model=models.HarnessVersions, options=options)
 
+    def source_changes(self, id: str, version_id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessSourceChanges:
+        """Return the rules and files an environment version changed that scenarios cite, with the scenarios citing each.
+
+        GET /simulate/api/harness-environments/{id}/versions/environment/{version_id}/source-changes/
+        """
+        path = {'id': id, 'version_id': version_id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_SOURCE_CHANGES, path=path, query=query, body=body, model=models.HarnessSourceChanges, options=options)
+
     def suite_members(self, id: str, version_id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> List[models.HarnessSuiteMember]:
         """List the scenarios in a saved suite version.
 
@@ -353,13 +495,13 @@ class SimulationJobsScenariosResource(Resource):
         body = {'changes': changes, 'rework': rework, **(extra_body or {})}
         return self._t.call(_ops.OP_SIMULATION_JOBS_SCENARIOS_AMEND, path=path, query=query, body=body, model=None, options=options)
 
-    def list(self, id: str, *, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, ordering: str | None | NotGiven = NOT_GIVEN, group_by: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
-        """List one page of an environment's (or run's) authored scenarios, by number; group_by defaults to goal when omitted (empty for a flat list).
+    def list(self, id: str, *, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, ordering: str | None | NotGiven = NOT_GIVEN, group_by: str | None | NotGiven = NOT_GIVEN, lifecycle: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+        """List one page of an environment's (or run's) authored scenarios, by number, each with its lifecycle; group_by defaults to goal when omitted (empty for a flat list), and lifecycle keeps one state (draft, validated, active, archived, source_changed or kept_as_written).
 
         GET /simulate/api/harness-jobs/{id}/scenarios/
         """
         path = {'id': id}
-        query = {'page': page, 'limit': limit, 'search': search, 'ordering': ordering, 'group_by': group_by, **(extra_query or {})}
+        query = {'page': page, 'limit': limit, 'search': search, 'ordering': ordering, 'group_by': group_by, 'lifecycle': lifecycle, **(extra_query or {})}
         body = None
         return self._t.call(_ops.OP_SIMULATION_JOBS_SCENARIOS_LIST, path=path, query=query, body=body, model=None, options=options)
 
@@ -1209,9 +1351,11 @@ class SimulationEnvironmentsResource(Resource):
     drafts: SimulationEnvironmentsDraftsResource
     evaluations: SimulationEnvironmentsEvaluationsResource
     nudges: SimulationEnvironmentsNudgesResource
+    readiness: SimulationEnvironmentsReadinessResource
     runs: SimulationEnvironmentsRunsResource
+    scenarios: SimulationEnvironmentsScenariosResource
     versions: SimulationEnvironmentsVersionsResource
-    _children: Dict[str, type] = {'actors': SimulationEnvironmentsActorsResource, 'drafts': SimulationEnvironmentsDraftsResource, 'evaluations': SimulationEnvironmentsEvaluationsResource, 'nudges': SimulationEnvironmentsNudgesResource, 'runs': SimulationEnvironmentsRunsResource, 'versions': SimulationEnvironmentsVersionsResource}
+    _children: Dict[str, type] = {'actors': SimulationEnvironmentsActorsResource, 'drafts': SimulationEnvironmentsDraftsResource, 'evaluations': SimulationEnvironmentsEvaluationsResource, 'nudges': SimulationEnvironmentsNudgesResource, 'readiness': SimulationEnvironmentsReadinessResource, 'runs': SimulationEnvironmentsRunsResource, 'scenarios': SimulationEnvironmentsScenariosResource, 'versions': SimulationEnvironmentsVersionsResource}
 
     def get(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessEnvironmentDetail:
         """Return a simulation environment with its contract, world, scenarios and evaluations.
@@ -1252,13 +1396,13 @@ class SimulationEnvironmentsResource(Resource):
         body = {'scenario_ids': scenario_ids, 'trials': trials, 'seed': seed, 'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, **(extra_body or {})}
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_RUN, path=path, query=query, body=body, model=models.HarnessRunCreateResponse, options=options)
 
-    def run_plan(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessRunPlan:
+    def run_plan(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, scenario_keys: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessRunPlan:
         """Resolve the agent, environment and suite versions a run would pin, with warnings. Starts nothing.
 
         GET /simulate/api/harness-environments/{id}/run-plan/
         """
         path = {'id': id}
-        query = {'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, **(extra_query or {})}
+        query = {'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, 'scenario_keys': scenario_keys, **(extra_query or {})}
         body = None
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_RUN_PLAN, path=path, query=query, body=body, model=models.HarnessRunPlan, options=options)
 
@@ -2828,14 +2972,14 @@ class AsyncSimulationEnvironmentsDraftsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_LIST, path=path, query=query, body=body, model=models.HarnessDrafts, options=options)
 
-    async def save(self, id: str, *, drafts: List[Dict[str, Any]], idempotency_key: str, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessDraftSaveResponse:
+    async def save(self, id: str, *, idempotency_key: str, drafts: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, candidates: Dict[str, Any] | None | NotGiven = NOT_GIVEN, expected_review_digest: str | None | NotGiven = NOT_GIVEN, name: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessDraftSaveResponse:
         """Save the named drafts together as new default versions; each needs expected_parent_id, and the body's idempotency_key replays an earlier save.
 
         POST /simulate/api/harness-environments/{id}/drafts/save/
         """
         path = {'id': id}
         query = {**(extra_query or {})}
-        body = {'drafts': drafts, 'idempotency_key': idempotency_key, **(extra_body or {})}
+        body = {'idempotency_key': idempotency_key, 'drafts': drafts, 'candidates': candidates, 'expected_review_digest': expected_review_digest, 'name': name, **(extra_body or {})}
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_SAVE, path=path, query=query, body=body, model=models.HarnessDraftSaveResponse, options=options)
 
 
@@ -2921,6 +3065,62 @@ class AsyncSimulationEnvironmentsNudgesResource(Resource):
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_NUDGES_STOP, path=path, query=query, body=body, model=models.HarnessNudge, options=options)
 
 
+class AsyncSimulationEnvironmentsReadinessResource(Resource):
+    """`client.simulation.environments.readiness`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+
+    async def cases(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, keys: List[str] | None | NotGiven = NOT_GIVEN, trials: int | None | NotGiven = NOT_GIVEN, bucket: Literal['eligible', 'blocked', 'stale', 'untested'] | None | NotGiven = NOT_GIVEN, row: Literal['start', 'message', 'continuity', 'streaming', 'tool_discovery', 'tool_routing', 'state', 'audio', 'files', 'browser', 'children', 'hidden_material', 'reset', 'resume', 'cancel', 'cost'] | None | NotGiven = NOT_GIVEN, cursor: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessCapabilityCasePage:
+        """List one page, by scenario number, of the selected scenarios in one readiness bucket (eligible, blocked, stale or untested) or held back by one readiness row; pass the previous page's next as cursor. Writes nothing.
+
+        GET /simulate/api/harness-environments/{id}/capabilities/cases/
+        """
+        path = {'id': id}
+        query = {'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, 'keys': keys, 'trials': trials, 'bucket': bucket, 'row': row, 'cursor': cursor, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_READINESS_CASES, path=path, query=query, body=body, model=models.HarnessCapabilityCasePage, options=options)
+
+    async def get(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, keys: List[str] | None | NotGiven = NOT_GIVEN, trials: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessCapabilitySelectionReport:
+        """Return the run readiness of a pairing of agent, environment and suite versions (absent ones are the defaults), computed now, with its blockers and the selected scenarios it holds back; keys narrows the selection and trials is the trial count planned. Writes nothing.
+
+        GET /simulate/api/harness-environments/{id}/capabilities/
+        """
+        path = {'id': id}
+        query = {'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, 'keys': keys, 'trials': trials, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_READINESS_GET, path=path, query=query, body=body, model=models.HarnessCapabilitySelectionReport, options=options)
+
+    async def get_for_scenarios(self, id: str, *, scenario_ids: List[str], agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, trials: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessCapabilitySelectionReport:
+        """Return the same run readiness report as readiness.get for a selection of scenarios too long for a query string (scenario_ids, more than 200 keys). Writes nothing.
+
+        POST /simulate/api/harness-environments/{id}/capabilities/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'scenario_ids': scenario_ids, 'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, 'trials': trials, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_READINESS_GET_FOR_SCENARIOS, path=path, query=query, body=body, model=models.HarnessCapabilitySelectionReport, options=options)
+
+    async def history(self, id: str, *, cursor: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessCertifiedPairingPage:
+        """List the version pairings certified on an environment, newest first, with the exact agent, environment and suite versions of each; pass the returned cursor for the next page.
+
+        GET /simulate/api/harness-environments/{id}/capabilities/history/
+        """
+        path = {'id': id}
+        query = {'cursor': cursor, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_READINESS_HISTORY, path=path, query=query, body=body, model=models.HarnessCertifiedPairingPage, options=options)
+
+    async def recheck(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessCapabilityRecheckResponse:
+        """Validate a pairing of versions again (absent ones are the defaults) without a run; moves no default. A pairing not yet certified runs its check in a build sandbox, which is billed.
+
+        POST /simulate/api/harness-environments/{id}/capabilities/recheck/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_READINESS_RECHECK, path=path, query=query, body=body, model=models.HarnessCapabilityRecheckResponse, options=options)
+
+
 class AsyncSimulationEnvironmentsRunsResource(Resource):
     """`client.simulation.environments.runs`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -2945,6 +3145,82 @@ class AsyncSimulationEnvironmentsRunsResource(Resource):
         query = {**(extra_query or {})}
         body = {'eval_config_ids': eval_config_ids, 'enable_tool_evaluation': enable_tool_evaluation, **(extra_body or {})}
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_RUNS_REGRADE, path=path, query=query, body=body, model=models.HarnessEnvironmentRunEvaluationsQueued, options=options)
+
+
+class AsyncSimulationEnvironmentsScenariosResource(Resource):
+    """`client.simulation.environments.scenarios`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+
+    async def archive(self, id: str, key: str, *, reason: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioLifecycleResponse:
+        """Take one scenario (key) out of future runs, with an optional reason; its identity, runs and evidence are kept, and restore brings it back.
+
+        POST /simulate/api/harness-environments/{id}/scenarios/{key}/archive/
+        """
+        path = {'id': id, 'key': key}
+        query = {**(extra_query or {})}
+        body = {'reason': reason, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_ARCHIVE, path=path, query=query, body=body, model=models.HarnessScenarioLifecycleResponse, options=options)
+
+    async def records(self, id: str, key: str, *, table: str, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioRecordsResponse:
+        """Return the seeded rows of one table of the world, to pick a real record for a scenario (key) whose starting record is missing. Writes nothing.
+
+        GET /simulate/api/harness-environments/{id}/scenarios/{key}/records/
+        """
+        path = {'id': id, 'key': key}
+        query = {'table': table, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_RECORDS, path=path, query=query, body=body, model=models.HarnessScenarioRecordsResponse, options=options)
+
+    async def restore(self, id: str, key: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioLifecycleResponse:
+        """Bring an archived scenario (key) back, at once when the saved suite still holds it, otherwise as a draft to save.
+
+        POST /simulate/api/harness-environments/{id}/scenarios/{key}/restore/
+        """
+        path = {'id': id, 'key': key}
+        query = {**(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_RESTORE, path=path, query=query, body=body, model=models.HarnessScenarioLifecycleResponse, options=options)
+
+    async def revisions(self, id: str, key: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioRevisions:
+        """List each distinct content of one scenario (key) across the environment's saved suite versions, newest first.
+
+        GET /simulate/api/harness-environments/{id}/scenarios/{key}/revisions/
+        """
+        path = {'id': id, 'key': key}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_REVISIONS, path=path, query=query, body=body, model=models.HarnessScenarioRevisions, options=options)
+
+    async def running_validation(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioRunningValidation:
+        """Return the validation still running for the environment's default versions, if any, and how many scenarios a validation of those not yet proved would prove.
+
+        GET /simulate/api/harness-environments/{id}/scenarios/validate/running/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_RUNNING_VALIDATION, path=path, query=query, body=body, model=models.HarnessScenarioRunningValidation, options=options)
+
+    async def validate(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, if_fresh: bool | None | NotGiven = NOT_GIVEN, keys: List[str] | None | NotGiven = NOT_GIVEN, reprove_all: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioValidateResponse:
+        """Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and is billed. Returns a job_id to follow with validation_status.
+
+        POST /simulate/api/harness-environments/{id}/scenarios/validate/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, 'if_fresh': if_fresh, 'keys': keys, 'reprove_all': reprove_all, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_VALIDATE, path=path, query=query, body=body, model=models.HarnessScenarioValidateResponse, options=options)
+
+    async def validation_status(self, id: str, *, job_id: str, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioValidationStatus:
+        """Return where one scenario validation (job_id) got to, and whether it recorded its proofs.
+
+        GET /simulate/api/harness-environments/{id}/scenarios/validate/
+        """
+        path = {'id': id}
+        query = {'job_id': job_id, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_VALIDATION_STATUS, path=path, query=query, body=body, model=models.HarnessScenarioValidationStatus, options=options)
 
 
 class AsyncSimulationEnvironmentsVersionsResource(Resource):
@@ -3002,6 +3278,16 @@ class AsyncSimulationEnvironmentsVersionsResource(Resource):
         body = {'expected_default_id': expected_default_id, **(extra_body or {})}
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_SET_DEFAULT, path=path, query=query, body=body, model=models.HarnessVersions, options=options)
 
+    async def source_changes(self, id: str, version_id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessSourceChanges:
+        """Return the rules and files an environment version changed that scenarios cite, with the scenarios citing each.
+
+        GET /simulate/api/harness-environments/{id}/versions/environment/{version_id}/source-changes/
+        """
+        path = {'id': id, 'version_id': version_id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_SOURCE_CHANGES, path=path, query=query, body=body, model=models.HarnessSourceChanges, options=options)
+
     async def suite_members(self, id: str, version_id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> List[models.HarnessSuiteMember]:
         """List the scenarios in a saved suite version.
 
@@ -3054,13 +3340,13 @@ class AsyncSimulationJobsScenariosResource(Resource):
         body = {'changes': changes, 'rework': rework, **(extra_body or {})}
         return await self._t.acall(_ops.OP_SIMULATION_JOBS_SCENARIOS_AMEND, path=path, query=query, body=body, model=None, options=options)
 
-    async def list(self, id: str, *, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, ordering: str | None | NotGiven = NOT_GIVEN, group_by: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
-        """List one page of an environment's (or run's) authored scenarios, by number; group_by defaults to goal when omitted (empty for a flat list).
+    async def list(self, id: str, *, page: int | None | NotGiven = NOT_GIVEN, limit: int | None | NotGiven = NOT_GIVEN, search: str | None | NotGiven = NOT_GIVEN, ordering: str | None | NotGiven = NOT_GIVEN, group_by: str | None | NotGiven = NOT_GIVEN, lifecycle: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> Any:
+        """List one page of an environment's (or run's) authored scenarios, by number, each with its lifecycle; group_by defaults to goal when omitted (empty for a flat list), and lifecycle keeps one state (draft, validated, active, archived, source_changed or kept_as_written).
 
         GET /simulate/api/harness-jobs/{id}/scenarios/
         """
         path = {'id': id}
-        query = {'page': page, 'limit': limit, 'search': search, 'ordering': ordering, 'group_by': group_by, **(extra_query or {})}
+        query = {'page': page, 'limit': limit, 'search': search, 'ordering': ordering, 'group_by': group_by, 'lifecycle': lifecycle, **(extra_query or {})}
         body = None
         return await self._t.acall(_ops.OP_SIMULATION_JOBS_SCENARIOS_LIST, path=path, query=query, body=body, model=None, options=options)
 
@@ -3910,9 +4196,11 @@ class AsyncSimulationEnvironmentsResource(Resource):
     drafts: AsyncSimulationEnvironmentsDraftsResource
     evaluations: AsyncSimulationEnvironmentsEvaluationsResource
     nudges: AsyncSimulationEnvironmentsNudgesResource
+    readiness: AsyncSimulationEnvironmentsReadinessResource
     runs: AsyncSimulationEnvironmentsRunsResource
+    scenarios: AsyncSimulationEnvironmentsScenariosResource
     versions: AsyncSimulationEnvironmentsVersionsResource
-    _children: Dict[str, type] = {'actors': AsyncSimulationEnvironmentsActorsResource, 'drafts': AsyncSimulationEnvironmentsDraftsResource, 'evaluations': AsyncSimulationEnvironmentsEvaluationsResource, 'nudges': AsyncSimulationEnvironmentsNudgesResource, 'runs': AsyncSimulationEnvironmentsRunsResource, 'versions': AsyncSimulationEnvironmentsVersionsResource}
+    _children: Dict[str, type] = {'actors': AsyncSimulationEnvironmentsActorsResource, 'drafts': AsyncSimulationEnvironmentsDraftsResource, 'evaluations': AsyncSimulationEnvironmentsEvaluationsResource, 'nudges': AsyncSimulationEnvironmentsNudgesResource, 'readiness': AsyncSimulationEnvironmentsReadinessResource, 'runs': AsyncSimulationEnvironmentsRunsResource, 'scenarios': AsyncSimulationEnvironmentsScenariosResource, 'versions': AsyncSimulationEnvironmentsVersionsResource}
 
     async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessEnvironmentDetail:
         """Return a simulation environment with its contract, world, scenarios and evaluations.
@@ -3953,13 +4241,13 @@ class AsyncSimulationEnvironmentsResource(Resource):
         body = {'scenario_ids': scenario_ids, 'trials': trials, 'seed': seed, 'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, **(extra_body or {})}
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_RUN, path=path, query=query, body=body, model=models.HarnessRunCreateResponse, options=options)
 
-    async def run_plan(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessRunPlan:
+    async def run_plan(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, scenario_keys: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessRunPlan:
         """Resolve the agent, environment and suite versions a run would pin, with warnings. Starts nothing.
 
         GET /simulate/api/harness-environments/{id}/run-plan/
         """
         path = {'id': id}
-        query = {'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, **(extra_query or {})}
+        query = {'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, 'scenario_keys': scenario_keys, **(extra_query or {})}
         body = None
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_RUN_PLAN, path=path, query=query, body=body, model=models.HarnessRunPlan, options=options)
 
@@ -5479,7 +5767,9 @@ __all__ = [
     'SimulationEnvironmentsDraftsResource',
     'SimulationEnvironmentsEvaluationsResource',
     'SimulationEnvironmentsNudgesResource',
+    'SimulationEnvironmentsReadinessResource',
     'SimulationEnvironmentsRunsResource',
+    'SimulationEnvironmentsScenariosResource',
     'SimulationEnvironmentsVersionsResource',
     'SimulationExecutionsResource',
     'SimulationExecutionsInsightsResource',
@@ -5544,7 +5834,9 @@ __all__ = [
     'AsyncSimulationEnvironmentsDraftsResource',
     'AsyncSimulationEnvironmentsEvaluationsResource',
     'AsyncSimulationEnvironmentsNudgesResource',
+    'AsyncSimulationEnvironmentsReadinessResource',
     'AsyncSimulationEnvironmentsRunsResource',
+    'AsyncSimulationEnvironmentsScenariosResource',
     'AsyncSimulationEnvironmentsVersionsResource',
     'AsyncSimulationExecutionsResource',
     'AsyncSimulationExecutionsInsightsResource',

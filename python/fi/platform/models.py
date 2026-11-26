@@ -1696,6 +1696,74 @@ class HarnessAgentCredentialsResponse(_Model):
     agent_version: Optional[HarnessVersion] = Field(default=None)
 
 
+class HarnessBlockedScenario(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['key', 'name'])
+    key: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+
+
+class HarnessBlockedTool(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['scenarios', 'tool'])
+    tool: Optional[str] = Field(default=None)
+    scenarios: Optional[List[Optional[HarnessBlockedScenario]]] = Field(default=None)
+
+
+class HarnessCapabilityAffected(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['count', 'keys', 'of', 'truncated'])
+    count: Optional[int] = Field(default=None)
+    of: Optional[int] = Field(default=None)
+    keys: Optional[List[Optional[str]]] = Field(default=None)
+    truncated: Optional[bool] = Field(default=None)
+
+
+class HarnessCapabilityAgentTools(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['count', 'read'])
+    read: Optional[bool] = Field(default=None)
+    count: Optional[int] = Field(default=None)
+
+
+class HarnessCapabilityAnswer(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['kind', 'worst'])
+    kind: Optional[str] = Field(default=None)  # one of: ready, blocked, stale, unchecked, validating
+    worst: Optional[str] = Field(default=None)  # one of: supported, partial, blocked, unavailable, untested, stale
+    reason_code: Optional[str] = Field(default=None)
+
+
+class HarnessCapabilityArea(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'rows', 'status'])
+    id: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: supported, partial, blocked, unavailable, untested, stale
+    rows: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class HarnessCapabilityCase(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['by', 'key', 'name', 'number', 'persona'])
+    key: Optional[str] = Field(default=None)
+    number: Optional[int] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    persona: Optional[str] = Field(default=None)
+    by: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class HarnessCapabilityCaseList(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['keys', 'truncated'])
+    keys: Optional[List[Optional[str]]] = Field(default=None)
+    truncated: Optional[bool] = Field(default=None)
+
+
+class HarnessCapabilityCaseLists(_Model):
+    eligible: Optional[HarnessCapabilityCaseList] = Field(default=None)
+    blocked: Optional[HarnessCapabilityCaseList] = Field(default=None)
+    stale: Optional[HarnessCapabilityCaseList] = Field(default=None)
+    untested: Optional[HarnessCapabilityCaseList] = Field(default=None)
+
+
+class HarnessCapabilityCasePage(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['items'])
+    items: Optional[List[Optional[HarnessCapabilityCase]]] = Field(default=None)
+    next: Optional[str] = Field(default=None)
+
+
 class HarnessCapabilityChanged(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['count', 'keys', 'truncated'])
     count: Optional[int] = Field(default=None)
@@ -1710,12 +1778,176 @@ class HarnessCapabilityChangedSince(_Model):
     suite_version: Optional[RunVersionLabel] = Field(default=None)
 
 
+class HarnessCapabilityCounts(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['blocked', 'partial', 'stale', 'supported', 'unavailable', 'untested'])
+    supported: Optional[int] = Field(default=None)
+    partial: Optional[int] = Field(default=None)
+    blocked: Optional[int] = Field(default=None)
+    unavailable: Optional[int] = Field(default=None)
+    untested: Optional[int] = Field(default=None)
+    stale: Optional[int] = Field(default=None)
+
+
+class HarnessCapabilityDroppedCase(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['code', 'key', 'reason'])
+    key: Optional[str] = Field(default=None)
+    code: Optional[str] = Field(default=None)  # one of: scenario_dropped, scenario_ungradable
+    reason: Optional[str] = Field(default=None)
+
+
+class HarnessCapabilityEvidence(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['check', 'result'])
+    check: Optional[str] = Field(default=None)
+    result: Optional[str] = Field(default=None)
+
+
 class HarnessCapabilityExcluded(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['count', 'keys', 'reason', 'truncated'])
     count: Optional[int] = Field(default=None)
     keys: Optional[List[Optional[str]]] = Field(default=None)
     truncated: Optional[bool] = Field(default=None)
     reason: Optional[str] = Field(default=None)  # one of: not_selected
+
+
+class HarnessCapabilityFix(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['action', 'type', 'would'])
+    type: Optional[str] = Field(default=None)
+    category: Optional[str] = Field(default=None)  # one of: startup, message_mapping, tool_routing, evidence, agent_version
+    target: Optional[str] = Field(default=None)
+    action: Optional[str] = Field(default=None)
+    would: Optional[str] = Field(default=None)
+    recheck: Optional[HarnessCapabilityFixRecheck] = Field(default=None)
+
+
+class HarnessCapabilityFixRecheck(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['method', 'path', 'scope'])
+    scope: Optional[str] = Field(default=None)  # one of: agent, pair
+    method: Optional[str] = Field(default=None)  # one of: POST
+    path: Optional[str] = Field(default=None)
+
+
+class HarnessCapabilityGrading(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['gradable', 'not_gradable', 'truncated'])
+    gradable: Optional[int] = Field(default=None)
+    not_gradable: Optional[List[Optional[HarnessCapabilityNotGradable]]] = Field(default=None)
+    truncated: Optional[bool] = Field(default=None)
+
+
+class HarnessCapabilityHeldBy(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['count', 'id', 'name', 'text'])
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    area: Optional[str] = Field(default=None)
+    count: Optional[int] = Field(default=None)
+    reason: Optional[str] = Field(default=None)
+    text: Optional[str] = Field(default=None)
+
+
+class HarnessCapabilityNotGradable(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['key', 'reason'])
+    key: Optional[str] = Field(default=None)
+    reason: Optional[str] = Field(default=None)  # one of: check_unreadable, no_checks, evidence_not_supported, judge_unavailable
+
+
+class HarnessCapabilityPairing(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['evidence'])
+    agent_version: Optional[RunVersionLabel] = Field(default=None)
+    environment_version: Optional[RunVersionLabel] = Field(default=None)
+    suite_version: Optional[RunVersionLabel] = Field(default=None)
+    evidence: Optional[str] = Field(default=None)  # one of: pair_certificate, build_certificate, none
+    agent_tools: Optional[HarnessCapabilityAgentTools] = Field(default=None)
+    evidence_unreadable: Optional[bool] = Field(default=None)
+
+
+class HarnessCapabilityRecheckResponse(_Model):
+    validation: Optional[HarnessPairValidation] = Field(default=None)
+
+
+class HarnessCapabilitySelectionCounts(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['blocked', 'dropped', 'eligible', 'held_by', 'reasons', 'requested', 'requirements_recorded', 'running', 'stale', 'suite_total', 'untested'])
+    suite_total: Optional[int] = Field(default=None)
+    excluded: Optional[HarnessCapabilityExcluded] = Field(default=None)
+    changed: Optional[HarnessCapabilityChanged] = Field(default=None)
+    requested: Optional[int] = Field(default=None)
+    eligible: Optional[int] = Field(default=None)
+    blocked: Optional[int] = Field(default=None)
+    stale: Optional[int] = Field(default=None)
+    untested: Optional[int] = Field(default=None)
+    lists: Optional[HarnessCapabilityCaseLists] = Field(default=None)
+    held_by: Optional[List[Optional[HarnessCapabilityHeldBy]]] = Field(default=None)
+    blocking_area: Optional[str] = Field(default=None)
+    dropped: Optional[List[Optional[HarnessCapabilityDroppedCase]]] = Field(default=None)
+    grading: Optional[HarnessCapabilityGrading] = Field(default=None)
+    requirements_recorded: Optional[bool] = Field(default=None)
+    next: Optional[str] = Field(default=None)  # one of: validate_first, run_unvalidated
+    running: Optional[int] = Field(default=None)
+    held_back: Optional[HarnessRunHeldBack] = Field(default=None)
+    reasons: Optional[Any] = Field(default=None)
+
+
+class HarnessCapabilitySelectionReport(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['areas', 'blockers', 'catalog_version', 'computed_at', 'rows', 'rules_version', 'workers'])
+    pairing: Optional[HarnessCapabilityPairing] = Field(default=None)
+    validation: Optional[HarnessPairValidation] = Field(default=None)
+    answer: Optional[HarnessCapabilityAnswer] = Field(default=None)
+    areas: Optional[List[Optional[HarnessCapabilityArea]]] = Field(default=None)
+    rows: Optional[List[Optional[HarnessCapabilitySelectionRow]]] = Field(default=None)
+    workers: Optional[List[Optional[WorkerBoundary]]] = Field(default=None)
+    counts: Optional[HarnessCapabilityCounts] = Field(default=None)
+    blockers: Optional[int] = Field(default=None)
+    catalog_version: Optional[str] = Field(default=None)
+    rules_version: Optional[str] = Field(default=None)
+    computed_at: Optional[str] = Field(default=None)
+    selection: Optional[HarnessCapabilitySelectionCounts] = Field(default=None)
+
+
+class HarnessCapabilitySelectionRow(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['consequence', 'evidence', 'id', 'label', 'measured', 'needed_by', 'status', 'targets'])
+    id: Optional[str] = Field(default=None)
+    label: Optional[str] = Field(default=None)
+    area: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: supported, partial, blocked, unavailable, untested, stale
+    measured: Optional[bool] = Field(default=None)
+    finding: Optional[str] = Field(default=None)  # one of: passed, failed, limited, not_applicable, not_run
+    reason_code: Optional[str] = Field(default=None)
+    reason: Optional[str] = Field(default=None)
+    targets: Optional[List[Optional[HarnessCapabilityTarget]]] = Field(default=None)
+    blocked_by: Optional[str] = Field(default=None)
+    stale_because: Optional[str] = Field(default=None)
+    was: Optional[str] = Field(default=None)  # one of: supported, partial, blocked, unavailable, untested, stale
+    evidence: Optional[List[Optional[HarnessCapabilityEvidence]]] = Field(default=None)
+    checked_at: Optional[str] = Field(default=None)
+    fix: Optional[HarnessCapabilityFix] = Field(default=None)
+    consequence: Optional[str] = Field(default=None)
+    needed_by: Optional[int] = Field(default=None)
+    affected: Optional[HarnessCapabilityAffected] = Field(default=None)
+
+
+class HarnessCapabilityTarget(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['kind', 'name', 'result'])
+    kind: Optional[str] = Field(default=None)  # one of: tool, agent_tool, action, check
+    name: Optional[str] = Field(default=None)
+    result: Optional[str] = Field(default=None)
+
+
+class HarnessCertifiedPairing(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['bundle_id', 'certified_at'])
+    bundle_id: Optional[str] = Field(default=None)
+    agent_version: Optional[RunVersionLabel] = Field(default=None)
+    environment_version: Optional[RunVersionLabel] = Field(default=None)
+    suite_version: Optional[RunVersionLabel] = Field(default=None)
+    certified_at: Optional[str] = Field(default=None)
+
+
+class HarnessCertifiedPairingPage(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['items'])
+    items: Optional[List[Optional[HarnessCertifiedPairing]]] = Field(default=None)
+    next: Optional[str] = Field(default=None)
+
+
+class HarnessControlStep(_Model):
+    tool: Optional[str] = Field(default=None)
+    arguments: Optional[Any] = Field(default=None)
 
 
 class HarnessConversationEventRead(_Model):
@@ -1808,6 +2040,7 @@ class HarnessDraftSaveResponse(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['saved'])
     saved: Optional[Any] = Field(default=None)
     versions: Optional[HarnessVersions] = Field(default=None)
+    not_active: Optional[List[Optional[Any]]] = Field(default=None)
 
 
 class HarnessDrafts(_Model):
@@ -2100,6 +2333,13 @@ class HarnessEnvironmentWorld(_Model):
     stores: Optional[List[Optional[HarnessEnvironmentStore]]] = Field(default=None)
 
 
+class HarnessNegativeControl(_Model):
+    name: Optional[str] = Field(default=None)
+    why: Optional[str] = Field(default=None)
+    steps: Optional[List[Optional[HarnessControlStep]]] = Field(default=None)
+    must_fail: Optional[List[Optional[str]]] = Field(default=None)
+
+
 class HarnessNudge(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['can_stop', 'created_at', 'id', 'queued_behind_input', 'state', 'target'])
     id: Optional[str] = Field(default=None)
@@ -2180,6 +2420,15 @@ class HarnessNudgeVariables(_Model):
     unknown: Optional[List[Optional[str]]] = Field(default=None)
 
 
+class HarnessPairValidation(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['state'])
+    state: Optional[str] = Field(default=None)  # one of: not_run, validating, ready, failed, check_unavailable, retry, unavailable
+    job_id: Optional[str] = Field(default=None)
+    purpose: Optional[str] = Field(default=None)  # one of: agent_move, recheck, save
+    finished_at: Optional[str] = Field(default=None)
+    error: Optional[Any] = Field(default=None)
+
+
 class HarnessPreflightCheck(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['detail', 'id', 'label', 'missing', 'status'])
     id: Optional[str] = Field(default=None)
@@ -2209,6 +2458,37 @@ class HarnessPreflightResponse(_Model):
     effective_parallelism: Optional[int] = Field(default=None)
     resource_profile: Optional[Any] = Field(default=None)
     snapshot: Optional[Any] = Field(default=None)
+
+
+class HarnessProofControl(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['assumed', 'ran'])
+    name: Optional[str] = Field(default=None)
+    why: Optional[str] = Field(default=None)
+    ran: Optional[bool] = Field(default=None)
+    failed: Optional[bool] = Field(default=None)
+    assumed: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class HarnessProofLeak(_Model):
+    who: Optional[str] = Field(default=None)
+    field: Optional[str] = Field(default=None)
+    grader_field: Optional[str] = Field(default=None)
+    excerpt: Optional[str] = Field(default=None)
+
+
+class HarnessReleaseCheckResults(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['hidden_checks_kept', 'reference_passes', 'resets', 'starts', 'wrong_answer_fails'])
+    starts: Optional[str] = Field(default=None)  # one of: passed, failed, pending
+    resets: Optional[str] = Field(default=None)  # one of: passed, failed, pending
+    reference_passes: Optional[str] = Field(default=None)  # one of: passed, failed, pending
+    wrong_answer_fails: Optional[str] = Field(default=None)  # one of: passed, failed, pending
+    hidden_checks_kept: Optional[str] = Field(default=None)  # one of: passed, failed, pending
+
+
+class HarnessReleaseChecks(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['status'])
+    status: Optional[str] = Field(default=None)  # one of: ready, checks_pending, failed
+    checks: Optional[HarnessReleaseCheckResults] = Field(default=None)
 
 
 class HarnessRunCreateResponse(_Model):
@@ -2246,10 +2526,14 @@ class HarnessRunPinnedVersions(_Model):
 
 
 class HarnessRunPlan(_Model):
-    __required__: ClassVar[FrozenSet[str]] = frozenset(['warnings'])
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['blocked_tools', 'held_back', 'runnable', 'warnings'])
     versions: Optional[HarnessRunPinnedVersions] = Field(default=None)
     warnings: Optional[List[Optional[HarnessRunWarning]]] = Field(default=None)
     bundle_cached: Optional[bool] = Field(default=None)
+    blocked_tools: Optional[List[Optional[HarnessBlockedTool]]] = Field(default=None)
+    runnable: Optional[bool] = Field(default=None)
+    blocked_code: Optional[str] = Field(default=None)  # one of: production_only
+    held_back: Optional[int] = Field(default=None)
 
 
 class HarnessRunReadinessSelection(_Model):
@@ -2289,11 +2573,120 @@ class HarnessRunWarning(_Model):
     scenario_keys: Optional[List[Optional[str]]] = Field(default=None)
 
 
+class HarnessScenarioLifecycle(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['legacy', 'must_pass', 'negative_controls', 'source_changed', 'sources', 'state'])
+    state: Optional[str] = Field(default=None)  # one of: draft, validated, active, kept_as_written, archived
+    reason: Optional[str] = Field(default=None)
+    held_by: Optional[str] = Field(default=None)  # one of: ours, unproved, proof_failed
+    reason_text: Optional[str] = Field(default=None)
+    warning: Optional[str] = Field(default=None)
+    warning_text: Optional[str] = Field(default=None)
+    legacy: Optional[bool] = Field(default=None)
+    proof: Optional[HarnessScenarioProof] = Field(default=None)
+    sources: Optional[List[Optional[HarnessSourceView]]] = Field(default=None)
+    source_changed: Optional[List[Optional[str]]] = Field(default=None)
+    source_changed_version: Optional[int] = Field(default=None)
+    source_changed_version_id: Optional[str] = Field(default=None)
+    must_pass: Optional[bool] = Field(default=None)
+    negative_controls: Optional[List[Optional[HarnessNegativeControl]]] = Field(default=None)
+
+
+class HarnessScenarioLifecycleResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['scenario_key'])
+    scenario_key: Optional[str] = Field(default=None)
+    lifecycle: Optional[HarnessScenarioLifecycle] = Field(default=None)
+    live: Optional[bool] = Field(default=None)
+
+
+class HarnessScenarioProof(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['assumed', 'controls', 'judged_only', 'leaks', 'proved'])
+    proved: Optional[bool] = Field(default=None)
+    outcome: Optional[str] = Field(default=None)
+    assumed: Optional[List[Optional[str]]] = Field(default=None)
+    controls: Optional[List[Optional[HarnessProofControl]]] = Field(default=None)
+    leaks: Optional[List[Optional[HarnessProofLeak]]] = Field(default=None)
+    judged_only: Optional[bool] = Field(default=None)
+    proved_at: Optional[str] = Field(default=None)
+    agent_version_id: Optional[str] = Field(default=None)
+    environment_version_id: Optional[str] = Field(default=None)
+    suite_version_id: Optional[str] = Field(default=None)
+
+
+class HarnessScenarioRecordsResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['available', 'rows', 'table'])
+    table: Optional[str] = Field(default=None)
+    rows: Optional[List[Optional[Any]]] = Field(default=None)
+    available: Optional[bool] = Field(default=None)
+
+
+class HarnessScenarioRevision(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['changed_fields', 'digest', 'revision', 'suite_versions'])
+    revision: Optional[int] = Field(default=None)
+    digest: Optional[str] = Field(default=None)
+    suite_versions: Optional[List[Optional[int]]] = Field(default=None)
+    first_suite_version: Optional[int] = Field(default=None)
+    changed_fields: Optional[List[Optional[str]]] = Field(default=None)
+    lifecycle_on_default_environment: Optional[HarnessScenarioLifecycle] = Field(default=None)
+
+
+class HarnessScenarioRevisions(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['revisions', 'scenario_key', 'truncated'])
+    scenario_key: Optional[str] = Field(default=None)
+    revisions: Optional[List[Optional[HarnessScenarioRevision]]] = Field(default=None)
+    truncated: Optional[bool] = Field(default=None)
+
+
+class HarnessScenarioRunningValidation(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['to_prove'])
+    job_id: Optional[str] = Field(default=None)
+    scenario_keys: Optional[List[Optional[str]]] = Field(default=None)
+    to_prove: Optional[int] = Field(default=None)
+    message: Optional[str] = Field(default=None)
+
+
+class HarnessScenarioValidateResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['state'])
+    state: Optional[str] = Field(default=None)  # one of: validating, ready, unavailable
+    job_id: Optional[str] = Field(default=None)
+    deadline_at: Optional[str] = Field(default=None)
+    finished_at: Optional[str] = Field(default=None)
+    message: Optional[str] = Field(default=None)
+
+
+class HarnessScenarioValidationStatus(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['job_id', 'proofs_recorded', 'proved', 'state', 'total'])
+    state: Optional[str] = Field(default=None)  # one of: validating, finished, failed, unavailable
+    job_id: Optional[str] = Field(default=None)
+    deadline_at: Optional[str] = Field(default=None)
+    finished_at: Optional[str] = Field(default=None)
+    proofs_recorded: Optional[bool] = Field(default=None)
+    message: Optional[str] = Field(default=None)
+    proved: Optional[int] = Field(default=None)
+    total: Optional[int] = Field(default=None)
+
+
 class HarnessSecretFileUploadResponse(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['environment_name', 'size'])
     environment_name: Optional[str] = Field(default=None)
     secret_ref: Optional[SecretReference] = Field(default=None)
     size: Optional[int] = Field(default=None)
+
+
+class HarnessSourceChange(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['cited_by', 'kind', 'ref'])
+    kind: Optional[str] = Field(default=None)  # one of: rule, file
+    ref: Optional[str] = Field(default=None)
+    before: Optional[str] = Field(default=None)
+    after: Optional[str] = Field(default=None)
+    cited_by: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class HarnessSourceChanges(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['changes', 'truncated'])
+    from_version: Optional[int] = Field(default=None)
+    to_version: Optional[int] = Field(default=None)
+    changes: Optional[List[Optional[HarnessSourceChange]]] = Field(default=None)
+    truncated: Optional[bool] = Field(default=None)
 
 
 class HarnessSourceUploadResponse(_Model):
@@ -2302,6 +2695,18 @@ class HarnessSourceUploadResponse(_Model):
     name: Optional[str] = Field(default=None)
     file_count: Optional[int] = Field(default=None)
     total_bytes: Optional[int] = Field(default=None)
+
+
+class HarnessSourceView(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['kind', 'label', 'problem', 'quote', 'ref', 'resolved', 'supports'])
+    kind: Optional[str] = Field(default=None)
+    ref: Optional[str] = Field(default=None)
+    quote: Optional[str] = Field(default=None)
+    supports: Optional[str] = Field(default=None)
+    resolved: Optional[bool] = Field(default=None)
+    label: Optional[str] = Field(default=None)
+    link: Optional[str] = Field(default=None)
+    problem: Optional[str] = Field(default=None)
 
 
 class HarnessSuiteMember(_Model):
@@ -2316,7 +2721,8 @@ class HarnessVersion(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'id', 'is_default', 'status', 'summary'])
     id: Optional[str] = Field(default=None)
     label: Optional[str] = Field(default=None)
-    status: Optional[str] = Field(default=None)  # one of: draft, active, discarded
+    name: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: draft, candidate, active, discarded
     is_default: Optional[bool] = Field(default=None)
     created_at: Optional[str] = Field(default=None)
     created_by: Optional[HarnessVersionPerson] = Field(default=None)
@@ -2338,6 +2744,9 @@ class HarnessVersion(_Model):
     requested_here: Optional[bool] = Field(default=None)
     pickable: Optional[bool] = Field(default=None)
     discardable: Optional[bool] = Field(default=None)
+    release_checks: Optional[HarnessReleaseChecks] = Field(default=None)
+    candidate_state: Optional[str] = Field(default=None)  # one of: validating, retry, ready, failed, check_unavailable, superseded, expired
+    saved_without_check: Optional[bool] = Field(default=None)
 
 
 class HarnessVersionDiff(_Model):
@@ -3764,11 +4173,40 @@ class UserInfoTwoFactorMethods(_Model):
     passkey: Optional[bool] = Field(default=None)
 
 
+class WorkerBoundary(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['binding', 'bypassed', 'bypassed_count', 'name', 'reason', 'reason_code', 'status', 'status_label', 'tools', 'worker_id'])
+    worker_id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    binding: Optional[str] = Field(default=None)  # one of: separate, shared
+    status: Optional[str] = Field(default=None)  # one of: supported, partial, blocked, unavailable, untested, stale
+    status_label: Optional[str] = Field(default=None)
+    reason_code: Optional[str] = Field(default=None)  # one of: evidence_unreadable, worker_channel_bypassed, sealed_before_worker_limits, tool_service_not_fronted, in_process_unbound, no_tool_service, in_process_door, shared_binding, held_at_world_cooperative, worker_not_sealed
+    reason: Optional[str] = Field(default=None)
+    tools: Optional[List[Optional[WorkerTool]]] = Field(default=None)
+    bypassed: Optional[List[Optional[WorkerBypass]]] = Field(default=None)
+    bypassed_count: Optional[int] = Field(default=None)
+    fix: Optional[HarnessCapabilityFix] = Field(default=None)
+    checked_at: Optional[str] = Field(default=None)
+
+
+class WorkerBypass(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['call_execution_id', 'run_id'])
+    run_id: Optional[str] = Field(default=None)
+    call_execution_id: Optional[str] = Field(default=None)
+
+
 class WorkerCheck(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['name'])
     name: Optional[str] = Field(default=None)
     passed: Optional[bool] = Field(default=None)
     result: Optional[str] = Field(default=None)  # one of: not_applicable, inconclusive, unmeasured
+
+
+class WorkerTool(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['boundary', 'tool'])
+    tool: Optional[str] = Field(default=None)
+    action: Optional[str] = Field(default=None)
+    boundary: Optional[str] = Field(default=None)  # one of: allowed, blocked, not_enforced
 
 
 class WorkspaceManagementItem(_Model):
@@ -3948,9 +4386,36 @@ HarnessActorUpload.model_rebuild()
 HarnessActorValidation.model_rebuild()
 HarnessActorView.model_rebuild()
 HarnessAgentCredentialsResponse.model_rebuild()
+HarnessBlockedScenario.model_rebuild()
+HarnessBlockedTool.model_rebuild()
+HarnessCapabilityAffected.model_rebuild()
+HarnessCapabilityAgentTools.model_rebuild()
+HarnessCapabilityAnswer.model_rebuild()
+HarnessCapabilityArea.model_rebuild()
+HarnessCapabilityCase.model_rebuild()
+HarnessCapabilityCaseList.model_rebuild()
+HarnessCapabilityCaseLists.model_rebuild()
+HarnessCapabilityCasePage.model_rebuild()
 HarnessCapabilityChanged.model_rebuild()
 HarnessCapabilityChangedSince.model_rebuild()
+HarnessCapabilityCounts.model_rebuild()
+HarnessCapabilityDroppedCase.model_rebuild()
+HarnessCapabilityEvidence.model_rebuild()
 HarnessCapabilityExcluded.model_rebuild()
+HarnessCapabilityFix.model_rebuild()
+HarnessCapabilityFixRecheck.model_rebuild()
+HarnessCapabilityGrading.model_rebuild()
+HarnessCapabilityHeldBy.model_rebuild()
+HarnessCapabilityNotGradable.model_rebuild()
+HarnessCapabilityPairing.model_rebuild()
+HarnessCapabilityRecheckResponse.model_rebuild()
+HarnessCapabilitySelectionCounts.model_rebuild()
+HarnessCapabilitySelectionReport.model_rebuild()
+HarnessCapabilitySelectionRow.model_rebuild()
+HarnessCapabilityTarget.model_rebuild()
+HarnessCertifiedPairing.model_rebuild()
+HarnessCertifiedPairingPage.model_rebuild()
+HarnessControlStep.model_rebuild()
 HarnessConversationEventRead.model_rebuild()
 HarnessConversationMessage.model_rebuild()
 HarnessConversationRead.model_rebuild()
@@ -3985,6 +4450,7 @@ HarnessEnvironmentStore.model_rebuild()
 HarnessEnvironmentStoreTable.model_rebuild()
 HarnessEnvironmentSubGoal.model_rebuild()
 HarnessEnvironmentWorld.model_rebuild()
+HarnessNegativeControl.model_rebuild()
 HarnessNudge.model_rebuild()
 HarnessNudgeError.model_rebuild()
 HarnessNudgeFacts.model_rebuild()
@@ -3992,9 +4458,14 @@ HarnessNudgeFile.model_rebuild()
 HarnessNudgeProblem.model_rebuild()
 HarnessNudgeReplacement.model_rebuild()
 HarnessNudgeVariables.model_rebuild()
+HarnessPairValidation.model_rebuild()
 HarnessPreflightCheck.model_rebuild()
 HarnessPreflightCredentials.model_rebuild()
 HarnessPreflightResponse.model_rebuild()
+HarnessProofControl.model_rebuild()
+HarnessProofLeak.model_rebuild()
+HarnessReleaseCheckResults.model_rebuild()
+HarnessReleaseChecks.model_rebuild()
 HarnessRunCreateResponse.model_rebuild()
 HarnessRunHeldBack.model_rebuild()
 HarnessRunPinnedVersions.model_rebuild()
@@ -4002,8 +4473,20 @@ HarnessRunPlan.model_rebuild()
 HarnessRunReadinessSelection.model_rebuild()
 HarnessRunSummary.model_rebuild()
 HarnessRunWarning.model_rebuild()
+HarnessScenarioLifecycle.model_rebuild()
+HarnessScenarioLifecycleResponse.model_rebuild()
+HarnessScenarioProof.model_rebuild()
+HarnessScenarioRecordsResponse.model_rebuild()
+HarnessScenarioRevision.model_rebuild()
+HarnessScenarioRevisions.model_rebuild()
+HarnessScenarioRunningValidation.model_rebuild()
+HarnessScenarioValidateResponse.model_rebuild()
+HarnessScenarioValidationStatus.model_rebuild()
 HarnessSecretFileUploadResponse.model_rebuild()
+HarnessSourceChange.model_rebuild()
+HarnessSourceChanges.model_rebuild()
 HarnessSourceUploadResponse.model_rebuild()
+HarnessSourceView.model_rebuild()
 HarnessSuiteMember.model_rebuild()
 HarnessVersion.model_rebuild()
 HarnessVersionDiff.model_rebuild()
@@ -4132,7 +4615,10 @@ UserAlertMonitorTrend.model_rebuild()
 UserInfoOrganization.model_rebuild()
 UserInfoResponse.model_rebuild()
 UserInfoTwoFactorMethods.model_rebuild()
+WorkerBoundary.model_rebuild()
+WorkerBypass.model_rebuild()
 WorkerCheck.model_rebuild()
+WorkerTool.model_rebuild()
 WorkspaceManagementItem.model_rebuild()
 WorkspaceManagementListResult.model_rebuild()
 _EvalTaskListResultResponse.model_rebuild()
@@ -4276,9 +4762,36 @@ __all__ = [
     'HarnessActorValidation',
     'HarnessActorView',
     'HarnessAgentCredentialsResponse',
+    'HarnessBlockedScenario',
+    'HarnessBlockedTool',
+    'HarnessCapabilityAffected',
+    'HarnessCapabilityAgentTools',
+    'HarnessCapabilityAnswer',
+    'HarnessCapabilityArea',
+    'HarnessCapabilityCase',
+    'HarnessCapabilityCaseList',
+    'HarnessCapabilityCaseLists',
+    'HarnessCapabilityCasePage',
     'HarnessCapabilityChanged',
     'HarnessCapabilityChangedSince',
+    'HarnessCapabilityCounts',
+    'HarnessCapabilityDroppedCase',
+    'HarnessCapabilityEvidence',
     'HarnessCapabilityExcluded',
+    'HarnessCapabilityFix',
+    'HarnessCapabilityFixRecheck',
+    'HarnessCapabilityGrading',
+    'HarnessCapabilityHeldBy',
+    'HarnessCapabilityNotGradable',
+    'HarnessCapabilityPairing',
+    'HarnessCapabilityRecheckResponse',
+    'HarnessCapabilitySelectionCounts',
+    'HarnessCapabilitySelectionReport',
+    'HarnessCapabilitySelectionRow',
+    'HarnessCapabilityTarget',
+    'HarnessCertifiedPairing',
+    'HarnessCertifiedPairingPage',
+    'HarnessControlStep',
     'HarnessConversationEventRead',
     'HarnessConversationMessage',
     'HarnessConversationRead',
@@ -4313,6 +4826,7 @@ __all__ = [
     'HarnessEnvironmentStoreTable',
     'HarnessEnvironmentSubGoal',
     'HarnessEnvironmentWorld',
+    'HarnessNegativeControl',
     'HarnessNudge',
     'HarnessNudgeError',
     'HarnessNudgeFacts',
@@ -4320,9 +4834,14 @@ __all__ = [
     'HarnessNudgeProblem',
     'HarnessNudgeReplacement',
     'HarnessNudgeVariables',
+    'HarnessPairValidation',
     'HarnessPreflightCheck',
     'HarnessPreflightCredentials',
     'HarnessPreflightResponse',
+    'HarnessProofControl',
+    'HarnessProofLeak',
+    'HarnessReleaseCheckResults',
+    'HarnessReleaseChecks',
     'HarnessRunCreateResponse',
     'HarnessRunHeldBack',
     'HarnessRunPinnedVersions',
@@ -4330,8 +4849,20 @@ __all__ = [
     'HarnessRunReadinessSelection',
     'HarnessRunSummary',
     'HarnessRunWarning',
+    'HarnessScenarioLifecycle',
+    'HarnessScenarioLifecycleResponse',
+    'HarnessScenarioProof',
+    'HarnessScenarioRecordsResponse',
+    'HarnessScenarioRevision',
+    'HarnessScenarioRevisions',
+    'HarnessScenarioRunningValidation',
+    'HarnessScenarioValidateResponse',
+    'HarnessScenarioValidationStatus',
     'HarnessSecretFileUploadResponse',
+    'HarnessSourceChange',
+    'HarnessSourceChanges',
     'HarnessSourceUploadResponse',
+    'HarnessSourceView',
     'HarnessSuiteMember',
     'HarnessVersion',
     'HarnessVersionDiff',
@@ -4460,7 +4991,10 @@ __all__ = [
     'UserInfoOrganization',
     'UserInfoResponse',
     'UserInfoTwoFactorMethods',
+    'WorkerBoundary',
+    'WorkerBypass',
     'WorkerCheck',
+    'WorkerTool',
     'WorkspaceManagementItem',
     'WorkspaceManagementListResult',
     '_EvalTaskListResultResponse',

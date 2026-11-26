@@ -1389,6 +1389,8 @@ export interface SimulationEnvironmentsRunPlanParams {
   agent_version_id?: string | null;
   environment_version_id?: string | null;
   suite_version_id?: string | null;
+  /** The scenarios the run would select, comma-separated; absent or blank selects every scenario. */
+  scenario_keys?: string | null;
 }
 
 export interface SimulationEnvironmentsActorsAcceptUnresolvedParams {
@@ -1446,9 +1448,14 @@ export interface SimulationEnvironmentsActorsValidateParams {
 }
 
 export interface SimulationEnvironmentsDraftsSaveParams {
-  drafts: Array<Record<string, unknown>>;
   /** Idempotency key */
   idempotency_key: string;
+  drafts?: Array<Record<string, unknown>> | null;
+  candidates?: Record<string, unknown> | null;
+  /** Expected review digest */
+  expected_review_digest?: string | null;
+  /** Name */
+  name?: string | null;
 }
 
 export interface SimulationEnvironmentsEvaluationsAddParams {
@@ -1487,6 +1494,54 @@ export interface SimulationEnvironmentsNudgesListParams {
   state?: string | null;
 }
 
+export interface SimulationEnvironmentsReadinessCasesParams {
+  agent_version_id?: string | null;
+  environment_version_id?: string | null;
+  suite_version_id?: string | null;
+  /** Scenario keys; more than 200 go in the POST body as scenario_ids. */
+  keys?: Array<string> | null;
+  trials?: number | null;
+  bucket?: "eligible" | "blocked" | "stale" | "untested" | null;
+  row?: "start" | "message" | "continuity" | "streaming" | "tool_discovery" | "tool_routing" | "state" | "audio" | "files" | "browser" | "children" | "hidden_material" | "reset" | "resume" | "cancel" | "cost" | null;
+  /** The previous page's next: the number it ended on. */
+  cursor?: number | null;
+}
+
+export interface SimulationEnvironmentsReadinessGetParams {
+  agent_version_id?: string | null;
+  environment_version_id?: string | null;
+  suite_version_id?: string | null;
+  /** Scenario keys; more than 200 go in the POST body as scenario_ids. */
+  keys?: Array<string> | null;
+  trials?: number | null;
+}
+
+export interface SimulationEnvironmentsReadinessGetForScenariosParams {
+  scenario_ids: Array<string>;
+  /** Agent version id */
+  agent_version_id?: string | null;
+  /** Environment version id */
+  environment_version_id?: string | null;
+  /** Suite version id */
+  suite_version_id?: string | null;
+  /** Trials */
+  trials?: number | null;
+}
+
+export interface SimulationEnvironmentsReadinessHistoryParams {
+  /** The previous page's next. */
+  cursor?: number | null;
+}
+
+export interface SimulationEnvironmentsReadinessRecheckParams {
+  /** Agent version id */
+  agent_version_id?: string | null;
+  /** Environment version id */
+  environment_version_id?: string | null;
+  /** Suite version id */
+  suite_version_id?: string | null;
+}
+
 export interface SimulationEnvironmentsRunsAddEvaluationParams {
   /** Name */
   name: string;
@@ -1496,6 +1551,33 @@ export interface SimulationEnvironmentsRunsRegradeParams {
   eval_config_ids: Array<string>;
   /** Enable tool evaluation */
   enable_tool_evaluation?: boolean | null;
+}
+
+export interface SimulationEnvironmentsScenariosArchiveParams {
+  /** Reason */
+  reason?: string | null;
+}
+
+export interface SimulationEnvironmentsScenariosRecordsParams {
+  table: string;
+}
+
+export interface SimulationEnvironmentsScenariosValidateParams {
+  /** Agent version id */
+  agent_version_id?: string | null;
+  /** Environment version id */
+  environment_version_id?: string | null;
+  /** Suite version id */
+  suite_version_id?: string | null;
+  /** If fresh */
+  if_fresh?: boolean | null;
+  keys?: Array<string> | null;
+  /** Reprove all */
+  reprove_all?: boolean | null;
+}
+
+export interface SimulationEnvironmentsScenariosValidationStatusParams {
+  job_id: string;
 }
 
 export interface SimulationEnvironmentsVersionsCreateAgentParams {
@@ -1667,6 +1749,7 @@ export interface SimulationJobsScenariosListParams {
   search?: string | null;
   ordering?: string | null;
   group_by?: string | null;
+  lifecycle?: string | null;
 }
 
 export interface SimulationPersonasCreateParams {
@@ -2110,7 +2193,7 @@ export class SimulationEnvironmentsDraftsResource extends Resource {
    * POST /simulate/api/harness-environments/{id}/drafts/save/
    */
   save(id: string, params: SimulationEnvironmentsDraftsSaveParams, options?: RequestOptions): Promise<models.HarnessDraftSaveResponse> {
-    return this._t.call<models.HarnessDraftSaveResponse>(ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_SAVE, { path: { id: id }, query: {}, body: { drafts: params.drafts, idempotency_key: params.idempotency_key } }, options);
+    return this._t.call<models.HarnessDraftSaveResponse>(ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_SAVE, { path: { id: id }, query: {}, body: { idempotency_key: params.idempotency_key, drafts: params.drafts, candidates: params.candidates, expected_review_digest: params.expected_review_digest, name: params.name } }, options);
   }
 }
 
@@ -2190,6 +2273,57 @@ export class SimulationEnvironmentsNudgesResource extends Resource {
 }
 
 /**
+ * `client.simulation.environments.readiness`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationEnvironmentsReadinessResource extends Resource {
+
+  /**
+   * List one page, by scenario number, of the selected scenarios in one readiness bucket (eligible, blocked, stale or untested) or held back by one readiness row; pass the previous page's next as cursor. Writes nothing.
+   *
+   * GET /simulate/api/harness-environments/{id}/capabilities/cases/
+   */
+  cases(id: string, params: SimulationEnvironmentsReadinessCasesParams = {}, options?: RequestOptions): Promise<models.HarnessCapabilityCasePage> {
+    return this._t.call<models.HarnessCapabilityCasePage>(ops.OP_SIMULATION_ENVIRONMENTS_READINESS_CASES, { path: { id: id }, query: { agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id, keys: params.keys, trials: params.trials, bucket: params.bucket, row: params.row, cursor: params.cursor } }, options);
+  }
+
+  /**
+   * Return the run readiness of a pairing of agent, environment and suite versions (absent ones are the defaults), computed now, with its blockers and the selected scenarios it holds back; keys narrows the selection and trials is the trial count planned. Writes nothing.
+   *
+   * GET /simulate/api/harness-environments/{id}/capabilities/
+   */
+  get(id: string, params: SimulationEnvironmentsReadinessGetParams = {}, options?: RequestOptions): Promise<models.HarnessCapabilitySelectionReport> {
+    return this._t.call<models.HarnessCapabilitySelectionReport>(ops.OP_SIMULATION_ENVIRONMENTS_READINESS_GET, { path: { id: id }, query: { agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id, keys: params.keys, trials: params.trials } }, options);
+  }
+
+  /**
+   * Return the same run readiness report as readiness.get for a selection of scenarios too long for a query string (scenario_ids, more than 200 keys). Writes nothing.
+   *
+   * POST /simulate/api/harness-environments/{id}/capabilities/
+   */
+  getForScenarios(id: string, params: SimulationEnvironmentsReadinessGetForScenariosParams, options?: RequestOptions): Promise<models.HarnessCapabilitySelectionReport> {
+    return this._t.call<models.HarnessCapabilitySelectionReport>(ops.OP_SIMULATION_ENVIRONMENTS_READINESS_GET_FOR_SCENARIOS, { path: { id: id }, query: {}, body: { scenario_ids: params.scenario_ids, agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id, trials: params.trials } }, options);
+  }
+
+  /**
+   * List the version pairings certified on an environment, newest first, with the exact agent, environment and suite versions of each; pass the returned cursor for the next page.
+   *
+   * GET /simulate/api/harness-environments/{id}/capabilities/history/
+   */
+  history(id: string, params: SimulationEnvironmentsReadinessHistoryParams = {}, options?: RequestOptions): Promise<models.HarnessCertifiedPairingPage> {
+    return this._t.call<models.HarnessCertifiedPairingPage>(ops.OP_SIMULATION_ENVIRONMENTS_READINESS_HISTORY, { path: { id: id }, query: { cursor: params.cursor } }, options);
+  }
+
+  /**
+   * Validate a pairing of versions again (absent ones are the defaults) without a run; moves no default. A pairing not yet certified runs its check in a build sandbox, which is billed.
+   *
+   * POST /simulate/api/harness-environments/{id}/capabilities/recheck/
+   */
+  recheck(id: string, params: SimulationEnvironmentsReadinessRecheckParams = {}, options?: RequestOptions): Promise<models.HarnessCapabilityRecheckResponse> {
+    return this._t.call<models.HarnessCapabilityRecheckResponse>(ops.OP_SIMULATION_ENVIRONMENTS_READINESS_RECHECK, { path: { id: id }, query: {}, body: { agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id } }, options);
+  }
+}
+
+/**
  * `client.simulation.environments.runs`. Subclass to add methods; reassign a child in the constructor to swap it.
  */
 export class SimulationEnvironmentsRunsResource extends Resource {
@@ -2210,6 +2344,75 @@ export class SimulationEnvironmentsRunsResource extends Resource {
    */
   regrade(id: string, executionId: string, params: SimulationEnvironmentsRunsRegradeParams, options?: RequestOptions): Promise<models.HarnessEnvironmentRunEvaluationsQueued> {
     return this._t.call<models.HarnessEnvironmentRunEvaluationsQueued>(ops.OP_SIMULATION_ENVIRONMENTS_RUNS_REGRADE, { path: { id: id, execution_id: executionId }, query: {}, body: { eval_config_ids: params.eval_config_ids, enable_tool_evaluation: params.enable_tool_evaluation } }, options);
+  }
+}
+
+/**
+ * `client.simulation.environments.scenarios`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationEnvironmentsScenariosResource extends Resource {
+
+  /**
+   * Take one scenario (key) out of future runs, with an optional reason; its identity, runs and evidence are kept, and restore brings it back.
+   *
+   * POST /simulate/api/harness-environments/{id}/scenarios/{key}/archive/
+   */
+  archive(id: string, key: string, params: SimulationEnvironmentsScenariosArchiveParams = {}, options?: RequestOptions): Promise<models.HarnessScenarioLifecycleResponse> {
+    return this._t.call<models.HarnessScenarioLifecycleResponse>(ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_ARCHIVE, { path: { id: id, key: key }, query: {}, body: { reason: params.reason } }, options);
+  }
+
+  /**
+   * Return the seeded rows of one table of the world, to pick a real record for a scenario (key) whose starting record is missing. Writes nothing.
+   *
+   * GET /simulate/api/harness-environments/{id}/scenarios/{key}/records/
+   */
+  records(id: string, key: string, params: SimulationEnvironmentsScenariosRecordsParams, options?: RequestOptions): Promise<models.HarnessScenarioRecordsResponse> {
+    return this._t.call<models.HarnessScenarioRecordsResponse>(ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_RECORDS, { path: { id: id, key: key }, query: { table: params.table } }, options);
+  }
+
+  /**
+   * Bring an archived scenario (key) back, at once when the saved suite still holds it, otherwise as a draft to save.
+   *
+   * POST /simulate/api/harness-environments/{id}/scenarios/{key}/restore/
+   */
+  restore(id: string, key: string, options?: RequestOptions): Promise<models.HarnessScenarioLifecycleResponse> {
+    return this._t.call<models.HarnessScenarioLifecycleResponse>(ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_RESTORE, { path: { id: id, key: key }, query: {}, body: {} }, options);
+  }
+
+  /**
+   * List each distinct content of one scenario (key) across the environment's saved suite versions, newest first.
+   *
+   * GET /simulate/api/harness-environments/{id}/scenarios/{key}/revisions/
+   */
+  revisions(id: string, key: string, options?: RequestOptions): Promise<models.HarnessScenarioRevisions> {
+    return this._t.call<models.HarnessScenarioRevisions>(ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_REVISIONS, { path: { id: id, key: key }, query: {} }, options);
+  }
+
+  /**
+   * Return the validation still running for the environment's default versions, if any, and how many scenarios a validation of those not yet proved would prove.
+   *
+   * GET /simulate/api/harness-environments/{id}/scenarios/validate/running/
+   */
+  runningValidation(id: string, options?: RequestOptions): Promise<models.HarnessScenarioRunningValidation> {
+    return this._t.call<models.HarnessScenarioRunningValidation>(ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_RUNNING_VALIDATION, { path: { id: id }, query: {} }, options);
+  }
+
+  /**
+   * Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and is billed. Returns a job_id to follow with validation_status.
+   *
+   * POST /simulate/api/harness-environments/{id}/scenarios/validate/
+   */
+  validate(id: string, params: SimulationEnvironmentsScenariosValidateParams = {}, options?: RequestOptions): Promise<models.HarnessScenarioValidateResponse> {
+    return this._t.call<models.HarnessScenarioValidateResponse>(ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_VALIDATE, { path: { id: id }, query: {}, body: { agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id, if_fresh: params.if_fresh, keys: params.keys, reprove_all: params.reprove_all } }, options);
+  }
+
+  /**
+   * Return where one scenario validation (job_id) got to, and whether it recorded its proofs.
+   *
+   * GET /simulate/api/harness-environments/{id}/scenarios/validate/
+   */
+  validationStatus(id: string, params: SimulationEnvironmentsScenariosValidationStatusParams, options?: RequestOptions): Promise<models.HarnessScenarioValidationStatus> {
+    return this._t.call<models.HarnessScenarioValidationStatus>(ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_VALIDATION_STATUS, { path: { id: id }, query: { job_id: params.job_id } }, options);
   }
 }
 
@@ -2264,6 +2467,15 @@ export class SimulationEnvironmentsVersionsResource extends Resource {
   }
 
   /**
+   * Return the rules and files an environment version changed that scenarios cite, with the scenarios citing each.
+   *
+   * GET /simulate/api/harness-environments/{id}/versions/environment/{version_id}/source-changes/
+   */
+  sourceChanges(id: string, versionId: string, options?: RequestOptions): Promise<models.HarnessSourceChanges> {
+    return this._t.call<models.HarnessSourceChanges>(ops.OP_SIMULATION_ENVIRONMENTS_VERSIONS_SOURCE_CHANGES, { path: { id: id, version_id: versionId }, query: {} }, options);
+  }
+
+  /**
    * List the scenarios in a saved suite version.
    *
    * GET /simulate/api/harness-environments/{id}/versions/suite/{version_id}/members/
@@ -2312,12 +2524,12 @@ export class SimulationJobsScenariosResource extends Resource {
   }
 
   /**
-   * List one page of an environment's (or run's) authored scenarios, by number; group_by defaults to goal when omitted (empty for a flat list).
+   * List one page of an environment's (or run's) authored scenarios, by number, each with its lifecycle; group_by defaults to goal when omitted (empty for a flat list), and lifecycle keeps one state (draft, validated, active, archived, source_changed or kept_as_written).
    *
    * GET /simulate/api/harness-jobs/{id}/scenarios/
    */
   list(id: string, params: SimulationJobsScenariosListParams = {}, options?: RequestOptions): Promise<unknown> {
-    return this._t.call<unknown>(ops.OP_SIMULATION_JOBS_SCENARIOS_LIST, { path: { id: id }, query: { page: params.page, limit: params.limit, search: params.search, ordering: params.ordering, group_by: params.group_by } }, options);
+    return this._t.call<unknown>(ops.OP_SIMULATION_JOBS_SCENARIOS_LIST, { path: { id: id }, query: { page: params.page, limit: params.limit, search: params.search, ordering: params.ordering, group_by: params.group_by, lifecycle: params.lifecycle } }, options);
   }
 }
 
@@ -3105,7 +3317,9 @@ export class SimulationEnvironmentsResource extends Resource {
   drafts: SimulationEnvironmentsDraftsResource;
   evaluations: SimulationEnvironmentsEvaluationsResource;
   nudges: SimulationEnvironmentsNudgesResource;
+  readiness: SimulationEnvironmentsReadinessResource;
   runs: SimulationEnvironmentsRunsResource;
+  scenarios: SimulationEnvironmentsScenariosResource;
   versions: SimulationEnvironmentsVersionsResource;
 
   constructor(transport: Transport) {
@@ -3114,7 +3328,9 @@ export class SimulationEnvironmentsResource extends Resource {
     this.drafts = new SimulationEnvironmentsDraftsResource(transport);
     this.evaluations = new SimulationEnvironmentsEvaluationsResource(transport);
     this.nudges = new SimulationEnvironmentsNudgesResource(transport);
+    this.readiness = new SimulationEnvironmentsReadinessResource(transport);
     this.runs = new SimulationEnvironmentsRunsResource(transport);
+    this.scenarios = new SimulationEnvironmentsScenariosResource(transport);
     this.versions = new SimulationEnvironmentsVersionsResource(transport);
   }
 
@@ -3160,7 +3376,7 @@ export class SimulationEnvironmentsResource extends Resource {
    * GET /simulate/api/harness-environments/{id}/run-plan/
    */
   runPlan(id: string, params: SimulationEnvironmentsRunPlanParams = {}, options?: RequestOptions): Promise<models.HarnessRunPlan> {
-    return this._t.call<models.HarnessRunPlan>(ops.OP_SIMULATION_ENVIRONMENTS_RUN_PLAN, { path: { id: id }, query: { agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id } }, options);
+    return this._t.call<models.HarnessRunPlan>(ops.OP_SIMULATION_ENVIRONMENTS_RUN_PLAN, { path: { id: id }, query: { agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id, scenario_keys: params.scenario_keys } }, options);
   }
 }
 
