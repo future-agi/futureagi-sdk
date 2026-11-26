@@ -76,4 +76,13 @@ describe("simulation environment actors", () => {
       code: "unresolved_not_found",
     });
   });
+
+  test("a run sends its seed", async () => {
+    const { fetch, seen } = recording();
+
+    await client(fetch).simulation.environments.run(ENV, { scenario_ids: ["refund-flow"], trials: 1, seed: "7" });
+
+    expect([seen[0].method, seen[0].path]).toEqual(["POST", H + "run/"]);
+    expect(seen[0].body).toEqual({ scenario_ids: ["refund-flow"], trials: 1, seed: "7" });
+  });
 });

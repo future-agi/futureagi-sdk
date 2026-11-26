@@ -33,7 +33,7 @@
       "X-Secret-Key": []
     }
   ],
-  "x-source-sha256": "e96514108f8496dd1d5a573dccab4d57515e2b00a7aadcf4f0d7479808ba7b56",
+  "x-source-sha256": "36a4e5de5f272a936e74d9c81edace28ce8c278d55f6e7568d1aa90150130255",
   "paths": {
     "/accounts/user-info/": {
       "parameters": [],
@@ -8782,6 +8782,12 @@
           }
         ],
         "responses": {
+          "403": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ViewerReadOnlyError"
+            }
+          },
           "202": {
             "description": "",
             "schema": {
@@ -27157,6 +27163,91 @@
         }
       }
     },
+    "HarnessCapabilityChanged": {
+      "description": "Selected cases whose contents differ from that run's suite version, or that it did not have.",
+      "required": [
+        "count",
+        "keys",
+        "truncated",
+        "since"
+      ],
+      "type": "object",
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer",
+          "minimum": 0
+        },
+        "keys": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "truncated": {
+          "title": "Truncated",
+          "type": "boolean"
+        },
+        "since": {
+          "$ref": "#/definitions/HarnessCapabilityChangedSince"
+        }
+      }
+    },
+    "HarnessCapabilityChangedSince": {
+      "description": "The newest run of this agent and environment version the selected cases are compared with; null when there is none.",
+      "required": [
+        "run_id",
+        "suite_version"
+      ],
+      "type": "object",
+      "properties": {
+        "run_id": {
+          "title": "Run id",
+          "type": "string",
+          "format": "uuid"
+        },
+        "suite_version": {
+          "$ref": "#/definitions/RunVersionLabel"
+        }
+      },
+      "x-nullable": true
+    },
+    "HarnessCapabilityExcluded": {
+      "required": [
+        "count",
+        "keys",
+        "truncated",
+        "reason"
+      ],
+      "type": "object",
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer",
+          "minimum": 0
+        },
+        "keys": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "truncated": {
+          "title": "Truncated",
+          "type": "boolean"
+        },
+        "reason": {
+          "title": "Reason",
+          "description": "Suite cases not selected for this run.",
+          "type": "string",
+          "enum": [
+            "not_selected"
+          ]
+        }
+      }
+    },
     "HarnessConsumption": {
       "required": [
         "text_sim_tokens",
@@ -30515,12 +30606,10 @@
       }
     },
     "HarnessRunCreate": {
-      "required": [
-        "scenario_ids"
-      ],
       "type": "object",
       "properties": {
         "scenario_ids": {
+          "description": "The scenarios to run, at most 1000. Leave it out to run every scenario of the chosen suite version, resolved by the server; an empty list is refused.",
           "type": "array",
           "items": {
             "type": "string",
@@ -30535,6 +30624,13 @@
           "default": 1,
           "maximum": 20,
           "minimum": 1
+        },
+        "seed": {
+          "title": "Seed",
+          "description": "The same seed draws the same personas and variations again; absent keeps the environment's. A whole number from 0 to 2^63 - 1, as decimal text.",
+          "type": "string",
+          "x-nullable": true,
+          "minLength": 1
         },
         "agent_version_id": {
           "title": "Agent version id",
@@ -30569,7 +30665,8 @@
         "state",
         "stage",
         "versions",
-        "warnings"
+        "warnings",
+        "selection"
       ],
       "type": "object",
       "properties": {
@@ -30632,6 +30729,73 @@
           "items": {
             "$ref": "#/definitions/HarnessRunWarning"
           }
+        },
+        "selection": {
+          "$ref": "#/definitions/HarnessRunReadinessSelection"
+        }
+      }
+    },
+    "HarnessRunHeldBack": {
+      "required": [
+        "count",
+        "keys",
+        "truncated",
+        "names",
+        "by"
+      ],
+      "type": "object",
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer",
+          "minimum": 0
+        },
+        "keys": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "truncated": {
+          "title": "Truncated",
+          "type": "boolean"
+        },
+        "names": {
+          "title": "Names",
+          "description": "Each listed case's current name, by its key; a case without one is shown by its key.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "by": {
+          "title": "By",
+          "description": "Held-back cases per row that held them: a readiness row, worker:<id>, worker_limits, scenario_dropped, no_world_door, or a lifecycle row (not_validated, not_active, proof_failed, tool_not_on_agent, scenario_archived, and unreadable for a case whose cited seed records could not be read just now).",
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "by_key": {
+          "title": "By key",
+          "description": "The row each listed case is counted under in `by`, by its key; its words are in `reasons`.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "reason_by_key": {
+          "title": "Reason by key",
+          "description": "Each listed case's own reason, by its key, where its lifecycle gives one (not validated, not active, proof failed, archived, seed records unread): show it for that case instead of the row's `reasons`.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
         }
       }
     },
@@ -30678,6 +30842,66 @@
           "x-nullable": true
         }
       }
+    },
+    "HarnessRunReadinessSelection": {
+      "description": "The cases readiness held back from this run and why; null when runs are not pinned to versions, and for a coding agent's key.",
+      "required": [
+        "suite_total",
+        "excluded",
+        "changed",
+        "requested",
+        "running",
+        "held_back",
+        "reasons"
+      ],
+      "type": "object",
+      "properties": {
+        "suite_total": {
+          "title": "Suite total",
+          "description": "Every case of the suite version.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "excluded": {
+          "$ref": "#/definitions/HarnessCapabilityExcluded"
+        },
+        "changed": {
+          "$ref": "#/definitions/HarnessCapabilityChanged"
+        },
+        "requested": {
+          "title": "Requested",
+          "type": "integer",
+          "minimum": 1
+        },
+        "running": {
+          "title": "Running",
+          "type": "integer",
+          "minimum": 0
+        },
+        "held_back": {
+          "$ref": "#/definitions/HarnessRunHeldBack"
+        },
+        "reasons": {
+          "title": "Reasons",
+          "description": "Each holding row's reason, in plain words.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "next": {
+          "title": "Next",
+          "description": "As the run preview's selection.next.",
+          "type": "string",
+          "enum": [
+            "validate_first",
+            "run_unvalidated"
+          ],
+          "x-nullable": true
+        }
+      },
+      "x-nullable": true
     },
     "HarnessRunSummary": {
       "required": [
@@ -30791,6 +31015,14 @@
             "suite"
           ],
           "x-nullable": true
+        },
+        "scenario_keys": {
+          "description": "Every scenario the warning is about, when it names scenarios.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         }
       }
     },
@@ -42508,6 +42740,87 @@
         "passkey": {
           "title": "Passkey",
           "type": "boolean"
+        }
+      }
+    },
+    "ViewerReadOnlyError": {
+      "required": [
+        "detail"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "title": "Type",
+          "type": "string",
+          "enum": [
+            "validation_error",
+            "authentication_error",
+            "payment_required",
+            "entitlement_error",
+            "permission_error",
+            "not_found",
+            "conflict",
+            "client_error",
+            "rate_limit",
+            "server_error",
+            "service_unavailable",
+            "timeout",
+            "api_error"
+          ],
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Code",
+          "type": "string",
+          "enum": [
+            "viewer_read_only"
+          ]
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        },
+        "result": {
+          "title": "Result",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "error": {
+          "title": "Error",
+          "type": "string",
+          "x-nullable": true
+        },
+        "attr": {
+          "title": "Attr",
+          "type": "string",
+          "x-nullable": true
+        },
+        "details": {
+          "title": "Details",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
         }
       }
     },

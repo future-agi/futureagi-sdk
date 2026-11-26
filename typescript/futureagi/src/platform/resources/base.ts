@@ -1367,9 +1367,11 @@ export interface SimulationEnvironmentsRenameParams {
 }
 
 export interface SimulationEnvironmentsRunParams {
-  scenario_ids: Array<string>;
+  scenario_ids?: Array<string> | null;
   /** Trials */
   trials?: number | null;
+  /** Seed */
+  seed?: string | null;
   /** Agent version id */
   agent_version_id?: string | null;
   /** Environment version id */
@@ -3134,8 +3136,8 @@ export class SimulationEnvironmentsResource extends Resource {
    *
    * POST /simulate/api/harness-environments/{id}/run/
    */
-  run(id: string, params: SimulationEnvironmentsRunParams, options?: RequestOptions): Promise<models.HarnessRunCreateResponse> {
-    return this._t.call<models.HarnessRunCreateResponse>(ops.OP_SIMULATION_ENVIRONMENTS_RUN, { path: { id: id }, query: {}, body: { scenario_ids: params.scenario_ids, trials: params.trials, agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id } }, options);
+  run(id: string, params: SimulationEnvironmentsRunParams = {}, options?: RequestOptions): Promise<models.HarnessRunCreateResponse> {
+    return this._t.call<models.HarnessRunCreateResponse>(ops.OP_SIMULATION_ENVIRONMENTS_RUN, { path: { id: id }, query: {}, body: { scenario_ids: params.scenario_ids, trials: params.trials, seed: params.seed, agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id } }, options);
   }
 
   /**

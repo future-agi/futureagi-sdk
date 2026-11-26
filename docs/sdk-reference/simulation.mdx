@@ -297,11 +297,11 @@ Start one run of an environment for the chosen scenario keys (scenario_ids) and 
 <CodeGroup>
 
 ```python Python
-result = client.simulation.environments.run("your-id", scenario_ids=[])
+result = client.simulation.environments.run("your-id")
 ```
 
 ```typescript TypeScript
-const result = await client.simulation.environments.run("your-id", { scenario_ids: [] });
+const result = await client.simulation.environments.run("your-id");
 ```
 
 </CodeGroup>
@@ -312,8 +312,9 @@ const result = await client.simulation.environments.run("your-id", { scenario_id
 client.simulation.environments.run(
     id: str,
     *,
-    scenario_ids: list[str],
+    scenario_ids: list[str] | None | NotGiven = NOT_GIVEN,
     trials: int | None | NotGiven = NOT_GIVEN,
+    seed: str | None | NotGiven = NOT_GIVEN,
     agent_version_id: str | None | NotGiven = NOT_GIVEN,
     environment_version_id: str | None | NotGiven = NOT_GIVEN,
     suite_version_id: str | None | NotGiven = NOT_GIVEN,
@@ -324,11 +325,12 @@ client.simulation.environments.run(
 ```
 
 ```typescript TypeScript
-client.simulation.environments.run(id: string, params: SimulationEnvironmentsRunParams, options?: RequestOptions): Promise<models.HarnessRunCreateResponse>
+client.simulation.environments.run(id: string, params: SimulationEnvironmentsRunParams = {}, options?: RequestOptions): Promise<models.HarnessRunCreateResponse>
 
 export interface SimulationEnvironmentsRunParams {
-  scenario_ids: Array<string>;
+  scenario_ids?: Array<string> | null;
   trials?: number | null;
+  seed?: string | null;
   agent_version_id?: string | null;
   environment_version_id?: string | null;
   suite_version_id?: string | null;
@@ -342,8 +344,9 @@ export interface SimulationEnvironmentsRunParams {
 <ParamField path="id" type="string" required>
   Positional argument `id`.
 </ParamField>
-<ParamField body="scenario_ids" type="string[]" required />
+<ParamField body="scenario_ids" type="string[]" optional />
 <ParamField body="trials" type="integer" optional />
+<ParamField body="seed" type="string" optional />
 <ParamField body="agent_version_id" type="string" optional />
 <ParamField body="environment_version_id" type="string" optional />
 <ParamField body="suite_version_id" type="string" optional />

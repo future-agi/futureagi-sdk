@@ -138,3 +138,13 @@ def test_an_environment_refusal_carries_its_code():
         client.simulation.environments.actors.accept_unresolved(ENV, policy="gone")
 
     assert refused.value.code == "unresolved_not_found"
+
+
+def test_a_run_sends_its_seed():
+    sent: list[httpx.Request] = []
+    client = _client(sent, {"status": True, "result": {"job_id": "j1"}})
+
+    client.simulation.environments.run(ENV, scenario_ids=["refund-flow"], trials=1, seed="7")
+
+    assert (sent[0].method, sent[0].url.path) == ("POST", f"/simulate/api/harness-environments/{ENV}/run/")
+    assert json.loads(sent[0].content) == {"scenario_ids": ["refund-flow"], "trials": 1, "seed": "7"}

@@ -1392,6 +1392,25 @@ export interface HarnessAgentCredentialsResponse {
   agent_version?: HarnessVersion | null;
 }
 
+export interface HarnessCapabilityChanged {
+  count?: number | null;
+  keys?: Array<string | null> | null;
+  truncated?: boolean | null;
+  since?: HarnessCapabilityChangedSince | null;
+}
+
+export interface HarnessCapabilityChangedSince {
+  run_id?: string | null;
+  suite_version?: RunVersionLabel | null;
+}
+
+export interface HarnessCapabilityExcluded {
+  count?: number | null;
+  keys?: Array<string | null> | null;
+  truncated?: boolean | null;
+  reason?: string | null; // one of: not_selected
+}
+
 export interface HarnessConversationEventRead {
   event_id?: string | null;
   sequence?: number | null;
@@ -1856,6 +1875,17 @@ export interface HarnessRunCreateResponse {
   stage?: string | null;
   versions?: HarnessRunPinnedVersions | null;
   warnings?: Array<HarnessRunWarning | null> | null;
+  selection?: HarnessRunReadinessSelection | null;
+}
+
+export interface HarnessRunHeldBack {
+  count?: number | null;
+  keys?: Array<string | null> | null;
+  truncated?: boolean | null;
+  names?: unknown | null;
+  by?: unknown | null;
+  by_key?: unknown | null;
+  reason_by_key?: unknown | null;
 }
 
 export interface HarnessRunPinnedVersions {
@@ -1868,6 +1898,17 @@ export interface HarnessRunPlan {
   versions?: HarnessRunPinnedVersions | null;
   warnings?: Array<HarnessRunWarning | null> | null;
   bundle_cached?: boolean | null;
+}
+
+export interface HarnessRunReadinessSelection {
+  suite_total?: number | null;
+  excluded?: HarnessCapabilityExcluded | null;
+  changed?: HarnessCapabilityChanged | null;
+  requested?: number | null;
+  running?: number | null;
+  held_back?: HarnessRunHeldBack | null;
+  reasons?: unknown | null;
+  next?: string | null; // one of: validate_first, run_unvalidated
 }
 
 export interface HarnessRunSummary {
@@ -1890,6 +1931,7 @@ export interface HarnessRunWarning {
   code?: string | null;
   message?: string | null;
   piece?: string | null; // one of: agent, environment, suite
+  scenario_keys?: Array<string | null> | null;
 }
 
 export interface HarnessSecretFileUploadResponse {

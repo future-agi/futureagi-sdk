@@ -1522,6 +1522,28 @@ class HarnessAgentCredentialsResponse(_Model):
     agent_version: Optional[HarnessVersion] = Field(default=None)
 
 
+class HarnessCapabilityChanged(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['count', 'keys', 'truncated'])
+    count: Optional[int] = Field(default=None)
+    keys: Optional[List[Optional[str]]] = Field(default=None)
+    truncated: Optional[bool] = Field(default=None)
+    since: Optional[HarnessCapabilityChangedSince] = Field(default=None)
+
+
+class HarnessCapabilityChangedSince(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['run_id'])
+    run_id: Optional[str] = Field(default=None)
+    suite_version: Optional[RunVersionLabel] = Field(default=None)
+
+
+class HarnessCapabilityExcluded(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['count', 'keys', 'reason', 'truncated'])
+    count: Optional[int] = Field(default=None)
+    keys: Optional[List[Optional[str]]] = Field(default=None)
+    truncated: Optional[bool] = Field(default=None)
+    reason: Optional[str] = Field(default=None)  # one of: not_selected
+
+
 class HarnessConversationEventRead(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['emitted_at', 'event_id', 'kind', 'payload', 'sequence', 'stage'])
     event_id: Optional[str] = Field(default=None)
@@ -2029,6 +2051,18 @@ class HarnessRunCreateResponse(_Model):
     stage: Optional[str] = Field(default=None)
     versions: Optional[HarnessRunPinnedVersions] = Field(default=None)
     warnings: Optional[List[Optional[HarnessRunWarning]]] = Field(default=None)
+    selection: Optional[HarnessRunReadinessSelection] = Field(default=None)
+
+
+class HarnessRunHeldBack(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['by', 'count', 'keys', 'names', 'truncated'])
+    count: Optional[int] = Field(default=None)
+    keys: Optional[List[Optional[str]]] = Field(default=None)
+    truncated: Optional[bool] = Field(default=None)
+    names: Optional[Any] = Field(default=None)
+    by: Optional[Any] = Field(default=None)
+    by_key: Optional[Any] = Field(default=None)
+    reason_by_key: Optional[Any] = Field(default=None)
 
 
 class HarnessRunPinnedVersions(_Model):
@@ -2042,6 +2076,18 @@ class HarnessRunPlan(_Model):
     versions: Optional[HarnessRunPinnedVersions] = Field(default=None)
     warnings: Optional[List[Optional[HarnessRunWarning]]] = Field(default=None)
     bundle_cached: Optional[bool] = Field(default=None)
+
+
+class HarnessRunReadinessSelection(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['reasons', 'requested', 'running', 'suite_total'])
+    suite_total: Optional[int] = Field(default=None)
+    excluded: Optional[HarnessCapabilityExcluded] = Field(default=None)
+    changed: Optional[HarnessCapabilityChanged] = Field(default=None)
+    requested: Optional[int] = Field(default=None)
+    running: Optional[int] = Field(default=None)
+    held_back: Optional[HarnessRunHeldBack] = Field(default=None)
+    reasons: Optional[Any] = Field(default=None)
+    next: Optional[str] = Field(default=None)  # one of: validate_first, run_unvalidated
 
 
 class HarnessRunSummary(_Model):
@@ -2066,6 +2112,7 @@ class HarnessRunWarning(_Model):
     code: Optional[str] = Field(default=None)
     message: Optional[str] = Field(default=None)
     piece: Optional[str] = Field(default=None)  # one of: agent, environment, suite
+    scenario_keys: Optional[List[Optional[str]]] = Field(default=None)
 
 
 class HarnessSecretFileUploadResponse(_Model):
@@ -3703,6 +3750,9 @@ HarnessActorUpload.model_rebuild()
 HarnessActorValidation.model_rebuild()
 HarnessActorView.model_rebuild()
 HarnessAgentCredentialsResponse.model_rebuild()
+HarnessCapabilityChanged.model_rebuild()
+HarnessCapabilityChangedSince.model_rebuild()
+HarnessCapabilityExcluded.model_rebuild()
 HarnessConversationEventRead.model_rebuild()
 HarnessConversationMessage.model_rebuild()
 HarnessConversationRead.model_rebuild()
@@ -3748,8 +3798,10 @@ HarnessPreflightCheck.model_rebuild()
 HarnessPreflightCredentials.model_rebuild()
 HarnessPreflightResponse.model_rebuild()
 HarnessRunCreateResponse.model_rebuild()
+HarnessRunHeldBack.model_rebuild()
 HarnessRunPinnedVersions.model_rebuild()
 HarnessRunPlan.model_rebuild()
+HarnessRunReadinessSelection.model_rebuild()
 HarnessRunSummary.model_rebuild()
 HarnessRunWarning.model_rebuild()
 HarnessSecretFileUploadResponse.model_rebuild()
@@ -4013,6 +4065,9 @@ __all__ = [
     'HarnessActorValidation',
     'HarnessActorView',
     'HarnessAgentCredentialsResponse',
+    'HarnessCapabilityChanged',
+    'HarnessCapabilityChangedSince',
+    'HarnessCapabilityExcluded',
     'HarnessConversationEventRead',
     'HarnessConversationMessage',
     'HarnessConversationRead',
@@ -4058,8 +4113,10 @@ __all__ = [
     'HarnessPreflightCredentials',
     'HarnessPreflightResponse',
     'HarnessRunCreateResponse',
+    'HarnessRunHeldBack',
     'HarnessRunPinnedVersions',
     'HarnessRunPlan',
+    'HarnessRunReadinessSelection',
     'HarnessRunSummary',
     'HarnessRunWarning',
     'HarnessSecretFileUploadResponse',
