@@ -1599,7 +1599,7 @@ operations:
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.environments.drafts.validate
-  description: Build candidate versions from the reviewed drafts and validate them; send expected_revisions (per piece, the draft revision from drafts.list) and the review_digest from drafts.review. It runs in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward. Follow validation in drafts.list: validating is still running; ready or check_unavailable, save the candidates with drafts.save; retry, outdated or superseded, validate again; failed, the agent failed the check; unavailable, this environment cannot validate, so save the drafts themselves.
+  description: Build candidate versions from the reviewed drafts and validate them; send expected_revisions (per piece, the draft revision from drafts.list) and the review_digest from drafts.review. It runs in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward. Follow validation in drafts.list. While it is validating, read it again; on ready or check_unavailable, save the candidates with drafts.save; on retry, outdated or superseded, validate again; failed means the agent failed the check; unavailable means this environment cannot validate, so save the drafts themselves.
   operation: {method: POST, path: '/simulate/api/harness-environments/{id}/drafts/validate/'}
   surfaces: {sdk: {}, mcp: false}
 

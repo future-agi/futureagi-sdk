@@ -149,7 +149,7 @@ class SimulationEnvironmentsDraftsResource(Resource):
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_SAVE, path=path, query=query, body=body, model=models.HarnessDraftSaveResponse, options=options)
 
     def validate(self, id: str, *, expected_revisions: Dict[str, Any], expected_review_digest: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessDraftValidateResponse:
-        """Build candidate versions from the reviewed drafts and validate them; send expected_revisions (per piece, the draft revision from drafts.list) and the review_digest from drafts.review. It runs in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward. Follow validation in drafts.list, then save the candidates with drafts.save.
+        """Build candidate versions from the reviewed drafts and validate them; send expected_revisions (per piece, the draft revision from drafts.list) and the review_digest from drafts.review. It runs in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward. Follow validation in drafts.list. While it is validating, read it again; on ready or check_unavailable, save the candidates with drafts.save; on retry, outdated or superseded, validate again; failed means the agent failed the check; unavailable means this environment cannot validate, so save the drafts themselves.
 
         POST /simulate/api/harness-environments/{id}/drafts/validate/
         """
@@ -3015,7 +3015,7 @@ class AsyncSimulationEnvironmentsDraftsResource(Resource):
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_SAVE, path=path, query=query, body=body, model=models.HarnessDraftSaveResponse, options=options)
 
     async def validate(self, id: str, *, expected_revisions: Dict[str, Any], expected_review_digest: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessDraftValidateResponse:
-        """Build candidate versions from the reviewed drafts and validate them; send expected_revisions (per piece, the draft revision from drafts.list) and the review_digest from drafts.review. It runs in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward. Follow validation in drafts.list, then save the candidates with drafts.save.
+        """Build candidate versions from the reviewed drafts and validate them; send expected_revisions (per piece, the draft revision from drafts.list) and the review_digest from drafts.review. It runs in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward. Follow validation in drafts.list. While it is validating, read it again; on ready or check_unavailable, save the candidates with drafts.save; on retry, outdated or superseded, validate again; failed means the agent failed the check; unavailable means this environment cannot validate, so save the drafts themselves.
 
         POST /simulate/api/harness-environments/{id}/drafts/validate/
         """
