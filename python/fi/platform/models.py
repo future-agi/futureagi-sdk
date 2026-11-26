@@ -1204,6 +1204,320 @@ class GatewaySummaryResult(_Model):
     model_count: Optional[int] = Field(default=None)
 
 
+class HarnessActor(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['arrival_overrides', 'editable_trigger', 'facts', 'files', 'goal', 'id', 'identities', 'kind', 'knowledge', 'locked_fields', 'name', 'permissions', 'permitted_actions', 'play', 'prompt', 'reaches', 'records', 'removable', 'removal_blocked_by', 'role', 'scenarios', 'side', 'surface', 'when_label'])
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    role: Optional[str] = Field(default=None)
+    kind: Optional[str] = Field(default=None)
+    goal: Optional[str] = Field(default=None)
+    play: Optional[str] = Field(default=None)
+    prompt: Optional[str] = Field(default=None)
+    surface: Optional[str] = Field(default=None)
+    model: Optional[str] = Field(default=None)
+    side: Optional[str] = Field(default=None)  # one of: caller, world
+    channel: Optional[str] = Field(default=None)
+    parent: Optional[str] = Field(default=None)
+    on_behalf_of: Optional[str] = Field(default=None)
+    identities: Optional[Any] = Field(default=None)
+    persona: Optional[HarnessActorPersona] = Field(default=None)
+    loudness_ratio: Optional[float] = Field(default=None)
+    constraints: Optional[HarnessActorConstraints] = Field(default=None)
+    facts: Optional[List[Optional[str]]] = Field(default=None)
+    files: Optional[List[Optional[str]]] = Field(default=None)
+    records: Optional[List[Optional[HarnessActorRecordSource]]] = Field(default=None)
+    knowledge: Optional[List[Optional[HarnessActorKnowledgeEntry]]] = Field(default=None)
+    behaviour: Optional[HarnessActorBehaviour] = Field(default=None)
+    permitted_actions: Optional[List[Optional[str]]] = Field(default=None)
+    activation: Optional[HarnessActorActivation] = Field(default=None)
+    max_turns: Optional[int] = Field(default=None)
+    max_lines: Optional[int] = Field(default=None)
+    scenarios: Optional[int] = Field(default=None)
+    review_decision: Optional[str] = Field(default=None)  # one of: accepted, rejected
+    arrival_overrides: Optional[List[Optional[HarnessActorArrivalOverride]]] = Field(default=None)
+    provenance: Optional[HarnessActorProvenance] = Field(default=None)
+    removable: Optional[bool] = Field(default=None)
+    removal_blocked_by: Optional[List[Optional[str]]] = Field(default=None)
+    locked_fields: Optional[List[Optional[HarnessActorLockedField]]] = Field(default=None)
+    reaches: Optional[List[Optional[str]]] = Field(default=None)
+    fallback: Optional[HarnessActorFallback] = Field(default=None)
+    permissions: Optional[List[Optional[HarnessActorPermission]]] = Field(default=None)
+    editable_trigger: Optional[bool] = Field(default=None)
+    when_label: Optional[str] = Field(default=None)
+    timeout_label: Optional[str] = Field(default=None)
+
+
+class HarnessActorActivation(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['fallback', 'timeout_seconds'])
+    trigger: Optional[HarnessActorTrigger] = Field(default=None)
+    timeout_seconds: Optional[float] = Field(default=None)
+    fallback: Optional[str] = Field(default=None)
+    fallback_arguments: Optional[Any] = Field(default=None)
+
+
+class HarnessActorArrivalOverride(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['scenario', 'when_label'])
+    scenario: Optional[str] = Field(default=None)
+    when_label: Optional[str] = Field(default=None)
+
+
+class HarnessActorBehaviour(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['style'])
+    style: Optional[str] = Field(default=None)
+    response_timing: Optional[HarnessActorResponseTiming] = Field(default=None)
+
+
+class HarnessActorChannelOption(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['cap_field', 'description', 'loudness', 'required_fields', 'trigger_kinds', 'trigger_options'])
+    channel: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    loudness: Optional[bool] = Field(default=None)
+    trigger_kinds: Optional[List[Optional[str]]] = Field(default=None)
+    required_fields: Optional[List[Optional[str]]] = Field(default=None)
+    cap_field: Optional[str] = Field(default=None)  # one of: max_turns, max_lines
+    label: Optional[str] = Field(default=None)
+    trigger_options: Optional[List[Optional[HarnessActorFieldOption]]] = Field(default=None)
+
+
+class HarnessActorConflict(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['action', 'actor', 'holder', 'holder_name'])
+    actor: Optional[str] = Field(default=None)
+    action: Optional[str] = Field(default=None)
+    holder: Optional[str] = Field(default=None)
+    holder_name: Optional[str] = Field(default=None)
+
+
+class HarnessActorConstraints(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['escalate_when', 'may_agree', 'private', 'stop_when'])
+    may_agree: Optional[List[Optional[str]]] = Field(default=None)
+    private: Optional[List[Optional[str]]] = Field(default=None)
+    escalate_when: Optional[List[Optional[str]]] = Field(default=None)
+    stop_when: Optional[List[Optional[str]]] = Field(default=None)
+
+
+class HarnessActorFallback(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['kind', 'label', 'value'])
+    kind: Optional[str] = Field(default=None)  # one of: silent, decline, action, actor
+    value: Optional[str] = Field(default=None)
+    label: Optional[str] = Field(default=None)
+
+
+class HarnessActorFieldOption(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['label', 'value'])
+    value: Optional[str] = Field(default=None)
+    label: Optional[str] = Field(default=None)
+
+
+class HarnessActorFieldOptions(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['accent', 'age_group', 'fallback_word', 'gender', 'kind', 'play', 'response_timing'])
+    kind: Optional[List[Optional[HarnessActorFieldOption]]] = Field(default=None)
+    play: Optional[List[Optional[HarnessActorFieldOption]]] = Field(default=None)
+    fallback_word: Optional[List[Optional[HarnessActorFieldOption]]] = Field(default=None)
+    gender: Optional[List[Optional[HarnessActorFieldOption]]] = Field(default=None)
+    age_group: Optional[List[Optional[HarnessActorFieldOption]]] = Field(default=None)
+    accent: Optional[List[Optional[HarnessActorFieldOption]]] = Field(default=None)
+    response_timing: Optional[List[Optional[HarnessActorFieldOption]]] = Field(default=None)
+
+
+class HarnessActorKnowledgeEntry(_Model):
+    kind: Optional[str] = Field(default=None)
+    text: Optional[str] = Field(default=None)
+    paths: Optional[List[Optional[str]]] = Field(default=None)
+    store: Optional[str] = Field(default=None)
+    collection: Optional[str] = Field(default=None)
+    where: Optional[Any] = Field(default=None)
+
+
+class HarnessActorKnowledgeSources(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['files', 'records'])
+    files: Optional[List[Optional[str]]] = Field(default=None)
+    records: Optional[List[Optional[HarnessActorRecordSource]]] = Field(default=None)
+    roles: Optional[Any] = Field(default=None)
+    seed_records_loaded: Optional[bool] = Field(default=None)
+
+
+class HarnessActorLimitField(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['key', 'kind'])
+    key: Optional[str] = Field(default=None)
+    kind: Optional[str] = Field(default=None)  # one of: whole, seconds, model
+    default: Optional[float] = Field(default=None)
+    default_label: Optional[str] = Field(default=None)
+
+
+class HarnessActorLimits(_Model):
+    max_active: Optional[int] = Field(default=None)
+    caller_takes_back_after_turns: Optional[int] = Field(default=None)
+    actor_seconds_per_call: Optional[float] = Field(default=None)
+    max_messages: Optional[int] = Field(default=None)
+    live_turns_per_actor: Optional[int] = Field(default=None)
+    live_turns_per_trial: Optional[int] = Field(default=None)
+    model: Optional[str] = Field(default=None)
+
+
+class HarnessActorList(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['actions', 'actors', 'channel_options', 'channels', 'has_caller', 'id_hint', 'limit_fields', 'record_max_chars', 'record_schemas', 'reserved_ids', 'revision', 'source', 'trigger_fields'])
+    actors: Optional[List[Optional[HarnessActor]]] = Field(default=None)
+    source: Optional[str] = Field(default=None)  # one of: draft, saved
+    revision: Optional[int] = Field(default=None)
+    record_schemas: Optional[Any] = Field(default=None)
+    actions: Optional[List[Optional[HarnessWorldAction]]] = Field(default=None)
+    channels: Optional[Any] = Field(default=None)
+    loudness: Optional[HarnessActorLoudness] = Field(default=None)
+    reserved_ids: Optional[List[Optional[str]]] = Field(default=None)
+    knowledge_sources: Optional[HarnessActorKnowledgeSources] = Field(default=None)
+    limits: Optional[HarnessActorLimits] = Field(default=None)
+    actor_models: Optional[List[Optional[str]]] = Field(default=None)
+    unresolved: Optional[List[Optional[HarnessActorUnresolved]]] = Field(default=None)
+    has_caller: Optional[bool] = Field(default=None)
+    record_max_chars: Optional[int] = Field(default=None)
+    channel_options: Optional[List[Optional[HarnessActorChannelOption]]] = Field(default=None)
+    id_hint: Optional[str] = Field(default=None)
+    limit_fields: Optional[List[Optional[HarnessActorLimitField]]] = Field(default=None)
+    side_defaults: Optional[HarnessActorSideDefaults] = Field(default=None)
+    field_options: Optional[HarnessActorFieldOptions] = Field(default=None)
+    upload: Optional[HarnessActorUpload] = Field(default=None)
+    trigger_fields: Optional[Any] = Field(default=None)
+    new_actor: Optional[HarnessActor] = Field(default=None)
+
+
+class HarnessActorLockedField(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['field', 'reason'])
+    field: Optional[str] = Field(default=None)
+    reason: Optional[str] = Field(default=None)
+
+
+class HarnessActorLoudness(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['automatic', 'channels', 'default', 'max', 'min', 'step'])
+    channels: Optional[List[Optional[str]]] = Field(default=None)
+    automatic: Optional[List[Optional[float]]] = Field(default=None)
+    min: Optional[float] = Field(default=None)
+    max: Optional[float] = Field(default=None)
+    step: Optional[float] = Field(default=None)
+    default: Optional[float] = Field(default=None)
+
+
+class HarnessActorNeverSees(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['files', 'grader', 'other_actors', 'others', 'scenario_fields'])
+    scenario_fields: Optional[List[Optional[str]]] = Field(default=None)
+    files: Optional[List[Optional[str]]] = Field(default=None)
+    other_actors: Optional[List[Optional[str]]] = Field(default=None)
+    grader: Optional[List[Optional[str]]] = Field(default=None)
+    others: Optional[List[Optional[HarnessActorOthersPrivate]]] = Field(default=None)
+
+
+class HarnessActorOthersPrivate(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['count', 'fields_'])
+    fields_: Optional[List[Optional[str]]] = Field(default=None, alias='fields')
+    count: Optional[int] = Field(default=None)
+
+
+class HarnessActorPermission(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['action', 'in_world'])
+    action: Optional[str] = Field(default=None)
+    in_world: Optional[bool] = Field(default=None)
+
+
+class HarnessActorPersona(_Model):
+    name: Optional[str] = Field(default=None)
+    gender: Optional[str] = Field(default=None)
+    age_group: Optional[str] = Field(default=None)
+    accent: Optional[str] = Field(default=None)
+    occupation: Optional[str] = Field(default=None)
+    location: Optional[str] = Field(default=None)
+    personality: Optional[str] = Field(default=None)
+    communication_style: Optional[str] = Field(default=None)
+    initial_message: Optional[str] = Field(default=None)
+    languages: Optional[List[Optional[str]]] = Field(default=None)
+    multilingual: Optional[bool] = Field(default=None)
+
+
+class HarnessActorProblem(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['message'])
+    field: Optional[str] = Field(default=None)
+    message: Optional[str] = Field(default=None)
+
+
+class HarnessActorProvenance(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['fields_', 'origin'])
+    origin: Optional[str] = Field(default=None)
+    by: Optional[str] = Field(default=None)
+    fields_: Optional[Any] = Field(default=None, alias='fields')
+
+
+class HarnessActorRecordSource(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['collection', 'store'])
+    store: Optional[str] = Field(default=None)
+    collection: Optional[str] = Field(default=None)
+
+
+class HarnessActorResponseTiming(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['kind'])
+    kind: Optional[str] = Field(default=None)  # one of: immediate, delayed
+    seconds: Optional[float] = Field(default=None)
+
+
+class HarnessActorSeen(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['input', 'label', 'source', 'text', 'value'])
+    input: Optional[str] = Field(default=None)
+    value: Optional[Any] = Field(default=None)
+    source: Optional[str] = Field(default=None)  # one of: actor, scenario, caller
+    text: Optional[str] = Field(default=None)
+    label: Optional[str] = Field(default=None)
+
+
+class HarnessActorSideDefault(_Model):
+    channel: Optional[str] = Field(default=None)
+
+
+class HarnessActorSideDefaults(_Model):
+    caller: Optional[HarnessActorSideDefault] = Field(default=None)
+    world: Optional[HarnessActorSideDefault] = Field(default=None)
+
+
+class HarnessActorTrigger(_Model):
+    kind: Optional[str] = Field(default=None)  # one of: always, after_seconds, on_tool, contacted, probability, mid_journey, on_keyword, conditional
+    seconds: Optional[float] = Field(default=None)
+    tool: Optional[str] = Field(default=None)
+    on_call: Optional[int] = Field(default=None)
+    p: Optional[float] = Field(default=None)
+    turn: Optional[int] = Field(default=None)
+    words: Optional[List[Optional[str]]] = Field(default=None)
+    collection: Optional[str] = Field(default=None)
+    where: Optional[Any] = Field(default=None)
+
+
+class HarnessActorUnresolved(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['policy'])
+    policy: Optional[str] = Field(default=None)
+    why: Optional[str] = Field(default=None)
+    actor: Optional[str] = Field(default=None)
+
+
+class HarnessActorUpload(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['formats', 'max_bytes', 'max_label'])
+    formats: Optional[List[Optional[str]]] = Field(default=None)
+    max_bytes: Optional[int] = Field(default=None)
+    max_label: Optional[str] = Field(default=None)
+
+
+class HarnessActorValidation(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['conflicts', 'over_by', 'problems'])
+    problems: Optional[List[Optional[HarnessActorProblem]]] = Field(default=None)
+    conflicts: Optional[List[Optional[HarnessActorConflict]]] = Field(default=None)
+    suggested_id: Optional[str] = Field(default=None)
+    over_by: Optional[int] = Field(default=None)
+
+
+class HarnessActorView(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['actor_id', 'permitted_actions', 'played_from_view', 'sees'])
+    actor_id: Optional[str] = Field(default=None)
+    permitted_actions: Optional[List[Optional[str]]] = Field(default=None)
+    sees: Optional[List[Optional[HarnessActorSeen]]] = Field(default=None)
+    never_sees: Optional[HarnessActorNeverSees] = Field(default=None)
+    played_from_view: Optional[bool] = Field(default=None)
+    unused_reason: Optional[str] = Field(default=None)
+
+
 class HarnessAgentCredentialsResponse(_Model):
     agent_version: Optional[HarnessVersion] = Field(default=None)
 
@@ -1824,6 +2138,13 @@ class HarnessVersions(_Model):
     agent: Optional[List[Optional[HarnessVersion]]] = Field(default=None)
     environment: Optional[List[Optional[HarnessVersion]]] = Field(default=None)
     suite: Optional[List[Optional[HarnessVersion]]] = Field(default=None)
+
+
+class HarnessWorldAction(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['action', 'description', 'tool'])
+    action: Optional[str] = Field(default=None)
+    tool: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
 
 
 class KeyMoment(_Model):
@@ -3348,6 +3669,39 @@ GatewayConfigProvider.model_rebuild()
 GatewayConfigResult.model_rebuild()
 GatewayStatus.model_rebuild()
 GatewaySummaryResult.model_rebuild()
+HarnessActor.model_rebuild()
+HarnessActorActivation.model_rebuild()
+HarnessActorArrivalOverride.model_rebuild()
+HarnessActorBehaviour.model_rebuild()
+HarnessActorChannelOption.model_rebuild()
+HarnessActorConflict.model_rebuild()
+HarnessActorConstraints.model_rebuild()
+HarnessActorFallback.model_rebuild()
+HarnessActorFieldOption.model_rebuild()
+HarnessActorFieldOptions.model_rebuild()
+HarnessActorKnowledgeEntry.model_rebuild()
+HarnessActorKnowledgeSources.model_rebuild()
+HarnessActorLimitField.model_rebuild()
+HarnessActorLimits.model_rebuild()
+HarnessActorList.model_rebuild()
+HarnessActorLockedField.model_rebuild()
+HarnessActorLoudness.model_rebuild()
+HarnessActorNeverSees.model_rebuild()
+HarnessActorOthersPrivate.model_rebuild()
+HarnessActorPermission.model_rebuild()
+HarnessActorPersona.model_rebuild()
+HarnessActorProblem.model_rebuild()
+HarnessActorProvenance.model_rebuild()
+HarnessActorRecordSource.model_rebuild()
+HarnessActorResponseTiming.model_rebuild()
+HarnessActorSeen.model_rebuild()
+HarnessActorSideDefault.model_rebuild()
+HarnessActorSideDefaults.model_rebuild()
+HarnessActorTrigger.model_rebuild()
+HarnessActorUnresolved.model_rebuild()
+HarnessActorUpload.model_rebuild()
+HarnessActorValidation.model_rebuild()
+HarnessActorView.model_rebuild()
 HarnessAgentCredentialsResponse.model_rebuild()
 HarnessConversationEventRead.model_rebuild()
 HarnessConversationMessage.model_rebuild()
@@ -3405,6 +3759,7 @@ HarnessVersion.model_rebuild()
 HarnessVersionDiff.model_rebuild()
 HarnessVersionPerson.model_rebuild()
 HarnessVersions.model_rebuild()
+HarnessWorldAction.model_rebuild()
 KeyMoment.model_rebuild()
 KnowledgeBaseItem.model_rebuild()
 LegacyKnowledgeBaseCreateResult.model_rebuild()
@@ -3624,6 +3979,39 @@ __all__ = [
     'GatewayConfigResult',
     'GatewayStatus',
     'GatewaySummaryResult',
+    'HarnessActor',
+    'HarnessActorActivation',
+    'HarnessActorArrivalOverride',
+    'HarnessActorBehaviour',
+    'HarnessActorChannelOption',
+    'HarnessActorConflict',
+    'HarnessActorConstraints',
+    'HarnessActorFallback',
+    'HarnessActorFieldOption',
+    'HarnessActorFieldOptions',
+    'HarnessActorKnowledgeEntry',
+    'HarnessActorKnowledgeSources',
+    'HarnessActorLimitField',
+    'HarnessActorLimits',
+    'HarnessActorList',
+    'HarnessActorLockedField',
+    'HarnessActorLoudness',
+    'HarnessActorNeverSees',
+    'HarnessActorOthersPrivate',
+    'HarnessActorPermission',
+    'HarnessActorPersona',
+    'HarnessActorProblem',
+    'HarnessActorProvenance',
+    'HarnessActorRecordSource',
+    'HarnessActorResponseTiming',
+    'HarnessActorSeen',
+    'HarnessActorSideDefault',
+    'HarnessActorSideDefaults',
+    'HarnessActorTrigger',
+    'HarnessActorUnresolved',
+    'HarnessActorUpload',
+    'HarnessActorValidation',
+    'HarnessActorView',
     'HarnessAgentCredentialsResponse',
     'HarnessConversationEventRead',
     'HarnessConversationMessage',
@@ -3681,6 +4069,7 @@ __all__ = [
     'HarnessVersionDiff',
     'HarnessVersionPerson',
     'HarnessVersions',
+    'HarnessWorldAction',
     'KeyMoment',
     'KnowledgeBaseItem',
     'LegacyKnowledgeBaseCreateResult',

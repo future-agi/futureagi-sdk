@@ -1,0 +1,109 @@
+"""client.simulation.environments.actors, against an in-process httpx MockTransport (no backend)."""
+
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+import fi.platform as fp
+import httpx
+import pytest
+
+ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+
+from tests.platform.test_generator import CONTRACT, _with  # noqa: E402
+
+from sdkgen import generator as generate  # noqa: E402
+
+BASE = "http://backend.test"
+ENV = "11111111-1111-4111-8111-11111111111a"
+ACTORS = {"status": True, "result": {"actors": [], "limits": {}, "revision": 3}}
+
+
+def _client(sent: list[httpx.Request], result: dict) -> fp.Client:
+    def handler(request: httpx.Request) -> httpx.Response:
+        sent.append(request)
+        return httpx.Response(200, json=result)
+
+    http = httpx.Client(transport=httpx.MockTransport(handler))
+    return fp.Client(api_key="k", secret_key="s", base_url=BASE, http_client=http)
+
+
+def test_list_and_get_read_the_environments_actors():
+    sent: list[httpx.Request] = []
+    client = _client(sent, ACTORS)
+
+    client.simulation.environments.actors.list(ENV)
+    client.simulation.environments.actors.get(ENV, "caller", scenario_key="refund-flow")
+
+    assert [(r.method, r.url.path) for r in sent] == [
+        ("GET", f"/simulate/api/harness-environments/{ENV}/actors/"),
+        ("GET", f"/simulate/api/harness-environments/{ENV}/actors/caller/"),
+    ]
+    assert sent[1].url.params["scenario_key"] == "refund-flow"
+
+
+def test_create_sends_new_id_as_the_actors_id_and_keeps_the_environment_in_the_path():
+    sent: list[httpx.Request] = []
+    client = _client(sent, ACTORS)
+
+    client.simulation.environments.actors.create(
+        ENV, actor={"name": "Dispatcher"}, new_id="dispatcher", expected_revision=3
+    )
+
+    assert sent[0].method == "POST"
+    assert sent[0].url.path == f"/simulate/api/harness-environments/{ENV}/actors/"
+    assert json.loads(sent[0].content) == {
+        "actor": {"name": "Dispatcher"},
+        "id": "dispatcher",
+        "expected_revision": 3,
+    }
+
+
+def test_update_replaces_one_actor_with_changes():
+    sent: list[httpx.Request] = []
+    client = _client(sent, ACTORS)
+
+    client.simulation.environments.actors.update(
+        ENV, "caller", changes={"goal": "Book a ride"}
+    )
+
+    assert (sent[0].method, sent[0].url.path) == (
+        "PUT",
+        f"/simulate/api/harness-environments/{ENV}/actors/caller/",
+    )
+    assert json.loads(sent[0].content) == {"changes": {"goal": "Book a ride"}}
+
+
+def test_validate_writes_nothing_and_names_the_op():
+    sent: list[httpx.Request] = []
+    client = _client(
+        sent,
+        {"status": True, "result": {"problems": [], "unconfirmed_shared_actions": []}},
+    )
+
+    client.simulation.environments.actors.validate(ENV, op="delete", actor_id="caller")
+
+    assert (sent[0].method, sent[0].url.path) == (
+        "POST",
+        f"/simulate/api/harness-environments/{ENV}/actor-validation/",
+    )
+    assert json.loads(sent[0].content) == {"op": "delete", "actor_id": "caller"}
+
+
+def test_two_parameters_with_one_argument_name_fail_the_build():
+    """Without the rename, the body `id` and the path `id` would be one Python argument twice."""
+    catalog = _with("simulation.environments.actors.create")
+    entry = next(
+        e
+        for e in catalog["operations"]
+        if e["id"] == "simulation.environments.actors.create"
+    )
+    entry.pop("contract_fix")
+
+    with pytest.raises(
+        generate.CatalogError, match=r"two parameters become the argument \['id'\]"
+    ):
+        generate.load(CONTRACT, catalog)

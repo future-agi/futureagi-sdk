@@ -26,6 +26,62 @@ from .._transport import (
 )
 
 
+class SimulationEnvironmentsActorsResource(Resource):
+    """`client.simulation.environments.actors`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: SyncTransport
+
+    def create(self, id: str, *, actor: Dict[str, Any] | None | NotGiven = NOT_GIVEN, changes: Dict[str, Any] | None | NotGiven = NOT_GIVEN, new_id: str | None | NotGiven = NOT_GIVEN, expected_revision: int | None | NotGiven = NOT_GIVEN, share_actions: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
+        """Add one actor to the environment's draft; runs keep the saved version until simulation.environments.drafts.save saves the draft; new_id asks for the actor's id. Returns every actor.
+
+        POST /simulate/api/harness-environments/{id}/actors/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'actor': actor, 'changes': changes, 'id': new_id, 'expected_revision': expected_revision, 'share_actions': share_actions, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_CREATE, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
+
+    def get(self, id: str, actor_id: str, *, scenario_key: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorView:
+        """Return what one actor sees and may do, optionally in one scenario (scenario_key), and what it never sees.
+
+        GET /simulate/api/harness-environments/{id}/actors/{actor_id}/
+        """
+        path = {'id': id, 'actor_id': actor_id}
+        query = {'scenario_key': scenario_key, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_GET, path=path, query=query, body=body, model=models.HarnessActorView, options=options)
+
+    def list(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
+        """List an environment's actors (the people, systems and tools the agent works with) and its actor limits, as the next run would use them, the draft's when there is one.
+
+        GET /simulate/api/harness-environments/{id}/actors/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_LIST, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
+
+    def update(self, id: str, actor_id: str, *, actor: Dict[str, Any] | None | NotGiven = NOT_GIVEN, changes: Dict[str, Any] | None | NotGiven = NOT_GIVEN, new_id: str | None | NotGiven = NOT_GIVEN, expected_revision: int | None | NotGiven = NOT_GIVEN, share_actions: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
+        """Replace one actor in the environment's draft, as a whole record (actor) or as changes to it (changes); its id never changes. Returns every actor.
+
+        PUT /simulate/api/harness-environments/{id}/actors/{actor_id}/
+        """
+        path = {'id': id, 'actor_id': actor_id}
+        query = {**(extra_query or {})}
+        body = {'actor': actor, 'changes': changes, 'id': new_id, 'expected_revision': expected_revision, 'share_actions': share_actions, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_UPDATE, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
+
+    def validate(self, id: str, *, op: Literal['create', 'replace', 'delete'], actor_id: str | None | NotGiven = NOT_GIVEN, changes: Dict[str, Any] | None | NotGiven = NOT_GIVEN, new_id: str | None | NotGiven = NOT_GIVEN, share_actions: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorValidation:
+        """Check a create, replace or removal (op) of one actor without writing anything; returns its problems, the actions it would share that share_actions does not confirm, and the id a create would get (new_id asks for one).
+
+        POST /simulate/api/harness-environments/{id}/actor-validation/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'op': op, 'actor_id': actor_id, 'changes': changes, 'id': new_id, 'share_actions': share_actions, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_VALIDATE, path=path, query=query, body=body, model=models.HarnessActorValidation, options=options)
+
+
 class SimulationEnvironmentsDraftsResource(Resource):
     """`client.simulation.environments.drafts`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -1109,12 +1165,13 @@ class SimulationEnvironmentsResource(Resource):
     """`client.simulation.environments`. Subclass to add methods; override `_children` to swap a nested resource."""
 
     _t: SyncTransport
+    actors: SimulationEnvironmentsActorsResource
     drafts: SimulationEnvironmentsDraftsResource
     evaluations: SimulationEnvironmentsEvaluationsResource
     nudges: SimulationEnvironmentsNudgesResource
     runs: SimulationEnvironmentsRunsResource
     versions: SimulationEnvironmentsVersionsResource
-    _children: Dict[str, type] = {'drafts': SimulationEnvironmentsDraftsResource, 'evaluations': SimulationEnvironmentsEvaluationsResource, 'nudges': SimulationEnvironmentsNudgesResource, 'runs': SimulationEnvironmentsRunsResource, 'versions': SimulationEnvironmentsVersionsResource}
+    _children: Dict[str, type] = {'actors': SimulationEnvironmentsActorsResource, 'drafts': SimulationEnvironmentsDraftsResource, 'evaluations': SimulationEnvironmentsEvaluationsResource, 'nudges': SimulationEnvironmentsNudgesResource, 'runs': SimulationEnvironmentsRunsResource, 'versions': SimulationEnvironmentsVersionsResource}
 
     def get(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessEnvironmentDetail:
         """Return a simulation environment with its contract, world, scenarios and evaluations.
@@ -2630,6 +2687,62 @@ class WorkspacesResource(Resource):
         return self._t.call(_ops.OP_WORKSPACES_LIST, path=path, query=query, body=body, model=models.WorkspaceManagementListResult, options=options)
 
 
+class AsyncSimulationEnvironmentsActorsResource(Resource):
+    """`client.simulation.environments.actors`. Subclass to add methods; override `_children` to swap a nested resource."""
+
+    _t: AsyncTransport
+
+    async def create(self, id: str, *, actor: Dict[str, Any] | None | NotGiven = NOT_GIVEN, changes: Dict[str, Any] | None | NotGiven = NOT_GIVEN, new_id: str | None | NotGiven = NOT_GIVEN, expected_revision: int | None | NotGiven = NOT_GIVEN, share_actions: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
+        """Add one actor to the environment's draft; runs keep the saved version until simulation.environments.drafts.save saves the draft; new_id asks for the actor's id. Returns every actor.
+
+        POST /simulate/api/harness-environments/{id}/actors/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'actor': actor, 'changes': changes, 'id': new_id, 'expected_revision': expected_revision, 'share_actions': share_actions, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_CREATE, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
+
+    async def get(self, id: str, actor_id: str, *, scenario_key: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorView:
+        """Return what one actor sees and may do, optionally in one scenario (scenario_key), and what it never sees.
+
+        GET /simulate/api/harness-environments/{id}/actors/{actor_id}/
+        """
+        path = {'id': id, 'actor_id': actor_id}
+        query = {'scenario_key': scenario_key, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_GET, path=path, query=query, body=body, model=models.HarnessActorView, options=options)
+
+    async def list(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
+        """List an environment's actors (the people, systems and tools the agent works with) and its actor limits, as the next run would use them, the draft's when there is one.
+
+        GET /simulate/api/harness-environments/{id}/actors/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_LIST, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
+
+    async def update(self, id: str, actor_id: str, *, actor: Dict[str, Any] | None | NotGiven = NOT_GIVEN, changes: Dict[str, Any] | None | NotGiven = NOT_GIVEN, new_id: str | None | NotGiven = NOT_GIVEN, expected_revision: int | None | NotGiven = NOT_GIVEN, share_actions: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
+        """Replace one actor in the environment's draft, as a whole record (actor) or as changes to it (changes); its id never changes. Returns every actor.
+
+        PUT /simulate/api/harness-environments/{id}/actors/{actor_id}/
+        """
+        path = {'id': id, 'actor_id': actor_id}
+        query = {**(extra_query or {})}
+        body = {'actor': actor, 'changes': changes, 'id': new_id, 'expected_revision': expected_revision, 'share_actions': share_actions, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_UPDATE, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
+
+    async def validate(self, id: str, *, op: Literal['create', 'replace', 'delete'], actor_id: str | None | NotGiven = NOT_GIVEN, changes: Dict[str, Any] | None | NotGiven = NOT_GIVEN, new_id: str | None | NotGiven = NOT_GIVEN, share_actions: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorValidation:
+        """Check a create, replace or removal (op) of one actor without writing anything; returns its problems, the actions it would share that share_actions does not confirm, and the id a create would get (new_id asks for one).
+
+        POST /simulate/api/harness-environments/{id}/actor-validation/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'op': op, 'actor_id': actor_id, 'changes': changes, 'id': new_id, 'share_actions': share_actions, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_VALIDATE, path=path, query=query, body=body, model=models.HarnessActorValidation, options=options)
+
+
 class AsyncSimulationEnvironmentsDraftsResource(Resource):
     """`client.simulation.environments.drafts`. Subclass to add methods; override `_children` to swap a nested resource."""
 
@@ -3713,12 +3826,13 @@ class AsyncSimulationEnvironmentsResource(Resource):
     """`client.simulation.environments`. Subclass to add methods; override `_children` to swap a nested resource."""
 
     _t: AsyncTransport
+    actors: AsyncSimulationEnvironmentsActorsResource
     drafts: AsyncSimulationEnvironmentsDraftsResource
     evaluations: AsyncSimulationEnvironmentsEvaluationsResource
     nudges: AsyncSimulationEnvironmentsNudgesResource
     runs: AsyncSimulationEnvironmentsRunsResource
     versions: AsyncSimulationEnvironmentsVersionsResource
-    _children: Dict[str, type] = {'drafts': AsyncSimulationEnvironmentsDraftsResource, 'evaluations': AsyncSimulationEnvironmentsEvaluationsResource, 'nudges': AsyncSimulationEnvironmentsNudgesResource, 'runs': AsyncSimulationEnvironmentsRunsResource, 'versions': AsyncSimulationEnvironmentsVersionsResource}
+    _children: Dict[str, type] = {'actors': AsyncSimulationEnvironmentsActorsResource, 'drafts': AsyncSimulationEnvironmentsDraftsResource, 'evaluations': AsyncSimulationEnvironmentsEvaluationsResource, 'nudges': AsyncSimulationEnvironmentsNudgesResource, 'runs': AsyncSimulationEnvironmentsRunsResource, 'versions': AsyncSimulationEnvironmentsVersionsResource}
 
     async def get(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessEnvironmentDetail:
         """Return a simulation environment with its contract, world, scenarios and evaluations.
@@ -5281,6 +5395,7 @@ __all__ = [
     'SimulationResource',
     'SimulationCallsResource',
     'SimulationEnvironmentsResource',
+    'SimulationEnvironmentsActorsResource',
     'SimulationEnvironmentsDraftsResource',
     'SimulationEnvironmentsEvaluationsResource',
     'SimulationEnvironmentsNudgesResource',
@@ -5345,6 +5460,7 @@ __all__ = [
     'AsyncSimulationResource',
     'AsyncSimulationCallsResource',
     'AsyncSimulationEnvironmentsResource',
+    'AsyncSimulationEnvironmentsActorsResource',
     'AsyncSimulationEnvironmentsDraftsResource',
     'AsyncSimulationEnvironmentsEvaluationsResource',
     'AsyncSimulationEnvironmentsNudgesResource',

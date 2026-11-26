@@ -1384,6 +1384,43 @@ export interface SimulationEnvironmentsRunPlanParams {
   suite_version_id?: string | null;
 }
 
+export interface SimulationEnvironmentsActorsCreateParams {
+  /** Actor */
+  actor?: Record<string, unknown> | null;
+  changes?: Record<string, unknown> | null;
+  /** Id */
+  id?: string | null;
+  /** Expected revision */
+  expected_revision?: number | null;
+  share_actions?: Array<string> | null;
+}
+
+export interface SimulationEnvironmentsActorsGetParams {
+  scenario_key?: string | null;
+}
+
+export interface SimulationEnvironmentsActorsUpdateParams {
+  /** Actor */
+  actor?: Record<string, unknown> | null;
+  changes?: Record<string, unknown> | null;
+  /** Id */
+  id?: string | null;
+  /** Expected revision */
+  expected_revision?: number | null;
+  share_actions?: Array<string> | null;
+}
+
+export interface SimulationEnvironmentsActorsValidateParams {
+  /** Op */
+  op: "create" | "replace" | "delete";
+  /** Actor id */
+  actor_id?: string | null;
+  changes?: Record<string, unknown> | null;
+  /** Id */
+  id?: string | null;
+  share_actions?: Array<string> | null;
+}
+
 export interface SimulationEnvironmentsDraftsSaveParams {
   drafts: Array<Record<string, unknown>>;
   /** Idempotency key */
@@ -1949,6 +1986,57 @@ export interface UsageOverviewParams {
   period?: string | null;
   period_end?: string | null;
   workspace_id?: string | null;
+}
+
+/**
+ * `client.simulation.environments.actors`. Subclass to add methods; reassign a child in the constructor to swap it.
+ */
+export class SimulationEnvironmentsActorsResource extends Resource {
+
+  /**
+   * Add one actor to the environment's draft; runs keep the saved version until simulation.environments.drafts.save saves the draft; new_id asks for the actor's id. Returns every actor.
+   *
+   * POST /simulate/api/harness-environments/{id}/actors/
+   */
+  create(id: string, params: SimulationEnvironmentsActorsCreateParams = {}, options?: RequestOptions): Promise<models.HarnessActorList> {
+    return this._t.call<models.HarnessActorList>(ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_CREATE, { path: { id: id }, query: {}, body: { actor: params.actor, changes: params.changes, id: params.id, expected_revision: params.expected_revision, share_actions: params.share_actions } }, options);
+  }
+
+  /**
+   * Return what one actor sees and may do, optionally in one scenario (scenario_key), and what it never sees.
+   *
+   * GET /simulate/api/harness-environments/{id}/actors/{actor_id}/
+   */
+  get(id: string, actorId: string, params: SimulationEnvironmentsActorsGetParams = {}, options?: RequestOptions): Promise<models.HarnessActorView> {
+    return this._t.call<models.HarnessActorView>(ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_GET, { path: { id: id, actor_id: actorId }, query: { scenario_key: params.scenario_key } }, options);
+  }
+
+  /**
+   * List an environment's actors (the people, systems and tools the agent works with) and its actor limits, as the next run would use them, the draft's when there is one.
+   *
+   * GET /simulate/api/harness-environments/{id}/actors/
+   */
+  list(id: string, options?: RequestOptions): Promise<models.HarnessActorList> {
+    return this._t.call<models.HarnessActorList>(ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_LIST, { path: { id: id }, query: {} }, options);
+  }
+
+  /**
+   * Replace one actor in the environment's draft, as a whole record (actor) or as changes to it (changes); its id never changes. Returns every actor.
+   *
+   * PUT /simulate/api/harness-environments/{id}/actors/{actor_id}/
+   */
+  update(id: string, actorId: string, params: SimulationEnvironmentsActorsUpdateParams = {}, options?: RequestOptions): Promise<models.HarnessActorList> {
+    return this._t.call<models.HarnessActorList>(ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_UPDATE, { path: { id: id, actor_id: actorId }, query: {}, body: { actor: params.actor, changes: params.changes, id: params.id, expected_revision: params.expected_revision, share_actions: params.share_actions } }, options);
+  }
+
+  /**
+   * Check a create, replace or removal (op) of one actor without writing anything; returns its problems, the actions it would share that share_actions does not confirm, and the id a create would get (new_id asks for one).
+   *
+   * POST /simulate/api/harness-environments/{id}/actor-validation/
+   */
+  validate(id: string, params: SimulationEnvironmentsActorsValidateParams, options?: RequestOptions): Promise<models.HarnessActorValidation> {
+    return this._t.call<models.HarnessActorValidation>(ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_VALIDATE, { path: { id: id }, query: {}, body: { op: params.op, actor_id: params.actor_id, changes: params.changes, id: params.id, share_actions: params.share_actions } }, options);
+  }
 }
 
 /**
@@ -2953,6 +3041,7 @@ export class SimulationCallsResource extends Resource {
  * `client.simulation.environments`. Subclass to add methods; reassign a child in the constructor to swap it.
  */
 export class SimulationEnvironmentsResource extends Resource {
+  actors: SimulationEnvironmentsActorsResource;
   drafts: SimulationEnvironmentsDraftsResource;
   evaluations: SimulationEnvironmentsEvaluationsResource;
   nudges: SimulationEnvironmentsNudgesResource;
@@ -2961,6 +3050,7 @@ export class SimulationEnvironmentsResource extends Resource {
 
   constructor(transport: Transport) {
     super(transport);
+    this.actors = new SimulationEnvironmentsActorsResource(transport);
     this.drafts = new SimulationEnvironmentsDraftsResource(transport);
     this.evaluations = new SimulationEnvironmentsEvaluationsResource(transport);
     this.nudges = new SimulationEnvironmentsNudgesResource(transport);

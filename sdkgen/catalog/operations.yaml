@@ -1468,6 +1468,40 @@ operations:
   operation: {method: GET, path: '/simulate/api/harness-environments/{id}/versions/{piece}/{version_id}/diff/'}
   surfaces: {sdk: {}, mcp: false}
 
+- id: simulation.environments.actors.list
+  description: List an environment's actors (the people, systems and tools the agent works with) and its actor limits, as the next run would use them, the draft's when there is one.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/actors/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.actors.get
+  description: Return what one actor sees and may do, optionally in one scenario (scenario_key), and what it never sees.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/actors/{actor_id}/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.actors.validate
+  description: Check a create, replace or removal (op) of one actor without writing anything; returns its problems, the actions it would share that share_actions does not confirm, and the id a create would get (new_id asks for one).
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/actor-validation/'}
+  contract_fix:
+    body_fields: {id: {type: string, as: new_id}}
+    note: the body's `id` (the id a created actor takes) shares its name with the environment's path `id`
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.actors.create
+  description: Add one actor to the environment's draft; runs keep the saved version until simulation.environments.drafts.save saves the draft; new_id asks for the actor's id. Returns every actor.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/actors/'}
+  contract_fix:
+    body_fields: {id: {type: string, as: new_id}}
+    note: the body's `id` (the id a created actor takes) shares its name with the environment's path `id`
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.actors.update
+  description: Replace one actor in the environment's draft, as a whole record (actor) or as changes to it (changes); its id never changes. Returns every actor.
+  operation: {method: PUT, path: '/simulate/api/harness-environments/{id}/actors/{actor_id}/'}
+  contract_fix:
+    body_fields: {id: {type: string, as: new_id}}
+    note: the body's `id` (the id a created actor takes) shares its name with the environment's path `id`
+  surfaces: {sdk: {}, mcp: false}
+
 - id: simulation.environments.drafts.list
   description: Return an environment's unsaved environment and suite drafts (with parent_id and revision for a save) and the drafts a rebuild set aside.
   operation: {method: GET, path: '/simulate/api/harness-environments/{id}/drafts/'}

@@ -33,24 +33,7 @@
       "X-Secret-Key": []
     }
   ],
-  "x-contract-sources": {
-    "sql": {
-      "backend_commit": "6fc655b986f862ccbdd475bfc87fc09c4ef459e9",
-      "openapi_sha256": "83db42792537641a476bd6c095ce0ea40ca17aa2c48315f804386ea90a594513",
-      "mcp_sha256": "0464aeb6212890164cf95b0599d89bb7db566f244cc831bf2c995901ba679a30",
-      "tools": [
-        "cancel_sql",
-        "get_sql_catalog",
-        "get_sql_result",
-        "run_sql"
-      ]
-    },
-    "other": {
-      "sdk_commit": "198f1f8bf23836072d5016976a9a6c235c52ee2b",
-      "slice_sha256": "11eb5cf10a002de5ec722b1ed63884f10b75522cfaf58e075be0e7a742f80a5f",
-      "openapi_sha256": "f4a74ecab77e78df6ca8c6a28b72c655bfd0e4d4f04f91ab376070d60be592d0"
-    }
-  },
+  "x-source-sha256": "3ab7ad9a7ca870b2d2886653e41cba139ac20a1f95613398628ba6dfeb67034b",
   "paths": {
     "/accounts/user-info/": {
       "parameters": [],
@@ -8006,6 +7989,197 @@
             "description": "",
             "schema": {
               "$ref": "#/definitions/HarnessEnvironmentDetail"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "simulate"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/simulate/api/harness-environments/{id}/actor-validation/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "operationId": "simulate_api_harness-environments_validate_actor",
+        "description": "What a create, replace or removal of one actor would say, writing nothing: its problems, the actions it\nwould share that `share_actions` does not confirm, the id a create gets, and how far it is over the bound.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HarnessActorValidate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/HarnessActorValidation"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "simulate"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/simulate/api/harness-environments/{id}/actors/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "operationId": "simulate_api_harness-environments_actors",
+        "description": "The environment's cast as the next run would use it: the draft's when there is one.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/HarnessActorList"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "simulate"
+        ],
+        "x-runtime-response-validation": true
+      },
+      "post": {
+        "operationId": "simulate_api_harness-environments_create_actor",
+        "description": "Add one actor to the environment's draft; the saved version is unchanged until the draft is saved.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HarnessActorWrite"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/HarnessActorList"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "simulate"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/simulate/api/harness-environments/{id}/actors/{actor_id}/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "actor_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "operationId": "simulate_api_harness-environments_actor_view",
+        "description": "What one actor sees and may do, optionally in one scenario, and what it never sees.",
+        "parameters": [
+          {
+            "name": "scenario_key",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/HarnessActorView"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "simulate"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "put": {
+        "operationId": "simulate_api_harness-environments_replace_actor",
+        "description": "Replace one actor in the draft, as a whole record or as changes to it; its id never changes.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HarnessActorWrite"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/HarnessActorList"
             }
           },
           "default": {
@@ -24773,6 +24947,1911 @@
         }
       }
     },
+    "HarnessActor": {
+      "required": [
+        "id",
+        "name",
+        "role",
+        "kind",
+        "goal",
+        "play",
+        "prompt",
+        "surface",
+        "model",
+        "side",
+        "channel",
+        "parent",
+        "on_behalf_of",
+        "identities",
+        "persona",
+        "loudness_ratio",
+        "constraints",
+        "facts",
+        "files",
+        "records",
+        "knowledge",
+        "behaviour",
+        "permitted_actions",
+        "activation",
+        "max_turns",
+        "max_lines",
+        "scenarios",
+        "arrival_overrides",
+        "provenance",
+        "removable",
+        "removal_blocked_by",
+        "locked_fields",
+        "reaches",
+        "fallback",
+        "permissions",
+        "editable_trigger",
+        "when_label",
+        "timeout_label"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "minLength": 1
+        },
+        "goal": {
+          "title": "Goal",
+          "type": "string"
+        },
+        "play": {
+          "title": "Play",
+          "type": "string",
+          "minLength": 1
+        },
+        "prompt": {
+          "title": "Prompt",
+          "type": "string"
+        },
+        "surface": {
+          "title": "Surface",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "side": {
+          "title": "Side",
+          "type": "string",
+          "enum": [
+            "caller",
+            "world"
+          ]
+        },
+        "channel": {
+          "title": "Channel",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "parent": {
+          "title": "Parent",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "on_behalf_of": {
+          "title": "On behalf of",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "identities": {
+          "title": "Identities",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "persona": {
+          "$ref": "#/definitions/HarnessActorPersona"
+        },
+        "loudness_ratio": {
+          "title": "Loudness ratio",
+          "type": "number",
+          "x-nullable": true
+        },
+        "constraints": {
+          "$ref": "#/definitions/HarnessActorConstraints"
+        },
+        "facts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorRecordSource"
+          }
+        },
+        "knowledge": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorKnowledgeEntry"
+          }
+        },
+        "behaviour": {
+          "$ref": "#/definitions/HarnessActorBehaviour"
+        },
+        "permitted_actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "activation": {
+          "$ref": "#/definitions/HarnessActorActivation"
+        },
+        "max_turns": {
+          "title": "Max turns",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "max_lines": {
+          "title": "Max lines",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "scenarios": {
+          "title": "Scenarios",
+          "description": "Scenarios that include the actor.",
+          "type": "integer"
+        },
+        "review_decision": {
+          "title": "Review decision",
+          "description": "The decision taken on the actor in the draft's change review; null when none holds.",
+          "type": "string",
+          "enum": [
+            "accepted",
+            "rejected"
+          ],
+          "x-nullable": true
+        },
+        "arrival_overrides": {
+          "description": "Scenarios that bring the actor in by their own trigger, with when it comes in there.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorArrivalOverride"
+          }
+        },
+        "provenance": {
+          "$ref": "#/definitions/HarnessActorProvenance"
+        },
+        "removable": {
+          "title": "Removable",
+          "type": "boolean"
+        },
+        "removal_blocked_by": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "locked_fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorLockedField"
+          }
+        },
+        "reaches": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "fallback": {
+          "$ref": "#/definitions/HarnessActorFallback"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorPermission"
+          }
+        },
+        "editable_trigger": {
+          "title": "Editable trigger",
+          "type": "boolean"
+        },
+        "when_label": {
+          "title": "When label",
+          "type": "string",
+          "minLength": 1
+        },
+        "timeout_label": {
+          "title": "Timeout label",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        }
+      }
+    },
+    "HarnessActorActivation": {
+      "required": [
+        "trigger",
+        "timeout_seconds",
+        "fallback"
+      ],
+      "type": "object",
+      "properties": {
+        "trigger": {
+          "$ref": "#/definitions/HarnessActorTrigger"
+        },
+        "timeout_seconds": {
+          "title": "Timeout seconds",
+          "type": "number"
+        },
+        "fallback": {
+          "title": "Fallback",
+          "type": "string",
+          "minLength": 1
+        },
+        "fallback_arguments": {
+          "title": "Fallback arguments",
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "HarnessActorArrivalOverride": {
+      "description": "Scenarios that bring the actor in by their own trigger, with when it comes in there.",
+      "required": [
+        "scenario",
+        "when_label"
+      ],
+      "type": "object",
+      "properties": {
+        "scenario": {
+          "title": "Scenario",
+          "type": "string",
+          "minLength": 1
+        },
+        "when_label": {
+          "title": "When label",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "HarnessActorBehaviour": {
+      "required": [
+        "style",
+        "response_timing"
+      ],
+      "type": "object",
+      "properties": {
+        "style": {
+          "title": "Style",
+          "type": "string"
+        },
+        "response_timing": {
+          "$ref": "#/definitions/HarnessActorResponseTiming"
+        }
+      }
+    },
+    "HarnessActorChanges": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 500
+        },
+        "role": {
+          "title": "Role",
+          "type": "string",
+          "maxLength": 1000
+        },
+        "side": {
+          "title": "Side",
+          "type": "string",
+          "enum": [
+            "caller",
+            "world"
+          ]
+        },
+        "channel": {
+          "title": "Channel",
+          "type": "string",
+          "maxLength": 100,
+          "x-nullable": true
+        },
+        "gender": {
+          "title": "Gender",
+          "type": "string",
+          "maxLength": 100
+        },
+        "age_group": {
+          "title": "Age group",
+          "type": "string",
+          "maxLength": 100
+        },
+        "accent": {
+          "title": "Accent",
+          "type": "string",
+          "maxLength": 100
+        },
+        "loudness_ratio": {
+          "title": "Loudness ratio",
+          "type": "number",
+          "x-nullable": true
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "parent": {
+          "title": "Parent",
+          "type": "string",
+          "maxLength": 64,
+          "x-nullable": true
+        },
+        "goal": {
+          "title": "Goal",
+          "type": "string"
+        },
+        "may_agree": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 200
+        },
+        "private": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 200
+        },
+        "escalate_when": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 200
+        },
+        "stop_when": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 200
+        },
+        "facts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 500
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1
+          },
+          "maxItems": 200
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorRecordSource"
+          }
+        },
+        "style": {
+          "title": "Style",
+          "type": "string"
+        },
+        "response_timing": {
+          "$ref": "#/definitions/HarnessActorResponseTimingChange"
+        },
+        "permitted_actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1
+          },
+          "maxItems": 200
+        },
+        "play": {
+          "title": "Play",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "trigger": {
+          "$ref": "#/definitions/HarnessActorTrigger"
+        },
+        "timeout_seconds": {
+          "title": "Timeout seconds",
+          "type": "number",
+          "minimum": 0,
+          "x-nullable": true
+        },
+        "fallback": {
+          "title": "Fallback",
+          "type": "string",
+          "maxLength": 200,
+          "minLength": 1
+        },
+        "fallback_arguments": {
+          "title": "Fallback arguments",
+          "type": "object",
+          "x-nullable": true,
+          "additionalProperties": true
+        },
+        "model": {
+          "title": "Model",
+          "type": "string",
+          "maxLength": 200,
+          "x-nullable": true
+        },
+        "max_turns": {
+          "title": "Max turns",
+          "type": "integer",
+          "minimum": 1,
+          "x-nullable": true
+        },
+        "max_lines": {
+          "title": "Max lines",
+          "type": "integer",
+          "minimum": 1,
+          "x-nullable": true
+        }
+      }
+    },
+    "HarnessActorChangesCheck": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "side": {
+          "title": "Side",
+          "type": "string",
+          "minLength": 1
+        },
+        "channel": {
+          "title": "Channel",
+          "type": "string",
+          "x-nullable": true
+        },
+        "gender": {
+          "title": "Gender",
+          "type": "string"
+        },
+        "age_group": {
+          "title": "Age group",
+          "type": "string"
+        },
+        "accent": {
+          "title": "Accent",
+          "type": "string"
+        },
+        "loudness_ratio": {
+          "title": "Loudness ratio",
+          "type": "number",
+          "x-nullable": true
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "minLength": 1
+        },
+        "parent": {
+          "title": "Parent",
+          "type": "string",
+          "x-nullable": true
+        },
+        "goal": {
+          "title": "Goal",
+          "type": "string"
+        },
+        "may_agree": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "private": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "escalate_when": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "stop_when": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "facts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorRecordSourceCheck"
+          }
+        },
+        "style": {
+          "title": "Style",
+          "type": "string"
+        },
+        "response_timing": {
+          "$ref": "#/definitions/HarnessActorResponseTimingChangeCheck"
+        },
+        "permitted_actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "play": {
+          "title": "Play",
+          "type": "string",
+          "minLength": 1
+        },
+        "trigger": {
+          "$ref": "#/definitions/HarnessActorTriggerCheck"
+        },
+        "timeout_seconds": {
+          "title": "Timeout seconds",
+          "type": "number",
+          "x-nullable": true
+        },
+        "fallback": {
+          "title": "Fallback",
+          "type": "string",
+          "minLength": 1
+        },
+        "fallback_arguments": {
+          "title": "Fallback arguments",
+          "type": "object",
+          "x-nullable": true,
+          "additionalProperties": true
+        },
+        "model": {
+          "title": "Model",
+          "type": "string",
+          "x-nullable": true
+        },
+        "max_turns": {
+          "title": "Max turns",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "max_lines": {
+          "title": "Max lines",
+          "type": "integer",
+          "x-nullable": true
+        }
+      }
+    },
+    "HarnessActorChannelOption": {
+      "required": [
+        "channel",
+        "description",
+        "loudness",
+        "trigger_kinds",
+        "required_fields",
+        "cap_field",
+        "label",
+        "trigger_options"
+      ],
+      "type": "object",
+      "properties": {
+        "channel": {
+          "title": "Channel",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "minLength": 1
+        },
+        "loudness": {
+          "title": "Loudness",
+          "type": "boolean"
+        },
+        "trigger_kinds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "cap_field": {
+          "title": "Cap field",
+          "type": "string",
+          "enum": [
+            "max_turns",
+            "max_lines"
+          ]
+        },
+        "label": {
+          "title": "Label",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "trigger_options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorFieldOption"
+          }
+        }
+      }
+    },
+    "HarnessActorConflict": {
+      "required": [
+        "actor",
+        "action",
+        "holder",
+        "holder_name"
+      ],
+      "type": "object",
+      "properties": {
+        "actor": {
+          "title": "Actor",
+          "type": "string",
+          "minLength": 1
+        },
+        "action": {
+          "title": "Action",
+          "type": "string",
+          "minLength": 1
+        },
+        "holder": {
+          "title": "Holder",
+          "type": "string",
+          "minLength": 1
+        },
+        "holder_name": {
+          "title": "Holder name",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "HarnessActorConstraints": {
+      "required": [
+        "may_agree",
+        "private",
+        "escalate_when",
+        "stop_when"
+      ],
+      "type": "object",
+      "properties": {
+        "may_agree": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "private": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "escalate_when": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "stop_when": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "HarnessActorFallback": {
+      "required": [
+        "kind",
+        "value",
+        "label"
+      ],
+      "type": "object",
+      "properties": {
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "enum": [
+            "silent",
+            "decline",
+            "action",
+            "actor"
+          ]
+        },
+        "value": {
+          "title": "Value",
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "title": "Label",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "HarnessActorFieldOption": {
+      "required": [
+        "value",
+        "label"
+      ],
+      "type": "object",
+      "properties": {
+        "value": {
+          "title": "Value",
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "title": "Label",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "HarnessActorFieldOptions": {
+      "required": [
+        "kind",
+        "play",
+        "fallback_word",
+        "gender",
+        "age_group",
+        "accent",
+        "response_timing"
+      ],
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorFieldOption"
+          }
+        },
+        "play": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorFieldOption"
+          }
+        },
+        "fallback_word": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorFieldOption"
+          }
+        },
+        "gender": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorFieldOption"
+          }
+        },
+        "age_group": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorFieldOption"
+          }
+        },
+        "accent": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorFieldOption"
+          }
+        },
+        "response_timing": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorFieldOption"
+          }
+        }
+      }
+    },
+    "HarnessActorKnowledgeEntry": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "store": {
+          "title": "Store",
+          "type": "string"
+        },
+        "collection": {
+          "title": "Collection",
+          "type": "string"
+        },
+        "where": {
+          "title": "Where",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "x-nullable": true
+          }
+        }
+      }
+    },
+    "HarnessActorKnowledgeSources": {
+      "required": [
+        "files",
+        "records"
+      ],
+      "type": "object",
+      "properties": {
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorRecordSource"
+          }
+        },
+        "roles": {
+          "title": "Roles",
+          "description": "Each attached file's role, by path. An evaluator-only file is never among `files`.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "policy",
+              "seed_records",
+              "evaluator_only"
+            ]
+          }
+        },
+        "seed_records_loaded": {
+          "title": "Seed records loaded",
+          "description": "Whether attached seed-records files reach what the agent's tools read, as the sealed rules say: false when the agent's tools serve their own data, so seed records are context only; null when the sealed release does not say.",
+          "type": "boolean",
+          "x-nullable": true
+        }
+      }
+    },
+    "HarnessActorLimitField": {
+      "required": [
+        "key",
+        "kind",
+        "default",
+        "default_label"
+      ],
+      "type": "object",
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "enum": [
+            "whole",
+            "seconds",
+            "model"
+          ]
+        },
+        "default": {
+          "title": "Default",
+          "type": "number",
+          "x-nullable": true
+        },
+        "default_label": {
+          "title": "Default label",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        }
+      }
+    },
+    "HarnessActorLimits": {
+      "description": "The whole limits block, replacing the stored one. Each limit is a positive number or null for no limit; model is one of actor_models. A limit left out takes the channel's default.",
+      "type": "object",
+      "properties": {
+        "max_active": {
+          "title": "Max active",
+          "type": "integer",
+          "minimum": 1,
+          "x-nullable": true
+        },
+        "caller_takes_back_after_turns": {
+          "title": "Caller takes back after turns",
+          "type": "integer",
+          "minimum": 1,
+          "x-nullable": true
+        },
+        "actor_seconds_per_call": {
+          "title": "Actor seconds per call",
+          "type": "number",
+          "minimum": 0,
+          "x-nullable": true
+        },
+        "max_messages": {
+          "title": "Max messages",
+          "type": "integer",
+          "minimum": 1,
+          "x-nullable": true
+        },
+        "live_turns_per_actor": {
+          "title": "Live turns per actor",
+          "type": "integer",
+          "minimum": 1,
+          "x-nullable": true
+        },
+        "live_turns_per_trial": {
+          "title": "Live turns per trial",
+          "type": "integer",
+          "minimum": 1,
+          "x-nullable": true
+        },
+        "model": {
+          "title": "Model",
+          "type": "string",
+          "maxLength": 200,
+          "minLength": 1,
+          "x-nullable": true
+        }
+      }
+    },
+    "HarnessActorList": {
+      "required": [
+        "actors",
+        "source",
+        "revision",
+        "record_schemas",
+        "actions",
+        "channels",
+        "loudness",
+        "reserved_ids",
+        "knowledge_sources",
+        "has_caller",
+        "record_max_chars",
+        "channel_options",
+        "id_hint",
+        "limit_fields",
+        "side_defaults",
+        "field_options",
+        "upload",
+        "trigger_fields",
+        "new_actor"
+      ],
+      "type": "object",
+      "properties": {
+        "actors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActor"
+          }
+        },
+        "source": {
+          "title": "Source",
+          "type": "string",
+          "enum": [
+            "draft",
+            "saved"
+          ]
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "record_schemas": {
+          "title": "Record schemas",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessWorldAction"
+          }
+        },
+        "channels": {
+          "title": "Channels",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "loudness": {
+          "$ref": "#/definitions/HarnessActorLoudness"
+        },
+        "reserved_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "knowledge_sources": {
+          "$ref": "#/definitions/HarnessActorKnowledgeSources"
+        },
+        "limits": {
+          "$ref": "#/definitions/HarnessActorLimits"
+        },
+        "actor_models": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorUnresolved"
+          }
+        },
+        "has_caller": {
+          "title": "Has caller",
+          "type": "boolean"
+        },
+        "record_max_chars": {
+          "title": "Record max chars",
+          "type": "integer"
+        },
+        "channel_options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorChannelOption"
+          }
+        },
+        "id_hint": {
+          "title": "Id hint",
+          "type": "string"
+        },
+        "limit_fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorLimitField"
+          }
+        },
+        "side_defaults": {
+          "$ref": "#/definitions/HarnessActorSideDefaults"
+        },
+        "field_options": {
+          "$ref": "#/definitions/HarnessActorFieldOptions"
+        },
+        "upload": {
+          "$ref": "#/definitions/HarnessActorUpload"
+        },
+        "trigger_fields": {
+          "title": "Trigger fields",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "new_actor": {
+          "$ref": "#/definitions/HarnessActor"
+        }
+      }
+    },
+    "HarnessActorLockedField": {
+      "required": [
+        "field",
+        "reason"
+      ],
+      "type": "object",
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "HarnessActorLoudness": {
+      "required": [
+        "channels",
+        "automatic",
+        "min",
+        "max",
+        "step",
+        "default"
+      ],
+      "type": "object",
+      "properties": {
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "automatic": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2
+        },
+        "min": {
+          "title": "Min",
+          "type": "number"
+        },
+        "max": {
+          "title": "Max",
+          "type": "number"
+        },
+        "step": {
+          "title": "Step",
+          "type": "number"
+        },
+        "default": {
+          "title": "Default",
+          "type": "number"
+        }
+      }
+    },
+    "HarnessActorNeverSees": {
+      "required": [
+        "scenario_fields",
+        "files",
+        "other_actors",
+        "grader",
+        "others"
+      ],
+      "type": "object",
+      "properties": {
+        "scenario_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "other_actors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "grader": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "others": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorOthersPrivate"
+          }
+        }
+      }
+    },
+    "HarnessActorOthersPrivate": {
+      "required": [
+        "fields",
+        "count"
+      ],
+      "type": "object",
+      "properties": {
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        }
+      }
+    },
+    "HarnessActorPermission": {
+      "required": [
+        "action",
+        "in_world"
+      ],
+      "type": "object",
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string",
+          "minLength": 1
+        },
+        "in_world": {
+          "title": "In world",
+          "type": "boolean"
+        }
+      }
+    },
+    "HarnessActorPersona": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "gender": {
+          "title": "Gender",
+          "type": "string"
+        },
+        "age_group": {
+          "title": "Age group",
+          "type": "string"
+        },
+        "accent": {
+          "title": "Accent",
+          "type": "string"
+        },
+        "occupation": {
+          "title": "Occupation",
+          "type": "string"
+        },
+        "location": {
+          "title": "Location",
+          "type": "string"
+        },
+        "personality": {
+          "title": "Personality",
+          "type": "string"
+        },
+        "communication_style": {
+          "title": "Communication style",
+          "type": "string"
+        },
+        "initial_message": {
+          "title": "Initial message",
+          "type": "string"
+        },
+        "languages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "multilingual": {
+          "title": "Multilingual",
+          "type": "boolean"
+        }
+      },
+      "x-nullable": true
+    },
+    "HarnessActorProblem": {
+      "required": [
+        "field",
+        "message"
+      ],
+      "type": "object",
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "message": {
+          "title": "Message",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "HarnessActorProvenance": {
+      "required": [
+        "origin",
+        "by",
+        "fields"
+      ],
+      "type": "object",
+      "properties": {
+        "origin": {
+          "title": "Origin",
+          "type": "string"
+        },
+        "by": {
+          "title": "By",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "fields": {
+          "title": "Fields",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "x-nullable": true
+    },
+    "HarnessActorRecordSource": {
+      "required": [
+        "store",
+        "collection"
+      ],
+      "type": "object",
+      "properties": {
+        "store": {
+          "title": "Store",
+          "type": "string"
+        },
+        "collection": {
+          "title": "Collection",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "HarnessActorRecordSourceCheck": {
+      "required": [
+        "store",
+        "collection"
+      ],
+      "type": "object",
+      "properties": {
+        "store": {
+          "title": "Store",
+          "type": "string"
+        },
+        "collection": {
+          "title": "Collection",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "HarnessActorResponseTiming": {
+      "required": [
+        "kind"
+      ],
+      "type": "object",
+      "properties": {
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "enum": [
+            "immediate",
+            "delayed"
+          ]
+        },
+        "seconds": {
+          "title": "Seconds",
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "HarnessActorResponseTimingChange": {
+      "required": [
+        "kind"
+      ],
+      "type": "object",
+      "properties": {
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "enum": [
+            "immediate",
+            "delayed"
+          ]
+        },
+        "seconds": {
+          "title": "Seconds",
+          "type": "number",
+          "minimum": 0,
+          "x-nullable": true
+        }
+      }
+    },
+    "HarnessActorResponseTimingChangeCheck": {
+      "required": [
+        "kind"
+      ],
+      "type": "object",
+      "properties": {
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "minLength": 1
+        },
+        "seconds": {
+          "title": "Seconds",
+          "type": "number",
+          "x-nullable": true
+        }
+      }
+    },
+    "HarnessActorSeen": {
+      "required": [
+        "input",
+        "value",
+        "source",
+        "text",
+        "label"
+      ],
+      "type": "object",
+      "properties": {
+        "input": {
+          "title": "Input",
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "title": "Value",
+          "type": "object"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string",
+          "enum": [
+            "actor",
+            "scenario",
+            "caller"
+          ]
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "HarnessActorSideDefault": {
+      "required": [
+        "channel"
+      ],
+      "type": "object",
+      "properties": {
+        "channel": {
+          "title": "Channel",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        }
+      }
+    },
+    "HarnessActorSideDefaults": {
+      "required": [
+        "caller",
+        "world"
+      ],
+      "type": "object",
+      "properties": {
+        "caller": {
+          "$ref": "#/definitions/HarnessActorSideDefault"
+        },
+        "world": {
+          "$ref": "#/definitions/HarnessActorSideDefault"
+        }
+      }
+    },
+    "HarnessActorTrigger": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "enum": [
+            "always",
+            "after_seconds",
+            "on_tool",
+            "contacted",
+            "probability",
+            "mid_journey",
+            "on_keyword",
+            "conditional"
+          ]
+        },
+        "seconds": {
+          "title": "Seconds",
+          "type": "number",
+          "minimum": 0
+        },
+        "tool": {
+          "title": "Tool",
+          "type": "string",
+          "maxLength": 200
+        },
+        "on_call": {
+          "title": "On call",
+          "type": "integer",
+          "minimum": 1
+        },
+        "p": {
+          "title": "P",
+          "type": "number",
+          "maximum": 1,
+          "minimum": 0
+        },
+        "turn": {
+          "title": "Turn",
+          "type": "integer",
+          "minimum": 0
+        },
+        "words": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1
+          },
+          "maxItems": 50
+        },
+        "collection": {
+          "title": "Collection",
+          "type": "string",
+          "maxLength": 200
+        },
+        "where": {
+          "title": "Where",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "x-nullable": true
+          }
+        }
+      }
+    },
+    "HarnessActorTriggerCheck": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "minLength": 1
+        },
+        "seconds": {
+          "title": "Seconds",
+          "type": "number"
+        },
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "on_call": {
+          "title": "On call",
+          "type": "integer"
+        },
+        "p": {
+          "title": "P",
+          "type": "number"
+        },
+        "turn": {
+          "title": "Turn",
+          "type": "integer"
+        },
+        "words": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "collection": {
+          "title": "Collection",
+          "type": "string"
+        },
+        "where": {
+          "title": "Where",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "x-nullable": true
+          }
+        }
+      }
+    },
+    "HarnessActorUnresolved": {
+      "required": [
+        "policy"
+      ],
+      "type": "object",
+      "properties": {
+        "policy": {
+          "title": "Policy",
+          "type": "string",
+          "minLength": 1
+        },
+        "why": {
+          "title": "Why",
+          "type": "string"
+        },
+        "actor": {
+          "title": "Actor",
+          "type": "string"
+        }
+      }
+    },
+    "HarnessActorUpload": {
+      "required": [
+        "formats",
+        "max_bytes",
+        "max_label"
+      ],
+      "type": "object",
+      "properties": {
+        "formats": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "max_bytes": {
+          "title": "Max bytes",
+          "type": "integer"
+        },
+        "max_label": {
+          "title": "Max label",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "HarnessActorValidate": {
+      "required": [
+        "op"
+      ],
+      "type": "object",
+      "properties": {
+        "op": {
+          "title": "Op",
+          "type": "string",
+          "enum": [
+            "create",
+            "replace",
+            "delete"
+          ]
+        },
+        "actor_id": {
+          "title": "Actor id",
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 1
+        },
+        "changes": {
+          "$ref": "#/definitions/HarnessActorChangesCheck"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "minLength": 1
+        },
+        "share_actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1
+          },
+          "maxItems": 100
+        }
+      }
+    },
+    "HarnessActorValidation": {
+      "required": [
+        "problems",
+        "conflicts",
+        "suggested_id",
+        "over_by"
+      ],
+      "type": "object",
+      "properties": {
+        "problems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorProblem"
+          }
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorConflict"
+          }
+        },
+        "suggested_id": {
+          "title": "Suggested id",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "over_by": {
+          "title": "Over by",
+          "type": "integer"
+        }
+      }
+    },
+    "HarnessActorView": {
+      "required": [
+        "actor_id",
+        "permitted_actions",
+        "sees",
+        "never_sees",
+        "played_from_view",
+        "unused_reason"
+      ],
+      "type": "object",
+      "properties": {
+        "actor_id": {
+          "title": "Actor id",
+          "type": "string",
+          "minLength": 1
+        },
+        "permitted_actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "sees": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessActorSeen"
+          }
+        },
+        "never_sees": {
+          "$ref": "#/definitions/HarnessActorNeverSees"
+        },
+        "played_from_view": {
+          "title": "Played from view",
+          "type": "boolean"
+        },
+        "unused_reason": {
+          "title": "Unused reason",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        }
+      }
+    },
+    "HarnessActorWrite": {
+      "type": "object",
+      "properties": {
+        "actor": {
+          "title": "Actor",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "changes": {
+          "$ref": "#/definitions/HarnessActorChanges"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 1
+        },
+        "expected_revision": {
+          "title": "Expected revision",
+          "type": "integer",
+          "minimum": 0,
+          "x-nullable": true
+        },
+        "share_actions": {
+          "description": "Actions the edit gives that only one other actor holds today, confirmed as shared; without it such an edit is refused with permission_conflict (409) and each conflict.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1
+          },
+          "maxItems": 100
+        }
+      }
+    },
     "HarnessAgent": {
       "required": [
         "connector"
@@ -29285,6 +31364,29 @@
           "items": {
             "$ref": "#/definitions/HarnessVersion"
           }
+        }
+      }
+    },
+    "HarnessWorldAction": {
+      "required": [
+        "action",
+        "tool",
+        "description"
+      ],
+      "type": "object",
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string",
+          "minLength": 1
+        },
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
         }
       }
     },

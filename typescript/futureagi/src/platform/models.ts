@@ -1101,6 +1101,293 @@ export interface GatewaySummaryResult {
   model_count?: number | null;
 }
 
+export interface HarnessActor {
+  id?: string | null;
+  name?: string | null;
+  role?: string | null;
+  kind?: string | null;
+  goal?: string | null;
+  play?: string | null;
+  prompt?: string | null;
+  surface?: string | null;
+  model?: string | null;
+  side?: string | null; // one of: caller, world
+  channel?: string | null;
+  parent?: string | null;
+  on_behalf_of?: string | null;
+  identities?: unknown | null;
+  persona?: HarnessActorPersona | null;
+  loudness_ratio?: number | null;
+  constraints?: HarnessActorConstraints | null;
+  facts?: Array<string | null> | null;
+  files?: Array<string | null> | null;
+  records?: Array<HarnessActorRecordSource | null> | null;
+  knowledge?: Array<HarnessActorKnowledgeEntry | null> | null;
+  behaviour?: HarnessActorBehaviour | null;
+  permitted_actions?: Array<string | null> | null;
+  activation?: HarnessActorActivation | null;
+  max_turns?: number | null;
+  max_lines?: number | null;
+  scenarios?: number | null;
+  review_decision?: string | null; // one of: accepted, rejected
+  arrival_overrides?: Array<HarnessActorArrivalOverride | null> | null;
+  provenance?: HarnessActorProvenance | null;
+  removable?: boolean | null;
+  removal_blocked_by?: Array<string | null> | null;
+  locked_fields?: Array<HarnessActorLockedField | null> | null;
+  reaches?: Array<string | null> | null;
+  fallback?: HarnessActorFallback | null;
+  permissions?: Array<HarnessActorPermission | null> | null;
+  editable_trigger?: boolean | null;
+  when_label?: string | null;
+  timeout_label?: string | null;
+}
+
+export interface HarnessActorActivation {
+  trigger?: HarnessActorTrigger | null;
+  timeout_seconds?: number | null;
+  fallback?: string | null;
+  fallback_arguments?: unknown | null;
+}
+
+export interface HarnessActorArrivalOverride {
+  scenario?: string | null;
+  when_label?: string | null;
+}
+
+export interface HarnessActorBehaviour {
+  style?: string | null;
+  response_timing?: HarnessActorResponseTiming | null;
+}
+
+export interface HarnessActorChannelOption {
+  channel?: string | null;
+  description?: string | null;
+  loudness?: boolean | null;
+  trigger_kinds?: Array<string | null> | null;
+  required_fields?: Array<string | null> | null;
+  cap_field?: string | null; // one of: max_turns, max_lines
+  label?: string | null;
+  trigger_options?: Array<HarnessActorFieldOption | null> | null;
+}
+
+export interface HarnessActorConflict {
+  actor?: string | null;
+  action?: string | null;
+  holder?: string | null;
+  holder_name?: string | null;
+}
+
+export interface HarnessActorConstraints {
+  may_agree?: Array<string | null> | null;
+  private?: Array<string | null> | null;
+  escalate_when?: Array<string | null> | null;
+  stop_when?: Array<string | null> | null;
+}
+
+export interface HarnessActorFallback {
+  kind?: string | null; // one of: silent, decline, action, actor
+  value?: string | null;
+  label?: string | null;
+}
+
+export interface HarnessActorFieldOption {
+  value?: string | null;
+  label?: string | null;
+}
+
+export interface HarnessActorFieldOptions {
+  kind?: Array<HarnessActorFieldOption | null> | null;
+  play?: Array<HarnessActorFieldOption | null> | null;
+  fallback_word?: Array<HarnessActorFieldOption | null> | null;
+  gender?: Array<HarnessActorFieldOption | null> | null;
+  age_group?: Array<HarnessActorFieldOption | null> | null;
+  accent?: Array<HarnessActorFieldOption | null> | null;
+  response_timing?: Array<HarnessActorFieldOption | null> | null;
+}
+
+export interface HarnessActorKnowledgeEntry {
+  kind?: string | null;
+  text?: string | null;
+  paths?: Array<string | null> | null;
+  store?: string | null;
+  collection?: string | null;
+  where?: unknown | null;
+}
+
+export interface HarnessActorKnowledgeSources {
+  files?: Array<string | null> | null;
+  records?: Array<HarnessActorRecordSource | null> | null;
+  roles?: unknown | null;
+  seed_records_loaded?: boolean | null;
+}
+
+export interface HarnessActorLimitField {
+  key?: string | null;
+  kind?: string | null; // one of: whole, seconds, model
+  default?: number | null;
+  default_label?: string | null;
+}
+
+export interface HarnessActorLimits {
+  max_active?: number | null;
+  caller_takes_back_after_turns?: number | null;
+  actor_seconds_per_call?: number | null;
+  max_messages?: number | null;
+  live_turns_per_actor?: number | null;
+  live_turns_per_trial?: number | null;
+  model?: string | null;
+}
+
+export interface HarnessActorList {
+  actors?: Array<HarnessActor | null> | null;
+  source?: string | null; // one of: draft, saved
+  revision?: number | null;
+  record_schemas?: unknown | null;
+  actions?: Array<HarnessWorldAction | null> | null;
+  channels?: unknown | null;
+  loudness?: HarnessActorLoudness | null;
+  reserved_ids?: Array<string | null> | null;
+  knowledge_sources?: HarnessActorKnowledgeSources | null;
+  limits?: HarnessActorLimits | null;
+  actor_models?: Array<string | null> | null;
+  unresolved?: Array<HarnessActorUnresolved | null> | null;
+  has_caller?: boolean | null;
+  record_max_chars?: number | null;
+  channel_options?: Array<HarnessActorChannelOption | null> | null;
+  id_hint?: string | null;
+  limit_fields?: Array<HarnessActorLimitField | null> | null;
+  side_defaults?: HarnessActorSideDefaults | null;
+  field_options?: HarnessActorFieldOptions | null;
+  upload?: HarnessActorUpload | null;
+  trigger_fields?: unknown | null;
+  new_actor?: HarnessActor | null;
+}
+
+export interface HarnessActorLockedField {
+  field?: string | null;
+  reason?: string | null;
+}
+
+export interface HarnessActorLoudness {
+  channels?: Array<string | null> | null;
+  automatic?: Array<number | null> | null;
+  min?: number | null;
+  max?: number | null;
+  step?: number | null;
+  default?: number | null;
+}
+
+export interface HarnessActorNeverSees {
+  scenario_fields?: Array<string | null> | null;
+  files?: Array<string | null> | null;
+  other_actors?: Array<string | null> | null;
+  grader?: Array<string | null> | null;
+  others?: Array<HarnessActorOthersPrivate | null> | null;
+}
+
+export interface HarnessActorOthersPrivate {
+  fields?: Array<string | null> | null;
+  count?: number | null;
+}
+
+export interface HarnessActorPermission {
+  action?: string | null;
+  in_world?: boolean | null;
+}
+
+export interface HarnessActorPersona {
+  name?: string | null;
+  gender?: string | null;
+  age_group?: string | null;
+  accent?: string | null;
+  occupation?: string | null;
+  location?: string | null;
+  personality?: string | null;
+  communication_style?: string | null;
+  initial_message?: string | null;
+  languages?: Array<string | null> | null;
+  multilingual?: boolean | null;
+}
+
+export interface HarnessActorProblem {
+  field?: string | null;
+  message?: string | null;
+}
+
+export interface HarnessActorProvenance {
+  origin?: string | null;
+  by?: string | null;
+  fields?: unknown | null;
+}
+
+export interface HarnessActorRecordSource {
+  store?: string | null;
+  collection?: string | null;
+}
+
+export interface HarnessActorResponseTiming {
+  kind?: string | null; // one of: immediate, delayed
+  seconds?: number | null;
+}
+
+export interface HarnessActorSeen {
+  input?: string | null;
+  value?: unknown | null;
+  source?: string | null; // one of: actor, scenario, caller
+  text?: string | null;
+  label?: string | null;
+}
+
+export interface HarnessActorSideDefault {
+  channel?: string | null;
+}
+
+export interface HarnessActorSideDefaults {
+  caller?: HarnessActorSideDefault | null;
+  world?: HarnessActorSideDefault | null;
+}
+
+export interface HarnessActorTrigger {
+  kind?: string | null; // one of: always, after_seconds, on_tool, contacted, probability, mid_journey, on_keyword, conditional
+  seconds?: number | null;
+  tool?: string | null;
+  on_call?: number | null;
+  p?: number | null;
+  turn?: number | null;
+  words?: Array<string | null> | null;
+  collection?: string | null;
+  where?: unknown | null;
+}
+
+export interface HarnessActorUnresolved {
+  policy?: string | null;
+  why?: string | null;
+  actor?: string | null;
+}
+
+export interface HarnessActorUpload {
+  formats?: Array<string | null> | null;
+  max_bytes?: number | null;
+  max_label?: string | null;
+}
+
+export interface HarnessActorValidation {
+  problems?: Array<HarnessActorProblem | null> | null;
+  conflicts?: Array<HarnessActorConflict | null> | null;
+  suggested_id?: string | null;
+  over_by?: number | null;
+}
+
+export interface HarnessActorView {
+  actor_id?: string | null;
+  permitted_actions?: Array<string | null> | null;
+  sees?: Array<HarnessActorSeen | null> | null;
+  never_sees?: HarnessActorNeverSees | null;
+  played_from_view?: boolean | null;
+  unused_reason?: string | null;
+}
+
 export interface HarnessAgentCredentialsResponse {
   agent_version?: HarnessVersion | null;
 }
@@ -1668,6 +1955,12 @@ export interface HarnessVersions {
   agent?: Array<HarnessVersion | null> | null;
   environment?: Array<HarnessVersion | null> | null;
   suite?: Array<HarnessVersion | null> | null;
+}
+
+export interface HarnessWorldAction {
+  action?: string | null;
+  tool?: string | null;
+  description?: string | null;
 }
 
 export interface KeyMoment {
