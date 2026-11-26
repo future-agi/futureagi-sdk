@@ -1356,6 +1356,11 @@ export interface SessionsListParams {
   allow_sampled?: boolean | null;
 }
 
+export interface SimulationCallsWorkersParams {
+  /** An earlier attempt's rerun snapshot id: its record as the rerun kept it; 404 when it is not this call's, state `not_kept` when it was snapshotted before records were kept. */
+  attempt?: string | null;
+}
+
 export interface SimulationEnvironmentsListParams {
   limit?: number | null;
   agent_definition_id?: string | null;
@@ -3080,6 +3085,15 @@ export class SimulationCallsResource extends Resource {
    */
   get(callExecutionId: string, options?: RequestOptions): Promise<unknown> {
     return this._t.call<unknown>(ops.OP_SIMULATION_CALLS_GET, { path: { call_execution_id: callExecutionId }, query: {} }, options);
+  }
+
+  /**
+   * For one trial (call) of a multi-agent app, return which of the app's participants (workers) did what, read from the traces the app sent. While the traces are still being collected it returns only pending and next_read_at (read again then); it returns None when the trial handed nothing to another agent.
+   *
+   * GET /simulate/v3/call-executions/{call_execution_id}/workers/
+   */
+  workers(callExecutionId: string, params: SimulationCallsWorkersParams = {}, options?: RequestOptions): Promise<models.CallWorkersResponse> {
+    return this._t.call<models.CallWorkersResponse>(ops.OP_SIMULATION_CALLS_WORKERS, { path: { call_execution_id: callExecutionId }, query: { attempt: params.attempt } }, options);
   }
 }
 

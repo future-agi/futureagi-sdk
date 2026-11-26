@@ -1,6 +1,6 @@
 ---
 title: "Simulation"
-description: "Reference for client.simulation in the Future AGI Python and TypeScript SDKs: simulation.calls.get, simulation.environments.get, simulation.environments.list, simulation.environments.rename, simulation.environments.run, simulation.environments.run_plan and 59 more."
+description: "Reference for client.simulation in the Future AGI Python and TypeScript SDKs: simulation.calls.get, simulation.calls.workers, simulation.environments.get, simulation.environments.list, simulation.environments.rename, simulation.environments.run and 60 more."
 ---
 
 `client.simulation` on `fi.Client` (Python) and `client.simulation` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.simulation.calls`, `client.simulation.environments`, `client.simulation.environments.actors`, `client.simulation.environments.drafts`, `client.simulation.environments.evaluations`, `client.simulation.environments.nudges`, `client.simulation.environments.runs`, `client.simulation.environments.versions`, `client.simulation.executions`, `client.simulation.executions.insights`, `client.simulation.jobs`, `client.simulation.jobs.scenarios`, `client.simulation.personas`, `client.simulation.scenarios`, `client.simulation.tests`. The models these methods return are on [Simulation response models](/docs/sdk/reference/simulation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
@@ -12,6 +12,7 @@ description: "Reference for client.simulation in the Future AGI Python and TypeS
 | Method | Description |
 |---|---|
 | [`simulation.calls.get`](#simulationcallsget) | Return one call (trial) of a run with its input, transcript, tool calls, checks and rerun snapshots. |
+| [`simulation.calls.workers`](#simulationcallsworkers) | For one trial (call) of a multi-agent app, return which of the app's participants (workers) did what, read from the traces the app sent. |
 | [`simulation.environments.get`](#simulationenvironmentsget) | Return a simulation environment with its contract, world, scenarios and evaluations. |
 | [`simulation.environments.list`](#simulationenvironmentslist) | List simulation environments in the current workspace, optionally for one agent definition. |
 | [`simulation.environments.rename`](#simulationenvironmentsrename) | Rename a simulation environment (the only editable field); returns the environment. |
@@ -129,6 +130,60 @@ client.simulation.calls.get(callExecutionId: string, options?: RequestOptions): 
 #### Returns
 
 The decoded response. The contract does not describe its shape, so it is untyped.
+
+### simulation.calls.workers
+
+For one trial (call) of a multi-agent app, return which of the app's participants (workers) did what, read from the traces the app sent. While the traces are still being collected it returns only pending and next_read_at (read again then); it returns None when the trial handed nothing to another agent.
+
+<ApiEndpoint method="GET" path="/simulate/v3/call-executions/{call_execution_id}/workers/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.calls.workers("your-call-execution-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.calls.workers("your-call-execution-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.calls.workers(
+    call_execution_id: str,
+    *,
+    attempt: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.CallWorkersResponse
+```
+
+```typescript TypeScript
+client.simulation.calls.workers(callExecutionId: string, params: SimulationCallsWorkersParams = {}, options?: RequestOptions): Promise<models.CallWorkersResponse>
+
+export interface SimulationCallsWorkersParams {
+  /** An earlier attempt's rerun snapshot id: its record as the rerun kept it; 404 when it is not this call's, state `not_kept` when it was snapshotted before records were kept. */
+  attempt?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="call_execution_id" type="string" required>
+  Positional argument `call_execution_id`.
+</ParamField>
+<ParamField query="attempt" type="string" optional>
+  An earlier attempt's rerun snapshot id: its record as the rerun kept it; 404 when it is not this call's, state `not_kept` when it was snapshotted before records were kept.
+</ParamField>
+
+#### Returns
+
+[`CallWorkersResponse`](/docs/sdk/reference/simulation-models#callworkersresponse).
 
 ## client.simulation.environments
 

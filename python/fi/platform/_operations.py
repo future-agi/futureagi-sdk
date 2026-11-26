@@ -220,6 +220,7 @@ OP_SIMULATION_EXECUTIONS_RERUN_CALLS = Operation(**{'id': 'simulation.executions
 OP_SIMULATION_EXECUTIONS_INSIGHTS_GET = Operation(**{'id': 'simulation.executions.insights.get', 'method': 'GET', 'path': '/simulate/test-executions/{test_execution_id}/debug-analysis/', 'unwrap': None, 'pagination': None})
 OP_SIMULATION_EXECUTIONS_INSIGHTS_START = Operation(**{'id': 'simulation.executions.insights.start', 'method': 'POST', 'path': '/simulate/test-executions/{test_execution_id}/debug-analysis/', 'unwrap': None, 'pagination': None})
 OP_SIMULATION_CALLS_GET = Operation(**{'id': 'simulation.calls.get', 'method': 'GET', 'path': '/simulate/v3/call-executions/{call_execution_id}/', 'unwrap': None, 'pagination': None})
+OP_SIMULATION_CALLS_WORKERS = Operation(**{'id': 'simulation.calls.workers', 'method': 'GET', 'path': '/simulate/v3/call-executions/{call_execution_id}/workers/', 'unwrap': None, 'pagination': None})
 OP_SIMULATION_PERSONAS_LIST = Operation(**{'id': 'simulation.personas.list', 'method': 'GET', 'path': '/simulate/api/personas/', 'unwrap': None, 'pagination': {'page_param': 'page', 'size_param': 'limit', 'first_page': 1, 'items': 'results', 'total_items': 'count'}})
 OP_SIMULATION_PERSONAS_GET = Operation(**{'id': 'simulation.personas.get', 'method': 'GET', 'path': '/simulate/api/personas/{id}/', 'unwrap': None, 'pagination': None})
 OP_SIMULATION_PERSONAS_CREATE = Operation(**{'id': 'simulation.personas.create', 'method': 'POST', 'path': '/simulate/api/personas/', 'unwrap': None, 'pagination': None})

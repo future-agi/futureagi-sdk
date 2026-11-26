@@ -336,6 +336,153 @@ export interface CallExecutionErrorLocalizerTask {
   updated_at?: string | null;
 }
 
+export interface CallWorker {
+  worker_id?: string | null;
+  id?: string | null;
+  name?: string | null;
+  observed?: boolean | null;
+  undeclared?: boolean | null;
+  instance_ids?: Array<string | null> | null;
+  model?: string | null;
+  tokens?: number | null;
+  state?: string | null; // one of: completed, failed, no_return, deadline_passed, cancel_requested, cancelled, infrastructure, not_observed, observed_no_end, unknown
+  cut_short?: boolean | null;
+  past_deadline?: boolean | null;
+  stopped_at?: number | null;
+  cleanup?: Cleanup | null;
+  checks?: Array<WorkerCheck | null> | null;
+  enforcement?: string | null; // one of: held_at_world, not_enforced, bypassed, unknown
+  enforcement_label?: string | null;
+  channel_bypassed?: boolean | null;
+}
+
+export interface CallWorkerCoordinator {
+  name?: string | null;
+}
+
+export interface CallWorkerEvent {
+  seq?: number | null;
+  type?: string | null; // one of: delegated, transferred, tool_call, returned
+  worker_id?: string | null;
+  by?: string | null;
+  delegation_id?: string | null;
+  task?: string | null;
+  result?: string | null;
+  task_shown?: ShownText | null;
+  result_shown?: ShownText | null;
+  tool?: string | null;
+  status?: string | null; // one of: ok, error
+  span_id?: string | null;
+  trace_id?: string | null;
+  input?: unknown | null;
+  output?: unknown | null;
+  input_omitted?: boolean | null;
+  output_omitted?: boolean | null;
+  refusal_code?: string | null;
+  launch?: string | null; // one of: async
+  relationship?: string | null; // one of: observed, unknown
+  at?: string | null;
+  ended_at?: string | null;
+  attribution?: string | null; // one of: reported, unattributed
+}
+
+export interface CallWorkerEventOrNull {
+  seq?: number | null;
+  type?: string | null; // one of: delegated, transferred, tool_call, returned
+  worker_id?: string | null;
+  by?: string | null;
+  delegation_id?: string | null;
+  task?: string | null;
+  result?: string | null;
+  task_shown?: ShownText | null;
+  result_shown?: ShownText | null;
+  tool?: string | null;
+  status?: string | null; // one of: ok, error
+  span_id?: string | null;
+  trace_id?: string | null;
+  input?: unknown | null;
+  output?: unknown | null;
+  input_omitted?: boolean | null;
+  output_omitted?: boolean | null;
+  refusal_code?: string | null;
+  launch?: string | null; // one of: async
+  relationship?: string | null; // one of: observed, unknown
+  at?: string | null;
+  ended_at?: string | null;
+  attribution?: string | null; // one of: reported, unattributed
+}
+
+export interface CallWorkerRound {
+  turn?: number | null;
+  request?: CallWorkerTurn | null;
+  response?: CallWorkerTurn | null;
+  children?: Array<number | null> | null;
+  calls_outside?: number | null;
+  handoffs?: Array<number | null> | null;
+  expects_messages?: boolean | null;
+}
+
+export interface CallWorkerStep {
+  kind?: string | null; // one of: handoff, tool_call
+  key?: number | null;
+  parent?: number | null;
+  depth?: number | null;
+  worker_id?: string | null;
+  transfer?: boolean | null;
+  handoff?: CallWorkerEventOrNull | null;
+  returned?: CallWorkerEventOrNull | null;
+  started_at?: string | null;
+  ended_at?: string | null;
+  parallel?: boolean | null;
+  end?: string | null; // one of: finished, failed, passed, no_return, cut_off
+  end_state?: string | null; // one of: completed, failed, no_return, deadline_passed, cancel_requested, cancelled, infrastructure, not_observed, observed_no_end, unknown
+  did_not_finish?: boolean | null;
+  first_of_worker?: boolean | null;
+  children?: Array<number | null> | null;
+  call?: CallWorkerEvent | null;
+  turn?: number | null;
+  order?: number | null;
+  relationship?: string | null; // one of: observed, unknown
+}
+
+export interface CallWorkerTurn {
+  text?: string | null;
+  at?: string | null;
+  shown?: ShownText | null;
+}
+
+export interface CallWorkersResponse {
+  workers?: Array<CallWorker | null> | null;
+  events?: Array<CallWorkerEvent | null> | null;
+  events_omitted?: number | null;
+  coordinator?: CallWorkerCoordinator | null;
+  started_at?: string | null;
+  spans_received?: boolean | null;
+  collected_at?: string | null;
+  project_id?: string | null;
+  collection?: string | null; // one of: complete, partial, unavailable, no_evidence, infrastructure_lost
+  steps?: Array<CallWorkerStep | null> | null;
+  turns?: Array<CallWorkerRound | null> | null;
+  depth?: number | null;
+  parallel?: number | null;
+  asynchronous?: number | null;
+  overlap_unknown?: boolean | null;
+  worker_depths?: unknown | null;
+  counts?: HandOffCounts | null;
+  cut_off?: boolean | null;
+  beyond_boundary?: boolean | null;
+  placements?: Array<FailurePlacement | null> | null;
+  stopped_by_user?: boolean | null;
+  pending?: boolean | null;
+  next_read_at?: string | null;
+  state?: string | null; // one of: recorded, not_kept, unreadable
+}
+
+export interface Cleanup {
+  status?: string | null; // one of: stopped, stopped_with_sandbox, still_running, unknown
+  at?: string | null;
+}
+
 export interface Column {
   id?: string | null;
   name?: string | null;
@@ -1001,6 +1148,14 @@ export interface FailedRerunItem {
   error?: string | null;
 }
 
+export interface FailurePlacement {
+  name?: string | null;
+  status?: string | null; // one of: failed, inconclusive
+  step?: number | null;
+  worker_id?: string | null;
+  untied?: string | null; // one of: no_moment, several_hand_offs, no_hand_off
+}
+
 export interface FeedDetailCore {
   row?: FeedListRow | null;
   description?: string | null;
@@ -1099,6 +1254,15 @@ export interface GatewaySummaryResult {
   status?: string | null;
   provider_count?: number | null;
   model_count?: number | null;
+}
+
+export interface HandOffCounts {
+  hand_offs?: number | null;
+  workers?: number | null;
+  finished?: number | null;
+  did_not_finish?: number | null;
+  passed?: number | null;
+  cut_off?: number | null;
 }
 
 export interface HarnessActor {
@@ -2745,6 +2909,11 @@ export interface SecretReference {
   purpose?: string | null; // one of: target_provider, simulator_provider, source_checkout
 }
 
+export interface ShownText {
+  format?: string | null; // one of: code, text
+  text?: string | null;
+}
+
 export interface SimulateEvalConfigResponse {
   id?: string | null;
   name?: string | null;
@@ -3284,6 +3453,12 @@ export interface UserInfoResponse {
 export interface UserInfoTwoFactorMethods {
   totp?: boolean | null;
   passkey?: boolean | null;
+}
+
+export interface WorkerCheck {
+  name?: string | null;
+  passed?: boolean | null;
+  result?: string | null; // one of: not_applicable, inconclusive, unmeasured
 }
 
 export interface WorkspaceManagementItem {

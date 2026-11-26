@@ -1709,6 +1709,11 @@ operations:
     note: contract types evaluations[].value as an object and function_calls[] with fixed fields; the server returns strings and numbers and the recorded tool trace
   surfaces: {sdk: {}, mcp: false}
 
+- id: simulation.calls.workers
+  description: For one trial (call) of a multi-agent app, return which of the app's participants (workers) did what, read from the traces the app sent. While the traces are still being collected it returns only pending and next_read_at (read again then); it returns None when the trial handed nothing to another agent.
+  operation: {method: GET, path: '/simulate/v3/call-executions/{call_execution_id}/workers/'}
+  surfaces: {sdk: {}, mcp: false}
+
 - id: simulation.personas.list
   description: List the system and workspace personas you can use, newest first, 10 per page by default; filter by type (prebuilt or custom), search or simulation_type (voice or text).
   operation: {method: GET, path: /simulate/api/personas/}

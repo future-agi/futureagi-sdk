@@ -1190,6 +1190,16 @@ class SimulationCallsResource(Resource):
         body = None
         return self._t.call(_ops.OP_SIMULATION_CALLS_GET, path=path, query=query, body=body, model=None, options=options)
 
+    def workers(self, call_execution_id: str, *, attempt: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.CallWorkersResponse:
+        """For one trial (call) of a multi-agent app, return which of the app's participants (workers) did what, read from the traces the app sent. While the traces are still being collected it returns only pending and next_read_at (read again then); it returns None when the trial handed nothing to another agent.
+
+        GET /simulate/v3/call-executions/{call_execution_id}/workers/
+        """
+        path = {'call_execution_id': call_execution_id}
+        query = {'attempt': attempt, **(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_CALLS_WORKERS, path=path, query=query, body=body, model=models.CallWorkersResponse, options=options)
+
 
 class SimulationEnvironmentsResource(Resource):
     """`client.simulation.environments`. Subclass to add methods; override `_children` to swap a nested resource."""
@@ -3880,6 +3890,16 @@ class AsyncSimulationCallsResource(Resource):
         query = {**(extra_query or {})}
         body = None
         return await self._t.acall(_ops.OP_SIMULATION_CALLS_GET, path=path, query=query, body=body, model=None, options=options)
+
+    async def workers(self, call_execution_id: str, *, attempt: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.CallWorkersResponse:
+        """For one trial (call) of a multi-agent app, return which of the app's participants (workers) did what, read from the traces the app sent. While the traces are still being collected it returns only pending and next_read_at (read again then); it returns None when the trial handed nothing to another agent.
+
+        GET /simulate/v3/call-executions/{call_execution_id}/workers/
+        """
+        path = {'call_execution_id': call_execution_id}
+        query = {'attempt': attempt, **(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_CALLS_WORKERS, path=path, query=query, body=body, model=models.CallWorkersResponse, options=options)
 
 
 class AsyncSimulationEnvironmentsResource(Resource):

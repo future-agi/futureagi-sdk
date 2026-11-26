@@ -375,6 +375,161 @@ class CallExecutionErrorLocalizerTask(_Model):
     updated_at: Optional[str] = Field(default=None)
 
 
+class CallWorker(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['checks', 'cut_short', 'id', 'instance_ids', 'name', 'observed', 'past_deadline', 'state', 'undeclared', 'worker_id'])
+    worker_id: Optional[str] = Field(default=None)
+    id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None)
+    observed: Optional[bool] = Field(default=None)
+    undeclared: Optional[bool] = Field(default=None)
+    instance_ids: Optional[List[Optional[str]]] = Field(default=None)
+    model: Optional[str] = Field(default=None)
+    tokens: Optional[int] = Field(default=None)
+    state: Optional[str] = Field(default=None)  # one of: completed, failed, no_return, deadline_passed, cancel_requested, cancelled, infrastructure, not_observed, observed_no_end, unknown
+    cut_short: Optional[bool] = Field(default=None)
+    past_deadline: Optional[bool] = Field(default=None)
+    stopped_at: Optional[float] = Field(default=None)
+    cleanup: Optional[Cleanup] = Field(default=None)
+    checks: Optional[List[Optional[WorkerCheck]]] = Field(default=None)
+    enforcement: Optional[str] = Field(default=None)  # one of: held_at_world, not_enforced, bypassed, unknown
+    enforcement_label: Optional[str] = Field(default=None)
+    channel_bypassed: Optional[bool] = Field(default=None)
+
+
+class CallWorkerCoordinator(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name'])
+    name: Optional[str] = Field(default=None)
+
+
+class CallWorkerEvent(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['attribution', 'seq', 'type'])
+    seq: Optional[int] = Field(default=None)
+    type: Optional[str] = Field(default=None)  # one of: delegated, transferred, tool_call, returned
+    worker_id: Optional[str] = Field(default=None)
+    by: Optional[str] = Field(default=None)
+    delegation_id: Optional[str] = Field(default=None)
+    task: Optional[str] = Field(default=None)
+    result: Optional[str] = Field(default=None)
+    task_shown: Optional[ShownText] = Field(default=None)
+    result_shown: Optional[ShownText] = Field(default=None)
+    tool: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: ok, error
+    span_id: Optional[str] = Field(default=None)
+    trace_id: Optional[str] = Field(default=None)
+    input: Optional[Any] = Field(default=None)
+    output: Optional[Any] = Field(default=None)
+    input_omitted: Optional[bool] = Field(default=None)
+    output_omitted: Optional[bool] = Field(default=None)
+    refusal_code: Optional[str] = Field(default=None)
+    launch: Optional[str] = Field(default=None)  # one of: async
+    relationship: Optional[str] = Field(default=None)  # one of: observed, unknown
+    at: Optional[str] = Field(default=None)
+    ended_at: Optional[str] = Field(default=None)
+    attribution: Optional[str] = Field(default=None)  # one of: reported, unattributed
+
+
+class CallWorkerEventOrNull(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['attribution', 'seq', 'type'])
+    seq: Optional[int] = Field(default=None)
+    type: Optional[str] = Field(default=None)  # one of: delegated, transferred, tool_call, returned
+    worker_id: Optional[str] = Field(default=None)
+    by: Optional[str] = Field(default=None)
+    delegation_id: Optional[str] = Field(default=None)
+    task: Optional[str] = Field(default=None)
+    result: Optional[str] = Field(default=None)
+    task_shown: Optional[ShownText] = Field(default=None)
+    result_shown: Optional[ShownText] = Field(default=None)
+    tool: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: ok, error
+    span_id: Optional[str] = Field(default=None)
+    trace_id: Optional[str] = Field(default=None)
+    input: Optional[Any] = Field(default=None)
+    output: Optional[Any] = Field(default=None)
+    input_omitted: Optional[bool] = Field(default=None)
+    output_omitted: Optional[bool] = Field(default=None)
+    refusal_code: Optional[str] = Field(default=None)
+    launch: Optional[str] = Field(default=None)  # one of: async
+    relationship: Optional[str] = Field(default=None)  # one of: observed, unknown
+    at: Optional[str] = Field(default=None)
+    ended_at: Optional[str] = Field(default=None)
+    attribution: Optional[str] = Field(default=None)  # one of: reported, unattributed
+
+
+class CallWorkerRound(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['calls_outside', 'children', 'expects_messages', 'handoffs'])
+    turn: Optional[int] = Field(default=None)
+    request: Optional[CallWorkerTurn] = Field(default=None)
+    response: Optional[CallWorkerTurn] = Field(default=None)
+    children: Optional[List[Optional[int]]] = Field(default=None)
+    calls_outside: Optional[int] = Field(default=None)
+    handoffs: Optional[List[Optional[int]]] = Field(default=None)
+    expects_messages: Optional[bool] = Field(default=None)
+
+
+class CallWorkerStep(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['depth', 'key', 'kind', 'order', 'relationship'])
+    kind: Optional[str] = Field(default=None)  # one of: handoff, tool_call
+    key: Optional[int] = Field(default=None)
+    parent: Optional[int] = Field(default=None)
+    depth: Optional[int] = Field(default=None)
+    worker_id: Optional[str] = Field(default=None)
+    transfer: Optional[bool] = Field(default=None)
+    handoff: Optional[CallWorkerEventOrNull] = Field(default=None)
+    returned: Optional[CallWorkerEventOrNull] = Field(default=None)
+    started_at: Optional[str] = Field(default=None)
+    ended_at: Optional[str] = Field(default=None)
+    parallel: Optional[bool] = Field(default=None)
+    end: Optional[str] = Field(default=None)  # one of: finished, failed, passed, no_return, cut_off
+    end_state: Optional[str] = Field(default=None)  # one of: completed, failed, no_return, deadline_passed, cancel_requested, cancelled, infrastructure, not_observed, observed_no_end, unknown
+    did_not_finish: Optional[bool] = Field(default=None)
+    first_of_worker: Optional[bool] = Field(default=None)
+    children: Optional[List[Optional[int]]] = Field(default=None)
+    call: Optional[CallWorkerEvent] = Field(default=None)
+    turn: Optional[int] = Field(default=None)
+    order: Optional[int] = Field(default=None)
+    relationship: Optional[str] = Field(default=None)  # one of: observed, unknown
+
+
+class CallWorkerTurn(_Model):
+    text: Optional[str] = Field(default=None)
+    at: Optional[str] = Field(default=None)
+    shown: Optional[ShownText] = Field(default=None)
+
+
+class CallWorkersResponse(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['asynchronous', 'beyond_boundary', 'collected_at', 'cut_off', 'depth', 'events', 'overlap_unknown', 'parallel', 'pending', 'placements', 'state', 'steps', 'stopped_by_user', 'turns', 'worker_depths', 'workers'])
+    workers: Optional[List[Optional[CallWorker]]] = Field(default=None)
+    events: Optional[List[Optional[CallWorkerEvent]]] = Field(default=None)
+    events_omitted: Optional[int] = Field(default=None)
+    coordinator: Optional[CallWorkerCoordinator] = Field(default=None)
+    started_at: Optional[str] = Field(default=None)
+    spans_received: Optional[bool] = Field(default=None)
+    collected_at: Optional[str] = Field(default=None)
+    project_id: Optional[str] = Field(default=None)
+    collection: Optional[str] = Field(default=None)  # one of: complete, partial, unavailable, no_evidence, infrastructure_lost
+    steps: Optional[List[Optional[CallWorkerStep]]] = Field(default=None)
+    turns: Optional[List[Optional[CallWorkerRound]]] = Field(default=None)
+    depth: Optional[int] = Field(default=None)
+    parallel: Optional[int] = Field(default=None)
+    asynchronous: Optional[int] = Field(default=None)
+    overlap_unknown: Optional[bool] = Field(default=None)
+    worker_depths: Optional[Any] = Field(default=None)
+    counts: Optional[HandOffCounts] = Field(default=None)
+    cut_off: Optional[bool] = Field(default=None)
+    beyond_boundary: Optional[bool] = Field(default=None)
+    placements: Optional[List[Optional[FailurePlacement]]] = Field(default=None)
+    stopped_by_user: Optional[bool] = Field(default=None)
+    pending: Optional[bool] = Field(default=None)
+    next_read_at: Optional[str] = Field(default=None)
+    state: Optional[str] = Field(default=None)  # one of: recorded, not_kept, unreadable
+
+
+class Cleanup(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['status'])
+    status: Optional[str] = Field(default=None)  # one of: stopped, stopped_with_sandbox, still_running, unknown
+    at: Optional[str] = Field(default=None)
+
+
 class Column(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['data_type', 'name', 'source'])
     id: Optional[str] = Field(default=None)
@@ -1098,6 +1253,15 @@ class FailedRerunItem(_Model):
     error: Optional[str] = Field(default=None)
 
 
+class FailurePlacement(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name', 'status'])
+    name: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: failed, inconclusive
+    step: Optional[int] = Field(default=None)
+    worker_id: Optional[str] = Field(default=None)
+    untied: Optional[str] = Field(default=None)  # one of: no_moment, several_hand_offs, no_hand_off
+
+
 class FeedDetailCore(_Model):
     row: Optional[FeedListRow] = Field(default=None)
     description: Optional[str] = Field(default=None)
@@ -1202,6 +1366,16 @@ class GatewaySummaryResult(_Model):
     status: Optional[str] = Field(default=None)
     provider_count: Optional[int] = Field(default=None)
     model_count: Optional[int] = Field(default=None)
+
+
+class HandOffCounts(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['cut_off', 'did_not_finish', 'finished', 'hand_offs', 'passed', 'workers'])
+    hand_offs: Optional[int] = Field(default=None)
+    workers: Optional[int] = Field(default=None)
+    finished: Optional[int] = Field(default=None)
+    did_not_finish: Optional[int] = Field(default=None)
+    passed: Optional[int] = Field(default=None)
+    cut_off: Optional[int] = Field(default=None)
 
 
 class HarnessActor(_Model):
@@ -3001,6 +3175,12 @@ class SecretReference(_Model):
     purpose: Optional[str] = Field(default=None)  # one of: target_provider, simulator_provider, source_checkout
 
 
+class ShownText(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['format', 'text'])
+    format: Optional[str] = Field(default=None)  # one of: code, text
+    text: Optional[str] = Field(default=None)
+
+
 class SimulateEvalConfigResponse(_Model):
     id: Optional[str] = Field(default=None)
     name: Optional[str] = Field(default=None)
@@ -3584,6 +3764,13 @@ class UserInfoTwoFactorMethods(_Model):
     passkey: Optional[bool] = Field(default=None)
 
 
+class WorkerCheck(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['name'])
+    name: Optional[str] = Field(default=None)
+    passed: Optional[bool] = Field(default=None)
+    result: Optional[str] = Field(default=None)  # one of: not_applicable, inconclusive, unmeasured
+
+
 class WorkspaceManagementItem(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['created_at', 'description', 'display_name', 'id', 'is_default', 'member_count', 'name'])
     id: Optional[str] = Field(default=None)
@@ -3644,6 +3831,15 @@ BulkAnnotationResponseResult.model_rebuild()
 BulkCreateScoresResult.model_rebuild()
 CallExecution.model_rebuild()
 CallExecutionErrorLocalizerTask.model_rebuild()
+CallWorker.model_rebuild()
+CallWorkerCoordinator.model_rebuild()
+CallWorkerEvent.model_rebuild()
+CallWorkerEventOrNull.model_rebuild()
+CallWorkerRound.model_rebuild()
+CallWorkerStep.model_rebuild()
+CallWorkerTurn.model_rebuild()
+CallWorkersResponse.model_rebuild()
+Cleanup.model_rebuild()
 Column.model_rebuild()
 CustomEvalConfig.model_rebuild()
 Dashboard.model_rebuild()
@@ -3709,6 +3905,7 @@ EventsOverTimePoint.model_rebuild()
 ExperimentDetailV2.model_rebuild()
 ExperimentListV2.model_rebuild()
 FailedRerunItem.model_rebuild()
+FailurePlacement.model_rebuild()
 FeedDetailCore.model_rebuild()
 FeedListResponse.model_rebuild()
 FeedListRow.model_rebuild()
@@ -3716,6 +3913,7 @@ GatewayConfigProvider.model_rebuild()
 GatewayConfigResult.model_rebuild()
 GatewayStatus.model_rebuild()
 GatewaySummaryResult.model_rebuild()
+HandOffCounts.model_rebuild()
 HarnessActor.model_rebuild()
 HarnessActorActivation.model_rebuild()
 HarnessActorArrivalOverride.model_rebuild()
@@ -3886,6 +4084,7 @@ ScenarioPromptItem.model_rebuild()
 ScenarioResponse.model_rebuild()
 Score.model_rebuild()
 SecretReference.model_rebuild()
+ShownText.model_rebuild()
 SimulateEvalConfigResponse.model_rebuild()
 SpanListColumnConfig.model_rebuild()
 SpanListMetadata.model_rebuild()
@@ -3933,6 +4132,7 @@ UserAlertMonitorTrend.model_rebuild()
 UserInfoOrganization.model_rebuild()
 UserInfoResponse.model_rebuild()
 UserInfoTwoFactorMethods.model_rebuild()
+WorkerCheck.model_rebuild()
 WorkspaceManagementItem.model_rebuild()
 WorkspaceManagementListResult.model_rebuild()
 _EvalTaskListResultResponse.model_rebuild()
@@ -3959,6 +4159,15 @@ __all__ = [
     'BulkCreateScoresResult',
     'CallExecution',
     'CallExecutionErrorLocalizerTask',
+    'CallWorker',
+    'CallWorkerCoordinator',
+    'CallWorkerEvent',
+    'CallWorkerEventOrNull',
+    'CallWorkerRound',
+    'CallWorkerStep',
+    'CallWorkerTurn',
+    'CallWorkersResponse',
+    'Cleanup',
     'Column',
     'CustomEvalConfig',
     'Dashboard',
@@ -4024,6 +4233,7 @@ __all__ = [
     'ExperimentDetailV2',
     'ExperimentListV2',
     'FailedRerunItem',
+    'FailurePlacement',
     'FeedDetailCore',
     'FeedListResponse',
     'FeedListRow',
@@ -4031,6 +4241,7 @@ __all__ = [
     'GatewayConfigResult',
     'GatewayStatus',
     'GatewaySummaryResult',
+    'HandOffCounts',
     'HarnessActor',
     'HarnessActorActivation',
     'HarnessActorArrivalOverride',
@@ -4201,6 +4412,7 @@ __all__ = [
     'ScenarioResponse',
     'Score',
     'SecretReference',
+    'ShownText',
     'SimulateEvalConfigResponse',
     'SpanListColumnConfig',
     'SpanListMetadata',
@@ -4248,6 +4460,7 @@ __all__ = [
     'UserInfoOrganization',
     'UserInfoResponse',
     'UserInfoTwoFactorMethods',
+    'WorkerCheck',
     'WorkspaceManagementItem',
     'WorkspaceManagementListResult',
     '_EvalTaskListResultResponse',
