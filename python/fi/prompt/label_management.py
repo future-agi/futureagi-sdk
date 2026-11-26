@@ -72,12 +72,14 @@ class LabelManagementMixin:
         fi_api_key: Optional[str] = None,
         fi_secret_key: Optional[str] = None,
         fi_base_url: Optional[str] = None,
+        allow_insecure_http: Optional[bool] = None,
     ) -> Dict:
         """Assign a label by name to a template/version using only names."""
         client = cls(
             fi_api_key=fi_api_key,
             fi_secret_key=fi_secret_key,
             fi_base_url=fi_base_url,
+            allow_insecure_http=allow_insecure_http,
         )
         try:
             return client._assign_label_to_template_version_by_names(template_name, version, label)
@@ -94,12 +96,14 @@ class LabelManagementMixin:
         fi_api_key: Optional[str] = None,
         fi_secret_key: Optional[str] = None,
         fi_base_url: Optional[str] = None,
+        allow_insecure_http: Optional[bool] = None,
     ) -> Dict:
         """Remove a label by name from a template/version using only names."""
         client = cls(
             fi_api_key=fi_api_key,
             fi_secret_key=fi_secret_key,
             fi_base_url=fi_base_url,
+            allow_insecure_http=allow_insecure_http,
         )
         try:
             return client._remove_label_from_template_version_by_names(template_name, version, label)
@@ -115,12 +119,14 @@ class LabelManagementMixin:
         fi_api_key: Optional[str] = None,
         fi_secret_key: Optional[str] = None,
         fi_base_url: Optional[str] = None,
+        allow_insecure_http: Optional[bool] = None,
     ) -> Dict:
         """Set default version for a template by name."""
         client = APIKeyAuth(
             fi_api_key=fi_api_key,
             fi_secret_key=fi_secret_key,
             fi_base_url=fi_base_url,
+            allow_insecure_http=allow_insecure_http,
         )
         try:
             response = client.request(
@@ -144,6 +150,7 @@ class LabelManagementMixin:
         fi_api_key: Optional[str] = None,
         fi_secret_key: Optional[str] = None,
         fi_base_url: Optional[str] = None,
+        allow_insecure_http: Optional[bool] = None,
     ) -> Dict:
         """List versions and labels for a template by name or id. Returns raw JSON."""
         if not template_name and not template_id:
@@ -152,6 +159,7 @@ class LabelManagementMixin:
             fi_api_key=fi_api_key,
             fi_secret_key=fi_secret_key,
             fi_base_url=fi_base_url,
+            allow_insecure_http=allow_insecure_http,
         )
         try:
             params = {"template_name": template_name} if template_name else {"template_id": template_id}

@@ -23,6 +23,7 @@ from ._errors import (
     error_from_response,
 )
 from ._pagination import AsyncPager, SyncPager, _get
+from fi.utils import _http_guard as _guard
 
 # 429 means the server did not process the request, so any method may retry it. A
 # timeout, a 5xx or a dropped connection may have happened after a write was applied,
@@ -172,6 +173,7 @@ class Config:
     workspace_id: str | None = None
     strict_responses: bool = False
     default_headers: Optional[Mapping[str, str]] = None
+    allow_insecure_http: Optional[bool] = None
 
     def headers(self, options: RequestOptions | None = None) -> dict[str, str]:
         headers = {
@@ -285,6 +287,20 @@ def _check_page(op: Operation, data: Any, strict: bool) -> Any:
     return data
 
 
+def _check_send(config: Config, url: str, headers: Mapping[str, str], client: Any, owned: bool) -> None:
+    """Refuse a request that carries a key over plain http unless it is to loopback or opted in; a client the caller
+    supplied must not be able to route it through a proxy. A caller's client that answers in the process (such as
+    ``httpx.MockTransport``) makes no connection and is not judged.
+
+    Each request is judged twice: as written, before httpx rewrites the host (IDNA, IPv4 forms), and as the client
+    built it, with its URL merged onto the client's ``base_url`` and its headers holding the client's defaults. The
+    proxy is the one the client picks for that URL (its environment proxies, ``NO_PROXY`` and ``trust_env``)."""
+    if not owned and _guard.in_process_transport(client, url):
+        return
+    if _guard.requires_direct(url, _guard.carries_key(headers), config.allow_insecure_http, ValueError) and not owned:
+        _guard.refuse_proxied_client(client, url, ValueError)
+
+
 def _backoff(attempt: int, response: httpx.Response | None) -> float:
     retry_after = response.headers.get("retry-after") if response is not None else None
     if retry_after:
@@ -303,7 +319,7 @@ class SyncTransport:
         self._owns_http = http_client is None
         # Redirects are followed here, not by httpx: only to the client's own origin (see _follow_redirect).
         # Every request also says so itself, because a caller's client may have follow_redirects=True.
-        self._http = http_client or httpx.Client(follow_redirects=False)
+        self._http = http_client or httpx.Client(follow_redirects=False, mounts=_guard.direct_mounts())
 
     def request(self, op: Operation, *, path=None, query=None, body=None, files=None, options: RequestOptions | None = None) -> Any:
         """One HTTP call for `op`: auth, retries, envelope unwrap, typed errors. Returns decoded JSON."""
@@ -312,8 +328,11 @@ class SyncTransport:
         headers, timeout, retries = self.config.headers(options), self.config.timeout_for(options), self.config.retries_for(options)
         attempt = redirects = 0
         while True:
+            _check_send(self.config, url, headers, self._http, self._owns_http)
+            request = self._http.build_request(method, url, params=_clean(query), headers=headers, timeout=timeout, **payload)
+            _check_send(self.config, str(request.url), request.headers, self._http, self._owns_http)
             try:
-                response = self._http.request(method, url, params=_clean(query), headers=headers, timeout=timeout, follow_redirects=False, **payload)
+                response = self._http.send(request, follow_redirects=False)
             except httpx.TransportError as exc:
                 if _can_retry(op, None, attempt, retries):
                     time.sleep(_backoff(attempt, None))
@@ -363,7 +382,7 @@ class AsyncTransport:
     def __init__(self, config: Config, http_client: httpx.AsyncClient | None = None) -> None:
         self.config = config
         self._owns_http = http_client is None
-        self._http = http_client or httpx.AsyncClient(follow_redirects=False)
+        self._http = http_client or httpx.AsyncClient(follow_redirects=False, mounts=_guard.direct_async_mounts())
 
     async def request(self, op: Operation, *, path=None, query=None, body=None, files=None, options: RequestOptions | None = None) -> Any:
         url, method = self.config.base_url + _url(op, path), op.method
@@ -371,8 +390,11 @@ class AsyncTransport:
         headers, timeout, retries = self.config.headers(options), self.config.timeout_for(options), self.config.retries_for(options)
         attempt = redirects = 0
         while True:
+            _check_send(self.config, url, headers, self._http, self._owns_http)
+            request = self._http.build_request(method, url, params=_clean(query), headers=headers, timeout=timeout, **payload)
+            _check_send(self.config, str(request.url), request.headers, self._http, self._owns_http)
             try:
-                response = await self._http.request(method, url, params=_clean(query), headers=headers, timeout=timeout, follow_redirects=False, **payload)
+                response = await self._http.send(request, follow_redirects=False)
             except httpx.TransportError as exc:
                 if _can_retry(op, None, attempt, retries):
                     await asyncio.sleep(_backoff(attempt, None))

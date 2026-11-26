@@ -30,6 +30,7 @@ from fi.gateway._constants import (
 )
 from fi.gateway._exceptions import APIConnectionError, APIStatusError, APITimeoutError
 from fi.gateway._utils import parse_timeout, serialize_agentcc_param
+from fi.utils import _http_guard as _guard
 
 logger = logging.getLogger("agentcc")
 
@@ -164,7 +165,9 @@ class BaseClient(ABC):
         callbacks: list[Any] | None = None,
         http_client: Any = None,
         retry_policy: Any = None,
+        allow_insecure_http: bool | None = None,
     ) -> None:
+        self._allow_insecure_http = allow_insecure_http
         self._api_key = api_key
         self._base_url = base_url.rstrip("/")
         self._timeout = parse_timeout(timeout)
@@ -220,6 +223,30 @@ class BaseClient(ABC):
         headers.update(options.headers)
 
         return headers
+
+    @staticmethod
+    def _limits() -> httpx.Limits:
+        return httpx.Limits(
+            max_connections=DEFAULT_MAX_CONNECTIONS,
+            max_keepalive_connections=DEFAULT_KEEPALIVE_CONNECTIONS,
+            keepalive_expiry=DEFAULT_KEEPALIVE_EXPIRY,
+        )
+
+    def _guard_send(self, url: str, headers: Any, client: Any) -> None:
+        """Refuse a request that carries a key over plain http unless it is to loopback or opted in; a client the
+        caller supplied must not be able to route it through a proxy. A caller's client that answers in the process
+        (such as ``httpx.MockTransport``) makes no connection and is not judged.
+
+        Each request is judged twice: as written, before httpx rewrites the host (IDNA, IPv4 forms), and as the
+        client built it, with its URL merged onto the client's ``base_url`` and its headers holding the client's
+        defaults. The proxy is the one the client picks for that URL (its environment proxies, ``NO_PROXY`` and
+        ``trust_env``)."""
+        from fi.gateway._exceptions import AgentCCError
+
+        if not self._owns_client and _guard.in_process_transport(client, url):
+            return
+        if _guard.requires_direct(url, _guard.carries_key(headers), self._allow_insecure_http, AgentCCError) and not self._owns_client:
+            _guard.refuse_proxied_client(client, url, AgentCCError)
 
     def _build_url(self, path: str) -> str:
         """Join base_url and path, handling slashes correctly."""
@@ -321,12 +348,9 @@ class SyncBaseClient(BaseClient):
     def _ensure_client(self) -> httpx.Client:
         if self._client is None:
             self._client = httpx.Client(
+                mounts=_guard.direct_mounts(self._limits()),
                 timeout=self._timeout,
-                limits=httpx.Limits(
-                    max_connections=DEFAULT_MAX_CONNECTIONS,
-                    max_keepalive_connections=DEFAULT_KEEPALIVE_CONNECTIONS,
-                    keepalive_expiry=DEFAULT_KEEPALIVE_EXPIRY,
-                ),
+                limits=self._limits(),
             )
             self._owns_client = True
         return self._client
@@ -342,15 +366,18 @@ class SyncBaseClient(BaseClient):
         headers = self._build_headers(options, agentcc_params)
         timeout = options.timeout or self._timeout
         client = self._ensure_client()
+        self._guard_send(url, headers, client)
+        request = client.build_request(
+            method=options.method,
+            url=url,
+            headers=headers,
+            timeout=timeout,
+            **_payload(options),
+        )
+        self._guard_send(str(request.url), request.headers, client)
 
         try:
-            response = client.request(
-                method=options.method,
-                url=url,
-                headers=headers,
-                timeout=timeout,
-                **_payload(options),
-            )
+            response = client.send(request, follow_redirects=False)
         except httpx.TimeoutException as e:
             raise APITimeoutError(f"Request timed out: {e}") from e
         except httpx.ConnectError as e:
@@ -360,7 +387,7 @@ class SyncBaseClient(BaseClient):
         if response.status_code == 246:
             self._process_guardrail_warning(response)
 
-        if response.status_code >= 400:
+        if response.status_code >= 300:
             self._process_error(response)
 
         return self._process_response_body(response, response_cls)
@@ -456,15 +483,18 @@ class SyncBaseClient(BaseClient):
         headers = self._build_headers(options, agentcc_params)
         timeout = options.timeout or self._timeout
         client = self._ensure_client()
+        self._guard_send(url, headers, client)
+        request = client.build_request(
+            method=options.method,
+            url=url,
+            headers=headers,
+            timeout=timeout,
+            **_payload(options),
+        )
+        self._guard_send(str(request.url), request.headers, client)
 
         try:
-            response = client.request(
-                method=options.method,
-                url=url,
-                headers=headers,
-                timeout=timeout,
-                **_payload(options),
-            )
+            response = client.send(request, follow_redirects=False)
         except httpx.TimeoutException as e:
             raise APITimeoutError(f"Request timed out: {e}") from e
         except httpx.ConnectError as e:
@@ -473,7 +503,7 @@ class SyncBaseClient(BaseClient):
         if response.status_code == 246:
             self._process_guardrail_warning(response)
 
-        if response.status_code >= 400:
+        if response.status_code >= 300:
             self._process_error(response)
 
         return response.content
@@ -565,24 +595,24 @@ class SyncBaseClient(BaseClient):
         headers = self._build_headers(options, agentcc_params)
         timeout = options.timeout or self._timeout
         client = self._ensure_client()
+        self._guard_send(url, headers, client)
+        request = client.build_request(
+            method=options.method,
+            url=url,
+            json=options.body,
+            headers=headers,
+            timeout=timeout,
+        )
+        self._guard_send(str(request.url), request.headers, client)
 
         try:
-            response = client.send(
-                client.build_request(
-                    method=options.method,
-                    url=url,
-                    json=options.body,
-                    headers=headers,
-                    timeout=timeout,
-                ),
-                stream=True,
-            )
+            response = client.send(request, follow_redirects=False, stream=True)
         except httpx.TimeoutException as e:
             raise APITimeoutError(f"Request timed out: {e}") from e
         except httpx.ConnectError as e:
             raise APIConnectionError(f"Connection error: {e}") from e
 
-        if response.status_code >= 400 or response.status_code == 246:
+        if response.status_code >= 300 or response.status_code == 246:
             try:
                 response.read()
                 if response.status_code == 246:
@@ -651,12 +681,9 @@ class AsyncBaseClient(BaseClient):
     def _ensure_client(self) -> httpx.AsyncClient:
         if self._client is None:
             self._client = httpx.AsyncClient(
+                mounts=_guard.direct_async_mounts(self._limits()),
                 timeout=self._timeout,
-                limits=httpx.Limits(
-                    max_connections=DEFAULT_MAX_CONNECTIONS,
-                    max_keepalive_connections=DEFAULT_KEEPALIVE_CONNECTIONS,
-                    keepalive_expiry=DEFAULT_KEEPALIVE_EXPIRY,
-                ),
+                limits=self._limits(),
             )
             self._owns_client = True
         return self._client
@@ -671,15 +698,18 @@ class AsyncBaseClient(BaseClient):
         headers = self._build_headers(options, agentcc_params)
         timeout = options.timeout or self._timeout
         client = self._ensure_client()
+        self._guard_send(url, headers, client)
+        request = client.build_request(
+            method=options.method,
+            url=url,
+            headers=headers,
+            timeout=timeout,
+            **_payload(options),
+        )
+        self._guard_send(str(request.url), request.headers, client)
 
         try:
-            response = await client.request(
-                method=options.method,
-                url=url,
-                headers=headers,
-                timeout=timeout,
-                **_payload(options),
-            )
+            response = await client.send(request, follow_redirects=False)
         except httpx.TimeoutException as e:
             raise APITimeoutError(f"Request timed out: {e}") from e
         except httpx.ConnectError as e:
@@ -688,7 +718,7 @@ class AsyncBaseClient(BaseClient):
         if response.status_code == 246:
             self._process_guardrail_warning(response)
 
-        if response.status_code >= 400:
+        if response.status_code >= 300:
             self._process_error(response)
 
         return self._process_response_body(response, response_cls)
@@ -782,15 +812,18 @@ class AsyncBaseClient(BaseClient):
         headers = self._build_headers(options, agentcc_params)
         timeout = options.timeout or self._timeout
         client = self._ensure_client()
+        self._guard_send(url, headers, client)
+        request = client.build_request(
+            method=options.method,
+            url=url,
+            headers=headers,
+            timeout=timeout,
+            **_payload(options),
+        )
+        self._guard_send(str(request.url), request.headers, client)
 
         try:
-            response = await client.request(
-                method=options.method,
-                url=url,
-                headers=headers,
-                timeout=timeout,
-                **_payload(options),
-            )
+            response = await client.send(request, follow_redirects=False)
         except httpx.TimeoutException as e:
             raise APITimeoutError(f"Request timed out: {e}") from e
         except httpx.ConnectError as e:
@@ -799,7 +832,7 @@ class AsyncBaseClient(BaseClient):
         if response.status_code == 246:
             self._process_guardrail_warning(response)
 
-        if response.status_code >= 400:
+        if response.status_code >= 300:
             self._process_error(response)
 
         return response.content
@@ -890,24 +923,24 @@ class AsyncBaseClient(BaseClient):
         headers = self._build_headers(options, agentcc_params)
         timeout = options.timeout or self._timeout
         client = self._ensure_client()
+        self._guard_send(url, headers, client)
+        request = client.build_request(
+            method=options.method,
+            url=url,
+            json=options.body,
+            headers=headers,
+            timeout=timeout,
+        )
+        self._guard_send(str(request.url), request.headers, client)
 
         try:
-            response = await client.send(
-                client.build_request(
-                    method=options.method,
-                    url=url,
-                    json=options.body,
-                    headers=headers,
-                    timeout=timeout,
-                ),
-                stream=True,
-            )
+            response = await client.send(request, follow_redirects=False, stream=True)
         except httpx.TimeoutException as e:
             raise APITimeoutError(f"Request timed out: {e}") from e
         except httpx.ConnectError as e:
             raise APIConnectionError(f"Connection error: {e}") from e
 
-        if response.status_code >= 400 or response.status_code == 246:
+        if response.status_code >= 300 or response.status_code == 246:
             try:
                 await response.aread()
                 if response.status_code == 246:

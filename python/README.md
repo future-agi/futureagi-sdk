@@ -70,6 +70,27 @@ os.environ["FI_SECRET_KEY"] = "your_secret_key"
 os.environ["FI_BASE_URL"] = "https://api.futureagi.com"
 ```
 
+### Plain `http://`, loopback and proxies
+
+The SDK sends API keys to `https://` URLs. A request that carries a key to a plain `http://` URL is sent only when:
+
+- the host is loopback: `localhost`, an address in `127.0.0.0/8`, or `::1`; or
+- the opt-in is on: set `FI_ALLOW_INSECURE_HTTP=1`, or pass `allow_insecure_http=True` to the client. An `allow_insecure_http` value other than `True` (such as `False`) turns the opt-in off for that client, whatever the variable says.
+
+```python
+from fi.platform import Client
+from fi.gateway import Gateway
+from fi.datasets import Dataset
+
+client = Client(base_url="http://platform.internal:8000", allow_insecure_http=True)
+gw = Gateway(base_url="http://gateway.internal:8080", allow_insecure_http=True)
+datasets = Dataset(fi_base_url="http://platform.internal:8000", allow_insecure_http=True)
+```
+
+Any other keyed plain-`http://` request is refused before a connection is made, with `ValueError` (`AgentCCError` for `fi.gateway`) whose `.code` is `"insecure_http_origin"`. `0.0.0.0`, `::ffff:127.0.0.1`, `localhost.localdomain`, names under `.localhost` and `host.docker.internal` are not loopback for this rule and need the opt-in. The opt-in does not unlock a host written with userinfo, non-ASCII characters, `%`, a trailing dot, or an IPv4 address in a short, whole-number, hex, octal or zero-padded form. `health_check`, `check_valid_key` and `ProviderAPIKeyClient` read the opt-in from `FI_ALLOW_INSECURE_HTTP` only.
+
+A keyed plain-`http://` request goes directly to the host and not through `HTTP_PROXY`, `ALL_PROXY`, a session `proxies` setting or an `httpx` proxy. When you pass your own `httpx` client as `http_client` to `fi.platform` or `fi.gateway`, the transport it selects for the URL (from its `proxy=`, its `mounts`, and the environment proxies it read under `trust_env`) must go through no proxy; otherwise the request is refused with the same error. A transport counts as going through no proxy only when its connection pool is exactly `httpcore.ConnectionPool` or `httpcore.AsyncConnectionPool` with httpcore's own network backend; any other pool or backend is treated as one that may use a proxy. `https://` requests use your proxy settings as configured. These rules apply to the `fi` package in this distribution; see the [changelog](https://github.com/future-agi/futureagi-sdk/blob/main/python/CHANGELOG.md) for the full list.
+
 ---
 
 ## 🎯 Quick Start
