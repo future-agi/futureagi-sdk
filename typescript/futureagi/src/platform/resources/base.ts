@@ -1461,6 +1461,13 @@ export interface SimulationEnvironmentsDraftsSaveParams {
   name?: string | null;
 }
 
+export interface SimulationEnvironmentsDraftsValidateParams {
+  /** Expected revisions */
+  expected_revisions: Record<string, unknown>;
+  /** Expected review digest */
+  expected_review_digest?: string | null;
+}
+
 export interface SimulationEnvironmentsEvaluationsAddParams {
   /** Name */
   name: string;
@@ -2191,12 +2198,30 @@ export class SimulationEnvironmentsDraftsResource extends Resource {
   }
 
   /**
-   * Save the named drafts together as new default versions; each needs expected_parent_id, and the body's idempotency_key replays an earlier save.
+   * Return every change the open drafts make, with the decision on each, and the review_digest that drafts.validate needs. Writes nothing.
+   *
+   * GET /simulate/api/harness-environments/{id}/drafts/review/
+   */
+  review(id: string, options?: RequestOptions): Promise<models.HarnessDraftReview> {
+    return this._t.call<models.HarnessDraftReview>(ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_REVIEW, { path: { id: id }, query: {} }, options);
+  }
+
+  /**
+   * Save the named drafts together as new default versions (each needs expected_parent_id), or the candidates drafts.validate built once its validation is ready; where drafts.list says validation_required, a plain save is refused. The body's idempotency_key replays an earlier save.
    *
    * POST /simulate/api/harness-environments/{id}/drafts/save/
    */
   save(id: string, params: SimulationEnvironmentsDraftsSaveParams, options?: RequestOptions): Promise<models.HarnessDraftSaveResponse> {
     return this._t.call<models.HarnessDraftSaveResponse>(ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_SAVE, { path: { id: id }, query: {}, body: { idempotency_key: params.idempotency_key, drafts: params.drafts, candidates: params.candidates, expected_review_digest: params.expected_review_digest, name: params.name } }, options);
+  }
+
+  /**
+   * Build candidate versions from the reviewed drafts and validate them; send expected_revisions (per piece, the draft revision from drafts.list) and the review_digest from drafts.review. It runs in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward. Follow validation in drafts.list, then save the candidates with drafts.save.
+   *
+   * POST /simulate/api/harness-environments/{id}/drafts/validate/
+   */
+  validate(id: string, params: SimulationEnvironmentsDraftsValidateParams, options?: RequestOptions): Promise<models.HarnessDraftValidateResponse> {
+    return this._t.call<models.HarnessDraftValidateResponse>(ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_VALIDATE, { path: { id: id }, query: {}, body: { expected_revisions: params.expected_revisions, expected_review_digest: params.expected_review_digest } }, options);
   }
 }
 

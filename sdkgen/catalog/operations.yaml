@@ -1589,8 +1589,18 @@ operations:
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.environments.drafts.save
-  description: Save the named drafts together as new default versions; each needs expected_parent_id, and the body's idempotency_key replays an earlier save.
+  description: Save the named drafts together as new default versions (each needs expected_parent_id), or the candidates drafts.validate built once its validation is ready; where drafts.list says validation_required, a plain save is refused. The body's idempotency_key replays an earlier save.
   operation: {method: POST, path: '/simulate/api/harness-environments/{id}/drafts/save/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.drafts.review
+  description: Return every change the open drafts make, with the decision on each, and the review_digest that drafts.validate needs. Writes nothing.
+  operation: {method: GET, path: '/simulate/api/harness-environments/{id}/drafts/review/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.drafts.validate
+  description: Build candidate versions from the reviewed drafts and validate them; send expected_revisions (per piece, the draft revision from drafts.list) and the review_digest from drafts.review. It runs in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward. Follow validation in drafts.list, then save the candidates with drafts.save.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/drafts/validate/'}
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.environments.nudges.list

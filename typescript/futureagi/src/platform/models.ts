@@ -1566,6 +1566,11 @@ export interface HarnessBlockedTool {
   scenarios?: Array<HarnessBlockedScenario | null> | null;
 }
 
+export interface HarnessCandidates {
+  environment_version_id?: string | null;
+  suite_version_id?: string | null;
+}
+
 export interface HarnessCapabilityAffected {
   count?: number | null;
   of?: number | null;
@@ -1833,7 +1838,8 @@ export interface HarnessConversationRuntime {
 export interface HarnessDraftItem {
   id?: string | null;
   label?: string | null;
-  status?: string | null; // one of: draft, active, discarded
+  name?: string | null;
+  status?: string | null; // one of: draft, candidate, active, discarded
   is_default?: boolean | null;
   created_at?: string | null;
   created_by?: HarnessVersionPerson | null;
@@ -1855,6 +1861,9 @@ export interface HarnessDraftItem {
   requested_here?: boolean | null;
   pickable?: boolean | null;
   discardable?: boolean | null;
+  release_checks?: HarnessReleaseChecks | null;
+  candidate_state?: string | null; // one of: validating, retry, ready, failed, check_unavailable, superseded, expired
+  saved_without_check?: boolean | null;
   stale?: boolean | null;
   revision?: number | null;
   last_edited_by?: HarnessVersionPerson | null;
@@ -1864,16 +1873,40 @@ export interface HarnessDraftItem {
   changes?: unknown | null;
 }
 
+export interface HarnessDraftReview {
+  drafts?: unknown | null;
+  changes?: Array<HarnessReviewChange | null> | null;
+  counts?: HarnessReviewCounts | null;
+  review_digest?: string | null;
+  can_save?: boolean | null;
+}
+
 export interface HarnessDraftSaveResponse {
   saved?: unknown | null;
   versions?: HarnessVersions | null;
   not_active?: Array<unknown | null> | null;
 }
 
+export interface HarnessDraftValidateResponse {
+  validation?: HarnessDraftValidation | null;
+  candidates?: HarnessCandidates | null;
+}
+
+export interface HarnessDraftValidation {
+  state?: string | null; // one of: validating, retry, ready, failed, check_unavailable, superseded, outdated, unavailable
+  job_id?: string | null;
+  error?: HarnessValidationError | null;
+  affected_scenarios?: Array<string | null> | null;
+  dropped_scenarios?: Array<string | null> | null;
+}
+
 export interface HarnessDrafts {
   environment?: HarnessDraftItem | null;
   suite?: HarnessDraftItem | null;
   set_aside?: Array<HarnessDraftItem | null> | null;
+  validation?: HarnessDraftValidation | null;
+  candidates?: HarnessCandidates | null;
+  validation_required?: boolean | null;
 }
 
 export interface HarnessEnvironment {
@@ -2278,6 +2311,40 @@ export interface HarnessReleaseChecks {
   checks?: HarnessReleaseCheckResults | null;
 }
 
+export interface HarnessReviewChange {
+  id?: string | null;
+  piece?: string | null; // one of: environment, suite
+  kind?: string | null; // one of: tool, rule, contract_field, sub_goal, actor, world_state, source, scenario, file
+  key?: string | null;
+  document?: string | null;
+  action?: string | null; // one of: added, removed, changed
+  fields?: Array<string | null> | null;
+  patch?: Array<unknown | null> | null;
+  base_digest?: string | null;
+  draft_digest?: string | null;
+  summary?: string | null;
+  decision?: string | null; // one of: accepted, rejected
+  affects?: unknown | null;
+  sources?: Array<unknown | null> | null;
+  depends_on?: Array<string | null> | null;
+  graded?: boolean | null;
+  revalidate?: Array<string | null> | null;
+  rows?: Array<unknown | null> | null;
+}
+
+export interface HarnessReviewCounts {
+  total?: number | null;
+  accepted?: number | null;
+  rejected?: number | null;
+  undecided?: number | null;
+}
+
+export interface HarnessReviewDraft {
+  id?: string | null;
+  revision?: number | null;
+  parent_id?: string | null;
+}
+
 export interface HarnessRunCreateResponse {
   environment_id?: string | null;
   job_id?: string | null;
@@ -2481,6 +2548,12 @@ export interface HarnessSuiteMember {
   number?: number | null;
   name?: string | null;
   use_case?: string | null;
+}
+
+export interface HarnessValidationError {
+  code?: string | null;
+  message?: string | null;
+  failed_actions?: Array<unknown | null> | null;
 }
 
 export interface HarnessVersion {

@@ -140,13 +140,45 @@ def test_save_the_validated_candidates_and_plan_a_selection():
     client = _client(sent, {})
 
     client.simulation.environments.drafts.save(
-        ENV, idempotency_key="save-1", candidates={"agent_version_id": "a1"}, expected_review_digest="d1", name="after validation"
+        ENV, idempotency_key="save-1", candidates={"environment_version_id": "e2", "suite_version_id": "s2"}, expected_review_digest="d1", name="after validation"
     )
     client.simulation.environments.run_plan(ENV, scenario_keys="refund-flow,book-ride")
 
     assert (sent[0].method, sent[0].url.path) == ("POST", H + "drafts/save/")
     assert json.loads(sent[0].content) == {
-        "idempotency_key": "save-1", "candidates": {"agent_version_id": "a1"}, "expected_review_digest": "d1", "name": "after validation"
+        "idempotency_key": "save-1", "candidates": {"environment_version_id": "e2", "suite_version_id": "s2"}, "expected_review_digest": "d1", "name": "after validation"
     }
     assert (sent[1].method, sent[1].url.path) == ("GET", H + "run-plan/")
     assert sent[1].url.params.get_list("scenario_keys") == ["refund-flow,book-ride"]
+
+
+def test_an_actor_change_is_reviewed_validated_then_its_candidates_saved():
+    """Where a plain save is refused (validation_required), the draft goes review, validate, save candidates."""
+    sent: list[httpx.Request] = []
+    review = {"drafts": {}, "changes": [], "counts": {}, "review_digest": "d1", "can_save": True}
+    client = _client(sent, review)
+    drafts = client.simulation.environments.drafts
+
+    seen = drafts.review(ENV)
+    drafts.validate(ENV, expected_revisions={"environment": 3}, expected_review_digest=seen.review_digest)
+
+    assert seen.review_digest == "d1"
+    assert (sent[0].method, sent[0].url.path) == ("GET", H + "drafts/review/")
+    assert (sent[1].method, sent[1].url.path) == ("POST", H + "drafts/validate/")
+    assert json.loads(sent[1].content) == {"expected_revisions": {"environment": 3}, "expected_review_digest": "d1"}
+
+
+def test_validation_and_candidates_are_read_from_the_drafts_list():
+    sent: list[httpx.Request] = []
+    listed = {
+        "environment": None, "suite": None, "set_aside": [], "validation_required": True,
+        "validation": {"state": "ready", "job_id": None},
+        "candidates": {"environment_version_id": "e2", "suite_version_id": "s2"},
+    }
+    client = _client(sent, listed)
+
+    drafts = client.simulation.environments.drafts.list(ENV)
+
+    assert drafts.validation_required is True
+    assert drafts.validation.state == "ready"
+    assert (drafts.candidates.environment_version_id, drafts.candidates.suite_version_id) == ("e2", "s2")

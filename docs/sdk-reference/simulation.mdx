@@ -1,6 +1,6 @@
 ---
 title: "Simulation"
-description: "Reference for client.simulation in the Future AGI Python and TypeScript SDKs: simulation.calls.get, simulation.calls.workers, simulation.environments.get, simulation.environments.list, simulation.environments.rename, simulation.environments.run and 73 more."
+description: "Reference for client.simulation in the Future AGI Python and TypeScript SDKs: simulation.calls.get, simulation.calls.workers, simulation.environments.get, simulation.environments.list, simulation.environments.rename, simulation.environments.run and 75 more."
 ---
 
 `client.simulation` on `fi.Client` (Python) and `client.simulation` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.simulation.calls`, `client.simulation.environments`, `client.simulation.environments.actors`, `client.simulation.environments.drafts`, `client.simulation.environments.evaluations`, `client.simulation.environments.nudges`, `client.simulation.environments.readiness`, `client.simulation.environments.runs`, `client.simulation.environments.scenarios`, `client.simulation.environments.versions`, `client.simulation.executions`, `client.simulation.executions.insights`, `client.simulation.jobs`, `client.simulation.jobs.scenarios`, `client.simulation.personas`, `client.simulation.scenarios`, `client.simulation.tests`. The models these methods return are on [Simulation response models](/docs/sdk/reference/simulation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
@@ -27,7 +27,9 @@ description: "Reference for client.simulation in the Future AGI Python and TypeS
 | [`simulation.environments.actors.update`](#simulationenvironmentsactorsupdate) | Replace one actor in the environment's draft, as a whole record (actor) or as changes to it (changes); its id never changes. |
 | [`simulation.environments.actors.validate`](#simulationenvironmentsactorsvalidate) | Check a create, replace or removal (op) of one actor without writing anything; returns its problems, the actions it would share that share_actions does not confirm, and the id a create would get (new_id asks for one). |
 | [`simulation.environments.drafts.list`](#simulationenvironmentsdraftslist) | Return an environment's unsaved environment and suite drafts (with parent_id and revision for a save) and the drafts a rebuild set aside. |
-| [`simulation.environments.drafts.save`](#simulationenvironmentsdraftssave) | Save the named drafts together as new default versions; each needs expected_parent_id, and the body's idempotency_key replays an earlier save. |
+| [`simulation.environments.drafts.review`](#simulationenvironmentsdraftsreview) | Return every change the open drafts make, with the decision on each, and the review_digest that drafts.validate needs. |
+| [`simulation.environments.drafts.save`](#simulationenvironmentsdraftssave) | Save the named drafts together as new default versions (each needs expected_parent_id), or the candidates drafts.validate built once its validation is ready; where drafts.list says validation_required, a plain save is refused. |
+| [`simulation.environments.drafts.validate`](#simulationenvironmentsdraftsvalidate) | Build candidate versions from the reviewed drafts and validate them; send expected_revisions (per piece, the draft revision from drafts.list) and the review_digest from drafts.review. |
 | [`simulation.environments.evaluations.add`](#simulationenvironmentsevaluationsadd) | Add one catalogue eval to an environment by exact name; it grades calls from now on (no backfill). |
 | [`simulation.environments.evaluations.available`](#simulationenvironmentsevaluationsavailable) | List the catalogue evals an environment can still add (its modality, minus those selected); 409 until the environment finishes building. |
 | [`simulation.environments.evaluations.set_tool_call`](#simulationenvironmentsevaluationsset_tool_call) | Turn the tool-call judge on or off for an environment (enable_tool_evaluation); returns the environment. |
@@ -1004,9 +1006,54 @@ client.simulation.environments.drafts.list(id: string, options?: RequestOptions)
 
 [`HarnessDrafts`](/docs/sdk/reference/simulation-models#harnessdrafts).
 
+### simulation.environments.drafts.review
+
+Return every change the open drafts make, with the decision on each, and the review_digest that drafts.validate needs. Writes nothing.
+
+<ApiEndpoint method="GET" path="/simulate/api/harness-environments/{id}/drafts/review/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.drafts.review("your-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.drafts.review("your-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.drafts.review(
+    id: str,
+    *,
+    extra_query: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessDraftReview
+```
+
+```typescript TypeScript
+client.simulation.environments.drafts.review(id: string, options?: RequestOptions): Promise<models.HarnessDraftReview>
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+
+#### Returns
+
+[`HarnessDraftReview`](/docs/sdk/reference/simulation-models#harnessdraftreview).
+
 ### simulation.environments.drafts.save
 
-Save the named drafts together as new default versions; each needs expected_parent_id, and the body's idempotency_key replays an earlier save.
+Save the named drafts together as new default versions (each needs expected_parent_id), or the candidates drafts.validate built once its validation is ready; where drafts.list says validation_required, a plain save is refused. The body's idempotency_key replays an earlier save.
 
 <ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/drafts/save/" />
 
@@ -1067,6 +1114,61 @@ export interface SimulationEnvironmentsDraftsSaveParams {
 #### Returns
 
 [`HarnessDraftSaveResponse`](/docs/sdk/reference/simulation-models#harnessdraftsaveresponse).
+
+### simulation.environments.drafts.validate
+
+Build candidate versions from the reviewed drafts and validate them; send expected_revisions (per piece, the draft revision from drafts.list) and the review_digest from drafts.review. It runs in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward. Follow validation in drafts.list, then save the candidates with drafts.save.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/drafts/validate/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.drafts.validate("your-id", expected_revisions={})
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.drafts.validate("your-id", { expected_revisions: {} });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.drafts.validate(
+    id: str,
+    *,
+    expected_revisions: dict[str, Any],
+    expected_review_digest: str | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessDraftValidateResponse
+```
+
+```typescript TypeScript
+client.simulation.environments.drafts.validate(id: string, params: SimulationEnvironmentsDraftsValidateParams, options?: RequestOptions): Promise<models.HarnessDraftValidateResponse>
+
+export interface SimulationEnvironmentsDraftsValidateParams {
+  expected_revisions: Record<string, unknown>;
+  expected_review_digest?: string | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="expected_revisions" type="object" required />
+<ParamField body="expected_review_digest" type="string" optional />
+
+#### Returns
+
+[`HarnessDraftValidateResponse`](/docs/sdk/reference/simulation-models#harnessdraftvalidateresponse).
 
 ## client.simulation.environments.evaluations
 

@@ -14754,6 +14754,88 @@
           "usage"
         ]
       }
+    },
+    "/simulate/api/harness-environments/{id}/drafts/review/": {
+      "get": {
+        "operationId": "simulate_api_harness-environments_drafts_drafts_review",
+        "description": "Every change the open drafts make, item by item, with the decision taken on each. No writes.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/HarnessDraftReview"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "simulate"
+        ],
+        "x-runtime-response-validation": true
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/simulate/api/harness-environments/{id}/drafts/validate/": {
+      "post": {
+        "operationId": "simulate_api_harness-environments_drafts_validate_drafts",
+        "description": "Build candidate versions from the reviewed drafts and start validating them; 202 while it runs.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HarnessDraftValidate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/HarnessDraftValidateResponse"
+            }
+          },
+          "202": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/HarnessDraftValidateResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "simulate"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
     }
   },
   "definitions": {
@@ -30366,6 +30448,7 @@
       "required": [
         "id",
         "label",
+        "name",
         "status",
         "is_default",
         "created_at",
@@ -30388,6 +30471,7 @@
         "requested_here",
         "pickable",
         "discardable",
+        "candidate_state",
         "stale",
         "revision",
         "last_edited_by",
@@ -30409,11 +30493,19 @@
           "minLength": 1,
           "x-nullable": true
         },
+        "name": {
+          "title": "Name",
+          "description": "The name a person gave the version, if any.",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
         "status": {
           "title": "Status",
           "type": "string",
           "enum": [
             "draft",
+            "candidate",
             "active",
             "discarded"
           ]
@@ -30543,6 +30635,29 @@
           "type": "boolean",
           "x-nullable": true
         },
+        "release_checks": {
+          "$ref": "#/definitions/HarnessReleaseChecks"
+        },
+        "candidate_state": {
+          "title": "Candidate state",
+          "description": "A version built by Validate: its validation while it waits to be saved, or why it was set aside; null for every other version.",
+          "type": "string",
+          "enum": [
+            "validating",
+            "retry",
+            "ready",
+            "failed",
+            "check_unavailable",
+            "superseded",
+            "expired"
+          ],
+          "x-nullable": true
+        },
+        "saved_without_check": {
+          "title": "Saved without check",
+          "description": "Saved while the check was unavailable; its pairings read Untested until checked. Read as false when absent.",
+          "type": "boolean"
+        },
         "stale": {
           "title": "Stale",
           "description": "Whether the default moved since the draft started; Save refuses it.",
@@ -30577,7 +30692,7 @@
         },
         "changes": {
           "title": "Changes",
-          "description": "Counts against the parent: added, removed and changed for the suite; tools, rules, sub_goals and world_files for the environment.",
+          "description": "Counts against the parent: added, removed and changed for the suite; actors, tools, rules, sub_goals and world_files for the environment.",
           "type": "object",
           "additionalProperties": {
             "type": "integer"
@@ -30690,7 +30805,9 @@
       "required": [
         "environment",
         "suite",
-        "set_aside"
+        "set_aside",
+        "validation",
+        "candidates"
       ],
       "type": "object",
       "properties": {
@@ -30705,6 +30822,17 @@
           "items": {
             "$ref": "#/definitions/HarnessDraftItem"
           }
+        },
+        "validation": {
+          "$ref": "#/definitions/HarnessDraftValidation"
+        },
+        "candidates": {
+          "$ref": "#/definitions/HarnessCandidates"
+        },
+        "validation_required": {
+          "title": "Validation required",
+          "description": "A Save of these drafts must go through Validate first; a plain Save is refused. Always sent by this release; read as false when absent (a server from before it, during a rolling deploy).",
+          "type": "boolean"
         }
       }
     },
@@ -46934,6 +47062,379 @@
           "x-nullable": true
         }
       }
+    },
+    "HarnessDraftValidateResponse": {
+      "required": [
+        "validation",
+        "candidates"
+      ],
+      "type": "object",
+      "properties": {
+        "validation": {
+          "$ref": "#/definitions/HarnessDraftValidation"
+        },
+        "candidates": {
+          "$ref": "#/definitions/HarnessCandidates"
+        }
+      }
+    },
+    "HarnessDraftValidate": {
+      "required": [
+        "expected_revisions"
+      ],
+      "type": "object",
+      "properties": {
+        "expected_revisions": {
+          "title": "Expected revisions",
+          "description": "Per piece, the draft revision the person reviewed.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "expected_review_digest": {
+          "title": "Expected review digest",
+          "description": "The review digest the person saw; required once any change is decided.",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "HarnessDraftReview": {
+      "required": [
+        "drafts",
+        "changes",
+        "counts",
+        "review_digest",
+        "can_save"
+      ],
+      "type": "object",
+      "properties": {
+        "drafts": {
+          "title": "Drafts",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/HarnessReviewDraft"
+          }
+        },
+        "changes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HarnessReviewChange"
+          }
+        },
+        "counts": {
+          "$ref": "#/definitions/HarnessReviewCounts"
+        },
+        "review_digest": {
+          "title": "Review digest",
+          "description": "Send back on Save; a review that moved is refused.",
+          "type": "string",
+          "minLength": 1
+        },
+        "can_save": {
+          "title": "Can save",
+          "type": "boolean"
+        }
+      }
+    },
+    "HarnessReviewChange": {
+      "required": [
+        "id",
+        "piece",
+        "kind",
+        "key",
+        "document",
+        "action",
+        "fields",
+        "patch",
+        "base_digest",
+        "draft_digest",
+        "summary",
+        "decision",
+        "affects",
+        "sources",
+        "depends_on",
+        "graded",
+        "revalidate"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "minLength": 1
+        },
+        "piece": {
+          "title": "Piece",
+          "type": "string",
+          "enum": [
+            "environment",
+            "suite"
+          ]
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "enum": [
+            "tool",
+            "rule",
+            "contract_field",
+            "sub_goal",
+            "actor",
+            "world_state",
+            "source",
+            "scenario",
+            "file"
+          ]
+        },
+        "key": {
+          "title": "Key",
+          "type": "string",
+          "minLength": 1
+        },
+        "document": {
+          "title": "Document",
+          "type": "string",
+          "minLength": 1
+        },
+        "action": {
+          "title": "Action",
+          "type": "string",
+          "enum": [
+            "added",
+            "removed",
+            "changed"
+          ]
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "patch": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "x-nullable": true,
+              "x-json-value": true,
+              "description": "Any valid JSON value."
+            }
+          }
+        },
+        "base_digest": {
+          "title": "Base digest",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "draft_digest": {
+          "title": "Draft digest",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string",
+          "minLength": 1
+        },
+        "decision": {
+          "title": "Decision",
+          "type": "string",
+          "enum": [
+            "accepted",
+            "rejected"
+          ],
+          "x-nullable": true
+        },
+        "affects": {
+          "title": "Affects",
+          "type": "object",
+          "x-string-or-array": true,
+          "description": "Plain text string or array of content-part objects."
+        },
+        "sources": {
+          "description": "Where the change came from, latest first: who, through what, when, and what it used (the person's message, or a file with its name and row).",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "x-nullable": true,
+              "x-json-value": true,
+              "description": "Any valid JSON value."
+            }
+          }
+        },
+        "depends_on": {
+          "description": "Changes this one needs; accepting it means accepting them.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "graded": {
+          "title": "Graded",
+          "description": "The change alters what trials are graded on.",
+          "type": "boolean"
+        },
+        "revalidate": {
+          "description": "The scenarios to prove again once this change is saved.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "rows": {
+          "description": "A world state change: rows added, removed and changed per table; null when it cannot be read.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "x-nullable": true
+            }
+          },
+          "x-nullable": true
+        }
+      }
+    },
+    "HarnessDraftValidation": {
+      "required": [
+        "state"
+      ],
+      "type": "object",
+      "properties": {
+        "state": {
+          "title": "State",
+          "description": "ready: certified, Save may go ahead; check_unavailable: the check failed on our side for a cause that repeats, so Save may go ahead uncertified, as a run may; failed: the agent failed the check; outdated: the changes or their decisions moved since they were validated, so Validate again.",
+          "type": "string",
+          "enum": [
+            "validating",
+            "retry",
+            "ready",
+            "failed",
+            "check_unavailable",
+            "superseded",
+            "outdated",
+            "unavailable"
+          ]
+        },
+        "job_id": {
+          "title": "Job id",
+          "description": "The validation job, while one runs.",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "error": {
+          "$ref": "#/definitions/HarnessValidationError"
+        },
+        "affected_scenarios": {
+          "description": "Scenarios that need a failed action on every path.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "dropped_scenarios": {
+          "description": "Scenarios certifying left out of the suite.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "x-nullable": true
+    },
+    "HarnessReviewCounts": {
+      "required": [
+        "total",
+        "accepted",
+        "rejected",
+        "undecided"
+      ],
+      "type": "object",
+      "properties": {
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "accepted": {
+          "title": "Accepted",
+          "type": "integer"
+        },
+        "rejected": {
+          "title": "Rejected",
+          "type": "integer"
+        },
+        "undecided": {
+          "title": "Undecided",
+          "type": "integer"
+        }
+      }
+    },
+    "HarnessReviewDraft": {
+      "required": [
+        "id",
+        "revision",
+        "parent_id"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "minLength": 1
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "parent_id": {
+          "title": "Parent id",
+          "type": "string"
+        }
+      }
+    },
+    "HarnessValidationError": {
+      "required": [
+        "code",
+        "message",
+        "failed_actions"
+      ],
+      "type": "object",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "failed_actions": {
+          "description": "Each action whose check failed, with the reason.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "x-nullable": true
+            }
+          }
+        }
+      },
+      "x-nullable": true
     }
   }
 }

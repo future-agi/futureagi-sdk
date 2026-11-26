@@ -128,8 +128,18 @@ class SimulationEnvironmentsDraftsResource(Resource):
         body = None
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_LIST, path=path, query=query, body=body, model=models.HarnessDrafts, options=options)
 
+    def review(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessDraftReview:
+        """Return every change the open drafts make, with the decision on each, and the review_digest that drafts.validate needs. Writes nothing.
+
+        GET /simulate/api/harness-environments/{id}/drafts/review/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_REVIEW, path=path, query=query, body=body, model=models.HarnessDraftReview, options=options)
+
     def save(self, id: str, *, idempotency_key: str, drafts: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, candidates: Dict[str, Any] | None | NotGiven = NOT_GIVEN, expected_review_digest: str | None | NotGiven = NOT_GIVEN, name: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessDraftSaveResponse:
-        """Save the named drafts together as new default versions; each needs expected_parent_id, and the body's idempotency_key replays an earlier save.
+        """Save the named drafts together as new default versions (each needs expected_parent_id), or the candidates drafts.validate built once its validation is ready; where drafts.list says validation_required, a plain save is refused. The body's idempotency_key replays an earlier save.
 
         POST /simulate/api/harness-environments/{id}/drafts/save/
         """
@@ -137,6 +147,16 @@ class SimulationEnvironmentsDraftsResource(Resource):
         query = {**(extra_query or {})}
         body = {'idempotency_key': idempotency_key, 'drafts': drafts, 'candidates': candidates, 'expected_review_digest': expected_review_digest, 'name': name, **(extra_body or {})}
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_SAVE, path=path, query=query, body=body, model=models.HarnessDraftSaveResponse, options=options)
+
+    def validate(self, id: str, *, expected_revisions: Dict[str, Any], expected_review_digest: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessDraftValidateResponse:
+        """Build candidate versions from the reviewed drafts and validate them; send expected_revisions (per piece, the draft revision from drafts.list) and the review_digest from drafts.review. It runs in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward. Follow validation in drafts.list, then save the candidates with drafts.save.
+
+        POST /simulate/api/harness-environments/{id}/drafts/validate/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'expected_revisions': expected_revisions, 'expected_review_digest': expected_review_digest, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_VALIDATE, path=path, query=query, body=body, model=models.HarnessDraftValidateResponse, options=options)
 
 
 class SimulationEnvironmentsEvaluationsResource(Resource):
@@ -2974,8 +2994,18 @@ class AsyncSimulationEnvironmentsDraftsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_LIST, path=path, query=query, body=body, model=models.HarnessDrafts, options=options)
 
+    async def review(self, id: str, *, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessDraftReview:
+        """Return every change the open drafts make, with the decision on each, and the review_digest that drafts.validate needs. Writes nothing.
+
+        GET /simulate/api/harness-environments/{id}/drafts/review/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = None
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_REVIEW, path=path, query=query, body=body, model=models.HarnessDraftReview, options=options)
+
     async def save(self, id: str, *, idempotency_key: str, drafts: List[Dict[str, Any]] | None | NotGiven = NOT_GIVEN, candidates: Dict[str, Any] | None | NotGiven = NOT_GIVEN, expected_review_digest: str | None | NotGiven = NOT_GIVEN, name: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessDraftSaveResponse:
-        """Save the named drafts together as new default versions; each needs expected_parent_id, and the body's idempotency_key replays an earlier save.
+        """Save the named drafts together as new default versions (each needs expected_parent_id), or the candidates drafts.validate built once its validation is ready; where drafts.list says validation_required, a plain save is refused. The body's idempotency_key replays an earlier save.
 
         POST /simulate/api/harness-environments/{id}/drafts/save/
         """
@@ -2983,6 +3013,16 @@ class AsyncSimulationEnvironmentsDraftsResource(Resource):
         query = {**(extra_query or {})}
         body = {'idempotency_key': idempotency_key, 'drafts': drafts, 'candidates': candidates, 'expected_review_digest': expected_review_digest, 'name': name, **(extra_body or {})}
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_SAVE, path=path, query=query, body=body, model=models.HarnessDraftSaveResponse, options=options)
+
+    async def validate(self, id: str, *, expected_revisions: Dict[str, Any], expected_review_digest: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessDraftValidateResponse:
+        """Build candidate versions from the reviewed drafts and validate them; send expected_revisions (per piece, the draft revision from drafts.list) and the review_digest from drafts.review. It runs in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward. Follow validation in drafts.list, then save the candidates with drafts.save.
+
+        POST /simulate/api/harness-environments/{id}/drafts/validate/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'expected_revisions': expected_revisions, 'expected_review_digest': expected_review_digest, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_DRAFTS_VALIDATE, path=path, query=query, body=body, model=models.HarnessDraftValidateResponse, options=options)
 
 
 class AsyncSimulationEnvironmentsEvaluationsResource(Resource):

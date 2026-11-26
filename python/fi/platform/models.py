@@ -1708,6 +1708,12 @@ class HarnessBlockedTool(_Model):
     scenarios: Optional[List[Optional[HarnessBlockedScenario]]] = Field(default=None)
 
 
+class HarnessCandidates(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['environment_version_id', 'suite_version_id'])
+    environment_version_id: Optional[str] = Field(default=None)
+    suite_version_id: Optional[str] = Field(default=None)
+
+
 class HarnessCapabilityAffected(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['count', 'keys', 'of', 'truncated'])
     count: Optional[int] = Field(default=None)
@@ -2005,7 +2011,8 @@ class HarnessDraftItem(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['changes', 'created_at', 'id', 'is_default', 'revision', 'stale', 'status', 'summary', 'updated_at'])
     id: Optional[str] = Field(default=None)
     label: Optional[str] = Field(default=None)
-    status: Optional[str] = Field(default=None)  # one of: draft, active, discarded
+    name: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # one of: draft, candidate, active, discarded
     is_default: Optional[bool] = Field(default=None)
     created_at: Optional[str] = Field(default=None)
     created_by: Optional[HarnessVersionPerson] = Field(default=None)
@@ -2027,6 +2034,9 @@ class HarnessDraftItem(_Model):
     requested_here: Optional[bool] = Field(default=None)
     pickable: Optional[bool] = Field(default=None)
     discardable: Optional[bool] = Field(default=None)
+    release_checks: Optional[HarnessReleaseChecks] = Field(default=None)
+    candidate_state: Optional[str] = Field(default=None)  # one of: validating, retry, ready, failed, check_unavailable, superseded, expired
+    saved_without_check: Optional[bool] = Field(default=None)
     stale: Optional[bool] = Field(default=None)
     revision: Optional[int] = Field(default=None)
     last_edited_by: Optional[HarnessVersionPerson] = Field(default=None)
@@ -2036,6 +2046,15 @@ class HarnessDraftItem(_Model):
     changes: Optional[Any] = Field(default=None)
 
 
+class HarnessDraftReview(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['can_save', 'changes', 'drafts', 'review_digest'])
+    drafts: Optional[Any] = Field(default=None)
+    changes: Optional[List[Optional[HarnessReviewChange]]] = Field(default=None)
+    counts: Optional[HarnessReviewCounts] = Field(default=None)
+    review_digest: Optional[str] = Field(default=None)
+    can_save: Optional[bool] = Field(default=None)
+
+
 class HarnessDraftSaveResponse(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['saved'])
     saved: Optional[Any] = Field(default=None)
@@ -2043,11 +2062,28 @@ class HarnessDraftSaveResponse(_Model):
     not_active: Optional[List[Optional[Any]]] = Field(default=None)
 
 
+class HarnessDraftValidateResponse(_Model):
+    validation: Optional[HarnessDraftValidation] = Field(default=None)
+    candidates: Optional[HarnessCandidates] = Field(default=None)
+
+
+class HarnessDraftValidation(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['state'])
+    state: Optional[str] = Field(default=None)  # one of: validating, retry, ready, failed, check_unavailable, superseded, outdated, unavailable
+    job_id: Optional[str] = Field(default=None)
+    error: Optional[HarnessValidationError] = Field(default=None)
+    affected_scenarios: Optional[List[Optional[str]]] = Field(default=None)
+    dropped_scenarios: Optional[List[Optional[str]]] = Field(default=None)
+
+
 class HarnessDrafts(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['set_aside'])
     environment: Optional[HarnessDraftItem] = Field(default=None)
     suite: Optional[HarnessDraftItem] = Field(default=None)
     set_aside: Optional[List[Optional[HarnessDraftItem]]] = Field(default=None)
+    validation: Optional[HarnessDraftValidation] = Field(default=None)
+    candidates: Optional[HarnessCandidates] = Field(default=None)
+    validation_required: Optional[bool] = Field(default=None)
 
 
 class HarnessEnvironment(_Model):
@@ -2491,6 +2527,43 @@ class HarnessReleaseChecks(_Model):
     checks: Optional[HarnessReleaseCheckResults] = Field(default=None)
 
 
+class HarnessReviewChange(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['action', 'affects', 'depends_on', 'document', 'fields_', 'graded', 'id', 'key', 'kind', 'patch', 'piece', 'revalidate', 'sources', 'summary'])
+    id: Optional[str] = Field(default=None)
+    piece: Optional[str] = Field(default=None)  # one of: environment, suite
+    kind: Optional[str] = Field(default=None)  # one of: tool, rule, contract_field, sub_goal, actor, world_state, source, scenario, file
+    key: Optional[str] = Field(default=None)
+    document: Optional[str] = Field(default=None)
+    action: Optional[str] = Field(default=None)  # one of: added, removed, changed
+    fields_: Optional[List[Optional[str]]] = Field(default=None, alias='fields')
+    patch: Optional[List[Optional[Any]]] = Field(default=None)
+    base_digest: Optional[str] = Field(default=None)
+    draft_digest: Optional[str] = Field(default=None)
+    summary: Optional[str] = Field(default=None)
+    decision: Optional[str] = Field(default=None)  # one of: accepted, rejected
+    affects: Optional[Any] = Field(default=None)
+    sources: Optional[List[Optional[Any]]] = Field(default=None)
+    depends_on: Optional[List[Optional[str]]] = Field(default=None)
+    graded: Optional[bool] = Field(default=None)
+    revalidate: Optional[List[Optional[str]]] = Field(default=None)
+    rows: Optional[List[Optional[Any]]] = Field(default=None)
+
+
+class HarnessReviewCounts(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['accepted', 'rejected', 'total', 'undecided'])
+    total: Optional[int] = Field(default=None)
+    accepted: Optional[int] = Field(default=None)
+    rejected: Optional[int] = Field(default=None)
+    undecided: Optional[int] = Field(default=None)
+
+
+class HarnessReviewDraft(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['id', 'parent_id', 'revision'])
+    id: Optional[str] = Field(default=None)
+    revision: Optional[int] = Field(default=None)
+    parent_id: Optional[str] = Field(default=None)
+
+
 class HarnessRunCreateResponse(_Model):
     __required__: ClassVar[FrozenSet[str]] = frozenset(['environment_id', 'job_id', 'run_id', 'run_test_id', 'scenario_count', 'stage', 'state', 'test_execution_id', 'total_calls', 'trials', 'warnings'])
     environment_id: Optional[str] = Field(default=None)
@@ -2715,6 +2788,13 @@ class HarnessSuiteMember(_Model):
     number: Optional[int] = Field(default=None)
     name: Optional[str] = Field(default=None)
     use_case: Optional[str] = Field(default=None)
+
+
+class HarnessValidationError(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['code', 'failed_actions', 'message'])
+    code: Optional[str] = Field(default=None)
+    message: Optional[str] = Field(default=None)
+    failed_actions: Optional[List[Optional[Any]]] = Field(default=None)
 
 
 class HarnessVersion(_Model):
@@ -4388,6 +4468,7 @@ HarnessActorView.model_rebuild()
 HarnessAgentCredentialsResponse.model_rebuild()
 HarnessBlockedScenario.model_rebuild()
 HarnessBlockedTool.model_rebuild()
+HarnessCandidates.model_rebuild()
 HarnessCapabilityAffected.model_rebuild()
 HarnessCapabilityAgentTools.model_rebuild()
 HarnessCapabilityAnswer.model_rebuild()
@@ -4421,7 +4502,10 @@ HarnessConversationMessage.model_rebuild()
 HarnessConversationRead.model_rebuild()
 HarnessConversationRuntime.model_rebuild()
 HarnessDraftItem.model_rebuild()
+HarnessDraftReview.model_rebuild()
 HarnessDraftSaveResponse.model_rebuild()
+HarnessDraftValidateResponse.model_rebuild()
+HarnessDraftValidation.model_rebuild()
 HarnessDrafts.model_rebuild()
 HarnessEnvironment.model_rebuild()
 HarnessEnvironmentAgent.model_rebuild()
@@ -4466,6 +4550,9 @@ HarnessProofControl.model_rebuild()
 HarnessProofLeak.model_rebuild()
 HarnessReleaseCheckResults.model_rebuild()
 HarnessReleaseChecks.model_rebuild()
+HarnessReviewChange.model_rebuild()
+HarnessReviewCounts.model_rebuild()
+HarnessReviewDraft.model_rebuild()
 HarnessRunCreateResponse.model_rebuild()
 HarnessRunHeldBack.model_rebuild()
 HarnessRunPinnedVersions.model_rebuild()
@@ -4488,6 +4575,7 @@ HarnessSourceChanges.model_rebuild()
 HarnessSourceUploadResponse.model_rebuild()
 HarnessSourceView.model_rebuild()
 HarnessSuiteMember.model_rebuild()
+HarnessValidationError.model_rebuild()
 HarnessVersion.model_rebuild()
 HarnessVersionDiff.model_rebuild()
 HarnessVersionPerson.model_rebuild()
@@ -4764,6 +4852,7 @@ __all__ = [
     'HarnessAgentCredentialsResponse',
     'HarnessBlockedScenario',
     'HarnessBlockedTool',
+    'HarnessCandidates',
     'HarnessCapabilityAffected',
     'HarnessCapabilityAgentTools',
     'HarnessCapabilityAnswer',
@@ -4797,7 +4886,10 @@ __all__ = [
     'HarnessConversationRead',
     'HarnessConversationRuntime',
     'HarnessDraftItem',
+    'HarnessDraftReview',
     'HarnessDraftSaveResponse',
+    'HarnessDraftValidateResponse',
+    'HarnessDraftValidation',
     'HarnessDrafts',
     'HarnessEnvironment',
     'HarnessEnvironmentAgent',
@@ -4842,6 +4934,9 @@ __all__ = [
     'HarnessProofLeak',
     'HarnessReleaseCheckResults',
     'HarnessReleaseChecks',
+    'HarnessReviewChange',
+    'HarnessReviewCounts',
+    'HarnessReviewDraft',
     'HarnessRunCreateResponse',
     'HarnessRunHeldBack',
     'HarnessRunPinnedVersions',
@@ -4864,6 +4959,7 @@ __all__ = [
     'HarnessSourceUploadResponse',
     'HarnessSourceView',
     'HarnessSuiteMember',
+    'HarnessValidationError',
     'HarnessVersion',
     'HarnessVersionDiff',
     'HarnessVersionPerson',

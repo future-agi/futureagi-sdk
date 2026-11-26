@@ -90,10 +90,24 @@ describe("run readiness", () => {
     const { fetch, seen } = recording();
     const env = client(fetch).simulation.environments;
 
-    await env.drafts.save(ENV, { idempotency_key: "save-1", candidates: { agent_version_id: "a1" }, expected_review_digest: "d1" });
+    await env.drafts.save(ENV, { idempotency_key: "save-1", candidates: { environment_version_id: "e2", suite_version_id: "s2" }, expected_review_digest: "d1" });
     await env.runPlan(ENV, { scenario_keys: "refund-flow,book-ride" });
 
-    expect(seen[0].body).toEqual({ idempotency_key: "save-1", candidates: { agent_version_id: "a1" }, expected_review_digest: "d1" });
+    expect(seen[0].body).toEqual({ idempotency_key: "save-1", candidates: { environment_version_id: "e2", suite_version_id: "s2" }, expected_review_digest: "d1" });
     expect(seen[1].query.get("scenario_keys")).toBe("refund-flow,book-ride");
+  });
+});
+
+describe("drafts that need validation", () => {
+  test("review, then validate with its digest", async () => {
+    const { fetch, seen } = recording({ drafts: {}, changes: [], counts: {}, review_digest: "d1", can_save: true });
+    const drafts = client(fetch).simulation.environments.drafts;
+
+    const review = await drafts.review(ENV);
+    await drafts.validate(ENV, { expected_revisions: { environment: 3 }, expected_review_digest: review.review_digest });
+
+    expect([seen[0].method, seen[0].path]).toEqual(["GET", H + "drafts/review/"]);
+    expect([seen[1].method, seen[1].path]).toEqual(["POST", H + "drafts/validate/"]);
+    expect(seen[1].body).toEqual({ expected_revisions: { environment: 3 }, expected_review_digest: "d1" });
   });
 });
