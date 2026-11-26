@@ -2317,7 +2317,7 @@ export class SimulationEnvironmentsReadinessResource extends Resource {
   }
 
   /**
-   * Validate a pairing of versions again (absent ones are the defaults) without a run; moves no default. A pairing not yet certified runs its check in a build sandbox, which is billed.
+   * Validate a pairing of versions again (absent ones are the defaults) without a run; moves no default. A pairing not yet certified runs its check in a build sandbox and makes model calls; see Usage for what it counts toward.
    *
    * POST /simulate/api/harness-environments/{id}/capabilities/recheck/
    */
@@ -2401,7 +2401,7 @@ export class SimulationEnvironmentsScenariosResource extends Resource {
   }
 
   /**
-   * Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and is billed. Returns a job_id to follow with validation_status.
+   * Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and makes model calls; see Usage for what it counts toward. Returns a job_id to follow with validation_status.
    *
    * POST /simulate/api/harness-environments/{id}/scenarios/validate/
    */

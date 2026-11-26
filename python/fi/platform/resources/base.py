@@ -267,7 +267,7 @@ class SimulationEnvironmentsReadinessResource(Resource):
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_READINESS_HISTORY, path=path, query=query, body=body, model=models.HarnessCertifiedPairingPage, options=options)
 
     def recheck(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessCapabilityRecheckResponse:
-        """Validate a pairing of versions again (absent ones are the defaults) without a run; moves no default. A pairing not yet certified runs its check in a build sandbox, which is billed.
+        """Validate a pairing of versions again (absent ones are the defaults) without a run; moves no default. A pairing not yet certified runs its check in a build sandbox and makes model calls; see Usage for what it counts toward.
 
         POST /simulate/api/harness-environments/{id}/capabilities/recheck/
         """
@@ -359,7 +359,7 @@ class SimulationEnvironmentsScenariosResource(Resource):
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_RUNNING_VALIDATION, path=path, query=query, body=body, model=models.HarnessScenarioRunningValidation, options=options)
 
     def validate(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, if_fresh: bool | None | NotGiven = NOT_GIVEN, keys: List[str] | None | NotGiven = NOT_GIVEN, reprove_all: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioValidateResponse:
-        """Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and is billed. Returns a job_id to follow with validation_status.
+        """Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and makes model calls; see Usage for what it counts toward. Returns a job_id to follow with validation_status.
 
         POST /simulate/api/harness-environments/{id}/scenarios/validate/
         """
@@ -3113,7 +3113,7 @@ class AsyncSimulationEnvironmentsReadinessResource(Resource):
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_READINESS_HISTORY, path=path, query=query, body=body, model=models.HarnessCertifiedPairingPage, options=options)
 
     async def recheck(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessCapabilityRecheckResponse:
-        """Validate a pairing of versions again (absent ones are the defaults) without a run; moves no default. A pairing not yet certified runs its check in a build sandbox, which is billed.
+        """Validate a pairing of versions again (absent ones are the defaults) without a run; moves no default. A pairing not yet certified runs its check in a build sandbox and makes model calls; see Usage for what it counts toward.
 
         POST /simulate/api/harness-environments/{id}/capabilities/recheck/
         """
@@ -3205,7 +3205,7 @@ class AsyncSimulationEnvironmentsScenariosResource(Resource):
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_SCENARIOS_RUNNING_VALIDATION, path=path, query=query, body=body, model=models.HarnessScenarioRunningValidation, options=options)
 
     async def validate(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, if_fresh: bool | None | NotGiven = NOT_GIVEN, keys: List[str] | None | NotGiven = NOT_GIVEN, reprove_all: bool | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessScenarioValidateResponse:
-        """Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and is billed. Returns a job_id to follow with validation_status.
+        """Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and makes model calls; see Usage for what it counts toward. Returns a job_id to follow with validation_status.
 
         POST /simulate/api/harness-environments/{id}/scenarios/validate/
         """
