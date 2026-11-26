@@ -15,7 +15,7 @@ description: "Reference for client.simulation in the Future AGI Python and TypeS
 | [`simulation.environments.get`](#simulationenvironmentsget) | Return a simulation environment with its contract, world, scenarios and evaluations. |
 | [`simulation.environments.list`](#simulationenvironmentslist) | List simulation environments in the current workspace, optionally for one agent definition. |
 | [`simulation.environments.rename`](#simulationenvironmentsrename) | Rename a simulation environment (the only editable field); returns the environment. |
-| [`simulation.environments.run`](#simulationenvironmentsrun) | Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults). |
+| [`simulation.environments.run`](#simulationenvironmentsrun) | Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults); seed draws the same personas and variations again. |
 | [`simulation.environments.run_plan`](#simulationenvironmentsrun_plan) | Resolve the agent, environment and suite versions a run would pin, with warnings. |
 | [`simulation.environments.actors.accept_unresolved`](#simulationenvironmentsactorsaccept_unresolved) | Accept the cast as written for one policy point the builder could not model (policy, exactly as actors.list returns it under unresolved), in the environment's draft. |
 | [`simulation.environments.actors.create`](#simulationenvironmentsactorscreate) | Add one actor to the environment's draft; runs keep the saved version until simulation.environments.drafts.save saves the draft; new_id asks for the actor's id. |
@@ -290,7 +290,7 @@ export interface SimulationEnvironmentsRenameParams {
 
 ### simulation.environments.run
 
-Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults). Send the same Idempotency-Key header (options headers) to get the same run back on a retry.
+Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults); seed draws the same personas and variations again. An Idempotency-Key header (options headers) is required; the same key gets the same run back on a retry.
 
 <ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/run/" />
 

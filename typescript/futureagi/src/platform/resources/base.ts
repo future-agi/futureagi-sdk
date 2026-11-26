@@ -3132,7 +3132,7 @@ export class SimulationEnvironmentsResource extends Resource {
   }
 
   /**
-   * Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults). Send the same Idempotency-Key header (options headers) to get the same run back on a retry.
+   * Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults); seed draws the same personas and variations again. An Idempotency-Key header (options headers) is required; the same key gets the same run back on a retry.
    *
    * POST /simulate/api/harness-environments/{id}/run/
    */
