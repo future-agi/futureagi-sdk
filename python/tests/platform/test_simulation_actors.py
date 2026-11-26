@@ -125,3 +125,16 @@ def test_delete_limits_and_accept_unresolved():
     assert sent[0].url.params["expected_revision"] == "3"
     assert json.loads(sent[1].content) == {"limits": {"max_active": 2, "actor_seconds_per_call": None}}
     assert json.loads(sent[2].content) == {"policy": "refunds over 500 need a manager", "expected_revision": 4}
+
+
+def test_an_environment_refusal_carries_its_code():
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(404, json={"error": "unresolved_not_found", "message": "that point is no longer waiting", "retryable": False})
+
+    http = httpx.Client(transport=httpx.MockTransport(handler))
+    client = fp.Client(api_key="k", secret_key="s", base_url=BASE, http_client=http)
+
+    with pytest.raises(fp.NotFoundError) as refused:
+        client.simulation.environments.actors.accept_unresolved(ENV, policy="gone")
+
+    assert refused.value.code == "unresolved_not_found"

@@ -42,7 +42,8 @@ class APIError(FutureAGIError):
     """The API answered with an error status.
 
     `type`, `code` and `detail` come from the backend's error envelope
-    (`{status: false, type, code, detail, ...}`) when it is present.
+    (`{status: false, type, code, detail, ...}`) when it is present. A simulation
+    environment refusal (`{error, message, retryable}`) gives its `error` as `code`.
     """
 
     status_code: int
@@ -54,7 +55,10 @@ class APIError(FutureAGIError):
         self.body = body
         envelope = body if isinstance(body, dict) else {}
         self.type: str | None = envelope.get("type")
-        self.code: str | None = envelope.get("code")
+        code = envelope.get("code")
+        if code is None and isinstance(envelope.get("error"), str):
+            code = envelope["error"]
+        self.code: str | None = code
         self.detail: Any = envelope.get("detail")
         self.request_id: str | None = response.headers.get("x-request-id")
 

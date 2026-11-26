@@ -63,4 +63,17 @@ describe("simulation environment actors", () => {
     expect(seen[1].body).toEqual({ limits: { max_active: 2, actor_seconds_per_call: null } });
     expect(seen[2].body).toEqual({ policy: "refunds over 500 need a manager" });
   });
+
+  test("an environment refusal carries its code", async () => {
+    const fetch: FetchLike = async () =>
+      new Response(JSON.stringify({ error: "unresolved_not_found", message: "gone", retryable: false }), {
+        status: 404,
+        headers: { "content-type": "application/json" },
+      });
+
+    await expect(client(fetch).simulation.environments.actors.acceptUnresolved(ENV, { policy: "gone" })).rejects.toMatchObject({
+      status: 404,
+      code: "unresolved_not_found",
+    });
+  });
 });
