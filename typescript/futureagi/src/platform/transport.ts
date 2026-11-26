@@ -51,8 +51,20 @@ export function withIdempotencyKey(options: RequestOptions | undefined, key: str
     if (name.toLowerCase() === "idempotency-key") given = value;
     else headers[name] = value;
   }
-  headers["Idempotency-Key"] = key || given || globalThis.crypto.randomUUID();
+  headers["Idempotency-Key"] = key || given || newKey();
   return { ...options, headers };
+}
+
+// A random v4 UUID. Web Crypto where the runtime has it (browsers, Node 19+); on Node 18, where it is not global,
+// Math.random, which is enough for a key that only has to differ between calls. No top-level Node import, so the
+// client still loads in a browser.
+function newKey(): string {
+  const webCrypto = (globalThis as { crypto?: { randomUUID?: () => string } }).crypto;
+  if (webCrypto?.randomUUID) return webCrypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+  });
 }
 
 export interface RequestArgs {
