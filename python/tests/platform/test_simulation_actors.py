@@ -148,3 +148,25 @@ def test_a_run_sends_its_seed():
 
     assert (sent[0].method, sent[0].url.path) == ("POST", f"/simulate/api/harness-environments/{ENV}/run/")
     assert json.loads(sent[0].content) == {"scenario_ids": ["refund-flow"], "trials": 1, "seed": "7"}
+
+
+def test_a_run_sends_an_idempotency_key_given_or_new():
+    sent: list[httpx.Request] = []
+    client = _client(sent, {"status": True, "result": {"job_id": "j1"}})
+
+    client.simulation.environments.run(ENV, scenario_ids=["refund-flow"], idempotency_key="run-1")
+    client.simulation.environments.run(ENV, scenario_ids=["refund-flow"])
+    client.simulation.environments.run(ENV, scenario_ids=["refund-flow"])
+
+    keys = [request.headers.get("idempotency-key") for request in sent]
+    assert keys[0] == "run-1"
+    assert keys[1] and keys[2] and keys[1] != keys[2]
+
+
+@pytest.mark.parametrize(
+    ("body", "code"), [({"code": 7}, None), ({"code": 7, "error": "keys_invalid"}, "keys_invalid")]
+)
+def test_an_error_code_that_is_not_a_string_is_read_as_typescript_reads_it(body, code):
+    response = httpx.Response(400, json=body, request=httpx.Request("GET", "https://x"))
+
+    assert fp.APIError("refused", response=response, body=body).code == code

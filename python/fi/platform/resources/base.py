@@ -23,6 +23,7 @@ from .._transport import (
     NotGiven,
     RequestOptions,
     SyncTransport,
+    with_idempotency_key,
 )
 
 
@@ -1386,14 +1387,15 @@ class SimulationEnvironmentsResource(Resource):
         body = {'name': name, **(extra_body or {})}
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_RENAME, path=path, query=query, body=body, model=models.HarnessEnvironmentDetail, options=options)
 
-    def run(self, id: str, *, scenario_ids: List[str] | None | NotGiven = NOT_GIVEN, trials: int | None | NotGiven = NOT_GIVEN, seed: str | None | NotGiven = NOT_GIVEN, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessRunCreateResponse:
-        """Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults); seed draws the same personas and variations again. An Idempotency-Key header (options headers) is required; the same key gets the same run back on a retry.
+    def run(self, id: str, *, scenario_ids: List[str] | None | NotGiven = NOT_GIVEN, trials: int | None | NotGiven = NOT_GIVEN, seed: str | None | NotGiven = NOT_GIVEN, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, idempotency_key: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessRunCreateResponse:
+        """Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults); seed draws the same personas and variations again. idempotency_key is sent as the Idempotency-Key header the run needs (a new one when left out); the same key gets the same run back on a retry.
 
         POST /simulate/api/harness-environments/{id}/run/
         """
         path = {'id': id}
         query = {**(extra_query or {})}
         body = {'scenario_ids': scenario_ids, 'trials': trials, 'seed': seed, 'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, **(extra_body or {})}
+        options = with_idempotency_key(options, idempotency_key)
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_RUN, path=path, query=query, body=body, model=models.HarnessRunCreateResponse, options=options)
 
     def run_plan(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, scenario_keys: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessRunPlan:
@@ -4231,14 +4233,15 @@ class AsyncSimulationEnvironmentsResource(Resource):
         body = {'name': name, **(extra_body or {})}
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_RENAME, path=path, query=query, body=body, model=models.HarnessEnvironmentDetail, options=options)
 
-    async def run(self, id: str, *, scenario_ids: List[str] | None | NotGiven = NOT_GIVEN, trials: int | None | NotGiven = NOT_GIVEN, seed: str | None | NotGiven = NOT_GIVEN, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessRunCreateResponse:
-        """Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults); seed draws the same personas and variations again. An Idempotency-Key header (options headers) is required; the same key gets the same run back on a retry.
+    async def run(self, id: str, *, scenario_ids: List[str] | None | NotGiven = NOT_GIVEN, trials: int | None | NotGiven = NOT_GIVEN, seed: str | None | NotGiven = NOT_GIVEN, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, idempotency_key: str | None = None, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessRunCreateResponse:
+        """Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults); seed draws the same personas and variations again. idempotency_key is sent as the Idempotency-Key header the run needs (a new one when left out); the same key gets the same run back on a retry.
 
         POST /simulate/api/harness-environments/{id}/run/
         """
         path = {'id': id}
         query = {**(extra_query or {})}
         body = {'scenario_ids': scenario_ids, 'trials': trials, 'seed': seed, 'agent_version_id': agent_version_id, 'environment_version_id': environment_version_id, 'suite_version_id': suite_version_id, **(extra_body or {})}
+        options = with_idempotency_key(options, idempotency_key)
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_RUN, path=path, query=query, body=body, model=models.HarnessRunCreateResponse, options=options)
 
     async def run_plan(self, id: str, *, agent_version_id: str | None | NotGiven = NOT_GIVEN, environment_version_id: str | None | NotGiven = NOT_GIVEN, suite_version_id: str | None | NotGiven = NOT_GIVEN, scenario_keys: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessRunPlan:

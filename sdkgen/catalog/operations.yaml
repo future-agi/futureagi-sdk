@@ -1435,9 +1435,9 @@ operations:
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.environments.run
-  description: Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults); seed draws the same personas and variations again. An Idempotency-Key header (options headers) is required; the same key gets the same run back on a retry.
+  description: Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults); seed draws the same personas and variations again. idempotency_key is sent as the Idempotency-Key header the run needs (a new one when left out); the same key gets the same run back on a retry.
   operation: {method: POST, path: '/simulate/api/harness-environments/{id}/run/', response_status: 202}
-  surfaces: {sdk: {}, mcp: false}
+  surfaces: {sdk: {idempotency_key: true}, mcp: false}
 
 - id: simulation.environments.versions.list
   description: List an environment's saved agent, environment and suite versions, and which of each is the default.

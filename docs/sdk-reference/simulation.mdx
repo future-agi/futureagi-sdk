@@ -358,7 +358,7 @@ export interface SimulationEnvironmentsRenameParams {
 
 ### simulation.environments.run
 
-Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults); seed draws the same personas and variations again. An Idempotency-Key header (options headers) is required; the same key gets the same run back on a retry.
+Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults); seed draws the same personas and variations again. idempotency_key is sent as the Idempotency-Key header the run needs (a new one when left out); the same key gets the same run back on a retry.
 
 <ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/run/" />
 
@@ -386,6 +386,7 @@ client.simulation.environments.run(
     agent_version_id: str | None | NotGiven = NOT_GIVEN,
     environment_version_id: str | None | NotGiven = NOT_GIVEN,
     suite_version_id: str | None | NotGiven = NOT_GIVEN,
+    idempotency_key: str | None = None,
     extra_query: dict[str, Any] | None = None,
     extra_body: dict[str, Any] | None = None,
     options: RequestOptions | None = None,
@@ -402,6 +403,8 @@ export interface SimulationEnvironmentsRunParams {
   agent_version_id?: string | null;
   environment_version_id?: string | null;
   suite_version_id?: string | null;
+  /** Sent as the Idempotency-Key header; a new one when left out. The same key gets the same result back. */
+  idempotencyKey?: string;
 }
 ```
 

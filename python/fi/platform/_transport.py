@@ -8,7 +8,8 @@ import os
 import random
 import time
 import warnings
-from dataclasses import dataclass
+import uuid
+from dataclasses import dataclass, replace
 from typing import IO, Any, Dict, List, Mapping, Optional, Tuple, Union
 from urllib.parse import quote
 
@@ -91,6 +92,16 @@ class RequestOptions:
     headers: Optional[Mapping[str, str]] = None  # added to (and overriding) the client's headers
     timeout: Optional[float] = None
     max_retries: Optional[int] = None
+
+
+def with_idempotency_key(options: RequestOptions | None, key: str | None) -> RequestOptions:
+    """The call's options with an `Idempotency-Key` header: the key given, else one already in the
+    headers, else a new one. Set once per call, so every retry of it sends the same key."""
+    headers = dict((options.headers if options else None) or {})
+    given = next((value for name, value in headers.items() if name.lower() == "idempotency-key"), None)
+    headers = {name: value for name, value in headers.items() if name.lower() != "idempotency-key"}
+    headers["Idempotency-Key"] = key or given or str(uuid.uuid4())
+    return replace(options or RequestOptions(), headers=headers)
 
 
 # What a caller may pass for a file parameter: a path, raw bytes, an open binary

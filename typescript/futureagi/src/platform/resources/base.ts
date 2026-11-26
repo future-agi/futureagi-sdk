@@ -12,6 +12,7 @@ import { Pager } from "../pagination";
 import { Resource } from "../resource";
 import { warnStability } from "../stability";
 import type { FileInput, JsonValue, RequestOptions, Transport } from "../transport";
+import { withIdempotencyKey } from "../transport";
 
 export interface AgentsCreateParams {
   /** Agent name */
@@ -1383,6 +1384,8 @@ export interface SimulationEnvironmentsRunParams {
   environment_version_id?: string | null;
   /** Suite version id */
   suite_version_id?: string | null;
+  /** Sent as the Idempotency-Key header; a new one when left out. The same key gets the same result back. */
+  idempotencyKey?: string;
 }
 
 export interface SimulationEnvironmentsRunPlanParams {
@@ -3362,12 +3365,12 @@ export class SimulationEnvironmentsResource extends Resource {
   }
 
   /**
-   * Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults); seed draws the same personas and variations again. An Idempotency-Key header (options headers) is required; the same key gets the same run back on a retry.
+   * Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults); seed draws the same personas and variations again. idempotency_key is sent as the Idempotency-Key header the run needs (a new one when left out); the same key gets the same run back on a retry.
    *
    * POST /simulate/api/harness-environments/{id}/run/
    */
   run(id: string, params: SimulationEnvironmentsRunParams = {}, options?: RequestOptions): Promise<models.HarnessRunCreateResponse> {
-    return this._t.call<models.HarnessRunCreateResponse>(ops.OP_SIMULATION_ENVIRONMENTS_RUN, { path: { id: id }, query: {}, body: { scenario_ids: params.scenario_ids, trials: params.trials, seed: params.seed, agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id } }, options);
+    return this._t.call<models.HarnessRunCreateResponse>(ops.OP_SIMULATION_ENVIRONMENTS_RUN, { path: { id: id }, query: {}, body: { scenario_ids: params.scenario_ids, trials: params.trials, seed: params.seed, agent_version_id: params.agent_version_id, environment_version_id: params.environment_version_id, suite_version_id: params.suite_version_id } }, withIdempotencyKey(options, params.idempotencyKey));
   }
 
   /**

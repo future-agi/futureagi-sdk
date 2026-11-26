@@ -56,8 +56,8 @@ class APIError(FutureAGIError):
         envelope = body if isinstance(body, dict) else {}
         self.type: str | None = envelope.get("type")
         code = envelope.get("code")
-        if code is None and isinstance(envelope.get("error"), str):
-            code = envelope["error"]
+        if not isinstance(code, str):
+            code = envelope["error"] if isinstance(envelope.get("error"), str) else None
         self.code: str | None = code
         self.detail: Any = envelope.get("detail")
         self.request_id: str | None = response.headers.get("x-request-id")

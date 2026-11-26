@@ -8,14 +8,15 @@ const ENV = "11111111-1111-4111-8111-11111111111a";
 const H = `/simulate/api/harness-environments/${ENV}/`;
 const ACTORS = { status: true, result: { actors: [], limits: {}, revision: 3 } };
 
-type Seen = { method: string; path: string; query: URLSearchParams; body: unknown };
+type Seen = { method: string; path: string; query: URLSearchParams; body: unknown; key?: string | null };
 
 function recording(): { fetch: FetchLike; seen: Seen[] } {
   const seen: Seen[] = [];
   const fetch: FetchLike = async (url, init) => {
     const u = new URL(url);
     const raw = init?.body ? String(init.body) : "";
-    seen.push({ method: init?.method ?? "GET", path: u.pathname, query: u.searchParams, body: raw ? JSON.parse(raw) : undefined });
+    const key = new Headers(init?.headers).get("idempotency-key");
+    seen.push({ method: init?.method ?? "GET", path: u.pathname, query: u.searchParams, body: raw ? JSON.parse(raw) : undefined, key });
     return new Response(JSON.stringify(ACTORS), { status: 200, headers: { "content-type": "application/json" } });
   };
   return { fetch, seen };
@@ -75,6 +76,20 @@ describe("simulation environment actors", () => {
       status: 404,
       code: "unresolved_not_found",
     });
+  });
+
+  test("a run sends an idempotency key, the one given or a new one", async () => {
+    const { fetch, seen } = recording();
+    const environments = client(fetch).simulation.environments;
+
+    await environments.run(ENV, { scenario_ids: ["refund-flow"], idempotencyKey: "run-1" });
+    await environments.run(ENV, { scenario_ids: ["refund-flow"] });
+    await environments.run(ENV, { scenario_ids: ["refund-flow"] });
+
+    expect(seen[0].key).toBe("run-1");
+    expect(seen[1].key).toBeTruthy();
+    expect(seen[1].key).not.toBe(seen[2].key);
+    expect(seen[0].body).toEqual({ scenario_ids: ["refund-flow"] });
   });
 
   test("a run sends its seed", async () => {

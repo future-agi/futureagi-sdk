@@ -40,6 +40,21 @@ export interface RequestOptions {
   extraBody?: Record<string, unknown>;
 }
 
+/**
+ * The call's options with an `Idempotency-Key` header: the key given, else one already in the headers, else a new
+ * one. Set once per call, so every retry of it sends the same key.
+ */
+export function withIdempotencyKey(options: RequestOptions | undefined, key: string | undefined): RequestOptions {
+  const headers: Record<string, string> = {};
+  let given: string | undefined;
+  for (const [name, value] of Object.entries(options?.headers ?? {})) {
+    if (name.toLowerCase() === "idempotency-key") given = value;
+    else headers[name] = value;
+  }
+  headers["Idempotency-Key"] = key || given || globalThis.crypto.randomUUID();
+  return { ...options, headers };
+}
+
 export interface RequestArgs {
   path?: Record<string, string>;
   query?: Record<string, unknown>;
