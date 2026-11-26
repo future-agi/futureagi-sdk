@@ -47,7 +47,7 @@ description: "Reference for client.simulation in the Future AGI Python and TypeS
 | [`simulation.environments.scenarios.restore`](#simulationenvironmentsscenariosrestore) | Bring an archived scenario (key) back, at once when the saved suite still holds it, otherwise as a draft to save. |
 | [`simulation.environments.scenarios.revisions`](#simulationenvironmentsscenariosrevisions) | List each distinct content of one scenario (key) across the environment's saved suite versions, newest first. |
 | [`simulation.environments.scenarios.running_validation`](#simulationenvironmentsscenariosrunning_validation) | Return the validation still running for the environment's default versions, if any, and how many scenarios a validation of those not yet proved would prove. |
-| [`simulation.environments.scenarios.validate`](#simulationenvironmentsscenariosvalidate) | Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and makes model calls; see Usage for what it counts toward. |
+| [`simulation.environments.scenarios.validate`](#simulationenvironmentsscenariosvalidate) | Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward. |
 | [`simulation.environments.scenarios.validation_status`](#simulationenvironmentsscenariosvalidation_status) | Return where one scenario validation (job_id) got to, and whether it recorded its proofs. |
 | [`simulation.environments.versions.create_agent`](#simulationenvironmentsversionscreate_agent) | Make an environment's next agent version from an uploaded folder (archive_artifact_id from simulation.jobs.upload_sources, alone), a prompt or agent_payload settings; it is checked next, then made the default. |
 | [`simulation.environments.versions.diff`](#simulationenvironmentsversionsdiff) | Show what one agent, environment or suite version (piece), or an open draft, changed against its parent, or against the version named by `against`. |
@@ -1731,7 +1731,7 @@ export interface SimulationEnvironmentsReadinessHistoryParams {
 
 ### simulation.environments.readiness.recheck
 
-Validate a pairing of versions again (absent ones are the defaults) without a run; moves no default. A pairing not yet certified runs its check in a build sandbox and makes model calls; see Usage for what it counts toward.
+Validate a pairing of versions again (absent ones are the defaults) without a run; moves no default. A pairing not yet certified runs its check in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward.
 
 <ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/capabilities/recheck/" />
 
@@ -2179,7 +2179,7 @@ client.simulation.environments.scenarios.runningValidation(id: string, options?:
 
 ### simulation.environments.scenarios.validate
 
-Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and makes model calls; see Usage for what it counts toward. Returns a job_id to follow with validation_status.
+Prove an environment's scenarios again for a pairing of agent, environment and suite versions (absent ones are the defaults), all of them or only keys; each proof runs in a build sandbox and makes model calls; see the Usage page in the app for what it counts toward. Returns a job_id to follow with validation_status.
 
 <ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/scenarios/validate/" />
 
