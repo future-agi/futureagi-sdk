@@ -33,7 +33,7 @@
       "X-Secret-Key": []
     }
   ],
-  "x-source-sha256": "3ab7ad9a7ca870b2d2886653e41cba139ac20a1f95613398628ba6dfeb67034b",
+  "x-source-sha256": "e96514108f8496dd1d5a573dccab4d57515e2b00a7aadcf4f0d7479808ba7b56",
   "paths": {
     "/accounts/user-info/": {
       "parameters": [],
@@ -8005,6 +8005,92 @@
         "x-runtime-response-validation": true
       }
     },
+    "/simulate/api/harness-environments/{id}/actor-limits/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "put": {
+        "operationId": "simulate_api_harness-environments_actor_limits",
+        "description": "Set the environment's actor limits in its draft (each a number, or null for no limit) and its actors' model.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HarnessActorLimitsWrite"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/HarnessActorList"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "simulate"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
+    "/simulate/api/harness-environments/{id}/actor-unresolved/accept/": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "operationId": "simulate_api_harness-environments_accept_unresolved",
+        "description": "Accept the cast as written for one policy point the builder could not model.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HarnessActorUnresolvedAccept"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/HarnessActorList"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "simulate"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      }
+    },
     "/simulate/api/harness-environments/{id}/actor-validation/": {
       "parameters": [
         {
@@ -8173,6 +8259,38 @@
             "schema": {
               "$ref": "#/definitions/HarnessActorWrite"
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/HarnessActorList"
+            }
+          },
+          "default": {
+            "description": "Default error response",
+            "schema": {
+              "$ref": "#/definitions/ManagementAPIErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "simulate"
+        ],
+        "x-runtime-request-validation": true,
+        "x-runtime-response-validation": true
+      },
+      "delete": {
+        "operationId": "simulate_api_harness-environments_delete_actor",
+        "description": "Take one actor out of the draft; refused while a scenario includes it.",
+        "parameters": [
+          {
+            "name": "expected_revision",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 0
           }
         ],
         "responses": {
@@ -25986,6 +26104,22 @@
         }
       }
     },
+    "HarnessActorLimitsWrite": {
+      "required": [
+        "limits"
+      ],
+      "type": "object",
+      "properties": {
+        "limits": {
+          "$ref": "#/definitions/HarnessActorLimits"
+        },
+        "expected_revision": {
+          "title": "Expected revision",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
     "HarnessActorList": {
       "required": [
         "actors",
@@ -26671,6 +26805,25 @@
         "actor": {
           "title": "Actor",
           "type": "string"
+        }
+      }
+    },
+    "HarnessActorUnresolvedAccept": {
+      "required": [
+        "policy"
+      ],
+      "type": "object",
+      "properties": {
+        "policy": {
+          "title": "Policy",
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 1
+        },
+        "expected_revision": {
+          "title": "Expected revision",
+          "type": "integer",
+          "minimum": 0
         }
       }
     },

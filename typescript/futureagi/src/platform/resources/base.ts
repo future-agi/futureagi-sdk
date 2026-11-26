@@ -1384,6 +1384,13 @@ export interface SimulationEnvironmentsRunPlanParams {
   suite_version_id?: string | null;
 }
 
+export interface SimulationEnvironmentsActorsAcceptUnresolvedParams {
+  /** Policy */
+  policy: string;
+  /** Expected revision */
+  expected_revision?: number | null;
+}
+
 export interface SimulationEnvironmentsActorsCreateParams {
   /** Actor */
   actor?: Record<string, unknown> | null;
@@ -1395,8 +1402,18 @@ export interface SimulationEnvironmentsActorsCreateParams {
   share_actions?: Array<string> | null;
 }
 
+export interface SimulationEnvironmentsActorsDeleteParams {
+  expected_revision?: number | null;
+}
+
 export interface SimulationEnvironmentsActorsGetParams {
   scenario_key?: string | null;
+}
+
+export interface SimulationEnvironmentsActorsSetLimitsParams {
+  limits: Record<string, unknown>;
+  /** Expected revision */
+  expected_revision?: number | null;
 }
 
 export interface SimulationEnvironmentsActorsUpdateParams {
@@ -1994,12 +2011,30 @@ export interface UsageOverviewParams {
 export class SimulationEnvironmentsActorsResource extends Resource {
 
   /**
+   * Accept the cast as written for one policy point the builder could not model (policy, exactly as actors.list returns it under unresolved), in the environment's draft. Returns every actor.
+   *
+   * POST /simulate/api/harness-environments/{id}/actor-unresolved/accept/
+   */
+  acceptUnresolved(id: string, params: SimulationEnvironmentsActorsAcceptUnresolvedParams, options?: RequestOptions): Promise<models.HarnessActorList> {
+    return this._t.call<models.HarnessActorList>(ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_ACCEPT_UNRESOLVED, { path: { id: id }, query: {}, body: { policy: params.policy, expected_revision: params.expected_revision } }, options);
+  }
+
+  /**
    * Add one actor to the environment's draft; runs keep the saved version until simulation.environments.drafts.save saves the draft; new_id asks for the actor's id. Returns every actor.
    *
    * POST /simulate/api/harness-environments/{id}/actors/
    */
   create(id: string, params: SimulationEnvironmentsActorsCreateParams = {}, options?: RequestOptions): Promise<models.HarnessActorList> {
     return this._t.call<models.HarnessActorList>(ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_CREATE, { path: { id: id }, query: {}, body: { actor: params.actor, changes: params.changes, id: params.id, expected_revision: params.expected_revision, share_actions: params.share_actions } }, options);
+  }
+
+  /**
+   * Take one actor out of the environment's draft; refused while a scenario includes it. expected_revision refuses a draft that changed since you read it. Returns every actor.
+   *
+   * DELETE /simulate/api/harness-environments/{id}/actors/{actor_id}/
+   */
+  delete(id: string, actorId: string, params: SimulationEnvironmentsActorsDeleteParams = {}, options?: RequestOptions): Promise<models.HarnessActorList> {
+    return this._t.call<models.HarnessActorList>(ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_DELETE, { path: { id: id, actor_id: actorId }, query: { expected_revision: params.expected_revision }, body: {} }, options);
   }
 
   /**
@@ -2018,6 +2053,15 @@ export class SimulationEnvironmentsActorsResource extends Resource {
    */
   list(id: string, options?: RequestOptions): Promise<models.HarnessActorList> {
     return this._t.call<models.HarnessActorList>(ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_LIST, { path: { id: id }, query: {} }, options);
+  }
+
+  /**
+   * Replace the environment's actor limits in its draft (each a positive number, or None for no limit) and its actors' model; a limit left out takes the channel's default. Returns every actor.
+   *
+   * PUT /simulate/api/harness-environments/{id}/actor-limits/
+   */
+  setLimits(id: string, params: SimulationEnvironmentsActorsSetLimitsParams, options?: RequestOptions): Promise<models.HarnessActorList> {
+    return this._t.call<models.HarnessActorList>(ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_SET_LIMITS, { path: { id: id }, query: {}, body: { limits: params.limits, expected_revision: params.expected_revision } }, options);
   }
 
   /**

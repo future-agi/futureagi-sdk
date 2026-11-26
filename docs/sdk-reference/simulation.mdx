@@ -1,6 +1,6 @@
 ---
 title: "Simulation"
-description: "Reference for client.simulation in the Future AGI Python and TypeScript SDKs: simulation.calls.get, simulation.environments.get, simulation.environments.list, simulation.environments.rename, simulation.environments.run, simulation.environments.run_plan and 56 more."
+description: "Reference for client.simulation in the Future AGI Python and TypeScript SDKs: simulation.calls.get, simulation.environments.get, simulation.environments.list, simulation.environments.rename, simulation.environments.run, simulation.environments.run_plan and 59 more."
 ---
 
 `client.simulation` on `fi.Client` (Python) and `client.simulation` on `Client` from `@future-agi/sdk` (TypeScript), with the nested resources `client.simulation.calls`, `client.simulation.environments`, `client.simulation.environments.actors`, `client.simulation.environments.drafts`, `client.simulation.environments.evaluations`, `client.simulation.environments.nudges`, `client.simulation.environments.runs`, `client.simulation.environments.versions`, `client.simulation.executions`, `client.simulation.executions.insights`, `client.simulation.jobs`, `client.simulation.jobs.scenarios`, `client.simulation.personas`, `client.simulation.scenarios`, `client.simulation.tests`. The models these methods return are on [Simulation response models](/docs/sdk/reference/simulation-models); how arguments, pagination, errors and strict mode work is in the [overview](/docs/sdk/reference).
@@ -17,9 +17,12 @@ description: "Reference for client.simulation in the Future AGI Python and TypeS
 | [`simulation.environments.rename`](#simulationenvironmentsrename) | Rename a simulation environment (the only editable field); returns the environment. |
 | [`simulation.environments.run`](#simulationenvironmentsrun) | Start one run of an environment for the chosen scenario keys (scenario_ids) and trials, pinning the agent, environment and suite versions (absent picks are the defaults). |
 | [`simulation.environments.run_plan`](#simulationenvironmentsrun_plan) | Resolve the agent, environment and suite versions a run would pin, with warnings. |
+| [`simulation.environments.actors.accept_unresolved`](#simulationenvironmentsactorsaccept_unresolved) | Accept the cast as written for one policy point the builder could not model (policy, exactly as actors.list returns it under unresolved), in the environment's draft. |
 | [`simulation.environments.actors.create`](#simulationenvironmentsactorscreate) | Add one actor to the environment's draft; runs keep the saved version until simulation.environments.drafts.save saves the draft; new_id asks for the actor's id. |
+| [`simulation.environments.actors.delete`](#simulationenvironmentsactorsdelete) | Take one actor out of the environment's draft; refused while a scenario includes it. |
 | [`simulation.environments.actors.get`](#simulationenvironmentsactorsget) | Return what one actor sees and may do, optionally in one scenario (scenario_key), and what it never sees. |
 | [`simulation.environments.actors.list`](#simulationenvironmentsactorslist) | List an environment's actors (the people, systems and tools the agent works with) and its actor limits, as the next run would use them, the draft's when there is one. |
+| [`simulation.environments.actors.set_limits`](#simulationenvironmentsactorsset_limits) | Replace the environment's actor limits in its draft (each a positive number, or None for no limit) and its actors' model; a limit left out takes the channel's default. |
 | [`simulation.environments.actors.update`](#simulationenvironmentsactorsupdate) | Replace one actor in the environment's draft, as a whole record (actor) or as changes to it (changes); its id never changes. |
 | [`simulation.environments.actors.validate`](#simulationenvironmentsactorsvalidate) | Check a create, replace or removal (op) of one actor without writing anything; returns its problems, the actions it would share that share_actions does not confirm, and the id a create would get (new_id asks for one). |
 | [`simulation.environments.drafts.list`](#simulationenvironmentsdraftslist) | Return an environment's unsaved environment and suite drafts (with parent_id and revision for a save) and the drafts a rebuild set aside. |
@@ -410,6 +413,61 @@ export interface SimulationEnvironmentsRunPlanParams {
 
 TypeScript: `client.simulation.environments.actors`.
 
+### simulation.environments.actors.accept_unresolved
+
+Accept the cast as written for one policy point the builder could not model (policy, exactly as actors.list returns it under unresolved), in the environment's draft. Returns every actor.
+
+<ApiEndpoint method="POST" path="/simulate/api/harness-environments/{id}/actor-unresolved/accept/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.actors.accept_unresolved("your-id", policy="your-policy")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.actors.acceptUnresolved("your-id", { policy: "your-policy" });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.actors.accept_unresolved(
+    id: str,
+    *,
+    policy: str,
+    expected_revision: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessActorList
+```
+
+```typescript TypeScript
+client.simulation.environments.actors.acceptUnresolved(id: string, params: SimulationEnvironmentsActorsAcceptUnresolvedParams, options?: RequestOptions): Promise<models.HarnessActorList>
+
+export interface SimulationEnvironmentsActorsAcceptUnresolvedParams {
+  policy: string;
+  expected_revision?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="policy" type="string" required />
+<ParamField body="expected_revision" type="integer" optional />
+
+#### Returns
+
+[`HarnessActorList`](/docs/sdk/reference/simulation-models#harnessactorlist).
+
 ### simulation.environments.actors.create
 
 Add one actor to the environment's draft; runs keep the saved version until simulation.environments.drafts.save saves the draft; new_id asks for the actor's id. Returns every actor.
@@ -469,6 +527,62 @@ export interface SimulationEnvironmentsActorsCreateParams {
 <ParamField body="id" type="string" optional />
 <ParamField body="expected_revision" type="integer" optional />
 <ParamField body="share_actions" type="string[]" optional />
+
+#### Returns
+
+[`HarnessActorList`](/docs/sdk/reference/simulation-models#harnessactorlist).
+
+### simulation.environments.actors.delete
+
+Take one actor out of the environment's draft; refused while a scenario includes it. expected_revision refuses a draft that changed since you read it. Returns every actor.
+
+<ApiEndpoint method="DELETE" path="/simulate/api/harness-environments/{id}/actors/{actor_id}/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.actors.delete("your-id", "your-actor-id")
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.actors.delete("your-id", "your-actor-id");
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.actors.delete(
+    id: str,
+    actor_id: str,
+    *,
+    expected_revision: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessActorList
+```
+
+```typescript TypeScript
+client.simulation.environments.actors.delete(id: string, actorId: string, params: SimulationEnvironmentsActorsDeleteParams = {}, options?: RequestOptions): Promise<models.HarnessActorList>
+
+export interface SimulationEnvironmentsActorsDeleteParams {
+  expected_revision?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField path="actor_id" type="string" required>
+  Positional argument `actor_id`.
+</ParamField>
+<ParamField query="expected_revision" type="integer" optional />
 
 #### Returns
 
@@ -569,6 +683,61 @@ client.simulation.environments.actors.list(id: string, options?: RequestOptions)
 <ParamField path="id" type="string" required>
   Positional argument `id`.
 </ParamField>
+
+#### Returns
+
+[`HarnessActorList`](/docs/sdk/reference/simulation-models#harnessactorlist).
+
+### simulation.environments.actors.set_limits
+
+Replace the environment's actor limits in its draft (each a positive number, or None for no limit) and its actors' model; a limit left out takes the channel's default. Returns every actor.
+
+<ApiEndpoint method="PUT" path="/simulate/api/harness-environments/{id}/actor-limits/" />
+
+<CodeGroup>
+
+```python Python
+result = client.simulation.environments.actors.set_limits("your-id", limits={})
+```
+
+```typescript TypeScript
+const result = await client.simulation.environments.actors.setLimits("your-id", { limits: {} });
+```
+
+</CodeGroup>
+
+<Expandable title="Signature">
+
+```python Python
+client.simulation.environments.actors.set_limits(
+    id: str,
+    *,
+    limits: dict[str, Any],
+    expected_revision: int | None | NotGiven = NOT_GIVEN,
+    extra_query: dict[str, Any] | None = None,
+    extra_body: dict[str, Any] | None = None,
+    options: RequestOptions | None = None,
+) -> models.HarnessActorList
+```
+
+```typescript TypeScript
+client.simulation.environments.actors.setLimits(id: string, params: SimulationEnvironmentsActorsSetLimitsParams, options?: RequestOptions): Promise<models.HarnessActorList>
+
+export interface SimulationEnvironmentsActorsSetLimitsParams {
+  limits: Record<string, unknown>;
+  expected_revision?: number | null;
+}
+```
+
+</Expandable>
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Positional argument `id`.
+</ParamField>
+<ParamField body="limits" type="object" required />
+<ParamField body="expected_revision" type="integer" optional />
 
 #### Returns
 

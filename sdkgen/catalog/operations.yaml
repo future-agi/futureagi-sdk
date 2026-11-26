@@ -1377,7 +1377,8 @@ operations:
 # Simulation, environment era: parity with the futureagi-cli `fi api` agents and
 # simulation groups (its catalog/extensions.yaml and cli.yaml). SDK-only: these
 # are not MCP tools. Deletes are deliberately left out (persona delete, draft
-# discard, evaluation remove), as is discarding an agent version; verify
+# discard, evaluation remove), as is discarding an agent version; an actor's
+# delete is in, since it edits the draft and nothing changes until it is saved; verify
 # (/harness-environments/{id}/verify/) waits for a backend release that has it.
 # ---------------------------------------------------------------------------
 
@@ -1500,6 +1501,21 @@ operations:
   contract_fix:
     body_fields: {id: {type: string, as: new_id}}
     note: the body's `id` (the id a created actor takes) shares its name with the environment's path `id`
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.actors.delete
+  description: Take one actor out of the environment's draft; refused while a scenario includes it. expected_revision refuses a draft that changed since you read it. Returns every actor.
+  operation: {method: DELETE, path: '/simulate/api/harness-environments/{id}/actors/{actor_id}/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.actors.set_limits
+  description: Replace the environment's actor limits in its draft (each a positive number, or None for no limit) and its actors' model; a limit left out takes the channel's default. Returns every actor.
+  operation: {method: PUT, path: '/simulate/api/harness-environments/{id}/actor-limits/'}
+  surfaces: {sdk: {}, mcp: false}
+
+- id: simulation.environments.actors.accept_unresolved
+  description: Accept the cast as written for one policy point the builder could not model (policy, exactly as actors.list returns it under unresolved), in the environment's draft. Returns every actor.
+  operation: {method: POST, path: '/simulate/api/harness-environments/{id}/actor-unresolved/accept/'}
   surfaces: {sdk: {}, mcp: false}
 
 - id: simulation.environments.drafts.list

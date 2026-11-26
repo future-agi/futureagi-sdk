@@ -31,6 +31,16 @@ class SimulationEnvironmentsActorsResource(Resource):
 
     _t: SyncTransport
 
+    def accept_unresolved(self, id: str, *, policy: str, expected_revision: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
+        """Accept the cast as written for one policy point the builder could not model (policy, exactly as actors.list returns it under unresolved), in the environment's draft. Returns every actor.
+
+        POST /simulate/api/harness-environments/{id}/actor-unresolved/accept/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'policy': policy, 'expected_revision': expected_revision, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_ACCEPT_UNRESOLVED, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
+
     def create(self, id: str, *, actor: Dict[str, Any] | None | NotGiven = NOT_GIVEN, changes: Dict[str, Any] | None | NotGiven = NOT_GIVEN, new_id: str | None | NotGiven = NOT_GIVEN, expected_revision: int | None | NotGiven = NOT_GIVEN, share_actions: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
         """Add one actor to the environment's draft; runs keep the saved version until simulation.environments.drafts.save saves the draft; new_id asks for the actor's id. Returns every actor.
 
@@ -40,6 +50,16 @@ class SimulationEnvironmentsActorsResource(Resource):
         query = {**(extra_query or {})}
         body = {'actor': actor, 'changes': changes, 'id': new_id, 'expected_revision': expected_revision, 'share_actions': share_actions, **(extra_body or {})}
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_CREATE, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
+
+    def delete(self, id: str, actor_id: str, *, expected_revision: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
+        """Take one actor out of the environment's draft; refused while a scenario includes it. expected_revision refuses a draft that changed since you read it. Returns every actor.
+
+        DELETE /simulate/api/harness-environments/{id}/actors/{actor_id}/
+        """
+        path = {'id': id, 'actor_id': actor_id}
+        query = {'expected_revision': expected_revision, **(extra_query or {})}
+        body = {**(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_DELETE, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
 
     def get(self, id: str, actor_id: str, *, scenario_key: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorView:
         """Return what one actor sees and may do, optionally in one scenario (scenario_key), and what it never sees.
@@ -60,6 +80,16 @@ class SimulationEnvironmentsActorsResource(Resource):
         query = {**(extra_query or {})}
         body = None
         return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_LIST, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
+
+    def set_limits(self, id: str, *, limits: Dict[str, Any], expected_revision: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
+        """Replace the environment's actor limits in its draft (each a positive number, or None for no limit) and its actors' model; a limit left out takes the channel's default. Returns every actor.
+
+        PUT /simulate/api/harness-environments/{id}/actor-limits/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'limits': limits, 'expected_revision': expected_revision, **(extra_body or {})}
+        return self._t.call(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_SET_LIMITS, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
 
     def update(self, id: str, actor_id: str, *, actor: Dict[str, Any] | None | NotGiven = NOT_GIVEN, changes: Dict[str, Any] | None | NotGiven = NOT_GIVEN, new_id: str | None | NotGiven = NOT_GIVEN, expected_revision: int | None | NotGiven = NOT_GIVEN, share_actions: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
         """Replace one actor in the environment's draft, as a whole record (actor) or as changes to it (changes); its id never changes. Returns every actor.
@@ -2692,6 +2722,16 @@ class AsyncSimulationEnvironmentsActorsResource(Resource):
 
     _t: AsyncTransport
 
+    async def accept_unresolved(self, id: str, *, policy: str, expected_revision: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
+        """Accept the cast as written for one policy point the builder could not model (policy, exactly as actors.list returns it under unresolved), in the environment's draft. Returns every actor.
+
+        POST /simulate/api/harness-environments/{id}/actor-unresolved/accept/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'policy': policy, 'expected_revision': expected_revision, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_ACCEPT_UNRESOLVED, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
+
     async def create(self, id: str, *, actor: Dict[str, Any] | None | NotGiven = NOT_GIVEN, changes: Dict[str, Any] | None | NotGiven = NOT_GIVEN, new_id: str | None | NotGiven = NOT_GIVEN, expected_revision: int | None | NotGiven = NOT_GIVEN, share_actions: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
         """Add one actor to the environment's draft; runs keep the saved version until simulation.environments.drafts.save saves the draft; new_id asks for the actor's id. Returns every actor.
 
@@ -2701,6 +2741,16 @@ class AsyncSimulationEnvironmentsActorsResource(Resource):
         query = {**(extra_query or {})}
         body = {'actor': actor, 'changes': changes, 'id': new_id, 'expected_revision': expected_revision, 'share_actions': share_actions, **(extra_body or {})}
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_CREATE, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
+
+    async def delete(self, id: str, actor_id: str, *, expected_revision: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
+        """Take one actor out of the environment's draft; refused while a scenario includes it. expected_revision refuses a draft that changed since you read it. Returns every actor.
+
+        DELETE /simulate/api/harness-environments/{id}/actors/{actor_id}/
+        """
+        path = {'id': id, 'actor_id': actor_id}
+        query = {'expected_revision': expected_revision, **(extra_query or {})}
+        body = {**(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_DELETE, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
 
     async def get(self, id: str, actor_id: str, *, scenario_key: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorView:
         """Return what one actor sees and may do, optionally in one scenario (scenario_key), and what it never sees.
@@ -2721,6 +2771,16 @@ class AsyncSimulationEnvironmentsActorsResource(Resource):
         query = {**(extra_query or {})}
         body = None
         return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_LIST, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
+
+    async def set_limits(self, id: str, *, limits: Dict[str, Any], expected_revision: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
+        """Replace the environment's actor limits in its draft (each a positive number, or None for no limit) and its actors' model; a limit left out takes the channel's default. Returns every actor.
+
+        PUT /simulate/api/harness-environments/{id}/actor-limits/
+        """
+        path = {'id': id}
+        query = {**(extra_query or {})}
+        body = {'limits': limits, 'expected_revision': expected_revision, **(extra_body or {})}
+        return await self._t.acall(_ops.OP_SIMULATION_ENVIRONMENTS_ACTORS_SET_LIMITS, path=path, query=query, body=body, model=models.HarnessActorList, options=options)
 
     async def update(self, id: str, actor_id: str, *, actor: Dict[str, Any] | None | NotGiven = NOT_GIVEN, changes: Dict[str, Any] | None | NotGiven = NOT_GIVEN, new_id: str | None | NotGiven = NOT_GIVEN, expected_revision: int | None | NotGiven = NOT_GIVEN, share_actions: List[str] | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.HarnessActorList:
         """Replace one actor in the environment's draft, as a whole record (actor) or as changes to it (changes); its id never changes. Returns every actor.

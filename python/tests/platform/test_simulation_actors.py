@@ -107,3 +107,21 @@ def test_two_parameters_with_one_argument_name_fail_the_build():
         generate.CatalogError, match=r"two parameters become the argument \['id'\]"
     ):
         generate.load(CONTRACT, catalog)
+
+
+def test_delete_limits_and_accept_unresolved():
+    sent: list[httpx.Request] = []
+    client = _client(sent, ACTORS)
+
+    client.simulation.environments.actors.delete(ENV, "coworker", expected_revision=3)
+    client.simulation.environments.actors.set_limits(ENV, limits={"max_active": 2, "actor_seconds_per_call": None})
+    client.simulation.environments.actors.accept_unresolved(ENV, policy="refunds over 500 need a manager", expected_revision=4)
+
+    assert [(r.method, r.url.path) for r in sent] == [
+        ("DELETE", f"/simulate/api/harness-environments/{ENV}/actors/coworker/"),
+        ("PUT", f"/simulate/api/harness-environments/{ENV}/actor-limits/"),
+        ("POST", f"/simulate/api/harness-environments/{ENV}/actor-unresolved/accept/"),
+    ]
+    assert sent[0].url.params["expected_revision"] == "3"
+    assert json.loads(sent[1].content) == {"limits": {"max_active": 2, "actor_seconds_per_call": None}}
+    assert json.loads(sent[2].content) == {"policy": "refunds over 500 need a manager", "expected_revision": 4}
