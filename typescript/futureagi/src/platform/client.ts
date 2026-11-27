@@ -7,6 +7,7 @@
 //   - Per call: `client.datasets.get(id, { timeout: 5000, headers: { ... } })`.
 
 import { API_KEY_ENVVAR_NAME, SECRET_KEY_ENVVAR_NAME, get_base_url } from "../utils/constants";
+import { markRuntimeFetch } from "../utils/plain-http";
 import { createResources, ResourceClasses, Resources } from "./resources";
 import { FetchLike, RequestArgs, RequestOptions, ResolvedConfig, Transport } from "./transport";
 
@@ -25,6 +26,8 @@ export interface ClientConfig {
   maxRetries?: number;
   /** Sent with every request. */
   defaultHeaders?: Record<string, string>;
+  /** Send keyed requests over plain http to hosts that are not loopback (also FI_ALLOW_INSECURE_HTTP=1). */
+  allowInsecureHttp?: boolean;
   /** Replace the global `fetch` (tests, proxies, custom agents). */
   fetch?: FetchLike;
   /** Replace or add resource classes: `{ datasets: MyDatasets }`. */
@@ -45,7 +48,7 @@ function resolveConfig(config: ClientConfig): ResolvedConfig {
   if (!fetchImpl) {
     throw new Error("no global fetch: pass `fetch` in the client config (Node >= 18 has one)");
   }
-  return {
+  const resolved: ResolvedConfig = {
     apiKey,
     secretKey,
     baseUrl: (config.baseUrl ?? get_base_url()).replace(/\/+$/, ""),
@@ -53,8 +56,11 @@ function resolveConfig(config: ClientConfig): ResolvedConfig {
     timeout: config.timeout ?? 60_000,
     maxRetries: config.maxRetries ?? 2,
     defaultHeaders: config.defaultHeaders,
+    allowInsecureHttp: config.allowInsecureHttp,
     fetch: fetchImpl,
   };
+  // Without a fetch from the caller, keyed plain-http requests that are sent go straight to their host (see transport).
+  return config.fetch === undefined ? markRuntimeFetch(resolved) : resolved;
 }
 
 /**

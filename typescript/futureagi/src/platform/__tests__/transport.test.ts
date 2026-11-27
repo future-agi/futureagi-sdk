@@ -9,7 +9,7 @@ import { APIConnectionError, APIError, BadRequestError, InternalServerError, Not
 import { OP_DATASETS_CREATE } from "../_operations";
 import type { FetchLike } from "../transport";
 
-const BASE = "http://backend.test";
+const BASE = "https://backend.test";
 
 interface Seen {
   url: string;
