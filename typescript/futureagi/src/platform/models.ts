@@ -139,6 +139,29 @@ export interface AgentFixCandidate {
   created_at?: string | null;
 }
 
+export interface AgentFixCandidateDetail {
+  id?: string | null;
+  attempt?: number | null;
+  agent_version_id?: string | null;
+  version_number?: number | null;
+  summary?: string | null;
+  outcome?: string | null; // one of: pending, rejected, finalist, winner
+  verdict?: AgentFixVerdict | null;
+  check_runs?: Array<AgentFixCheckRun | null> | null;
+  override?: AgentFixOverride | null;
+  pull_request_url?: string | null;
+  created_at?: string | null;
+  wording?: AgentFixCandidateWording | null;
+}
+
+export interface AgentFixCandidateWording {
+  headline?: string | null;
+  must_pass?: string | null;
+  must_pass_broken?: number | null;
+  changes?: string | null;
+  caveats?: Array<string | null> | null;
+}
+
 export interface AgentFixCeilingNumbers {
   baseline?: number | null;
   candidate?: number | null;
@@ -167,6 +190,7 @@ export interface AgentFixEpochIssue {
   job_id?: string | null;
   cluster_id?: string | null;
   project_id?: string | null;
+  title?: string | null;
 }
 
 export interface AgentFixEvalWarning {
@@ -188,6 +212,12 @@ export interface AgentFixFlakyProtected {
   sub_goal?: string | null;
   passed?: number | null;
   runs?: number | null;
+}
+
+export interface AgentFixLaunchBlocked {
+  code?: string | null;
+  message?: string | null;
+  cluster_id?: string | null;
 }
 
 export interface AgentFixLaunchDefaults {
@@ -226,8 +256,10 @@ export interface AgentFixLaunchOptions {
   surfaces?: Array<AgentFixLaunchSurface | null> | null;
   defaults?: AgentFixLaunchDefaults | null;
   limits?: AgentFixLaunchLimits | null;
-  blocked?: AgentFixFailure | null;
+  blocked?: AgentFixLaunchBlocked | null;
   variations_blocked?: AgentFixFailure | null;
+  held_back_scenario_keys?: Array<string | null> | null;
+  ship?: AgentFixShipReadiness | null;
 }
 
 export interface AgentFixLaunchScenario {
@@ -333,6 +365,7 @@ export interface AgentFixRun {
   retryable?: boolean | null;
   limited_validation?: boolean | null;
   issue?: AgentFixEpochIssue | null;
+  from_issue?: boolean | null;
   check_runs?: Array<AgentFixCheckRun | null> | null;
   candidates?: Array<AgentFixCandidate | null> | null;
   started_at?: string | null;
@@ -363,13 +396,21 @@ export interface AgentFixRunDetail {
   retryable?: boolean | null;
   limited_validation?: boolean | null;
   issue?: AgentFixEpochIssue | null;
+  from_issue?: boolean | null;
   check_runs?: Array<AgentFixCheckRun | null> | null;
-  candidates?: Array<AgentFixCandidate | null> | null;
+  candidates?: Array<AgentFixCandidateDetail | null> | null;
   started_at?: string | null;
   finished_at?: string | null;
   created_at?: string | null;
   eval_warnings?: Array<AgentFixEvalWarning | null> | null;
   eval_grading?: string | null; // one of: none, pending, done, incomplete
+  flaky_protected_text?: Array<string | null> | null;
+  scenario_names?: unknown | null;
+}
+
+export interface AgentFixShipReadiness {
+  path?: string | null; // one of: pull_request, make_default
+  blocked?: AgentFixFailure | null;
 }
 
 export interface AgentFixVerdict {

@@ -1508,6 +1508,8 @@ export interface SimulationEpochsLaunchOptionsParams {
 export interface SimulationEpochsListParams {
   environment_id: string;
   limit?: number | null;
+  /** Comma-separated fix states to list, any of: queued, running, stopping, ready, no_improvement, not_reproduced, out_of_budget, stopped, failed, too_few_cases. */
+  state?: string | null;
 }
 
 export interface SimulationEpochsCandidatesMakeDefaultParams {
@@ -3219,7 +3221,7 @@ export class SimulationEpochsResource extends Resource {
    * GET /simulate/api/agent-fix-runs/
    */
   list(params: SimulationEpochsListParams, options?: RequestOptions): Pager<models.AgentFixRun> {
-    return this._t.paginate<models.AgentFixRun>(ops.OP_SIMULATION_EPOCHS_LIST, { path: {}, query: { environment_id: params.environment_id, limit: params.limit } }, options);
+    return this._t.paginate<models.AgentFixRun>(ops.OP_SIMULATION_EPOCHS_LIST, { path: {}, query: { environment_id: params.environment_id, limit: params.limit, state: params.state } }, options);
   }
 
   /**

@@ -1968,6 +1968,7 @@ client.simulation.epochs.list(
     *,
     environment_id: str,
     limit: int | None | NotGiven = NOT_GIVEN,
+    state: str | None | NotGiven = NOT_GIVEN,
     extra_query: dict[str, Any] | None = None,
     options: RequestOptions | None = None,
 ) -> SyncPager[models.AgentFixRun]
@@ -1979,6 +1980,8 @@ client.simulation.epochs.list(params: SimulationEpochsListParams, options?: Requ
 export interface SimulationEpochsListParams {
   environment_id: string;
   limit?: number | null;
+  /** Comma-separated fix states to list, any of: queued, running, stopping, ready, no_improvement, not_reproduced, out_of_budget, stopped, failed, too_few_cases. */
+  state?: string | null;
 }
 ```
 
@@ -1988,6 +1991,9 @@ export interface SimulationEpochsListParams {
 
 <ParamField query="environment_id" type="string" required />
 <ParamField query="limit" type="integer" optional />
+<ParamField query="state" type="string" optional>
+  Comma-separated fix states to list, any of: queued, running, stopping, ready, no_improvement, not_reproduced, out_of_budget, stopped, failed, too_few_cases.
+</ParamField>
 
 The pager sends `page` itself; pass `limit` to change the page size.
 

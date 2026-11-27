@@ -1306,13 +1306,13 @@ class SimulationEpochsResource(Resource):
         body = None
         return self._t.call(_ops.OP_SIMULATION_EPOCHS_LAUNCH_OPTIONS, path=path, query=query, body=body, model=models.AgentFixLaunchOptions, options=options)
 
-    def list(self, *, environment_id: str, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.AgentFixRun]:
+    def list(self, *, environment_id: str, limit: int | None | NotGiven = NOT_GIVEN, state: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> SyncPager[models.AgentFixRun]:
         """List the Epochs of one environment, newest first, with each Epoch's state and limits. Supply environment_id.
 
         GET /simulate/api/agent-fix-runs/
         """
         path = None
-        query = {'environment_id': environment_id, 'limit': limit, **(extra_query or {})}
+        query = {'environment_id': environment_id, 'limit': limit, 'state': state, **(extra_query or {})}
         return self._t.paginate(_ops.OP_SIMULATION_EPOCHS_LIST, path=path, query=query, model=models.AgentFixRun, options=options)
 
     def retry(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixRun:
@@ -4081,13 +4081,13 @@ class AsyncSimulationEpochsResource(Resource):
         body = None
         return await self._t.acall(_ops.OP_SIMULATION_EPOCHS_LAUNCH_OPTIONS, path=path, query=query, body=body, model=models.AgentFixLaunchOptions, options=options)
 
-    def list(self, *, environment_id: str, limit: int | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.AgentFixRun]:
+    def list(self, *, environment_id: str, limit: int | None | NotGiven = NOT_GIVEN, state: str | None | NotGiven = NOT_GIVEN, extra_query: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> AsyncPager[models.AgentFixRun]:
         """List the Epochs of one environment, newest first, with each Epoch's state and limits. Supply environment_id.
 
         GET /simulate/api/agent-fix-runs/
         """
         path = None
-        query = {'environment_id': environment_id, 'limit': limit, **(extra_query or {})}
+        query = {'environment_id': environment_id, 'limit': limit, 'state': state, **(extra_query or {})}
         return self._t.apaginate(_ops.OP_SIMULATION_EPOCHS_LIST, path=path, query=query, model=models.AgentFixRun, options=options)
 
     async def retry(self, id: str, *, extra_query: Dict[str, Any] | None = None, extra_body: Dict[str, Any] | None = None, options: RequestOptions | None = None) -> models.AgentFixRun:

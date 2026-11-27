@@ -171,6 +171,31 @@ class AgentFixCandidate(_Model):
     created_at: Optional[str] = Field(default=None)
 
 
+class AgentFixCandidateDetail(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['agent_version_id', 'attempt', 'pull_request_url', 'version_number'])
+    id: Optional[str] = Field(default=None)
+    attempt: Optional[int] = Field(default=None)
+    agent_version_id: Optional[str] = Field(default=None)
+    version_number: Optional[int] = Field(default=None)
+    summary: Optional[str] = Field(default=None)
+    outcome: Optional[str] = Field(default=None)  # one of: pending, rejected, finalist, winner
+    verdict: Optional[AgentFixVerdict] = Field(default=None)
+    check_runs: Optional[List[Optional[AgentFixCheckRun]]] = Field(default=None)
+    override: Optional[AgentFixOverride] = Field(default=None)
+    pull_request_url: Optional[str] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    wording: Optional[AgentFixCandidateWording] = Field(default=None)
+
+
+class AgentFixCandidateWording(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['caveats', 'headline', 'must_pass', 'must_pass_broken'])
+    headline: Optional[str] = Field(default=None)
+    must_pass: Optional[str] = Field(default=None)
+    must_pass_broken: Optional[int] = Field(default=None)
+    changes: Optional[str] = Field(default=None)
+    caveats: Optional[List[Optional[str]]] = Field(default=None)
+
+
 class AgentFixCeilingNumbers(_Model):
     baseline: Optional[float] = Field(default=None)
     candidate: Optional[float] = Field(default=None)
@@ -202,6 +227,7 @@ class AgentFixEpochIssue(_Model):
     job_id: Optional[str] = Field(default=None)
     cluster_id: Optional[str] = Field(default=None)
     project_id: Optional[str] = Field(default=None)
+    title: Optional[str] = Field(default=None)
 
 
 class AgentFixEvalWarning(_Model):
@@ -226,6 +252,13 @@ class AgentFixFlakyProtected(_Model):
     sub_goal: Optional[str] = Field(default=None)
     passed: Optional[int] = Field(default=None)
     runs: Optional[int] = Field(default=None)
+
+
+class AgentFixLaunchBlocked(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['code', 'message'])
+    code: Optional[str] = Field(default=None)
+    message: Optional[str] = Field(default=None)
+    cluster_id: Optional[str] = Field(default=None)
 
 
 class AgentFixLaunchDefaults(_Model):
@@ -268,8 +301,10 @@ class AgentFixLaunchOptions(_Model):
     surfaces: Optional[List[Optional[AgentFixLaunchSurface]]] = Field(default=None)
     defaults: Optional[AgentFixLaunchDefaults] = Field(default=None)
     limits: Optional[AgentFixLaunchLimits] = Field(default=None)
-    blocked: Optional[AgentFixFailure] = Field(default=None)
+    blocked: Optional[AgentFixLaunchBlocked] = Field(default=None)
     variations_blocked: Optional[AgentFixFailure] = Field(default=None)
+    held_back_scenario_keys: Optional[List[Optional[str]]] = Field(default=None)
+    ship: Optional[AgentFixShipReadiness] = Field(default=None)
 
 
 class AgentFixLaunchScenario(_Model):
@@ -386,6 +421,7 @@ class AgentFixRun(_Model):
     retryable: Optional[bool] = Field(default=None)
     limited_validation: Optional[bool] = Field(default=None)
     issue: Optional[AgentFixEpochIssue] = Field(default=None)
+    from_issue: Optional[bool] = Field(default=None)
     check_runs: Optional[List[Optional[AgentFixCheckRun]]] = Field(default=None)
     candidates: Optional[List[Optional[AgentFixCandidate]]] = Field(default=None)
     started_at: Optional[str] = Field(default=None)
@@ -417,13 +453,22 @@ class AgentFixRunDetail(_Model):
     retryable: Optional[bool] = Field(default=None)
     limited_validation: Optional[bool] = Field(default=None)
     issue: Optional[AgentFixEpochIssue] = Field(default=None)
+    from_issue: Optional[bool] = Field(default=None)
     check_runs: Optional[List[Optional[AgentFixCheckRun]]] = Field(default=None)
-    candidates: Optional[List[Optional[AgentFixCandidate]]] = Field(default=None)
+    candidates: Optional[List[Optional[AgentFixCandidateDetail]]] = Field(default=None)
     started_at: Optional[str] = Field(default=None)
     finished_at: Optional[str] = Field(default=None)
     created_at: Optional[str] = Field(default=None)
     eval_warnings: Optional[List[Optional[AgentFixEvalWarning]]] = Field(default=None)
     eval_grading: Optional[str] = Field(default=None)  # one of: none, pending, done, incomplete
+    flaky_protected_text: Optional[List[Optional[str]]] = Field(default=None)
+    scenario_names: Optional[Any] = Field(default=None)
+
+
+class AgentFixShipReadiness(_Model):
+    __required__: ClassVar[FrozenSet[str]] = frozenset(['path'])
+    path: Optional[str] = Field(default=None)  # one of: pull_request, make_default
+    blocked: Optional[AgentFixFailure] = Field(default=None)
 
 
 class AgentFixVerdict(_Model):
@@ -3732,6 +3777,8 @@ AgentDefinitionListResponse.model_rebuild()
 AgentDefinitionResponse.model_rebuild()
 AgentFixAgent.model_rebuild()
 AgentFixCandidate.model_rebuild()
+AgentFixCandidateDetail.model_rebuild()
+AgentFixCandidateWording.model_rebuild()
 AgentFixCeilingNumbers.model_rebuild()
 AgentFixCheckRun.model_rebuild()
 AgentFixDiagnosis.model_rebuild()
@@ -3740,6 +3787,7 @@ AgentFixEpochIssue.model_rebuild()
 AgentFixEvalWarning.model_rebuild()
 AgentFixFailure.model_rebuild()
 AgentFixFlakyProtected.model_rebuild()
+AgentFixLaunchBlocked.model_rebuild()
 AgentFixLaunchDefaults.model_rebuild()
 AgentFixLaunchEnvironment.model_rebuild()
 AgentFixLaunchLimits.model_rebuild()
@@ -3756,6 +3804,7 @@ AgentFixReport.model_rebuild()
 AgentFixRequest.model_rebuild()
 AgentFixRun.model_rebuild()
 AgentFixRunDetail.model_rebuild()
+AgentFixShipReadiness.model_rebuild()
 AgentFixVerdict.model_rebuild()
 AgentFixVerdictTier.model_rebuild()
 AgentFixVerdictTierPart.model_rebuild()
@@ -4053,6 +4102,8 @@ __all__ = [
     'AgentDefinitionResponse',
     'AgentFixAgent',
     'AgentFixCandidate',
+    'AgentFixCandidateDetail',
+    'AgentFixCandidateWording',
     'AgentFixCeilingNumbers',
     'AgentFixCheckRun',
     'AgentFixDiagnosis',
@@ -4061,6 +4112,7 @@ __all__ = [
     'AgentFixEvalWarning',
     'AgentFixFailure',
     'AgentFixFlakyProtected',
+    'AgentFixLaunchBlocked',
     'AgentFixLaunchDefaults',
     'AgentFixLaunchEnvironment',
     'AgentFixLaunchLimits',
@@ -4077,6 +4129,7 @@ __all__ = [
     'AgentFixRequest',
     'AgentFixRun',
     'AgentFixRunDetail',
+    'AgentFixShipReadiness',
     'AgentFixVerdict',
     'AgentFixVerdictTier',
     'AgentFixVerdictTierPart',
