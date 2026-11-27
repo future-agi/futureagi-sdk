@@ -40,6 +40,33 @@ export interface RequestOptions {
   extraBody?: Record<string, unknown>;
 }
 
+/**
+ * The call's options with an `Idempotency-Key` header: the key given, else one already in the headers, else a new
+ * one. Set once per call, so every retry of it sends the same key.
+ */
+export function withIdempotencyKey(options: RequestOptions | undefined, key: string | undefined): RequestOptions {
+  const headers: Record<string, string> = {};
+  let given: string | undefined;
+  for (const [name, value] of Object.entries(options?.headers ?? {})) {
+    if (name.toLowerCase() === "idempotency-key") given = value;
+    else headers[name] = value;
+  }
+  headers["Idempotency-Key"] = key || given || newKey();
+  return { ...options, headers };
+}
+
+// A random v4 UUID. Web Crypto where the runtime has it (browsers, Node 19+); on Node 18, where it is not global,
+// Math.random, which is enough for a key that only has to differ between calls. No top-level Node import, so the
+// client still loads in a browser.
+function newKey(): string {
+  const webCrypto = (globalThis as { crypto?: { randomUUID?: () => string } }).crypto;
+  if (webCrypto?.randomUUID) return webCrypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
+
 export interface RequestArgs {
   path?: Record<string, string>;
   query?: Record<string, unknown>;
@@ -137,6 +164,8 @@ export function rawOperation(method: string, path: string, unwrap: string | null
 function buildUrl(config: ResolvedConfig, op: Operation, args: RequestArgs, options?: RequestOptions): string {
   let path = op.path;
   for (const [name, value] of Object.entries(args.path ?? {})) {
+    // An empty value drops a path segment, which reaches another route (often a list) instead of failing.
+    if (!String(value ?? "").trim()) throw new TypeError(`${op.id}: ${name} is empty`);
     path = path.replace(`{${name}}`, encodeURIComponent(String(value)));
   }
   const url = new URL(config.baseUrl + path);

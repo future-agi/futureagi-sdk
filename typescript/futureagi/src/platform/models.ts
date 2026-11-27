@@ -125,6 +125,27 @@ export interface AgentFixAgent {
   ref?: string | null;
 }
 
+export interface AgentFixAttemptTier {
+  name?: string | null;
+  status?: string | null; // one of: passed, failed, pending, skipped
+  detail?: string | null;
+}
+
+export interface AgentFixAttemptVerdict {
+  id?: string | null;
+  number?: number | null;
+  state?: string | null; // one of: queued, running, stopping, ready, no_improvement, not_reproduced, out_of_budget, stopped, failed, too_few_cases
+  step?: string | null; // one of: variations, reproduce, search, verify, done
+  ending?: string | null; // one of: ready, no_improvement, not_reproduced, out_of_budget, failed
+  failure?: AgentFixFailure | null;
+  summary?: string | null;
+  tiers?: Array<AgentFixAttemptTier | null> | null;
+  counted?: boolean | null;
+  must_pass_regressions?: Array<string | null> | null;
+  patch_available?: boolean | null;
+  pull_request_url?: string | null;
+}
+
 export interface AgentFixCandidate {
   id?: string | null;
   attempt?: number | null;
@@ -174,6 +195,35 @@ export interface AgentFixCheckRun {
   test_execution_id?: string | null;
   label?: string | null;
   state?: string | null;
+}
+
+export interface AgentFixCodingAgentBrief {
+  source_run?: AgentFixLaunchSourceRun | null;
+  environment?: AgentFixLaunchEnvironment | null;
+  agent?: AgentFixAgent | null;
+  base_commit?: string | null;
+  files?: Array<string | null> | null;
+  targets?: Array<AgentFixCodingAgentTarget | null> | null;
+  protected_scenario_keys?: Array<string | null> | null;
+  locked_paths?: Array<string | null> | null;
+  failures?: Array<AgentFixCodingAgentFailure | null> | null;
+  attempts?: AgentFixOutsideAttempts | null;
+  blocked?: AgentFixFailure | null;
+  instructions?: string | null;
+}
+
+export interface AgentFixCodingAgentFailure {
+  scenario_key?: string | null;
+  trial?: number | null;
+  sub_goals?: unknown | null;
+  reasons?: unknown | null;
+  transcript?: string | null;
+}
+
+export interface AgentFixCodingAgentTarget {
+  key?: string | null;
+  name?: string | null;
+  failing_sub_goals?: Array<string | null> | null;
 }
 
 export interface AgentFixDiagnosis {
@@ -260,6 +310,8 @@ export interface AgentFixLaunchOptions {
   variations_blocked?: AgentFixFailure | null;
   held_back_scenario_keys?: Array<string | null> | null;
   ship?: AgentFixShipReadiness | null;
+  held_back_from?: string | null; // one of: locked_version, sample
+  locked_version_label?: string | null;
 }
 
 export interface AgentFixLaunchScenario {
@@ -268,6 +320,7 @@ export interface AgentFixLaunchScenario {
   passed?: boolean | null;
   failing_sub_goals?: Array<string | null> | null;
   evidence_import_id?: string | null;
+  split?: string | null; // one of: train, test
 }
 
 export interface AgentFixLaunchSourceRun {
@@ -291,6 +344,16 @@ export interface AgentFixLaunchSurface {
 
 export interface AgentFixMakeDefault {
   outcome?: string | null;
+}
+
+export interface AgentFixOutsideAttempts {
+  used?: number | null;
+  max?: number | null;
+}
+
+export interface AgentFixOutsideCandidate {
+  summary?: string | null;
+  number?: number | null;
 }
 
 export interface AgentFixOverride {
@@ -340,6 +403,7 @@ export interface AgentFixRequest {
   observes_models?: boolean | null;
   meters_agent_cost?: boolean | null;
   measured_automatically?: boolean | null;
+  outside_candidate?: AgentFixOutsideCandidate | null;
 }
 
 export interface AgentFixRun {
@@ -363,6 +427,8 @@ export interface AgentFixRun {
   failure?: AgentFixFailure | null;
   retried_from_id?: string | null;
   retryable?: boolean | null;
+  attempt_of_id?: string | null;
+  counted?: boolean | null;
   limited_validation?: boolean | null;
   issue?: AgentFixEpochIssue | null;
   from_issue?: boolean | null;
@@ -394,6 +460,8 @@ export interface AgentFixRunDetail {
   failure?: AgentFixFailure | null;
   retried_from_id?: string | null;
   retryable?: boolean | null;
+  attempt_of_id?: string | null;
+  counted?: boolean | null;
   limited_validation?: boolean | null;
   issue?: AgentFixEpochIssue | null;
   from_issue?: boolean | null;
@@ -655,6 +723,153 @@ export interface CallExecutionErrorLocalizerTask {
   error_message?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
+}
+
+export interface CallWorker {
+  worker_id?: string | null;
+  id?: string | null;
+  name?: string | null;
+  observed?: boolean | null;
+  undeclared?: boolean | null;
+  instance_ids?: Array<string | null> | null;
+  model?: string | null;
+  tokens?: number | null;
+  state?: string | null; // one of: completed, failed, no_return, deadline_passed, cancel_requested, cancelled, infrastructure, not_observed, observed_no_end, unknown
+  cut_short?: boolean | null;
+  past_deadline?: boolean | null;
+  stopped_at?: number | null;
+  cleanup?: Cleanup | null;
+  checks?: Array<WorkerCheck | null> | null;
+  enforcement?: string | null; // one of: held_at_world, not_enforced, bypassed, unknown
+  enforcement_label?: string | null;
+  channel_bypassed?: boolean | null;
+}
+
+export interface CallWorkerCoordinator {
+  name?: string | null;
+}
+
+export interface CallWorkerEvent {
+  seq?: number | null;
+  type?: string | null; // one of: delegated, transferred, tool_call, returned
+  worker_id?: string | null;
+  by?: string | null;
+  delegation_id?: string | null;
+  task?: string | null;
+  result?: string | null;
+  task_shown?: ShownText | null;
+  result_shown?: ShownText | null;
+  tool?: string | null;
+  status?: string | null; // one of: ok, error
+  span_id?: string | null;
+  trace_id?: string | null;
+  input?: unknown | null;
+  output?: unknown | null;
+  input_omitted?: boolean | null;
+  output_omitted?: boolean | null;
+  refusal_code?: string | null;
+  launch?: string | null; // one of: async
+  relationship?: string | null; // one of: observed, unknown
+  at?: string | null;
+  ended_at?: string | null;
+  attribution?: string | null; // one of: reported, unattributed
+}
+
+export interface CallWorkerEventOrNull {
+  seq?: number | null;
+  type?: string | null; // one of: delegated, transferred, tool_call, returned
+  worker_id?: string | null;
+  by?: string | null;
+  delegation_id?: string | null;
+  task?: string | null;
+  result?: string | null;
+  task_shown?: ShownText | null;
+  result_shown?: ShownText | null;
+  tool?: string | null;
+  status?: string | null; // one of: ok, error
+  span_id?: string | null;
+  trace_id?: string | null;
+  input?: unknown | null;
+  output?: unknown | null;
+  input_omitted?: boolean | null;
+  output_omitted?: boolean | null;
+  refusal_code?: string | null;
+  launch?: string | null; // one of: async
+  relationship?: string | null; // one of: observed, unknown
+  at?: string | null;
+  ended_at?: string | null;
+  attribution?: string | null; // one of: reported, unattributed
+}
+
+export interface CallWorkerRound {
+  turn?: number | null;
+  request?: CallWorkerTurn | null;
+  response?: CallWorkerTurn | null;
+  children?: Array<number | null> | null;
+  calls_outside?: number | null;
+  handoffs?: Array<number | null> | null;
+  expects_messages?: boolean | null;
+}
+
+export interface CallWorkerStep {
+  kind?: string | null; // one of: handoff, tool_call
+  key?: number | null;
+  parent?: number | null;
+  depth?: number | null;
+  worker_id?: string | null;
+  transfer?: boolean | null;
+  handoff?: CallWorkerEventOrNull | null;
+  returned?: CallWorkerEventOrNull | null;
+  started_at?: string | null;
+  ended_at?: string | null;
+  parallel?: boolean | null;
+  end?: string | null; // one of: finished, failed, passed, no_return, cut_off
+  end_state?: string | null; // one of: completed, failed, no_return, deadline_passed, cancel_requested, cancelled, infrastructure, not_observed, observed_no_end, unknown
+  did_not_finish?: boolean | null;
+  first_of_worker?: boolean | null;
+  children?: Array<number | null> | null;
+  call?: CallWorkerEvent | null;
+  turn?: number | null;
+  order?: number | null;
+  relationship?: string | null; // one of: observed, unknown
+}
+
+export interface CallWorkerTurn {
+  text?: string | null;
+  at?: string | null;
+  shown?: ShownText | null;
+}
+
+export interface CallWorkersResponse {
+  workers?: Array<CallWorker | null> | null;
+  events?: Array<CallWorkerEvent | null> | null;
+  events_omitted?: number | null;
+  coordinator?: CallWorkerCoordinator | null;
+  started_at?: string | null;
+  spans_received?: boolean | null;
+  collected_at?: string | null;
+  project_id?: string | null;
+  collection?: string | null; // one of: complete, partial, unavailable, no_evidence, infrastructure_lost
+  steps?: Array<CallWorkerStep | null> | null;
+  turns?: Array<CallWorkerRound | null> | null;
+  depth?: number | null;
+  parallel?: number | null;
+  asynchronous?: number | null;
+  overlap_unknown?: boolean | null;
+  worker_depths?: unknown | null;
+  counts?: HandOffCounts | null;
+  cut_off?: boolean | null;
+  beyond_boundary?: boolean | null;
+  placements?: Array<FailurePlacement | null> | null;
+  stopped_by_user?: boolean | null;
+  pending?: boolean | null;
+  next_read_at?: string | null;
+  state?: string | null; // one of: recorded, not_kept, unreadable
+}
+
+export interface Cleanup {
+  status?: string | null; // one of: stopped, stopped_with_sandbox, still_running, unknown
+  at?: string | null;
 }
 
 export interface Column {
@@ -1467,6 +1682,14 @@ export interface FailedRerunItem {
   error?: string | null;
 }
 
+export interface FailurePlacement {
+  name?: string | null;
+  status?: string | null; // one of: failed, inconclusive
+  step?: number | null;
+  worker_id?: string | null;
+  untied?: string | null; // one of: no_moment, several_hand_offs, no_hand_off
+}
+
 export interface FeedDetailCore {
   row?: FeedListRow | null;
   description?: string | null;
@@ -1567,8 +1790,536 @@ export interface GatewaySummaryResult {
   model_count?: number | null;
 }
 
+export interface HandOffCounts {
+  hand_offs?: number | null;
+  workers?: number | null;
+  finished?: number | null;
+  did_not_finish?: number | null;
+  passed?: number | null;
+  cut_off?: number | null;
+}
+
+export interface HarnessActor {
+  id?: string | null;
+  name?: string | null;
+  role?: string | null;
+  kind?: string | null;
+  goal?: string | null;
+  play?: string | null;
+  prompt?: string | null;
+  surface?: string | null;
+  model?: string | null;
+  side?: string | null; // one of: caller, world
+  channel?: string | null;
+  parent?: string | null;
+  on_behalf_of?: string | null;
+  identities?: unknown | null;
+  persona?: HarnessActorPersona | null;
+  loudness_ratio?: number | null;
+  constraints?: HarnessActorConstraints | null;
+  facts?: Array<string | null> | null;
+  files?: Array<string | null> | null;
+  records?: Array<HarnessActorRecordSource | null> | null;
+  knowledge?: Array<HarnessActorKnowledgeEntry | null> | null;
+  behaviour?: HarnessActorBehaviour | null;
+  permitted_actions?: Array<string | null> | null;
+  activation?: HarnessActorActivation | null;
+  max_turns?: number | null;
+  max_lines?: number | null;
+  scenarios?: number | null;
+  review_decision?: string | null; // one of: accepted, rejected
+  arrival_overrides?: Array<HarnessActorArrivalOverride | null> | null;
+  provenance?: HarnessActorProvenance | null;
+  removable?: boolean | null;
+  removal_blocked_by?: Array<string | null> | null;
+  locked_fields?: Array<HarnessActorLockedField | null> | null;
+  reaches?: Array<string | null> | null;
+  fallback?: HarnessActorFallback | null;
+  permissions?: Array<HarnessActorPermission | null> | null;
+  editable_trigger?: boolean | null;
+  when_label?: string | null;
+  timeout_label?: string | null;
+}
+
+export interface HarnessActorActivation {
+  trigger?: HarnessActorTrigger | null;
+  timeout_seconds?: number | null;
+  fallback?: string | null;
+  fallback_arguments?: unknown | null;
+}
+
+export interface HarnessActorArrivalOverride {
+  scenario?: string | null;
+  when_label?: string | null;
+}
+
+export interface HarnessActorBehaviour {
+  style?: string | null;
+  response_timing?: HarnessActorResponseTiming | null;
+}
+
+export interface HarnessActorChannelOption {
+  channel?: string | null;
+  description?: string | null;
+  loudness?: boolean | null;
+  trigger_kinds?: Array<string | null> | null;
+  required_fields?: Array<string | null> | null;
+  cap_field?: string | null; // one of: max_turns, max_lines
+  label?: string | null;
+  trigger_options?: Array<HarnessActorFieldOption | null> | null;
+}
+
+export interface HarnessActorConflict {
+  actor?: string | null;
+  action?: string | null;
+  holder?: string | null;
+  holder_name?: string | null;
+}
+
+export interface HarnessActorConstraints {
+  may_agree?: Array<string | null> | null;
+  private?: Array<string | null> | null;
+  escalate_when?: Array<string | null> | null;
+  stop_when?: Array<string | null> | null;
+}
+
+export interface HarnessActorFallback {
+  kind?: string | null; // one of: silent, decline, action, actor
+  value?: string | null;
+  label?: string | null;
+}
+
+export interface HarnessActorFieldOption {
+  value?: string | null;
+  label?: string | null;
+}
+
+export interface HarnessActorFieldOptions {
+  kind?: Array<HarnessActorFieldOption | null> | null;
+  play?: Array<HarnessActorFieldOption | null> | null;
+  fallback_word?: Array<HarnessActorFieldOption | null> | null;
+  gender?: Array<HarnessActorFieldOption | null> | null;
+  age_group?: Array<HarnessActorFieldOption | null> | null;
+  accent?: Array<HarnessActorFieldOption | null> | null;
+  response_timing?: Array<HarnessActorFieldOption | null> | null;
+}
+
+export interface HarnessActorKnowledgeEntry {
+  kind?: string | null;
+  text?: string | null;
+  paths?: Array<string | null> | null;
+  store?: string | null;
+  collection?: string | null;
+  where?: unknown | null;
+}
+
+export interface HarnessActorKnowledgeSources {
+  files?: Array<string | null> | null;
+  records?: Array<HarnessActorRecordSource | null> | null;
+  roles?: unknown | null;
+  seed_records_loaded?: boolean | null;
+}
+
+export interface HarnessActorLimitField {
+  key?: string | null;
+  kind?: string | null; // one of: whole, seconds, model
+  default?: number | null;
+  default_label?: string | null;
+}
+
+export interface HarnessActorLimits {
+  max_active?: number | null;
+  caller_takes_back_after_turns?: number | null;
+  actor_seconds_per_call?: number | null;
+  max_messages?: number | null;
+  live_turns_per_actor?: number | null;
+  live_turns_per_trial?: number | null;
+  model?: string | null;
+}
+
+export interface HarnessActorList {
+  actors?: Array<HarnessActor | null> | null;
+  source?: string | null; // one of: draft, saved
+  revision?: number | null;
+  record_schemas?: unknown | null;
+  actions?: Array<HarnessWorldAction | null> | null;
+  channels?: unknown | null;
+  loudness?: HarnessActorLoudness | null;
+  reserved_ids?: Array<string | null> | null;
+  knowledge_sources?: HarnessActorKnowledgeSources | null;
+  limits?: HarnessActorLimits | null;
+  actor_models?: Array<string | null> | null;
+  unresolved?: Array<HarnessActorUnresolved | null> | null;
+  has_caller?: boolean | null;
+  record_max_chars?: number | null;
+  channel_options?: Array<HarnessActorChannelOption | null> | null;
+  id_hint?: string | null;
+  limit_fields?: Array<HarnessActorLimitField | null> | null;
+  side_defaults?: HarnessActorSideDefaults | null;
+  field_options?: HarnessActorFieldOptions | null;
+  upload?: HarnessActorUpload | null;
+  trigger_fields?: unknown | null;
+  new_actor?: HarnessActor | null;
+}
+
+export interface HarnessActorLockedField {
+  field?: string | null;
+  reason?: string | null;
+}
+
+export interface HarnessActorLoudness {
+  channels?: Array<string | null> | null;
+  automatic?: Array<number | null> | null;
+  min?: number | null;
+  max?: number | null;
+  step?: number | null;
+  default?: number | null;
+}
+
+export interface HarnessActorNeverSees {
+  scenario_fields?: Array<string | null> | null;
+  files?: Array<string | null> | null;
+  other_actors?: Array<string | null> | null;
+  grader?: Array<string | null> | null;
+  others?: Array<HarnessActorOthersPrivate | null> | null;
+}
+
+export interface HarnessActorOthersPrivate {
+  fields?: Array<string | null> | null;
+  count?: number | null;
+}
+
+export interface HarnessActorPermission {
+  action?: string | null;
+  in_world?: boolean | null;
+}
+
+export interface HarnessActorPersona {
+  name?: string | null;
+  gender?: string | null;
+  age_group?: string | null;
+  accent?: string | null;
+  occupation?: string | null;
+  location?: string | null;
+  personality?: string | null;
+  communication_style?: string | null;
+  initial_message?: string | null;
+  languages?: Array<string | null> | null;
+  multilingual?: boolean | null;
+}
+
+export interface HarnessActorProblem {
+  field?: string | null;
+  message?: string | null;
+}
+
+export interface HarnessActorProvenance {
+  origin?: string | null;
+  by?: string | null;
+  fields?: unknown | null;
+}
+
+export interface HarnessActorRecordSource {
+  store?: string | null;
+  collection?: string | null;
+}
+
+export interface HarnessActorResponseTiming {
+  kind?: string | null; // one of: immediate, delayed
+  seconds?: number | null;
+}
+
+export interface HarnessActorSeen {
+  input?: string | null;
+  value?: unknown | null;
+  source?: string | null; // one of: actor, scenario, caller
+  text?: string | null;
+  label?: string | null;
+}
+
+export interface HarnessActorSideDefault {
+  channel?: string | null;
+}
+
+export interface HarnessActorSideDefaults {
+  caller?: HarnessActorSideDefault | null;
+  world?: HarnessActorSideDefault | null;
+}
+
+export interface HarnessActorTrigger {
+  kind?: string | null; // one of: always, after_seconds, on_tool, contacted, probability, mid_journey, on_keyword, conditional
+  seconds?: number | null;
+  tool?: string | null;
+  on_call?: number | null;
+  p?: number | null;
+  turn?: number | null;
+  words?: Array<string | null> | null;
+  collection?: string | null;
+  where?: unknown | null;
+}
+
+export interface HarnessActorUnresolved {
+  policy?: string | null;
+  why?: string | null;
+  actor?: string | null;
+}
+
+export interface HarnessActorUpload {
+  formats?: Array<string | null> | null;
+  max_bytes?: number | null;
+  max_label?: string | null;
+}
+
+export interface HarnessActorValidation {
+  problems?: Array<HarnessActorProblem | null> | null;
+  conflicts?: Array<HarnessActorConflict | null> | null;
+  suggested_id?: string | null;
+  over_by?: number | null;
+}
+
+export interface HarnessActorView {
+  actor_id?: string | null;
+  permitted_actions?: Array<string | null> | null;
+  sees?: Array<HarnessActorSeen | null> | null;
+  never_sees?: HarnessActorNeverSees | null;
+  played_from_view?: boolean | null;
+  unused_reason?: string | null;
+}
+
 export interface HarnessAgentCredentialsResponse {
   agent_version?: HarnessVersion | null;
+}
+
+export interface HarnessBlockedScenario {
+  key?: string | null;
+  name?: string | null;
+}
+
+export interface HarnessBlockedTool {
+  tool?: string | null;
+  scenarios?: Array<HarnessBlockedScenario | null> | null;
+}
+
+export interface HarnessCandidates {
+  environment_version_id?: string | null;
+  suite_version_id?: string | null;
+}
+
+export interface HarnessCapabilityAffected {
+  count?: number | null;
+  of?: number | null;
+  keys?: Array<string | null> | null;
+  truncated?: boolean | null;
+}
+
+export interface HarnessCapabilityAgentTools {
+  read?: boolean | null;
+  count?: number | null;
+}
+
+export interface HarnessCapabilityAnswer {
+  kind?: string | null; // one of: ready, blocked, stale, unchecked, validating
+  worst?: string | null; // one of: supported, partial, blocked, unavailable, untested, stale
+  reason_code?: string | null;
+}
+
+export interface HarnessCapabilityArea {
+  id?: string | null;
+  status?: string | null; // one of: supported, partial, blocked, unavailable, untested, stale
+  rows?: Array<string | null> | null;
+}
+
+export interface HarnessCapabilityCase {
+  key?: string | null;
+  number?: number | null;
+  name?: string | null;
+  persona?: string | null;
+  by?: Array<string | null> | null;
+}
+
+export interface HarnessCapabilityCaseList {
+  keys?: Array<string | null> | null;
+  truncated?: boolean | null;
+}
+
+export interface HarnessCapabilityCaseLists {
+  eligible?: HarnessCapabilityCaseList | null;
+  blocked?: HarnessCapabilityCaseList | null;
+  stale?: HarnessCapabilityCaseList | null;
+  untested?: HarnessCapabilityCaseList | null;
+}
+
+export interface HarnessCapabilityCasePage {
+  items?: Array<HarnessCapabilityCase | null> | null;
+  next?: string | null;
+}
+
+export interface HarnessCapabilityChanged {
+  count?: number | null;
+  keys?: Array<string | null> | null;
+  truncated?: boolean | null;
+  since?: HarnessCapabilityChangedSince | null;
+}
+
+export interface HarnessCapabilityChangedSince {
+  run_id?: string | null;
+  suite_version?: RunVersionLabel | null;
+}
+
+export interface HarnessCapabilityCounts {
+  supported?: number | null;
+  partial?: number | null;
+  blocked?: number | null;
+  unavailable?: number | null;
+  untested?: number | null;
+  stale?: number | null;
+}
+
+export interface HarnessCapabilityDroppedCase {
+  key?: string | null;
+  code?: string | null; // one of: scenario_dropped, scenario_ungradable
+  reason?: string | null;
+}
+
+export interface HarnessCapabilityEvidence {
+  check?: string | null;
+  result?: string | null;
+}
+
+export interface HarnessCapabilityExcluded {
+  count?: number | null;
+  keys?: Array<string | null> | null;
+  truncated?: boolean | null;
+  reason?: string | null; // one of: not_selected
+}
+
+export interface HarnessCapabilityFix {
+  type?: string | null;
+  category?: string | null; // one of: startup, message_mapping, tool_routing, evidence, agent_version
+  target?: string | null;
+  action?: string | null;
+  would?: string | null;
+  recheck?: HarnessCapabilityFixRecheck | null;
+}
+
+export interface HarnessCapabilityFixRecheck {
+  scope?: string | null; // one of: agent, pair
+  method?: string | null; // one of: POST
+  path?: string | null;
+}
+
+export interface HarnessCapabilityGrading {
+  gradable?: number | null;
+  not_gradable?: Array<HarnessCapabilityNotGradable | null> | null;
+  truncated?: boolean | null;
+}
+
+export interface HarnessCapabilityHeldBy {
+  id?: string | null;
+  name?: string | null;
+  area?: string | null;
+  count?: number | null;
+  reason?: string | null;
+  text?: string | null;
+}
+
+export interface HarnessCapabilityNotGradable {
+  key?: string | null;
+  reason?: string | null; // one of: check_unreadable, no_checks, evidence_not_supported, judge_unavailable
+}
+
+export interface HarnessCapabilityPairing {
+  agent_version?: RunVersionLabel | null;
+  environment_version?: RunVersionLabel | null;
+  suite_version?: RunVersionLabel | null;
+  evidence?: string | null; // one of: pair_certificate, build_certificate, none
+  agent_tools?: HarnessCapabilityAgentTools | null;
+  evidence_unreadable?: boolean | null;
+}
+
+export interface HarnessCapabilityRecheckResponse {
+  validation?: HarnessPairValidation | null;
+}
+
+export interface HarnessCapabilitySelectionCounts {
+  suite_total?: number | null;
+  excluded?: HarnessCapabilityExcluded | null;
+  changed?: HarnessCapabilityChanged | null;
+  requested?: number | null;
+  eligible?: number | null;
+  blocked?: number | null;
+  stale?: number | null;
+  untested?: number | null;
+  lists?: HarnessCapabilityCaseLists | null;
+  held_by?: Array<HarnessCapabilityHeldBy | null> | null;
+  blocking_area?: string | null;
+  dropped?: Array<HarnessCapabilityDroppedCase | null> | null;
+  grading?: HarnessCapabilityGrading | null;
+  requirements_recorded?: boolean | null;
+  next?: string | null; // one of: validate_first, run_unvalidated
+  running?: number | null;
+  held_back?: HarnessRunHeldBack | null;
+  reasons?: unknown | null;
+}
+
+export interface HarnessCapabilitySelectionReport {
+  pairing?: HarnessCapabilityPairing | null;
+  validation?: HarnessPairValidation | null;
+  answer?: HarnessCapabilityAnswer | null;
+  areas?: Array<HarnessCapabilityArea | null> | null;
+  rows?: Array<HarnessCapabilitySelectionRow | null> | null;
+  workers?: Array<WorkerBoundary | null> | null;
+  counts?: HarnessCapabilityCounts | null;
+  blockers?: number | null;
+  catalog_version?: string | null;
+  rules_version?: string | null;
+  computed_at?: string | null;
+  selection?: HarnessCapabilitySelectionCounts | null;
+}
+
+export interface HarnessCapabilitySelectionRow {
+  id?: string | null;
+  label?: string | null;
+  area?: string | null;
+  status?: string | null; // one of: supported, partial, blocked, unavailable, untested, stale
+  measured?: boolean | null;
+  finding?: string | null; // one of: passed, failed, limited, not_applicable, not_run
+  reason_code?: string | null;
+  reason?: string | null;
+  targets?: Array<HarnessCapabilityTarget | null> | null;
+  blocked_by?: string | null;
+  stale_because?: string | null;
+  was?: string | null; // one of: supported, partial, blocked, unavailable, untested, stale
+  evidence?: Array<HarnessCapabilityEvidence | null> | null;
+  checked_at?: string | null;
+  fix?: HarnessCapabilityFix | null;
+  consequence?: string | null;
+  needed_by?: number | null;
+  affected?: HarnessCapabilityAffected | null;
+}
+
+export interface HarnessCapabilityTarget {
+  kind?: string | null; // one of: tool, agent_tool, action, check
+  name?: string | null;
+  result?: string | null;
+}
+
+export interface HarnessCertifiedPairing {
+  bundle_id?: string | null;
+  agent_version?: RunVersionLabel | null;
+  environment_version?: RunVersionLabel | null;
+  suite_version?: RunVersionLabel | null;
+  certified_at?: string | null;
+}
+
+export interface HarnessCertifiedPairingPage {
+  items?: Array<HarnessCertifiedPairing | null> | null;
+  next?: string | null;
+}
+
+export interface HarnessControlStep {
+  tool?: string | null;
+  arguments?: unknown | null;
 }
 
 export interface HarnessConversationEventRead {
@@ -1621,7 +2372,8 @@ export interface HarnessConversationRuntime {
 export interface HarnessDraftItem {
   id?: string | null;
   label?: string | null;
-  status?: string | null; // one of: draft, active, discarded
+  name?: string | null;
+  status?: string | null; // one of: draft, candidate, active, discarded
   is_default?: boolean | null;
   created_at?: string | null;
   created_by?: HarnessVersionPerson | null;
@@ -1643,6 +2395,9 @@ export interface HarnessDraftItem {
   requested_here?: boolean | null;
   pickable?: boolean | null;
   discardable?: boolean | null;
+  release_checks?: HarnessReleaseChecks | null;
+  candidate_state?: string | null; // one of: validating, retry, ready, failed, check_unavailable, superseded, expired
+  saved_without_check?: boolean | null;
   stale?: boolean | null;
   revision?: number | null;
   last_edited_by?: HarnessVersionPerson | null;
@@ -1652,15 +2407,40 @@ export interface HarnessDraftItem {
   changes?: unknown | null;
 }
 
+export interface HarnessDraftReview {
+  drafts?: unknown | null;
+  changes?: Array<HarnessReviewChange | null> | null;
+  counts?: HarnessReviewCounts | null;
+  review_digest?: string | null;
+  can_save?: boolean | null;
+}
+
 export interface HarnessDraftSaveResponse {
   saved?: unknown | null;
   versions?: HarnessVersions | null;
+  not_active?: Array<unknown | null> | null;
+}
+
+export interface HarnessDraftValidateResponse {
+  validation?: HarnessDraftValidation | null;
+  candidates?: HarnessCandidates | null;
+}
+
+export interface HarnessDraftValidation {
+  state?: string | null; // one of: validating, retry, ready, failed, check_unavailable, superseded, outdated, unavailable
+  job_id?: string | null;
+  error?: HarnessValidationError | null;
+  affected_scenarios?: Array<string | null> | null;
+  dropped_scenarios?: Array<string | null> | null;
 }
 
 export interface HarnessDrafts {
   environment?: HarnessDraftItem | null;
   suite?: HarnessDraftItem | null;
   set_aside?: Array<HarnessDraftItem | null> | null;
+  validation?: HarnessDraftValidation | null;
+  candidates?: HarnessCandidates | null;
+  validation_required?: boolean | null;
 }
 
 export interface HarnessEnvironment {
@@ -1920,6 +2700,13 @@ export interface HarnessEnvironmentWorld {
   stores?: Array<HarnessEnvironmentStore | null> | null;
 }
 
+export interface HarnessNegativeControl {
+  name?: string | null;
+  why?: string | null;
+  steps?: Array<HarnessControlStep | null> | null;
+  must_fail?: Array<string | null> | null;
+}
+
 export interface HarnessNudge {
   id?: string | null;
   target?: string | null; // one of: environment, suite
@@ -1994,6 +2781,14 @@ export interface HarnessNudgeVariables {
   unknown?: Array<string | null> | null;
 }
 
+export interface HarnessPairValidation {
+  state?: string | null; // one of: not_run, validating, ready, failed, check_unavailable, retry, unavailable
+  job_id?: string | null;
+  purpose?: string | null; // one of: agent_move, recheck, save
+  finished_at?: string | null;
+  error?: unknown | null;
+}
+
 export interface HarnessPreflightCheck {
   id?: string | null;
   label?: string | null;
@@ -2022,6 +2817,68 @@ export interface HarnessPreflightResponse {
   snapshot?: unknown | null;
 }
 
+export interface HarnessProofControl {
+  name?: string | null;
+  why?: string | null;
+  ran?: boolean | null;
+  failed?: boolean | null;
+  assumed?: Array<string | null> | null;
+}
+
+export interface HarnessProofLeak {
+  who?: string | null;
+  field?: string | null;
+  grader_field?: string | null;
+  excerpt?: string | null;
+}
+
+export interface HarnessReleaseCheckResults {
+  starts?: string | null; // one of: passed, failed, pending
+  resets?: string | null; // one of: passed, failed, pending
+  reference_passes?: string | null; // one of: passed, failed, pending
+  wrong_answer_fails?: string | null; // one of: passed, failed, pending
+  hidden_checks_kept?: string | null; // one of: passed, failed, pending
+}
+
+export interface HarnessReleaseChecks {
+  status?: string | null; // one of: ready, checks_pending, failed
+  checks?: HarnessReleaseCheckResults | null;
+}
+
+export interface HarnessReviewChange {
+  id?: string | null;
+  piece?: string | null; // one of: environment, suite
+  kind?: string | null; // one of: tool, rule, contract_field, sub_goal, actor, world_state, source, scenario, file
+  key?: string | null;
+  document?: string | null;
+  action?: string | null; // one of: added, removed, changed
+  fields?: Array<string | null> | null;
+  patch?: Array<unknown | null> | null;
+  base_digest?: string | null;
+  draft_digest?: string | null;
+  summary?: string | null;
+  decision?: string | null; // one of: accepted, rejected
+  affects?: unknown | null;
+  sources?: Array<unknown | null> | null;
+  depends_on?: Array<string | null> | null;
+  graded?: boolean | null;
+  revalidate?: Array<string | null> | null;
+  rows?: Array<unknown | null> | null;
+}
+
+export interface HarnessReviewCounts {
+  total?: number | null;
+  accepted?: number | null;
+  rejected?: number | null;
+  undecided?: number | null;
+}
+
+export interface HarnessReviewDraft {
+  id?: string | null;
+  revision?: number | null;
+  parent_id?: string | null;
+}
+
 export interface HarnessRunCreateResponse {
   environment_id?: string | null;
   job_id?: string | null;
@@ -2035,6 +2892,17 @@ export interface HarnessRunCreateResponse {
   stage?: string | null;
   versions?: HarnessRunPinnedVersions | null;
   warnings?: Array<HarnessRunWarning | null> | null;
+  selection?: HarnessRunReadinessSelection | null;
+}
+
+export interface HarnessRunHeldBack {
+  count?: number | null;
+  keys?: Array<string | null> | null;
+  truncated?: boolean | null;
+  names?: unknown | null;
+  by?: unknown | null;
+  by_key?: unknown | null;
+  reason_by_key?: unknown | null;
 }
 
 export interface HarnessRunPinnedVersions {
@@ -2047,6 +2915,21 @@ export interface HarnessRunPlan {
   versions?: HarnessRunPinnedVersions | null;
   warnings?: Array<HarnessRunWarning | null> | null;
   bundle_cached?: boolean | null;
+  blocked_tools?: Array<HarnessBlockedTool | null> | null;
+  runnable?: boolean | null;
+  blocked_code?: string | null; // one of: production_only
+  held_back?: number | null;
+}
+
+export interface HarnessRunReadinessSelection {
+  suite_total?: number | null;
+  excluded?: HarnessCapabilityExcluded | null;
+  changed?: HarnessCapabilityChanged | null;
+  requested?: number | null;
+  running?: number | null;
+  held_back?: HarnessRunHeldBack | null;
+  reasons?: unknown | null;
+  next?: string | null; // one of: validate_first, run_unvalidated
 }
 
 export interface HarnessRunSummary {
@@ -2069,12 +2952,111 @@ export interface HarnessRunWarning {
   code?: string | null;
   message?: string | null;
   piece?: string | null; // one of: agent, environment, suite
+  scenario_keys?: Array<string | null> | null;
+}
+
+export interface HarnessScenarioLifecycle {
+  state?: string | null; // one of: draft, validated, active, kept_as_written, archived
+  reason?: string | null;
+  held_by?: string | null; // one of: ours, unproved, proof_failed
+  reason_text?: string | null;
+  warning?: string | null;
+  warning_text?: string | null;
+  legacy?: boolean | null;
+  proof?: HarnessScenarioProof | null;
+  sources?: Array<HarnessSourceView | null> | null;
+  source_changed?: Array<string | null> | null;
+  source_changed_version?: number | null;
+  source_changed_version_id?: string | null;
+  must_pass?: boolean | null;
+  negative_controls?: Array<HarnessNegativeControl | null> | null;
+}
+
+export interface HarnessScenarioLifecycleResponse {
+  scenario_key?: string | null;
+  lifecycle?: HarnessScenarioLifecycle | null;
+  live?: boolean | null;
+}
+
+export interface HarnessScenarioProof {
+  proved?: boolean | null;
+  outcome?: string | null;
+  assumed?: Array<string | null> | null;
+  controls?: Array<HarnessProofControl | null> | null;
+  leaks?: Array<HarnessProofLeak | null> | null;
+  judged_only?: boolean | null;
+  proved_at?: string | null;
+  agent_version_id?: string | null;
+  environment_version_id?: string | null;
+  suite_version_id?: string | null;
+}
+
+export interface HarnessScenarioRecordsResponse {
+  table?: string | null;
+  rows?: Array<unknown | null> | null;
+  available?: boolean | null;
+}
+
+export interface HarnessScenarioRevision {
+  revision?: number | null;
+  digest?: string | null;
+  suite_versions?: Array<number | null> | null;
+  first_suite_version?: number | null;
+  changed_fields?: Array<string | null> | null;
+  lifecycle_on_default_environment?: HarnessScenarioLifecycle | null;
+}
+
+export interface HarnessScenarioRevisions {
+  scenario_key?: string | null;
+  revisions?: Array<HarnessScenarioRevision | null> | null;
+  truncated?: boolean | null;
+}
+
+export interface HarnessScenarioRunningValidation {
+  job_id?: string | null;
+  scenario_keys?: Array<string | null> | null;
+  to_prove?: number | null;
+  message?: string | null;
+}
+
+export interface HarnessScenarioValidateResponse {
+  state?: string | null; // one of: validating, ready, unavailable
+  job_id?: string | null;
+  deadline_at?: string | null;
+  finished_at?: string | null;
+  message?: string | null;
+}
+
+export interface HarnessScenarioValidationStatus {
+  state?: string | null; // one of: validating, finished, failed, unavailable
+  job_id?: string | null;
+  deadline_at?: string | null;
+  finished_at?: string | null;
+  proofs_recorded?: boolean | null;
+  message?: string | null;
+  proved?: number | null;
+  total?: number | null;
 }
 
 export interface HarnessSecretFileUploadResponse {
   environment_name?: string | null;
   secret_ref?: SecretReference | null;
   size?: number | null;
+}
+
+export interface HarnessSourceChange {
+  kind?: string | null; // one of: rule, file
+  ref?: string | null;
+  before?: string | null;
+  after?: string | null;
+  cited_by?: Array<string | null> | null;
+}
+
+export interface HarnessSourceChanges {
+  from_version?: number | null;
+  to_version?: number | null;
+  changes?: Array<HarnessSourceChange | null> | null;
+  truncated?: boolean | null;
 }
 
 export interface HarnessSourceUploadResponse {
@@ -2084,6 +3066,17 @@ export interface HarnessSourceUploadResponse {
   total_bytes?: number | null;
 }
 
+export interface HarnessSourceView {
+  kind?: string | null;
+  ref?: string | null;
+  quote?: string | null;
+  supports?: string | null;
+  resolved?: boolean | null;
+  label?: string | null;
+  link?: string | null;
+  problem?: string | null;
+}
+
 export interface HarnessSuiteMember {
   scenario_key?: string | null;
   number?: number | null;
@@ -2091,10 +3084,17 @@ export interface HarnessSuiteMember {
   use_case?: string | null;
 }
 
+export interface HarnessValidationError {
+  code?: string | null;
+  message?: string | null;
+  failed_actions?: Array<unknown | null> | null;
+}
+
 export interface HarnessVersion {
   id?: string | null;
   label?: string | null;
-  status?: string | null; // one of: draft, active, discarded
+  name?: string | null;
+  status?: string | null; // one of: draft, candidate, active, discarded
   is_default?: boolean | null;
   created_at?: string | null;
   created_by?: HarnessVersionPerson | null;
@@ -2116,6 +3116,9 @@ export interface HarnessVersion {
   requested_here?: boolean | null;
   pickable?: boolean | null;
   discardable?: boolean | null;
+  release_checks?: HarnessReleaseChecks | null;
+  candidate_state?: string | null; // one of: validating, retry, ready, failed, check_unavailable, superseded, expired
+  saved_without_check?: boolean | null;
 }
 
 export interface HarnessVersionDiff {
@@ -2134,6 +3137,12 @@ export interface HarnessVersions {
   agent?: Array<HarnessVersion | null> | null;
   environment?: Array<HarnessVersion | null> | null;
   suite?: Array<HarnessVersion | null> | null;
+}
+
+export interface HarnessWorldAction {
+  action?: string | null;
+  tool?: string | null;
+  description?: string | null;
 }
 
 export interface KeyMoment {
@@ -2876,6 +3885,11 @@ export interface SecretReference {
   purpose?: string | null; // one of: target_provider, simulator_provider, source_checkout
 }
 
+export interface ShownText {
+  format?: string | null; // one of: code, text
+  text?: string | null;
+}
+
 export interface SimulateEvalConfigResponse {
   id?: string | null;
   name?: string | null;
@@ -3415,6 +4429,38 @@ export interface UserInfoResponse {
 export interface UserInfoTwoFactorMethods {
   totp?: boolean | null;
   passkey?: boolean | null;
+}
+
+export interface WorkerBoundary {
+  worker_id?: string | null;
+  name?: string | null;
+  binding?: string | null; // one of: separate, shared
+  status?: string | null; // one of: supported, partial, blocked, unavailable, untested, stale
+  status_label?: string | null;
+  reason_code?: string | null; // one of: evidence_unreadable, worker_channel_bypassed, sealed_before_worker_limits, tool_service_not_fronted, in_process_unbound, no_tool_service, in_process_door, shared_binding, held_at_world_cooperative, worker_not_sealed
+  reason?: string | null;
+  tools?: Array<WorkerTool | null> | null;
+  bypassed?: Array<WorkerBypass | null> | null;
+  bypassed_count?: number | null;
+  fix?: HarnessCapabilityFix | null;
+  checked_at?: string | null;
+}
+
+export interface WorkerBypass {
+  run_id?: string | null;
+  call_execution_id?: string | null;
+}
+
+export interface WorkerCheck {
+  name?: string | null;
+  passed?: boolean | null;
+  result?: string | null; // one of: not_applicable, inconclusive, unmeasured
+}
+
+export interface WorkerTool {
+  tool?: string | null;
+  action?: string | null;
+  boundary?: string | null; // one of: allowed, blocked, not_enforced
 }
 
 export interface WorkspaceManagementItem {

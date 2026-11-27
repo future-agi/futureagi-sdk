@@ -2,7 +2,7 @@
 
 `sdkgen` generates the platform client for both SDKs (`fi.Client` in Python, `new Client()` in TypeScript) from the backend's API contract plus a small catalog. The catalog records, for each operation, the MCP tool it corresponds to in the monorepo (`futureagi/mcp_server/catalog/tools.yaml`), so an operation has the same name in the SDKs and in MCP; the MCP server itself is generated and served from the monorepo, not here.
 
-It covers the operations behind **all 128 MCP tools** (same names) plus **105 SDK-only operations**, among them everything the hand-written `fi.datasets`, `fi.prompt`, `fi.kb`, `fi.queues` and `fi.annotations` modules can do: 233 operations across 26 resources. The monorepo's E2E CI checks that the catalog's MCP names still match the monorepo's tool list.
+It covers the operations behind **all 130 MCP tools** (same names) plus **129 SDK-only operations**, among them everything the hand-written `fi.datasets`, `fi.prompt`, `fi.kb`, `fi.queues` and `fi.annotations` modules can do: 259 operations across 26 resources. The monorepo's E2E CI checks that the catalog's MCP names still match the monorepo's tool list.
 
 ```
 future-agi/api_contracts/openapi/swagger.json ──sync_contract.py──▶ sdkgen/contracts/swagger.json
@@ -222,9 +222,10 @@ The one-time setup is required before automatic releases work. Missing app crede
 ### Reproduce the scoped SQL and Epoch mappings before the next backend sync
 
 Two groups of operations come from one product dev commit, ahead of a backend
-release: the four SQL tools and the 17 tools of the product's MCP group `epoch`
+release: the four SQL tools and the 19 tools of the product's MCP group `epoch`
 (Debug failures, evidence imports and Epoch). Every other operation keeps the
-contract of an earlier SDK release slice. The SDK still pins the v1.59.0
+contract of the SDK `dev` slice it was composed on (`x-contract-sources.other`).
+The SDK still pins the v1.59.0
 release in `BACKEND_VERSION`. That release already serves the Debug failures and
 Epoch (`agent-fix-runs`) routes, though four Epoch operations have an older
 contract there, but it has no evidence-imports routes and no MCP group `epoch`.
@@ -238,15 +239,15 @@ page caps, response unwrapping, and, for `epoch`, the description byte for
 byte. From the SDK checkout:
 
 ```sh
-product_commit=2dcb8dcd0902a7efe851b2e7e22885f11582b326
-sdk_baseline=198f1f8bf23836072d5016976a9a6c235c52ee2b
+product_commit=2aa9ca36dcdcaf5e2177be287b4dc03bc689cd8b
+sdk_baseline=2c8a5061c5818e29a6aaf5486b09f8268c625a78
 python sdkgen/sync_scoped_contract.py "$PRODUCT_REPO" "$product_commit" "$sdk_baseline"
 python sdkgen/generate.py
 python sdkgen/check_mcp_parity.py --ref "$product_commit"
 python sdkgen/check_mcp_descriptions.py
 ```
 
-The parity command checks the **entire** MCP name list of that commit (128
+The parity command checks the **entire** MCP name list of that commit (130
 tools), in both directions. It does not qualify a later product ref or the
 release image. `check_mcp_descriptions.py` reads `tools.yaml` at the commit in
 `x-contract-sources` and checks its sha256 before comparing. The normal release

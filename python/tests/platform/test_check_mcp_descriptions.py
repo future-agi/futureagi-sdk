@@ -36,13 +36,13 @@ def test_the_recorded_product_tools_yaml_matches_byte_for_byte():
     raw = descriptions.fetch(record["backend_commit"])
     assert hashlib.sha256(raw).hexdigest() == record["tools_yaml_sha256"]
     product = descriptions.yaml_tools(raw)
-    assert sum(1 for tool in product.values() if tool["group"] == "epoch") == 17
+    assert sum(1 for tool in product.values() if tool["group"] == "epoch") == 19
     assert descriptions.compare(CATALOG, product) == []
 
 
 def test_one_changed_byte_is_reported_with_its_offset():
     tools = _product_tools(CATALOG)
-    assert len(tools) == 17 and descriptions.compare(CATALOG, tools) == []
+    assert len(tools) == 19 and descriptions.compare(CATALOG, tools) == []
     catalog = copy.deepcopy(CATALOG)
     entry = next(e for e in catalog["operations"] if e["id"] == "simulation.epochs.stop")
     entry["description"] = entry["description"].replace("Stopped", "stopped")
