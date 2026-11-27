@@ -235,6 +235,8 @@ def _signature(op: Op) -> tuple[list[str], list[tuple[Param, str]]]:
             null = "" if op.rejects_optional_null(p) else " | None"
             args.append(f"{arg_name(p)}: {py}{null} | NotGiven = NOT_GIVEN")
         named.append((p, arg_name(p)))
+    if op.surfaces["sdk"].get("idempotency_key"):
+        args.append("idempotency_key: str | None = None")
     # Escape hatches: fields the contract does not (yet) describe, and per-call request options.
     args.append("extra_query: dict[str, Any] | None = None")
     if op.sends_body:
@@ -270,6 +272,8 @@ def _method(op: Op, *, is_async: bool) -> str:
         uploads = ", ".join(f"{p.name!r}: {a}" for p, a in named if p.location == "body" and is_file(p.schema))
         lines.append(f"        files = {{{uploads}}}\n")
     model_arg = model or "None"
+    if op.surfaces["sdk"].get("idempotency_key"):
+        lines.append("        options = with_idempotency_key(options, idempotency_key)\n")
     if op.pagination:
         fn = "apaginate" if is_async else "paginate"
         lines.append(f"        return self._t.{fn}(_ops.{op_constant(op)}, path=path, query=query, model={model_arg}, options=options)\n")
@@ -313,7 +317,7 @@ def emit_resources(ops: list[Op]) -> str:
         "from .._pagination import AsyncPager, SyncPager\n",
         "from .._resource import Resource\n",
         "from .._stability import _stability\n",
-        "from .._transport import (\n    NOT_GIVEN,\n    AsyncTransport,\n    FileInput,\n    NotGiven,\n    RequestOptions,\n    SyncTransport,\n)\n",
+        "from .._transport import (\n    NOT_GIVEN,\n    AsyncTransport,\n    FileInput,\n    NotGiven,\n    RequestOptions,\n    SyncTransport,\n    with_idempotency_key,\n)\n",
     ]
     for is_async in (False, True):
         for ns in sorted(tree, key=lambda ns: (-len(ns), ns)):  # children before parents

@@ -13,7 +13,8 @@ export class APIConnectionError extends FutureAGIError {}
 
 /**
  * The API answered with an error status. `type`, `code` and `detail` come from the backend's
- * error envelope (`{status: false, type, code, detail, ...}`) when it is present.
+ * error envelope (`{status: false, type, code, detail, ...}`) when it is present. A simulation
+ * environment refusal (`{error, message, retryable}`) gives its `error` as `code`.
  */
 export class APIError extends FutureAGIError {
   readonly status: number;
@@ -29,7 +30,8 @@ export class APIError extends FutureAGIError {
     this.body = body;
     const envelope = isRecord(body) ? body : {};
     this.type = typeof envelope.type === "string" ? envelope.type : null;
-    this.code = typeof envelope.code === "string" ? envelope.code : null;
+    this.code =
+      typeof envelope.code === "string" ? envelope.code : typeof envelope.error === "string" ? envelope.error : null;
     this.detail = envelope.detail;
     this.requestId = requestId;
   }
