@@ -8,6 +8,7 @@ from .constants import (
     SECRET_KEY_ENVVAR_NAME,
 )
 from .types import Environments, ModelTypes
+from ._http_guard import ERROR_CODE as _INSECURE_HTTP_ORIGIN
 
 
 class SDKException(Exception):
@@ -45,6 +46,9 @@ class DatasetError(SDKException):
         return "Invalid Dataset Operation."
 
     def get_error_code(self) -> str:
+        # fi.datasets raises a DatasetError in place of a plain http refusal with ``.code`` set to the refusal code
+        if getattr(self, "code", None) == _INSECURE_HTTP_ORIGIN:
+            return _INSECURE_HTTP_ORIGIN
         return "DATASET_OPERATION_INVALID"
 
     def __repr__(self) -> str: 

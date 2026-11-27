@@ -1,3 +1,4 @@
+import hashlib as _hashlib
 import time
 import threading
 from typing import Dict, Optional
@@ -11,6 +12,7 @@ from fi.utils.logging import logger
 from fi.utils.routes import Routes
 from fi.prompt.cache import prompt_cache
 from fi.prompt.label_management import LabelManagementMixin
+from fi.utils import _http_guard as _guard
 
 
 class SimpleJsonResponseHandler(ResponseHandler[Dict, Dict]):
@@ -150,6 +152,15 @@ class PromptResponseHandler(ResponseHandler[Dict, PromptTemplate]):
             response.raise_for_status()
 
 
+def _template_cache_scope(client: APIKeyAuth) -> str:
+    """The part of a template cache key that ties it to one client: its base URL, its effective plain http opt-in
+    and a digest of its keys (the raw keys are not kept in the cache)."""
+    headers = client._default_headers
+    keys = f"{headers.get('X-Api-Key') or ''}\0{headers.get('X-Secret-Key') or ''}"
+    opted_in = "1" if _guard.insecure_http_allowed(client._allow_insecure_http) else "0"
+    return f"{client._base_url}|{opted_in}|{_hashlib.sha256(keys.encode('utf-8')).hexdigest()}"
+
+
 class Prompt(APIKeyAuth, LabelManagementMixin):
     # Use global prompt_cache; keep TTL alias for backward compat
     CACHE_TTL_SEC: int = prompt_cache._ttl_sec
@@ -214,6 +225,8 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         fi_api_key: Optional[str] = None,
         fi_secret_key: Optional[str] = None,
         fi_base_url: Optional[str] = None,
+        *,
+        allow_insecure_http: Optional[bool] = None,
     ) -> Dict:
         """Return the raw JSON payload from GET /model-hub/prompt-templates/.
         """
@@ -222,6 +235,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             fi_api_key=fi_api_key,
             fi_secret_key=fi_secret_key,
             fi_base_url=fi_base_url,
+            allow_insecure_http=allow_insecure_http,
         )
 
         response = auth_client.request(
@@ -449,6 +463,8 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         fi_api_key: Optional[str] = None,
         fi_secret_key: Optional[str] = None,
         fi_base_url: Optional[str] = None,
+        *,
+        allow_insecure_http: Optional[bool] = None,
     ) -> bool:
         """Delete a template by its exact name.
         """
@@ -457,6 +473,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
             fi_api_key=fi_api_key,
             fi_secret_key=fi_secret_key,
             fi_base_url=fi_base_url,
+            allow_insecure_http=allow_insecure_http,
         )
 
         try:
@@ -567,6 +584,8 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         fi_api_key: Optional[str] = None,
         fi_secret_key: Optional[str] = None,
         fi_base_url: Optional[str] = None,
+        *,
+        allow_insecure_http: Optional[bool] = None,
     ) -> "Prompt":
         """
         Retrieve a prompt template by its exact name.
@@ -576,26 +595,29 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
         'production' label, and if that fails, it will fall back to the server's
         default version resolution (e.g., the latest committed version).
         """
-        cache_key = prompt_cache.make_key(name, version=version, label=label)
+        client = APIKeyAuth(
+            fi_api_key=fi_api_key,
+            fi_secret_key=fi_secret_key,
+            fi_base_url=fi_base_url,
+            allow_insecure_http=allow_insecure_http,
+        )
+        # A cached template is only served to a call with the same keys, base URL and plain http opt-in.
+        cache_key = f"{prompt_cache.make_key(name, version=version, label=label)}|scope:{_template_cache_scope(client)}"
 
         fresh = prompt_cache.get(cache_key)
         if fresh is not None:
+            client.close()
             return cls(
                 template=fresh,
                 fi_api_key=fi_api_key,
                 fi_secret_key=fi_secret_key,
                 fi_base_url=fi_base_url,
+                allow_insecure_http=allow_insecure_http,
             )
 
         stale = prompt_cache.get_stale(cache_key)
         # Note: Async refresh logic is not applied here to simplify the fallback flow.
         # If stale data is present, it will be used only if the live fetch fails.
-
-        client = APIKeyAuth(
-            fi_api_key=fi_api_key,
-            fi_secret_key=fi_secret_key,
-            fi_base_url=fi_base_url,
-        )
 
         try:
             template = None
@@ -654,6 +676,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                 fi_api_key=fi_api_key,
                 fi_secret_key=fi_secret_key,
                 fi_base_url=fi_base_url,
+                allow_insecure_http=allow_insecure_http,
             )
 
         except Exception as exc:
@@ -668,6 +691,7 @@ class Prompt(APIKeyAuth, LabelManagementMixin):
                     fi_api_key=fi_api_key,
                     fi_secret_key=fi_secret_key,
                     fi_base_url=fi_base_url,
+                    allow_insecure_http=allow_insecure_http,
                 )
             raise
         finally:

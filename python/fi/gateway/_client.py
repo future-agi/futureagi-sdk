@@ -27,6 +27,15 @@ class AgentCC:
             model="gpt-4o",
             messages=[{"role": "user", "content": "Hello"}],
         )
+
+    ``allow_insecure_http``: ``True`` lets the client send its key to a plain ``http://`` URL whose host is not
+    loopback (``localhost``, ``127.0.0.0/8`` and ``::1`` need no opt-in). ``None`` (the default) turns the opt-in on
+    when ``FI_ALLOW_INSECURE_HTTP`` is ``1``; any other argument value (such as ``False``) turns it off. Without the opt-in, such a request raises
+    ``AgentCCError`` with ``.code`` ``"insecure_http_origin"`` before a connection is made. The opt-in does not unlock
+    a host written with userinfo, non-ASCII characters, ``%``, a trailing dot, or an IPv4 address in a short, hex or
+    octal form. A keyed plain ``http://`` request goes through no proxy; with an ``http_client`` passed in, it is
+    refused unless the transport that client selects for the URL goes through no proxy, and a client whose transport
+    is ``httpx.MockTransport``, ``WSGITransport`` or ``ASGITransport`` is not checked.
     """
 
     def __init__(
@@ -49,6 +58,7 @@ class AgentCC:
         pre_call_rules: list[Callable] | None = None,
         modify_params: bool = False,
         enable_json_schema_validation: bool = False,
+        allow_insecure_http: bool | None = None,
     ) -> None:
         from fi.gateway._exceptions import AgentCCError
 
@@ -81,6 +91,7 @@ class AgentCC:
         self._pre_call_rules = pre_call_rules
         self._modify_params = modify_params
         self._enable_json_schema_validation = enable_json_schema_validation
+        self._allow_insecure_http = allow_insecure_http
 
         self._base_client: Any = None
         self._chat: Any = None
@@ -154,6 +165,7 @@ class AgentCC:
                 callbacks=self._callbacks,
                 http_client=self._http_client,
                 retry_policy=self._retry_policy,
+                allow_insecure_http=self._allow_insecure_http,
             )
             self._base_client._owner = self  # lets responses update the active session
         return self._base_client
@@ -322,6 +334,7 @@ class AgentCC:
             pre_call_rules=self._pre_call_rules,
             modify_params=self._modify_params,
             enable_json_schema_validation=self._enable_json_schema_validation,
+            allow_insecure_http=self._allow_insecure_http,
             retry_policy=self._retry_policy,
             redact_messages=self._redact_messages,
         )
@@ -363,6 +376,15 @@ class AsyncAgentCC:
             model="gpt-4o",
             messages=[{"role": "user", "content": "Hello"}],
         )
+
+    ``allow_insecure_http``: ``True`` lets the client send its key to a plain ``http://`` URL whose host is not
+    loopback (``localhost``, ``127.0.0.0/8`` and ``::1`` need no opt-in). ``None`` (the default) turns the opt-in on
+    when ``FI_ALLOW_INSECURE_HTTP`` is ``1``; any other argument value (such as ``False``) turns it off. Without the opt-in, such a request raises
+    ``AgentCCError`` with ``.code`` ``"insecure_http_origin"`` before a connection is made. The opt-in does not unlock
+    a host written with userinfo, non-ASCII characters, ``%``, a trailing dot, or an IPv4 address in a short, hex or
+    octal form. A keyed plain ``http://`` request goes through no proxy; with an ``http_client`` passed in, it is
+    refused unless the transport that client selects for the URL goes through no proxy, and a client whose transport
+    is ``httpx.MockTransport``, ``WSGITransport`` or ``ASGITransport`` is not checked.
     """
 
     def __init__(
@@ -385,6 +407,7 @@ class AsyncAgentCC:
         pre_call_rules: list[Callable] | None = None,
         modify_params: bool = False,
         enable_json_schema_validation: bool = False,
+        allow_insecure_http: bool | None = None,
     ) -> None:
         from fi.gateway._exceptions import AgentCCError
 
@@ -417,6 +440,7 @@ class AsyncAgentCC:
         self._pre_call_rules = pre_call_rules
         self._modify_params = modify_params
         self._enable_json_schema_validation = enable_json_schema_validation
+        self._allow_insecure_http = allow_insecure_http
 
         self._base_client: Any = None
         self._chat: Any = None
@@ -490,6 +514,7 @@ class AsyncAgentCC:
                 callbacks=self._callbacks,
                 http_client=self._http_client,
                 retry_policy=self._retry_policy,
+                allow_insecure_http=self._allow_insecure_http,
             )
             self._base_client._owner = self  # lets responses update the active session
         return self._base_client
@@ -657,6 +682,7 @@ class AsyncAgentCC:
             pre_call_rules=self._pre_call_rules,
             modify_params=self._modify_params,
             enable_json_schema_validation=self._enable_json_schema_validation,
+            allow_insecure_http=self._allow_insecure_http,
             retry_policy=self._retry_policy,
             redact_messages=self._redact_messages,
         )

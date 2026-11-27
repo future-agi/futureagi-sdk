@@ -88,6 +88,15 @@ def return_raw_request(
     }
 
 
+def _direct_kwargs(url: str, headers: Mapping[str, str]) -> dict[str, Any]:
+    """Extra ``httpx`` arguments for a request to ``url``: none, or the one that sends a keyed plain-http request
+    without a proxy. Raises when a keyed request to ``url`` is refused."""
+    from fi.gateway._exceptions import AgentCCError
+    from fi.utils._http_guard import carries_key, requires_direct
+
+    return {"trust_env": False} if requires_direct(url, carries_key(headers), None, AgentCCError) else {}
+
+
 def health_check(
     model: str | None = None,
     api_key: str | None = None,
@@ -104,6 +113,10 @@ def health_check(
 
     Returns:
         Dict with ``status`` ('ok' or 'error'), ``latency_ms``, and optionally ``error``.
+
+    Raises:
+        AgentCCError: code ``insecure_http_origin``, when the key may not be sent to ``base_url`` over plain http;
+            ``FI_ALLOW_INSECURE_HTTP=1`` allows it.
     """
     import os
 
@@ -116,6 +129,7 @@ def health_check(
     if resolved_key:
         headers["Authorization"] = f"Bearer {resolved_key}"
 
+    direct = _direct_kwargs(resolved_url, headers)
     try:
         start = time.monotonic()
         if model is None:
@@ -124,6 +138,7 @@ def health_check(
                 f"{resolved_url.rstrip('/')}/health",
                 headers=headers,
                 timeout=timeout,
+                **direct,
             )
         else:
             # Send a minimal completion request
@@ -136,6 +151,7 @@ def health_check(
                     "max_tokens": 1,
                 },
                 timeout=timeout,
+                **direct,
             )
         elapsed_ms = (time.monotonic() - start) * 1000
 
@@ -154,13 +170,18 @@ def health_check(
 def check_valid_key(api_key: str, base_url: str) -> bool:
     """Check if an API key is valid by hitting the gateway models endpoint.
 
-    Returns ``True`` if the key authenticates successfully, ``False`` otherwise.
+    Returns ``True`` if the key authenticates successfully, ``False`` otherwise. Raises ``AgentCCError`` (code
+    ``insecure_http_origin``) when the key may not be sent to ``base_url`` over plain http; ``FI_ALLOW_INSECURE_HTTP=1``
+    allows it.
     """
+    headers = {"Authorization": f"Bearer {api_key}"}
+    direct = _direct_kwargs(base_url, headers)
     try:
         response = httpx.get(
             f"{base_url.rstrip('/')}/v1/models",
-            headers={"Authorization": f"Bearer {api_key}"},
+            headers=headers,
             timeout=10.0,
+            **direct,
         )
         return response.status_code == 200
     except Exception:
