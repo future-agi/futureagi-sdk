@@ -52,4 +52,6 @@ export interface AnnotationOptions {
   fiSecretKey?: string;
   fiBaseUrl?: string;
   timeout?: number;
+  /** Send keyed requests over plain http to hosts that are not loopback (also FI_ALLOW_INSECURE_HTTP=1). */
+  allowInsecureHttp?: boolean;
 }

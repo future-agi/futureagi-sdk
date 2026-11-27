@@ -3,6 +3,7 @@ import { AUTH_ENVVAR_NAME, get_base_url } from '../utils/constants';
 import { ModelProvider, ApiKey, RequestConfig, HttpMethod } from './types';
 import { Routes } from '../utils/routes';
 import { AxiosResponse } from 'axios';
+import { insecureHttpCause } from '../utils/plain-http';
 
 /**
  * Interface for API key configuration
@@ -80,12 +81,14 @@ class ProviderAPIKeyClient extends APIKeyAuth {
         apiKey: ApiKey,
         fiApiKey?: string,
         fiSecretKey?: string,
-        fiBaseUrl?: string
+        fiBaseUrl?: string,
+        options: { allowInsecureHttp?: boolean } = {}
     ) {
         super({
             fiApiKey,
             fiSecretKey,
-            fiBaseUrl
+            fiBaseUrl,
+            allowInsecureHttp: options.allowInsecureHttp,
         });
         this.apiKey = apiKey;
     }
@@ -161,12 +164,14 @@ class ProviderAPIKeyClient extends APIKeyAuth {
         fiApiKey?: string;
         fiSecretKey?: string;
         fiBaseUrl?: string;
+        allowInsecureHttp?: boolean;
     } = {}): ProviderAPIKeyClient {
         return new ProviderAPIKeyClient(
             apiKey,
             options.fiApiKey,
             options.fiSecretKey,
-            options.fiBaseUrl
+            options.fiBaseUrl,
+            { allowInsecureHttp: options.allowInsecureHttp }
         );
     }
 
@@ -177,6 +182,7 @@ class ProviderAPIKeyClient extends APIKeyAuth {
         fiApiKey?: string;
         fiSecretKey?: string;
         fiBaseUrl?: string;
+        allowInsecureHttp?: boolean;
     } = {}): Promise<ApiKey> {
         const instance = this._getInstance(apiKey, options);
         await instance.set();
@@ -190,6 +196,7 @@ class ProviderAPIKeyClient extends APIKeyAuth {
         fiApiKey?: string;
         fiSecretKey?: string;
         fiBaseUrl?: string;
+        allowInsecureHttp?: boolean;
     } = {}): Promise<ApiKey | undefined> {
         const apiKey: ApiKey = { provider };
         const instance = this._getInstance(apiKey, options);
@@ -203,6 +210,7 @@ class ProviderAPIKeyClient extends APIKeyAuth {
         fiApiKey?: string;
         fiSecretKey?: string;
         fiBaseUrl?: string;
+        allowInsecureHttp?: boolean;
     } = {}): Promise<ApiKey[]> {
         // The apiKey object is required for the constructor, but not used in this method.
         const instance = this._getInstance({} as ApiKey, options);
@@ -217,6 +225,9 @@ class ProviderAPIKeyClient extends APIKeyAuth {
     }
 }
 
+/** The `allowInsecureHttp` option each APIKeyManager was created with, passed on to the requests it delegates. */
+const managerOptIn = new WeakMap<object, boolean | undefined>();
+
 /**
  * Singleton API Key Manager for managing FutureAGI credentials (fi_api_key, fi_secret_key)
  */
@@ -224,8 +235,9 @@ class APIKeyManager extends APIKeyAuth {
     private static _instance?: APIKeyManager;
     private _initialized = false;
 
-    private constructor() {
-        super();
+    private constructor(options: { allowInsecureHttp?: boolean } = {}) {
+        super({ allowInsecureHttp: options.allowInsecureHttp });
+        managerOptIn.set(this, options.allowInsecureHttp);
         const fiApiKey = this.getFiApiKey();
         const fiSecretKey = this.getFiSecretKey();
 
@@ -235,11 +247,11 @@ class APIKeyManager extends APIKeyAuth {
     }
 
     /**
-     * Get the singleton instance
+     * Get the singleton instance; `options` apply when this call creates it.
      */
-    public static getInstance(): APIKeyManager {
+    public static getInstance(options: { allowInsecureHttp?: boolean } = {}): APIKeyManager {
         if (!APIKeyManager._instance) {
-            APIKeyManager._instance = new APIKeyManager();
+            APIKeyManager._instance = new APIKeyManager(options);
         }
         return APIKeyManager._instance;
     }
@@ -299,7 +311,8 @@ class APIKeyManager extends APIKeyAuth {
     async setProviderApiKey(provider: ModelProvider, key: string): Promise<void> {
         await ProviderAPIKeyClient.setApiKey({ provider, key }, {
             fiApiKey: this.getFiApiKey(),
-            fiSecretKey: this.getFiSecretKey()
+            fiSecretKey: this.getFiSecretKey(),
+            allowInsecureHttp: managerOptIn.get(this),
         });
     }
 
@@ -309,7 +322,8 @@ class APIKeyManager extends APIKeyAuth {
     async getProviderApiKey(provider: ModelProvider): Promise<ApiKey | undefined> {
         return await ProviderAPIKeyClient.getApiKey(provider, {
             fiApiKey: this.getFiApiKey(),
-            fiSecretKey: this.getFiSecretKey()
+            fiSecretKey: this.getFiSecretKey(),
+            allowInsecureHttp: managerOptIn.get(this),
         });
     }
 
@@ -319,7 +333,8 @@ class APIKeyManager extends APIKeyAuth {
     async listProviderApiKeys(): Promise<ApiKey[]> {
         return await ProviderAPIKeyClient.listApiKeys({
             fiApiKey: this.getFiApiKey(),
-            fiSecretKey: this.getFiSecretKey()
+            fiSecretKey: this.getFiSecretKey(),
+            allowInsecureHttp: managerOptIn.get(this),
         });
     }
 
@@ -350,6 +365,14 @@ class APIKeyManager extends APIKeyAuth {
             requiredProviders.map(provider => this.isProviderConfigured(provider))
         );
 
+        // A refused keyed plain-http request says nothing about which keys are set: the caller receives the refusal.
+        for (const result of results) {
+            const refusal = result.status === 'rejected' ? insecureHttpCause(result.reason) : undefined;
+            if (refusal) {
+                throw refusal;
+            }
+        }
+
         const missingProviders = requiredProviders.filter((provider, index) => {
             const result = results[index];
             return result.status === 'rejected' || !result.value;
@@ -376,8 +399,8 @@ class APIKeyManager extends APIKeyAuth {
 /**
  * Factory function to get API key manager instance
  */
-function getAPIKeyManager(): APIKeyManager {
-    return APIKeyManager.getInstance();
+function getAPIKeyManager(options: { allowInsecureHttp?: boolean } = {}): APIKeyManager {
+    return APIKeyManager.getInstance(options);
 }
 
 /**
