@@ -56,13 +56,13 @@ operations:
   simulation.epochs.coding_agent_brief:
     bucket: b
     status: refusal-only until PR2 TH-10732
-    asserts: '404 {"error": "not_found"} on an unknown run'
-    needs: "a finished run job on an environment (product seeder)"
+    asserts: '404 {"error": "not_found"}: the route is off on the stack (AGENT_FIX_OUTSIDE_ATTEMPTS_ENABLED unset)'
+    needs: "AGENT_FIX_OUTSIDE_ATTEMPTS_ENABLED=true on the stack, then a finished run job on an environment (product seeder)"
   simulation.epochs.attempt_verdict:
     bucket: b
     status: refusal-only until PR2 TH-10732
-    asserts: '404 {"error": "not_found"} on an unknown Epoch'
-    needs: "an attempt submitted by a coding agent (product seeder)"
+    asserts: '404 {"error": "not_found"}: the route is off on the stack (AGENT_FIX_OUTSIDE_ATTEMPTS_ENABLED unset)'
+    needs: "AGENT_FIX_OUTSIDE_ATTEMPTS_ENABLED=true on the stack, then an attempt submitted by a coding agent (product seeder)"
   simulation.epochs.list:
     bucket: b
     status: refusal-only until PR2 TH-10732

@@ -23,6 +23,7 @@ EPOCH_TOOLS = {
     "get_evidence_import", "draft_evidence_import", "add_evidence_import_cases", "discard_evidence_import",
     "get_epoch_launch_options", "list_epochs", "get_epoch", "launch_epoch", "stop_epoch", "retry_epoch",
     "get_epoch_candidate_patch", "make_epoch_candidate_default", "open_epoch_candidate_pull_request",
+    "get_epoch_coding_agent_brief", "get_epoch_attempt_verdict",
 }
 # The SQL tools' MCP inputs, written out rather than derived, so the gate is checked against an
 # independent statement of the product shape: (path, query, body, required).

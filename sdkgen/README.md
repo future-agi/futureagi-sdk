@@ -226,9 +226,10 @@ release: the four SQL tools and the 19 tools of the product's MCP group `epoch`
 (Debug failures, evidence imports and Epoch). Every other operation keeps the
 contract of the SDK `dev` slice it was composed on (`x-contract-sources.other`).
 The SDK still pins the v1.59.0
-release in `BACKEND_VERSION`. That release already serves the Debug failures and
-Epoch (`agent-fix-runs`) routes, though four Epoch operations have an older
-contract there, but it has no evidence-imports routes and no MCP group `epoch`.
+release in `BACKEND_VERSION`. That release already serves Debug failures and most
+Epoch (`agent-fix-runs`) routes, though four of them have an older contract there.
+It has no evidence-imports routes, no coding-agent brief or attempt verdict
+routes, and no MCP group `epoch`.
 `sdkgen/sync_scoped_contract.py` writes the mixed slice and records both input
 commits and the byte hashes of the product's OpenAPI, `tools.generated.json`
 and `tools.yaml` in `x-contract-sources` (`sql`, `epoch` and `other`). Before

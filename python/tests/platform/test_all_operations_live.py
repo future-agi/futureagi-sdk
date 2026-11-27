@@ -50,8 +50,8 @@ def allow(fn, *statuses: int):
         raise
 
 
-# run_debug_failures refuses a run it cannot diagnose with 409 and exactly one of these codes
-# (product tracer/services/simulation_investigation.py:165-188).
+# run_debug_failures refuses a run it cannot diagnose with 409 and one of these eligibility codes
+# (debug_failures_refusal, product tracer/services/simulation_investigation.py:159-189).
 DEBUG_FAILURES_INELIGIBLE = {
     "execution_not_completed",
     "execution_calls_unfinished",
@@ -889,7 +889,7 @@ def test_agents_and_simulation(client, request):
     # 202 (pending while its jobs wait for the Error Feed worker, which a standalone stack does not
     # run) only for a finished run with at least 15 connected calls and a failing call; any other
     # run is refused with 409 and one of the eligibility codes in
-    # tracer/services/simulation_investigation.py:165-188. An unknown run is a 404 in the product's
+    # tracer/services/simulation_investigation.py:159-189. An unknown run is a 404 in the product's
     # error envelope {status: false, ...}, where a missing route would get Django's 404 page.
     insights = client.simulation.executions.insights
     if execution:
@@ -1032,14 +1032,17 @@ def test_evidence_imports_and_epochs(client):
     - Epochs and candidates: agent_fix._not_found, 404 {"error": "not_found", "message": "Not
       found"} (simulate/views/agent_fix.py:96-99, HostedHarnessError.as_dict in
       simulate/services/hosted_harness.py:115-121; list 154, launch_options 183, launch 202,
-      coding_agent_brief and attempt_verdict on product 2aa9ca3,
       get 226, retry 239, stop 254, make_default 283, open_pull_request 306, patch 332). These
       views first check the fix_my_agent entitlement (AgentFixRunViewSet.initial, 112-116; a
       denial is a 402 entitlement_error from accounts/authentication.py custom_exception_handler),
       so this body also shows the entitlement allowed. It is on a self-hosted stack:
       fix_my_agent requires a licence but is not oss_locked (tfc/capabilities/registry.py:195-201),
       and self-hosted allows every such feature (tfc/capabilities/service.py:156-161), unlike
-      instant_eval and insights, which are oss_locked.
+      instant_eval and insights, which are oss_locked;
+    - a coding agent's brief and attempt verdict (product 2aa9ca3): the same 404 body, but from
+      AgentFixRunViewSet.initial before the entitlement check, because the stack leaves
+      AGENT_FIX_OUTSIDE_ATTEMPTS_ENABLED off (simulate/views/agent_fix.py:143-148,
+      tfc/settings/settings.py:1166-1170). Their 404 says nothing about the entitlement.
 
     Request bodies are valid, so the serializer passes and the view itself refuses."""
     env, import_id, run, candidate = (str(uuid.uuid4()) for _ in range(4))
