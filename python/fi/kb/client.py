@@ -9,6 +9,11 @@ from fi.utils.routes import Routes
 from fi.utils.errors import FileNotFoundException, UnsupportedFileType, SDKException
 import os
 
+def _refused(error: BaseException) -> bool:
+    """Whether ``error`` is the refusal of a keyed plain-http request, which is raised as it is."""
+    return getattr(error, "code", None) == "insecure_http_origin"
+
+
 class KBResponseHandler(ResponseHandler[Dict, KnowledgeBaseConfig]):
 
     @classmethod
@@ -111,7 +116,9 @@ class KnowledgeBase(APIKeyAuth):
         if kb_name:
             try:
                 self.kb = self._get_kb_from_name(kb_name)
-            except Exception:
+            except Exception as e:
+                if _refused(e):
+                    raise
                 raise SDKException(
                     f"Knowledge Base with name '{kb_name}' not found. Please create it first or verify the name."
                 )
@@ -132,6 +139,7 @@ class KnowledgeBase(APIKeyAuth):
         Returns:
             self for chaining
         """
+        files = []
         try:
             import requests  
             
@@ -139,7 +147,9 @@ class KnowledgeBase(APIKeyAuth):
             if not self.kb or self.kb.name != kb_name:
                 try:
                     self.kb = self._get_kb_from_name(kb_name)
-                except Exception:
+                except Exception as e:
+                    if _refused(e):
+                        raise
                     raise SDKException(
                         f"Knowledge Base named '{kb_name}' not found when attempting to update."
                     )
@@ -160,8 +170,6 @@ class KnowledgeBase(APIKeyAuth):
                 "kb_id": str(self.kb.id),
                 "name": self.kb.name if new_name is None else new_name,
             }
-            
-            files = []
             
             try:
                 if self._valid_file_paths:
@@ -187,13 +195,7 @@ class KnowledgeBase(APIKeyAuth):
                     'X-Secret-Key': self._fi_secret_key,
                 }
                 
-                response = requests.patch(
-                    url=url,
-                    data=data,
-                    files=files,  
-                    headers=headers,
-                    timeout=300
-                )
+                response = self._upload("PATCH", url, headers, data, files)
                 
                 KBResponseHandler._handle_error(response)
                 parsed_result_data = KBResponseHandler._parse_success(response)
@@ -221,6 +223,8 @@ class KnowledgeBase(APIKeyAuth):
             for _, (_name, fh, _type) in files:
                 if hasattr(fh, 'close') and not fh.closed:
                     fh.close()
+            if _refused(e):
+                raise
             raise SDKException("Failed to update the Knowledge Base due to an unexpected error.", cause=e)
 
     def delete_files_from_kb(
@@ -278,6 +282,8 @@ class KnowledgeBase(APIKeyAuth):
         except SDKException:
             raise
         except Exception as e:
+            if _refused(e):
+                raise
             raise SDKException("Failed to delete files from the Knowledge Base due to an unexpected error.", cause=e)
 
     def delete_kb(
@@ -356,6 +362,8 @@ class KnowledgeBase(APIKeyAuth):
         except SDKException:
             raise
         except Exception as e:
+            if _refused(e):
+                raise
             raise SDKException("Failed to delete Knowledge Base(s) due to an unexpected error.", cause=e)
 
     def create_kb(self, name: Optional[str] = None, file_paths: Optional[Union[str, List[str]]] = None):
@@ -406,13 +414,7 @@ class KnowledgeBase(APIKeyAuth):
                     'X-Secret-Key': self._fi_secret_key,
                 }
                 
-                response = requests.post(
-                    url=url,
-                    data=data,
-                    files=files,  
-                    headers=headers,
-                    timeout=300
-                )
+                response = self._upload("POST", url, headers, data, files)
                 KBResponseHandler._handle_error(response)
                 parsed_result_data = KBResponseHandler._parse_success(response)
 
@@ -437,7 +439,20 @@ class KnowledgeBase(APIKeyAuth):
             for _, (_name, fh, _type) in files:
                 if hasattr(fh, 'close') and not fh.closed:
                     fh.close()
+            if _refused(e):
+                raise
             raise SDKException("Failed to create the Knowledge Base due to an unexpected error.", cause=e)
+
+    def _upload(self, method: str, url: str, headers: Dict[str, str], data: Dict, files: List) -> "requests.Response":
+        """Send a multipart upload as ``requests.request`` does, through a fresh session: the client's session
+        settings do not apply, and the request is judged on its own headers (see ``fi.api.auth._send_prepared``)."""
+        import requests
+
+        from fi.api.auth import _prepare, _send_prepared
+
+        with requests.Session() as session:
+            prepared = _prepare(session, requests.Request(method=method, url=url, headers=headers, data=data, files=files), self._allow_insecure_http)
+            return _send_prepared(session, prepared, 300, self._allow_insecure_http, url=url)
 
     def _check_file_paths(self, file_paths: Union[str, List[str]]) -> bool:
         """

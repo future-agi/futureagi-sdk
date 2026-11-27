@@ -20,7 +20,7 @@ from ._transport import AsyncTransport, Config, FileInput, RequestOptions, SyncT
 from .resources import AsyncResources, Resources
 
 
-def _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses, default_headers) -> Config:
+def _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses, default_headers, allow_insecure_http=None) -> Config:
     api_key = api_key or os.environ.get(API_KEY_ENVVAR_NAME)
     secret_key = secret_key or os.environ.get(SECRET_KEY_ENVVAR_NAME)
     if not api_key or not secret_key:
@@ -36,6 +36,7 @@ def _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, s
         workspace_id=workspace_id or os.environ.get("FI_WORKSPACE_ID"),
         strict_responses=strict_responses,
         default_headers=dict(default_headers) if default_headers else None,
+        allow_insecure_http=allow_insecure_http,
     )
 
 
@@ -46,6 +47,16 @@ class Client(Resources):
         client = Client()                      # FI_API_KEY / FI_SECRET_KEY / FI_BASE_URL
         for ds in client.datasets.list():
             print(ds.name)
+
+    ``allow_insecure_http``: ``True`` lets the client send its key to a plain ``http://`` URL whose host is not
+    loopback (``localhost``, ``127.0.0.0/8`` and ``::1`` need no opt-in). ``None`` (the default) turns the opt-in on
+    when ``FI_ALLOW_INSECURE_HTTP`` is ``1``; any other argument value (such as ``False``) turns it off. Without the
+    opt-in, such a request raises ``ValueError`` with ``.code`` ``"insecure_http_origin"`` before a connection is made.
+    The opt-in does not unlock a host written with userinfo, non-ASCII characters, ``%``, a trailing dot, or an IPv4
+    address in a short, hex or octal form. A keyed plain ``http://`` request goes through no proxy; with an
+    ``http_client`` passed in, it is refused unless the transport that client selects for the URL goes through no
+    proxy, and a client whose transport is ``httpx.MockTransport``, ``WSGITransport`` or ``ASGITransport`` is not
+    checked.
     """
 
     def __init__(
@@ -60,9 +71,10 @@ class Client(Resources):
         strict_responses: bool = False,
         default_headers: Mapping[str, str] | None = None,
         http_client: httpx.Client | None = None,
+        allow_insecure_http: bool | None = None,
     ) -> None:
         self._transport = SyncTransport(
-            _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses, default_headers), http_client
+            _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses, default_headers, allow_insecure_http), http_client
         )
         self._init_resources(self._transport)
 
@@ -99,7 +111,18 @@ class Client(Resources):
 
 
 class AsyncClient(AsyncResources):
-    """Same API as `Client`, with `await` / `async for`."""
+    """Same API as `Client`, with `await` / `async for`.
+
+    ``allow_insecure_http``: ``True`` lets the client send its key to a plain ``http://`` URL whose host is not
+    loopback (``localhost``, ``127.0.0.0/8`` and ``::1`` need no opt-in). ``None`` (the default) turns the opt-in on
+    when ``FI_ALLOW_INSECURE_HTTP`` is ``1``; any other argument value (such as ``False``) turns it off. Without the
+    opt-in, such a request raises ``ValueError`` with ``.code`` ``"insecure_http_origin"`` before a connection is made.
+    The opt-in does not unlock a host written with userinfo, non-ASCII characters, ``%``, a trailing dot, or an IPv4
+    address in a short, hex or octal form. A keyed plain ``http://`` request goes through no proxy; with an
+    ``http_client`` passed in, it is refused unless the transport that client selects for the URL goes through no
+    proxy, and a client whose transport is ``httpx.MockTransport``, ``WSGITransport`` or ``ASGITransport`` is not
+    checked.
+    """
 
     def __init__(
         self,
@@ -113,9 +136,10 @@ class AsyncClient(AsyncResources):
         strict_responses: bool = False,
         default_headers: Mapping[str, str] | None = None,
         http_client: httpx.AsyncClient | None = None,
+        allow_insecure_http: bool | None = None,
     ) -> None:
         self._transport = AsyncTransport(
-            _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses, default_headers), http_client
+            _config(api_key, secret_key, base_url, timeout, max_retries, workspace_id, strict_responses, default_headers, allow_insecure_http), http_client
         )
         self._init_resources(self._transport)
 

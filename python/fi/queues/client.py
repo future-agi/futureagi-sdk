@@ -229,6 +229,14 @@ class AnnotationQueue(APIKeyAuth):
 
         # Check progress
         progress = client.get_progress(queue.id)
+
+    Keyword arguments in ``**kwargs`` go to ``fi.api.auth.HttpClient``; among them is ``allow_insecure_http``.
+    ``True`` lets the client send its keys to a plain ``http://`` URL whose host is not loopback (``localhost``,
+    ``127.0.0.0/8`` and ``::1`` need no opt-in). ``None`` (the default) turns the opt-in on when
+    ``FI_ALLOW_INSECURE_HTTP`` is ``1``; any other argument value (such as ``False``) turns it off. Without the opt-in,
+    such a request raises ``ValueError`` with ``.code`` ``"insecure_http_origin"`` before a connection is made. The
+    opt-in does not unlock a host written with userinfo, non-ASCII characters, ``%``, a trailing dot, or an IPv4
+    address in a short, hex or octal form. A keyed plain ``http://`` request goes through no proxy.
     """
 
     def __init__(
