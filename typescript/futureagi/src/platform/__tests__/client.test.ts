@@ -18,11 +18,11 @@ describe("configuration", () => {
   test("reads keys and the base URL from the environment", async () => {
     process.env.FI_API_KEY = "env-key";
     process.env.FI_SECRET_KEY = "env-secret";
-    process.env.FI_BASE_URL = "http://env.test/";
+    process.env.FI_BASE_URL = "https://env.test/";
     const calls: Array<[string, RequestInit]> = [];
     const client = new Client({ fetch: async (url, init) => (calls.push([url, init]), ok(url, init)) });
     await client.request("GET", "/x/");
-    expect(calls[0][0]).toBe("http://env.test/x/");
+    expect(calls[0][0]).toBe("https://env.test/x/");
     expect(calls[0][1].headers).toMatchObject({ "X-Api-Key": "env-key", "X-Secret-Key": "env-secret" });
   });
 
@@ -35,7 +35,7 @@ describe("configuration", () => {
 });
 
 describe("resources", () => {
-  const client = () => new Client({ apiKey: "k", secretKey: "s", baseUrl: "http://unused", fetch: ok });
+  const client = () => new Client({ apiKey: "k", secretKey: "s", baseUrl: "https://unused", fetch: ok });
 
   test("every top-level resource and nested resource is wired, with camelCase names", () => {
     const c = client();
@@ -63,7 +63,7 @@ describe("resources", () => {
         return "custom datasets";
       }
     }
-    const c = new Client({ apiKey: "k", secretKey: "s", baseUrl: "http://unused", fetch: ok, resources: { datasets: MyDatasets } });
+    const c = new Client({ apiKey: "k", secretKey: "s", baseUrl: "https://unused", fetch: ok, resources: { datasets: MyDatasets } });
     const datasets = c.datasets as MyDatasets;
     expect(datasets.mine()).toBe("custom datasets");
     expect(datasets.columns.mine()).toBe("custom columns");
@@ -79,7 +79,7 @@ describe("resources", () => {
     class MyClient extends Client {
       readonly billing = new Billing(this.transport);
     }
-    expect(await new MyClient({ apiKey: "k", secretKey: "s", baseUrl: "http://unused", fetch: ok }).billing.invoices()).toEqual({ ids: ["s1"] });
+    expect(await new MyClient({ apiKey: "k", secretKey: "s", baseUrl: "https://unused", fetch: ok }).billing.invoices()).toEqual({ ids: ["s1"] });
   });
 
   test("beta methods warn once", async () => {

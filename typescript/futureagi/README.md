@@ -186,6 +186,31 @@ import {
 See the full **TypeDoc API reference** at  
 <https://futureagi.com/docs/sdk/typescript>.
 
+## Keys over plain http
+
+A request that carries your key (`X-Api-Key`, `X-Secret-Key`, `Authorization` and the other credential headers) is
+not sent over plain http to a host that is not loopback (`localhost`, `127.0.0.0/8`, `::1`). The call rejects before
+any connection is made with an `Error` whose `code` is `insecure_http_origin`, and the client does not retry it:
+
+```ts
+try {
+  await kb.listKbs(); // any call of a client that sends your key
+} catch (err) {
+  if ((err as { code?: string }).code === 'insecure_http_origin') {
+    // use an https:// base URL, or opt in to plain http
+  }
+}
+```
+
+To send keyed requests over plain http to such a host, set `allowInsecureHttp: true` in the client options, or set
+`FI_ALLOW_INSECURE_HTTP=1` when the option is not given. An explicit `allowInsecureHttp: false` wins over the
+variable. On the SDK's own transport, a redirect that would take a key to plain http, or the body of a keyed request
+to another origin, is refused with the same code. A request sent through your own axios transport or adapter, for example one that follows redirects itself, is not re-checked when it is redirected, so the redirect can carry your API key to another host, including one over plain HTTP. Use the SDK's default transport, or turn redirects off in your own. Through a proxy, keyed requests travel only inside a `CONNECT` tunnel, and a
+`Proxy-Authorization` header that you set goes only on the `CONNECT` (a keyed plain-http request sent directly to
+its host goes without it). An adapter function of your own that replaces the client's `transport` sends with what
+it sets. Through a proxy, the SDK uses the agent you pass when the client is created; an httpsAgent set later in an adapter or interceptor is not used, so certificate pinning must be set on the client's agent. A `fetch` given to the platform `Client` receives https requests as they are. The SDK checks where a request goes before your own adapter or transport runs. If that code changes the request afterwards, for example by handing it to another axios adapter, adding a proxy, or changing its URL, agent or DNS lookup, the change is not re-checked, and your API key can reach the new destination, through a proxy in plain text. Sending a request through the client's own axios instance yourself, for example resending the config from an error or response after a cross-origin redirect, adds the client's key headers to wherever that request goes. Keyed requests through a proxy need axios 1.7 or later; with axios 1.6 they fail with an error. See the
+[CHANGELOG](https://github.com/future-agi/futureagi-sdk/blob/main/typescript/futureagi/CHANGELOG.md) for the details.
+
 ## Error handling
 
 All SDK-specific failures extend `SDKException`.

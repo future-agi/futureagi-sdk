@@ -3,6 +3,7 @@
 
 import { APIConnectionError, APIError, errorFromResponse, isRecord } from "./errors";
 import { getPath, Pager, Pagination } from "./pagination";
+import { INSECURE_HTTP_CODE, ProxyEndpoint, carriesKey, flattenHeaders, insecureHttpError, isLoopbackUrl, plainHttpRoute, proxyFor, sendDirect, usesRuntimeFetch } from "../utils/plain-http";
 
 /** What generated code passes in for each call (emitted from the catalog). */
 export interface Operation {
@@ -58,6 +59,8 @@ export interface ResolvedConfig {
   timeout: number;
   maxRetries: number;
   defaultHeaders?: Record<string, string>;
+  /** Send keyed requests over plain http to hosts that are not loopback (also FI_ALLOW_INSECURE_HTTP=1). */
+  allowInsecureHttp?: boolean;
   fetch: FetchLike;
 }
 
@@ -74,13 +77,7 @@ const MAX_REDIRECTS = 5;
  * client's `X-Workspace-Id` instead of being sent next to it (header names are case-insensitive, and a
  * server given both may combine or reject them). */
 function mergeHeaders(...layers: Array<Record<string, string> | undefined>): Record<string, string> {
-  const byName = new Map<string, [string, string]>();
-  for (const layer of layers) {
-    for (const [key, value] of Object.entries(layer ?? {})) {
-      byName.set(key.toLowerCase(), [key, value]);
-    }
-  }
-  return Object.fromEntries(byName.values());
+  return flattenHeaders(layers); // a layer given as `Headers`, a `Map` or [name, value] pairs is read as headers too
 }
 
 const originOf = (url: string) => new URL(url).origin.toLowerCase();
@@ -243,6 +240,71 @@ function decode(op: Operation, status: number, headers: Headers, text: string): 
   return data;
 }
 
+type Route = { kind: "fetch" } | { kind: "direct" } | { kind: "tunnel"; proxy: ProxyEndpoint };
+
+/** How a request to `url` is sent: `fetch` (the configured fetch, as given), `direct` (straight to its host, with the
+ * SDK's own Node agent: a keyed plain-http request of a client that uses the runtime's fetch) or `tunnel` (a keyed
+ * https request of a client that uses the runtime's fetch, when the environment names a proxy for `url`: sent by the
+ * SDK inside a CONNECT tunnel through that proxy, with TLS to its host inside the tunnel). Throws the
+ * refusal for a keyed plain-http request that cannot be sent directly (a fetch supplied by the caller, to a host that
+ * is not loopback) and for a keyed request whose proxy cannot carry a tunnel. */
+function routing(config: ResolvedConfig, url: string, headers: Record<string, string>): Route {
+  const keyed = carriesKey(headers);
+  const plain = plainHttpRoute(url, keyed, config.allowInsecureHttp);
+  if (usesRuntimeFetch(config) && keyed && plain === "unchanged" && /^https:/i.test(url)) {
+    const proxy = proxyFor(url);
+    if (proxy !== null) {
+      return { kind: "tunnel", proxy };
+    }
+  }
+  if (plain === "unchanged") {
+    return { kind: "fetch" };
+  }
+  if (usesRuntimeFetch(config)) {
+    return { kind: "direct" };
+  }
+  if (isLoopbackUrl(url)) {
+    return { kind: "fetch" }; // the caller's fetch decides how to reach this machine
+  }
+  throw cannotSendDirectly(url);
+}
+
+function cannotSendDirectly(url: string): Error {
+  return insecureHttpError(
+    `The request to ${new URL(url).host} cannot be sent directly over plain http: the transport in use may route it through a proxy. ` +
+      "Use an https:// base URL.",
+  );
+}
+
+/** Send `init` to `url` by the route `routing` chose. */
+async function send(config: ResolvedConfig, url: string, init: RequestInit & { method: string; headers: Record<string, string> }, route: Route): Promise<Response> {
+  if (route.kind !== "fetch") {
+    let proxy = route.kind === "tunnel" ? route.proxy : undefined;
+    let headers = init.headers;
+    // A Proxy-Authorization the caller set is for the proxy: it goes on the CONNECT (when the proxy has no user name and
+    // password of its own), and not inside the tunnel to the host. On the direct route there is no proxy, and it is not sent.
+    for (const proxyAuthName of Object.keys(headers).filter((name) => name.trim().toLowerCase() === "proxy-authorization")) {
+      const { [proxyAuthName]: callerProxyAuth, ...rest } = headers;
+      headers = rest;
+      if (proxy !== undefined && proxy.auth === undefined && proxy.authorization === undefined && String(callerProxyAuth).trim() !== "") {
+        proxy = { ...proxy, authorization: String(callerProxyAuth) };
+      }
+    }
+    const response = await sendDirect(url, { method: init.method, headers, body: init.body, signal: init.signal ?? undefined, timeout: config.timeout }, proxy);
+    if (response !== null) {
+      return response;
+    }
+    if (proxy !== undefined) {
+      throw insecureHttpError(`The request to ${new URL(url).host} cannot be sent through the proxy: this runtime has no Node http, https, net and tls modules.`);
+    }
+    if (!isLoopbackUrl(url)) {
+      throw cannotSendDirectly(url); // a runtime without node:http
+    }
+    return config.fetch(url, { ...init, headers });
+  }
+  return config.fetch(url, init);
+}
+
 export class Transport {
   constructor(readonly config: ResolvedConfig) {}
 
@@ -272,13 +334,15 @@ export class Transport {
       let response: Response;
       let text: string;
       try {
-        response = await this.config.fetch(url, {
+        const sent = mergeHeaders(this.headers(options), headers);
+        const route = routing(this.config, url, sent);
+        response = await send(this.config, url, {
           method,
-          headers: mergeHeaders(this.headers(options), headers),
+          headers: sent,
           body,
           signal: AbortSignal.timeout(timeout),
           redirect: "manual", // followed below, and only within the client's own origin
-        });
+        }, route);
         const location = response.headers.get("location");
         if (REDIRECT_STATUSES.has(response.status) && location) {
           discard(response);
@@ -296,8 +360,8 @@ export class Transport {
         }
         text = await response.text(); // the connection can still drop or time out mid-body: a transport error like any other
       } catch (error) {
-        if (error instanceof APIConnectionError) {
-          throw error; // a refused redirect: a decision, not a transport failure
+        if (error instanceof APIConnectionError || (error as { code?: unknown } | null)?.code === INSECURE_HTTP_CODE) {
+          throw error; // a refused redirect or address: a decision, not a transport failure
         }
         if (canRetry(op, null, attempt, maxRetries)) {
           await sleep(backoffMs(attempt, null));

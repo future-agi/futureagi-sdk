@@ -14,6 +14,7 @@ import {
   TemplateAlreadyExists,
   TemplateNotFound,
 } from '../utils/errors';
+import { insecureHttpCause } from '../utils/plain-http';
 
 /**
  * Simple JSON handler – returns parsed JSON on success, handles common auth/not-found errors.
@@ -175,6 +176,58 @@ class PromptResponseHandler extends ResponseHandler<
 }
 
 /**
+ * The lookup of `getTemplateByName`, sent with `client` (its keys, base URL and options).
+ */
+async function lookupTemplateByName(
+  client: APIKeyAuth,
+  name: string,
+  label?: string,
+  version?: string,
+): Promise<PromptTemplate> {
+  // If a specific version or label is provided, use the direct endpoint. No fallback.
+  if (version || label) {
+    const params: Record<string, any> = { name };
+    if (version) params.version = version;
+    if (label) params.label = label;
+
+    return (await client.request(
+      {
+        method: HttpMethod.GET,
+        url: `${client.baseUrl}/${Routes.prompt_label_get_by_name}`,
+        params,
+      } as RequestConfig,
+      PromptResponseHandler,
+    )) as PromptTemplate;
+  }
+
+  // No version or label, so try 'production' with fallback.
+  try {
+    return (await client.request(
+      {
+        method: HttpMethod.GET,
+        url: `${client.baseUrl}/${Routes.prompt_label_get_by_name}`,
+        params: { name, label: 'production' },
+      } as RequestConfig,
+      PromptResponseHandler,
+    )) as PromptTemplate;
+  } catch (err) {
+    if (err instanceof TemplateNotFound || (err instanceof SDKException && err.message.includes('No version found'))) {
+      // Fallback to the default template resolution endpoint
+      return (await client.request(
+        {
+          method: HttpMethod.GET,
+          url: `${client.baseUrl}/${Routes.get_template_by_name}`,
+          params: { name },
+        } as RequestConfig,
+        PromptResponseHandler,
+      )) as PromptTemplate;
+    }
+    // Re-throw other errors
+    throw err;
+  }
+}
+
+/**
  * Main Prompt client – allows programmatic CRUD and execution of prompt templates.
  */
 export class Prompt extends APIKeyAuth {
@@ -208,51 +261,12 @@ export class Prompt extends APIKeyAuth {
   ): Promise<PromptTemplate> {
     const client = new APIKeyAuth(options);
     try {
-      // If a specific version or label is provided, use the direct endpoint. No fallback.
-      if (version || label) {
-        const params: Record<string, any> = { name };
-        if (version) params.version = version;
-        if (label) params.label = label;
-
-        return (await client.request(
-          {
-            method: HttpMethod.GET,
-            url: `${client.baseUrl}/${Routes.prompt_label_get_by_name}`,
-            params,
-          } as RequestConfig,
-          PromptResponseHandler,
-        )) as PromptTemplate;
-      }
-
-      // No version or label, so try 'production' with fallback.
-      try {
-        return (await client.request(
-          {
-            method: HttpMethod.GET,
-            url: `${client.baseUrl}/${Routes.prompt_label_get_by_name}`,
-            params: { name, label: 'production' },
-          } as RequestConfig,
-          PromptResponseHandler,
-        )) as PromptTemplate;
-      } catch (err) {
-        if (err instanceof TemplateNotFound || (err instanceof SDKException && err.message.includes('No version found'))) {
-          // Fallback to the default template resolution endpoint
-          return (await client.request(
-            {
-              method: HttpMethod.GET,
-              url: `${client.baseUrl}/${Routes.get_template_by_name}`,
-              params: { name },
-            } as RequestConfig,
-            PromptResponseHandler,
-          )) as PromptTemplate;
-        }
-        // Re-throw other errors
-        throw err;
-      }
+      return await lookupTemplateByName(client, name, label, version);
     } finally {
       await client.close();
     }
   }
+
 
   /**
    * Delete template by name (helper).
@@ -346,16 +360,18 @@ export class Prompt extends APIKeyAuth {
     // Attempt to fetch existing template by name; propagate any errors.
     if (this.template.name) {
       try {
-        const remote = await Prompt.getTemplateByName(this.template.name, {
-          fiApiKey: this.fiApiKey,
-          fiSecretKey: this.fiSecretKey,
-          fiBaseUrl: this.baseUrl,
-        });
+        // Sent with this instance, so its options (allowInsecureHttp, timeout, ...) apply to the lookup.
+        const remote = await lookupTemplateByName(this, this.template.name);
 
         // Found existing template – adopt it and return immediately
         this.template = remote;
         return this;
       } catch (err) {
+        // A request refused for a plain-http host is not a "not found": it is passed on with its code.
+        const refusal = insecureHttpCause(err);
+        if (refusal) {
+          throw refusal;
+        }
         // In production, treat any error during lookup as "not found" and proceed to create
         // This handles cases where the lookup endpoint is unstable but create works
         // Template truly does not exist – proceed to create below

@@ -2,6 +2,7 @@ import { APIKeyAuth } from '../api/auth';
 import { HttpMethod, RequestConfig } from '../api/types';
 import { Routes } from '../utils/routes';
 import { SDKException, InvalidAuthError } from '../utils/errors';
+import { insecureHttpCause } from '../utils/plain-http';
 import {
   AnnotationLabel,
   Project,
@@ -21,7 +22,8 @@ export class Annotation extends APIKeyAuth {
         fiApiKey: options.fiApiKey,
         fiSecretKey: options.fiSecretKey,
         fiBaseUrl: options.fiBaseUrl,
-        timeout: options.timeout
+        timeout: options.timeout,
+        allowInsecureHttp: options.allowInsecureHttp,
     });
   }
 
@@ -89,6 +91,10 @@ export class Annotation extends APIKeyAuth {
       const response = await this.request(config);
       return this._parseBulkAnnotationResponse(response.data);
     } catch (error: any) {
+      const refusal = insecureHttpCause(error); // keeps its code
+      if (refusal) {
+        throw refusal;
+      }
       if (error.response?.status === 403) {
         throw new InvalidAuthError();
       }
@@ -131,6 +137,10 @@ export class Annotation extends APIKeyAuth {
         settings: item.settings,
       }));
     } catch (error: any) {
+      const refusal = insecureHttpCause(error); // keeps its code
+      if (refusal) {
+        throw refusal;
+      }
       if (error.response?.status === 403) {
         throw new InvalidAuthError();
       }
@@ -184,6 +194,10 @@ export class Annotation extends APIKeyAuth {
         created_at: item.created_at,
       }));
     } catch (error: any) {
+      const refusal = insecureHttpCause(error); // keeps its code
+      if (refusal) {
+        throw refusal;
+      }
       if (error.response?.status === 403) {
         throw new InvalidAuthError();
       }

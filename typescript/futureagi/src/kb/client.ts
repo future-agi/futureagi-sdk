@@ -20,6 +20,18 @@ import { AxiosResponse } from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import axios from 'axios';
+import { insecureHttpCause } from '../utils/plain-http';
+
+/**
+ * Throws the refused keyed plain-http request (code insecure_http_origin) found in `error` or its chain of causes, so
+ * the caller receives that refusal itself rather than an error that wraps it.
+ */
+function rethrowRefusal(error: unknown): void {
+    const refusal = insecureHttpCause(error);
+    if (refusal) {
+        throw refusal;
+    }
+}
 
 /**
  * Response handler for Knowledge Base operations
@@ -103,7 +115,8 @@ export class KnowledgeBase extends APIKeyAuth {
             fiApiKey: options.fiApiKey,
             fiSecretKey: options.fiSecretKey,
             fiBaseUrl: options.fiBaseUrl,
-            timeout: options.timeout
+            timeout: options.timeout,
+            allowInsecureHttp: options.allowInsecureHttp,
         });
 
         this.kb = undefined;
@@ -114,7 +127,12 @@ export class KnowledgeBase extends APIKeyAuth {
                 .then(foundKb => {
                     this.kb = foundKb;
                 })
-                .catch(() => {
+                .catch((error) => {
+                    if (insecureHttpCause(error)) {
+                        // A refused keyed plain-http request is not a missing name. Nothing awaits this lookup, so it
+                        // settles here; `kb` stays unset and the next call on this client meets the same refusal.
+                        return;
+                    }
                     throw new SDKException(
                         `Knowledge Base with name '${kbName}' not found. Please create it first.`
                     );
@@ -209,6 +227,7 @@ export class KnowledgeBase extends APIKeyAuth {
             return this;
 
         } catch (error) {
+            rethrowRefusal(error);
             if (error instanceof SDKException) {
                 throw error;
             }
@@ -256,6 +275,7 @@ export class KnowledgeBase extends APIKeyAuth {
             return this;
 
         } catch (error) {
+            rethrowRefusal(error);
             if (error instanceof SDKException) {
                 throw error;
             }
@@ -286,7 +306,9 @@ export class KnowledgeBase extends APIKeyAuth {
                     try {
                         const conf = await this._getKbFromName(n);
                         resolvedIds.push(String(conf.id));
-                    } catch {
+                    } catch (error) {
+                        // a refused request is not a name that was not found
+                        rethrowRefusal(error);
                         // ignore names that weren't found
                     }
                 }
@@ -333,6 +355,7 @@ export class KnowledgeBase extends APIKeyAuth {
             return this;
 
         } catch (error) {
+            rethrowRefusal(error);
             if (error instanceof SDKException) {
                 throw error;
             }
@@ -360,7 +383,7 @@ export class KnowledgeBase extends APIKeyAuth {
 
             // Handle optional files
             const files: Record<string, any> = {};
-            if (filePaths) {
+            if (filePaths && filePaths.length > 0) {
                 await this._checkFilePaths(filePaths);
 
                 this._validFilePaths.forEach((filePath, idx) => {
@@ -399,6 +422,7 @@ export class KnowledgeBase extends APIKeyAuth {
             return this;
 
         } catch (error) {
+            rethrowRefusal(error);
             if (error instanceof SDKException) {
                 throw error;
             }
@@ -430,6 +454,7 @@ export class KnowledgeBase extends APIKeyAuth {
             }));
 
         } catch (error) {
+            rethrowRefusal(error);
             if (error instanceof SDKException) {
                 throw error;
             }
