@@ -150,10 +150,12 @@ def test_surfaces_ship_independently():
 
 
 def test_mcp_names_keep_existing_tools_or_follow_the_id():
-    # Every catalog entry keeps the monorepo's MCP tool name: 107 tools, same names.
+    # The 107 release mappings plus four named SQL tools from the scoped product source.
     ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
     names = {op_id: ops[op_id].surfaces["mcp"]["name"] for op_id in MCP_IDS}
-    assert len(names) == 107
+    sql_names = {name for key, name in names.items() if key.startswith("sql.")}
+    assert sql_names == {"run_sql", "get_sql_result", "cancel_sql", "get_sql_catalog"}
+    assert len(names) == 111
     assert names["datasets.list"] == "list_datasets"
     assert names["traces.list"] == "search_traces"
     # Without an override the name follows the id.
@@ -473,6 +475,60 @@ def test_multipart_needs_a_method_that_sends_a_body():
     )
     with pytest.raises(generate.CatalogError, match="multipart is only meaningful"):
         generate.load(CONTRACT, catalog)
+
+
+def test_a_form_data_contract_becomes_multipart_body_params():
+    """drf-yasg writes a real multipart view as formData params: form fields and files are
+    body params, and the file field still needs `operation.multipart: true`."""
+    ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
+    secret = {p.name: p for p in ops["simulation.jobs.upload_secret_file"].params}
+    assert secret["file"].location == "body" and secret["file"].schema["type"] == "file"
+    assert secret["environment_name"].location == "body" and secret["environment_name"].required
+    # body_fields: the contract declares one file and one path; the server reads lists.
+    sources = {p.name: p for p in ops["simulation.jobs.upload_sources"].params}
+    assert sources["files"].schema == {"type": "array", "items": {"type": "file"}}
+    assert sources["paths"].schema == {"type": "array", "items": {"type": "string"}}
+    catalog = _with(
+        "simulation.jobs.upload_secret_file",
+        operation={"method": "POST", "path": "/simulate/api/harness-jobs/secret-files/"},
+    )
+    with pytest.raises(generate.CatalogError, match="need `operation.multipart: true`"):
+        generate.load(CONTRACT, catalog)
+
+
+def test_a_required_nullable_input_must_be_passed_and_may_be_null():
+    ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
+    op = ops["simulation.environments.versions.set_default"]
+    args, _ = pygen._signature(op)
+    assert "expected_default_id: str | None" in args  # required: no default
+    iface, _ = tsgen._params_interface(op)
+    assert "  expected_default_id: string | null;\n" in iface
+
+
+def test_a_202_response_is_typed_and_released_untyped_methods_stay_untyped():
+    """202 Accepted carries a schema like 200/201 (Jaya, #104); scenarios.create shipped in 0.7.0
+    as a dict, so it stays untyped until a release may break."""
+    ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
+    assert pygen._return_annotation(ops["simulation.environments.run"], is_async=False)[0] == "models.HarnessRunCreateResponse"
+    assert pygen._return_annotation(ops["simulation.executions.insights.start"], is_async=False)[0] == "models.TestExecutionDebugAnalysisResponse"
+    assert ops["simulation.scenarios.create"].returns is None
+
+
+def test_persona_update_takes_lists_like_persona_create():
+    ops = {o.id: o for o in generate.load(CONTRACT, CATALOG)}
+    update = {p.name: p.schema for p in ops["simulation.personas.update"].params if p.location == "body"}
+    create = {p.name: p.schema for p in ops["simulation.personas.create"].params if p.location == "body"}
+    for name in ("gender", "age_group", "location", "personality", "accent", "keywords"):
+        assert update[name] == {"type": "array", "items": {"type": "string"}}, name
+        assert create[name]["type"] == "array", name
+
+
+def test_strict_mode_does_not_require_nested_objects():
+    from fi.platform import models
+
+    required = models.TestExecutionDebugAnalysisResponse.__required__
+    assert "status" in required and not {"report", "summary"} & required
+    assert "created_by" not in models.HarnessVersion.__required__
 
 
 def test_docs_reference_covers_every_sdk_operation_once():

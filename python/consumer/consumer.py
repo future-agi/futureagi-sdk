@@ -22,7 +22,10 @@ KB = {"id": "k1", "name": "k", "embedding_model": "BAAI/bge-small-en-v1.5", "chu
 
 
 def handler(request: httpx.Request) -> httpx.Response:
-    body = json.loads(request.content) if request.content else None
+    if request.headers.get("content-type", "").startswith("multipart/form-data"):
+        body: Any = request.read()  # form fields and files, checked as bytes below
+    else:
+        body = json.loads(request.content) if request.content else None
     SEEN.append({"method": request.method, "path": request.url.path, "body": body})
     if request.url.path.startswith("/tracer/dashboard/"):
         return httpx.Response(200, json={"status": True, "result": {**DASHBOARD, **(body or {})}})
@@ -32,6 +35,10 @@ def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={"status": True, "result": {"template_id": "p1", "prompt_config": [], "variable_names": {}, "evaluation_configs": [], "placeholders": {}}})
     if request.url.path == "/model-hub/scores/":
         return httpx.Response(200, json={"status": True, "result": {"id": "s1", "source_type": "dataset_row", "value": (body or {})["value"]}})
+    if request.url.path == "/simulate/api/harness-jobs/j1/":
+        return httpx.Response(200, json={"status": True, "result": {"job": {"job_id": "j1"}, "status": {"state": "completed"}}})
+    if request.url.path == "/simulate/api/harness-jobs/sources/":
+        return httpx.Response(201, json={"source_id": "src1", "name": "agent", "file_count": 2, "total_bytes": 4})
     if request.url.path == "/model-hub/develops/create-empty-dataset/":
         return httpx.Response(200, json={"status": True, "result": {}})  # a broken backend: no dataset_id
     return httpx.Response(200, json={"status": True, "result": {"value": 1}})
@@ -71,6 +78,13 @@ try:
 except ResponseValidationError:
     pass
 assert client.datasets.create(new_dataset_name="x").dataset_id is None
+
+# The simulation wait helpers and a repeated-field multipart upload, from the installed wheel.
+job: dict[str, Any] = client.simulation.wait_for_job("j1", poll_interval=0.01)
+assert job["status"]["state"] == "completed"
+staged: models.HarnessSourceUploadResponse = client.simulation.jobs.upload_sources(files=[("a.py", b"a"), ("b.py", b"b")], paths=["a.py", "b.py"])
+assert staged.source_id == "src1"
+assert SEEN[-1]["body"].count(b'name="paths"') == 2 and SEEN[-1]["body"].count(b'name="files"') == 2
 
 # The escape hatches keep their types.
 whole: Any = client.request("GET", "/x/", unwrap=None)
